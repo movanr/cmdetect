@@ -2,22 +2,12 @@ import { betterAuth } from "better-auth";
 import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
+import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Type definition for user metadata structure
-// Expected metadata structure:
-// {
-//   roles: ['org_admin', 'physician'],
-//   organizationId: 'uuid',
-//   practitionerId: 'uuid' // optional
-// }
-interface UserMetadata {
-  roles?: string[];
-  organizationId?: string;
-  practitionerId?: string;
-}
+// Better Auth user will now have these fields directly instead of JSON metadata
 
 export const auth = betterAuth({
   database: new Pool({
@@ -26,6 +16,15 @@ export const auth = betterAuth({
 
   // Better Auth session secret (separate from JWT signing key)
   secret: process.env.BETTER_AUTH_SECRET!,
+
+  // Configure Better Auth to use UUIDs instead of default string IDs
+  advanced: {
+    database: {
+      generateId: () => uuidv4(),
+      // Disable automatic ID generation to let PostgreSQL handle UUIDs
+      useNumberId: false,
+    },
+  },
 
   // Plugins
   plugins: [
@@ -36,46 +35,30 @@ export const auth = betterAuth({
         audience: "hasura",
         expirationTime: "8h", // Longer session for healthcare workflow
         definePayload: ({ user }) => {
-          // Parse user metadata for roles and organization info
-          let metadata: UserMetadata = {};
-          try {
-            metadata = user.metadata
-              ? JSON.parse(user.metadata as string)
-              : {};
-          } catch {
-            metadata = {};
-          }
-
           // Validate roles array and apply hierarchy
           const roleHierarchy = ["org_admin", "physician", "receptionist"];
-          const userRoles =
-            metadata.roles?.filter((role) => roleHierarchy.includes(role)) ||
-            [];
+          const userRoles = (user.roles as string[]) || [];
+          const validRoles = userRoles.filter((role) => roleHierarchy.includes(role));
 
-          if (userRoles.length > 0 && metadata?.organizationId) {
-            // User has valid metadata with roles
+          if (validRoles.length > 0 && user.organizationId) {
+            // User has valid roles and organization
             const defaultRole =
-              roleHierarchy.find((role) => userRoles.includes(role)) ||
-              userRoles[0];
+              roleHierarchy.find((role) => validRoles.includes(role)) ||
+              validRoles[0];
 
             const claims: Record<string, any> = {
               "x-hasura-default-role": defaultRole,
-              "x-hasura-allowed-roles": userRoles,
+              "x-hasura-allowed-roles": validRoles,
               "x-hasura-user-id": user.id,
-              "x-hasura-organization-id": metadata.organizationId,
+              "x-hasura-organization-id": user.organizationId,
             };
-
-            // Only add practitioner-id if it exists
-            if (metadata.practitionerId) {
-              claims["x-hasura-practitioner-id"] = metadata.practitionerId;
-            }
 
             return {
               ...user,
               "https://hasura.io/jwt/claims": claims,
             };
           } else {
-            // User exists but no valid metadata - limited access
+            // User exists but no valid roles/organization - limited access
             return {
               ...user,
               "https://hasura.io/jwt/claims": {
@@ -129,11 +112,32 @@ Falls Sie dieses Konto nicht erstellt haben, ignorieren Sie diese E-Mail.`,
     requireEmailVerification: true, // Required for multi-tenant security
   },
 
-  // User metadata support for roles and organization info
+  // Extended user schema with healthcare-specific fields
   user: {
     additionalFields: {
-      metadata: {
+      firstName: {
         type: "string",
+        required: false,
+      },
+      lastName: {
+        type: "string",
+        required: false,
+      },
+      roles: {
+        type: "string[]",
+        required: false,
+      },
+      organizationId: {
+        type: "string", // Better Auth handles UUID as string
+        required: false,
+      },
+      isActive: {
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+      },
+      deletedAt: {
+        type: "date",
         required: false,
       },
     },

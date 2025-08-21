@@ -1,0 +1,3 @@
+table:
+  name: jwks
+  schema: public

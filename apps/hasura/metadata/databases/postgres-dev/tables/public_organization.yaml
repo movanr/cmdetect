@@ -37,89 +37,10 @@ array_relationships:
         table:
           name: questionnaire_response
           schema: public
-select_permissions:
-  - role: org_admin
-    permission:
-      columns:
-        - address_line1
-        - address_line2
-        - city
-        - country
-        - created_at
-        - deleted_at
-        - email
-        - id
-        - name
-        - phone
-        - postal_code
-        - updated_at
-        - website
-      filter:
-        _and:
-          - id:
-              _eq: X-Hasura-Organization-Id
-          - deleted_at:
-              _is_null: true
-    comment: ""
-  - role: physician
-    permission:
-      columns:
-        - address_line1
-        - address_line2
-        - city
-        - country
-        - email
-        - name
-        - phone
-        - postal_code
-        - website
-      filter:
-        _and:
-          - id:
-              _eq: X-Hasura-Organization-Id
-          - deleted_at:
-              _is_null: true
-    comment: ""
-  - role: receptionist
-    permission:
-      columns:
-        - address_line1
-        - address_line2
-        - city
-        - country
-        - email
-        - name
-        - phone
-        - postal_code
-        - website
-      filter:
-        _and:
-          - id:
-              _eq: X-Hasura-Organization-Id
-          - deleted_at:
-              _is_null: true
-    comment: ""
-update_permissions:
-  - role: org_admin
-    permission:
-      columns:
-        - address_line1
-        - address_line2
-        - city
-        - country
-        - deleted_at
-        - email
-        - name
-        - phone
-        - postal_code
-        - website
-      filter:
-        _and:
-          - id:
-              _eq: X-Hasura-Organization-Id
-          - deleted_at:
-              _is_null: true
-      check: {}
-      set:
-        updated_at: now()
-    comment: ""
+  - name: users
+    using:
+      foreign_key_constraint_on:
+        column: organizationId
+        table:
+          name: user
+          schema: public

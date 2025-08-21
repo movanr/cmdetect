@@ -1,0 +1,50 @@
+table:
+  name: user
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organizationId
+array_relationships:
+  - name: accounts
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          name: account
+          schema: public
+  - name: patientRegistrationsByCreatedByUserId
+    using:
+      foreign_key_constraint_on:
+        column: created_by_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: patientRegistrationsByFirstViewedByUserId
+    using:
+      foreign_key_constraint_on:
+        column: first_viewed_by_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: patientRegistrationsByLastActivityByUserId
+    using:
+      foreign_key_constraint_on:
+        column: last_activity_by_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: patient_registrations
+    using:
+      foreign_key_constraint_on:
+        column: assigned_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: sessions
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          name: session
+          schema: public
