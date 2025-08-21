@@ -1,0 +1,41 @@
+{
+  "name": "cmdetect-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CMDetect Healthcare Application Monorepo",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "jest",
+    "test:permissions": "jest tests/permissions",
+    "test:watch": "jest --watch",
+    "test:setup": "tsx scripts/setup-test-users.ts",
+    "clean": "turbo run clean",
+    "type-check": "turbo run type-check",
+    "lint": "turbo run lint",
+    "auth:dev": "pnpm --filter @cmdetect/auth-server dev",
+    "frontend:dev": "pnpm --filter @cmdetect/frontend dev",
+    "hasura:console": "cd apps/hasura && hasura console",
+    "setup": "pnpm install && pnpm build:deps",
+    "build:deps": "pnpm --filter @cmdetect/shared-types build && pnpm --filter @cmdetect/config build"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.0",
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.0",
+    "prettier": "^3.2.0",
+    "eslint": "^8.56.0",
+    "@types/jest": "^29.5.5",
+    "dotenv": "^16.3.1",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^3.14.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

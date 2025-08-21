@@ -1,0 +1,6 @@
+version: 3
+endpoint: http://91.98.19.187:8080
+metadata_directory: metadata
+migrations_directory: migrations
+seeds_directory: seeds
+admin_secret: ${HASURA_GRAPHQL_ADMIN_SECRET}

@@ -1,0 +1,42 @@
+{
+  "name": "@cmdetect/auth-server",
+  "version": "1.0.0",
+  "description": "Authentication server built with Better Auth for CMDetect",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "nodemon --exec tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "migrate": "npx @better-auth/cli migrate",
+    "seed:users": "tsx scripts/seed-all-test-users.ts",
+    "seed:users:cleanup": "tsx scripts/seed-all-test-users.ts cleanup",
+    "seed:single": "tsx scripts/create-test-user.ts",
+    "seed:single:cleanup": "tsx scripts/create-test-user.ts cleanup"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "better-auth": "^1.3.4",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "pg": "^8.16.3",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.5",
+    "dotenv": "^17.2.1",
+    "@cmdetect/shared-types": "workspace:*",
+    "@cmdetect/config": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/pg": "^8.15.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^6.4.17",
+    "@types/node": "^24.2.1",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  }
+}

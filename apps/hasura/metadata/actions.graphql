@@ -1,0 +1,41 @@
+type Mutation {
+  submit_patient_anamnesis(
+    link_token: String!
+    consent_data: PatientConsentInput!
+    questionnaire_responses: [QuestionnaireResponseInput!]!
+  ): SubmitPatientAnamnesisOutput
+}
+
+input PatientConsentInput {
+  consent_given: Boolean!
+  consent_text: String!
+  consent_version: String!
+  ip_address: String
+  user_agent: String
+}
+
+input QuestionnaireResponseInput {
+  questionnaire: String!
+  fhir_resource: jsonb!
+}
+
+type SubmitPatientQuestionnaireOutput {
+  success: Boolean!
+  registration_id: uuid
+  message: String
+  submitted_questionnaires: [String!]
+  errors: [String!]
+}
+
+type Mutation {
+  submit_patient_questionnaire: SubmitPatientQuestionnaireOutput
+}
+
+type SubmitPatientAnamnesisOutput {
+  success: Boolean!
+  registration_id: uuid
+  message: String
+  submitted_questionnaires: [String!]
+  errors: [String!]
+}
+
