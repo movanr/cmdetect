@@ -15,18 +15,6 @@ object_relationships:
         table:
           name: patient_consent
           schema: public
-  - name: practitioner
-    using:
-      foreign_key_constraint_on: assigned_practitioner_id
-  - name: practitionerByCreatedByPractitionerId
-    using:
-      foreign_key_constraint_on: created_by_practitioner_id
-  - name: practitionerByFirstViewedBy
-    using:
-      foreign_key_constraint_on: first_viewed_by
-  - name: practitionerByLastActivityBy
-    using:
-      foreign_key_constraint_on: last_activity_by
   - name: user
     using:
       foreign_key_constraint_on: assigned_user_id

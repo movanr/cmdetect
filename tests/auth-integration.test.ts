@@ -61,9 +61,9 @@ describe('Auth Server Integration', () => {
       // This would test auth failure, but we'd need to implement authenticateUser directly
       // For now, let's just verify our test accounts are configured properly
       expect(TestUsers.org1Admin.email).toBe('admin1@test.com');
-      expect(TestUsers.org1Admin.role).toBe('org_admin');
+      expect(TestUsers.org1Admin.roles[0]).toBe('org_admin');
       expect(TestUsers.org2Admin.email).toBe('admin2@test.com');
-      expect(TestUsers.org2Admin.role).toBe('org_admin');
+      expect(TestUsers.org2Admin.roles[0]).toBe('org_admin');
     });
   });
   

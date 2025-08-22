@@ -1,22 +1,6 @@
-actions:
-  - name: submit_patient_anamnesis
-    definition:
-      kind: synchronous
-      handler: http://91.98.19.187:3001/api/hasura-actions/submit-patient-anamnesis
-      forward_client_headers: true
-      headers:
-        - name: x-hasura-admin-secret
-          value: urKu1kn26UtWSTwXJb4RHf2rT4j3WwRXx4wbh0lWw
-        - name: content-type
-          value: application/json
-    comment: Action for anonymous patient anamnesis submission using secure link tokens. Validates link token, processes consent and questionnaire data, updates registration status. Used by patients accessing questionnaires via email links - no authentication required.
+actions: []
 custom_types:
   enums: []
-  input_objects:
-    - name: PatientConsentInput
-    - name: QuestionnaireResponseInput
-  objects:
-    - name: SubmitPatientQuestionnaireOutput
-    - name: Mutation
-    - name: SubmitPatientAnamnesisOutput
+  input_objects: []
+  objects: []
   scalars: []

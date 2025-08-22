@@ -12,10 +12,11 @@ export interface TestUser {
   email: string;
   password: string;
 
-  // Hasura practitioner data
-  practitionerId: string;
+  // Hasura user data
+  userId: string;
   organizationId: string;
-  role: "org_admin" | "physician" | "receptionist";
+  roles: ("org_admin" | "physician" | "receptionist")[];
+  defaultRole?: "org_admin" | "physician" | "receptionist";
   firstName: string;
   lastName: string;
   isActive: boolean;
@@ -44,8 +45,8 @@ export interface TestRegistration {
   id: string;
   organizationId: string;
   patientId: string;
-  createdByPractitionerId: string;
-  assignedPractitionerId: string;
+  createdByUserId: string;
+  assignedUserId: string;
   status: string;
   workflowStatus: string;
 }
@@ -68,16 +69,17 @@ export const TestOrganizations: Record<string, TestOrganization> = {
 };
 
 // =============================================================================
-// TEST USERS (PRACTITIONERS)
+// TEST USERS
 // =============================================================================
 
 export const TestUsers: Record<string, TestUser> = {
   org1Admin: {
     email: "admin1@test.com",
     password: "testPassword123!",
-    role: "org_admin",
+    roles: ["org_admin"],
+    defaultRole: "org_admin",
     organizationId: TestOrganizations.org1.id,
-    practitionerId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    userId: "0k5ztoePaLBnAXcWUYiqQlXVGMStxsjj",
     firstName: "Admin",
     lastName: "One",
     isActive: true,
@@ -87,9 +89,10 @@ export const TestUsers: Record<string, TestUser> = {
   org1Physician: {
     email: "doctor1@test.com",
     password: "testPassword123!",
-    role: "physician",
+    roles: ["physician"],
+    defaultRole: "physician",
     organizationId: TestOrganizations.org1.id,
-    practitionerId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    userId: "2gqcFxx9QcdkYChzfJSaj9WPRxpF2FnZ",
     firstName: "Doctor",
     lastName: "One",
     isActive: true,
@@ -99,9 +102,10 @@ export const TestUsers: Record<string, TestUser> = {
   org1Receptionist: {
     email: "reception1@test.com",
     password: "testPassword123!",
-    role: "receptionist",
+    roles: ["receptionist"],
+    defaultRole: "receptionist",
     organizationId: TestOrganizations.org1.id,
-    practitionerId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+    userId: "6IKha1NlNi7Wo6kYJw2f92TswIPcetR1",
     firstName: "Reception",
     lastName: "One",
     isActive: true,
@@ -111,9 +115,10 @@ export const TestUsers: Record<string, TestUser> = {
   org2Admin: {
     email: "admin2@test.com",
     password: "testPassword123!",
-    role: "org_admin",
+    roles: ["org_admin"],
+    defaultRole: "org_admin",
     organizationId: TestOrganizations.org2.id,
-    practitionerId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+    userId: "DO9fd4YMX0MU1IY3YiLqWW1cJ7O5J7zP",
     firstName: "Admin",
     lastName: "Two",
     isActive: true,
@@ -123,9 +128,10 @@ export const TestUsers: Record<string, TestUser> = {
   org2Physician: {
     email: "doctor2@test.com",
     password: "testPassword123!",
-    role: "physician",
+    roles: ["physician", "receptionist"], // Example: Doctor who can also act as receptionist
+    defaultRole: "physician",
     organizationId: TestOrganizations.org2.id,
-    practitionerId: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+    userId: "PArxsKZufS8fgyEAJ1PxwmTD9dsV8xp2",
     firstName: "Doctor",
     lastName: "Two",
     isActive: true,
@@ -178,8 +184,8 @@ export const TestRegistrations: Record<string, TestRegistration> = {
     id: "r1r1r1r1-r1r1-r1r1-r1r1-r1r1r1r1r1r1",
     organizationId: TestOrganizations.org1.id,
     patientId: TestPatients.org1Patient1.id,
-    createdByPractitionerId: TestUsers.org1Receptionist.practitionerId,
-    assignedPractitionerId: TestUsers.org1Physician.practitionerId,
+    createdByUserId: TestUsers.org1Receptionist.userId,
+    assignedUserId: TestUsers.org1Physician.userId,
     status: "pending",
     workflowStatus: "new_submission",
   },
@@ -188,8 +194,8 @@ export const TestRegistrations: Record<string, TestRegistration> = {
     id: "r2r2r2r2-r2r2-r2r2-r2r2-r2r2r2r2r2r2",
     organizationId: TestOrganizations.org1.id,
     patientId: TestPatients.org1Patient2.id,
-    createdByPractitionerId: TestUsers.org1Admin.practitionerId,
-    assignedPractitionerId: TestUsers.org1Physician.practitionerId,
+    createdByUserId: TestUsers.org1Admin.userId,
+    assignedUserId: TestUsers.org1Physician.userId,
     status: "consent_pending",
     workflowStatus: "under_review",
   },
@@ -198,8 +204,8 @@ export const TestRegistrations: Record<string, TestRegistration> = {
     id: "r3r3r3r3-r3r3-r3r3-r3r3-r3r3r3r3r3r3",
     organizationId: TestOrganizations.org2.id,
     patientId: TestPatients.org2Patient1.id,
-    createdByPractitionerId: TestUsers.org2Admin.practitionerId,
-    assignedPractitionerId: TestUsers.org2Physician.practitionerId,
+    createdByUserId: TestUsers.org2Admin.userId,
+    assignedUserId: TestUsers.org2Physician.userId,
     status: "submitted",
     workflowStatus: "completed",
   },
@@ -215,12 +221,12 @@ export const TestDataIds = {
     org1: TestOrganizations.org1.id,
     org2: TestOrganizations.org2.id,
   },
-  practitioners: {
-    org1Admin: TestUsers.org1Admin.practitionerId,
-    org1Physician: TestUsers.org1Physician.practitionerId,
-    org1Receptionist: TestUsers.org1Receptionist.practitionerId,
-    org2Admin: TestUsers.org2Admin.practitionerId,
-    org2Physician: TestUsers.org2Physician.practitionerId,
+  users: {
+    org1Admin: TestUsers.org1Admin.userId,
+    org1Physician: TestUsers.org1Physician.userId,
+    org1Receptionist: TestUsers.org1Receptionist.userId,
+    org2Admin: TestUsers.org2Admin.userId,
+    org2Physician: TestUsers.org2Physician.userId,
   },
   patients: {
     org1Patient1: TestPatients.org1Patient1.id,
@@ -272,6 +278,8 @@ export function getUserByEmail(email: string): TestUser | undefined {
 /**
  * Get users by role
  */
-export function getUsersByRole(role: TestUser["role"]): TestUser[] {
-  return Object.values(TestUsers).filter((user) => user.role === role);
+export function getUsersByRole(
+  role: "org_admin" | "physician" | "receptionist"
+): TestUser[] {
+  return Object.values(TestUsers).filter((user) => user.roles.includes(role));
 }

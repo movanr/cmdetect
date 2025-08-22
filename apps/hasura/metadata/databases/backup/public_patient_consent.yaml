@@ -1,0 +1,96 @@
+table:
+  name: patient_consent
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organization_id
+  - name: patient_registration
+    using:
+      foreign_key_constraint_on: patient_registration_id
+array_relationships:
+  - name: questionnaire_responses
+    using:
+      foreign_key_constraint_on:
+        column: patient_consent_id
+        table:
+          name: questionnaire_response
+          schema: public
+select_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - consent_given
+        - consent_version
+        - ip_address
+        - consent_text
+        - user_agent
+        - consented_at
+        - created_at
+        - deleted_at
+        - updated_at
+        - id
+        - organization_id
+        - patient_registration_id
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - consent_given
+        - consent_text
+        - consent_version
+        - consented_at
+        - created_at
+        - id
+        - ip_address
+        - organization_id
+        - patient_registration_id
+        - updated_at
+        - user_agent
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: receptionist
+    permission:
+      columns:
+        - consent_given
+        - consent_text
+        - consent_version
+        - consented_at
+        - created_at
+        - id
+        - ip_address
+        - organization_id
+        - patient_registration_id
+        - updated_at
+        - user_agent
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+update_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - deleted_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+    comment: ""

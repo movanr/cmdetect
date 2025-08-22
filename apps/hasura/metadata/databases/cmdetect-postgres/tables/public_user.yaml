@@ -1,0 +1,158 @@
+table:
+  name: user
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organizationId
+array_relationships:
+  - name: patientRegistrationsByCreatedByUserId
+    using:
+      foreign_key_constraint_on:
+        column: created_by_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: patientRegistrationsByFirstViewedByUserId
+    using:
+      foreign_key_constraint_on:
+        column: first_viewed_by_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: patientRegistrationsByLastActivityByUserId
+    using:
+      foreign_key_constraint_on:
+        column: last_activity_by_user_id
+        table:
+          name: patient_registration
+          schema: public
+  - name: patient_registrations
+    using:
+      foreign_key_constraint_on:
+        column: assigned_user_id
+        table:
+          name: patient_registration
+          schema: public
+insert_permissions:
+  - role: org_admin
+    permission:
+      check:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+      set:
+        organizationId: x-hasura-Organization-Id
+      columns:
+        - email
+        - firstName
+        - lastName
+        - roles
+    comment: ""
+select_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - createdAt
+        - email
+        - firstName
+        - id
+        - isActive
+        - lastName
+        - organizationId
+        - roles
+        - updatedAt
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - deletedAt:
+              _is_null: true
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - email
+        - firstName
+        - isActive
+        - lastName
+        - roles
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - deletedAt:
+              _is_null: true
+    comment: ""
+  - role: receptionist
+    permission:
+      columns:
+        - email
+        - firstName
+        - isActive
+        - lastName
+        - roles
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - deletedAt:
+              _is_null: true
+          - roles:
+              _contains:
+                - physician
+    comment: This ensures receptionists only see users who have the physician role when creating assignments
+update_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - deletedAt
+        - email
+        - firstName
+        - isActive
+        - lastName
+        - roles
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - deletedAt:
+              _is_null: true
+      check: {}
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - email
+        - firstName
+        - lastName
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - id:
+              _eq: X-Hasura-User-Id
+          - deletedAt:
+              _is_null: true
+      check: null
+      set:
+        updatedAt: now()
+    comment: ""
+  - role: receptionist
+    permission:
+      columns:
+        - email
+        - firstName
+        - lastName
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - id:
+              _eq: X-Hasura-User-Id
+          - deletedAt:
+              _is_null: true
+      check: null
+      set:
+        updatedAt: now()
+    comment: ""

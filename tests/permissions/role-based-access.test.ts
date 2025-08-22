@@ -9,29 +9,8 @@ describe("Role-Based Access Control", () => {
   });
 
   describe("Org Admin Permissions", () => {
-    it("org_admin can create new practitioners in their organization", async () => {
-      const result = await clients.org1Admin.request<{
-        insert_practitioner_one: { id: string; organization_id: string };
-      }>(`
-        mutation {
-          insert_practitioner_one(object: {
-            auth_user_id: "new-auth-user"
-            email: "new-practitioner@test.com"
-            first_name: "New"
-            last_name: "Practitioner"
-            roles: ["physician"]
-          }) {
-            id
-            organization_id
-          }
-        }
-      `);
-
-      expect(result.insert_practitioner_one).toBeTruthy();
-      expect(result.insert_practitioner_one.organization_id).toBe(
-        TestDataIds.organizations.org1
-      );
-    });
+    // TODO: User creation should go through Better Auth webhook/API, not direct Hasura mutations
+    // Remove this test until webhook is implemented
 
     it("org_admin can access all patients in their organization", async () => {
       const patients = await clients.org1Admin.request<{
@@ -58,22 +37,22 @@ describe("Role-Based Access Control", () => {
   describe("Physician Permissions", () => {
     it("physician can access patients assigned to them via registrations", async () => {
       // First, create a patient registration assigned to the physician
-      const registration = {
+      const registrationData = {
         organization_id: TestDataIds.organizations.org1,
         patient_id: TestDataIds.patients.org1Patient1,
-        created_by_practitioner_id: TestDataIds.practitioners.org1Admin,
-        assigned_practitioner_id: TestDataIds.practitioners.org1Physician,
+        created_by_user_id: TestDataIds.users.org1Admin,
+        assigned_user_id: TestDataIds.users.org1Physician,
         status: "pending",
       };
 
       await clients.admin.request(`
         mutation {
           insert_patient_registration_one(object: {
-            organization_id: "${registration.organization_id}"
-            patient_id: "${registration.patient_id}"
-            created_by_practitioner_id: "${registration.created_by_practitioner_id}"
-            assigned_practitioner_id: "${registration.assigned_practitioner_id}"
-            status: "${registration.status}"
+            organization_id: "${registrationData.organization_id}"
+            patient_id: "${registrationData.patient_id}"
+            created_by_user_id: "${registrationData.created_by_user_id}"
+            assigned_user_id: "${registrationData.assigned_user_id}"
+            status: "${registrationData.status}"
           }) {
             id
           }
@@ -98,27 +77,16 @@ describe("Role-Based Access Control", () => {
       ).toBe(true);
     });
 
-    it("physician cannot create new practitioners", async () => {
-      const newPractitioner = {
-        auth_user_id: "unauthorized-user",
-        email: "unauthorized@test.com",
-        first_name: "Unauthorized",
-        last_name: "User",
-        roles: ["physician"],
-        organization_id: TestDataIds.organizations.org1,
-      };
-
-      // This should fail - physicians cannot create practitioners
+    it("physician cannot create new users", async () => {
+      // This should fail - physicians cannot create users
       await expect(
         clients.org1Physician.request(`
           mutation {
-            insert_practitioner_one(object: {
-              auth_user_id: "unauthorized-user"
+            insert_user_one(object: {
               email: "unauthorized@test.com"
-              first_name: "Unauthorized"
-              last_name: "User"
+              firstName: "Unauthorized"
+              lastName: "User"
               roles: ["physician"]
-              organization_id: "${TestDataIds.organizations.org1}"
             }) {
               id
             }
@@ -130,11 +98,6 @@ describe("Role-Based Access Control", () => {
 
   describe("Receptionist Permissions", () => {
     it("receptionist can create patients in their organization", async () => {
-      const newPatient = {
-        clinic_internal_id: "P999",
-        first_name_encrypted: "encrypted_new",
-        last_name_encrypted: "encrypted_patient",
-      };
 
       const result = await clients.org1Receptionist.request<{
         insert_patient_one: { id: string; organization_id: string };
@@ -155,6 +118,15 @@ describe("Role-Based Access Control", () => {
       expect(result.insert_patient_one.organization_id).toBe(
         TestDataIds.organizations.org1
       );
+
+      // Clean up the created patient to not interfere with subsequent tests
+      await clients.admin.request(`
+        mutation {
+          delete_patient_by_pk(id: "${result.insert_patient_one.id}") {
+            id
+          }
+        }
+      `);
     });
 
     it("receptionist can access all patients in their organization", async () => {
@@ -180,7 +152,7 @@ describe("Role-Based Access Control", () => {
 
     it("receptionist can create patient_registration with auto-set fields", async () => {
       // Test that receptionist can create patient registrations
-      // and that organization_id and created_by_practitioner_id are auto-set from JWT
+      // and that organization_id and created_by_user_id are auto-set from JWT
       const result = await clients.org1Receptionist.request<{
         insert_patient_registration: {
           affected_rows: number;
@@ -188,7 +160,7 @@ describe("Role-Based Access Control", () => {
             id: string;
             organization_id: string;
             patient_id: string;
-            created_by_practitioner_id: string;
+            created_by_user_id: string;
             notes: string;
           }>;
         };
@@ -196,7 +168,7 @@ describe("Role-Based Access Control", () => {
         mutation {
           insert_patient_registration(objects: [{
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
+            assigned_user_id: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created registration"
           }]) {
             affected_rows
@@ -204,7 +176,7 @@ describe("Role-Based Access Control", () => {
               id
               organization_id
               patient_id
-              created_by_practitioner_id
+              created_by_user_id
               notes
             }
           }
@@ -219,33 +191,22 @@ describe("Role-Based Access Control", () => {
 
       // Verify auto-set fields
       expect(registration.organization_id).toBe(TestDataIds.organizations.org1);
-      expect(registration.created_by_practitioner_id).toBe(
-        TestDataIds.practitioners.org1Receptionist
+      expect(registration.created_by_user_id).toBe(
+        TestDataIds.users.org1Receptionist
       );
       expect(registration.patient_id).toBe(TestDataIds.patients.org1Patient1);
     });
 
-    it("receptionist cannot create practitioners", async () => {
-      const newPractitioner = {
-        auth_user_id: "receptionist-created-user",
-        email: "receptionist-created@test.com",
-        first_name: "Should",
-        last_name: "Fail",
-        roles: ["physician"],
-        organization_id: TestDataIds.organizations.org1,
-      };
-
-      // This should fail - receptionists cannot create practitioners
+    it("receptionist cannot create users", async () => {
+      // This should fail - receptionists cannot create users
       await expect(
         clients.org1Receptionist.request(`
           mutation {
-            insert_practitioner_one(object: {
-              auth_user_id: "receptionist-created-user"
+            insert_user_one(object: {
               email: "receptionist-created@test.com"
-              first_name: "Should"
-              last_name: "Fail"
+              firstName: "Should"
+              lastName: "Fail"
               roles: ["physician"]
-              organization_id: "${TestDataIds.organizations.org1}"
             }) {
               id
             }

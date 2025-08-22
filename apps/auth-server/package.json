@@ -11,9 +11,7 @@
     "type-check": "tsc --noEmit",
     "migrate": "npx @better-auth/cli migrate",
     "seed:users": "tsx scripts/seed-all-test-users.ts",
-    "seed:users:cleanup": "tsx scripts/seed-all-test-users.ts cleanup",
-    "seed:single": "tsx scripts/create-test-user.ts",
-    "seed:single:cleanup": "tsx scripts/create-test-user.ts cleanup"
+    "seed:users:cleanup": "tsx scripts/seed-all-test-users.ts cleanup"
   },
   "type": "commonjs",
   "dependencies": {

@@ -1,11 +1,5 @@
-import { createAdminClient } from './graphql-client';
-import { 
-  TestUsers, 
-  TestOrganizations, 
-  TestPatients, 
-  TestRegistrations,
-  TestDataIds 
-} from './test-data';
+import { createAdminClient } from "./graphql-client";
+import { TestDataIds } from "./test-data";
 
 const adminClient = createAdminClient();
 
@@ -32,11 +26,13 @@ export async function testDatabaseConnection(): Promise<boolean> {
 
 // TestDataIds is now imported from test-data.ts
 
+
 /**
- * Clear all test data from the database
+ * Clear application test data (NOT auth users or organizations)
+ * Auth users and organizations are managed separately by the auth server seed script
  */
 export async function clearTestData(): Promise<void> {
-  // Delete in reverse dependency order
+  // Delete only application data, leave auth users and organizations alone
   await adminClient.request(`
     mutation {
       delete_questionnaire_response(where: {}) {
@@ -51,12 +47,6 @@ export async function clearTestData(): Promise<void> {
       delete_patient(where: {}) {
         affected_rows
       }
-      delete_practitioner(where: {}) {
-        affected_rows
-      }
-      delete_organization(where: {}) {
-        affected_rows
-      }
     }
   `);
 }
@@ -65,48 +55,9 @@ export async function clearTestData(): Promise<void> {
  * Set up basic test data for permission testing
  */
 export async function setupTestData(): Promise<void> {
-  // Create organizations
-  await adminClient.request(`
-    mutation {
-      insert_organization(objects: [
-        {
-          id: "${TestDataIds.organizations.org1}",
-          name: "Test Medical Practice 1",
-          city: "Test City 1"
-        },
-        {
-          id: "${TestDataIds.organizations.org2}",
-          name: "Test Medical Practice 2", 
-          city: "Test City 2"
-        }
-      ]) {
-        affected_rows
-      }
-    }
-  `);
+  // Note: Organizations and auth users are created separately via auth server seed script
 
-  // Create practitioners from TestUsers (single source of truth)
-  const practitionersGraphQL = Object.values(TestUsers).map(user => `
-    {
-      id: "${user.practitionerId}",
-      auth_user_id: "${user.email}",
-      email: "${user.email}",
-      first_name: "${user.firstName}",
-      last_name: "${user.lastName}",
-      roles: ["${user.role}"],
-      organization_id: "${user.organizationId}",
-      is_active: ${user.isActive}
-    }`).join(',');
-
-  await adminClient.request(`
-    mutation {
-      insert_practitioner(objects: [${practitionersGraphQL}]) {
-        affected_rows
-      }
-    }
-  `);
-
-  // Create test patients  
+  // Create test patients
   await adminClient.request(`
     mutation {
       insert_patient(objects: [

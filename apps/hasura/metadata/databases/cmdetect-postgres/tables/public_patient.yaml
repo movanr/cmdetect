@@ -1,0 +1,147 @@
+table:
+  name: patient
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organization_id
+array_relationships:
+  - name: patient_registrations
+    using:
+      foreign_key_constraint_on:
+        column: patient_id
+        table:
+          name: patient_registration
+          schema: public
+insert_permissions:
+  - role: org_admin
+    permission:
+      check:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+      set:
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - clinic_internal_id
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
+    comment: ""
+  - role: receptionist
+    permission:
+      check:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+      set:
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - clinic_internal_id
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
+    comment: ""
+select_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - clinic_internal_id
+        - created_at
+        - date_of_birth_encrypted
+        - deleted_at
+        - first_name_encrypted
+        - gender_encrypted
+        - id
+        - last_name_encrypted
+        - organization_id
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - clinic_internal_id
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
+        - created_at
+        - deleted_at
+        - updated_at
+        - id
+        - organization_id
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - patient_registrations:
+              assigned_user_id:
+                _eq: X-Hasura-User-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: receptionist
+    permission:
+      columns:
+        - clinic_internal_id
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
+        - created_at
+        - deleted_at
+        - updated_at
+        - id
+        - organization_id
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+update_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - clinic_internal_id
+        - date_of_birth_encrypted
+        - deleted_at
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+      set:
+        updated_at: now()
+    comment: ""
+  - role: receptionist
+    permission:
+      columns:
+        - clinic_internal_id
+        - date_of_birth_encrypted
+        - deleted_at
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+      set:
+        updated_at: now()
+    comment: ""

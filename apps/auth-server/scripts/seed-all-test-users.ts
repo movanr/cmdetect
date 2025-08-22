@@ -40,8 +40,8 @@ interface TestUser {
   password: string;
   name: string;
   roles: string[];
+  defaultRole?: string;
   organizationId: string | null;
-  practitionerId: string | null;
 }
 
 const TEST_USERS: TestUser[] = [
@@ -52,7 +52,6 @@ const TEST_USERS: TestUser[] = [
     name: "Test Admin One",
     roles: ["org_admin"],
     organizationId: TEST_ORGANIZATIONS[0].id,
-    practitionerId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   },
   {
     email: "doctor1@test.com",
@@ -60,7 +59,6 @@ const TEST_USERS: TestUser[] = [
     name: "Dr. Test Doctor One",
     roles: ["physician"],
     organizationId: TEST_ORGANIZATIONS[0].id,
-    practitionerId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
   },
   {
     email: "reception1@test.com",
@@ -68,7 +66,6 @@ const TEST_USERS: TestUser[] = [
     name: "Test Reception One",
     roles: ["receptionist"],
     organizationId: TEST_ORGANIZATIONS[0].id,
-    practitionerId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
   },
 
   // Organization 2 users
@@ -78,15 +75,14 @@ const TEST_USERS: TestUser[] = [
     name: "Test Admin Two",
     roles: ["org_admin"],
     organizationId: TEST_ORGANIZATIONS[1].id,
-    practitionerId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
   },
   {
     email: "doctor2@test.com",
     password: "testPassword123!",
     name: "Dr. Test Doctor Two",
-    roles: ["physician"],
+    roles: ["physician", "receptionist"], // Multi-role example
+    defaultRole: "physician",
     organizationId: TEST_ORGANIZATIONS[1].id,
-    practitionerId: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
   },
 
   // Unverified user (no organization)
@@ -96,7 +92,6 @@ const TEST_USERS: TestUser[] = [
     name: "Test Unverified",
     roles: [],
     organizationId: null,
-    practitionerId: null,
   },
 ];
 
@@ -109,7 +104,7 @@ async function seedAllTestUsers() {
     });
 
     // Check if any users already exist
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
       const existingUsers = await client.query(
         'SELECT email FROM "user" WHERE email = ANY($1)',
@@ -126,6 +121,24 @@ async function seedAllTestUsers() {
       client.release();
     }
 
+    // Step 1: Create organizations first
+    console.log("\n🏢 Creating test organizations...");
+    client = await pool.connect();
+    try {
+      for (const org of TEST_ORGANIZATIONS) {
+        await client.query(
+          `INSERT INTO organization (id, name, city, created_at, updated_at) 
+           VALUES ($1, $2, $3, NOW(), NOW())
+           ON CONFLICT (id) DO NOTHING`,
+          [org.id, org.name, org.city]
+        );
+        console.log(`   ✅ Organization created: ${org.name}`);
+      }
+    } finally {
+      client.release();
+    }
+
+    // Step 2: Create test users
     console.log("\n👥 Creating test users...");
     const createdUsers: (TestUser & { userId: string })[] = [];
 
@@ -151,25 +164,32 @@ async function seedAllTestUsers() {
 
         console.log(`   ✅ User created with ID: ${signupResult.user.id}`);
 
-        // Step 2: Update user metadata via database
-        const metadata =
-          userData.roles.length > 0
-            ? {
-                roles: userData.roles,
-                organizationId: userData.organizationId,
-                ...(userData.practitionerId && { practitionerId: userData.practitionerId }),
-              }
-            : {};
-
-        const client = await pool.connect();
+        // Step 2: Update user with additional fields directly in the user table
+        const updateClient = await pool.connect();
         try {
-          await client.query(
-            'UPDATE "user" SET metadata = $1, "emailVerified" = $2 WHERE id = $3',
-            [JSON.stringify(metadata), true, signupResult.user.id]
+          // Update the user table columns directly instead of using metadata
+          await updateClient.query(
+            `UPDATE "user" 
+             SET "emailVerified" = $1, 
+                 roles = $2, 
+                 "organizationId" = $3,
+                 "firstName" = $4,
+                 "lastName" = $5,
+                 "isActive" = $6
+             WHERE id = $7`,
+            [
+              true, // emailVerified
+              JSON.stringify(userData.roles), // roles as JSON array
+              userData.organizationId, // organizationId
+              userData.name.split(' ')[0], // firstName (first part of name)
+              userData.name.split(' ').slice(1).join(' '), // lastName (rest of name)
+              true, // isActive
+              signupResult.user.id
+            ]
           );
-          console.log(`   ✅ Metadata updated for ${userData.email}`);
+          console.log(`   ✅ User fields updated for ${userData.email}`);
         } finally {
-          client.release();
+          updateClient.release();
         }
 
         createdUsers.push({
@@ -226,8 +246,8 @@ async function seedAllTestUsers() {
       if (user.organizationId) {
         console.log(`   🆔 Organization ID: ${user.organizationId}`);
       }
-      if (user.practitionerId) {
-        console.log(`   🩺 Practitioner ID: ${user.practitionerId}`);
+      if (user.defaultRole) {
+        console.log(`   🎯 Default Role: ${user.defaultRole}`);
       }
       console.log("");
     });
@@ -275,6 +295,15 @@ async function cleanupAllTestUsers() {
     if (result.rows.length === 0) {
       console.log("⚠️  No test users found to delete");
     }
+
+    // Also clean up test organizations
+    const orgResult = await client.query(
+      'DELETE FROM organization WHERE id = ANY($1) RETURNING name',
+      [TEST_ORGANIZATIONS.map(org => org.id)]
+    );
+    
+    console.log(`✅ Deleted ${orgResult.rows.length} test organizations`);
+    orgResult.rows.forEach((row) => console.log(`   - ${row.name}`));
   } catch (error) {
     console.error("❌ Error cleaning up test users:", error);
     throw error;

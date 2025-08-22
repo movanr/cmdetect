@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 
 // Auth server configuration
-const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'http://91.98.19.187:3001';
+const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || 'http://localhost:3001';
 
 // Import centralized test data
 import { TestUsers } from './test-data';

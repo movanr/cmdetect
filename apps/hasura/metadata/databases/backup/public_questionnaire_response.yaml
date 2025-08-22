@@ -1,0 +1,78 @@
+table:
+  name: questionnaire_response
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organization_id
+  - name: patient_consent
+    using:
+      foreign_key_constraint_on: patient_consent_id
+  - name: patient_registration
+    using:
+      foreign_key_constraint_on: patient_registration_id
+insert_permissions:
+  - role: org_admin
+    permission:
+      check:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+      set:
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - created_at
+        - deleted_at
+        - fhir_resource
+        - id
+        - patient_consent_id
+        - patient_registration_id
+        - submitted_at
+        - updated_at
+    comment: ""
+  - role: receptionist
+    permission:
+      check:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+      set:
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - fhir_resource
+        - patient_consent_id
+        - patient_registration_id
+        - submitted_at
+    comment: ""
+select_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - created_at
+        - fhir_resource
+        - id
+        - organization_id
+        - patient_consent_id
+        - patient_registration_id
+        - submitted_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+update_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - deleted_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+    comment: ""

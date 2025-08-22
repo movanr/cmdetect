@@ -23,13 +23,6 @@ array_relationships:
         table:
           name: patient
           schema: public
-  - name: practitioners
-    using:
-      foreign_key_constraint_on:
-        column: organization_id
-        table:
-          name: practitioner
-          schema: public
   - name: questionnaire_responses
     using:
       foreign_key_constraint_on:

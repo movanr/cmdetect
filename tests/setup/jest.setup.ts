@@ -12,11 +12,8 @@ beforeAll(async () => {
   console.log('Test environment ready');
 });
 
-// Clean up after each test to ensure isolation
-afterEach(async () => {
-  // Reset to clean state for next test
-  await resetTestDatabase();
-});
+// NOTE: Not cleaning after each test to preserve auth users for subsequent tests
+// Tests should be designed to be independent without requiring full database reset
 
 // Global test teardown
 afterAll(async () => {

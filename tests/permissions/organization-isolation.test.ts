@@ -76,35 +76,35 @@ describe('Organization Isolation', () => {
     });
   });
 
-  describe('Practitioner Access Control', () => {
-    it('org_admin can only access practitioners from their organization', async () => {
-      const org1Practitioners = await clients.org1Admin.request<{
-        practitioner: Array<{id: string, organization_id: string}>
+  describe('User Access Control', () => {
+    it('org_admin can only access users from their organization', async () => {
+      const org1Users = await clients.org1Admin.request<{
+        user: Array<{id: string, organizationId: string}>
       }>(`
         query {
-          practitioner {
+          user {
             id
-            organization_id
+            organizationId
           }
         }
       `);
 
-      // Verify all practitioners belong to org1
-      expect(org1Practitioners.practitioner.every((p) => p.organization_id === TestDataIds.organizations.org1)).toBe(true);
+      // Verify all users belong to org1
+      expect(org1Users.user.every((p) => p.organizationId === TestDataIds.organizations.org1)).toBe(true);
 
-      const org2Practitioners = await clients.org2Admin.request<{
-        practitioner: Array<{id: string, organization_id: string}>
+      const org2Users = await clients.org2Admin.request<{
+        user: Array<{id: string, organizationId: string}>
       }>(`
         query {
-          practitioner {
+          user {
             id
-            organization_id
+            organizationId
           }
         }
       `);
 
-      // Verify all practitioners belong to org2
-      expect(org2Practitioners.practitioner.every((p) => p.organization_id === TestDataIds.organizations.org2)).toBe(true);
+      // Verify all users belong to org2
+      expect(org2Users.user.every((p) => p.organizationId === TestDataIds.organizations.org2)).toBe(true);
     });
   });
 
@@ -210,7 +210,7 @@ describe('Organization Isolation', () => {
         mutation {
           insert_patient_registration_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
+            assigned_user_id: "${TestDataIds.users.org1Physician}"
             notes: "Test registration"
           }) {
             id
@@ -231,7 +231,7 @@ describe('Organization Isolation', () => {
         mutation {
           insert_patient_registration_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient2}"
-            assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
+            assigned_user_id: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created registration"
           }) {
             id
@@ -252,7 +252,7 @@ describe('Organization Isolation', () => {
           mutation {
             insert_patient_registration_one(object: {
               patient_id: "${TestDataIds.patients.org2Patient1}"
-              assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
+              assigned_user_id: "${TestDataIds.users.org1Physician}"
               notes: "Cross-org attempt"
             }) {
               id
@@ -269,7 +269,7 @@ describe('Organization Isolation', () => {
           mutation {
             insert_patient_registration_one(object: {
               patient_id: "${TestDataIds.patients.org1Patient1}"
-              assigned_practitioner_id: "${TestDataIds.practitioners.org2Physician}"
+              assigned_user_id: "${TestDataIds.users.org2Physician}"
               notes: "Cross-org practitioner attempt"
             }) {
               id
@@ -286,8 +286,8 @@ describe('Organization Isolation', () => {
           insert_patient_registration_one(object: {
             organization_id: "${TestDataIds.organizations.org1}"
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
-            created_by_practitioner_id: "${TestDataIds.practitioners.org1Admin}"
+            assigned_user_id: "${TestDataIds.users.org1Physician}"
+            created_by_user_id: "${TestDataIds.users.org1Admin}"
             notes: "Assigned to physician"
           }) {
             id
@@ -297,12 +297,12 @@ describe('Organization Isolation', () => {
 
       // Physician should see it
       const result = await clients.org1Physician.request<{
-        patient_registration: Array<{id: string, assigned_practitioner_id: string, organization_id: string}>
+        patient_registration: Array<{id: string, assigned_user_id: string, organization_id: string}>
       }>(`
         query {
           patient_registration {
             id
-            assigned_practitioner_id
+            assigned_user_id
             organization_id
           }
         }
@@ -311,7 +311,7 @@ describe('Organization Isolation', () => {
       expect(result.patient_registration.length).toBeGreaterThan(0);
       expect(result.patient_registration.every(r => 
         r.organization_id === TestDataIds.organizations.org1 &&
-        (r.assigned_practitioner_id === TestDataIds.practitioners.org1Physician)
+        (r.assigned_user_id === TestDataIds.users.org1Physician)
       )).toBe(true);
     });
 
@@ -323,7 +323,7 @@ describe('Organization Isolation', () => {
         mutation {
           insert_patient_registration_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
+            assigned_user_id: "${TestDataIds.users.org1Physician}"
             notes: "To be soft deleted"
           }) {
             id
@@ -448,16 +448,16 @@ describe('Organization Isolation', () => {
     });
 
     it('org2 admin cannot access org1 practitioner by ID', async () => {
-      const result = await clients.org2Admin.request<{practitioner_by_pk: {id: string, email: string} | null}>(`
+      const result = await clients.org2Admin.request<{user_by_pk: {id: string, email: string} | null}>(`
         query {
-          practitioner_by_pk(id: "${TestDataIds.practitioners.org1Admin}") {
+          user_by_pk(id: "${TestDataIds.users.org1Admin}") {
             id
             email
           }
         }
       `);
 
-      expect(result.practitioner_by_pk).toBeNull();
+      expect(result.user_by_pk).toBeNull();
     });
 
     it('cross-organization patient registration queries return empty', async () => {
@@ -466,7 +466,7 @@ describe('Organization Isolation', () => {
         mutation {
           insert_patient_registration_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_practitioner_id: "${TestDataIds.practitioners.org1Physician}"
+            assigned_user_id: "${TestDataIds.users.org1Physician}"
             notes: "Org1 registration"
           }) {
             id

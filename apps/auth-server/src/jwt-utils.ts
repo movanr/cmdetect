@@ -11,17 +11,14 @@ export function verifyUserJWT(authHeader: string): UserJWTPayload {
   }
 
   const token = authHeader.substring(7); // Remove "Bearer " prefix
-  const privateKey = process.env.JWT_PRIVATE_KEY;
-  if (!privateKey) {
-    throw new Error('JWT_PRIVATE_KEY environment variable is required');
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET environment variable is required');
   }
 
   try {
-    // Note: For proper JWT verification, we should use the public key
-    // but since we only have the private key, we'll use it for verification
-    // In production, consider adding JWT_PUBLIC_KEY for verification
-    const decoded = jwt.verify(token, privateKey, { 
-      algorithms: ['RS256'],
+    const decoded = jwt.verify(token, jwtSecret, { 
+      algorithms: ['HS256'],
       issuer: 'cmdetect-auth-server'
     }) as UserJWTPayload;
 

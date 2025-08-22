@@ -1,22 +1,6 @@
 name: hasura
 
 services:
-  postgres:
-    image: postgres:15
-    container_name: hasura_postgres
-    restart: always
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-    networks:
-      - hasura-network
-    # Port nur für Entwicklung - für Produktion entfernen!
-    ports:
-      - "5432:5432"
-
   graphql-engine:
     image: hasura/graphql-engine:v2.46.0
     container_name: hasura_graphql
@@ -36,7 +20,7 @@ services:
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET}
 
       # JWT Configuration for Better Auth
-      HASURA_GRAPHQL_JWT_SECRET: '{"type": "EdDSA", "jwk_url": "${AUTH_SERVER_URL}/api/auth/jwks"}'
+      HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
 
       # Console-Einstellungen
       # enable the console served by server
@@ -51,8 +35,6 @@ services:
       HASURA_GRAPHQL_METADATA_DEFAULTS: '{"backend_configs":{"dataconnector":{"athena":{"uri":"http://data-connector-agent:8081/api/v1/athena"},"mariadb":{"uri":"http://data-connector-agent:8081/api/v1/mariadb"},"mysql8":{"uri":"http://data-connector-agent:8081/api/v1/mysql"},"oracle":{"uri":"http://data-connector-agent:8081/api/v1/oracle"},"snowflake":{"uri":"http://data-connector-agent:8081/api/v1/snowflake"}}}}'
 
     depends_on:
-      postgres:
-        condition: service_started
       data-connector-agent:
         condition: service_healthy
     networks:
@@ -78,8 +60,7 @@ services:
     networks:
       - hasura-network
 
-volumes:
-  db_data:
+# No volumes needed locally
 
 networks:
   hasura-network:
