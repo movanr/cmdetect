@@ -5,9 +5,9 @@ object_relationships:
   - name: organization
     using:
       foreign_key_constraint_on: organization_id
-  - name: patient_registration
+  - name: patient_record
     using:
-      foreign_key_constraint_on: patient_registration_id
+      foreign_key_constraint_on: patient_record_id
 array_relationships:
   - name: questionnaire_responses
     using:
@@ -31,7 +31,7 @@ select_permissions:
         - updated_at
         - id
         - organization_id
-        - patient_registration_id
+        - patient_record_id
       filter:
         _and:
           - organization_id:
@@ -50,7 +50,7 @@ select_permissions:
         - id
         - ip_address
         - organization_id
-        - patient_registration_id
+        - patient_record_id
         - updated_at
         - user_agent
       filter:
@@ -71,7 +71,7 @@ select_permissions:
         - id
         - ip_address
         - organization_id
-        - patient_registration_id
+        - patient_record_id
         - updated_at
         - user_agent
       filter:

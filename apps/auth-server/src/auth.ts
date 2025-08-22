@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
-import { v4 as uuidv4 } from 'uuid';
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -17,14 +16,6 @@ export const auth = betterAuth({
   // Better Auth session secret (separate from JWT signing key)
   secret: process.env.BETTER_AUTH_SECRET!,
 
-  // Configure Better Auth to use UUIDs instead of default string IDs
-  advanced: {
-    database: {
-      generateId: () => uuidv4(),
-      // Disable automatic ID generation to let PostgreSQL handle UUIDs
-      useNumberId: false,
-    },
-  },
 
   // Plugins
   plugins: [
@@ -49,7 +40,7 @@ export const auth = betterAuth({
             const claims: Record<string, any> = {
               "x-hasura-default-role": defaultRole,
               "x-hasura-allowed-roles": validRoles,
-              "x-hasura-user-id": user.id,
+              "x-hasura-user-id": user.app_uuid, // Always use app_uuid for everything
               "x-hasura-organization-id": user.organizationId,
             };
 
@@ -64,7 +55,7 @@ export const auth = betterAuth({
               "https://hasura.io/jwt/claims": {
                 "x-hasura-default-role": "unverified",
                 "x-hasura-allowed-roles": ["unverified"],
-                "x-hasura-user-id": user.id,
+                "x-hasura-user-id": user.app_uuid, // Always use app_uuid for everything
               },
             };
           }
@@ -129,6 +120,10 @@ Falls Sie dieses Konto nicht erstellt haben, ignorieren Sie diese E-Mail.`,
       },
       organizationId: {
         type: "string", // Better Auth handles UUID as string
+        required: false,
+      },
+      app_uuid: {
+        type: "string", // UUID stored as string
         required: false,
       },
       isActive: {

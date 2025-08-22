@@ -6,12 +6,12 @@ object_relationships:
     using:
       foreign_key_constraint_on: organization_id
 array_relationships:
-  - name: patient_registrations
+  - name: patient_records
     using:
       foreign_key_constraint_on:
         column: patient_id
         table:
-          name: patient_registration
+          name: patient_record
           schema: public
 insert_permissions:
   - role: org_admin
@@ -80,8 +80,8 @@ select_permissions:
         _and:
           - organization_id:
               _eq: X-Hasura-Organization-Id
-          - patient_registrations:
-              assigned_user_id:
+          - patient_records:
+              assigned_to:
                 _eq: X-Hasura-User-Id
           - deleted_at:
               _is_null: true

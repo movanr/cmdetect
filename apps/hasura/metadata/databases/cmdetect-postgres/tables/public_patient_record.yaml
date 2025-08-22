@@ -1,5 +1,5 @@
 table:
-  name: patient_registration
+  name: patient_record
   schema: public
 object_relationships:
   - name: organization
@@ -11,27 +11,27 @@ object_relationships:
   - name: patient_consent
     using:
       foreign_key_constraint_on:
-        column: patient_registration_id
+        column: patient_record_id
         table:
           name: patient_consent
           schema: public
   - name: user
     using:
-      foreign_key_constraint_on: assigned_user_id
-  - name: userByCreatedByUserId
+      foreign_key_constraint_on: assigned_to
+  - name: userByCreatedBy
     using:
-      foreign_key_constraint_on: created_by_user_id
-  - name: userByFirstViewedByUserId
+      foreign_key_constraint_on: created_by
+  - name: userByFirstViewedBy
     using:
-      foreign_key_constraint_on: first_viewed_by_user_id
-  - name: userByLastActivityByUserId
+      foreign_key_constraint_on: first_viewed_by
+  - name: userByLastActivityBy
     using:
-      foreign_key_constraint_on: last_activity_by_user_id
+      foreign_key_constraint_on: last_activity_by
 array_relationships:
   - name: questionnaire_responses
     using:
       foreign_key_constraint_on:
-        column: patient_registration_id
+        column: patient_record_id
         table:
           name: questionnaire_response
           schema: public
@@ -49,10 +49,10 @@ insert_permissions:
               organizationId:
                 _eq: X-Hasura-Organization-Id
       set:
-        created_by_user_id: x-hasura-User-Id
+        created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
-        - assigned_user_id
+        - assigned_to
         - notes
         - patient_id
     comment: ""
@@ -69,10 +69,10 @@ insert_permissions:
               organizationId:
                 _eq: X-Hasura-Organization-Id
       set:
-        created_by_user_id: x-hasura-User-Id
+        created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
-        - assigned_user_id
+        - assigned_to
         - notes
         - patient_id
     comment: ""
@@ -80,21 +80,21 @@ select_permissions:
   - role: org_admin
     permission:
       columns:
-        - link_token
-        - status
+        - invite_token
+        - invite_status
         - workflow_status
         - notes
         - created_at
         - deleted_at
         - first_viewed_at
         - last_activity_at
-        - link_expires_at
+        - invite_expires_at
         - updated_at
-        - assigned_user_id
-        - created_by_user_id
-        - first_viewed_by_user_id
+        - assigned_to
+        - created_by
+        - first_viewed_by
         - id
-        - last_activity_by_user_id
+        - last_activity_by
         - organization_id
         - patient_id
       filter:
@@ -107,20 +107,20 @@ select_permissions:
   - role: physician
     permission:
       columns:
-        - assigned_user_id
+        - assigned_to
         - created_at
-        - created_by_user_id
+        - created_by
         - first_viewed_at
-        - first_viewed_by_user_id
+        - first_viewed_by
         - id
         - last_activity_at
-        - last_activity_by_user_id
-        - link_expires_at
-        - link_token
+        - last_activity_by
+        - invite_expires_at
+        - invite_token
         - notes
         - organization_id
         - patient_id
-        - status
+        - invite_status
         - updated_at
         - workflow_status
       filter:
@@ -128,31 +128,31 @@ select_permissions:
           - organization_id:
               _eq: X-Hasura-Organization-Id
           - _or:
-              - assigned_user_id:
+              - assigned_to:
                   _eq: X-Hasura-User-Id
-              - created_by_user_id:
+              - created_by:
                   _eq: X-Hasura-User-Id
           - deleted_at:
               _is_null: true
-    comment: Can see registrations assigned to them + created by them
+    comment: Can see records assigned to them + created by them
   - role: receptionist
     permission:
       columns:
-        - link_token
-        - status
+        - invite_token
+        - invite_status
         - workflow_status
         - notes
         - created_at
         - deleted_at
         - first_viewed_at
         - last_activity_at
-        - link_expires_at
+        - invite_expires_at
         - updated_at
-        - assigned_user_id
-        - created_by_user_id
-        - first_viewed_by_user_id
+        - assigned_to
+        - created_by
+        - first_viewed_by
         - id
-        - last_activity_by_user_id
+        - last_activity_by
         - organization_id
         - patient_id
       filter:
@@ -163,7 +163,7 @@ update_permissions:
   - role: org_admin
     permission:
       columns:
-        - assigned_user_id
+        - assigned_to
         - deleted_at
         - notes
         - patient_id
@@ -180,28 +180,28 @@ update_permissions:
       columns:
         - deleted_at
         - first_viewed_at
-        - first_viewed_by_user_id
+        - first_viewed_by
         - last_activity_at
-        - last_activity_by_user_id
+        - last_activity_by
         - notes
         - workflow_status
       filter:
         _and:
           - organization_id:
               _eq: X-Hasura-Organization-Id
-          - assigned_user_id:
+          - assigned_to:
               _eq: X-Hasura-User-Id
           - deleted_at:
               _is_null: true
       check: null
       set:
-        last_activity_by_user_id: x-hasura-User-Id
+        last_activity_by: x-hasura-User-Id
         updated_at: now()
     comment: Can update workflow status and notes for assigned cases
   - role: receptionist
     permission:
       columns:
-        - assigned_user_id
+        - assigned_to
         - deleted_at
         - notes
         - patient_id
@@ -209,5 +209,5 @@ update_permissions:
       check: null
       set:
         last_activity_at: now()
-        last_activity_by_user_id: x-hasura-User-Id
+        last_activity_by: x-hasura-User-Id
     comment: ""

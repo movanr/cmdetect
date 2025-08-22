@@ -40,19 +40,19 @@ describe("Role-Based Access Control", () => {
       const registrationData = {
         organization_id: TestDataIds.organizations.org1,
         patient_id: TestDataIds.patients.org1Patient1,
-        created_by_user_id: TestDataIds.users.org1Admin,
-        assigned_user_id: TestDataIds.users.org1Physician,
+        created_by: TestDataIds.users.org1AdminAppUuid,
+        assigned_to: TestDataIds.users.org1PhysicianAppUuid,
         status: "pending",
       };
 
       await clients.admin.request(`
         mutation {
-          insert_patient_registration_one(object: {
+          insert_patient_record_one(object: {
             organization_id: "${registrationData.organization_id}"
             patient_id: "${registrationData.patient_id}"
-            created_by_user_id: "${registrationData.created_by_user_id}"
-            assigned_user_id: "${registrationData.assigned_user_id}"
-            status: "${registrationData.status}"
+            created_by: "${registrationData.created_by}"
+            assigned_to: "${registrationData.assigned_to}"
+            invite_status: "${registrationData.status}"
           }) {
             id
           }
@@ -150,25 +150,25 @@ describe("Role-Based Access Control", () => {
       ).toBe(true);
     });
 
-    it("receptionist can create patient_registration with auto-set fields", async () => {
+    it("receptionist can create patient_record with auto-set fields", async () => {
       // Test that receptionist can create patient registrations
-      // and that organization_id and created_by_user_id are auto-set from JWT
+      // and that organization_id and created_by are auto-set from JWT
       const result = await clients.org1Receptionist.request<{
-        insert_patient_registration: {
+        insert_patient_record: {
           affected_rows: number;
           returning: Array<{
             id: string;
             organization_id: string;
             patient_id: string;
-            created_by_user_id: string;
+            created_by: string;
             notes: string;
           }>;
         };
       }>(`
         mutation {
-          insert_patient_registration(objects: [{
+          insert_patient_record(objects: [{
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_user_id: "${TestDataIds.users.org1Physician}"
+            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
             notes: "Receptionist created registration"
           }]) {
             affected_rows
@@ -176,7 +176,7 @@ describe("Role-Based Access Control", () => {
               id
               organization_id
               patient_id
-              created_by_user_id
+              created_by
               notes
             }
           }
@@ -184,15 +184,15 @@ describe("Role-Based Access Control", () => {
       `);
 
       // Verify the registration was created successfully
-      expect(result.insert_patient_registration.affected_rows).toBe(1);
-      expect(result.insert_patient_registration.returning).toHaveLength(1);
+      expect(result.insert_patient_record.affected_rows).toBe(1);
+      expect(result.insert_patient_record.returning).toHaveLength(1);
 
-      const registration = result.insert_patient_registration.returning[0];
+      const registration = result.insert_patient_record.returning[0];
 
       // Verify auto-set fields
       expect(registration.organization_id).toBe(TestDataIds.organizations.org1);
-      expect(registration.created_by_user_id).toBe(
-        TestDataIds.users.org1Receptionist
+      expect(registration.created_by).toBe(
+        TestDataIds.users.org1ReceptionistAppUuid
       );
       expect(registration.patient_id).toBe(TestDataIds.patients.org1Patient1);
     });

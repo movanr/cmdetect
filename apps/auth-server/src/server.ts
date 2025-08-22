@@ -4,7 +4,6 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
-import hasuraActionsRouter from "./hasura-actions";
 
 dotenv.config();
 
@@ -26,8 +25,6 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 // JSON middleware after auth handler
 app.use(express.json());
 
-// Hasura action routes
-app.use("/api/hasura-actions", hasuraActionsRouter);
 
 // Health check
 app.get("/health", (_, res) => {

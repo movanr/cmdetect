@@ -8,9 +8,9 @@ object_relationships:
   - name: patient_consent
     using:
       foreign_key_constraint_on: patient_consent_id
-  - name: patient_registration
+  - name: patient_record
     using:
-      foreign_key_constraint_on: patient_registration_id
+      foreign_key_constraint_on: patient_record_id
 insert_permissions:
   - role: org_admin
     permission:
@@ -26,7 +26,7 @@ insert_permissions:
         - fhir_resource
         - id
         - patient_consent_id
-        - patient_registration_id
+        - patient_record_id
         - submitted_at
         - updated_at
     comment: ""
@@ -41,7 +41,7 @@ insert_permissions:
       columns:
         - fhir_resource
         - patient_consent_id
-        - patient_registration_id
+        - patient_record_id
         - submitted_at
     comment: ""
 select_permissions:
@@ -53,7 +53,7 @@ select_permissions:
         - id
         - organization_id
         - patient_consent_id
-        - patient_registration_id
+        - patient_record_id
         - submitted_at
         - updated_at
       filter:

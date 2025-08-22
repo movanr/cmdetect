@@ -202,16 +202,16 @@ describe('Organization Isolation', () => {
     });
   });
 
-  describe('Patient Registration Access Control', () => {
-    it('org_admin can create registrations in their organization', async () => {
+  describe('Patient Record Access Control', () => {
+    it('org_admin can create records in their organization', async () => {
       const result = await clients.org1Admin.request<{
-        insert_patient_registration_one: {id: string, organization_id: string, patient_id: string}
+        insert_patient_record_one: {id: string, organization_id: string, patient_id: string}
       }>(`
         mutation {
-          insert_patient_registration_one(object: {
+          insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_user_id: "${TestDataIds.users.org1Physician}"
-            notes: "Test registration"
+            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            notes: "Test record"
           }) {
             id
             organization_id
@@ -220,18 +220,18 @@ describe('Organization Isolation', () => {
         }
       `);
 
-      expect(result.insert_patient_registration_one).toBeTruthy();
-      expect(result.insert_patient_registration_one.organization_id).toBe(TestDataIds.organizations.org1);
+      expect(result.insert_patient_record_one).toBeTruthy();
+      expect(result.insert_patient_record_one.organization_id).toBe(TestDataIds.organizations.org1);
     });
 
     it('receptionist can create registrations in their organization', async () => {
       const result = await clients.org1Receptionist.request<{
-        insert_patient_registration_one: {id: string, organization_id: string}
+        insert_patient_record_one: {id: string, organization_id: string}
       }>(`
         mutation {
-          insert_patient_registration_one(object: {
+          insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient2}"
-            assigned_user_id: "${TestDataIds.users.org1Physician}"
+            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
             notes: "Receptionist created registration"
           }) {
             id
@@ -240,8 +240,8 @@ describe('Organization Isolation', () => {
         }
       `);
 
-      expect(result.insert_patient_registration_one).toBeTruthy();
-      expect(result.insert_patient_registration_one.organization_id).toBe(TestDataIds.organizations.org1);
+      expect(result.insert_patient_record_one).toBeTruthy();
+      expect(result.insert_patient_record_one.organization_id).toBe(TestDataIds.organizations.org1);
     });
 
 
@@ -250,9 +250,9 @@ describe('Organization Isolation', () => {
       await expect(
         clients.org1Admin.request(`
           mutation {
-            insert_patient_registration_one(object: {
+            insert_patient_record_one(object: {
               patient_id: "${TestDataIds.patients.org2Patient1}"
-              assigned_user_id: "${TestDataIds.users.org1Physician}"
+              assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
               notes: "Cross-org attempt"
             }) {
               id
@@ -267,9 +267,9 @@ describe('Organization Isolation', () => {
       await expect(
         clients.org1Admin.request(`
           mutation {
-            insert_patient_registration_one(object: {
+            insert_patient_record_one(object: {
               patient_id: "${TestDataIds.patients.org1Patient1}"
-              assigned_user_id: "${TestDataIds.users.org2Physician}"
+              assigned_to: "${TestDataIds.users.org2PhysicianAppUuid}"
               notes: "Cross-org practitioner attempt"
             }) {
               id
@@ -283,11 +283,11 @@ describe('Organization Isolation', () => {
       // First create a registration assigned to physician
       await clients.admin.request(`
         mutation {
-          insert_patient_registration_one(object: {
+          insert_patient_record_one(object: {
             organization_id: "${TestDataIds.organizations.org1}"
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_user_id: "${TestDataIds.users.org1Physician}"
-            created_by_user_id: "${TestDataIds.users.org1Admin}"
+            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            created_by: "${TestDataIds.users.org1AdminAppUuid}"
             notes: "Assigned to physician"
           }) {
             id
@@ -297,33 +297,33 @@ describe('Organization Isolation', () => {
 
       // Physician should see it
       const result = await clients.org1Physician.request<{
-        patient_registration: Array<{id: string, assigned_user_id: string, organization_id: string}>
+        patient_record: Array<{id: string, assigned_to: string, organization_id: string}>
       }>(`
         query {
-          patient_registration {
+          patient_record {
             id
-            assigned_user_id
+            assigned_to
             organization_id
           }
         }
       `);
 
-      expect(result.patient_registration.length).toBeGreaterThan(0);
-      expect(result.patient_registration.every(r => 
+      expect(result.patient_record.length).toBeGreaterThan(0);
+      expect(result.patient_record.every(r => 
         r.organization_id === TestDataIds.organizations.org1 &&
-        (r.assigned_user_id === TestDataIds.users.org1Physician)
+        (r.assigned_to === TestDataIds.users.org1PhysicianAppUuid)
       )).toBe(true);
     });
 
     it('org_admin can soft delete registrations in their organization', async () => {
       // First create a registration
       const createResult = await clients.org1Admin.request<{
-        insert_patient_registration_one: {id: string}
+        insert_patient_record_one: {id: string}
       }>(`
         mutation {
-          insert_patient_registration_one(object: {
+          insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_user_id: "${TestDataIds.users.org1Physician}"
+            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
             notes: "To be soft deleted"
           }) {
             id
@@ -333,11 +333,11 @@ describe('Organization Isolation', () => {
 
       // Then soft delete it by setting deleted_at
       const updateResult = await clients.org1Admin.request<{
-        update_patient_registration_by_pk: {id: string, deleted_at: string}
+        update_patient_record_by_pk: {id: string, deleted_at: string}
       }>(`
         mutation {
-          update_patient_registration_by_pk(
-            pk_columns: { id: "${createResult.insert_patient_registration_one.id}" }
+          update_patient_record_by_pk(
+            pk_columns: { id: "${createResult.insert_patient_record_one.id}" }
             _set: { deleted_at: "now()" }
           ) {
             id
@@ -346,21 +346,21 @@ describe('Organization Isolation', () => {
         }
       `);
 
-      expect(updateResult.update_patient_registration_by_pk).toBeTruthy();
-      expect(updateResult.update_patient_registration_by_pk.deleted_at).not.toBeNull();
+      expect(updateResult.update_patient_record_by_pk).toBeTruthy();
+      expect(updateResult.update_patient_record_by_pk.deleted_at).not.toBeNull();
 
       // Verify the soft-deleted record no longer appears in normal queries
       const queryResult = await clients.org1Admin.request<{
-        patient_registration_by_pk: {id: string} | null
+        patient_record_by_pk: {id: string} | null
       }>(`
         query {
-          patient_registration_by_pk(id: "${createResult.insert_patient_registration_one.id}") {
+          patient_record_by_pk(id: "${createResult.insert_patient_record_one.id}") {
             id
           }
         }
       `);
 
-      expect(queryResult.patient_registration_by_pk).toBeNull();
+      expect(queryResult.patient_record_by_pk).toBeNull();
     });
   });
 
@@ -464,9 +464,9 @@ describe('Organization Isolation', () => {
       // Create registration in org1
       await clients.org1Admin.request(`
         mutation {
-          insert_patient_registration_one(object: {
+          insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_user_id: "${TestDataIds.users.org1Physician}"
+            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
             notes: "Org1 registration"
           }) {
             id
@@ -476,10 +476,10 @@ describe('Organization Isolation', () => {
 
       // Org2 admin should not see any registrations from org1
       const org2Result = await clients.org2Admin.request<{
-        patient_registration: Array<{id: string, organization_id: string}>
+        patient_record: Array<{id: string, organization_id: string}>
       }>(`
         query {
-          patient_registration {
+          patient_record {
             id
             organization_id
           }
@@ -487,7 +487,7 @@ describe('Organization Isolation', () => {
       `);
 
       // Should only see org2 registrations (if any)
-      expect(org2Result.patient_registration.every(r => 
+      expect(org2Result.patient_record.every(r => 
         r.organization_id === TestDataIds.organizations.org2
       )).toBe(true);
     });

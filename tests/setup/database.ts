@@ -41,7 +41,7 @@ export async function clearTestData(): Promise<void> {
       delete_patient_consent(where: {}) {
         affected_rows
       }
-      delete_patient_registration(where: {}) {
+      delete_patient_record(where: {}) {
         affected_rows
       }
       delete_patient(where: {}) {

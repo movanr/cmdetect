@@ -6,33 +6,33 @@ object_relationships:
     using:
       foreign_key_constraint_on: organizationId
 array_relationships:
-  - name: patientRegistrationsByCreatedByUserId
+  - name: patientRecordsByCreatedBy
     using:
       foreign_key_constraint_on:
-        column: created_by_user_id
+        column: created_by
         table:
-          name: patient_registration
+          name: patient_record
           schema: public
-  - name: patientRegistrationsByFirstViewedByUserId
+  - name: patientRecordsByFirstViewedBy
     using:
       foreign_key_constraint_on:
-        column: first_viewed_by_user_id
+        column: first_viewed_by
         table:
-          name: patient_registration
+          name: patient_record
           schema: public
-  - name: patientRegistrationsByLastActivityByUserId
+  - name: patientRecordsByLastActivityBy
     using:
       foreign_key_constraint_on:
-        column: last_activity_by_user_id
+        column: last_activity_by
         table:
-          name: patient_registration
+          name: patient_record
           schema: public
-  - name: patient_registrations
+  - name: patient_records
     using:
       foreign_key_constraint_on:
-        column: assigned_user_id
+        column: assigned_to
         table:
-          name: patient_registration
+          name: patient_record
           schema: public
 insert_permissions:
   - role: org_admin

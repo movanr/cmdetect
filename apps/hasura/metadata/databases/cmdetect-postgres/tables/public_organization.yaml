@@ -9,12 +9,12 @@ array_relationships:
         table:
           name: patient_consent
           schema: public
-  - name: patient_registrations
+  - name: patient_records
     using:
       foreign_key_constraint_on:
         column: organization_id
         table:
-          name: patient_registration
+          name: patient_record
           schema: public
   - name: patients
     using:

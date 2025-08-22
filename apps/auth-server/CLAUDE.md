@@ -91,10 +91,6 @@ All test users use password: `TestPassword123!`
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`: Email configuration
 - `POSTGRES_PASSWORD`: Database password for Docker setup
 
-### Hasura Actions
-- `HASURA_DATABASE_URL`: PostgreSQL connection string for Hasura database (patient data)
-- `HASURA_ENDPOINT`: Hasura GraphQL endpoint URL
-- `HASURA_ADMIN_SECRET`: Hasura admin secret for authenticated operations
 
 ## Development Setup
 
@@ -105,26 +101,9 @@ All test users use password: `TestPassword123!`
 
 The server runs on port 3001 with:
 - Auth endpoints at `/api/auth/*`
-- Hasura action endpoints at `/api/hasura-actions/*`
 - Admin endpoints at `/admin/*` (placeholder for future features)
 - Health check at `/health`
 
-## Hasura Actions
-
-### Patient Anamnesis Submission
-
-The server provides a Hasura action handler for anonymous patient anamnesis submission:
-
-**Endpoint**: `POST /api/hasura-actions/submit-patient-anamnesis`
-
-**Purpose**: Validates secure link tokens, processes patient consent and anamnesis data (including questionnaire responses), and updates registration status. Used by patients accessing anamnesis forms via email links - no authentication required.
-
-**Features**:
-- Link token validation with expiry checking
-- Consent data collection with audit trail (IP, user agent)
-- Multiple questionnaire responses per anamnesis submission
-- Automatic status updates via database triggers
-- Comprehensive error handling and validation
 
 ## Testing Authentication
 
