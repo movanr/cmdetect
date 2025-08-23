@@ -5,9 +5,9 @@ dotenvConfig();
 
 const config: CodegenConfig = {
   schema: {
-    [process.env.HASURA_GRAPHQL_URL || "http://91.98.19.187:8080/v1/graphql"]: {
+    [process.env.VITE_HASURA_GRAPHQL_URL || "http://localhost:8080/v1/graphql"]: {
       headers: {
-        "x-hasura-admin-secret": process.env.HASURA_ADMIN_SECRET || "",
+        "x-hasura-admin-secret": process.env.VITE_HASURA_ADMIN_SECRET || "",
       },
     },
   },

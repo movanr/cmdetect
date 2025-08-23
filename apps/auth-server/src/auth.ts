@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { jwt } from "better-auth/plugins";
+import { jwt, anonymous } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
 import dotenv from "dotenv";
@@ -15,6 +15,12 @@ export const auth = betterAuth({
 
   // Better Auth session secret (separate from JWT signing key)
   secret: process.env.BETTER_AUTH_SECRET!,
+
+  // Trusted origins for CORS
+  trustedOrigins: [
+    process.env.FRONTEND_URL || "http://localhost:3000",
+    "http://localhost:3000",
+  ],
 
 
   // Plugins

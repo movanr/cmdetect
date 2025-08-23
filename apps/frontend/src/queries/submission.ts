@@ -1,37 +1,30 @@
 import { graphql } from "../graphql";
 
-/*export const getSubmissionsList = graphql(`
-  query GetSubmissionsList($organizationId: uuid!) {
-    patient_registration(
+// Basic query to test organization access
+export const getOrganizations = graphql(`
+  query GetOrganizations {
+    organization {
+      id
+      name
+      city
+      created_at
+    }
+  }
+`);
+
+// Query patient records for organization
+export const getPatientRecords = graphql(`
+  query GetPatientRecords($organizationId: uuid!) {
+    patient_record(
       where: { organization_id: { _eq: $organizationId } }
       order_by: { created_at: desc }
     ) {
       id
-      status
-      link_expires_at
+      workflow_status
+      invite_status
       created_at
+      organization_id
       notes
-      patient {
-        id
-        clinic_internal_id
-        first_name_encrypted
-        last_name_encrypted
-        date_of_birth_encrypted
-        gender_encrypted
-        organization_id
-      }
-      assigned_to_practitioner {
-        id
-        first_name
-        last_name
-      }
-      created_by_practitioner {
-        id
-        first_name
-        last_name
-      }
-      
     }
   }
 `);
-*/

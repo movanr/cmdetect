@@ -68,10 +68,13 @@ select_permissions:
         - address_line2
         - city
         - country
+        - created_at
         - email
+        - id
         - name
         - phone
         - postal_code
+        - updated_at
         - website
       filter:
         _and:
@@ -87,10 +90,13 @@ select_permissions:
         - address_line2
         - city
         - country
+        - created_at
         - email
+        - id
         - name
         - phone
         - postal_code
+        - updated_at
         - website
       filter:
         _and:

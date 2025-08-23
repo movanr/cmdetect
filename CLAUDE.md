@@ -70,7 +70,7 @@ The system consists of three main services that must run together:
 - JWT tokens with RS256 asymmetric encryption (8-hour expiration)
 - Multi-tenant organization isolation via `x-hasura-organization-id` claim
 - Role-based access: `org_admin`, `physician`, `receptionist`, `unverified`
-- Custom Hasura claims including `x-hasura-practitioner-id` for user linkage
+- `x-hasura-user-id` contains `app_uuid`
 - Email verification required for account activation
 
 ### Database Architecture
@@ -78,13 +78,13 @@ The system consists of three main services that must run together:
 **Two PostgreSQL databases:**
 
 1. **Auth Database** (Better Auth): User accounts, sessions, email verification
-2. **Application Database** (Hasura): Patients, practitioners, questionnaire responses
+2. **Application Database** (Hasura): Patients, patient records, questionnaire responses
 
 **Key Tables:**
 
-- `patient`, `practitioner`, `organization` (multi-tenant base entities)
-- `patient_registration` (secure link tokens for anamnesis forms)
-- `questionnaire_response` (patient anamnesis data)
+- `patient`, `user`, `organization` (multi-tenant base entities)
+- `patient_record` (patient cases with workflow status and invite tokens)
+- `questionnaire_response` (patient anamnesis data with multiple questionnaires per record)
 - `patient_consent` (consent tracking with audit trail)
 
 ## GraphQL Integration
@@ -166,7 +166,6 @@ pnpm test:permissions
 
 ### Security Notes
 
-- JWT tokens use RS256 asymmetric encryption
 - Email verification required for all accounts
 - CORS configured for specific development origins
 - Admin secrets required for Hasura access

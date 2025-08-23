@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getSubmissions } from "../queries/submission";
+import { getOrganizations, getPatientRecords } from "../queries/submission";
 import { execute } from "../graphql/execute";
 import { useState } from "react";
 
@@ -9,81 +9,72 @@ export const Route = createFileRoute("/submissions")({
 });
 
 function Submissions() {
-  const [organisationId, setOrganisationId] = useState("");
+  const [selectedOrgId, setSelectedOrgId] = useState("");
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["submissions", organisationId],
-    queryFn: () => execute(getSubmissions, { organisationId }),
-    enabled: !!organisationId,
+  // Get all organizations (this will be filtered by JWT claims when auth is working)
+  const { data: orgsData, isLoading: orgsLoading, error: orgsError } = useQuery({
+    queryKey: ["organizations"],
+    queryFn: () => execute(getOrganizations),
   });
 
-  if (error) return <div>Error loading submissions: {error.message}</div>;
+  // Get patient records for selected organization
+  const { data: recordsData, isLoading: recordsLoading, error: recordsError } = useQuery({
+    queryKey: ["patient-records", selectedOrgId],
+    queryFn: () => execute(getPatientRecords, { organizationId: selectedOrgId }),
+    enabled: !!selectedOrgId,
+  });
 
-  const submissions = data?.submission || [];
+  if (orgsError) return <div>Error loading organizations: {orgsError.message}</div>;
+  if (recordsError) return <div>Error loading patient records: {recordsError.message}</div>;
+
+  const organizations = orgsData?.organization || [];
+  const patientRecords = recordsData?.patient_record || [];
 
   return (
-    <div>
-      <h1>Submissions</h1>
-      <div style={{ marginBottom: "20px" }}>
-        <label>
-          Organisation ID:
-          <input
-            type="text"
-            value={organisationId}
-            onChange={(e) => setOrganisationId(e.target.value)}
-            placeholder="Enter organisation ID for testing"
-            style={{ marginLeft: "8px", padding: "4px" }}
-          />
-        </label>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Test Data Access</h1>
+      
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Organizations</h2>
+        {orgsLoading ? (
+          <div>Loading organizations...</div>
+        ) : (
+          <div className="space-y-2">
+            {organizations.map((org) => (
+              <div 
+                key={org.id}
+                className="border p-3 rounded cursor-pointer hover:bg-gray-100"
+                onClick={() => setSelectedOrgId(org.id)}
+                style={{ backgroundColor: selectedOrgId === org.id ? '#e5f3ff' : 'white' }}
+              >
+                <h3 className="font-semibold">{org.name}</h3>
+                <p className="text-sm text-gray-600">City: {org.city}</p>
+                <p className="text-xs text-gray-500">ID: {org.id}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {isLoading && <div>Loading submissions...</div>}
-
-      {organisationId && !isLoading && (
-        <div>
-          {submissions.length === 0 ? (
-            <p>No submissions found for organisation ID: {organisationId}</p>
+      {selectedOrgId && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Patient Records</h2>
+          {recordsLoading ? (
+            <div>Loading patient records...</div>
+          ) : patientRecords.length === 0 ? (
+            <p>No patient records found for this organization</p>
           ) : (
-            submissions.map((submission) => (
-              <div
-                key={submission.id}
-                style={{
-                  border: "1px solid #ccc",
-                  margin: "8px",
-                  padding: "16px",
-                }}
-              >
-                <h3>Submission ID: {submission.id}</h3>
-                <p>
-                  <strong>Status:</strong> {submission.status}
-                </p>
-                <h4>
-                  Questionnaire Responses (
-                  {submission.questionnaire_responses?.length || 0})
-                </h4>
-                {submission.questionnaire_responses?.map((response, index) => (
-                  <div
-                    key={index}
-                    style={{ marginLeft: "16px", marginBottom: "12px" }}
-                  >
-                    <h5>Response {index + 1}</h5>
-                    <pre
-                      style={{
-                        background: "#f5f5f5",
-                        padding: "8px",
-                        overflow: "auto",
-                      }}
-                    >
-                      {JSON.stringify(response.fhir_resource, null, 2)}
-                    </pre>
-                  </div>
-                )) || (
-                  <p style={{ marginLeft: "16px" }}>
-                    No questionnaire responses
-                  </p>
-                )}
-              </div>
-            ))
+            <div className="space-y-2">
+              {patientRecords.map((record) => (
+                <div key={record.id} className="border p-3 rounded">
+                  <p><strong>Record ID:</strong> {record.id}</p>
+                  <p><strong>Workflow Status:</strong> {record.workflow_status}</p>
+                  <p><strong>Invite Status:</strong> {record.invite_status}</p>
+                  <p><strong>Created:</strong> {new Date(record.created_at).toLocaleString()}</p>
+                  {record.notes && <p><strong>Notes:</strong> {record.notes}</p>}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
