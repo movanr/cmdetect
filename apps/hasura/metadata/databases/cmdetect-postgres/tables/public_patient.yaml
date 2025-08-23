@@ -16,9 +16,7 @@ array_relationships:
 insert_permissions:
   - role: org_admin
     permission:
-      check:
-        organization_id:
-          _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         organization_id: x-hasura-Organization-Id
       columns:
@@ -30,9 +28,7 @@ insert_permissions:
     comment: ""
   - role: receptionist
     permission:
-      check:
-        organization_id:
-          _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         organization_id: x-hasura-Organization-Id
       columns:

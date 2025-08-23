@@ -7,7 +7,7 @@ export async function execute<TResult, TVariables>(
 ) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Accept: "application/graphql-response+json",
+    Accept: "application/json",
   };
 
   // Try to get JWT token for authenticated requests
@@ -16,6 +16,22 @@ export async function execute<TResult, TVariables>(
   if (jwtToken) {
     headers["Authorization"] = `Bearer ${jwtToken}`;
   }
+
+  // Extract invite token from current URL query parameters if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteToken = urlParams.get('invite_token');
+  
+  console.log("Current URL search params:", window.location.search);
+  console.log("Extracted invite token:", inviteToken);
+  
+  if (inviteToken) {
+    headers["X-Hasura-Invite-Token"] = inviteToken;
+    console.log("Added X-Hasura-Invite-Token header:", inviteToken);
+  } else {
+    console.log("No invite token found in URL");
+  }
+  
+  console.log("GraphQL request headers:", headers);
 
   const response = await fetch(
     import.meta.env.VITE_HASURA_GRAPHQL_URL ||
@@ -31,7 +47,7 @@ export async function execute<TResult, TVariables>(
   );
 
   if (!response.ok) {
-    throw new Error("Network response was not ok");
+    throw new Error(`Network response was not ok: ${response.status}`);
   }
 
   const result = await response.json();

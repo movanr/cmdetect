@@ -3085,6 +3085,7 @@ type user {
   id: String!
   image: String
   isActive: Boolean
+  isAnonymous: Boolean
   lastName: String
   name: String!
   """An object relationship"""
@@ -3284,6 +3285,7 @@ input user_bool_exp {
   id: String_comparison_exp
   image: String_comparison_exp
   isActive: Boolean_comparison_exp
+  isAnonymous: Boolean_comparison_exp
   lastName: String_comparison_exp
   name: String_comparison_exp
   organization: organization_bool_exp
@@ -3352,6 +3354,7 @@ input user_insert_input {
   id: String
   image: String
   isActive: Boolean
+  isAnonymous: Boolean
   lastName: String
   name: String
   organization: organization_obj_rel_insert_input
@@ -3467,6 +3470,7 @@ input user_order_by {
   id: order_by
   image: order_by
   isActive: order_by
+  isAnonymous: order_by
   lastName: order_by
   name: order_by
   organization: organization_order_by
@@ -3512,6 +3516,8 @@ enum user_select_column {
   """column name"""
   isActive
   """column name"""
+  isAnonymous
+  """column name"""
   lastName
   """column name"""
   name
@@ -3531,6 +3537,8 @@ enum user_select_column_user_aggregate_bool_exp_bool_and_arguments_columns {
   emailVerified
   """column name"""
   isActive
+  """column name"""
+  isAnonymous
 }
 
 """
@@ -3541,6 +3549,8 @@ enum user_select_column_user_aggregate_bool_exp_bool_or_arguments_columns {
   emailVerified
   """column name"""
   isActive
+  """column name"""
+  isAnonymous
 }
 
 """
@@ -3556,6 +3566,7 @@ input user_set_input {
   id: String
   image: String
   isActive: Boolean
+  isAnonymous: Boolean
   lastName: String
   name: String
   organizationId: uuid
@@ -3584,6 +3595,7 @@ input user_stream_cursor_value_input {
   id: String
   image: String
   isActive: Boolean
+  isAnonymous: Boolean
   lastName: String
   name: String
   organizationId: uuid
@@ -3613,6 +3625,8 @@ enum user_update_column {
   image
   """column name"""
   isActive
+  """column name"""
+  isAnonymous
   """column name"""
   lastName
   """column name"""

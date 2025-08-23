@@ -37,10 +37,7 @@ array_relationships:
 insert_permissions:
   - role: org_admin
     permission:
-      check:
-        _and:
-          - organizationId:
-              _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         organizationId: x-hasura-Organization-Id
       columns:

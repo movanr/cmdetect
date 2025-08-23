@@ -19,11 +19,11 @@ app.use(
   })
 );
 
-// Auth routes (must be before express.json())
-app.all("/api/auth/*splat", toNodeHandler(auth));
-
 // JSON middleware after auth handler
 app.use(express.json());
+
+// Auth routes (must be after custom routes)
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 
 // Health check

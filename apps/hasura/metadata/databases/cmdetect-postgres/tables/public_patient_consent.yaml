@@ -16,6 +16,35 @@ array_relationships:
         table:
           name: questionnaire_response
           schema: public
+insert_permissions:
+  - role: anonymous
+    permission:
+      check:
+        _exists:
+          _table:
+            name: patient_record
+            schema: public
+          _where:
+            _and:
+              - invite_token:
+                  _eq: X-Hasura-Invite-Token
+              - invite_expires_at:
+                  _gt: now
+              - patient_id:
+                  _eq: X-Hasura-Patient-Id
+              - organization_id:
+                  _eq: X-Hasura-Organization-Id
+      set:
+        consented_at: now()
+        organization_id: x-hasura-Organization-Id
+        patient_record_id: x-hasura-Patient-Record-Id
+      columns:
+        - consent_given
+        - consent_text
+        - consent_version
+        - ip_address
+        - user_agent
+    comment: Allow anonymous users to create consent records for questionnaire submissions
 select_permissions:
   - role: org_admin
     permission:

@@ -40,8 +40,6 @@ insert_permissions:
     permission:
       check:
         _and:
-          - organization_id:
-              _eq: X-Hasura-Organization-Id
           - patient:
               organization_id:
                 _eq: X-Hasura-Organization-Id
@@ -60,8 +58,6 @@ insert_permissions:
     permission:
       check:
         _and:
-          - organization_id:
-              _eq: X-Hasura-Organization-Id
           - patient:
               organization_id:
                 _eq: X-Hasura-Organization-Id
@@ -77,6 +73,30 @@ insert_permissions:
         - patient_id
     comment: ""
 select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+        - invite_status
+        - workflow_status
+        - notes
+        - created_at
+        - deleted_at
+        - first_viewed_at
+        - invite_expires_at
+        - last_activity_at
+        - updated_at
+        - assigned_to
+        - created_by
+        - first_viewed_by
+        - id
+        - invite_token
+        - last_activity_by
+        - organization_id
+        - patient_id
+      filter:
+        invite_token:
+          _eq: X-Hasura-Invite-Token
+    comment: ""
   - role: org_admin
     permission:
       columns:

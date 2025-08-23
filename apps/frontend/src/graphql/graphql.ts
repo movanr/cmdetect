@@ -2870,6 +2870,7 @@ export type User = {
   id: Scalars['String']['output'];
   image?: Maybe<Scalars['String']['output']>;
   isActive?: Maybe<Scalars['Boolean']['output']>;
+  isAnonymous?: Maybe<Scalars['Boolean']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   /** An object relationship */
@@ -3063,6 +3064,7 @@ export type User_Bool_Exp = {
   id?: InputMaybe<String_Comparison_Exp>;
   image?: InputMaybe<String_Comparison_Exp>;
   isActive?: InputMaybe<Boolean_Comparison_Exp>;
+  isAnonymous?: InputMaybe<Boolean_Comparison_Exp>;
   lastName?: InputMaybe<String_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
@@ -3115,6 +3117,7 @@ export type User_Insert_Input = {
   id?: InputMaybe<Scalars['String']['input']>;
   image?: InputMaybe<Scalars['String']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  isAnonymous?: InputMaybe<Scalars['Boolean']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
@@ -3223,6 +3226,7 @@ export type User_Order_By = {
   id?: InputMaybe<Order_By>;
   image?: InputMaybe<Order_By>;
   isActive?: InputMaybe<Order_By>;
+  isAnonymous?: InputMaybe<Order_By>;
   lastName?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
@@ -3266,6 +3270,8 @@ export enum User_Select_Column {
   /** column name */
   IsActive = 'isActive',
   /** column name */
+  IsAnonymous = 'isAnonymous',
+  /** column name */
   LastName = 'lastName',
   /** column name */
   Name = 'name',
@@ -3282,7 +3288,9 @@ export enum User_Select_Column_User_Aggregate_Bool_Exp_Bool_And_Arguments_Column
   /** column name */
   EmailVerified = 'emailVerified',
   /** column name */
-  IsActive = 'isActive'
+  IsActive = 'isActive',
+  /** column name */
+  IsAnonymous = 'isAnonymous'
 }
 
 /** select "user_aggregate_bool_exp_bool_or_arguments_columns" columns of table "user" */
@@ -3290,7 +3298,9 @@ export enum User_Select_Column_User_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns
   /** column name */
   EmailVerified = 'emailVerified',
   /** column name */
-  IsActive = 'isActive'
+  IsActive = 'isActive',
+  /** column name */
+  IsAnonymous = 'isAnonymous'
 }
 
 /** input type for updating data in table "user" */
@@ -3304,6 +3314,7 @@ export type User_Set_Input = {
   id?: InputMaybe<Scalars['String']['input']>;
   image?: InputMaybe<Scalars['String']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  isAnonymous?: InputMaybe<Scalars['Boolean']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -3330,6 +3341,7 @@ export type User_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['String']['input']>;
   image?: InputMaybe<Scalars['String']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  isAnonymous?: InputMaybe<Scalars['Boolean']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['uuid']['input']>;
@@ -3357,6 +3369,8 @@ export enum User_Update_Column {
   Image = 'image',
   /** column name */
   IsActive = 'isActive',
+  /** column name */
+  IsAnonymous = 'isAnonymous',
   /** column name */
   LastName = 'lastName',
   /** column name */
@@ -3411,6 +3425,11 @@ export type GetPatientRecordsQueryVariables = Exact<{
 
 export type GetPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: any, workflow_status?: string | null, invite_status?: string | null, created_at?: any | null, organization_id: any, notes?: string | null }> };
 
+export type GetPatientRecordByInviteQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPatientRecordByInviteQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: any, invite_token?: any | null, invite_status?: string | null, workflow_status?: string | null, notes?: string | null, created_at?: any | null, invite_expires_at?: any | null, organization_id: any, patient_id: any }> };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -3455,3 +3474,18 @@ export const GetPatientRecordsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetPatientRecordsQuery, GetPatientRecordsQueryVariables>;
+export const GetPatientRecordByInviteDocument = new TypedDocumentString(`
+    query GetPatientRecordByInvite {
+  patient_record {
+    id
+    invite_token
+    invite_status
+    workflow_status
+    notes
+    created_at
+    invite_expires_at
+    organization_id
+    patient_id
+  }
+}
+    `) as unknown as TypedDocumentString<GetPatientRecordByInviteQuery, GetPatientRecordByInviteQueryVariables>;

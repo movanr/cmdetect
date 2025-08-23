@@ -12,37 +12,52 @@ object_relationships:
     using:
       foreign_key_constraint_on: patient_record_id
 insert_permissions:
+  - role: anonymous
+    permission:
+      check:
+        _exists:
+          _table:
+            name: patient_record
+            schema: public
+          _where:
+            _and:
+              - invite_token:
+                  _eq: X-Hasura-Invite-Token
+              - invite_expires_at:
+                  _gt: now
+              - patient_id:
+                  _eq: X-Hasura-Patient-Id
+              - organization_id:
+                  _eq: X-Hasura-Organization-Id
+      set:
+        organization_id: x-hasura-Organization-Id
+        patient_record_id: x-hasura-Patient-Record-Id
+        submitted_at: now()
+      columns:
+        - fhir_resource
+        - patient_consent_id
+    comment: ""
   - role: org_admin
     permission:
-      check:
-        _and:
-          - organization_id:
-              _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         organization_id: x-hasura-Organization-Id
+        submitted_at: now()
       columns:
-        - created_at
-        - deleted_at
         - fhir_resource
-        - id
         - patient_consent_id
         - patient_record_id
-        - submitted_at
-        - updated_at
     comment: ""
-  - role: receptionist
+  - role: physician
     permission:
-      check:
-        _and:
-          - organization_id:
-              _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         organization_id: x-hasura-Organization-Id
+        submitted_at: now()
       columns:
         - fhir_resource
         - patient_consent_id
         - patient_record_id
-        - submitted_at
     comment: ""
 select_permissions:
   - role: org_admin
@@ -75,4 +90,18 @@ update_permissions:
           - deleted_at:
               _is_null: true
       check: null
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - fhir_resource
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+      set:
+        updated_at: now()
     comment: ""

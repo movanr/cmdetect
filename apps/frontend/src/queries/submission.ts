@@ -28,3 +28,22 @@ export const getPatientRecords = graphql(`
     }
   }
 `);
+
+// Query patient record by invite token (filtered by header)
+export const getPatientRecordByInvite = graphql(`
+  query GetPatientRecordByInvite {
+    patient_record {
+      id
+      invite_token
+      invite_status
+      workflow_status
+      notes
+      created_at
+      invite_expires_at
+      organization_id
+      patient_id
+    }
+  }
+`);
+
+

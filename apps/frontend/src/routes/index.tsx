@@ -50,6 +50,14 @@ function App() {
               <h3 className="font-semibold">View Organization Data</h3>
               <p className="text-sm">Test authenticated GraphQL queries</p>
             </Link>
+            
+            <Link
+              to="/anonymous"
+              className="block p-4 bg-green-50 rounded-lg hover:bg-green-100 text-green-800"
+            >
+              <h3 className="font-semibold">Anonymous Access Test</h3>
+              <p className="text-sm">Test patient questionnaire access without authentication</p>
+            </Link>
           </div>
         </div>
       ) : (
@@ -59,12 +67,22 @@ function App() {
             <p>You need to authenticate to access organization data.</p>
           </div>
 
-          <Link
-            to="/login"
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-          >
-            Sign In
-          </Link>
+          <div className="space-y-4">
+            <Link
+              to="/login"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+            >
+              Sign In
+            </Link>
+            
+            <Link
+              to="/anonymous"
+              className="block p-4 bg-green-50 rounded-lg hover:bg-green-100 text-green-800 mt-4"
+            >
+              <h3 className="font-semibold">Patient Access (Anonymous)</h3>
+              <p className="text-sm">Test anonymous questionnaire access</p>
+            </Link>
+          </div>
         </div>
       )}
     </div>
