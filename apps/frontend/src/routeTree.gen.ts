@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AnonymousRouteImport } from './routes/anonymous'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SubmissionsRoute = SubmissionsRouteImport.update({
@@ -24,11 +23,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnonymousRoute = AnonymousRouteImport.update({
-  id: '/anonymous',
-  path: '/anonymous',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,34 +31,30 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/anonymous': typeof AnonymousRoute
   '/login': typeof LoginRoute
   '/submissions': typeof SubmissionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/anonymous': typeof AnonymousRoute
   '/login': typeof LoginRoute
   '/submissions': typeof SubmissionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/anonymous': typeof AnonymousRoute
   '/login': typeof LoginRoute
   '/submissions': typeof SubmissionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anonymous' | '/login' | '/submissions'
+  fullPaths: '/' | '/login' | '/submissions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anonymous' | '/login' | '/submissions'
-  id: '__root__' | '/' | '/anonymous' | '/login' | '/submissions'
+  to: '/' | '/login' | '/submissions'
+  id: '__root__' | '/' | '/login' | '/submissions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnonymousRoute: typeof AnonymousRoute
   LoginRoute: typeof LoginRoute
   SubmissionsRoute: typeof SubmissionsRoute
 }
@@ -85,13 +75,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/anonymous': {
-      id: '/anonymous'
-      path: '/anonymous'
-      fullPath: '/anonymous'
-      preLoaderRoute: typeof AnonymousRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -104,7 +87,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnonymousRoute: AnonymousRoute,
   LoginRoute: LoginRoute,
   SubmissionsRoute: SubmissionsRoute,
 }

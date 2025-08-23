@@ -25,15 +25,21 @@ function App() {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-6">CMDetect Dashboard</h1>
-      
+
       {session ? (
         <div>
           <div className="bg-green-50 p-4 rounded-lg mb-6">
             <h2 className="text-xl font-semibold mb-2">Welcome back!</h2>
-            <p><strong>User:</strong> {session.user.email}</p>
-            <p><strong>Name:</strong> {session.user.name}</p>
-            <p><strong>User ID:</strong> {session.user.id}</p>
-            
+            <p>
+              <strong>User:</strong> {session.user.email}
+            </p>
+            <p>
+              <strong>Name:</strong> {session.user.name}
+            </p>
+            <p>
+              <strong>User ID:</strong> {session.user.id}
+            </p>
+
             <button
               onClick={handleSignOut}
               className="mt-3 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
@@ -50,13 +56,15 @@ function App() {
               <h3 className="font-semibold">View Organization Data</h3>
               <p className="text-sm">Test authenticated GraphQL queries</p>
             </Link>
-            
+
             <Link
               to="/anonymous"
               className="block p-4 bg-green-50 rounded-lg hover:bg-green-100 text-green-800"
             >
               <h3 className="font-semibold">Anonymous Access Test</h3>
-              <p className="text-sm">Test patient questionnaire access without authentication</p>
+              <p className="text-sm">
+                Test patient questionnaire access without authentication
+              </p>
             </Link>
           </div>
         </div>
@@ -73,14 +81,6 @@ function App() {
               className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
             >
               Sign In
-            </Link>
-            
-            <Link
-              to="/anonymous"
-              className="block p-4 bg-green-50 rounded-lg hover:bg-green-100 text-green-800 mt-4"
-            >
-              <h3 className="font-semibold">Patient Access (Anonymous)</h3>
-              <p className="text-sm">Test anonymous questionnaire access</p>
             </Link>
           </div>
         </div>

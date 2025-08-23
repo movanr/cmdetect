@@ -17,21 +17,6 @@ export async function execute<TResult, TVariables>(
     headers["Authorization"] = `Bearer ${jwtToken}`;
   }
 
-  // Extract invite token from current URL query parameters if present
-  const urlParams = new URLSearchParams(window.location.search);
-  const inviteToken = urlParams.get('invite_token');
-  
-  console.log("Current URL search params:", window.location.search);
-  console.log("Extracted invite token:", inviteToken);
-  
-  if (inviteToken) {
-    headers["X-Hasura-Invite-Token"] = inviteToken;
-    console.log("Added X-Hasura-Invite-Token header:", inviteToken);
-  } else {
-    console.log("No invite token found in URL");
-  }
-  
-  console.log("GraphQL request headers:", headers);
 
   const response = await fetch(
     import.meta.env.VITE_HASURA_GRAPHQL_URL ||
