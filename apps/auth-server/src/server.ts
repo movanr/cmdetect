@@ -295,6 +295,61 @@ app.post("/actions/submit-questionnaire-response", async (req, res) => {
   }
 });
 
+// Role switching endpoint - database-based approach
+app.post("/api/auth/switch-role", async (req, res) => {
+  try {
+    const { role } = req.body;
+
+    if (!role || typeof role !== 'string') {
+      return res.status(400).json({
+        error: "Role is required and must be a string"
+      });
+    }
+
+    // Get current session using Better Auth
+    const sessionResult = await auth.api.getSession({
+      headers: new Headers(req.headers as HeadersInit)
+    });
+
+    if (!sessionResult || !sessionResult.user) {
+      return res.status(401).json({
+        error: "Invalid session"
+      });
+    }
+
+    const user = sessionResult.user;
+    const userRoles = (user.roles as string[]) || [];
+
+    // Validate that user has the requested role
+    if (!userRoles.includes(role)) {
+      return res.status(403).json({
+        error: `You don't have permission to switch to role: ${role}`
+      });
+    }
+
+    // Update user's active role in database
+    await db.query(
+      'UPDATE "user" SET "activeRole" = $1 WHERE id = $2',
+      [role, user.id]
+    );
+
+    console.log(`User ${user.email} switched to role: ${role}`);
+
+    res.json({
+      success: true,
+      activeRole: role,
+      availableRoles: userRoles,
+      message: "Role switched successfully. Please refresh your session to get a new token."
+    });
+
+  } catch (error) {
+    console.error("Error switching role:", error);
+    res.status(500).json({
+      error: "Failed to switch role"
+    });
+  }
+});
+
 // Auth routes (must be after custom routes)
 app.all("/api/auth/*splat", toNodeHandler(auth));
 

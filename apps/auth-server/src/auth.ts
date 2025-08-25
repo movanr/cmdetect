@@ -56,10 +56,12 @@ export const auth = betterAuth({
           const validRoles = userRoles.filter((role) => roleHierarchy.includes(role));
 
           if (validRoles.length > 0 && user.organizationId) {
-            // User has valid roles and organization
-            const defaultRole =
-              roleHierarchy.find((role) => validRoles.includes(role)) ||
-              validRoles[0];
+            // Use activeRole from user if set, otherwise use hierarchy default
+            const activeRole = (user.activeRole && validRoles.includes(user.activeRole))
+              ? user.activeRole
+              : roleHierarchy.find((role) => validRoles.includes(role)) || validRoles[0];
+            
+            const defaultRole = activeRole;
 
             const claims: Record<string, any> = {
               "x-hasura-default-role": defaultRole,
@@ -140,6 +142,10 @@ Falls Sie dieses Konto nicht erstellt haben, ignorieren Sie diese E-Mail.`,
       },
       roles: {
         type: "string[]",
+        required: false,
+      },
+      activeRole: {
+        type: "string",
         required: false,
       },
       organizationId: {
