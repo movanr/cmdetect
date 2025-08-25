@@ -13,8 +13,8 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 - **apps/auth-server**: Better Auth-based authentication service with JWT integration for Hasura
 - **apps/frontend**: React + TanStack Router + TanStack Query frontend with GraphQL codegen
 - **apps/hasura**: Hasura GraphQL Engine with PostgreSQL, metadata, and migrations
-- **packages/shared-types**: Common TypeScript interfaces across applications
 - **packages/config**: Shared configuration and validation schemas
+- **packages/database**: Database utilities and shared database logic
 - **tests/**: Integration tests focusing on Hasura permissions and organization isolation
 
 ## Development Commands
@@ -36,6 +36,7 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 - `pnpm build` - Build all packages through Turbo pipeline
 - `pnpm build:deps` - Build only shared packages (run before first dev)
 - `pnpm type-check` - Type check all packages
+- `pnpm lint` - Run linting across all packages
 - `pnpm test` - Run integration tests (requires running Hasura/PostgreSQL)
 - `pnpm test:permissions` - Run specific permission tests
 - `pnpm test:watch` - Run tests in watch mode
@@ -57,7 +58,7 @@ The system consists of three main services that must run together:
    - JWT authentication integration
    - Role-based permissions and organization isolation
 2. **Authentication Server** (port 3001)
-   - Better Auth with JWT/RS256 tokens
+   - Better Auth with JWT tokens
    - Email verification workflow
    - Hasura action handlers for anonymous operations
 3. **React Frontend** (port 3000)
@@ -67,7 +68,7 @@ The system consists of three main services that must run together:
 
 ### Authentication Flow
 
-- JWT tokens with RS256 asymmetric encryption (8-hour expiration)
+- JWT tokens with Better Auth (8-hour expiration)
 - Multi-tenant organization isolation via `x-hasura-organization-id` claim
 - Role-based access: `org_admin`, `physician`, `receptionist`, `unverified`
 - `x-hasura-user-id` contains `app_uuid`
@@ -127,10 +128,10 @@ pnpm test:permissions
 **Root .env** (created by setup-dev.sh):
 
 - `POSTGRES_PASSWORD` - Database password for Docker
-- `JWT_PRIVATE_KEY` - RS256 private key path
 - `BETTER_AUTH_SECRET` - Session secret (32+ characters)
 - `HASURA_ADMIN_SECRET` - Admin access to Hasura
 - `AUTH_SERVER_URL` - URL for JWT key discovery
+- `HASURA_GRAPHQL_JWT_SECRET` - JWT configuration for Hasura
 
 **Hasura .env** (apps/hasura/.env):
 
