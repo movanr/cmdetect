@@ -34,6 +34,21 @@ export type Boolean_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['Boolean']['input']>>;
 };
 
+export type ConsentInput = {
+  consent_given: Scalars['Boolean']['input'];
+  consent_text: Scalars['String']['input'];
+  consent_version: Scalars['String']['input'];
+  ip_address?: InputMaybe<Scalars['String']['input']>;
+  user_agent?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ConsentResponse = {
+  __typename?: 'ConsentResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  patient_consent_id?: Maybe<Scalars['uuid']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
 /** Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'. */
 export type Int_Comparison_Exp = {
   _eq?: InputMaybe<Scalars['Int']['input']>;
@@ -45,6 +60,18 @@ export type Int_Comparison_Exp = {
   _lte?: InputMaybe<Scalars['Int']['input']>;
   _neq?: InputMaybe<Scalars['Int']['input']>;
   _nin?: InputMaybe<Array<Scalars['Int']['input']>>;
+};
+
+export type QuestionnaireResponseInput = {
+  fhir_resource: Scalars['jsonb']['input'];
+  patient_consent_id: Scalars['uuid']['input'];
+};
+
+export type QuestionnaireResponseResponse = {
+  __typename?: 'QuestionnaireResponseResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  questionnaire_response_id?: Maybe<Scalars['uuid']['output']>;
+  success: Scalars['Boolean']['output'];
 };
 
 /** Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'. */
@@ -180,6 +207,8 @@ export type Mutation_Root = {
   insert_user?: Maybe<User_Mutation_Response>;
   /** insert a single row into the table: "user" */
   insert_user_one?: Maybe<User>;
+  submitPatientConsent: ConsentResponse;
+  submitQuestionnaireResponse: QuestionnaireResponseResponse;
   /** update data of the table: "organization" */
   update_organization?: Maybe<Organization_Mutation_Response>;
   /** update single row of the table: "organization" */
@@ -372,6 +401,20 @@ export type Mutation_RootInsert_UserArgs = {
 export type Mutation_RootInsert_User_OneArgs = {
   object: User_Insert_Input;
   on_conflict?: InputMaybe<User_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootSubmitPatientConsentArgs = {
+  consent_data: ConsentInput;
+  invite_token: Scalars['String']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootSubmitQuestionnaireResponseArgs = {
+  invite_token: Scalars['String']['input'];
+  response_data: QuestionnaireResponseInput;
 };
 
 
@@ -1566,7 +1609,6 @@ export type Patient_Record = {
   first_viewed_by?: Maybe<Scalars['uuid']['output']>;
   id: Scalars['uuid']['output'];
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
-  invite_status?: Maybe<Scalars['String']['output']>;
   invite_token?: Maybe<Scalars['uuid']['output']>;
   last_activity_at?: Maybe<Scalars['timestamptz']['output']>;
   last_activity_by?: Maybe<Scalars['uuid']['output']>;
@@ -1592,7 +1634,6 @@ export type Patient_Record = {
   userByFirstViewedBy?: Maybe<User>;
   /** An object relationship */
   userByLastActivityBy?: Maybe<User>;
-  workflow_status?: Maybe<Scalars['String']['output']>;
 };
 
 
@@ -1675,7 +1716,6 @@ export type Patient_Record_Bool_Exp = {
   first_viewed_by?: InputMaybe<Uuid_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   invite_expires_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  invite_status?: InputMaybe<String_Comparison_Exp>;
   invite_token?: InputMaybe<Uuid_Comparison_Exp>;
   last_activity_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   last_activity_by?: InputMaybe<Uuid_Comparison_Exp>;
@@ -1692,7 +1732,6 @@ export type Patient_Record_Bool_Exp = {
   userByCreatedBy?: InputMaybe<User_Bool_Exp>;
   userByFirstViewedBy?: InputMaybe<User_Bool_Exp>;
   userByLastActivityBy?: InputMaybe<User_Bool_Exp>;
-  workflow_status?: InputMaybe<String_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "patient_record" */
@@ -1713,7 +1752,6 @@ export type Patient_Record_Insert_Input = {
   first_viewed_by?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  invite_status?: InputMaybe<Scalars['String']['input']>;
   invite_token?: InputMaybe<Scalars['uuid']['input']>;
   last_activity_at?: InputMaybe<Scalars['timestamptz']['input']>;
   last_activity_by?: InputMaybe<Scalars['uuid']['input']>;
@@ -1729,7 +1767,6 @@ export type Patient_Record_Insert_Input = {
   userByCreatedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userByFirstViewedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userByLastActivityBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
-  workflow_status?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate max on columns */
@@ -1743,7 +1780,6 @@ export type Patient_Record_Max_Fields = {
   first_viewed_by?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
-  invite_status?: Maybe<Scalars['String']['output']>;
   invite_token?: Maybe<Scalars['uuid']['output']>;
   last_activity_at?: Maybe<Scalars['timestamptz']['output']>;
   last_activity_by?: Maybe<Scalars['uuid']['output']>;
@@ -1751,7 +1787,6 @@ export type Patient_Record_Max_Fields = {
   organization_id?: Maybe<Scalars['uuid']['output']>;
   patient_id?: Maybe<Scalars['uuid']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
-  workflow_status?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by max() on columns of table "patient_record" */
@@ -1764,7 +1799,6 @@ export type Patient_Record_Max_Order_By = {
   first_viewed_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
-  invite_status?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
   last_activity_at?: InputMaybe<Order_By>;
   last_activity_by?: InputMaybe<Order_By>;
@@ -1772,7 +1806,6 @@ export type Patient_Record_Max_Order_By = {
   organization_id?: InputMaybe<Order_By>;
   patient_id?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
-  workflow_status?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -1786,7 +1819,6 @@ export type Patient_Record_Min_Fields = {
   first_viewed_by?: Maybe<Scalars['uuid']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
-  invite_status?: Maybe<Scalars['String']['output']>;
   invite_token?: Maybe<Scalars['uuid']['output']>;
   last_activity_at?: Maybe<Scalars['timestamptz']['output']>;
   last_activity_by?: Maybe<Scalars['uuid']['output']>;
@@ -1794,7 +1826,6 @@ export type Patient_Record_Min_Fields = {
   organization_id?: Maybe<Scalars['uuid']['output']>;
   patient_id?: Maybe<Scalars['uuid']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
-  workflow_status?: Maybe<Scalars['String']['output']>;
 };
 
 /** order by min() on columns of table "patient_record" */
@@ -1807,7 +1838,6 @@ export type Patient_Record_Min_Order_By = {
   first_viewed_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
-  invite_status?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
   last_activity_at?: InputMaybe<Order_By>;
   last_activity_by?: InputMaybe<Order_By>;
@@ -1815,7 +1845,6 @@ export type Patient_Record_Min_Order_By = {
   organization_id?: InputMaybe<Order_By>;
   patient_id?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
-  workflow_status?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "patient_record" */
@@ -1851,7 +1880,6 @@ export type Patient_Record_Order_By = {
   first_viewed_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
-  invite_status?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
   last_activity_at?: InputMaybe<Order_By>;
   last_activity_by?: InputMaybe<Order_By>;
@@ -1867,7 +1895,6 @@ export type Patient_Record_Order_By = {
   userByCreatedBy?: InputMaybe<User_Order_By>;
   userByFirstViewedBy?: InputMaybe<User_Order_By>;
   userByLastActivityBy?: InputMaybe<User_Order_By>;
-  workflow_status?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: patient_record */
@@ -1894,8 +1921,6 @@ export enum Patient_Record_Select_Column {
   /** column name */
   InviteExpiresAt = 'invite_expires_at',
   /** column name */
-  InviteStatus = 'invite_status',
-  /** column name */
   InviteToken = 'invite_token',
   /** column name */
   LastActivityAt = 'last_activity_at',
@@ -1908,9 +1933,7 @@ export enum Patient_Record_Select_Column {
   /** column name */
   PatientId = 'patient_id',
   /** column name */
-  UpdatedAt = 'updated_at',
-  /** column name */
-  WorkflowStatus = 'workflow_status'
+  UpdatedAt = 'updated_at'
 }
 
 /** input type for updating data in table "patient_record" */
@@ -1923,7 +1946,6 @@ export type Patient_Record_Set_Input = {
   first_viewed_by?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  invite_status?: InputMaybe<Scalars['String']['input']>;
   invite_token?: InputMaybe<Scalars['uuid']['input']>;
   last_activity_at?: InputMaybe<Scalars['timestamptz']['input']>;
   last_activity_by?: InputMaybe<Scalars['uuid']['input']>;
@@ -1931,7 +1953,6 @@ export type Patient_Record_Set_Input = {
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
   patient_id?: InputMaybe<Scalars['uuid']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  workflow_status?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Streaming cursor of the table "patient_record" */
@@ -1952,7 +1973,6 @@ export type Patient_Record_Stream_Cursor_Value_Input = {
   first_viewed_by?: InputMaybe<Scalars['uuid']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  invite_status?: InputMaybe<Scalars['String']['input']>;
   invite_token?: InputMaybe<Scalars['uuid']['input']>;
   last_activity_at?: InputMaybe<Scalars['timestamptz']['input']>;
   last_activity_by?: InputMaybe<Scalars['uuid']['input']>;
@@ -1960,7 +1980,6 @@ export type Patient_Record_Stream_Cursor_Value_Input = {
   organization_id?: InputMaybe<Scalars['uuid']['input']>;
   patient_id?: InputMaybe<Scalars['uuid']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  workflow_status?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** update columns of table "patient_record" */
@@ -1982,8 +2001,6 @@ export enum Patient_Record_Update_Column {
   /** column name */
   InviteExpiresAt = 'invite_expires_at',
   /** column name */
-  InviteStatus = 'invite_status',
-  /** column name */
   InviteToken = 'invite_token',
   /** column name */
   LastActivityAt = 'last_activity_at',
@@ -1996,9 +2013,7 @@ export enum Patient_Record_Update_Column {
   /** column name */
   PatientId = 'patient_id',
   /** column name */
-  UpdatedAt = 'updated_at',
-  /** column name */
-  WorkflowStatus = 'workflow_status'
+  UpdatedAt = 'updated_at'
 }
 
 export type Patient_Record_Updates = {
@@ -3423,12 +3438,23 @@ export type GetPatientRecordsQueryVariables = Exact<{
 }>;
 
 
-export type GetPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: any, workflow_status?: string | null, invite_status?: string | null, created_at?: any | null, organization_id: any, notes?: string | null }> };
+export type GetPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: any, created_at?: any | null, organization_id: any, notes?: string | null }> };
 
-export type GetPatientRecordByInviteQueryVariables = Exact<{ [key: string]: never; }>;
+export type SubmitPatientConsentMutationVariables = Exact<{
+  invite_token: Scalars['String']['input'];
+  consent_data: ConsentInput;
+}>;
 
 
-export type GetPatientRecordByInviteQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: any, invite_token?: any | null, invite_status?: string | null, workflow_status?: string | null, notes?: string | null, created_at?: any | null, invite_expires_at?: any | null, organization_id: any, patient_id: any }> };
+export type SubmitPatientConsentMutation = { __typename?: 'mutation_root', submitPatientConsent: { __typename?: 'ConsentResponse', success: boolean, patient_consent_id?: any | null, error?: string | null } };
+
+export type SubmitQuestionnaireResponseMutationVariables = Exact<{
+  invite_token: Scalars['String']['input'];
+  response_data: QuestionnaireResponseInput;
+}>;
+
+
+export type SubmitQuestionnaireResponseMutation = { __typename?: 'mutation_root', submitQuestionnaireResponse: { __typename?: 'QuestionnaireResponseResponse', success: boolean, questionnaire_response_id?: any | null, error?: string | null } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -3466,26 +3492,30 @@ export const GetPatientRecordsDocument = new TypedDocumentString(`
     order_by: {created_at: desc}
   ) {
     id
-    workflow_status
-    invite_status
     created_at
     organization_id
     notes
   }
 }
     `) as unknown as TypedDocumentString<GetPatientRecordsQuery, GetPatientRecordsQueryVariables>;
-export const GetPatientRecordByInviteDocument = new TypedDocumentString(`
-    query GetPatientRecordByInvite {
-  patient_record {
-    id
-    invite_token
-    invite_status
-    workflow_status
-    notes
-    created_at
-    invite_expires_at
-    organization_id
-    patient_id
+export const SubmitPatientConsentDocument = new TypedDocumentString(`
+    mutation SubmitPatientConsent($invite_token: String!, $consent_data: ConsentInput!) {
+  submitPatientConsent(invite_token: $invite_token, consent_data: $consent_data) {
+    success
+    patient_consent_id
+    error
   }
 }
-    `) as unknown as TypedDocumentString<GetPatientRecordByInviteQuery, GetPatientRecordByInviteQueryVariables>;
+    `) as unknown as TypedDocumentString<SubmitPatientConsentMutation, SubmitPatientConsentMutationVariables>;
+export const SubmitQuestionnaireResponseDocument = new TypedDocumentString(`
+    mutation SubmitQuestionnaireResponse($invite_token: String!, $response_data: QuestionnaireResponseInput!) {
+  submitQuestionnaireResponse(
+    invite_token: $invite_token
+    response_data: $response_data
+  ) {
+    success
+    questionnaire_response_id
+    error
+  }
+}
+    `) as unknown as TypedDocumentString<SubmitQuestionnaireResponseMutation, SubmitQuestionnaireResponseMutationVariables>;

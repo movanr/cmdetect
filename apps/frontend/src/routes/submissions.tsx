@@ -12,20 +12,31 @@ function Submissions() {
   const [selectedOrgId, setSelectedOrgId] = useState("");
 
   // Get all organizations (this will be filtered by JWT claims when auth is working)
-  const { data: orgsData, isLoading: orgsLoading, error: orgsError } = useQuery({
+  const {
+    data: orgsData,
+    isLoading: orgsLoading,
+    error: orgsError,
+  } = useQuery({
     queryKey: ["organizations"],
     queryFn: () => execute(getOrganizations),
   });
 
   // Get patient records for selected organization
-  const { data: recordsData, isLoading: recordsLoading, error: recordsError } = useQuery({
+  const {
+    data: recordsData,
+    isLoading: recordsLoading,
+    error: recordsError,
+  } = useQuery({
     queryKey: ["patient-records", selectedOrgId],
-    queryFn: () => execute(getPatientRecords, { organizationId: selectedOrgId }),
+    queryFn: () =>
+      execute(getPatientRecords, { organizationId: selectedOrgId }),
     enabled: !!selectedOrgId,
   });
 
-  if (orgsError) return <div>Error loading organizations: {orgsError.message}</div>;
-  if (recordsError) return <div>Error loading patient records: {recordsError.message}</div>;
+  if (orgsError)
+    return <div>Error loading organizations: {orgsError.message}</div>;
+  if (recordsError)
+    return <div>Error loading patient records: {recordsError.message}</div>;
 
   const organizations = orgsData?.organization || [];
   const patientRecords = recordsData?.patient_record || [];
@@ -33,7 +44,7 @@ function Submissions() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Test Data Access</h1>
-      
+
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Organizations</h2>
         {orgsLoading ? (
@@ -41,11 +52,14 @@ function Submissions() {
         ) : (
           <div className="space-y-2">
             {organizations.map((org) => (
-              <div 
+              <div
                 key={org.id}
                 className="border p-3 rounded cursor-pointer hover:bg-gray-100"
                 onClick={() => setSelectedOrgId(org.id)}
-                style={{ backgroundColor: selectedOrgId === org.id ? '#e5f3ff' : 'white' }}
+                style={{
+                  backgroundColor:
+                    selectedOrgId === org.id ? "#e5f3ff" : "white",
+                }}
               >
                 <h3 className="font-semibold">{org.name}</h3>
                 <p className="text-sm text-gray-600">City: {org.city}</p>
@@ -67,11 +81,18 @@ function Submissions() {
             <div className="space-y-2">
               {patientRecords.map((record) => (
                 <div key={record.id} className="border p-3 rounded">
-                  <p><strong>Record ID:</strong> {record.id}</p>
-                  <p><strong>Workflow Status:</strong> {record.workflow_status}</p>
-                  <p><strong>Invite Status:</strong> {record.invite_status}</p>
-                  <p><strong>Created:</strong> {new Date(record.created_at).toLocaleString()}</p>
-                  {record.notes && <p><strong>Notes:</strong> {record.notes}</p>}
+                  <p>
+                    <strong>Record ID:</strong> {record.id}
+                  </p>
+                  <p>
+                    <strong>Created:</strong>{" "}
+                    {new Date(record.created_at).toLocaleString()}
+                  </p>
+                  {record.notes && (
+                    <p>
+                      <strong>Notes:</strong> {record.notes}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

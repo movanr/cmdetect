@@ -16,7 +16,6 @@
   "type": "commonjs",
   "dependencies": {
     "@cmdetect/config": "workspace:*",
-    "@cmdetect/shared-types": "workspace:*",
     "better-auth": "^1.3.4",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",

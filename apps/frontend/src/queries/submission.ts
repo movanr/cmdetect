@@ -20,8 +20,6 @@ export const getPatientRecords = graphql(`
       order_by: { created_at: desc }
     ) {
       id
-      workflow_status
-      invite_status
       created_at
       organization_id
       notes
@@ -29,5 +27,36 @@ export const getPatientRecords = graphql(`
   }
 `);
 
+// Patient consent submission via Hasura Action
+export const submitPatientConsent = graphql(`
+  mutation SubmitPatientConsent(
+    $invite_token: String!
+    $consent_data: ConsentInput!
+  ) {
+    submitPatientConsent(
+      invite_token: $invite_token
+      consent_data: $consent_data
+    ) {
+      success
+      patient_consent_id
+      error
+    }
+  }
+`);
 
-
+// Questionnaire response submission via Hasura Action
+export const submitQuestionnaireResponse = graphql(`
+  mutation SubmitQuestionnaireResponse(
+    $invite_token: String!
+    $response_data: QuestionnaireResponseInput!
+  ) {
+    submitQuestionnaireResponse(
+      invite_token: $invite_token
+      response_data: $response_data
+    ) {
+      success
+      questionnaire_response_id
+      error
+    }
+  }
+`);

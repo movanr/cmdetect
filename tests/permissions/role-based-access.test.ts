@@ -52,7 +52,6 @@ describe("Role-Based Access Control", () => {
             patient_id: "${registrationData.patient_id}"
             created_by: "${registrationData.created_by}"
             assigned_to: "${registrationData.assigned_to}"
-            invite_status: "${registrationData.status}"
           }) {
             id
           }
@@ -98,7 +97,6 @@ describe("Role-Based Access Control", () => {
 
   describe("Receptionist Permissions", () => {
     it("receptionist can create patients in their organization", async () => {
-
       const result = await clients.org1Receptionist.request<{
         insert_patient_one: { id: string; organization_id: string };
       }>(`

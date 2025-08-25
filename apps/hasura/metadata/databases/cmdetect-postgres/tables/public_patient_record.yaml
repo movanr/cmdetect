@@ -77,8 +77,6 @@ select_permissions:
     permission:
       columns:
         - invite_token
-        - invite_status
-        - workflow_status
         - notes
         - created_at
         - deleted_at
@@ -116,9 +114,7 @@ select_permissions:
         - notes
         - organization_id
         - patient_id
-        - invite_status
         - updated_at
-        - workflow_status
       filter:
         _and:
           - organization_id:
@@ -135,8 +131,6 @@ select_permissions:
     permission:
       columns:
         - invite_token
-        - invite_status
-        - workflow_status
         - notes
         - created_at
         - deleted_at
@@ -180,7 +174,6 @@ update_permissions:
         - last_activity_at
         - last_activity_by
         - notes
-        - workflow_status
       filter:
         _and:
           - organization_id:
@@ -193,7 +186,7 @@ update_permissions:
       set:
         last_activity_by: x-hasura-User-Id
         updated_at: now()
-    comment: Can update workflow status and notes for assigned cases
+    comment: ""
   - role: receptionist
     permission:
       columns:

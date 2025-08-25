@@ -1,0 +1,39 @@
+type Mutation {
+  submitPatientConsent(
+    invite_token: String!
+    consent_data: ConsentInput!
+  ): ConsentResponse!
+}
+
+type Mutation {
+  submitQuestionnaireResponse(
+    invite_token: String!
+    response_data: QuestionnaireResponseInput!
+  ): QuestionnaireResponseResponse!
+}
+
+input ConsentInput {
+  consent_given: Boolean!
+  consent_text: String!
+  consent_version: String!
+  ip_address: String
+  user_agent: String
+}
+
+input QuestionnaireResponseInput {
+  fhir_resource: jsonb!
+  patient_consent_id: uuid!
+}
+
+type ConsentResponse {
+  success: Boolean!
+  patient_consent_id: uuid
+  error: String
+}
+
+type QuestionnaireResponseResponse {
+  success: Boolean!
+  questionnaire_response_id: uuid
+  error: String
+}
+

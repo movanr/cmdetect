@@ -1,5 +1,5 @@
 import { createAdminClient } from "./graphql-client";
-import { TestDataIds } from "./test-data";
+import { TestDataIds, TestPatientRecords } from "./test-data";
 
 const adminClient = createAdminClient();
 
@@ -84,6 +84,26 @@ export async function setupTestData(): Promise<void> {
         }
       ]) {
         affected_rows
+      }
+    }
+  `);
+
+  // Create test patient records
+  await adminClient.request(`
+    mutation {
+      insert_patient_record(objects: [
+        {
+          organization_id: "${TestPatientRecords.org1PatientRecord1.organizationId}",
+          patient_id: "${TestPatientRecords.org1PatientRecord1.patientId}",
+          created_by: "${TestPatientRecords.org1PatientRecord1.createdBy}",
+          assigned_to: "${TestPatientRecords.org1PatientRecord1.assignedTo}"
+        }
+      ]) {
+        affected_rows
+        returning {
+          id
+          invite_token
+        }
       }
     }
   `);

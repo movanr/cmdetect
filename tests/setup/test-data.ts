@@ -49,7 +49,13 @@ export interface TestRegistration {
   createdByUserId: string;
   assignedUserId: string;
   status: string;
-  workflowStatus: string;
+}
+
+export interface TestPatientRecord {
+  organizationId: string;
+  patientId: string;
+  createdBy: string; // user app_uuid
+  assignedTo: string; // user app_uuid
 }
 
 // =============================================================================
@@ -182,38 +188,15 @@ export const TestPatients: Record<string, TestPatient> = {
 };
 
 // =============================================================================
-// TEST REGISTRATIONS
+// TEST PATIENT RECORDS
 // =============================================================================
 
-export const TestRegistrations: Record<string, TestRegistration> = {
-  org1Registration1: {
-    id: "r1r1r1r1-r1r1-r1r1-r1r1-r1r1r1r1r1r1",
+export const TestPatientRecords: Record<string, TestPatientRecord> = {
+  org1PatientRecord1: {
     organizationId: TestOrganizations.org1.id,
     patientId: TestPatients.org1Patient1.id,
-    createdByUserId: TestUsers.org1Receptionist.userId,
-    assignedUserId: TestUsers.org1Physician.userId,
-    status: "pending",
-    workflowStatus: "new_submission",
-  },
-
-  org1Registration2: {
-    id: "r2r2r2r2-r2r2-r2r2-r2r2-r2r2r2r2r2r2",
-    organizationId: TestOrganizations.org1.id,
-    patientId: TestPatients.org1Patient2.id,
-    createdByUserId: TestUsers.org1Admin.userId,
-    assignedUserId: TestUsers.org1Physician.userId,
-    status: "consent_pending",
-    workflowStatus: "under_review",
-  },
-
-  org2Registration1: {
-    id: "r3r3r3r3-r3r3-r3r3-r3r3-r3r3r3r3r3r3",
-    organizationId: TestOrganizations.org2.id,
-    patientId: TestPatients.org2Patient1.id,
-    createdByUserId: TestUsers.org2Admin.userId,
-    assignedUserId: TestUsers.org2Physician.userId,
-    status: "submitted",
-    workflowStatus: "completed",
+    createdBy: TestUsers.org1Receptionist.appUuid,
+    assignedTo: TestUsers.org1Physician.appUuid,
   },
 };
 
@@ -244,11 +227,6 @@ export const TestDataIds = {
     org1Patient1: TestPatients.org1Patient1.id,
     org1Patient2: TestPatients.org1Patient2.id,
     org2Patient1: TestPatients.org2Patient1.id,
-  },
-  registrations: {
-    org1Registration1: TestRegistrations.org1Registration1.id,
-    org1Registration2: TestRegistrations.org1Registration2.id,
-    org2Registration1: TestRegistrations.org2Registration1.id,
   },
 };
 

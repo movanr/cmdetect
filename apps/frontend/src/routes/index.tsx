@@ -57,15 +57,17 @@ function App() {
               <p className="text-sm">Test authenticated GraphQL queries</p>
             </Link>
 
-            <Link
-              to="/anonymous"
-              className="block p-4 bg-green-50 rounded-lg hover:bg-green-100 text-green-800"
-            >
-              <h3 className="font-semibold">Anonymous Access Test</h3>
-              <p className="text-sm">
-                Test patient questionnaire access without authentication
+            <div className="block p-4 bg-green-50 rounded-lg border border-green-200 text-green-800">
+              <h3 className="font-semibold">Patient Questionnaire Test</h3>
+              <p className="text-sm mb-2">
+                Test patient consent and questionnaire submission via Hasura
+                Actions
               </p>
-            </Link>
+              <p className="text-xs text-green-600">
+                Manually navigate to:{" "}
+                <code>/patient?invite_token=YOUR_INVITE_TOKEN</code>
+              </p>
+            </div>
           </div>
         </div>
       ) : (

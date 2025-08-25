@@ -18,7 +18,7 @@
     "frontend:dev": "pnpm --filter @cmdetect/frontend dev",
     "hasura:console": "cd apps/hasura && hasura console",
     "setup": "pnpm install && pnpm build:deps",
-    "build:deps": "pnpm --filter @cmdetect/shared-types build && pnpm --filter @cmdetect/config build"
+    "build:deps": "pnpm --filter @cmdetect/config build"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

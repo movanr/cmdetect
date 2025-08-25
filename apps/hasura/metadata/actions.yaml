@@ -1,6 +1,24 @@
-actions: []
+actions:
+  - name: submitPatientConsent
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3001/actions/submit-patient-consent
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
+  - name: submitQuestionnaireResponse
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3001/actions/submit-questionnaire-response
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
 custom_types:
   enums: []
-  input_objects: []
-  objects: []
+  input_objects:
+    - name: ConsentInput
+    - name: QuestionnaireResponseInput
+  objects:
+    - name: ConsentResponse
+    - name: QuestionnaireResponseResponse
   scalars: []
