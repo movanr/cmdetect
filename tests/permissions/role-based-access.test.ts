@@ -40,8 +40,8 @@ describe("Role-Based Access Control", () => {
       const registrationData = {
         organization_id: TestDataIds.organizations.org1,
         patient_id: TestDataIds.patients.org1Patient1,
-        created_by: TestDataIds.users.org1AdminAppUuid,
-        assigned_to: TestDataIds.users.org1PhysicianAppUuid,
+        created_by: TestDataIds.users.org1Admin,
+        assigned_to: TestDataIds.users.org1Physician,
         status: "pending",
       };
 
@@ -166,7 +166,7 @@ describe("Role-Based Access Control", () => {
         mutation {
           insert_patient_record(objects: [{
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created registration"
           }]) {
             affected_rows
@@ -189,9 +189,7 @@ describe("Role-Based Access Control", () => {
 
       // Verify auto-set fields
       expect(registration.organization_id).toBe(TestDataIds.organizations.org1);
-      expect(registration.created_by).toBe(
-        TestDataIds.users.org1ReceptionistAppUuid
-      );
+      expect(registration.created_by).toBe(TestDataIds.users.org1Receptionist);
       expect(registration.patient_id).toBe(TestDataIds.patients.org1Patient1);
     });
 

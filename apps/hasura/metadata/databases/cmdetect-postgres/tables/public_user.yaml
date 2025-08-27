@@ -95,9 +95,6 @@ select_permissions:
               _eq: X-Hasura-Organization-Id
           - deletedAt:
               _is_null: true
-          - roles:
-              _contains:
-                - physician
     comment: This ensures receptionists only see users who have the physician role when creating assignments
 update_permissions:
   - role: org_admin

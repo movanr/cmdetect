@@ -252,7 +252,7 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Test record"
           }) {
             id
@@ -275,7 +275,7 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient2}"
-            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created registration"
           }) {
             id
@@ -297,7 +297,7 @@ describe("Organization Isolation", () => {
           mutation {
             insert_patient_record_one(object: {
               patient_id: "${TestDataIds.patients.org2Patient1}"
-              assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+              assigned_to: "${TestDataIds.users.org1Physician}"
               notes: "Cross-org attempt"
             }) {
               id
@@ -314,7 +314,7 @@ describe("Organization Isolation", () => {
           mutation {
             insert_patient_record_one(object: {
               patient_id: "${TestDataIds.patients.org1Patient1}"
-              assigned_to: "${TestDataIds.users.org2PhysicianAppUuid}"
+              assigned_to: "${TestDataIds.users.org2Physician}"
               notes: "Cross-org practitioner attempt"
             }) {
               id
@@ -331,8 +331,8 @@ describe("Organization Isolation", () => {
           insert_patient_record_one(object: {
             organization_id: "${TestDataIds.organizations.org1}"
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
-            created_by: "${TestDataIds.users.org1AdminAppUuid}"
+            assigned_to: "${TestDataIds.users.org1Physician}"
+            created_by: "${TestDataIds.users.org1Admin}"
             notes: "Assigned to physician"
           }) {
             id
@@ -362,7 +362,7 @@ describe("Organization Isolation", () => {
         result.patient_record.every(
           (r) =>
             r.organization_id === TestDataIds.organizations.org1 &&
-            r.assigned_to === TestDataIds.users.org1PhysicianAppUuid
+            r.assigned_to === TestDataIds.users.org1Physician
         )
       ).toBe(true);
     });
@@ -375,7 +375,7 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "To be soft deleted"
           }) {
             id
@@ -526,7 +526,7 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             patient_id: "${TestDataIds.patients.org1Patient1}"
-            assigned_to: "${TestDataIds.users.org1PhysicianAppUuid}"
+            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Org1 registration"
           }) {
             id
