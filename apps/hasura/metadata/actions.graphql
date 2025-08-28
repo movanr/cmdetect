@@ -22,7 +22,6 @@ input ConsentInput {
 
 input QuestionnaireResponseInput {
   fhir_resource: jsonb!
-  patient_consent_id: uuid!
 }
 
 type ConsentResponse {

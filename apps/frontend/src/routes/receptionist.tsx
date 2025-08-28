@@ -1,7 +1,10 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRole } from "../contexts/RoleContext";
 import { useSession } from "../lib/auth";
+import { PatientSearch, type Patient } from "../components/PatientSearch";
+import { CreatePatientRecord } from "../components/CreatePatientRecord";
+import { CreatePatient } from "../components/CreatePatient";
 
 export const Route = createFileRoute("/receptionist")({
   beforeLoad: ({ context }) => {
@@ -100,25 +103,134 @@ function ReceptionistLayout() {
       {/* Receptionist Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Reception Dashboard
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Current Role: <span className="font-medium text-gray-900">{activeRole}</span>
-            </p>
-            <p className="text-gray-600">
-              This is the receptionist interface. Here you can create new patient records, 
-              manage appointments, and handle case assignments to physicians.
-            </p>
-            
-            {/* Nested routes will render here */}
-            <div className="mt-6">
-              <Outlet />
-            </div>
+          <ReceptionistDashboard />
+          
+          {/* Nested routes will render here */}
+          <div className="mt-6">
+            <Outlet />
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ReceptionistDashboard() {
+  const [currentView, setCurrentView] = useState<'search' | 'createRecord' | 'createPatient'>('search');
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [lastSearchedClinicId, setLastSearchedClinicId] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const handlePatientFound = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setCurrentView('createRecord');
+    setSuccessMessage(null);
+  };
+
+  const handlePatientNotFound = (clinicId: string) => {
+    setLastSearchedClinicId(clinicId);
+    setCurrentView('createPatient');
+    setSuccessMessage(null);
+  };
+
+  const handlePatientCreated = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setCurrentView('createRecord');
+    setSuccessMessage(`Patient "${patient.first_name_encrypted} ${patient.last_name_encrypted}" created successfully!`);
+  };
+
+  const handlePatientRecordCreated = (patientRecord: any) => {
+    setCurrentView('search');
+    setSelectedPatient(null);
+    setLastSearchedClinicId('');
+    setSuccessMessage(`Patient record created successfully and assigned to ${patientRecord.user?.name || 'physician'}!`);
+  };
+
+  const handleCancel = () => {
+    setCurrentView('search');
+    setSelectedPatient(null);
+    setLastSearchedClinicId('');
+    setSuccessMessage(null);
+  };
+
+  // Auto-clear success message after 5 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  return (
+    <div className="space-y-6">
+      {/* Success Message */}
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">{successMessage}</p>
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="text-green-700 hover:text-green-800"
+            >
+              <span className="sr-only">Dismiss</span>
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      {currentView === 'search' && (
+        <PatientSearch
+          onPatientFound={handlePatientFound}
+          onPatientNotFound={handlePatientNotFound}
+        />
+      )}
+
+      {currentView === 'createRecord' && selectedPatient && (
+        <CreatePatientRecord
+          patient={selectedPatient}
+          onSuccess={handlePatientRecordCreated}
+          onCancel={handleCancel}
+        />
+      )}
+
+      {currentView === 'createPatient' && lastSearchedClinicId && (
+        <CreatePatient
+          clinicId={lastSearchedClinicId}
+          onSuccess={handlePatientCreated}
+          onCancel={handleCancel}
+        />
+      )}
+
+      {/* Help Text */}
+      {currentView === 'search' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Patient Record Management
+          </h3>
+          <div className="space-y-3 text-sm text-gray-600">
+            <p>
+              <strong>Step 1:</strong> Enter the patient's clinic internal ID to search for existing records.
+            </p>
+            <p>
+              <strong>Step 2:</strong> If the patient exists, you can create a new case and assign it to a physician.
+            </p>
+            <p>
+              <strong>Step 3:</strong> If no patient is found, you'll be prompted to create a new patient record first.
+            </p>
+          </div>
+          <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-md">
+            <p className="text-sm text-purple-700">
+              All patient records are automatically scoped to your organization and tracked for audit purposes.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

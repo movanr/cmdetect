@@ -21,17 +21,14 @@ select_permissions:
     permission:
       columns:
         - consent_given
-        - consent_version
-        - ip_address
         - consent_text
-        - user_agent
+        - consent_version
         - consented_at
         - created_at
-        - deleted_at
-        - updated_at
         - id
         - organization_id
         - patient_record_id
+        - updated_at
       filter:
         _and:
           - organization_id:
@@ -48,11 +45,9 @@ select_permissions:
         - consented_at
         - created_at
         - id
-        - ip_address
         - organization_id
         - patient_record_id
         - updated_at
-        - user_agent
       filter:
         _and:
           - organization_id:
@@ -69,11 +64,9 @@ select_permissions:
         - consented_at
         - created_at
         - id
-        - ip_address
         - organization_id
         - patient_record_id
         - updated_at
-        - user_agent
       filter:
         _and:
           - organization_id:

@@ -144,12 +144,21 @@ app.post("/actions/submit-patient-consent", async (req, res) => {
 
     const patientRecord = patientRecords[0];
 
-    // Insert patient consent
+    // Upsert patient consent (insert or update if consent already exists)
     const consentQuery = `
       INSERT INTO patient_consent (
         patient_record_id, organization_id, consent_given, 
         consent_text, consent_version, ip_address, user_agent, consented_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
+      ON CONFLICT (patient_record_id) 
+      DO UPDATE SET 
+        consent_given = EXCLUDED.consent_given,
+        consent_text = EXCLUDED.consent_text,
+        consent_version = EXCLUDED.consent_version,
+        ip_address = EXCLUDED.ip_address,
+        user_agent = EXCLUDED.user_agent,
+        consented_at = EXCLUDED.consented_at,
+        updated_at = NOW()
       RETURNING id
     `;
 
@@ -197,23 +206,6 @@ app.post("/actions/submit-questionnaire-response", async (req, res) => {
       });
     }
 
-    if (
-      !response_data.patient_consent_id ||
-      typeof response_data.patient_consent_id !== "string"
-    ) {
-      return res.json({
-        success: false,
-        error: "patient_consent_id is required and must be a string",
-      });
-    }
-
-    // Validate UUID format for patient_consent_id
-    if (!validateUUID(response_data.patient_consent_id)) {
-      return res.json({
-        success: false,
-        error: "Invalid patient_consent_id format",
-      });
-    }
 
     // Validate FHIR resource
     const fhirValidation = validateFHIRQuestionnaireResponse(response_data.fhir_resource);
@@ -246,25 +238,23 @@ app.post("/actions/submit-questionnaire-response", async (req, res) => {
 
     const patientRecord = patientRecords[0];
 
-    // Verify consent exists and belongs to this patient record
+    // Find consent for this patient record
     const consentQuery = `
       SELECT id FROM patient_consent 
-      WHERE id = $1 AND patient_record_id = $2
+      WHERE patient_record_id = $1
     `;
 
-    const consentsResult = await db.query(consentQuery, [
-      response_data.patient_consent_id,
-      patientRecord.id,
-    ]);
+    const consentsResult = await db.query(consentQuery, [patientRecord.id]);
     const consents = consentsResult.rows;
 
     if (consents.length === 0) {
       return res.json({
         success: false,
-        error:
-          "Invalid consent ID or consent not found for this patient record",
+        error: "No consent found for this patient record. Please submit consent first.",
       });
     }
+
+    const consentId = consents[0].id;
 
     // Insert questionnaire response
     const responseQuery = `
@@ -277,7 +267,7 @@ app.post("/actions/submit-questionnaire-response", async (req, res) => {
 
     const responseQueryResult = await db.query(responseQuery, [
       patientRecord.id,
-      response_data.patient_consent_id,
+      consentId,
       patientRecord.organization_id,
       response_data.fhir_resource,
     ]);

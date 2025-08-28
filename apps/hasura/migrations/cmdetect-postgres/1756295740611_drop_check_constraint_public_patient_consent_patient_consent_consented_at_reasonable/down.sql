@@ -1,0 +1,1 @@
+alter table "public"."patient_consent" add constraint "patient_consent_consented_at_reasonable" check (CHECK (consented_at >= (created_at - '01:00:00'::interval) AND consented_at <= (created_at + '01:00:00'::interval)));
