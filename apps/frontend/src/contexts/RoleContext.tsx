@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useSession, switchUserRole } from '../lib/auth';
 
 // Define available roles in the system
-export type UserRole = 'org_admin' | 'physician' | 'receptionist';
+export type UserRole = 'org_admin' | 'physician' | 'receptionist' | 'unverified';
 
 export interface RoleContextType {
   // Current state

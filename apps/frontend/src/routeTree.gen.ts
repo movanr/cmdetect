@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnverifiedRouteImport } from './routes/unverified'
 import { Route as ReceptionistRouteImport } from './routes/receptionist'
 import { Route as PhysicianRouteImport } from './routes/physician'
 import { Route as PatientRouteImport } from './routes/patient'
@@ -16,6 +17,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UnverifiedRoute = UnverifiedRouteImport.update({
+  id: '/unverified',
+  path: '/unverified',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReceptionistRoute = ReceptionistRouteImport.update({
   id: '/receptionist',
   path: '/receptionist',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/patient': typeof PatientRoute
   '/physician': typeof PhysicianRoute
   '/receptionist': typeof ReceptionistRoute
+  '/unverified': typeof UnverifiedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/patient': typeof PatientRoute
   '/physician': typeof PhysicianRoute
   '/receptionist': typeof ReceptionistRoute
+  '/unverified': typeof UnverifiedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/patient': typeof PatientRoute
   '/physician': typeof PhysicianRoute
   '/receptionist': typeof ReceptionistRoute
+  '/unverified': typeof UnverifiedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,8 +90,16 @@ export interface FileRouteTypes {
     | '/patient'
     | '/physician'
     | '/receptionist'
+    | '/unverified'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/login' | '/patient' | '/physician' | '/receptionist'
+  to:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/patient'
+    | '/physician'
+    | '/receptionist'
+    | '/unverified'
   id:
     | '__root__'
     | '/'
@@ -91,6 +108,7 @@ export interface FileRouteTypes {
     | '/patient'
     | '/physician'
     | '/receptionist'
+    | '/unverified'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,10 +118,18 @@ export interface RootRouteChildren {
   PatientRoute: typeof PatientRoute
   PhysicianRoute: typeof PhysicianRoute
   ReceptionistRoute: typeof ReceptionistRoute
+  UnverifiedRoute: typeof UnverifiedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unverified': {
+      id: '/unverified'
+      path: '/unverified'
+      fullPath: '/unverified'
+      preLoaderRoute: typeof UnverifiedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/receptionist': {
       id: '/receptionist'
       path: '/receptionist'
@@ -156,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   PatientRoute: PatientRoute,
   PhysicianRoute: PhysicianRoute,
   ReceptionistRoute: ReceptionistRoute,
+  UnverifiedRoute: UnverifiedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
