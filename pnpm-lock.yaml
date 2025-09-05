@@ -126,6 +126,15 @@ importers:
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.11.0)
+      '@noble/ciphers':
+        specifier: ^2.0.0
+        version: 2.0.0
+      '@noble/curves':
+        specifier: ^2.0.0
+        version: 2.0.0
+      '@noble/hashes':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@scure/bip39':
         specifier: ^2.0.0
         version: 2.0.0
@@ -2661,6 +2670,18 @@ packages:
 
   /@noble/ciphers@0.6.0:
     resolution: {integrity: sha512-mIbq/R9QXk5/cTfESb1OKtyFnk7oc1Om/8onA1158K9/OZUQFDEVy55jVTato+xmp3XX6F6Qh0zz0Nc1AxAlRQ==}
+    dev: false
+
+  /@noble/ciphers@2.0.0:
+    resolution: {integrity: sha512-j/l6jpnpaIBM87cAYPJzi/6TgqmBv9spkqPyCXvRYsu5uxqh6tPJZDnD85yo8VWqzTuTQPgfv7NgT63u7kbwAQ==}
+    engines: {node: '>= 20.19.0'}
+    dev: false
+
+  /@noble/curves@2.0.0:
+    resolution: {integrity: sha512-RiwZZeJnsTnhT+/gg2KvITJZhK5oagQrpZo+yQyd3mv3D5NAG2qEeEHpw7IkXRlpkoD45wl2o4ydHAvY9wyEfw==}
+    engines: {node: '>= 20.19.0'}
+    dependencies:
+      '@noble/hashes': 2.0.0
     dev: false
 
   /@noble/hashes@1.8.0:

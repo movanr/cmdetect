@@ -1,20 +1,17 @@
 export {
   generateOrganizationKeys,
   recoverKeysFromMnemonic,
-  importPublicKeyFromPem,
-  importPrivateKeyFromPem
-} from './keyGeneration';
+  verifyDeterministicKeys,
+  validateKeyPair,
+} from "./keyGeneration";
 
-export {
-  encryptPatientData,
-  decryptPatientData
-} from './encryption';
+export { encryptPatientData, decryptPatientData } from "./encryption";
 
 export {
   storePrivateKey,
   loadPrivateKey,
   hasStoredPrivateKey,
-  deleteStoredPrivateKey
-} from './storage';
+  deleteStoredPrivateKey,
+} from "./storage";
 
-export * from './types';
+export * from "./types";
