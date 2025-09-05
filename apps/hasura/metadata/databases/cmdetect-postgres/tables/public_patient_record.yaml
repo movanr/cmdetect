@@ -2,12 +2,18 @@ table:
   name: patient_record
   schema: public
 object_relationships:
+  - name: assignedTo
+    using:
+      manual_configuration:
+        column_mapping:
+          assigned_to: id
+        insertion_order: null
+        remote_table:
+          name: user
+          schema: public
   - name: organization
     using:
       foreign_key_constraint_on: organization_id
-  - name: patient
-    using:
-      foreign_key_constraint_on: patient_id
   - name: patient_consent
     using:
       foreign_key_constraint_on:
@@ -39,58 +45,65 @@ insert_permissions:
   - role: org_admin
     permission:
       check:
-        _and:
-          - patient:
-              organization_id:
-                _eq: X-Hasura-Organization-Id
-          - user:
-              organizationId:
-                _eq: X-Hasura-Organization-Id
+        assignedTo:
+          organizationId:
+            _eq: X-Hasura-Organization-Id
       set:
         created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
         - assigned_to
+        - clinic_internal_id
         - notes
-        - patient_id
+    comment: ""
+  - role: physician
+    permission:
+      check: {}
+      set:
+        assigned_to: x-hasura-User-Id
+        created_by: x-hasura-User-Id
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - clinic_internal_id
+        - notes
     comment: ""
   - role: receptionist
     permission:
       check:
-        _and:
-          - patient:
-              organization_id:
-                _eq: X-Hasura-Organization-Id
-          - user:
-              organizationId:
-                _eq: X-Hasura-Organization-Id
+        assignedTo:
+          organizationId:
+            _eq: X-Hasura-Organization-Id
       set:
         created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
         - assigned_to
+        - clinic_internal_id
         - notes
-        - patient_id
     comment: ""
 select_permissions:
   - role: org_admin
     permission:
       columns:
-        - invite_token
-        - notes
-        - created_at
-        - deleted_at
-        - first_viewed_at
-        - last_activity_at
-        - invite_expires_at
-        - updated_at
         - assigned_to
+        - clinic_internal_id
+        - created_at
         - created_by
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - first_viewed_at
         - first_viewed_by
+        - gender_encrypted
         - id
+        - invite_expires_at
+        - invite_token
+        - last_activity_at
         - last_activity_by
+        - last_name_encrypted
+        - notes
         - organization_id
-        - patient_id
+        - patient_data_completed_at
+        - updated_at
       filter:
         _and:
           - organization_id:
@@ -102,68 +115,87 @@ select_permissions:
     permission:
       columns:
         - assigned_to
+        - clinic_internal_id
         - created_at
         - created_by
+        - date_of_birth_encrypted
+        - first_name_encrypted
         - first_viewed_at
         - first_viewed_by
+        - gender_encrypted
         - id
-        - last_activity_at
-        - last_activity_by
         - invite_expires_at
         - invite_token
+        - last_activity_at
+        - last_activity_by
+        - last_name_encrypted
         - notes
         - organization_id
-        - patient_id
+        - patient_data_completed_at
         - updated_at
       filter:
         _and:
           - organization_id:
               _eq: X-Hasura-Organization-Id
-          - _or:
-              - assigned_to:
-                  _eq: X-Hasura-User-Id
-              - created_by:
-                  _eq: X-Hasura-User-Id
           - deleted_at:
               _is_null: true
-    comment: Can see records assigned to them + created by them
+          - assigned_to:
+              _eq: X-Hasura-User-Id
+    comment: ""
   - role: receptionist
     permission:
       columns:
-        - invite_token
-        - notes
-        - created_at
-        - deleted_at
-        - first_viewed_at
-        - last_activity_at
-        - invite_expires_at
-        - updated_at
         - assigned_to
+        - clinic_internal_id
+        - created_at
         - created_by
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - first_viewed_at
         - first_viewed_by
+        - gender_encrypted
         - id
+        - invite_expires_at
+        - invite_token
+        - last_activity_at
         - last_activity_by
+        - last_name_encrypted
+        - notes
         - organization_id
-        - patient_id
+        - patient_data_completed_at
+        - updated_at
       filter:
-        organization_id:
-          _eq: X-Hasura-Organization-Id
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
     comment: ""
 update_permissions:
   - role: org_admin
     permission:
       columns:
         - assigned_to
+        - clinic_internal_id
+        - date_of_birth_encrypted
         - deleted_at
+        - first_name_encrypted
+        - gender_encrypted
+        - last_name_encrypted
         - notes
-        - patient_id
       filter:
         _and:
           - organization_id:
               _eq: X-Hasura-Organization-Id
           - deleted_at:
               _is_null: true
-      check: null
+      check:
+        assignedTo:
+          organizationId:
+            _eq: X-Hasura-Organization-Id
+      set:
+        last_activity_by: x-hasura-User-Id
+        updated_at: now()
     comment: ""
   - role: physician
     permission:
@@ -191,12 +223,15 @@ update_permissions:
     permission:
       columns:
         - assigned_to
-        - deleted_at
-        - notes
-        - patient_id
-      filter: {}
-      check: null
-      set:
-        last_activity_at: now()
-        last_activity_by: x-hasura-User-Id
+        - clinic_internal_id
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check:
+        assignedTo:
+          organizationId:
+            _eq: X-Hasura-Organization-Id
     comment: ""

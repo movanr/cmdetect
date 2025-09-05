@@ -1,5 +1,5 @@
 import { createAdminClient } from "./graphql-client";
-import { TestDataIds, TestPatientRecords } from "./test-data";
+import { TestPatientRecords } from "./test-data";
 
 const adminClient = createAdminClient();
 
@@ -44,9 +44,6 @@ export async function clearTestData(): Promise<void> {
       delete_patient_record(where: {}) {
         affected_rows
       }
-      delete_patient(where: {}) {
-        affected_rows
-      }
     }
   `);
 }
@@ -57,44 +54,13 @@ export async function clearTestData(): Promise<void> {
 export async function setupTestData(): Promise<void> {
   // Note: Organizations and auth users are created separately via auth server seed script
 
-  // Create test patients
-  await adminClient.request(`
-    mutation {
-      insert_patient(objects: [
-        {
-          id: "${TestDataIds.patients.org1Patient1}",
-          organization_id: "${TestDataIds.organizations.org1}",
-          clinic_internal_id: "P001",
-          first_name_encrypted: "encrypted_john",
-          last_name_encrypted: "encrypted_doe"
-        },
-        {
-          id: "${TestDataIds.patients.org1Patient2}", 
-          organization_id: "${TestDataIds.organizations.org1}",
-          clinic_internal_id: "P002",
-          first_name_encrypted: "encrypted_jane",
-          last_name_encrypted: "encrypted_smith"
-        },
-        {
-          id: "${TestDataIds.patients.org2Patient1}",
-          organization_id: "${TestDataIds.organizations.org2}",
-          clinic_internal_id: "P001",
-          first_name_encrypted: "encrypted_bob",
-          last_name_encrypted: "encrypted_johnson"
-        }
-      ]) {
-        affected_rows
-      }
-    }
-  `);
-
-  // Create test patient records
+  // Create test patient records (patient data is now part of patient_record)
   await adminClient.request(`
     mutation {
       insert_patient_record(objects: [
         {
           organization_id: "${TestPatientRecords.org1PatientRecord1.organizationId}",
-          patient_id: "${TestPatientRecords.org1PatientRecord1.patientId}",
+          clinic_internal_id: "P001",
           created_by: "${TestPatientRecords.org1PatientRecord1.createdBy}",
           assigned_to: "${TestPatientRecords.org1PatientRecord1.assignedTo}"
         }

@@ -43,7 +43,7 @@ describe("Questionnaire Response Action Handler", () => {
       mutation {
         insert_patient_record(objects: [{
           organization_id: "${TestDataIds.organizations.org1}",
-          patient_id: "${TestDataIds.patients.org1Patient1}",
+          clinic_internal_id: "P001-QR-TEST",
           created_by: "${TestDataIds.users.org1Receptionist}",
           assigned_to: "${TestDataIds.users.org1Physician}",
           invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
@@ -372,18 +372,9 @@ describe("Questionnaire Response Action Handler", () => {
         // Create a new patient record for each test to avoid conflicts
         const newPatientResult = (await adminClient.request(`
           mutation {
-            insert_patient(objects: [{
-              id: "test-patient-${status}",
-              organization_id: "${TestDataIds.organizations.org1}",
-              clinic_internal_id: "P-${status.toUpperCase()}",
-              first_name_encrypted: "encrypted_test",
-              last_name_encrypted: "encrypted_${status}"
-            }]) {
-              returning { id }
-            }
             insert_patient_record(objects: [{
               organization_id: "${TestDataIds.organizations.org1}",
-              patient_id: "test-patient-${status}",
+              clinic_internal_id: "P-${status.toUpperCase()}",
               created_by: "${TestDataIds.users.org1Receptionist}",
               assigned_to: "${TestDataIds.users.org1Physician}",
               invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
@@ -483,18 +474,9 @@ describe("Questionnaire Response Action Handler", () => {
       // Create a patient record without consent
       const noConsentResult = (await adminClient.request(`
         mutation {
-          insert_patient(objects: [{
-            id: "test-patient-no-consent",
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P-NO-CONSENT",
-            first_name_encrypted: "encrypted_no",
-            last_name_encrypted: "encrypted_consent"
-          }]) {
-            returning { id }
-          }
           insert_patient_record(objects: [{
             organization_id: "${TestDataIds.organizations.org1}",
-            patient_id: "test-patient-no-consent",
+            clinic_internal_id: "P-NO-CONSENT",
             created_by: "${TestDataIds.users.org1Receptionist}",
             assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
@@ -626,18 +608,9 @@ describe("Questionnaire Response Action Handler", () => {
       // Create another patient record for this test
       const newPatientResult = (await adminClient.request(`
         mutation {
-          insert_patient(objects: [{
-            id: "test-patient-minimal-fhir",
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P-MINIMAL-FHIR",
-            first_name_encrypted: "encrypted_minimal",
-            last_name_encrypted: "encrypted_fhir"
-          }]) {
-            returning { id }
-          }
           insert_patient_record(objects: [{
             organization_id: "${TestDataIds.organizations.org1}",
-            patient_id: "test-patient-minimal-fhir",
+            clinic_internal_id: "P-MINIMAL-FHIR",
             created_by: "${TestDataIds.users.org1Receptionist}",
             assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"

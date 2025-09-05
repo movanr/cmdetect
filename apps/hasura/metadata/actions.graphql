@@ -12,6 +12,19 @@ type Mutation {
   ): QuestionnaireResponseResponse!
 }
 
+type Mutation {
+  validateInviteToken(
+    invite_token: String!
+  ): ValidateInviteTokenResponse!
+}
+
+type Mutation {
+  submitPatientPersonalData(
+    invite_token: String!
+    patient_data: PatientPersonalDataInput!
+  ): PatientPersonalDataResponse!
+}
+
 input ConsentInput {
   consent_given: Boolean!
   consent_text: String!
@@ -33,6 +46,33 @@ type ConsentResponse {
 type QuestionnaireResponseResponse {
   success: Boolean!
   questionnaire_response_id: uuid
+  error: String
+}
+
+input ValidateInviteTokenInput {
+  invite_token: String!
+}
+
+type ValidateInviteTokenResponse {
+  valid: Boolean!
+  organization_name: String
+  public_key_pem: String
+  patient_record_id: uuid
+  expires_at: String
+  error_message: String
+}
+
+input PatientPersonalDataInput {
+  first_name_encrypted: String!
+  last_name_encrypted: String!
+  gender_encrypted: String!
+  date_of_birth_encrypted: String!
+}
+
+type PatientPersonalDataResponse {
+  success: Boolean!
+  patient_record_id: uuid
+  message: String
   error: String
 }
 

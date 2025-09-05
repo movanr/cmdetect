@@ -104,3 +104,31 @@ export function validateRoleData(role: any): ValidationResult {
 
   return { valid: true };
 }
+
+/**
+ * Validates encrypted patient personal data structure
+ */
+export function validatePatientPersonalData(patient_data: any): ValidationResult {
+  if (!patient_data || typeof patient_data !== "object") {
+    return { valid: false, error: "Invalid patient personal data" };
+  }
+
+  // Validate all required encrypted fields
+  if (!patient_data.first_name_encrypted || typeof patient_data.first_name_encrypted !== "string" || patient_data.first_name_encrypted.trim().length === 0) {
+    return { valid: false, error: "first_name_encrypted is required and must be a non-empty string" };
+  }
+
+  if (!patient_data.last_name_encrypted || typeof patient_data.last_name_encrypted !== "string" || patient_data.last_name_encrypted.trim().length === 0) {
+    return { valid: false, error: "last_name_encrypted is required and must be a non-empty string" };
+  }
+
+  if (!patient_data.gender_encrypted || typeof patient_data.gender_encrypted !== "string" || patient_data.gender_encrypted.trim().length === 0) {
+    return { valid: false, error: "gender_encrypted is required and must be a non-empty string" };
+  }
+
+  if (!patient_data.date_of_birth_encrypted || typeof patient_data.date_of_birth_encrypted !== "string" || patient_data.date_of_birth_encrypted.trim().length === 0) {
+    return { valid: false, error: "date_of_birth_encrypted is required and must be a non-empty string" };
+  }
+
+  return { valid: true };
+}

@@ -52,7 +52,6 @@ export interface TestRegistration {
 
 export interface TestPatientRecord {
   organizationId: string;
-  patientId: string;
   createdBy: string;
   assignedTo: string;
 }
@@ -188,7 +187,6 @@ export const TestPatients: Record<string, TestPatient> = {
 export const TestPatientRecords: Record<string, TestPatientRecord> = {
   org1PatientRecord1: {
     organizationId: TestOrganizations.org1.id,
-    patientId: TestPatients.org1Patient1.id,
     createdBy: TestUsers.org1Receptionist.userId,
     assignedTo: TestUsers.org1Physician.userId,
   },

@@ -54,6 +54,22 @@ app.post(
   )
 );
 
+app.post(
+  "/actions/submit-patient-personal-data",
+  handleAsyncError(
+    (req, res) => actionHandlers.submitPatientPersonalData(req, res),
+    "Failed to submit patient personal data"
+  )
+);
+
+app.post(
+  "/actions/validate-invite-token",
+  handleAsyncError(
+    (req, res) => actionHandlers.validateInviteToken(req, res),
+    "Failed to validate invite token"
+  )
+);
+
 // Authentication endpoints
 app.post(
   "/api/auth/switch-role",

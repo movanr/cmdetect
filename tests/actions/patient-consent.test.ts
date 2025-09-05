@@ -37,10 +37,10 @@ describe("Patient Consent Action Handler", () => {
       mutation {
         insert_patient_record(objects: [{
           organization_id: "${TestDataIds.organizations.org1}",
-          patient_id: "${TestDataIds.patients.org1Patient1}",
+          clinic_internal_id: "P001-TEST",
           created_by: "${TestDataIds.users.org1Receptionist}",
           assigned_to: "${TestDataIds.users.org1Physician}",
-          invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}" # 24 hours from now
+          invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
         }]) {
           returning {
             id
@@ -273,7 +273,7 @@ describe("Patient Consent Action Handler", () => {
         mutation {
           insert_patient_record(objects: [{
             organization_id: "${TestDataIds.organizations.org1}",
-            patient_id: "${TestDataIds.patients.org1Patient2}",
+            clinic_internal_id: "P002-TEST",
             created_by: "${TestDataIds.users.org1Receptionist}",
             assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
@@ -380,20 +380,9 @@ describe("Patient Consent Action Handler", () => {
       // Create another patient record for this test
       const newPatientResult = await adminClient.request(`
         mutation {
-          insert_patient(objects: [{
-            id: "test-patient-minimal",
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P-MINIMAL",
-            first_name_encrypted: "encrypted_test",
-            last_name_encrypted: "encrypted_minimal"
-          }]) {
-            returning {
-              id
-            }
-          }
           insert_patient_record(objects: [{
             organization_id: "${TestDataIds.organizations.org1}",
-            patient_id: "test-patient-minimal",
+            clinic_internal_id: "P-MINIMAL",
             created_by: "${TestDataIds.users.org1Receptionist}",
             assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"

@@ -13,12 +13,30 @@ actions:
       forward_client_headers: true
     permissions:
       - role: anonymous
+  - name: validateInviteToken
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3001/actions/validate-invite-token
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
+  - name: submitPatientPersonalData
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3001/actions/submit-patient-personal-data
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
 custom_types:
   enums: []
   input_objects:
     - name: ConsentInput
     - name: QuestionnaireResponseInput
+    - name: ValidateInviteTokenInput
+    - name: PatientPersonalDataInput
   objects:
     - name: ConsentResponse
     - name: QuestionnaireResponseResponse
+    - name: ValidateInviteTokenResponse
+    - name: PatientPersonalDataResponse
   scalars: []

@@ -53,6 +53,24 @@ select_permissions:
           - deleted_at:
               _is_null: true
     comment: ""
+  - role: physician
+    permission:
+      columns:
+        - created_at
+        - fhir_resource
+        - id
+        - organization_id
+        - patient_consent_id
+        - patient_record_id
+        - submitted_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
 update_permissions:
   - role: org_admin
     permission:

@@ -7,7 +7,8 @@ import { Pool } from 'pg';
 export interface PatientRecord {
   id: string;
   organization_id: string;
-  patient_id: string;
+  clinic_internal_id: string;
+  patient_data_completed_at?: Date;
 }
 
 export interface PatientConsent {
@@ -27,6 +28,15 @@ export interface QuestionnaireResponse {
   fhir_resource: any;
 }
 
+export interface InviteValidationResult {
+  valid: boolean;
+  organization_name?: string;
+  public_key_pem?: string;
+  patient_record_id?: string;
+  expires_at?: string;
+  error_message?: string;
+}
+
 /**
  * Database service for managing patient records, consent, and questionnaire responses
  */
@@ -38,10 +48,11 @@ export class DatabaseService {
    */
   async getPatientRecordByInviteToken(inviteToken: string): Promise<PatientRecord | null> {
     const query = `
-      SELECT id, organization_id, patient_id 
+      SELECT id, organization_id, clinic_internal_id, patient_data_completed_at 
       FROM patient_record 
       WHERE invite_token = $1 
       AND invite_expires_at > NOW()
+      AND deleted_at IS NULL
     `;
 
     const result = await this.db.query(query, [inviteToken]);
@@ -130,5 +141,106 @@ export class DatabaseService {
   async updateUserActiveRole(userId: string, role: string): Promise<void> {
     const query = 'UPDATE "user" SET "activeRole" = $1 WHERE id = $2';
     await this.db.query(query, [role, userId]);
+  }
+
+  /**
+   * Updates patient record with encrypted personal data
+   */
+  async updatePatientPersonalData(
+    patientRecordId: string,
+    firstNameEncrypted: string,
+    lastNameEncrypted: string,
+    genderEncrypted: string,
+    dateOfBirthEncrypted: string
+  ): Promise<void> {
+    const query = `
+      UPDATE patient_record 
+      SET first_name_encrypted = $2,
+          last_name_encrypted = $3,
+          gender_encrypted = $4,
+          date_of_birth_encrypted = $5,
+          patient_data_completed_at = NOW(),
+          updated_at = NOW()
+      WHERE id = $1
+      AND deleted_at IS NULL
+    `;
+
+    await this.db.query(query, [
+      patientRecordId,
+      firstNameEncrypted,
+      lastNameEncrypted,
+      genderEncrypted,
+      dateOfBirthEncrypted,
+    ]);
+  }
+
+  /**
+   * Validates invite token and returns organization details for patient encryption
+   */
+  async validateInviteTokenWithPublicKey(inviteToken: string): Promise<InviteValidationResult> {
+    try {
+      const query = `
+        SELECT 
+          pr.id as patient_record_id,
+          pr.invite_expires_at,
+          o.name as organization_name,
+          o.public_key_pem
+        FROM patient_record pr
+        JOIN organization o ON pr.organization_id = o.id
+        WHERE pr.invite_token = $1 
+          AND pr.invite_expires_at > NOW()
+          AND pr.deleted_at IS NULL
+          AND o.deleted_at IS NULL
+      `;
+
+      const result = await this.db.query(query, [inviteToken]);
+      
+      if (result.rows.length === 0) {
+        // Check if token exists but is expired
+        const expiredQuery = `
+          SELECT pr.invite_expires_at 
+          FROM patient_record pr
+          WHERE pr.invite_token = $1 AND pr.deleted_at IS NULL
+        `;
+        const expiredResult = await this.db.query(expiredQuery, [inviteToken]);
+        
+        if (expiredResult.rows.length > 0) {
+          return {
+            valid: false,
+            error_message: "Invite link has expired"
+          };
+        } else {
+          return {
+            valid: false,
+            error_message: "Invalid invite link"
+          };
+        }
+      }
+
+      const row = result.rows[0];
+
+      // Check if organization has a public key configured
+      if (!row.public_key_pem) {
+        return {
+          valid: false,
+          error_message: "Organization encryption not configured"
+        };
+      }
+
+      return {
+        valid: true,
+        organization_name: row.organization_name,
+        public_key_pem: row.public_key_pem,
+        patient_record_id: row.patient_record_id,
+        expires_at: row.invite_expires_at.toISOString()
+      };
+
+    } catch (error) {
+      console.error('Database error during invite validation:', error);
+      return {
+        valid: false,
+        error_message: "Database error occurred during validation"
+      };
+    }
   }
 }
