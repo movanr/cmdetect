@@ -50,21 +50,20 @@ select_permissions:
   - role: org_admin
     permission:
       columns:
-        - emailVerified
-        - isActive
-        - isAnonymous
-        - roles
         - activeRole
-        - app_uuid
+        - createdAt
+        - deletedAt
         - email
+        - emailVerified
         - firstName
         - id
         - image
+        - isActive
+        - isAnonymous
         - lastName
         - name
         - organizationId
-        - createdAt
-        - deletedAt
+        - roles
         - updatedAt
       filter:
         _and:

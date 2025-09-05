@@ -6,6 +6,13 @@ type Mutation {
 }
 
 type Mutation {
+  submitPatientPersonalData(
+    invite_token: String!
+    patient_data: PatientPersonalDataInput!
+  ): PatientPersonalDataResponse!
+}
+
+type Mutation {
   submitQuestionnaireResponse(
     invite_token: String!
     response_data: QuestionnaireResponseInput!
@@ -16,13 +23,6 @@ type Mutation {
   validateInviteToken(
     invite_token: String!
   ): ValidateInviteTokenResponse!
-}
-
-type Mutation {
-  submitPatientPersonalData(
-    invite_token: String!
-    patient_data: PatientPersonalDataInput!
-  ): PatientPersonalDataResponse!
 }
 
 input ConsentInput {
@@ -37,6 +37,17 @@ input QuestionnaireResponseInput {
   fhir_resource: jsonb!
 }
 
+input ValidateInviteTokenInput {
+  invite_token: String!
+}
+
+input PatientPersonalDataInput {
+  first_name_encrypted: String!
+  last_name_encrypted: String!
+  gender_encrypted: String!
+  date_of_birth_encrypted: String!
+}
+
 type ConsentResponse {
   success: Boolean!
   patient_consent_id: uuid
@@ -49,10 +60,6 @@ type QuestionnaireResponseResponse {
   error: String
 }
 
-input ValidateInviteTokenInput {
-  invite_token: String!
-}
-
 type ValidateInviteTokenResponse {
   valid: Boolean!
   organization_name: String
@@ -60,13 +67,6 @@ type ValidateInviteTokenResponse {
   patient_record_id: uuid
   expires_at: String
   error_message: String
-}
-
-input PatientPersonalDataInput {
-  first_name_encrypted: String!
-  last_name_encrypted: String!
-  gender_encrypted: String!
-  date_of_birth_encrypted: String!
 }
 
 type PatientPersonalDataResponse {

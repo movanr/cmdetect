@@ -34,24 +34,12 @@ CREATE TABLE public.organization (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     deleted_at timestamp with time zone,
+    public_key_pem text,
+    key_created_at timestamp with time zone DEFAULT now(),
+    key_fingerprint text,
     CONSTRAINT organization_deleted_at_consistency CHECK (((deleted_at IS NULL) OR (deleted_at <= now()))),
     CONSTRAINT organization_email_format CHECK (((email IS NULL) OR ((email)::text ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text))),
     CONSTRAINT organization_name_not_empty CHECK ((length(TRIM(BOTH FROM name)) > 0))
-);
-CREATE TABLE public.patient (
-    id text DEFAULT (gen_random_uuid())::text NOT NULL,
-    organization_id text NOT NULL,
-    clinic_internal_id character varying NOT NULL,
-    first_name_encrypted text NOT NULL,
-    last_name_encrypted text NOT NULL,
-    gender_encrypted text,
-    date_of_birth_encrypted text,
-    created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now(),
-    deleted_at timestamp with time zone,
-    CONSTRAINT patient_clinic_internal_id_not_empty CHECK ((length(TRIM(BOTH FROM clinic_internal_id)) > 0)),
-    CONSTRAINT patient_deleted_at_consistency CHECK (((deleted_at IS NULL) OR (deleted_at <= now()))),
-    CONSTRAINT patient_encrypted_fields_not_empty CHECK (((length(TRIM(BOTH FROM first_name_encrypted)) > 0) AND (length(TRIM(BOTH FROM last_name_encrypted)) > 0)))
 );
 CREATE TABLE public.patient_consent (
     id text DEFAULT (gen_random_uuid())::text NOT NULL,
@@ -60,13 +48,10 @@ CREATE TABLE public.patient_consent (
     consent_given boolean NOT NULL,
     consent_text text NOT NULL,
     consent_version character varying NOT NULL,
-    ip_address inet,
-    user_agent text,
     consented_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     deleted_at timestamp with time zone,
-    CONSTRAINT patient_consent_consented_at_reasonable CHECK (((consented_at >= (created_at - '01:00:00'::interval)) AND (consented_at <= (created_at + '01:00:00'::interval)))),
     CONSTRAINT patient_consent_deleted_at_consistency CHECK (((deleted_at IS NULL) OR (deleted_at <= now()))),
     CONSTRAINT patient_consent_text_not_empty CHECK ((length(TRIM(BOTH FROM consent_text)) > 0)),
     CONSTRAINT patient_consent_version_not_empty CHECK ((length(TRIM(BOTH FROM consent_version)) > 0))
@@ -74,7 +59,6 @@ CREATE TABLE public.patient_consent (
 CREATE TABLE public.patient_record (
     id text DEFAULT (gen_random_uuid())::text NOT NULL,
     organization_id text NOT NULL,
-    patient_id text NOT NULL,
     created_by text NOT NULL,
     assigned_to text NOT NULL,
     invite_token text DEFAULT (gen_random_uuid())::text NOT NULL,
@@ -87,11 +71,19 @@ CREATE TABLE public.patient_record (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     deleted_at timestamp with time zone,
-    CONSTRAINT patient_record_deleted_at_consistency CHECK (((deleted_at IS NULL) OR (deleted_at <= now()))),
+    clinic_internal_id character varying NOT NULL,
+    first_name_encrypted text,
+    last_name_encrypted text,
+    gender_encrypted text,
+    date_of_birth_encrypted text,
+    patient_data_completed_at timestamp with time zone,
+    CONSTRAINT patient_record_clinic_internal_id_not_empty CHECK ((length(TRIM(BOTH FROM clinic_internal_id)) > 0)),
+    CONSTRAINT patient_remaked_at IS NULL) OR (deleted_at <= now()))),
     CONSTRAINT patient_record_first_viewed_after_creation CHECK (((first_viewed_at IS NULL) OR (first_viewed_at >= created_at))),
     CONSTRAINT patient_record_invite_expires_future CHECK ((invite_expires_at > created_at)),
     CONSTRAINT patient_record_invite_token_not_empty CHECK ((length(TRIM(BOTH FROM invite_token)) > 0)),
-    CONSTRAINT patient_record_last_activity_after_creation CHECK (((last_activity_at IS NULL) OR (last_activity_at >= created_at)))
+    CONSTRAINT patient_record_last_activity_after_creation CHECK (((last_activity_at IS NULL) OR (last_activity_at >= created_at))),
+    CONSTRAINT patient_record_patient_data_complete CHECK ((((first_name_encrypted IS NULL) AND (last_name_encrypted IS NULL) AND (patient_data_completed_at IS NULL)) OR ((first_name_encrypted IS NOT NULL) AND (last_name_encrypted IS NOT NULL) AND (patient_data_completed_at IS NOT NULL) AND (length(TRIM(BOTH FROM first_name_encrypted)) > 0) AND (length(TRIM(BOTH FROM last_name_encrypted)) > 0))))
 );
 CREATE TABLE public.questionnaire_response (
     id text DEFAULT (gen_random_uuid())::text NOT NULL,
@@ -136,7 +128,7 @@ CREATE TABLE public."user" (
     "isActive" boolean,
     "deletedAt" timestamp without time zone,
     CONSTRAINT user_deleted_at_consistency CHECK ((("deletedAt" IS NULL) OR ("deletedAt" <= now()))),
-    CONSTRAINT user_email_format CHECK ((email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text)),
+    CONSTRAINT user_email_format CHECK ((email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.:/%-]+$'::text)),
     CONSTRAINT user_name_not_empty CHECK ((length(TRIM(BOTH FROM name)) > 0)),
     CONSTRAINT user_roles_is_array CHECK ((jsonb_typeof(roles) = 'array'::text))
 );
@@ -154,14 +146,10 @@ ALTER TABLE ONLY public.jwks
     ADD CONSTRAINT jwks_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.patient
-    ADD CONSTRAINT patient_clinic_internal_id_org_unique UNIQUE (organization_id, clinic_internal_id);
 ALTER TABLE ONLY public.patient_consent
     ADD CONSTRAINT patient_consent_patient_record_unique UNIQUE (patient_record_id);
 ALTER TABLE ONLY public.patient_consent
     ADD CONSTRAINT patient_consent_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.patient
-    ADD CONSTRAINT patient_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.patient_record
     ADD CONSTRAINT patient_record_invite_token_unique UNIQUE (invite_token);
 ALTER TABLE ONLY public.patient_record
@@ -180,16 +168,16 @@ ALTER TABLE ONLY public."user"
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.verification
     ADD CONSTRAINT verification_pkey PRIMARY KEY (id);
-CREATE INDEX idx_patient_clinic_internal_id ON public.patient USING btree (clinic_internal_id, organization_id) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_patient_consent_consented_at ON public.patient_consent USING btree (consented_at DESC) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_patient_consent_organization_id ON public.patient_consent USING btree (organization_id) WHERE (deleted_at IS NULL);
-CREATE INDEX idx_patient_organization_id ON public.patient USING btree (organization_id) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_patient_record_activity_times ON public.patient_record USING btree (last_activity_at DESC, first_viewed_at) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_patient_record_assigned_to ON public.patient_record USING btree (assigned_to) WHERE (deleted_at IS NULL);
+CREATE INDEX idx_patient_record_clinic_internal_id ON public.patient_record USING btree (organization_id, clinic_internal_id) WHERE (deleted_at IS NULL);
+CREATE INDEX idx_patient_record_completed ON public.patient_record USING btree (organization_id, patient_data_completed_at DESC) WHERE ((patient_data_completed_at IS NOT NULL) AND (deleted_at IS NULL));
 CREATE INDEX idx_patient_record_created_by ON public.patient_record USING btree (created_by) WHERE (deleted_at IS NULL);
+CREATE INDEX idx_patient_record_incomplete ON public.patient_record USING btree (organization_id, created_at) WHERE ((patient_data_completed_at IS NULL) AND (deleted_at IS NULL));
 CREATE INDEX idx_patient_record_invite_token ON public.patient_record USING btree (invite_token) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_patient_record_organization_id ON public.patient_record USING btree (organization_id) WHERE (deleted_at IS NULL);
-CREATE INDEX idx_patient_record_patient_id ON public.patient_record USING btree (patient_id) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_questionnaire_response_fhir_questionnaire ON public.questionnaire_response USING btree (((fhir_resource ->> 'questionnaire'::text))) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_questionnaire_response_organization_id ON public.questionnaire_response USING btree (organization_id) WHERE (deleted_at IS NULL);
 CREATE INDEX idx_questionnaire_response_patient_consent_id ON public.questionnaire_response USING btree (patient_consent_id) WHERE (deleted_at IS NULL);
@@ -204,8 +192,6 @@ ALTER TABLE ONLY public.patient_consent
     ADD CONSTRAINT patient_consent_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.patient_consent
     ADD CONSTRAINT patient_consent_patient_record_id_fkey FOREIGN KEY (patient_record_id) REFERENCES public.patient_record(id) ON DELETE CASCADE;
-ALTER TABLE ONLY public.patient
-    ADD CONSTRAINT patient_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.patient_record
     ADD CONSTRAINT patient_record_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES public."user"(id) ON DELETE RESTRICT;
 ALTER TABLE ONLY public.patient_record
@@ -216,8 +202,6 @@ ALTER TABLE ONLY public.patient_record
     ADD CONSTRAINT patient_record_last_activity_by_fkey FOREIGN KEY (last_activity_by) REFERENCES public."user"(id) ON DELETE SET NULL;
 ALTER TABLE ONLY public.patient_record
     ADD CONSTRAINT patient_record_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE;
-ALTER TABLE ONLY public.patient_record
-    ADD CONSTRAINT patient_record_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patient(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.questionnaire_response
     ADD CONSTRAINT questionnaire_response_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.questionnaire_response

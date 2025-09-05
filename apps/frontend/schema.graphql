@@ -56,9 +56,22 @@ input Int_comparison_exp {
   _nin: [Int!]
 }
 
+input PatientPersonalDataInput {
+  date_of_birth_encrypted: String!
+  first_name_encrypted: String!
+  gender_encrypted: String!
+  last_name_encrypted: String!
+}
+
+type PatientPersonalDataResponse {
+  error: String
+  message: String
+  patient_record_id: uuid
+  success: Boolean!
+}
+
 input QuestionnaireResponseInput {
   fhir_resource: jsonb!
-  patient_consent_id: uuid!
 }
 
 type QuestionnaireResponseResponse {
@@ -110,29 +123,21 @@ input String_comparison_exp {
   _similar: String
 }
 
+type ValidateInviteTokenResponse {
+  error_message: String
+  expires_at: String
+  organization_name: String
+  patient_record_id: uuid
+  public_key_pem: String
+  valid: Boolean!
+}
+
 """ordering argument of a cursor"""
 enum cursor_ordering {
   """ascending ordering of the cursor"""
   ASC
   """descending ordering of the cursor"""
   DESC
-}
-
-scalar inet
-
-"""
-Boolean expression to compare columns of type "inet". All fields are combined with logical 'AND'.
-"""
-input inet_comparison_exp {
-  _eq: inet
-  _gt: inet
-  _gte: inet
-  _in: [inet!]
-  _is_null: Boolean
-  _lt: inet
-  _lte: inet
-  _neq: inet
-  _nin: [inet!]
 }
 
 scalar jsonb
@@ -180,17 +185,6 @@ type mutation_root {
   delete single row from the table: "organization"
   """
   delete_organization_by_pk(id: String!): organization
-  """
-  delete data from the table: "patient"
-  """
-  delete_patient(
-    """filter the rows which have to be deleted"""
-    where: patient_bool_exp!
-  ): patient_mutation_response
-  """
-  delete single row from the table: "patient"
-  """
-  delete_patient_by_pk(id: String!): patient
   """
   delete data from the table: "patient_consent"
   """
@@ -254,15 +248,6 @@ type mutation_root {
     on_conflict: organization_on_conflict
   ): organization
   """
-  insert data into the table: "patient"
-  """
-  insert_patient(
-    """the rows to be inserted"""
-    objects: [patient_insert_input!]!
-    """upsert condition"""
-    on_conflict: patient_on_conflict
-  ): patient_mutation_response
-  """
   insert data into the table: "patient_consent"
   """
   insert_patient_consent(
@@ -280,15 +265,6 @@ type mutation_root {
     """upsert condition"""
     on_conflict: patient_consent_on_conflict
   ): patient_consent
-  """
-  insert a single row into the table: "patient"
-  """
-  insert_patient_one(
-    """the row to be inserted"""
-    object: patient_insert_input!
-    """upsert condition"""
-    on_conflict: patient_on_conflict
-  ): patient
   """
   insert data into the table: "patient_record"
   """
@@ -344,6 +320,7 @@ type mutation_root {
     on_conflict: user_on_conflict
   ): user
   submitPatientConsent(consent_data: ConsentInput!, invite_token: String!): ConsentResponse!
+  submitPatientPersonalData(invite_token: String!, patient_data: PatientPersonalDataInput!): PatientPersonalDataResponse!
   submitQuestionnaireResponse(invite_token: String!, response_data: QuestionnaireResponseInput!): QuestionnaireResponseResponse!
   """
   update data of the table: "organization"
@@ -370,23 +347,6 @@ type mutation_root {
     updates: [organization_updates!]!
   ): [organization_mutation_response]
   """
-  update data of the table: "patient"
-  """
-  update_patient(
-    """sets the columns of the filtered rows to the given values"""
-    _set: patient_set_input
-    """filter the rows which have to be updated"""
-    where: patient_bool_exp!
-  ): patient_mutation_response
-  """
-  update single row of the table: "patient"
-  """
-  update_patient_by_pk(
-    """sets the columns of the filtered rows to the given values"""
-    _set: patient_set_input
-    pk_columns: patient_pk_columns_input!
-  ): patient
-  """
   update data of the table: "patient_consent"
   """
   update_patient_consent(
@@ -410,13 +370,6 @@ type mutation_root {
     """updates to execute, in order"""
     updates: [patient_consent_updates!]!
   ): [patient_consent_mutation_response]
-  """
-  update multiples rows of table: "patient"
-  """
-  update_patient_many(
-    """updates to execute, in order"""
-    updates: [patient_updates!]!
-  ): [patient_mutation_response]
   """
   update data of the table: "patient_record"
   """
@@ -553,6 +506,7 @@ type mutation_root {
     """updates to execute, in order"""
     updates: [user_updates!]!
   ): [user_mutation_response]
+  validateInviteToken(invite_token: String!): ValidateInviteTokenResponse!
 }
 
 """column ordering options"""
@@ -583,6 +537,8 @@ type organization {
   deleted_at: timestamptz
   email: String
   id: String!
+  key_created_at: timestamptz
+  key_fingerprint: String
   name: String!
   """An array relationship"""
   patient_consents(
@@ -636,34 +592,9 @@ type organization {
     """filter the rows returned"""
     where: patient_record_bool_exp
   ): patient_record_aggregate!
-  """An array relationship"""
-  patients(
-    """distinct select on columns"""
-    distinct_on: [patient_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_order_by!]
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): [patient!]!
-  """An aggregate relationship"""
-  patients_aggregate(
-    """distinct select on columns"""
-    distinct_on: [patient_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_order_by!]
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): patient_aggregate!
   phone: String
   postal_code: String
+  public_key_pem: String
   """An array relationship"""
   questionnaire_responses(
     """distinct select on columns"""
@@ -752,15 +683,16 @@ input organization_bool_exp {
   deleted_at: timestamptz_comparison_exp
   email: String_comparison_exp
   id: String_comparison_exp
+  key_created_at: timestamptz_comparison_exp
+  key_fingerprint: String_comparison_exp
   name: String_comparison_exp
   patient_consents: patient_consent_bool_exp
   patient_consents_aggregate: patient_consent_aggregate_bool_exp
   patient_records: patient_record_bool_exp
   patient_records_aggregate: patient_record_aggregate_bool_exp
-  patients: patient_bool_exp
-  patients_aggregate: patient_aggregate_bool_exp
   phone: String_comparison_exp
   postal_code: String_comparison_exp
+  public_key_pem: String_comparison_exp
   questionnaire_responses: questionnaire_response_bool_exp
   questionnaire_responses_aggregate: questionnaire_response_aggregate_bool_exp
   updated_at: timestamptz_comparison_exp
@@ -791,12 +723,14 @@ input organization_insert_input {
   deleted_at: timestamptz
   email: String
   id: String
+  key_created_at: timestamptz
+  key_fingerprint: String
   name: String
   patient_consents: patient_consent_arr_rel_insert_input
   patient_records: patient_record_arr_rel_insert_input
-  patients: patient_arr_rel_insert_input
   phone: String
   postal_code: String
+  public_key_pem: String
   questionnaire_responses: questionnaire_response_arr_rel_insert_input
   updated_at: timestamptz
   users: user_arr_rel_insert_input
@@ -813,9 +747,12 @@ type organization_max_fields {
   deleted_at: timestamptz
   email: String
   id: String
+  key_created_at: timestamptz
+  key_fingerprint: String
   name: String
   phone: String
   postal_code: String
+  public_key_pem: String
   updated_at: timestamptz
   website: String
 }
@@ -830,9 +767,12 @@ type organization_min_fields {
   deleted_at: timestamptz
   email: String
   id: String
+  key_created_at: timestamptz
+  key_fingerprint: String
   name: String
   phone: String
   postal_code: String
+  public_key_pem: String
   updated_at: timestamptz
   website: String
 }
@@ -875,12 +815,14 @@ input organization_order_by {
   deleted_at: order_by
   email: order_by
   id: order_by
+  key_created_at: order_by
+  key_fingerprint: order_by
   name: order_by
   patient_consents_aggregate: patient_consent_aggregate_order_by
   patient_records_aggregate: patient_record_aggregate_order_by
-  patients_aggregate: patient_aggregate_order_by
   phone: order_by
   postal_code: order_by
+  public_key_pem: order_by
   questionnaire_responses_aggregate: questionnaire_response_aggregate_order_by
   updated_at: order_by
   users_aggregate: user_aggregate_order_by
@@ -913,11 +855,17 @@ enum organization_select_column {
   """column name"""
   id
   """column name"""
+  key_created_at
+  """column name"""
+  key_fingerprint
+  """column name"""
   name
   """column name"""
   phone
   """column name"""
   postal_code
+  """column name"""
+  public_key_pem
   """column name"""
   updated_at
   """column name"""
@@ -936,9 +884,12 @@ input organization_set_input {
   deleted_at: timestamptz
   email: String
   id: String
+  key_created_at: timestamptz
+  key_fingerprint: String
   name: String
   phone: String
   postal_code: String
+  public_key_pem: String
   updated_at: timestamptz
   website: String
 }
@@ -963,9 +914,12 @@ input organization_stream_cursor_value_input {
   deleted_at: timestamptz
   email: String
   id: String
+  key_created_at: timestamptz
+  key_fingerprint: String
   name: String
   phone: String
   postal_code: String
+  public_key_pem: String
   updated_at: timestamptz
   website: String
 }
@@ -991,11 +945,17 @@ enum organization_update_column {
   """column name"""
   id
   """column name"""
+  key_created_at
+  """column name"""
+  key_fingerprint
+  """column name"""
   name
   """column name"""
   phone
   """column name"""
   postal_code
+  """column name"""
+  public_key_pem
   """column name"""
   updated_at
   """column name"""
@@ -1010,118 +970,6 @@ input organization_updates {
 }
 
 """
-columns and relationships of "patient"
-"""
-type patient {
-  clinic_internal_id: String!
-  created_at: timestamptz
-  date_of_birth_encrypted: String
-  deleted_at: timestamptz
-  first_name_encrypted: String!
-  gender_encrypted: String
-  id: String!
-  last_name_encrypted: String!
-  """An object relationship"""
-  organization: organization!
-  organization_id: String!
-  """An array relationship"""
-  patient_records(
-    """distinct select on columns"""
-    distinct_on: [patient_record_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_record_order_by!]
-    """filter the rows returned"""
-    where: patient_record_bool_exp
-  ): [patient_record!]!
-  """An aggregate relationship"""
-  patient_records_aggregate(
-    """distinct select on columns"""
-    distinct_on: [patient_record_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_record_order_by!]
-    """filter the rows returned"""
-    where: patient_record_bool_exp
-  ): patient_record_aggregate!
-  updated_at: timestamptz
-}
-
-"""
-aggregated selection of "patient"
-"""
-type patient_aggregate {
-  aggregate: patient_aggregate_fields
-  nodes: [patient!]!
-}
-
-input patient_aggregate_bool_exp {
-  count: patient_aggregate_bool_exp_count
-}
-
-input patient_aggregate_bool_exp_count {
-  arguments: [patient_select_column!]
-  distinct: Boolean
-  filter: patient_bool_exp
-  predicate: Int_comparison_exp!
-}
-
-"""
-aggregate fields of "patient"
-"""
-type patient_aggregate_fields {
-  count(columns: [patient_select_column!], distinct: Boolean): Int!
-  max: patient_max_fields
-  min: patient_min_fields
-}
-
-"""
-order by aggregate values of table "patient"
-"""
-input patient_aggregate_order_by {
-  count: order_by
-  max: patient_max_order_by
-  min: patient_min_order_by
-}
-
-"""
-input type for inserting array relation for remote table "patient"
-"""
-input patient_arr_rel_insert_input {
-  data: [patient_insert_input!]!
-  """upsert condition"""
-  on_conflict: patient_on_conflict
-}
-
-"""
-Boolean expression to filter rows from the table "patient". All fields are combined with a logical 'AND'.
-"""
-input patient_bool_exp {
-  _and: [patient_bool_exp!]
-  _not: patient_bool_exp
-  _or: [patient_bool_exp!]
-  clinic_internal_id: String_comparison_exp
-  created_at: timestamptz_comparison_exp
-  date_of_birth_encrypted: String_comparison_exp
-  deleted_at: timestamptz_comparison_exp
-  first_name_encrypted: String_comparison_exp
-  gender_encrypted: String_comparison_exp
-  id: String_comparison_exp
-  last_name_encrypted: String_comparison_exp
-  organization: organization_bool_exp
-  organization_id: String_comparison_exp
-  patient_records: patient_record_bool_exp
-  patient_records_aggregate: patient_record_aggregate_bool_exp
-  updated_at: timestamptz_comparison_exp
-}
-
-"""
 columns and relationships of "patient_consent"
 """
 type patient_consent {
@@ -1132,7 +980,6 @@ type patient_consent {
   created_at: timestamptz
   deleted_at: timestamptz
   id: String!
-  ip_address: inet
   """An object relationship"""
   organization: organization!
   organization_id: String!
@@ -1166,7 +1013,6 @@ type patient_consent {
     where: questionnaire_response_bool_exp
   ): questionnaire_response_aggregate!
   updated_at: timestamptz
-  user_agent: String
 }
 
 """
@@ -1245,7 +1091,6 @@ input patient_consent_bool_exp {
   created_at: timestamptz_comparison_exp
   deleted_at: timestamptz_comparison_exp
   id: String_comparison_exp
-  ip_address: inet_comparison_exp
   organization: organization_bool_exp
   organization_id: String_comparison_exp
   patient_record: patient_record_bool_exp
@@ -1253,7 +1098,6 @@ input patient_consent_bool_exp {
   questionnaire_responses: questionnaire_response_bool_exp
   questionnaire_responses_aggregate: questionnaire_response_aggregate_bool_exp
   updated_at: timestamptz_comparison_exp
-  user_agent: String_comparison_exp
 }
 
 """
@@ -1281,14 +1125,12 @@ input patient_consent_insert_input {
   created_at: timestamptz
   deleted_at: timestamptz
   id: String
-  ip_address: inet
   organization: organization_obj_rel_insert_input
   organization_id: String
   patient_record: patient_record_obj_rel_insert_input
   patient_record_id: String
   questionnaire_responses: questionnaire_response_arr_rel_insert_input
   updated_at: timestamptz
-  user_agent: String
 }
 
 """aggregate max on columns"""
@@ -1302,7 +1144,6 @@ type patient_consent_max_fields {
   organization_id: String
   patient_record_id: String
   updated_at: timestamptz
-  user_agent: String
 }
 
 """
@@ -1318,7 +1159,6 @@ input patient_consent_max_order_by {
   organization_id: order_by
   patient_record_id: order_by
   updated_at: order_by
-  user_agent: order_by
 }
 
 """aggregate min on columns"""
@@ -1332,7 +1172,6 @@ type patient_consent_min_fields {
   organization_id: String
   patient_record_id: String
   updated_at: timestamptz
-  user_agent: String
 }
 
 """
@@ -1348,7 +1187,6 @@ input patient_consent_min_order_by {
   organization_id: order_by
   patient_record_id: order_by
   updated_at: order_by
-  user_agent: order_by
 }
 
 """
@@ -1388,14 +1226,12 @@ input patient_consent_order_by {
   created_at: order_by
   deleted_at: order_by
   id: order_by
-  ip_address: order_by
   organization: organization_order_by
   organization_id: order_by
   patient_record: patient_record_order_by
   patient_record_id: order_by
   questionnaire_responses_aggregate: questionnaire_response_aggregate_order_by
   updated_at: order_by
-  user_agent: order_by
 }
 
 """primary key columns input for table: patient_consent"""
@@ -1422,15 +1258,11 @@ enum patient_consent_select_column {
   """column name"""
   id
   """column name"""
-  ip_address
-  """column name"""
   organization_id
   """column name"""
   patient_record_id
   """column name"""
   updated_at
-  """column name"""
-  user_agent
 }
 
 """
@@ -1460,11 +1292,9 @@ input patient_consent_set_input {
   created_at: timestamptz
   deleted_at: timestamptz
   id: String
-  ip_address: inet
   organization_id: String
   patient_record_id: String
   updated_at: timestamptz
-  user_agent: String
 }
 
 """
@@ -1486,11 +1316,9 @@ input patient_consent_stream_cursor_value_input {
   created_at: timestamptz
   deleted_at: timestamptz
   id: String
-  ip_address: inet
   organization_id: String
   patient_record_id: String
   updated_at: timestamptz
-  user_agent: String
 }
 
 """
@@ -1512,15 +1340,11 @@ enum patient_consent_update_column {
   """column name"""
   id
   """column name"""
-  ip_address
-  """column name"""
   organization_id
   """column name"""
   patient_record_id
   """column name"""
   updated_at
-  """column name"""
-  user_agent
 }
 
 input patient_consent_updates {
@@ -1531,170 +1355,34 @@ input patient_consent_updates {
 }
 
 """
-unique or primary key constraints on table "patient"
-"""
-enum patient_constraint {
-  """
-  unique or primary key constraint on columns "organization_id", "clinic_internal_id"
-  """
-  patient_clinic_internal_id_org_unique
-  """
-  unique or primary key constraint on columns "id"
-  """
-  patient_pkey
-}
-
-"""
-input type for inserting data into table "patient"
-"""
-input patient_insert_input {
-  clinic_internal_id: String
-  created_at: timestamptz
-  date_of_birth_encrypted: String
-  deleted_at: timestamptz
-  first_name_encrypted: String
-  gender_encrypted: String
-  id: String
-  last_name_encrypted: String
-  organization: organization_obj_rel_insert_input
-  organization_id: String
-  patient_records: patient_record_arr_rel_insert_input
-  updated_at: timestamptz
-}
-
-"""aggregate max on columns"""
-type patient_max_fields {
-  clinic_internal_id: String
-  created_at: timestamptz
-  date_of_birth_encrypted: String
-  deleted_at: timestamptz
-  first_name_encrypted: String
-  gender_encrypted: String
-  id: String
-  last_name_encrypted: String
-  organization_id: String
-  updated_at: timestamptz
-}
-
-"""
-order by max() on columns of table "patient"
-"""
-input patient_max_order_by {
-  clinic_internal_id: order_by
-  created_at: order_by
-  date_of_birth_encrypted: order_by
-  deleted_at: order_by
-  first_name_encrypted: order_by
-  gender_encrypted: order_by
-  id: order_by
-  last_name_encrypted: order_by
-  organization_id: order_by
-  updated_at: order_by
-}
-
-"""aggregate min on columns"""
-type patient_min_fields {
-  clinic_internal_id: String
-  created_at: timestamptz
-  date_of_birth_encrypted: String
-  deleted_at: timestamptz
-  first_name_encrypted: String
-  gender_encrypted: String
-  id: String
-  last_name_encrypted: String
-  organization_id: String
-  updated_at: timestamptz
-}
-
-"""
-order by min() on columns of table "patient"
-"""
-input patient_min_order_by {
-  clinic_internal_id: order_by
-  created_at: order_by
-  date_of_birth_encrypted: order_by
-  deleted_at: order_by
-  first_name_encrypted: order_by
-  gender_encrypted: order_by
-  id: order_by
-  last_name_encrypted: order_by
-  organization_id: order_by
-  updated_at: order_by
-}
-
-"""
-response of any mutation on the table "patient"
-"""
-type patient_mutation_response {
-  """number of rows affected by the mutation"""
-  affected_rows: Int!
-  """data from the rows affected by the mutation"""
-  returning: [patient!]!
-}
-
-"""
-input type for inserting object relation for remote table "patient"
-"""
-input patient_obj_rel_insert_input {
-  data: patient_insert_input!
-  """upsert condition"""
-  on_conflict: patient_on_conflict
-}
-
-"""
-on_conflict condition type for table "patient"
-"""
-input patient_on_conflict {
-  constraint: patient_constraint!
-  update_columns: [patient_update_column!]! = []
-  where: patient_bool_exp
-}
-
-"""Ordering options when selecting data from "patient"."""
-input patient_order_by {
-  clinic_internal_id: order_by
-  created_at: order_by
-  date_of_birth_encrypted: order_by
-  deleted_at: order_by
-  first_name_encrypted: order_by
-  gender_encrypted: order_by
-  id: order_by
-  last_name_encrypted: order_by
-  organization: organization_order_by
-  organization_id: order_by
-  patient_records_aggregate: patient_record_aggregate_order_by
-  updated_at: order_by
-}
-
-"""primary key columns input for table: patient"""
-input patient_pk_columns_input {
-  id: String!
-}
-
-"""
 columns and relationships of "patient_record"
 """
 type patient_record {
+  """An object relationship"""
+  assignedTo: user
   assigned_to: String!
+  clinic_internal_id: String!
   created_at: timestamptz
   created_by: String!
+  date_of_birth_encrypted: String
   deleted_at: timestamptz
+  first_name_encrypted: String
   first_viewed_at: timestamptz
   first_viewed_by: String
+  gender_encrypted: String
   id: String!
   invite_expires_at: timestamptz!
   invite_token: String!
   last_activity_at: timestamptz
   last_activity_by: String
+  last_name_encrypted: String
   notes: String
   """An object relationship"""
   organization: organization!
   organization_id: String!
   """An object relationship"""
-  patient: patient!
-  """An object relationship"""
   patient_consent: patient_consent
-  patient_id: String!
+  patient_data_completed_at: timestamptz
   """An array relationship"""
   questionnaire_responses(
     """distinct select on columns"""
@@ -1785,23 +1473,28 @@ input patient_record_bool_exp {
   _and: [patient_record_bool_exp!]
   _not: patient_record_bool_exp
   _or: [patient_record_bool_exp!]
+  assignedTo: user_bool_exp
   assigned_to: String_comparison_exp
+  clinic_internal_id: String_comparison_exp
   created_at: timestamptz_comparison_exp
   created_by: String_comparison_exp
+  date_of_birth_encrypted: String_comparison_exp
   deleted_at: timestamptz_comparison_exp
+  first_name_encrypted: String_comparison_exp
   first_viewed_at: timestamptz_comparison_exp
   first_viewed_by: String_comparison_exp
+  gender_encrypted: String_comparison_exp
   id: String_comparison_exp
   invite_expires_at: timestamptz_comparison_exp
   invite_token: String_comparison_exp
   last_activity_at: timestamptz_comparison_exp
   last_activity_by: String_comparison_exp
+  last_name_encrypted: String_comparison_exp
   notes: String_comparison_exp
   organization: organization_bool_exp
   organization_id: String_comparison_exp
-  patient: patient_bool_exp
   patient_consent: patient_consent_bool_exp
-  patient_id: String_comparison_exp
+  patient_data_completed_at: timestamptz_comparison_exp
   questionnaire_responses: questionnaire_response_bool_exp
   questionnaire_responses_aggregate: questionnaire_response_aggregate_bool_exp
   updated_at: timestamptz_comparison_exp
@@ -1829,23 +1522,28 @@ enum patient_record_constraint {
 input type for inserting data into table "patient_record"
 """
 input patient_record_insert_input {
+  assignedTo: user_obj_rel_insert_input
   assigned_to: String
+  clinic_internal_id: String
   created_at: timestamptz
   created_by: String
+  date_of_birth_encrypted: String
   deleted_at: timestamptz
+  first_name_encrypted: String
   first_viewed_at: timestamptz
   first_viewed_by: String
+  gender_encrypted: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
   last_activity_at: timestamptz
   last_activity_by: String
+  last_name_encrypted: String
   notes: String
   organization: organization_obj_rel_insert_input
   organization_id: String
-  patient: patient_obj_rel_insert_input
   patient_consent: patient_consent_obj_rel_insert_input
-  patient_id: String
+  patient_data_completed_at: timestamptz
   questionnaire_responses: questionnaire_response_arr_rel_insert_input
   updated_at: timestamptz
   user: user_obj_rel_insert_input
@@ -1857,19 +1555,24 @@ input patient_record_insert_input {
 """aggregate max on columns"""
 type patient_record_max_fields {
   assigned_to: String
+  clinic_internal_id: String
   created_at: timestamptz
   created_by: String
+  date_of_birth_encrypted: String
   deleted_at: timestamptz
+  first_name_encrypted: String
   first_viewed_at: timestamptz
   first_viewed_by: String
+  gender_encrypted: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
   last_activity_at: timestamptz
   last_activity_by: String
+  last_name_encrypted: String
   notes: String
   organization_id: String
-  patient_id: String
+  patient_data_completed_at: timestamptz
   updated_at: timestamptz
 }
 
@@ -1878,38 +1581,48 @@ order by max() on columns of table "patient_record"
 """
 input patient_record_max_order_by {
   assigned_to: order_by
+  clinic_internal_id: order_by
   created_at: order_by
   created_by: order_by
+  date_of_birth_encrypted: order_by
   deleted_at: order_by
+  first_name_encrypted: order_by
   first_viewed_at: order_by
   first_viewed_by: order_by
+  gender_encrypted: order_by
   id: order_by
   invite_expires_at: order_by
   invite_token: order_by
   last_activity_at: order_by
   last_activity_by: order_by
+  last_name_encrypted: order_by
   notes: order_by
   organization_id: order_by
-  patient_id: order_by
+  patient_data_completed_at: order_by
   updated_at: order_by
 }
 
 """aggregate min on columns"""
 type patient_record_min_fields {
   assigned_to: String
+  clinic_internal_id: String
   created_at: timestamptz
   created_by: String
+  date_of_birth_encrypted: String
   deleted_at: timestamptz
+  first_name_encrypted: String
   first_viewed_at: timestamptz
   first_viewed_by: String
+  gender_encrypted: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
   last_activity_at: timestamptz
   last_activity_by: String
+  last_name_encrypted: String
   notes: String
   organization_id: String
-  patient_id: String
+  patient_data_completed_at: timestamptz
   updated_at: timestamptz
 }
 
@@ -1918,19 +1631,24 @@ order by min() on columns of table "patient_record"
 """
 input patient_record_min_order_by {
   assigned_to: order_by
+  clinic_internal_id: order_by
   created_at: order_by
   created_by: order_by
+  date_of_birth_encrypted: order_by
   deleted_at: order_by
+  first_name_encrypted: order_by
   first_viewed_at: order_by
   first_viewed_by: order_by
+  gender_encrypted: order_by
   id: order_by
   invite_expires_at: order_by
   invite_token: order_by
   last_activity_at: order_by
   last_activity_by: order_by
+  last_name_encrypted: order_by
   notes: order_by
   organization_id: order_by
-  patient_id: order_by
+  patient_data_completed_at: order_by
   updated_at: order_by
 }
 
@@ -1964,23 +1682,28 @@ input patient_record_on_conflict {
 
 """Ordering options when selecting data from "patient_record"."""
 input patient_record_order_by {
+  assignedTo: user_order_by
   assigned_to: order_by
+  clinic_internal_id: order_by
   created_at: order_by
   created_by: order_by
+  date_of_birth_encrypted: order_by
   deleted_at: order_by
+  first_name_encrypted: order_by
   first_viewed_at: order_by
   first_viewed_by: order_by
+  gender_encrypted: order_by
   id: order_by
   invite_expires_at: order_by
   invite_token: order_by
   last_activity_at: order_by
   last_activity_by: order_by
+  last_name_encrypted: order_by
   notes: order_by
   organization: organization_order_by
   organization_id: order_by
-  patient: patient_order_by
   patient_consent: patient_consent_order_by
-  patient_id: order_by
+  patient_data_completed_at: order_by
   questionnaire_responses_aggregate: questionnaire_response_aggregate_order_by
   updated_at: order_by
   user: user_order_by
@@ -2001,15 +1724,23 @@ enum patient_record_select_column {
   """column name"""
   assigned_to
   """column name"""
+  clinic_internal_id
+  """column name"""
   created_at
   """column name"""
   created_by
   """column name"""
+  date_of_birth_encrypted
+  """column name"""
   deleted_at
+  """column name"""
+  first_name_encrypted
   """column name"""
   first_viewed_at
   """column name"""
   first_viewed_by
+  """column name"""
+  gender_encrypted
   """column name"""
   id
   """column name"""
@@ -2021,11 +1752,13 @@ enum patient_record_select_column {
   """column name"""
   last_activity_by
   """column name"""
+  last_name_encrypted
+  """column name"""
   notes
   """column name"""
   organization_id
   """column name"""
-  patient_id
+  patient_data_completed_at
   """column name"""
   updated_at
 }
@@ -2035,19 +1768,24 @@ input type for updating data in table "patient_record"
 """
 input patient_record_set_input {
   assigned_to: String
+  clinic_internal_id: String
   created_at: timestamptz
   created_by: String
+  date_of_birth_encrypted: String
   deleted_at: timestamptz
+  first_name_encrypted: String
   first_viewed_at: timestamptz
   first_viewed_by: String
+  gender_encrypted: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
   last_activity_at: timestamptz
   last_activity_by: String
+  last_name_encrypted: String
   notes: String
   organization_id: String
-  patient_id: String
+  patient_data_completed_at: timestamptz
   updated_at: timestamptz
 }
 
@@ -2064,19 +1802,24 @@ input patient_record_stream_cursor_input {
 """Initial value of the column from where the streaming should start"""
 input patient_record_stream_cursor_value_input {
   assigned_to: String
+  clinic_internal_id: String
   created_at: timestamptz
   created_by: String
+  date_of_birth_encrypted: String
   deleted_at: timestamptz
+  first_name_encrypted: String
   first_viewed_at: timestamptz
   first_viewed_by: String
+  gender_encrypted: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
   last_activity_at: timestamptz
   last_activity_by: String
+  last_name_encrypted: String
   notes: String
   organization_id: String
-  patient_id: String
+  patient_data_completed_at: timestamptz
   updated_at: timestamptz
 }
 
@@ -2087,15 +1830,23 @@ enum patient_record_update_column {
   """column name"""
   assigned_to
   """column name"""
+  clinic_internal_id
+  """column name"""
   created_at
   """column name"""
   created_by
   """column name"""
+  date_of_birth_encrypted
+  """column name"""
   deleted_at
+  """column name"""
+  first_name_encrypted
   """column name"""
   first_viewed_at
   """column name"""
   first_viewed_by
+  """column name"""
+  gender_encrypted
   """column name"""
   id
   """column name"""
@@ -2107,11 +1858,13 @@ enum patient_record_update_column {
   """column name"""
   last_activity_by
   """column name"""
+  last_name_encrypted
+  """column name"""
   notes
   """column name"""
   organization_id
   """column name"""
-  patient_id
+  patient_data_completed_at
   """column name"""
   updated_at
 }
@@ -2121,105 +1874,6 @@ input patient_record_updates {
   _set: patient_record_set_input
   """filter the rows which have to be updated"""
   where: patient_record_bool_exp!
-}
-
-"""
-select columns of table "patient"
-"""
-enum patient_select_column {
-  """column name"""
-  clinic_internal_id
-  """column name"""
-  created_at
-  """column name"""
-  date_of_birth_encrypted
-  """column name"""
-  deleted_at
-  """column name"""
-  first_name_encrypted
-  """column name"""
-  gender_encrypted
-  """column name"""
-  id
-  """column name"""
-  last_name_encrypted
-  """column name"""
-  organization_id
-  """column name"""
-  updated_at
-}
-
-"""
-input type for updating data in table "patient"
-"""
-input patient_set_input {
-  clinic_internal_id: String
-  created_at: timestamptz
-  date_of_birth_encrypted: String
-  deleted_at: timestamptz
-  first_name_encrypted: String
-  gender_encrypted: String
-  id: String
-  last_name_encrypted: String
-  organization_id: String
-  updated_at: timestamptz
-}
-
-"""
-Streaming cursor of the table "patient"
-"""
-input patient_stream_cursor_input {
-  """Stream column input with initial value"""
-  initial_value: patient_stream_cursor_value_input!
-  """cursor ordering"""
-  ordering: cursor_ordering
-}
-
-"""Initial value of the column from where the streaming should start"""
-input patient_stream_cursor_value_input {
-  clinic_internal_id: String
-  created_at: timestamptz
-  date_of_birth_encrypted: String
-  deleted_at: timestamptz
-  first_name_encrypted: String
-  gender_encrypted: String
-  id: String
-  last_name_encrypted: String
-  organization_id: String
-  updated_at: timestamptz
-}
-
-"""
-update columns of table "patient"
-"""
-enum patient_update_column {
-  """column name"""
-  clinic_internal_id
-  """column name"""
-  created_at
-  """column name"""
-  date_of_birth_encrypted
-  """column name"""
-  deleted_at
-  """column name"""
-  first_name_encrypted
-  """column name"""
-  gender_encrypted
-  """column name"""
-  id
-  """column name"""
-  last_name_encrypted
-  """column name"""
-  organization_id
-  """column name"""
-  updated_at
-}
-
-input patient_updates {
-  """sets the columns of the filtered rows to the given values"""
-  _set: patient_set_input
-  """filter the rows which have to be updated"""
-  where: patient_bool_exp!
 }
 
 type query_root {
@@ -2255,38 +1909,6 @@ type query_root {
   ): organization_aggregate!
   """fetch data from the table: "organization" using primary key columns"""
   organization_by_pk(id: String!): organization
-  """
-  fetch data from the table: "patient"
-  """
-  patient(
-    """distinct select on columns"""
-    distinct_on: [patient_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_order_by!]
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): [patient!]!
-  """
-  fetch aggregated fields from the table: "patient"
-  """
-  patient_aggregate(
-    """distinct select on columns"""
-    distinct_on: [patient_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_order_by!]
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): patient_aggregate!
-  """fetch data from the table: "patient" using primary key columns"""
-  patient_by_pk(id: String!): patient
   """
   fetch data from the table: "patient_consent"
   """
@@ -2819,38 +2441,6 @@ type subscription_root {
     where: organization_bool_exp
   ): [organization!]!
   """
-  fetch data from the table: "patient"
-  """
-  patient(
-    """distinct select on columns"""
-    distinct_on: [patient_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_order_by!]
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): [patient!]!
-  """
-  fetch aggregated fields from the table: "patient"
-  """
-  patient_aggregate(
-    """distinct select on columns"""
-    distinct_on: [patient_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_order_by!]
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): patient_aggregate!
-  """fetch data from the table: "patient" using primary key columns"""
-  patient_by_pk(id: String!): patient
-  """
   fetch data from the table: "patient_consent"
   """
   patient_consent(
@@ -2936,17 +2526,6 @@ type subscription_root {
     """filter the rows returned"""
     where: patient_record_bool_exp
   ): [patient_record!]!
-  """
-  fetch data from the table in a streaming manner: "patient"
-  """
-  patient_stream(
-    """maximum number of rows returned in a single batch"""
-    batch_size: Int!
-    """cursor to stream the results returned by the query"""
-    cursor: [patient_stream_cursor_input]!
-    """filter the rows returned"""
-    where: patient_bool_exp
-  ): [patient!]!
   """
   fetch data from the table: "questionnaire_response"
   """
@@ -3076,7 +2655,6 @@ columns and relationships of "user"
 """
 type user {
   activeRole: String
-  app_uuid: String
   createdAt: timestamp!
   deletedAt: timestamp
   email: String!
@@ -3277,7 +2855,6 @@ input user_bool_exp {
   _not: user_bool_exp
   _or: [user_bool_exp!]
   activeRole: String_comparison_exp
-  app_uuid: String_comparison_exp
   createdAt: timestamp_comparison_exp
   deletedAt: timestamp_comparison_exp
   email: String_comparison_exp
@@ -3347,7 +2924,6 @@ input type for inserting data into table "user"
 """
 input user_insert_input {
   activeRole: String
-  app_uuid: String
   createdAt: timestamp
   deletedAt: timestamp
   email: String
@@ -3372,7 +2948,6 @@ input user_insert_input {
 """aggregate max on columns"""
 type user_max_fields {
   activeRole: String
-  app_uuid: String
   createdAt: timestamp
   deletedAt: timestamp
   email: String
@@ -3390,7 +2965,6 @@ order by max() on columns of table "user"
 """
 input user_max_order_by {
   activeRole: order_by
-  app_uuid: order_by
   createdAt: order_by
   deletedAt: order_by
   email: order_by
@@ -3406,7 +2980,6 @@ input user_max_order_by {
 """aggregate min on columns"""
 type user_min_fields {
   activeRole: String
-  app_uuid: String
   createdAt: timestamp
   deletedAt: timestamp
   email: String
@@ -3424,7 +2997,6 @@ order by min() on columns of table "user"
 """
 input user_min_order_by {
   activeRole: order_by
-  app_uuid: order_by
   createdAt: order_by
   deletedAt: order_by
   email: order_by
@@ -3468,7 +3040,6 @@ input user_on_conflict {
 """Ordering options when selecting data from "user"."""
 input user_order_by {
   activeRole: order_by
-  app_uuid: order_by
   createdAt: order_by
   deletedAt: order_by
   email: order_by
@@ -3506,8 +3077,6 @@ select columns of table "user"
 enum user_select_column {
   """column name"""
   activeRole
-  """column name"""
-  app_uuid
   """column name"""
   createdAt
   """column name"""
@@ -3567,7 +3136,6 @@ input type for updating data in table "user"
 """
 input user_set_input {
   activeRole: String
-  app_uuid: String
   createdAt: timestamp
   deletedAt: timestamp
   email: String
@@ -3597,7 +3165,6 @@ input user_stream_cursor_input {
 """Initial value of the column from where the streaming should start"""
 input user_stream_cursor_value_input {
   activeRole: String
-  app_uuid: String
   createdAt: timestamp
   deletedAt: timestamp
   email: String
@@ -3620,8 +3187,6 @@ update columns of table "user"
 enum user_update_column {
   """column name"""
   activeRole
-  """column name"""
-  app_uuid
   """column name"""
   createdAt
   """column name"""

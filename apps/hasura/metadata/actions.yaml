@@ -6,6 +6,13 @@ actions:
       forward_client_headers: true
     permissions:
       - role: anonymous
+  - name: submitPatientPersonalData
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3001/actions/submit-patient-personal-data
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
   - name: submitQuestionnaireResponse
     definition:
       kind: synchronous
@@ -17,13 +24,6 @@ actions:
     definition:
       kind: synchronous
       handler: http://host.docker.internal:3001/actions/validate-invite-token
-      forward_client_headers: true
-    permissions:
-      - role: anonymous
-  - name: submitPatientPersonalData
-    definition:
-      kind: synchronous
-      handler: http://host.docker.internal:3001/actions/submit-patient-personal-data
       forward_client_headers: true
     permissions:
       - role: anonymous

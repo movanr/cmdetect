@@ -84,7 +84,7 @@ export const auth = betterAuth({
               "https://hasura.io/jwt/claims": {
                 "x-hasura-default-role": "unverified",
                 "x-hasura-allowed-roles": ["unverified"],
-                "x-hasura-user-id": user.app_uuid, // Always use app_uuid for everything
+                "x-hasura-user-id": user.id,
               },
             };
           }
