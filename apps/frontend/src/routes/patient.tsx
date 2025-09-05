@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { execute } from "../graphql/execute";
 import {
   submitPatientConsent,
@@ -24,7 +24,6 @@ export const Route = createFileRoute("/patient")({
 function PatientPage() {
   const { data: session } = useSession();
   const { invite_token } = Route.useSearch();
-  const queryClient = useQueryClient();
 
   // Simple state for session creation
   const [isCreatingSession, setIsCreatingSession] = useState(false);
@@ -135,7 +134,6 @@ function PatientPage() {
     );
   }
 
-
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Patient Questionnaire</h1>
@@ -199,7 +197,9 @@ function PatientPage() {
             <h3 className="text-lg font-semibold text-green-800 mb-2">
               ✅ Consent Recorded
             </h3>
-            <p className="text-green-700 text-sm">Consent submitted successfully</p>
+            <p className="text-green-700 text-sm">
+              Consent submitted successfully
+            </p>
           </div>
 
           <div className="p-4 bg-white rounded-lg border">
