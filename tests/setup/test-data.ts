@@ -14,7 +14,6 @@ export interface TestUser {
 
   // Hasura user data
   userId: string;
-  appUuid: string; // The app_uuid from user.app_uuid for patient_record references
   organizationId: string;
   roles: ("org_admin" | "physician" | "receptionist")[];
   defaultRole?: "org_admin" | "physician" | "receptionist";
@@ -53,9 +52,8 @@ export interface TestRegistration {
 
 export interface TestPatientRecord {
   organizationId: string;
-  patientId: string;
-  createdBy: string; // user app_uuid
-  assignedTo: string; // user app_uuid
+  createdBy: string;
+  assignedTo: string;
 }
 
 // =============================================================================
@@ -86,8 +84,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["org_admin"],
     defaultRole: "org_admin",
     organizationId: TestOrganizations.org1.id,
-    userId: "0k5ztoePaLBnAXcWUYiqQlXVGMStxsjj",
-    appUuid: "d8e262c4-f282-4bb7-a189-8ee3ca923289",
+    userId: "lLEeCpaZ6VS9omwmrenDKTHPbIVTnoOG",
     firstName: "Admin",
     lastName: "One",
     isActive: true,
@@ -100,8 +97,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["physician"],
     defaultRole: "physician",
     organizationId: TestOrganizations.org1.id,
-    userId: "2gqcFxx9QcdkYChzfJSaj9WPRxpF2FnZ",
-    appUuid: "d201b345-11bf-4869-b11b-d8e128edb58c",
+    userId: "l5yaJtMeBLnulXiHuk2DnchMfBwG5HfE",
     firstName: "Doctor",
     lastName: "One",
     isActive: true,
@@ -114,8 +110,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["receptionist"],
     defaultRole: "receptionist",
     organizationId: TestOrganizations.org1.id,
-    userId: "6IKha1NlNi7Wo6kYJw2f92TswIPcetR1",
-    appUuid: "992bd82a-da91-4914-9e9d-34b1e0ec4435",
+    userId: "M2EEgL39LMV06URjO2eaaNACGHeNUvjv",
     firstName: "Reception",
     lastName: "One",
     isActive: true,
@@ -128,8 +123,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["org_admin"],
     defaultRole: "org_admin",
     organizationId: TestOrganizations.org2.id,
-    userId: "DO9fd4YMX0MU1IY3YiLqWW1cJ7O5J7zP",
-    appUuid: "d847bb5d-397d-4048-beb7-b74eee2c760b",
+    userId: "35Npuj7FxeVvz3zZoT2IQdMGlJTRIvA9",
     firstName: "Admin",
     lastName: "Two",
     isActive: true,
@@ -139,11 +133,10 @@ export const TestUsers: Record<string, TestUser> = {
   org2Physician: {
     email: "doctor2@test.com",
     password: "testPassword123!",
-    roles: ["physician", "receptionist"], // Example: Doctor who can also act as receptionist
+    roles: ["physician", "receptionist"],
     defaultRole: "physician",
     organizationId: TestOrganizations.org2.id,
-    userId: "db0653f9-1793-41a0-885d-415586edf292",
-    appUuid: "p2p2p2p2-p2p2-p2p2-p2p2-p2p2p2p2p2p2",
+    userId: "2JxSkLgZz2qAlgPFjyZVLmNg6ppvkiT7",
     firstName: "Doctor",
     lastName: "Two",
     isActive: true,
@@ -194,9 +187,8 @@ export const TestPatients: Record<string, TestPatient> = {
 export const TestPatientRecords: Record<string, TestPatientRecord> = {
   org1PatientRecord1: {
     organizationId: TestOrganizations.org1.id,
-    patientId: TestPatients.org1Patient1.id,
-    createdBy: TestUsers.org1Receptionist.appUuid,
-    assignedTo: TestUsers.org1Physician.appUuid,
+    createdBy: TestUsers.org1Receptionist.userId,
+    assignedTo: TestUsers.org1Physician.userId,
   },
 };
 
@@ -216,12 +208,6 @@ export const TestDataIds = {
     org1Receptionist: TestUsers.org1Receptionist.userId,
     org2Admin: TestUsers.org2Admin.userId,
     org2Physician: TestUsers.org2Physician.userId,
-    // App UUIDs for patient_record references
-    org1AdminAppUuid: TestUsers.org1Admin.appUuid,
-    org1PhysicianAppUuid: TestUsers.org1Physician.appUuid,
-    org1ReceptionistAppUuid: TestUsers.org1Receptionist.appUuid,
-    org2AdminAppUuid: TestUsers.org2Admin.appUuid,
-    org2PhysicianAppUuid: TestUsers.org2Physician.appUuid,
   },
   patients: {
     org1Patient1: TestPatients.org1Patient1.id,

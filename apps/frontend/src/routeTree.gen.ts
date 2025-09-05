@@ -9,14 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as UnverifiedRouteImport } from './routes/unverified'
+import { Route as ReceptionistRouteImport } from './routes/receptionist'
+import { Route as PhysicianRouteImport } from './routes/physician'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
-const SubmissionsRoute = SubmissionsRouteImport.update({
-  id: '/submissions',
-  path: '/submissions',
+const UnverifiedRoute = UnverifiedRouteImport.update({
+  id: '/unverified',
+  path: '/unverified',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReceptionistRoute = ReceptionistRouteImport.update({
+  id: '/receptionist',
+  path: '/receptionist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhysicianRoute = PhysicianRouteImport.update({
+  id: '/physician',
+  path: '/physician',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PatientRoute = PatientRouteImport.update({
@@ -29,6 +42,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,45 +55,93 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/patient': typeof PatientRoute
-  '/submissions': typeof SubmissionsRoute
+  '/physician': typeof PhysicianRoute
+  '/receptionist': typeof ReceptionistRoute
+  '/unverified': typeof UnverifiedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/patient': typeof PatientRoute
-  '/submissions': typeof SubmissionsRoute
+  '/physician': typeof PhysicianRoute
+  '/receptionist': typeof ReceptionistRoute
+  '/unverified': typeof UnverifiedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/patient': typeof PatientRoute
-  '/submissions': typeof SubmissionsRoute
+  '/physician': typeof PhysicianRoute
+  '/receptionist': typeof ReceptionistRoute
+  '/unverified': typeof UnverifiedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/patient' | '/submissions'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/patient'
+    | '/physician'
+    | '/receptionist'
+    | '/unverified'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/patient' | '/submissions'
-  id: '__root__' | '/' | '/login' | '/patient' | '/submissions'
+  to:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/patient'
+    | '/physician'
+    | '/receptionist'
+    | '/unverified'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/patient'
+    | '/physician'
+    | '/receptionist'
+    | '/unverified'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   LoginRoute: typeof LoginRoute
   PatientRoute: typeof PatientRoute
-  SubmissionsRoute: typeof SubmissionsRoute
+  PhysicianRoute: typeof PhysicianRoute
+  ReceptionistRoute: typeof ReceptionistRoute
+  UnverifiedRoute: typeof UnverifiedRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/submissions': {
-      id: '/submissions'
-      path: '/submissions'
-      fullPath: '/submissions'
-      preLoaderRoute: typeof SubmissionsRouteImport
+    '/unverified': {
+      id: '/unverified'
+      path: '/unverified'
+      fullPath: '/unverified'
+      preLoaderRoute: typeof UnverifiedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/receptionist': {
+      id: '/receptionist'
+      path: '/receptionist'
+      fullPath: '/receptionist'
+      preLoaderRoute: typeof ReceptionistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/physician': {
+      id: '/physician'
+      path: '/physician'
+      fullPath: '/physician'
+      preLoaderRoute: typeof PhysicianRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/patient': {
@@ -92,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,9 +177,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   LoginRoute: LoginRoute,
   PatientRoute: PatientRoute,
-  SubmissionsRoute: SubmissionsRoute,
+  PhysicianRoute: PhysicianRoute,
+  ReceptionistRoute: ReceptionistRoute,
+  UnverifiedRoute: UnverifiedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

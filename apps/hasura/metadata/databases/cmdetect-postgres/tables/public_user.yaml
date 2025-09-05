@@ -50,12 +50,18 @@ select_permissions:
   - role: org_admin
     permission:
       columns:
+        - activeRole
         - createdAt
+        - deletedAt
         - email
+        - emailVerified
         - firstName
         - id
+        - image
         - isActive
+        - isAnonymous
         - lastName
+        - name
         - organizationId
         - roles
         - updatedAt
@@ -69,10 +75,14 @@ select_permissions:
   - role: physician
     permission:
       columns:
+        - activeRole
         - email
         - firstName
+        - id
+        - image
         - isActive
         - lastName
+        - organizationId
         - roles
       filter:
         _and:
@@ -84,10 +94,14 @@ select_permissions:
   - role: receptionist
     permission:
       columns:
+        - activeRole
         - email
         - firstName
+        - id
+        - image
         - isActive
         - lastName
+        - organizationId
         - roles
       filter:
         _and:
@@ -96,8 +110,7 @@ select_permissions:
           - deletedAt:
               _is_null: true
           - roles:
-              _contains:
-                - physician
+              _contains: physician
     comment: This ensures receptionists only see users who have the physician role when creating assignments
 update_permissions:
   - role: org_admin

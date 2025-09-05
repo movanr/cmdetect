@@ -14,7 +14,7 @@ export const getOrganizations = graphql(`
 
 // Query patient records for organization
 export const getPatientRecords = graphql(`
-  query GetPatientRecords($organizationId: uuid!) {
+  query GetPatientRecords($organizationId: String!) {
     patient_record(
       where: { organization_id: { _eq: $organizationId } }
       order_by: { created_at: desc }
@@ -60,3 +60,4 @@ export const submitQuestionnaireResponse = graphql(`
     }
   }
 `);
+

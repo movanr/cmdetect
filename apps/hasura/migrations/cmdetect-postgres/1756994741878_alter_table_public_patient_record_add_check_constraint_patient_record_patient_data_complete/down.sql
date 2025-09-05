@@ -1,0 +1,2 @@
+alter table "public"."patient_record" drop constraint "patient_record_patient_data_complete";
+alter table "public"."patient_record" add constraint "patient_record_patient_data_complete" check (CHECK (first_name_encrypted IS NULL AND last_name_encrypted IS NULL AND patient_data_completed_at IS NULL OR first_name_encrypted IS NOT NULL AND last_name_encrypted IS NOT NULL AND patient_data_completed_at IS NOT NULL AND length(TRIM(BOTH FROM first_name_encrypted)) > 0 AND length(TRIM(BOTH FROM last_name_encrypted)) > 0));

@@ -27,7 +27,7 @@ describe("Test Setup Verification", () => {
       "22222222-2222-2222-2222-222222222222"
     );
     expect(TestDataIds.users.org1Admin).toBe(
-      "0k5ztoePaLBnAXcWUYiqQlXVGMStxsjj"
+      "lLEeCpaZ6VS9omwmrenDKTHPbIVTnoOG"
     );
     expect(TestDataIds.patients.org1Patient1).toBe(
       "f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1"

@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CMDetect is a healthcare application monorepo built with TypeScript, featuring a React frontend, Node.js authentication server, and Hasura GraphQL backend. The system implements multi-tenant organization isolation with role-based access control for medical practice management.
+CMDetect is a healthcare application monorepo built with TypeScript, featuring a React 19 frontend with end-to-end encryption, Better Auth v1.3.4 authentication server, and Hasura GraphQL backend. The system implements multi-tenant organization isolation with role-based access control and patient data encryption for medical practice management.
 
 ## Monorepo Structure
 
 This is a **pnpm workspace** with **Turbo** for build orchestration:
 
-- **apps/auth-server**: Better Auth-based authentication service with JWT integration for Hasura
-- **apps/frontend**: React + TanStack Router + TanStack Query frontend with GraphQL codegen
-- **apps/hasura**: Hasura GraphQL Engine with PostgreSQL, metadata, and migrations
+- **apps/auth-server**: Better Auth v1.3.4 authentication service with JWT integration and action handlers
+- **apps/frontend**: React 19 + TanStack Router v1.131 + TanStack Query v5.83 + Vite 6.1 + Tailwind CSS v4.1
+- **apps/hasura**: Hasura GraphQL Engine v2.46.0 with PostgreSQL, metadata, and migrations
 - **packages/config**: Shared configuration and validation schemas
 - **packages/database**: Database utilities and shared database logic
 - **tests/**: Integration tests focusing on Hasura permissions and organization isolation
@@ -46,6 +46,8 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 - `pnpm --filter @cmdetect/auth-server migrate` - Run Better Auth migrations
 - `pnpm --filter @cmdetect/auth-server seed:users` - Create test users for all roles
 - `pnpm --filter @cmdetect/auth-server seed:users:cleanup` - Remove test users
+- `cd apps/hasura && docker-compose up -d` - Start PostgreSQL and Hasura services
+- `cd apps/hasura && docker-compose down` - Stop all services
 
 ## Architecture
 
@@ -65,14 +67,16 @@ The system consists of three main services that must run together:
    - TanStack Router for routing with type safety
    - TanStack Query for GraphQL data fetching
    - GraphQL Code Generator for type-safe operations
+   - End-to-end encryption for patient PII using WebCrypto API
 
 ### Authentication Flow
 
 - JWT tokens with Better Auth (8-hour expiration)
 - Multi-tenant organization isolation via `x-hasura-organization-id` claim
-- Role-based access: `org_admin`, `physician`, `receptionist`, `unverified`
-- `x-hasura-user-id` contains `app_uuid`
+- Role-based access: `org_admin`, `physician`, `receptionist`, `unverified` with active role switching
+- `x-hasura-user-id` contains `user_ui` for user identification
 - Email verification required for account activation
+- Anonymous access for patient questionnaire submission via invite tokens
 
 ### Database Architecture
 
@@ -83,10 +87,12 @@ The system consists of three main services that must run together:
 
 **Key Tables:**
 
-- `patient`, `user`, `organization` (multi-tenant base entities)
-- `patient_record` (patient cases with workflow status and invite tokens)
-- `questionnaire_response` (patient anamnesis data with multiple questionnaires per record)
-- `patient_consent` (consent tracking with audit trail)
+- `organization` (multi-tenant root with encryption keys: `public_key_pem`, `key_fingerprint`)
+- `user` (Better Auth users with roles array and `organizationId`)
+- `patient_record` (cases with encrypted PII: `first_name_encrypted`, `last_name_encrypted`, etc.)
+- `patient_consent` (GDPR-compliant consent with version tracking)
+- `questionnaire_response` (FHIR-compatible medical responses with unique constraints)
+- `account`, `session`, `verification`, `jwks` (Better Auth tables)
 
 ## GraphQL Integration
 
@@ -100,14 +106,20 @@ The system consists of three main services that must run together:
 
 - **Organization isolation**: All queries automatically filtered by `x-hasura-organization-id`
 - **Role permissions**: Different CRUD access per role (org_admin, physician, receptionist)
-- **Anonymous operations**: Hasura actions for secure patient form submission
+- **Anonymous operations**: Hasura actions for secure patient form submission with encryption
+  - `submitPatientConsent`: Anonymous consent capture
+  - `submitQuestionnaireResponse`: FHIR questionnaire submission
+  - `submitPatientPersonalData`: Encrypted PII submission (NEW)
+  - `validateInviteToken`: Token validation with organization public key (NEW)
 
 ## Testing Strategy
 
 ### Permission Testing (tests/)
 
-- **Organization isolation**: Verifies multi-tenant data separation
+- **Organization isolation**: Verifies multi-tenant data separation (`tests/permissions/`)
 - **Role-based access**: Tests role-specific operation restrictions
+- **Hasura actions**: Tests anonymous operations and encryption flow (`tests/actions/`)
+- **Auth endpoints**: Tests role switching and JWT claims (`tests/auth-endpoints/`)
 - **Sequential execution**: Tests run with `maxWorkers: 1` to avoid database conflicts
 - **Clean state**: Each test starts with a fresh database state
 
@@ -119,6 +131,12 @@ cd apps/hasura && docker-compose up -d
 
 # Run permission tests
 pnpm test:permissions
+
+# Run single test file
+pnpm test tests/permissions/specific-test.test.ts
+
+# Tests use maxWorkers: 1 for sequential execution
+# Each test starts with clean database state
 ```
 
 ## Environment Configuration
@@ -127,11 +145,12 @@ pnpm test:permissions
 
 **Root .env** (created by setup-dev.sh):
 
-- `POSTGRES_PASSWORD` - Database password for Docker
-- `BETTER_AUTH_SECRET` - Session secret (32+ characters)
-- `HASURA_ADMIN_SECRET` - Admin access to Hasura
-- `AUTH_SERVER_URL` - URL for JWT key discovery
-- `HASURA_GRAPHQL_JWT_SECRET` - JWT configuration for Hasura
+- `DATABASE_URL` - PostgreSQL connection for Better Auth
+- `HASURA_DATABASE_URL` - Application database connection
+- `BETTER_AUTH_SECRET` - Session encryption key (32+ characters)
+- `HASURA_GRAPHQL_ADMIN_SECRET` - Admin access to Hasura
+- `AUTH_SERVER_URL` - Service discovery URL for JWT keys
+- `HASURA_GRAPHQL_JWT_SECRET` - JWT verification configuration
 
 **Hasura .env** (apps/hasura/.env):
 
@@ -171,6 +190,66 @@ pnpm test:permissions
 - CORS configured for specific development origins
 - Admin secrets required for Hasura access
 - Organization isolation enforced at database level
+- End-to-end encryption for patient PII using RSA-2048 + AES-256-GCM
+
+## End-to-End Encryption System
+
+### Crypto Architecture (NEW)
+
+**Hybrid Encryption Strategy:**
+
+- **Organization Level**: RSA-2048 key pairs for each organization
+- **Data Level**: AES-256-GCM for encrypting patient PII
+- **Key Storage**: Organization public keys in database, private keys via BIP39 mnemonic
+- **Browser Implementation**: WebCrypto API (no external crypto dependencies)
+
+**Key Components:**
+
+- **Crypto Module** (`apps/frontend/src/lib/crypto/`): Complete encryption/decryption utilities
+- **BIP39 Integration**: 12-word mnemonic phrases for key backup and recovery
+- **IndexedDB Storage**: Secure client-side storage for private keys
+- **Invite Token Flow**: Organization public key discovery for patient data encryption
+
+**Patient Data Flow:**
+
+1. Patient visits invite URL with token
+2. Frontend fetches organization public key via `validateInviteToken` action
+3. Patient data encrypted client-side before submission
+4. Encrypted data stored in `patient_record` table (`*_encrypted` fields)
+5. Healthcare providers decrypt using organization private key
+
+## Important Development Notes
+
+### Test User Credentials
+
+All test users use password: `TestPassword123!`
+
+- `admin@test.com` (org_admin role)
+- `physician@test.com` (physician role)
+- `receptionist@test.com` (receptionist role)
+- `unverified@test.com` (no roles)
+
+### Package Manager Requirements
+
+- This project uses **pnpm** workspaces, not npm or yarn
+- Node.js >= 18.0.0 required
+- pnpm >= 8.15.0 required (for latest workspace features)
+- Turbo v1.13.4+ for build orchestration
+
+### Database Connection Details
+
+- **Auth Database**: Better Auth uses separate PostgreSQL database
+- **Application Database**: Hasura connects to main PostgreSQL instance
+- Both databases can run in same PostgreSQL container but are separate schemas
+
+### Key File Locations
+
+- **JWT Keys**: Generated in `.keys/` directory by setup script
+- **Hasura Metadata**: `apps/hasura/metadata/` directory
+- **Hasura Migrations**: `apps/hasura/migrations/cmdetect-postgres/`
+- **GraphQL Generated Types**: `apps/frontend/src/graphql/`
+- **Crypto Module**: `apps/frontend/src/lib/crypto/` (encryption utilities)
+- **Action Handlers**: `apps/auth-server/src/routes/actions/` (Hasura action endpoints)
 
 ## Best practices
 

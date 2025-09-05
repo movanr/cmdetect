@@ -22,12 +22,11 @@ export const auth = betterAuth({
     "http://localhost:3000",
   ],
 
-
   // Plugins
   plugins: [
     // Anonymous sessions for patient questionnaire access
     anonymous(),
-    
+
     // JWT Configuration for Hasura with custom claims
     jwt({
       jwt: {
@@ -36,7 +35,7 @@ export const auth = betterAuth({
         expirationTime: "8h", // Longer session for healthcare workflow
         definePayload: ({ user }) => {
           // Check if this is an anonymous user
-          if (!user || user.email?.startsWith('temp-') || user.isAnonymous) {
+          if (!user || user.email?.startsWith("temp-") || user.isAnonymous) {
             // Anonymous user for patient questionnaire access
             const claims: Record<string, any> = {
               "x-hasura-default-role": "anonymous",
@@ -53,18 +52,24 @@ export const auth = betterAuth({
           // Validate roles array and apply hierarchy for authenticated users
           const roleHierarchy = ["org_admin", "physician", "receptionist"];
           const userRoles = (user.roles as string[]) || [];
-          const validRoles = userRoles.filter((role) => roleHierarchy.includes(role));
+          const validRoles = userRoles.filter((role) =>
+            roleHierarchy.includes(role)
+          );
 
           if (validRoles.length > 0 && user.organizationId) {
-            // User has valid roles and organization
-            const defaultRole =
-              roleHierarchy.find((role) => validRoles.includes(role)) ||
-              validRoles[0];
+            // Use activeRole from user if set, otherwise use hierarchy default
+            const activeRole =
+              user.activeRole && validRoles.includes(user.activeRole)
+                ? user.activeRole
+                : roleHierarchy.find((role) => validRoles.includes(role)) ||
+                  validRoles[0];
+
+            const defaultRole = activeRole;
 
             const claims: Record<string, any> = {
               "x-hasura-default-role": defaultRole,
               "x-hasura-allowed-roles": validRoles,
-              "x-hasura-user-id": user.app_uuid, // Always use app_uuid for everything
+              "x-hasura-user-id": user.id,
               "x-hasura-organization-id": user.organizationId,
             };
 
@@ -79,7 +84,7 @@ export const auth = betterAuth({
               "https://hasura.io/jwt/claims": {
                 "x-hasura-default-role": "unverified",
                 "x-hasura-allowed-roles": ["unverified"],
-                "x-hasura-user-id": user.app_uuid, // Always use app_uuid for everything
+                "x-hasura-user-id": user.id,
               },
             };
           }
@@ -120,7 +125,6 @@ Falls Sie dieses Konto nicht erstellt haben, ignorieren Sie diese E-Mail.`,
     expiresIn: 86400, // 24 hours - more reasonable for business workflow
   },
 
-
   // Authentication providers
   emailAndPassword: {
     enabled: true,
@@ -142,12 +146,12 @@ Falls Sie dieses Konto nicht erstellt haben, ignorieren Sie diese E-Mail.`,
         type: "string[]",
         required: false,
       },
-      organizationId: {
-        type: "string", // Better Auth handles UUID as string
+      activeRole: {
+        type: "string",
         required: false,
       },
-      app_uuid: {
-        type: "string", // UUID stored as string
+      organizationId: {
+        type: "string",
         required: false,
       },
       isActive: {

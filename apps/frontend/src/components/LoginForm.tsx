@@ -19,7 +19,7 @@ export function LoginForm() {
       });
 
       if (result.error) {
-        setError(result.error.message);
+        setError(result.error.message || "Login failed");
       } else {
         // Success - the session hook will update automatically
         console.log("Login successful:", result);
