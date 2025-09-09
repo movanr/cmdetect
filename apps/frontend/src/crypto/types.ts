@@ -23,6 +23,16 @@ export interface StoredKey {
   encryptedKey: string;
   iv: string;
   salt: string;
+  createdAt: string;
+}
+
+export interface MultiUserStoredKey {
+  [userId: string]: StoredKey;
+}
+
+export interface UserKeyInfo {
+  exists: boolean;
+  createdAt: string | null;
 }
 
 export interface CryptoError extends Error {

@@ -12,6 +12,9 @@ export {
   loadPrivateKey,
   hasStoredPrivateKey,
   deleteStoredPrivateKey,
+  listStoredUsers,
+  deleteAllStoredKeys,
+  getUserKeyInfo,
 } from "./storage";
 
 export * from "./types";
