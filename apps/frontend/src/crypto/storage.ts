@@ -1,30 +1,18 @@
 import { CRYPTO_ALGORITHMS, CRYPTO_CONSTANTS } from "./types";
-import type {
-  StoredKey,
-  CryptoError,
-  MultiUserStoredKey,
-  UserKeyInfo,
-} from "./types";
+import type { StoredKey, CryptoError } from "./types";
 
 const DB_NAME = "CMDetectCrypto";
 const DB_VERSION = 1;
 const STORE_NAME = "privateKeys";
-const MULTI_USER_KEY_ID = "multi_user_private_keys";
-
-// Note: getUserKeyId not needed since we use multi-user storage structure
+const KEY_ID = "organization_private_key";
 
 export async function storePrivateKey(
   privateKey: string,
-  password: string,
-  userId: string
+  password: string
 ): Promise<void> {
   try {
     if (!password || password.length < 8) {
       throw new Error("Password must be at least 8 characters long");
-    }
-
-    if (!userId) {
-      throw new Error("User ID is required");
     }
 
     const salt = crypto.getRandomValues(
@@ -69,31 +57,17 @@ export async function storePrivateKey(
     );
 
     const storedKey: StoredKey = {
-      encryptedKey: arrayBufferToBase64(new Uint8Array(encryptedPrivateKey)),
+      encryptedKey: arrayBufferToBase64(encryptedPrivateKey),
       iv: arrayBufferToBase64(iv),
       salt: arrayBufferToBase64(salt),
-      createdAt: new Date().toISOString(),
     };
 
     const db = await openDatabase();
     const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
 
-    // Get existing multi-user keys or create new structure
-    const existingKeys = await new Promise<MultiUserStoredKey>(
-      (resolve, reject) => {
-        const request = store.get(MULTI_USER_KEY_ID);
-        request.onsuccess = () => resolve(request.result || {});
-        request.onerror = () =>
-          reject(new Error("Failed to read existing keys"));
-      }
-    );
-
-    // Update with new user key
-    existingKeys[userId] = storedKey;
-
     await new Promise<void>((resolve, reject) => {
-      const request = store.put(existingKeys, MULTI_USER_KEY_ID);
+      const request = store.put(storedKey, KEY_ID);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(new Error("Failed to store private key"));
     });
@@ -112,42 +86,27 @@ export async function storePrivateKey(
   }
 }
 
-export async function loadPrivateKey(
-  password: string,
-  userId: string
-): Promise<string> {
+export async function loadPrivateKey(password: string): Promise<string> {
   try {
     if (!password) {
       throw new Error("Password is required");
-    }
-
-    if (!userId) {
-      throw new Error("User ID is required");
     }
 
     const db = await openDatabase();
     const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
 
-    const multiUserKeys = await new Promise<MultiUserStoredKey>(
-      (resolve, reject) => {
-        const request = store.get(MULTI_USER_KEY_ID);
-        request.onsuccess = () => {
-          if (request.result) {
-            resolve(request.result as MultiUserStoredKey);
-          } else {
-            reject(new Error("No private keys found"));
-          }
-        };
-        request.onerror = () =>
-          reject(new Error("Failed to load private keys"));
-      }
-    );
-
-    const storedKey = multiUserKeys[userId];
-    if (!storedKey) {
-      throw new Error(`No private key found for user: ${userId}`);
-    }
+    const storedKey = await new Promise<StoredKey>((resolve, reject) => {
+      const request = store.get(KEY_ID);
+      request.onsuccess = () => {
+        if (request.result) {
+          resolve(request.result as StoredKey);
+        } else {
+          reject(new Error("No private key found"));
+        }
+      };
+      request.onerror = () => reject(new Error("Failed to load private key"));
+    });
 
     const salt = base64ToArrayBuffer(storedKey.salt);
     const iv = base64ToArrayBuffer(storedKey.iv);
@@ -206,22 +165,15 @@ export async function loadPrivateKey(
   }
 }
 
-export async function hasStoredPrivateKey(userId: string): Promise<boolean> {
+export async function hasStoredPrivateKey(): Promise<boolean> {
   try {
-    if (!userId) {
-      return false;
-    }
-
     const db = await openDatabase();
     const transaction = db.transaction([STORE_NAME], "readonly");
     const store = transaction.objectStore(STORE_NAME);
 
     return await new Promise<boolean>((resolve, reject) => {
-      const request = store.get(MULTI_USER_KEY_ID);
-      request.onsuccess = () => {
-        const multiUserKeys = request.result as MultiUserStoredKey;
-        resolve(!!(multiUserKeys && multiUserKeys[userId]));
-      };
+      const request = store.get(KEY_ID);
+      request.onsuccess = () => resolve(!!request.result);
       request.onerror = () =>
         reject(new Error("Failed to check for stored key"));
     });
@@ -230,38 +182,17 @@ export async function hasStoredPrivateKey(userId: string): Promise<boolean> {
   }
 }
 
-export async function deleteStoredPrivateKey(userId: string): Promise<void> {
+export async function deleteStoredPrivateKey(): Promise<void> {
   try {
-    if (!userId) {
-      throw new Error("User ID is required");
-    }
-
     const db = await openDatabase();
     const transaction = db.transaction([STORE_NAME], "readwrite");
     const store = transaction.objectStore(STORE_NAME);
 
-    // Get existing multi-user keys
-    const existingKeys = await new Promise<MultiUserStoredKey>(
-      (resolve, reject) => {
-        const request = store.get(MULTI_USER_KEY_ID);
-        request.onsuccess = () => resolve(request.result || {});
-        request.onerror = () =>
-          reject(new Error("Failed to read existing keys"));
-      }
-    );
-
-    // Remove the specific user's key
-    if (existingKeys[userId]) {
-      delete existingKeys[userId];
-
-      // Update the storage with remaining keys
-      await new Promise<void>((resolve, reject) => {
-        const request = store.put(existingKeys, MULTI_USER_KEY_ID);
-        request.onsuccess = () => resolve();
-        request.onerror = () =>
-          reject(new Error("Failed to delete private key"));
-      });
-    }
+    await new Promise<void>((resolve, reject) => {
+      const request = store.delete(KEY_ID);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(new Error("Failed to delete private key"));
+    });
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
@@ -274,83 +205,6 @@ export async function deleteStoredPrivateKey(userId: string): Promise<void> {
       code: "STORAGE_DELETE_FAILED",
     };
     throw cryptoError;
-  }
-}
-
-// New multi-user management functions
-export async function listStoredUsers(): Promise<string[]> {
-  try {
-    const db = await openDatabase();
-    const transaction = db.transaction([STORE_NAME], "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-
-    return await new Promise<string[]>((resolve, reject) => {
-      const request = store.get(MULTI_USER_KEY_ID);
-      request.onsuccess = () => {
-        const multiUserKeys = request.result as MultiUserStoredKey;
-        resolve(multiUserKeys ? Object.keys(multiUserKeys) : []);
-      };
-      request.onerror = () => reject(new Error("Failed to list stored users"));
-    });
-  } catch (error) {
-    return [];
-  }
-}
-
-export async function deleteAllStoredKeys(): Promise<void> {
-  try {
-    const db = await openDatabase();
-    const transaction = db.transaction([STORE_NAME], "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-
-    await new Promise<void>((resolve, reject) => {
-      const request = store.delete(MULTI_USER_KEY_ID);
-      request.onsuccess = () => resolve();
-      request.onerror = () =>
-        reject(new Error("Failed to delete all stored keys"));
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(new Error("Transaction failed"));
-    });
-  } catch (error) {
-    const cryptoError: CryptoError = {
-      name: "StorageError",
-      message: `Failed to delete all stored keys: ${error instanceof Error ? error.message : "Unknown error"}`,
-      code: "STORAGE_DELETE_FAILED",
-    };
-    throw cryptoError;
-  }
-}
-
-export async function getUserKeyInfo(userId: string): Promise<UserKeyInfo> {
-  try {
-    if (!userId) {
-      return { exists: false, createdAt: null };
-    }
-
-    const db = await openDatabase();
-    const transaction = db.transaction([STORE_NAME], "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-
-    return await new Promise<UserKeyInfo>((resolve, reject) => {
-      const request = store.get(MULTI_USER_KEY_ID);
-      request.onsuccess = () => {
-        const multiUserKeys = request.result as MultiUserStoredKey;
-        if (multiUserKeys && multiUserKeys[userId]) {
-          resolve({
-            exists: true,
-            createdAt: multiUserKeys[userId].createdAt,
-          });
-        } else {
-          resolve({ exists: false, createdAt: null });
-        }
-      };
-      request.onerror = () => reject(new Error("Failed to get user key info"));
-    });
-  } catch (error) {
-    return { exists: false, createdAt: null };
   }
 }
 
@@ -376,7 +230,8 @@ async function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-function arrayBufferToBase64(bytes: Uint8Array): string {
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
   let binary = "";
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);

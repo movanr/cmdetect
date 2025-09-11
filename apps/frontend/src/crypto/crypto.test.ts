@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import "./test-setup";
 import {
   generateOrganizationKeys,
@@ -11,15 +11,11 @@ import {
   deleteStoredPrivateKey,
   verifyDeterministicKeys,
   validateKeyPair,
-  listStoredUsers,
-  deleteAllStoredKeys,
-  getUserKeyInfo,
 } from "./index";
 import type { PatientPII } from "./index";
 
 describe("Healthcare Encryption MVP", () => {
   const testPassword = "testPassword123!";
-  const testUserId = "test-user-123";
   const samplePatientData: PatientPII = {
     firstName: "Max",
     lastName: "Mustermann",
@@ -28,8 +24,8 @@ describe("Healthcare Encryption MVP", () => {
   };
 
   beforeEach(async () => {
-    if (await hasStoredPrivateKey(testUserId)) {
-      await deleteStoredPrivateKey(testUserId);
+    if (await hasStoredPrivateKey()) {
+      await deleteStoredPrivateKey();
     }
   });
 
@@ -336,8 +332,8 @@ describe("Healthcare Encryption MVP", () => {
     it("should store and load private key with password", async () => {
       const keys = await generateOrganizationKeys();
 
-      await storePrivateKey(keys.privateKey, testPassword, testUserId);
-      const loaded = await loadPrivateKey(testPassword, testUserId);
+      await storePrivateKey(keys.privateKey, testPassword);
+      const loaded = await loadPrivateKey(testPassword);
 
       expect(loaded).toBe(keys.privateKey);
     });
@@ -345,36 +341,34 @@ describe("Healthcare Encryption MVP", () => {
     it("should detect stored private key", async () => {
       const keys = await generateOrganizationKeys();
 
-      expect(await hasStoredPrivateKey(testUserId)).toBe(false);
+      expect(await hasStoredPrivateKey()).toBe(false);
 
-      await storePrivateKey(keys.privateKey, testPassword, testUserId);
-      expect(await hasStoredPrivateKey(testUserId)).toBe(true);
+      await storePrivateKey(keys.privateKey, testPassword);
+      expect(await hasStoredPrivateKey()).toBe(true);
     });
 
     it("should fail to load with wrong password", async () => {
       const keys = await generateOrganizationKeys();
-      await storePrivateKey(keys.privateKey, testPassword, testUserId);
+      await storePrivateKey(keys.privateKey, testPassword);
 
-      await expect(
-        loadPrivateKey("wrongPassword", testUserId)
-      ).rejects.toThrow();
+      await expect(loadPrivateKey("wrongPassword")).rejects.toThrow();
     });
 
     it("should delete stored private key", async () => {
       const keys = await generateOrganizationKeys();
-      await storePrivateKey(keys.privateKey, testPassword, testUserId);
+      await storePrivateKey(keys.privateKey, testPassword);
 
-      expect(await hasStoredPrivateKey(testUserId)).toBe(true);
+      expect(await hasStoredPrivateKey()).toBe(true);
 
-      await deleteStoredPrivateKey(testUserId);
-      expect(await hasStoredPrivateKey(testUserId)).toBe(false);
+      await deleteStoredPrivateKey();
+      expect(await hasStoredPrivateKey()).toBe(false);
     });
 
     it("should require minimum password length", async () => {
       const keys = await generateOrganizationKeys();
 
       await expect(
-        storePrivateKey(keys.privateKey, "1234567", testUserId) // 7 chars, too short
+        storePrivateKey(keys.privateKey, "1234567") // 7 chars, too short
       ).rejects.toThrow("Password must be at least 8 characters long");
     });
   });
@@ -391,10 +385,10 @@ describe("Healthcare Encryption MVP", () => {
       );
 
       // Store private key
-      await storePrivateKey(keys.privateKey, testPassword, testUserId);
+      await storePrivateKey(keys.privateKey, testPassword);
 
       // Load private key
-      const loadedPrivateKey = await loadPrivateKey(testPassword, testUserId);
+      const loadedPrivateKey = await loadPrivateKey(testPassword);
 
       // Decrypt patient data
       const decrypted = await decryptPatientData(encrypted, loadedPrivateKey);
@@ -407,7 +401,7 @@ describe("Healthcare Encryption MVP", () => {
       const original = await generateOrganizationKeys();
 
       // Store the keys securely
-      await storePrivateKey(original.privateKey, testPassword, testUserId);
+      await storePrivateKey(original.privateKey, testPassword);
 
       // Encrypt data with public key
       const encrypted = await encryptPatientData(
@@ -416,10 +410,7 @@ describe("Healthcare Encryption MVP", () => {
       );
 
       // Load keys from storage (simulating recovery)
-      const recoveredPrivateKey = await loadPrivateKey(
-        testPassword,
-        testUserId
-      );
+      const recoveredPrivateKey = await loadPrivateKey(testPassword);
 
       // Decrypt with recovered private key
       const decrypted = await decryptPatientData(
@@ -448,142 +439,6 @@ describe("Healthcare Encryption MVP", () => {
       const decrypted = await decryptPatientData(encrypted, keys.privateKey);
 
       expect(decrypted).toEqual(complexPatientData);
-    });
-  });
-
-  describe("Multi-User Storage Support", () => {
-    const user1 = "user-1";
-    const user2 = "user-2";
-    const user3 = "user-3";
-    const password1 = "password123!";
-    const password2 = "different456!";
-
-    beforeEach(async () => {
-      await deleteAllStoredKeys();
-    });
-
-    it("should store keys for multiple users independently", async () => {
-      const keys1 = await generateOrganizationKeys();
-      const keys2 = await generateOrganizationKeys();
-      const keys3 = await generateOrganizationKeys();
-
-      // Store keys for different users
-      await storePrivateKey(keys1.privateKey, password1, user1);
-      await storePrivateKey(keys2.privateKey, password2, user2);
-      await storePrivateKey(keys3.privateKey, password1, user3);
-
-      // All users should have stored keys
-      expect(await hasStoredPrivateKey(user1)).toBe(true);
-      expect(await hasStoredPrivateKey(user2)).toBe(true);
-      expect(await hasStoredPrivateKey(user3)).toBe(true);
-
-      // Load each user's key independently
-      const loaded1 = await loadPrivateKey(password1, user1);
-      const loaded2 = await loadPrivateKey(password2, user2);
-      const loaded3 = await loadPrivateKey(password1, user3);
-
-      expect(loaded1).toBe(keys1.privateKey);
-      expect(loaded2).toBe(keys2.privateKey);
-      expect(loaded3).toBe(keys3.privateKey);
-    });
-
-    it("should list all stored users", async () => {
-      const keys = await generateOrganizationKeys();
-
-      // Initially no users
-      expect(await listStoredUsers()).toEqual([]);
-
-      // Add users one by one
-      await storePrivateKey(keys.privateKey, password1, user1);
-      expect(await listStoredUsers()).toEqual([user1]);
-
-      await storePrivateKey(keys.privateKey, password2, user2);
-      expect(await listStoredUsers()).toHaveLength(2);
-      expect(await listStoredUsers()).toContain(user1);
-      expect(await listStoredUsers()).toContain(user2);
-
-      await storePrivateKey(keys.privateKey, password1, user3);
-      expect(await listStoredUsers()).toHaveLength(3);
-      expect(await listStoredUsers()).toContain(user3);
-    });
-
-    it("should get user key info with creation timestamp", async () => {
-      const keys = await generateOrganizationKeys();
-
-      // User doesn't exist initially
-      const info1 = await getUserKeyInfo(user1);
-      expect(info1.exists).toBe(false);
-      expect(info1.createdAt).toBeNull();
-
-      // Store key and check info
-      await storePrivateKey(keys.privateKey, password1, user1);
-      const info2 = await getUserKeyInfo(user1);
-      expect(info2.exists).toBe(true);
-      expect(info2.createdAt).toBeDefined();
-      expect(new Date(info2.createdAt!).getTime()).toBeLessThanOrEqual(
-        Date.now()
-      );
-    });
-
-    it("should delete individual user keys", async () => {
-      const keys = await generateOrganizationKeys();
-
-      // Store keys for multiple users
-      await storePrivateKey(keys.privateKey, password1, user1);
-      await storePrivateKey(keys.privateKey, password2, user2);
-      await storePrivateKey(keys.privateKey, password1, user3);
-
-      expect(await listStoredUsers()).toHaveLength(3);
-
-      // Delete one user's key
-      await deleteStoredPrivateKey(user2);
-
-      expect(await hasStoredPrivateKey(user1)).toBe(true);
-      expect(await hasStoredPrivateKey(user2)).toBe(false);
-      expect(await hasStoredPrivateKey(user3)).toBe(true);
-
-      const remainingUsers = await listStoredUsers();
-      expect(remainingUsers).toHaveLength(2);
-      expect(remainingUsers).toContain(user1);
-      expect(remainingUsers).toContain(user3);
-      expect(remainingUsers).not.toContain(user2);
-    });
-
-    it("should prevent cross-user key access", async () => {
-      const keys1 = await generateOrganizationKeys();
-      const keys2 = await generateOrganizationKeys();
-
-      await storePrivateKey(keys1.privateKey, password1, user1);
-      await storePrivateKey(keys2.privateKey, password2, user2);
-
-      // User1 cannot load user2's key with user1's password
-      await expect(loadPrivateKey(password1, user2)).rejects.toThrow();
-
-      // User2 cannot load user1's key with user2's password
-      await expect(loadPrivateKey(password2, user1)).rejects.toThrow();
-
-      // But each user can load their own key
-      expect(await loadPrivateKey(password1, user1)).toBe(keys1.privateKey);
-      expect(await loadPrivateKey(password2, user2)).toBe(keys2.privateKey);
-    });
-
-    it("should delete all stored keys", async () => {
-      const keys = await generateOrganizationKeys();
-
-      // Store keys for multiple users
-      await storePrivateKey(keys.privateKey, password1, user1);
-      await storePrivateKey(keys.privateKey, password2, user2);
-      await storePrivateKey(keys.privateKey, password1, user3);
-
-      expect(await listStoredUsers()).toHaveLength(3);
-
-      // Delete all keys
-      await deleteAllStoredKeys();
-
-      expect(await listStoredUsers()).toEqual([]);
-      expect(await hasStoredPrivateKey(user1)).toBe(false);
-      expect(await hasStoredPrivateKey(user2)).toBe(false);
-      expect(await hasStoredPrivateKey(user3)).toBe(false);
     });
   });
 });
