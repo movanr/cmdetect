@@ -190,7 +190,7 @@ pnpm test tests/permissions/specific-test.test.ts
 - CORS configured for specific development origins
 - Admin secrets required for Hasura access
 - Organization isolation enforced at database level
-- End-to-end encryption for patient PII using RSA-2048 + AES-256-GCM
+- End-to-end encryption for patient PII using ECDSA P-256 + ECIES
 
 ## End-to-End Encryption System
 
@@ -198,10 +198,10 @@ pnpm test tests/permissions/specific-test.test.ts
 
 **Hybrid Encryption Strategy:**
 
-- **Organization Level**: RSA-2048 key pairs for each organization
-- **Data Level**: AES-256-GCM for encrypting patient PII
+- **Organization Level**: ECDSA P-256 key pairs for each organization  
+- **Data Level**: ECIES (ECDH + AES-256-GCM) for encrypting patient PII
 - **Key Storage**: Organization public keys in database, private keys via BIP39 mnemonic
-- **Browser Implementation**: WebCrypto API (no external crypto dependencies)
+- **Browser Implementation**: Noble Curves library (@noble/curves, @scure/bip39)
 
 **Key Components:**
 
