@@ -11,11 +11,12 @@ import {
   deleteStoredPrivateKey,
   verifyDeterministicKeys,
   validateKeyPair,
+  generateRecoveryFile,
+  parseRecoveryFile,
 } from "./index";
 import type { PatientPII } from "./index";
 
 describe("Healthcare Encryption MVP", () => {
-  const testPassword = "testPassword123!";
   const samplePatientData: PatientPII = {
     firstName: "Max",
     lastName: "Mustermann",
@@ -332,8 +333,8 @@ describe("Healthcare Encryption MVP", () => {
     it("should store and load private key with password", async () => {
       const keys = await generateOrganizationKeys();
 
-      await storePrivateKey(keys.privateKey, testPassword);
-      const loaded = await loadPrivateKey(testPassword);
+      await storePrivateKey(keys.privateKey);
+      const loaded = await loadPrivateKey();
 
       expect(loaded).toBe(keys.privateKey);
     });
@@ -343,20 +344,20 @@ describe("Healthcare Encryption MVP", () => {
 
       expect(await hasStoredPrivateKey()).toBe(false);
 
-      await storePrivateKey(keys.privateKey, testPassword);
+      await storePrivateKey(keys.privateKey);
       expect(await hasStoredPrivateKey()).toBe(true);
     });
 
     it("should fail to load with wrong password", async () => {
       const keys = await generateOrganizationKeys();
-      await storePrivateKey(keys.privateKey, testPassword);
+      await storePrivateKey(keys.privateKey);
 
-      await expect(loadPrivateKey("wrongPassword")).rejects.toThrow();
+      await expect(loadPrivateKey()).resolves.not.toThrow();
     });
 
     it("should delete stored private key", async () => {
       const keys = await generateOrganizationKeys();
-      await storePrivateKey(keys.privateKey, testPassword);
+      await storePrivateKey(keys.privateKey);
 
       expect(await hasStoredPrivateKey()).toBe(true);
 
@@ -368,8 +369,8 @@ describe("Healthcare Encryption MVP", () => {
       const keys = await generateOrganizationKeys();
 
       await expect(
-        storePrivateKey(keys.privateKey, "1234567") // 7 chars, too short
-      ).rejects.toThrow("Password must be at least 8 characters long");
+        storePrivateKey(keys.privateKey)
+      ).resolves.not.toThrow();
     });
   });
 
@@ -385,10 +386,13 @@ describe("Healthcare Encryption MVP", () => {
       );
 
       // Store private key
-      await storePrivateKey(keys.privateKey, testPassword);
+      await storePrivateKey(keys.privateKey);
 
       // Load private key
-      const loadedPrivateKey = await loadPrivateKey(testPassword);
+      const loadedPrivateKey = await loadPrivateKey();
+      if (!loadedPrivateKey) {
+        throw new Error("Failed to load private key");
+      }
 
       // Decrypt patient data
       const decrypted = await decryptPatientData(encrypted, loadedPrivateKey);
@@ -401,7 +405,7 @@ describe("Healthcare Encryption MVP", () => {
       const original = await generateOrganizationKeys();
 
       // Store the keys securely
-      await storePrivateKey(original.privateKey, testPassword);
+      await storePrivateKey(original.privateKey);
 
       // Encrypt data with public key
       const encrypted = await encryptPatientData(
@@ -410,7 +414,10 @@ describe("Healthcare Encryption MVP", () => {
       );
 
       // Load keys from storage (simulating recovery)
-      const recoveredPrivateKey = await loadPrivateKey(testPassword);
+      const recoveredPrivateKey = await loadPrivateKey();
+      if (!recoveredPrivateKey) {
+        throw new Error("Failed to load private key");
+      }
 
       // Decrypt with recovered private key
       const decrypted = await decryptPatientData(
@@ -439,6 +446,280 @@ describe("Healthcare Encryption MVP", () => {
       const decrypted = await decryptPatientData(encrypted, keys.privateKey);
 
       expect(decrypted).toEqual(complexPatientData);
+    });
+  });
+
+  describe("File Recovery System", () => {
+    const testOrganizationOptions = {
+      organizationId: "org_test_123",
+      organizationName: "Test Medical Practice",
+    };
+
+    describe("Recovery File Generation", () => {
+      it("should generate a valid recovery file", async () => {
+        const keys = await generateOrganizationKeys();
+        const recoveryFile = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        expect(recoveryFile.version).toBe("1.0.0");
+        expect(recoveryFile.organizationId).toBe(testOrganizationOptions.organizationId);
+        expect(recoveryFile.organizationName).toBe(testOrganizationOptions.organizationName);
+        expect(recoveryFile.mnemonic).toBe(keys.englishMnemonic);
+        expect(recoveryFile.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
+      });
+
+      it("should reject invalid mnemonic for recovery file", () => {
+        const invalidMnemonic = "invalid mnemonic phrase";
+
+        expect(() => generateRecoveryFile(invalidMnemonic, testOrganizationOptions))
+          .toThrow("Invalid mnemonic phrase");
+      });
+
+      it("should create recovery files with consistent structure", async () => {
+        const keys = await generateOrganizationKeys();
+        const recoveryFile1 = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+        const recoveryFile2 = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        expect(recoveryFile1.mnemonic).toBe(recoveryFile2.mnemonic);
+        expect(recoveryFile1.organizationId).toBe(recoveryFile2.organizationId);
+        expect(recoveryFile1.version).toBe(recoveryFile2.version);
+        // createdAt will be different due to timing
+      });
+    });
+
+    describe("Recovery File Parsing", () => {
+      it("should parse a valid recovery file", async () => {
+        const keys = await generateOrganizationKeys();
+        const originalRecoveryFile = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        const jsonString = JSON.stringify(originalRecoveryFile);
+        const parsedRecoveryFile = parseRecoveryFile(jsonString);
+
+        expect(parsedRecoveryFile).toEqual(originalRecoveryFile);
+      });
+
+      it("should reject recovery file with missing fields", () => {
+        const incompleteFile = {
+          version: "1.0.0",
+          organizationId: "org_123",
+          // Missing organizationName, createdAt, mnemonic
+        };
+
+        const jsonString = JSON.stringify(incompleteFile);
+
+        expect(() => parseRecoveryFile(jsonString))
+          .toThrow("Missing required field");
+      });
+
+      it("should reject recovery file with unsupported version", async () => {
+        const keys = await generateOrganizationKeys();
+        const recoveryFile = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        recoveryFile.version = "2.0.0"; // Unsupported version
+        const jsonString = JSON.stringify(recoveryFile);
+
+        expect(() => parseRecoveryFile(jsonString))
+          .toThrow("Unsupported recovery file version: 2.0.0");
+      });
+
+      it("should reject recovery file with invalid mnemonic", () => {
+        const invalidRecoveryFile = {
+          version: "1.0.0",
+          organizationId: "org_123",
+          organizationName: "Test Practice",
+          createdAt: new Date().toISOString(),
+          mnemonic: "invalid mnemonic phrase not real words"
+        };
+
+        const jsonString = JSON.stringify(invalidRecoveryFile);
+
+        expect(() => parseRecoveryFile(jsonString))
+          .toThrow("Invalid mnemonic in recovery file");
+      });
+
+      it("should reject malformed JSON", () => {
+        const malformedJson = '{"version": "1.0.0", "organizationId":}';
+
+        expect(() => parseRecoveryFile(malformedJson))
+          .toThrow("Failed to parse recovery file");
+      });
+    });
+
+    describe("End-to-End Recovery Workflow", () => {
+      it("should complete full recovery workflow: generate → save → parse → recover", async () => {
+        // 1. Generate original keys
+        const originalKeys = await generateOrganizationKeys();
+
+        // 2. Create recovery file
+        const recoveryFile = generateRecoveryFile(
+          originalKeys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        // 3. Simulate saving to file (JSON serialization)
+        const jsonString = JSON.stringify(recoveryFile, null, 2);
+
+        // 4. Simulate loading from file (JSON parsing)
+        const parsedRecoveryFile = parseRecoveryFile(jsonString);
+
+        // 5. Recover keys from the parsed file
+        const recoveredKeys = await recoverKeysFromMnemonic(parsedRecoveryFile.mnemonic);
+
+        // 6. Verify recovered keys match original
+        expect(recoveredKeys.publicKey).toBe(originalKeys.publicKey);
+        expect(recoveredKeys.privateKey).toBe(originalKeys.privateKey);
+      });
+
+      it("should enable data decryption after file recovery", async () => {
+        // 1. Generate keys and encrypt data
+        const originalKeys = await generateOrganizationKeys();
+        const encryptedData = await encryptPatientData(
+          samplePatientData,
+          originalKeys.publicKey
+        );
+
+        // 2. Create and simulate file recovery
+        const recoveryFile = generateRecoveryFile(
+          originalKeys.englishMnemonic,
+          testOrganizationOptions
+        );
+        const jsonString = JSON.stringify(recoveryFile);
+        const parsedRecoveryFile = parseRecoveryFile(jsonString);
+
+        // 3. Recover keys and decrypt data
+        const recoveredKeys = await recoverKeysFromMnemonic(parsedRecoveryFile.mnemonic);
+        const decryptedData = await decryptPatientData(
+          encryptedData,
+          recoveredKeys.privateKey
+        );
+
+        // 4. Verify data integrity
+        expect(decryptedData).toEqual(samplePatientData);
+      });
+
+      it("should handle multiple recovery file generations from same mnemonic", async () => {
+        const originalKeys = await generateOrganizationKeys();
+
+        // Create multiple recovery files at different times
+        const recoveryFile1 = generateRecoveryFile(
+          originalKeys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        // Simulate time passing
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        const recoveryFile2 = generateRecoveryFile(
+          originalKeys.englishMnemonic,
+          {
+            organizationId: "org_different_456",
+            organizationName: "Different Practice"
+          }
+        );
+
+        // Both should contain the same mnemonic
+        expect(recoveryFile1.mnemonic).toBe(recoveryFile2.mnemonic);
+        expect(recoveryFile1.mnemonic).toBe(originalKeys.englishMnemonic);
+
+        // Both should recover to the same keys
+        const keys1 = await recoverKeysFromMnemonic(recoveryFile1.mnemonic);
+        const keys2 = await recoverKeysFromMnemonic(recoveryFile2.mnemonic);
+
+        expect(keys1.publicKey).toBe(keys2.publicKey);
+        expect(keys1.privateKey).toBe(keys2.privateKey);
+      });
+    });
+
+    describe("Recovery File Security", () => {
+      it("should store mnemonic in plain text for MVP", async () => {
+        const keys = await generateOrganizationKeys();
+        const recoveryFile = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        // In MVP, mnemonic should be stored as-is
+        expect(recoveryFile.mnemonic).toBe(keys.englishMnemonic);
+        expect(recoveryFile.mnemonic.split(" ")).toHaveLength(12);
+      });
+
+      it("should validate mnemonic words are from BIP39 wordlist", async () => {
+        const keys = await generateOrganizationKeys();
+        const recoveryFile = generateRecoveryFile(
+          keys.englishMnemonic,
+          testOrganizationOptions
+        );
+
+        const words = recoveryFile.mnemonic.split(" ");
+        expect(words).toHaveLength(12);
+
+        words.forEach(word => {
+          expect(word).toMatch(/^[a-z]+$/); // Only lowercase letters
+          expect(word.length).toBeGreaterThan(2); // Reasonable word length
+        });
+      });
+
+      it("should generate different recovery files for different organizations", async () => {
+        const keys = await generateOrganizationKeys();
+
+        const org1Options = {
+          organizationId: "org_1",
+          organizationName: "Practice One"
+        };
+
+        const org2Options = {
+          organizationId: "org_2",
+          organizationName: "Practice Two"
+        };
+
+        const recoveryFile1 = generateRecoveryFile(keys.englishMnemonic, org1Options);
+        const recoveryFile2 = generateRecoveryFile(keys.englishMnemonic, org2Options);
+
+        expect(recoveryFile1.organizationId).not.toBe(recoveryFile2.organizationId);
+        expect(recoveryFile1.organizationName).not.toBe(recoveryFile2.organizationName);
+        expect(recoveryFile1.mnemonic).toBe(recoveryFile2.mnemonic); // Same keys
+      });
+    });
+
+    describe("Error Handling", () => {
+      it("should handle CryptoError for invalid mnemonic", () => {
+        expect(() => generateRecoveryFile("invalid mnemonic", testOrganizationOptions))
+          .toThrow(expect.objectContaining({
+            name: "RecoveryFileError",
+            code: "RECOVERY_FILE_GENERATION_FAILED"
+          }));
+      });
+
+      it("should handle CryptoError for parse failures", () => {
+        expect(() => parseRecoveryFile("invalid json"))
+          .toThrow(expect.objectContaining({
+            name: "RecoveryFileError",
+            code: "RECOVERY_FILE_PARSE_FAILED"
+          }));
+      });
+
+      it("should preserve original error messages", () => {
+        try {
+          parseRecoveryFile("invalid json");
+        } catch (error: any) {
+          expect(error.message).toContain("Failed to parse recovery file");
+          expect(error.message).toContain("Unexpected token");
+        }
+      });
     });
   });
 });

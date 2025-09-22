@@ -14,4 +14,12 @@ export {
   deleteStoredPrivateKey,
 } from "./storage";
 
+export {
+  generateRecoveryFile,
+  downloadRecoveryFile,
+  parseRecoveryFile,
+  createAndDownloadRecoveryFile,
+  uploadRecoveryFile,
+} from "./fileRecovery";
+
 export * from "./types";

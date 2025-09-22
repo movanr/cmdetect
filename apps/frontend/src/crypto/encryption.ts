@@ -1,4 +1,4 @@
-import { CRYPTO_ALGORITHMS, CRYPTO_CONSTANTS } from "./types";
+import { CRYPTO_CONSTANTS } from "./types";
 import type { PatientPII, EncryptedPayload, CryptoError } from "./types";
 import { parsePublicKeyFromPem, parsePrivateKeyFromPem } from "./keyGeneration";
 import { p256 } from "@noble/curves/nist";
@@ -38,7 +38,7 @@ export async function encryptPatientData(
         aesKeyMaterial.byteOffset + aesKeyMaterial.byteLength
       ) as BufferSource,
       {
-        name: CRYPTO_ALGORITHMS.AES.name,
+        name: "AES-GCM",
       },
       false,
       ["encrypt"]
@@ -53,7 +53,7 @@ export async function encryptPatientData(
 
     const encryptedData = await crypto.subtle.encrypt(
       {
-        name: CRYPTO_ALGORITHMS.AES.name,
+        name: "AES-GCM",
         iv: iv,
       },
       aesKey,
@@ -118,7 +118,7 @@ export async function decryptPatientData(
         aesKeyMaterial.byteOffset + aesKeyMaterial.byteLength
       ) as BufferSource,
       {
-        name: CRYPTO_ALGORITHMS.AES.name,
+        name: "AES-GCM",
       },
       false,
       ["decrypt"]
@@ -132,7 +132,7 @@ export async function decryptPatientData(
 
     const decryptedPatientDataBuffer = await crypto.subtle.decrypt(
       {
-        name: CRYPTO_ALGORITHMS.AES.name,
+        name: "AES-GCM",
         iv: ivBuffer,
       },
       aesKey,
