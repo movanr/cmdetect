@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LoginForm } from "../components/LoginForm";
 import { useSession } from "../lib/auth";
 import { useEffect } from "react";

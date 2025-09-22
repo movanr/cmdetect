@@ -33,8 +33,8 @@ export function RoleProvider({ children }: RoleProviderProps) {
   // Extract roles from session when it changes
   useEffect(() => {
     if (session?.user) {
-      const userRoles = (session.user.roles as UserRole[]) || [];
-      const currentActiveRole = session.user.activeRole as UserRole;
+      const userRoles = ((session.user as any).roles as UserRole[]) || [];
+      const currentActiveRole = (session.user as any).activeRole as UserRole;
       
       setAvailableRoles(userRoles);
       
