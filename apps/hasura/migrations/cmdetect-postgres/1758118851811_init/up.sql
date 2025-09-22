@@ -35,7 +35,7 @@ CREATE TABLE public.organization (
     updated_at timestamp with time zone DEFAULT now(),
     deleted_at timestamp with time zone,
     public_key_pem text,
-    key_created_at timestamp with time zone DEFAULT now(),
+    key_created_at timestamp with time zone,
     key_fingerprint text,
     CONSTRAINT organization_deleted_at_consistency CHECK (((deleted_at IS NULL) OR (deleted_at <= now()))),
     CONSTRAINT organization_email_format CHECK (((email IS NULL) OR ((email)::text ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text))),
@@ -78,12 +78,12 @@ CREATE TABLE public.patient_record (
     date_of_birth_encrypted text,
     patient_data_completed_at timestamp with time zone,
     CONSTRAINT patient_record_clinic_internal_id_not_empty CHECK ((length(TRIM(BOTH FROM clinic_internal_id)) > 0)),
-    CONSTRAINT patient_remaked_at IS NULL) OR (deleted_at <= now()))),
+    CONSTRAINT patient_record_deleted_at_consistency CHECK (((deleted_at IS NULL) OR (deleted_at <= now()))),
     CONSTRAINT patient_record_first_viewed_after_creation CHECK (((first_viewed_at IS NULL) OR (first_viewed_at >= created_at))),
     CONSTRAINT patient_record_invite_expires_future CHECK ((invite_expires_at > created_at)),
     CONSTRAINT patient_record_invite_token_not_empty CHECK ((length(TRIM(BOTH FROM invite_token)) > 0)),
     CONSTRAINT patient_record_last_activity_after_creation CHECK (((last_activity_at IS NULL) OR (last_activity_at >= created_at))),
-    CONSTRAINT patient_record_patient_data_complete CHECK ((((first_name_encrypted IS NULL) AND (last_name_encrypted IS NULL) AND (patient_data_completed_at IS NULL)) OR ((first_name_encrypted IS NOT NULL) AND (last_name_encrypted IS NOT NULL) AND (patient_data_completed_at IS NOT NULL) AND (length(TRIM(BOTH FROM first_name_encrypted)) > 0) AND (length(TRIM(BOTH FROM last_name_encrypted)) > 0))))
+    CONSTRAINT patient_record_patient_data_complete CHECK ((((first_name_encrypted IS NULL) AND (last_name_encrypted IS NULL) AND (gender_encrypted IS NULL) AND (date_of_birth_encrypted IS NULL) AND (patient_data_completed_at IS NULL)) OR ((first_name_encrypted IS NOT NULL) AND (last_name_encrypted IS NOT NULL) AND (gender_encrypted IS NOT NULL) AND (date_of_birth_encrypted IS NOT NULL) AND (patient_data_completed_at IS NOT NULL) AND (length(TRIM(BOTH FROM first_name_encrypted)) > 0) AND (length(TRIM(BOTH FROM last_name_encrypted)) > 0) AND (length(TRIM(BOTH FROM gender_encrypted)) > 0) AND (length(TRIM(BOTH FROM date_of_birth_encrypted)) > 0))))
 );
 CREATE TABLE public.questionnaire_response (
     id text DEFAULT (gen_random_uuid())::text NOT NULL,
@@ -124,7 +124,6 @@ CREATE TABLE public."user" (
     roles jsonb,
     "activeRole" text,
     "organizationId" text,
-    app_uuid text,
     "isActive" boolean,
     "deletedAt" timestamp without time zone,
     CONSTRAINT user_deleted_at_consistency CHECK ((("deletedAt" IS NULL) OR ("deletedAt" <= now()))),
