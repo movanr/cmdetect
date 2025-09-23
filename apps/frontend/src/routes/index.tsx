@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSession } from "../lib/auth";
 import { useRole } from "../contexts/RoleContext";
 import { DashboardLayout, RoleNavigation } from "../components/Navigation";
+import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,9 +37,11 @@ function App() {
   }
 
   return session ? (
-    <DashboardLayout>
-      <RoleNavigation availableRoles={availableRoles} hasRole={hasRole} />
-    </DashboardLayout>
+    <KeySetupGuard>
+      <DashboardLayout>
+        <RoleNavigation availableRoles={availableRoles} hasRole={hasRole} />
+      </DashboardLayout>
+    </KeySetupGuard>
   ) : (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="w-full max-w-md space-y-8">

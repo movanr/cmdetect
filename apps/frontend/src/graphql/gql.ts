@@ -15,28 +15,32 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": typeof types.GetOrganizationPhysiciansDocument,
     "\n  query GetOrganizations {\n    organization {\n      id\n      name\n      city\n      created_at\n    }\n  }\n": typeof types.GetOrganizationsDocument,
+    "\n  query GetOrganizationById($id: String!) {\n    organization_by_pk(id: $id) {\n      id\n      name\n      city\n      created_at\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": typeof types.GetOrganizationByIdDocument,
     "\n  query GetPatientRecords($organizationId: String!) {\n    patient_record(\n      where: { organization_id: { _eq: $organizationId } }\n      order_by: { created_at: desc }\n    ) {\n      id\n      created_at\n      organization_id\n      notes\n    }\n  }\n": typeof types.GetPatientRecordsDocument,
     "\n  mutation SubmitPatientConsent(\n    $invite_token: String!\n    $consent_data: ConsentInput!\n  ) {\n    submitPatientConsent(\n      invite_token: $invite_token\n      consent_data: $consent_data\n    ) {\n      success\n      patient_consent_id\n      error\n    }\n  }\n": typeof types.SubmitPatientConsentDocument,
     "\n  mutation SubmitQuestionnaireResponse(\n    $invite_token: String!\n    $response_data: QuestionnaireResponseInput!\n  ) {\n    submitQuestionnaireResponse(\n      invite_token: $invite_token\n      response_data: $response_data\n    ) {\n      success\n      questionnaire_response_id\n      error\n    }\n  }\n": typeof types.SubmitQuestionnaireResponseDocument,
+    "\n  mutation UpdateOrganizationPublicKey(\n    $id: String!\n    $public_key_pem: String!\n    $key_fingerprint: String!\n    $key_created_at: timestamptz!\n  ) {\n    update_organization_by_pk(\n      pk_columns: { id: $id }\n      _set: {\n        public_key_pem: $public_key_pem\n        key_fingerprint: $key_fingerprint\n        key_created_at: $key_created_at\n      }\n    ) {\n      id\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": typeof types.UpdateOrganizationPublicKeyDocument,
+    "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": typeof types.GetOrganizationPhysiciansDocument,
 };
 const documents: Documents = {
-    "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": types.GetOrganizationPhysiciansDocument,
     "\n  query GetOrganizations {\n    organization {\n      id\n      name\n      city\n      created_at\n    }\n  }\n": types.GetOrganizationsDocument,
+    "\n  query GetOrganizationById($id: String!) {\n    organization_by_pk(id: $id) {\n      id\n      name\n      city\n      created_at\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": types.GetOrganizationByIdDocument,
     "\n  query GetPatientRecords($organizationId: String!) {\n    patient_record(\n      where: { organization_id: { _eq: $organizationId } }\n      order_by: { created_at: desc }\n    ) {\n      id\n      created_at\n      organization_id\n      notes\n    }\n  }\n": types.GetPatientRecordsDocument,
     "\n  mutation SubmitPatientConsent(\n    $invite_token: String!\n    $consent_data: ConsentInput!\n  ) {\n    submitPatientConsent(\n      invite_token: $invite_token\n      consent_data: $consent_data\n    ) {\n      success\n      patient_consent_id\n      error\n    }\n  }\n": types.SubmitPatientConsentDocument,
     "\n  mutation SubmitQuestionnaireResponse(\n    $invite_token: String!\n    $response_data: QuestionnaireResponseInput!\n  ) {\n    submitQuestionnaireResponse(\n      invite_token: $invite_token\n      response_data: $response_data\n    ) {\n      success\n      questionnaire_response_id\n      error\n    }\n  }\n": types.SubmitQuestionnaireResponseDocument,
+    "\n  mutation UpdateOrganizationPublicKey(\n    $id: String!\n    $public_key_pem: String!\n    $key_fingerprint: String!\n    $key_created_at: timestamptz!\n  ) {\n    update_organization_by_pk(\n      pk_columns: { id: $id }\n      _set: {\n        public_key_pem: $public_key_pem\n        key_fingerprint: $key_fingerprint\n        key_created_at: $key_created_at\n      }\n    ) {\n      id\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": types.UpdateOrganizationPublicKeyDocument,
+    "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": types.GetOrganizationPhysiciansDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n"): typeof import('./graphql').GetOrganizationPhysiciansDocument;
+export function graphql(source: "\n  query GetOrganizations {\n    organization {\n      id\n      name\n      city\n      created_at\n    }\n  }\n"): typeof import('./graphql').GetOrganizationsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetOrganizations {\n    organization {\n      id\n      name\n      city\n      created_at\n    }\n  }\n"): typeof import('./graphql').GetOrganizationsDocument;
+export function graphql(source: "\n  query GetOrganizationById($id: String!) {\n    organization_by_pk(id: $id) {\n      id\n      name\n      city\n      created_at\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n"): typeof import('./graphql').GetOrganizationByIdDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -49,6 +53,14 @@ export function graphql(source: "\n  mutation SubmitPatientConsent(\n    $invite
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation SubmitQuestionnaireResponse(\n    $invite_token: String!\n    $response_data: QuestionnaireResponseInput!\n  ) {\n    submitQuestionnaireResponse(\n      invite_token: $invite_token\n      response_data: $response_data\n    ) {\n      success\n      questionnaire_response_id\n      error\n    }\n  }\n"): typeof import('./graphql').SubmitQuestionnaireResponseDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOrganizationPublicKey(\n    $id: String!\n    $public_key_pem: String!\n    $key_fingerprint: String!\n    $key_created_at: timestamptz!\n  ) {\n    update_organization_by_pk(\n      pk_columns: { id: $id }\n      _set: {\n        public_key_pem: $public_key_pem\n        key_fingerprint: $key_fingerprint\n        key_created_at: $key_created_at\n      }\n    ) {\n      id\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n"): typeof import('./graphql').UpdateOrganizationPublicKeyDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n"): typeof import('./graphql').GetOrganizationPhysiciansDocument;
 
 
 export function graphql(source: string) {

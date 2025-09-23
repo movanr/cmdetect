@@ -3,6 +3,8 @@ export {
   recoverKeysFromMnemonic,
   verifyDeterministicKeys,
   validateKeyPair,
+  generateKeyFingerprint,
+  testKeyCompatibility,
 } from "./keyGeneration";
 
 export { encryptPatientData, decryptPatientData } from "./encryption";

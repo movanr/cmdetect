@@ -5,7 +5,7 @@ import { execute } from "../graphql/execute";
 import {
   submitPatientConsent,
   submitQuestionnaireResponse,
-} from "../queries/submission";
+} from "../queries/queries";
 import { signIn, useSession } from "../lib/auth";
 
 interface PatientSearch {

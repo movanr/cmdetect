@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { 
-  ArrowLeft, 
-  Shield, 
-  Stethoscope, 
-  UserCheck, 
+import {
+  ArrowLeft,
+  Shield,
+  Stethoscope,
+  UserCheck,
   AlertTriangle
 } from 'lucide-react'
 import { DashboardLayout } from './Navigation'

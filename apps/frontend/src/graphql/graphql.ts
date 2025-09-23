@@ -3042,15 +3042,17 @@ export type User_Updates = {
   where: User_Bool_Exp;
 };
 
-export type GetOrganizationPhysiciansQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetOrganizationPhysiciansQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: string, firstName?: string | null, lastName?: string | null, email: string }> };
-
 export type GetOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetOrganizationsQuery = { __typename?: 'query_root', organization: Array<{ __typename?: 'organization', id: string, name: string, city?: string | null, created_at?: any | null }> };
+
+export type GetOrganizationByIdQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetOrganizationByIdQuery = { __typename?: 'query_root', organization_by_pk?: { __typename?: 'organization', id: string, name: string, city?: string | null, created_at?: any | null, public_key_pem?: string | null, key_fingerprint?: string | null, key_created_at?: any | null } | null };
 
 export type GetPatientRecordsQueryVariables = Exact<{
   organizationId: Scalars['String']['input'];
@@ -3075,6 +3077,21 @@ export type SubmitQuestionnaireResponseMutationVariables = Exact<{
 
 export type SubmitQuestionnaireResponseMutation = { __typename?: 'mutation_root', submitQuestionnaireResponse: { __typename?: 'QuestionnaireResponseResponse', success: boolean, questionnaire_response_id?: any | null, error?: string | null } };
 
+export type UpdateOrganizationPublicKeyMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  public_key_pem: Scalars['String']['input'];
+  key_fingerprint: Scalars['String']['input'];
+  key_created_at: Scalars['timestamptz']['input'];
+}>;
+
+
+export type UpdateOrganizationPublicKeyMutation = { __typename?: 'mutation_root', update_organization_by_pk?: { __typename?: 'organization', id: string, public_key_pem?: string | null, key_fingerprint?: string | null, key_created_at?: any | null } | null };
+
+export type GetOrganizationPhysiciansQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetOrganizationPhysiciansQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: string, firstName?: string | null, lastName?: string | null, email: string }> };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -3094,16 +3111,6 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
-export const GetOrganizationPhysiciansDocument = new TypedDocumentString(`
-    query GetOrganizationPhysicians {
-  user {
-    id
-    firstName
-    lastName
-    email
-  }
-}
-    `) as unknown as TypedDocumentString<GetOrganizationPhysiciansQuery, GetOrganizationPhysiciansQueryVariables>;
 export const GetOrganizationsDocument = new TypedDocumentString(`
     query GetOrganizations {
   organization {
@@ -3114,6 +3121,19 @@ export const GetOrganizationsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetOrganizationsQuery, GetOrganizationsQueryVariables>;
+export const GetOrganizationByIdDocument = new TypedDocumentString(`
+    query GetOrganizationById($id: String!) {
+  organization_by_pk(id: $id) {
+    id
+    name
+    city
+    created_at
+    public_key_pem
+    key_fingerprint
+    key_created_at
+  }
+}
+    `) as unknown as TypedDocumentString<GetOrganizationByIdQuery, GetOrganizationByIdQueryVariables>;
 export const GetPatientRecordsDocument = new TypedDocumentString(`
     query GetPatientRecords($organizationId: String!) {
   patient_record(
@@ -3148,3 +3168,26 @@ export const SubmitQuestionnaireResponseDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SubmitQuestionnaireResponseMutation, SubmitQuestionnaireResponseMutationVariables>;
+export const UpdateOrganizationPublicKeyDocument = new TypedDocumentString(`
+    mutation UpdateOrganizationPublicKey($id: String!, $public_key_pem: String!, $key_fingerprint: String!, $key_created_at: timestamptz!) {
+  update_organization_by_pk(
+    pk_columns: {id: $id}
+    _set: {public_key_pem: $public_key_pem, key_fingerprint: $key_fingerprint, key_created_at: $key_created_at}
+  ) {
+    id
+    public_key_pem
+    key_fingerprint
+    key_created_at
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateOrganizationPublicKeyMutation, UpdateOrganizationPublicKeyMutationVariables>;
+export const GetOrganizationPhysiciansDocument = new TypedDocumentString(`
+    query GetOrganizationPhysicians {
+  user {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+    `) as unknown as TypedDocumentString<GetOrganizationPhysiciansQuery, GetOrganizationPhysiciansQueryVariables>;

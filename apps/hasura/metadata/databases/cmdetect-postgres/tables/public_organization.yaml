@@ -39,12 +39,14 @@ select_permissions:
         - city
         - country
         - created_at
-        - deleted_at
         - email
         - id
+        - key_created_at
+        - key_fingerprint
         - name
         - phone
         - postal_code
+        - public_key_pem
         - updated_at
         - website
       filter:
@@ -64,9 +66,12 @@ select_permissions:
         - created_at
         - email
         - id
+        - key_created_at
+        - key_fingerprint
         - name
         - phone
         - postal_code
+        - public_key_pem
         - updated_at
         - website
       filter:
@@ -86,9 +91,12 @@ select_permissions:
         - created_at
         - email
         - id
+        - key_created_at
+        - key_fingerprint
         - name
         - phone
         - postal_code
+        - public_key_pem
         - updated_at
         - website
       filter:
@@ -108,9 +116,12 @@ update_permissions:
         - country
         - deleted_at
         - email
+        - key_created_at
+        - key_fingerprint
         - name
         - phone
         - postal_code
+        - public_key_pem
         - website
       filter:
         _and:

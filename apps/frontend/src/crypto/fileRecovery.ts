@@ -138,31 +138,59 @@ export function uploadRecoveryFile(): Promise<RecoveryFileData> {
     input.type = "file";
     input.accept = ".json";
 
+    let isResolved = false;
+
     input.onchange = (event) => {
+      if (isResolved) return;
+
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) {
+        isResolved = true;
         reject(new Error("No file selected"));
         return;
       }
 
       const reader = new FileReader();
       reader.onload = (e) => {
+        if (isResolved) return;
+
         const content = e.target?.result as string;
         if (!content) {
+          isResolved = true;
           reject(new Error("Failed to read file"));
           return;
         }
 
         try {
           const recoveryData = parseRecoveryFile(content);
+          isResolved = true;
           resolve(recoveryData);
         } catch (error) {
+          isResolved = true;
           reject(error);
         }
       };
-      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.onerror = () => {
+        if (!isResolved) {
+          isResolved = true;
+          reject(new Error("Failed to read file"));
+        }
+      };
       reader.readAsText(file);
     };
+
+    // Handle cancellation by listening for window focus
+    const handleCancel = () => {
+      setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true;
+          reject(new Error("File selection cancelled"));
+          window.removeEventListener('focus', handleCancel);
+        }
+      }, 300); // Give some time for the file dialog to process
+    };
+
+    window.addEventListener('focus', handleCancel, { once: true });
 
     input.click();
   });

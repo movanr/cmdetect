@@ -162,6 +162,59 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer as ArrayBuffer;
 }
 
+// Generate key fingerprint from public key PEM
+export function generateKeyFingerprint(publicKeyPem: string): string {
+  try {
+    const publicKeyBytes = parsePublicKeyFromPem(publicKeyPem);
+    const hash = sha256(publicKeyBytes);
+
+    // Convert to hex format with colons (first 16 bytes for readability)
+    const fingerprintBytes = hash.slice(0, 16);
+    return Array.from(fingerprintBytes)
+      .map(byte => byte.toString(16).padStart(2, '0').toUpperCase())
+      .join(':');
+  } catch (error) {
+    throw new Error(`Failed to generate key fingerprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+// Test if private key can decrypt data encrypted with public key
+export async function testKeyCompatibility(
+  privateKeyPem: string,
+  publicKeyPem: string
+): Promise<boolean> {
+  try {
+    const testMessage = "test-encryption-compatibility-" + Math.random();
+
+    // Import the existing encryption functions (we'll need to use them)
+    const { encryptPatientData, decryptPatientData } = await import('./encryption');
+
+    // Create valid test data that matches PatientPII interface
+    const testData = {
+      firstName: "Test",
+      lastName: "Patient",
+      dateOfBirth: "1990-01-01",
+      gender: "other",
+      testValidationField: testMessage // Our validation field
+    };
+
+    // Encrypt test data with the public key
+    const encryptedData = await encryptPatientData(testData, publicKeyPem);
+
+    // Try to decrypt with the private key
+    const decryptedData = await decryptPatientData(
+      encryptedData,
+      privateKeyPem
+    );
+
+    // Check if decryption succeeded and matches original
+    return decryptedData.testValidationField === testMessage;
+  } catch (error) {
+    // If encryption/decryption fails, keys are incompatible
+    return false;
+  }
+}
+
 // Key validation function
 export function validateKeyPair(
   privateKeyPem: string,
