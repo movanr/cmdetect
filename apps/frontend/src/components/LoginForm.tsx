@@ -18,18 +18,17 @@ import { toast } from "sonner";
 import logoSvg from "../assets/logo.svg";
 
 const testAccounts = [
-  { email: "admin@test.com", role: "org_admin", label: "Organization Admin" },
-  { email: "physician@test.com", role: "physician", label: "Physician" },
-  {
-    email: "receptionist@test.com",
-    role: "receptionist",
-    label: "Receptionist",
-  },
-  {
-    email: "unverified@test.com",
-    role: "unverified",
-    label: "Unverified User",
-  },
+  // Organization 1 users
+  { email: "admin1@test.com", role: "org_admin", label: "Test Admin One" },
+  { email: "doctor1@test.com", role: "physician", label: "Dr. Test Doctor One" },
+  { email: "reception1@test.com", role: "receptionist", label: "Test Reception One" },
+
+  // Organization 2 users
+  { email: "admin2@test.com", role: "org_admin", label: "Test Admin Two" },
+  { email: "doctor2@test.com", role: "physician", label: "Dr. Test Doctor Two (Multi-role)" },
+
+  // Unverified user
+  { email: "unverified@test.com", role: "unverified", label: "Test Unverified" },
 ];
 
 export function LoginForm() {
@@ -53,8 +52,7 @@ export function LoginForm() {
         setError(result.error.message || "Login failed");
         toast.error(result.error.message || "Login failed");
       } else {
-        toast.success("Login successful");
-        console.log("Login successful:", result);
+        //toast.success("Login successful");
       }
     } catch (err) {
       const errorMessage = "Login failed. Please try again.";
@@ -68,7 +66,7 @@ export function LoginForm() {
 
   const fillTestAccount = (email: string) => {
     setEmail(email);
-    setPassword("TestPassword123!");
+    setPassword("testPassword123!");
   };
 
   return (
@@ -166,7 +164,7 @@ export function LoginForm() {
                         </Badge>
                       </div>
                       <span className="text-xs text-muted-foreground mt-1">
-                        Password: TestPassword123!
+                        Password: testPassword123!
                       </span>
                     </div>
                   </Button>

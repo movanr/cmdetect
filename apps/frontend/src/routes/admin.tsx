@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import {
   RoleLayout,
   StatsGrid,
@@ -6,13 +6,15 @@ import {
   EmptyState,
 } from "../components/RoleLayout";
 import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
-import { Users, Settings, Activity, Shield } from "lucide-react";
+import { Users, Settings, Activity, Shield, Key } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
 function AdminLayout() {
+  const navigate = useNavigate();
   const navigationItems = [
     { label: "Dashboard", href: "/admin", active: true },
     { label: "User Management", href: "/admin/users", active: false },
@@ -28,9 +30,21 @@ function AdminLayout() {
         description="Manage users, settings, and system configuration"
         navigationItems={navigationItems}
       >
-        <div className="space-y-6">
-          {/* Stats Overview */}
-          <StatsGrid>
+      <div className="space-y-6">
+        {/* Manual Key Setup Button */}
+        <div className="flex justify-end">
+          <Button
+            onClick={() => navigate({ to: "/key-setup" })}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Key className="h-4 w-4" />
+            Setup Encryption Keys
+          </Button>
+        </div>
+
+        {/* Stats Overview */}
+        <StatsGrid>
             <StatCard
               title="Total Users"
               value="24"

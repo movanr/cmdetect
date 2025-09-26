@@ -1,96 +1,81 @@
-import { useState, useEffect } from "react";
-import {
-  hasStoredPrivateKey,
-  loadPrivateKey,
-  testKeyCompatibility,
-} from "../../crypto";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { hasStoredPrivateKey, loadPrivateKey, testKeyCompatibility } from '../../crypto';
 
 interface UseKeyValidationProps {
-  organizationPublicKey?: string;
-  onValidationComplete?: (isValid: boolean) => void;
+  organizationPublicKey?: string | null;
+  onValidationComplete?: (
+    isValid: boolean,
+    validationData?: {
+      hasLocalKey: boolean;
+      hasPublicKey: boolean;
+      isCompatible: boolean | null;
+    }
+  ) => void;
 }
 
-export interface KeyValidationResult {
-  hasLocalKey: boolean;
-  hasPublicKey: boolean;
-  isCompatible: boolean | null;
-  isLoading: boolean;
-  error?: string;
-}
+export function useKeyValidation({ organizationPublicKey, onValidationComplete }: UseKeyValidationProps) {
+  const [hasLocalKey, setHasLocalKey] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>();
 
-export function useKeyValidation({
-  organizationPublicKey,
-  onValidationComplete,
-}: UseKeyValidationProps) {
-  const [result, setResult] = useState<KeyValidationResult>({
-    hasLocalKey: false,
-    hasPublicKey: false,
-    isCompatible: null,
-    isLoading: true,
-  });
+  // Use ref to avoid infinite re-renders from callback changes
+  const callbackRef = useRef(onValidationComplete);
+  callbackRef.current = onValidationComplete;
 
-  const validateKeys = async () => {
+  const validateKeys = useCallback(async () => {
+    if (organizationPublicKey === undefined) return; // Wait for org data
+
     try {
-      setResult((prev) => ({ ...prev, isLoading: true, error: undefined }));
+      setIsLoading(true);
+      setError(undefined);
 
-      const hasLocalKey = await hasStoredPrivateKey();
+      const hasLocal = await hasStoredPrivateKey();
+      setHasLocalKey(hasLocal);
+
       const hasPublicKey = !!organizationPublicKey;
-
       let isCompatible: boolean | null = null;
 
-      // Only test compatibility if both keys exist
-      if (hasLocalKey && hasPublicKey) {
+      if (hasLocal && hasPublicKey) {
         try {
           const privateKey = await loadPrivateKey();
           if (privateKey) {
-            isCompatible = await testKeyCompatibility(
-              privateKey,
-              organizationPublicKey
-            );
+            isCompatible = await testKeyCompatibility(privateKey, organizationPublicKey);
           }
-        } catch (error) {
-          console.error("Error testing key compatibility:", error);
+        } catch (compatError) {
+          console.error('Compatibility test failed:', compatError);
           isCompatible = false;
         }
       }
 
-      const newResult = {
-        hasLocalKey,
+      const isValid = hasLocal && hasPublicKey && isCompatible === true;
+
+      callbackRef.current?.(isValid, {
+        hasLocalKey: hasLocal,
         hasPublicKey,
-        isCompatible,
-        isLoading: false,
-      };
+        isCompatible
+      });
 
-      setResult(newResult);
-
-      // Call callback with final validation result
-      if (onValidationComplete) {
-        const isValid = hasLocalKey && hasPublicKey && isCompatible === true;
-        onValidationComplete(isValid);
-      }
-    } catch (error) {
-      console.error("Error validating keys:", error);
-      setResult({
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Validation failed';
+      setError(errorMessage);
+      callbackRef.current?.(false, {
         hasLocalKey: false,
         hasPublicKey: false,
-        isCompatible: null,
-        isLoading: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        isCompatible: null
       });
-      onValidationComplete?.(false);
-    }
-  };
-
-  useEffect(() => {
-    // Only validate if we have a defined value (either a key or explicitly null)
-    // This prevents validation from running with undefined during initial load
-    if (organizationPublicKey !== undefined) {
-      validateKeys();
+    } finally {
+      setIsLoading(false);
     }
   }, [organizationPublicKey]);
 
+  useEffect(() => {
+    validateKeys();
+  }, [validateKeys]);
+
   return {
-    ...result,
-    revalidate: validateKeys,
+    hasLocalKey,
+    isLoading,
+    error,
+    revalidate: validateKeys
   };
 }

@@ -1,10 +1,10 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useSession, signOut } from "../lib/auth";
-import { useRole, type UserRole } from "../contexts/RoleContext";
+import { type UserRole } from "../contexts/RoleContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   LogOut,
@@ -187,45 +187,36 @@ export function RoleNavigation({
 }
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
   const { data: session } = useSession();
-  const { availableRoles, activeRole } = useRole();
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success("Signed out successfully");
+      //toast.success("Signed out successfully");
+      // Navigate to login after successful sign out
+      navigate({ to: "/login" });
     } catch (error) {
       console.error("Sign out error:", error);
       toast.error("Failed to sign out");
     }
   };
 
-  if (!session) return null;
+  // Handle navigation to login when no session - use useEffect to avoid setState during render
+  useEffect(() => {
+    if (!session) {
+      navigate({ to: "/login" });
+    }
+  }, [session, navigate]);
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <NavigationHeader session={session} onSignOut={handleSignOut} />
       {children}
-
-      {/* Debug Panel in Development */}
-      {process.env.NODE_ENV === "development" && (
-        <>
-          <Separator className="mt-8" />
-          <div className="container py-4">
-            <Card className="bg-muted/50">
-              <CardContent className="p-4">
-                <h3 className="text-sm font-medium mb-2">Debug Information</h3>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Active Role: {activeRole || "None"}</p>
-                  <p>Available Roles: [{availableRoles.join(", ")}]</p>
-                  <p>User ID: {session.user.id}</p>
-                  <p>Email: {session.user.email}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      )}
     </div>
   );
 }

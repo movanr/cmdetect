@@ -1,108 +1,79 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useRole } from "../contexts/RoleContext";
-import { useSession } from "../lib/auth";
+import {
+  RoleLayout,
+  StatsGrid,
+  StatCard,
+  EmptyState,
+} from "../components/RoleLayout";
 import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
+import { UserCheck, Calendar, FileText, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/receptionist")({
   component: ReceptionistLayout,
 });
 
 function ReceptionistLayout() {
-  const { data: session } = useSession();
-  const { activeRole, switchRole, hasRole, isLoading } = useRole();
-
-  useEffect(() => {
-    if (
-      session?.user &&
-      hasRole("receptionist") &&
-      activeRole !== "receptionist"
-    ) {
-      switchRole("receptionist");
-    }
-  }, [session, hasRole, activeRole, switchRole]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">
-            Switching to receptionist mode...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session?.user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Authentication Required
-          </h2>
-          <p className="text-gray-600">
-            Please sign in to access receptionist features.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!hasRole("receptionist")) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
-          <p className="text-gray-600">
-            You don't have permission to access receptionist features.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const navigationItems = [
+    { label: "Patient Records", href: "/receptionist", active: true },
+    { label: "Appointments", href: "/receptionist/appointments", active: false },
+    { label: "Check-ins", href: "/receptionist/checkins", active: false },
+    { label: "Reports", href: "/receptionist/reports", active: false },
+  ];
 
   return (
     <KeySetupGuard>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-4">
-                <h1 className="text-xl font-semibold text-gray-900">
-                  Reception Desk
-                </h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  {activeRole === "receptionist"
-                    ? "Receptionist Mode"
-                    : "Role Loading..."}
-                </span>
-              </div>
-              <div className="text-sm text-gray-600">
-                {session.user?.name || session.user?.email || "User"}
-              </div>
-            </div>
-          </div>
-        </header>
+      <RoleLayout
+        requiredRole="receptionist"
+        title="Reception Desk"
+        description="Manage patient records, appointments, and check-ins"
+        navigationItems={navigationItems}
+      >
+        <div className="space-y-6">
+          {/* Stats Overview */}
+          <StatsGrid>
+            <StatCard
+              title="Scheduled Today"
+              value="18"
+              description="Appointments"
+              icon={Calendar}
+              trend={{ value: 3, isPositive: true }}
+            />
+            <StatCard
+              title="Checked In"
+              value="12"
+              description="Patients waiting"
+              icon={UserCheck}
+            />
+            <StatCard
+              title="New Patients"
+              value="5"
+              description="This week"
+              icon={FileText}
+              trend={{ value: 2, isPositive: true }}
+            />
+            <StatCard
+              title="Efficiency"
+              value="96%"
+              description="On-time rate"
+              icon={TrendingUp}
+              trend={{ value: 1, isPositive: true }}
+            />
+          </StatsGrid>
 
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Receptionist Dashboard
-              </h2>
-              <p className="text-gray-600">
-                This is the receptionist interface.
-              </p>
-
-              <div className="mt-6">
-                <Outlet />
-              </div>
-            </div>
+          {/* Recent Activity */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Recent Activity</h3>
+            <EmptyState
+              icon={Calendar}
+              title="No recent appointments"
+              description="Patient appointments and check-ins will appear here when scheduled."
+            />
           </div>
-        </main>
-      </div>
+
+          {/* Nested routes will render here */}
+          <Outlet />
+        </div>
+      </RoleLayout>
     </KeySetupGuard>
   );
 }

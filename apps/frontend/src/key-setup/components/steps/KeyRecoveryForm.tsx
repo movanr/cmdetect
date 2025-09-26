@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RefreshCw, Upload, FileText, AlertTriangle } from "lucide-react";
-import { useKeyRecovery } from "../hooks/useKeyRecovery";
+import { useKeyRecovery } from "../../hooks/useKeyRecovery";
 
 interface KeyRecoveryFormProps {
   organizationPublicKey?: string;
