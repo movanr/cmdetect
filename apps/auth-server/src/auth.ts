@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { jwt, anonymous } from "better-auth/plugins";
+import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
 import dotenv from "dotenv";
@@ -24,9 +24,6 @@ export const auth = betterAuth({
 
   // Plugins
   plugins: [
-    // Anonymous sessions for patient questionnaire access
-    anonymous(),
-
     // JWT Configuration for Hasura with custom claims
     jwt({
       jwt: {
@@ -34,21 +31,6 @@ export const auth = betterAuth({
         audience: "hasura",
         expirationTime: "8h", // Longer session for healthcare workflow
         definePayload: ({ user }) => {
-          // Check if this is an anonymous user
-          if (!user || user.email?.startsWith("temp-") || user.isAnonymous) {
-            // Anonymous user for patient questionnaire access
-            const claims: Record<string, any> = {
-              "x-hasura-default-role": "anonymous",
-              "x-hasura-allowed-roles": ["anonymous"],
-              "x-hasura-user-id": user?.id || "anonymous",
-            };
-
-            return {
-              ...user,
-              "https://hasura.io/jwt/claims": claims,
-            };
-          }
-
           // Validate roles array and apply hierarchy for authenticated users
           const roleHierarchy = ["org_admin", "physician", "receptionist"];
           const userRoles = (user.roles as string[]) || [];

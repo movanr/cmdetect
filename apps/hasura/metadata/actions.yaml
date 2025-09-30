@@ -5,28 +5,28 @@ actions:
       handler: http://host.docker.internal:3001/actions/submit-patient-consent
       forward_client_headers: true
     permissions:
-      - role: anonymous
+      - role: public
   - name: submitPatientPersonalData
     definition:
       kind: synchronous
       handler: http://host.docker.internal:3001/actions/submit-patient-personal-data
       forward_client_headers: true
     permissions:
-      - role: anonymous
+      - role: public
   - name: submitQuestionnaireResponse
     definition:
       kind: synchronous
       handler: http://host.docker.internal:3001/actions/submit-questionnaire-response
       forward_client_headers: true
     permissions:
-      - role: anonymous
+      - role: public
   - name: validateInviteToken
     definition:
       kind: synchronous
       handler: http://host.docker.internal:3001/actions/validate-invite-token
       forward_client_headers: true
     permissions:
-      - role: anonymous
+      - role: public
 custom_types:
   enums: []
   input_objects:

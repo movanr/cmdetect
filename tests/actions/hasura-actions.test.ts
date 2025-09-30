@@ -62,54 +62,10 @@ describe("Hasura Actions Integration", () => {
     inviteToken = result.insert_patient_record.returning[0].invite_token;
   };
 
-  const createAnonymousSessionAndGetJWT = async () => {
-    const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || "http://localhost:3001";
-    
-    // Step 1: Create anonymous session
-    const sessionResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/sign-in/anonymous`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-
-    if (!sessionResponse.ok) {
-      throw new Error(`Failed to create anonymous session: ${sessionResponse.statusText}`);
-    }
-
-    const sessionCookie = sessionResponse.headers.get('set-cookie');
-    if (!sessionCookie) {
-      throw new Error('No session cookie received');
-    }
-
-    // Step 2: Get JWT token using the session cookie
-    const tokenResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/token`, {
-      method: 'GET',
-      headers: {
-        'Cookie': sessionCookie,
-      }
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error(`Failed to get JWT token: ${tokenResponse.statusText}`);
-    }
-
-    const tokenData = await tokenResponse.json();
-    
-    // Successfully created anonymous session and retrieved JWT token
-    
-    return tokenData.token;
-  };
-
-  const hasuraGraphQLRequest = async (query: string, variables?: any, jwtToken?: string) => {
+  const hasuraGraphQLRequest = async (query: string, variables?: any) => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    
-    // Add JWT token for authentication
-    if (jwtToken) {
-      headers['Authorization'] = `Bearer ${jwtToken}`;
-    }
 
     const response = await fetch(HASURA_URL, {
       method: 'POST',
@@ -129,8 +85,6 @@ describe("Hasura Actions Integration", () => {
 
   describe("validateInviteToken Action", () => {
     it("should reject invalid invite token through GraphQL", async () => {
-      const jwtToken = await createAnonymousSessionAndGetJWT();
-      
       const query = `
         mutation TestValidateInvite($token: String!) {
           validateInviteToken(invite_token: $token) {
@@ -142,8 +96,8 @@ describe("Hasura Actions Integration", () => {
         }
       `;
 
-      const result = await hasuraGraphQLRequest(query, { token: "invalid-token-123" }, jwtToken);
-      
+      const result = await hasuraGraphQLRequest(query, { token: "invalid-token-123" });
+
       expect(result.validateInviteToken.valid).toBe(false);
       expect(result.validateInviteToken.error_message).toBe("Invalid invite token format");
       expect(result.validateInviteToken.organization_name).toBeNull();
@@ -151,8 +105,6 @@ describe("Hasura Actions Integration", () => {
     });
 
     it("should validate correct invite token through GraphQL", async () => {
-      const jwtToken = await createAnonymousSessionAndGetJWT();
-      
       const query = `
         mutation TestValidateInvite($token: String!) {
           validateInviteToken(invite_token: $token) {
@@ -166,8 +118,8 @@ describe("Hasura Actions Integration", () => {
         }
       `;
 
-      const result = await hasuraGraphQLRequest(query, { token: inviteToken }, jwtToken);
-      
+      const result = await hasuraGraphQLRequest(query, { token: inviteToken });
+
       expect(result.validateInviteToken.valid).toBe(true);
       expect(result.validateInviteToken.organization_name).toBe("Test Medical Practice 1");
       expect(result.validateInviteToken.public_key_pem).toContain("BEGIN PUBLIC KEY");
@@ -177,8 +129,6 @@ describe("Hasura Actions Integration", () => {
     });
 
     it("should reject malformed UUID through GraphQL", async () => {
-      const jwtToken = await createAnonymousSessionAndGetJWT();
-      
       const query = `
         mutation TestValidateInvite($token: String!) {
           validateInviteToken(invite_token: $token) {
@@ -188,8 +138,8 @@ describe("Hasura Actions Integration", () => {
         }
       `;
 
-      const result = await hasuraGraphQLRequest(query, { token: "not-a-valid-uuid" }, jwtToken);
-      
+      const result = await hasuraGraphQLRequest(query, { token: "not-a-valid-uuid" });
+
       expect(result.validateInviteToken.valid).toBe(false);
       expect(result.validateInviteToken.error_message).toBe("Invalid invite token format");
     });
@@ -197,8 +147,6 @@ describe("Hasura Actions Integration", () => {
 
   describe("submitPatientConsent Action", () => {
     it("should successfully submit consent through GraphQL", async () => {
-      const jwtToken = await createAnonymousSessionAndGetJWT();
-      
       const query = `
         mutation SubmitConsent($token: String!, $consent: ConsentInput!) {
           submitPatientConsent(invite_token: $token, consent_data: $consent) {
@@ -218,8 +166,8 @@ describe("Hasura Actions Integration", () => {
         }
       };
 
-      const result = await hasuraGraphQLRequest(query, variables, jwtToken);
-      
+      const result = await hasuraGraphQLRequest(query, variables);
+
       expect(result.submitPatientConsent.success).toBe(true);
       expect(result.submitPatientConsent.patient_consent_id).toBeDefined();
       expect(result.submitPatientConsent.error).toBeNull();
@@ -228,8 +176,6 @@ describe("Hasura Actions Integration", () => {
 
   describe("submitPatientPersonalData Action", () => {
     it("should successfully submit encrypted personal data through GraphQL", async () => {
-      const jwtToken = await createAnonymousSessionAndGetJWT();
-      
       const query = `
         mutation SubmitPersonalData($token: String!, $data: PatientPersonalDataInput!) {
           submitPatientPersonalData(invite_token: $token, patient_data: $data) {
@@ -251,8 +197,8 @@ describe("Hasura Actions Integration", () => {
         }
       };
 
-      const result = await hasuraGraphQLRequest(query, variables, jwtToken);
-      
+      const result = await hasuraGraphQLRequest(query, variables);
+
       expect(result.submitPatientPersonalData.success).toBe(true);
       expect(result.submitPatientPersonalData.patient_record_id).toBe(patientRecordId);
       expect(result.submitPatientPersonalData.message).toBe("Patient personal data submitted successfully");
@@ -288,12 +234,10 @@ describe("Hasura Actions Integration", () => {
     });
   });
 
-  describe("Anonymous Access", () => {
-    it("should allow anonymous access to validateInviteToken", async () => {
-      const jwtToken = await createAnonymousSessionAndGetJWT();
-      
+  describe("Public Access", () => {
+    it("should allow unauthenticated public access to validateInviteToken", async () => {
       const query = `
-        mutation TestAnonymousAccess($token: String!) {
+        mutation TestPublicAccess($token: String!) {
           validateInviteToken(invite_token: $token) {
             valid
             error_message
@@ -301,9 +245,9 @@ describe("Hasura Actions Integration", () => {
         }
       `;
 
-      // This should succeed with anonymous session
-      const result = await hasuraGraphQLRequest(query, { token: "test-token" }, jwtToken);
-      
+      // This should succeed without any authentication
+      const result = await hasuraGraphQLRequest(query, { token: "test-token" });
+
       expect(result.validateInviteToken.valid).toBe(false);
       expect(result.validateInviteToken.error_message).toBe("Invalid invite token format");
     });

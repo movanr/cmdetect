@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { execute } from "../graphql/execute";
 import {
   submitPatientConsent,
   submitQuestionnaireResponse,
 } from "../queries/queries";
-import { signIn, useSession } from "../lib/auth";
 
 interface PatientSearch {
   invite_token?: string;
@@ -22,34 +21,8 @@ export const Route = createFileRoute("/patient")({
 });
 
 function PatientPage() {
-  const { data: session } = useSession();
   const { invite_token } = Route.useSearch();
-
-  // Simple state for session creation
-  const [isCreatingSession, setIsCreatingSession] = useState(false);
-  const sessionCreationAttempted = useRef(false);
   const [responses, setResponses] = useState<string[]>([]);
-
-  // Auto-create anonymous session if not exists (simple, no complex dependencies)
-  useEffect(() => {
-    if (
-      invite_token &&
-      !session?.user &&
-      !isCreatingSession &&
-      !sessionCreationAttempted.current
-    ) {
-      sessionCreationAttempted.current = true;
-      setIsCreatingSession(true);
-
-      signIn
-        .anonymous()
-        .then(() => console.log("Anonymous session created for patient"))
-        .catch((error) =>
-          console.error("Error creating anonymous session:", error)
-        )
-        .finally(() => setIsCreatingSession(false));
-    }
-  }, [invite_token, session?.user, isCreatingSession]);
 
   // State to track if consent was submitted in this session
   const [consentSubmitted, setConsentSubmitted] = useState(false);
@@ -118,17 +91,6 @@ function PatientPage() {
             No invite token provided. Please use the link provided by your
             healthcare provider.
           </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading states
-  if (isCreatingSession || !session?.user) {
-    return (
-      <div className="p-4 max-w-2xl mx-auto">
-        <div className="p-4 bg-blue-50 rounded border border-blue-200">
-          <p className="text-blue-700">Setting up your secure session...</p>
         </div>
       </div>
     );
