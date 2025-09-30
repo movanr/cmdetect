@@ -3,9 +3,13 @@ import {
   RoleLayout,
   StatsGrid,
   StatCard,
-  EmptyState,
 } from "../components/RoleLayout";
 import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
+import { InvitesView } from "../components/dashboard/InvitesView";
+import { useInvites } from "../lib/patient-records";
+import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
+
+type PatientRecord = GetAllPatientRecordsQuery['patient_record'][number];
 import { UserCheck, Calendar, FileText, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/receptionist")({
@@ -13,11 +17,10 @@ export const Route = createFileRoute("/receptionist")({
 });
 
 function ReceptionistLayout() {
+  const { data: invites } = useInvites();
+
   const navigationItems = [
     { label: "Patient Records", href: "/receptionist", active: true },
-    { label: "Appointments", href: "/receptionist/appointments", active: false },
-    { label: "Check-ins", href: "/receptionist/checkins", active: false },
-    { label: "Reports", href: "/receptionist/reports", active: false },
   ];
 
   return (
@@ -32,42 +35,41 @@ function ReceptionistLayout() {
           {/* Stats Overview */}
           <StatsGrid>
             <StatCard
-              title="Scheduled Today"
-              value="18"
-              description="Appointments"
+              title="Active Invites"
+              value={invites?.length || 0}
+              description="Pending responses"
               icon={Calendar}
-              trend={{ value: 3, isPositive: true }}
             />
             <StatCard
-              title="Checked In"
-              value="12"
-              description="Patients waiting"
+              title="Expired Invites"
+              value={invites?.filter((invite: PatientRecord) => {
+                return invite.invite_expires_at && new Date(invite.invite_expires_at) <= new Date()
+              })?.length || 0}
+              description="Need attention"
               icon={UserCheck}
             />
             <StatCard
-              title="New Patients"
-              value="5"
-              description="This week"
+              title="This Week"
+              value={invites?.filter((invite: PatientRecord) => {
+                const oneWeekAgo = new Date()
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+                return new Date(invite.created_at) >= oneWeekAgo
+              })?.length || 0}
+              description="New invites"
               icon={FileText}
-              trend={{ value: 2, isPositive: true }}
             />
             <StatCard
-              title="Efficiency"
-              value="96%"
-              description="On-time rate"
+              title="Response Rate"
+              value="0%"
+              description="Overall completion"
               icon={TrendingUp}
-              trend={{ value: 1, isPositive: true }}
             />
           </StatsGrid>
 
-          {/* Recent Activity */}
+          {/* Dashboard Content */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Recent Activity</h3>
-            <EmptyState
-              icon={Calendar}
-              title="No recent appointments"
-              description="Patient appointments and check-ins will appear here when scheduled."
-            />
+            <h3 className="text-lg font-semibold">Patient Invites</h3>
+            <InvitesView />
           </div>
 
           {/* Nested routes will render here */}

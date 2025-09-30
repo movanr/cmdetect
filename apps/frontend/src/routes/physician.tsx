@@ -3,25 +3,27 @@ import {
   RoleLayout,
   StatsGrid,
   StatCard,
-  EmptyState,
 } from "../components/RoleLayout";
 import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
+import { InvitesView } from "../components/dashboard/InvitesView";
+import { SubmissionsView } from "../components/dashboard/SubmissionsView";
+import { useInvites, useSubmissions } from "../lib/patient-records";
+import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
+
+type PatientRecord = GetAllPatientRecordsQuery['patient_record'][number];
 import { FileText, Users, Calendar, TrendingUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/physician")({
   component: PhysicianLayout,
 });
 
 function PhysicianLayout() {
+  const { data: invites } = useInvites();
+  const { data: submissions } = useSubmissions();
+
   const navigationItems = [
     { label: "Patient Records", href: "/physician", active: true },
-    { label: "Assigned Cases", href: "/physician/cases", active: false },
-    {
-      label: "Questionnaires",
-      href: "/physician/questionnaires",
-      active: false,
-    },
-    { label: "Reports", href: "/physician/reports", active: false },
   ];
 
   return (
@@ -36,43 +38,46 @@ function PhysicianLayout() {
           {/* Stats Overview */}
           <StatsGrid>
             <StatCard
-              title="Assigned Patients"
-              value="32"
-              description="Active cases"
+              title="Pending Invites"
+              value={invites?.length || 0}
+              description="Awaiting response"
               icon={Users}
-              trend={{ value: 5, isPositive: true }}
             />
             <StatCard
-              title="Pending Reviews"
-              value="8"
-              description="Questionnaires to review"
+              title="Patient Submissions"
+              value={submissions?.length || 0}
+              description="Ready for review"
               icon={FileText}
             />
             <StatCard
-              title="Appointments"
-              value="12"
-              description="This week"
+              title="Unreviewed"
+              value={submissions?.filter((submission: PatientRecord) => !submission.first_viewed_at)?.length || 0}
+              description="New submissions"
               icon={Calendar}
-              trend={{ value: 3, isPositive: true }}
             />
             <StatCard
               title="Completion Rate"
-              value="94%"
-              description="This month"
+              value={submissions && invites ?
+                Math.round((submissions.length / (submissions.length + invites.length)) * 100) : 0
+              }
+              description="Response rate"
               icon={TrendingUp}
-              trend={{ value: 2, isPositive: true }}
             />
           </StatsGrid>
 
-          {/* Recent Cases */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Recent Cases</h3>
-            <EmptyState
-              icon={FileText}
-              title="No recent cases"
-              description="Patient cases and medical records will appear here when assigned to you."
-            />
-          </div>
+          {/* Dashboard Tabs */}
+          <Tabs defaultValue="submissions" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="submissions">Submissions</TabsTrigger>
+              <TabsTrigger value="invites">Invites</TabsTrigger>
+            </TabsList>
+            <TabsContent value="submissions" className="space-y-4">
+              <SubmissionsView />
+            </TabsContent>
+            <TabsContent value="invites" className="space-y-4">
+              <InvitesView />
+            </TabsContent>
+          </Tabs>
 
           {/* Nested routes will render here */}
           <Outlet />

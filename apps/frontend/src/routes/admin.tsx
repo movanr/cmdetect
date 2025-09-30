@@ -3,11 +3,15 @@ import {
   RoleLayout,
   StatsGrid,
   StatCard,
-  EmptyState,
 } from "../components/RoleLayout";
 import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
+import { InvitesView } from "../components/dashboard/InvitesView";
+import { SubmissionsView } from "../components/dashboard/SubmissionsView";
+import { UsersView } from "../components/dashboard/UsersView";
+import { useInvites, useSubmissions, useUsers } from "../lib/patient-records";
 import { Users, Settings, Activity, Shield, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -15,11 +19,12 @@ export const Route = createFileRoute("/admin")({
 
 function AdminLayout() {
   const navigate = useNavigate();
+  const { data: invites } = useInvites();
+  const { data: submissions } = useSubmissions();
+  const { data: users } = useUsers();
+
   const navigationItems = [
     { label: "Dashboard", href: "/admin", active: true },
-    { label: "User Management", href: "/admin/users", active: false },
-    { label: "Organization Settings", href: "/admin/settings", active: false },
-    { label: "System Configuration", href: "/admin/config", active: false },
   ];
 
   return (
@@ -47,41 +52,47 @@ function AdminLayout() {
         <StatsGrid>
             <StatCard
               title="Total Users"
-              value="24"
+              value={users?.length || 0}
               description="Active accounts"
               icon={Users}
-              trend={{ value: 12, isPositive: true }}
             />
             <StatCard
-              title="Active Sessions"
-              value="18"
-              description="Currently online"
+              title="Pending Invites"
+              value={invites?.length || 0}
+              description="Awaiting response"
               icon={Activity}
             />
             <StatCard
-              title="System Health"
-              value="98.9%"
-              description="Uptime this month"
+              title="Submissions"
+              value={submissions?.length || 0}
+              description="Completed forms"
               icon={Shield}
-              trend={{ value: 0.2, isPositive: true }}
             />
             <StatCard
-              title="Configurations"
-              value="12"
-              description="Total settings"
+              title="Key Status"
+              value="Active"
+              description="Encryption ready"
               icon={Settings}
             />
           </StatsGrid>
 
-          {/* Recent Activity */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Recent Activity</h3>
-            <EmptyState
-              icon={Activity}
-              title="No recent activity"
-              description="System activity and user actions will appear here when they occur."
-            />
-          </div>
+          {/* Dashboard Tabs */}
+          <Tabs defaultValue="invites" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="invites">Invites</TabsTrigger>
+              <TabsTrigger value="submissions">Submissions</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
+            </TabsList>
+            <TabsContent value="invites" className="space-y-4">
+              <InvitesView />
+            </TabsContent>
+            <TabsContent value="submissions" className="space-y-4">
+              <SubmissionsView />
+            </TabsContent>
+            <TabsContent value="users" className="space-y-4">
+              <UsersView />
+            </TabsContent>
+          </Tabs>
 
           {/* Nested routes will render here */}
           <Outlet />
