@@ -26,11 +26,11 @@ describe("Test Setup Verification", () => {
     expect(TestDataIds.organizations.org2).toBe(
       "22222222-2222-2222-2222-222222222222"
     );
-    expect(TestDataIds.users.org1Admin).toBe(
-      "lLEeCpaZ6VS9omwmrenDKTHPbIVTnoOG"
+    expect(TestDataIds.organizations.org3).toBe(
+      "33333333-3333-3333-3333-333333333333"
     );
-    expect(TestDataIds.patients.org1Patient1).toBe(
-      "f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1"
+    expect(TestDataIds.users.org1Admin).toBe(
+      "4gLI1mnAaxP91SdpIDWmPf8RDKou5vHC"
     );
   });
 });

@@ -31,31 +31,6 @@ export interface TestOrganization {
   description: string;
 }
 
-export interface TestPatient {
-  id: string;
-  organizationId: string;
-  clinicInternalId: string;
-  firstNameEncrypted: string;
-  lastNameEncrypted: string;
-  dateOfBirthEncrypted?: string;
-  genderEncrypted?: string;
-}
-
-export interface TestRegistration {
-  id: string;
-  organizationId: string;
-  patientId: string;
-  createdByUserId: string;
-  assignedUserId: string;
-  status: string;
-}
-
-export interface TestPatientRecord {
-  organizationId: string;
-  createdBy: string;
-  assignedTo: string;
-}
-
 // =============================================================================
 // ORGANIZATIONS
 // =============================================================================
@@ -64,12 +39,20 @@ export const TestOrganizations: Record<string, TestOrganization> = {
   org1: {
     id: "11111111-1111-1111-1111-111111111111",
     name: "Test Medical Practice 1",
-    description: "First test organization for multi-tenant testing",
+    description:
+      "First test organization for automated integration testing only",
   },
   org2: {
     id: "22222222-2222-2222-2222-222222222222",
     name: "Test Medical Practice 2",
-    description: "Second test organization for isolation testing",
+    description:
+      "Second test organization for automated isolation testing only",
+  },
+  org3: {
+    id: "33333333-3333-3333-3333-333333333333",
+    name: "Manual Test Medical Practice",
+    description:
+      "Organization for manual frontend testing with real user login flows",
   },
 };
 
@@ -84,7 +67,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["org_admin"],
     defaultRole: "org_admin",
     organizationId: TestOrganizations.org1.id,
-    userId: "lLEeCpaZ6VS9omwmrenDKTHPbIVTnoOG",
+    userId: "4gLI1mnAaxP91SdpIDWmPf8RDKou5vHC",
     firstName: "Admin",
     lastName: "One",
     isActive: true,
@@ -97,7 +80,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["physician"],
     defaultRole: "physician",
     organizationId: TestOrganizations.org1.id,
-    userId: "l5yaJtMeBLnulXiHuk2DnchMfBwG5HfE",
+    userId: "zm8ZjF4Cg4MXLV0Zr8OrnwLBR6uk3WFH",
     firstName: "Doctor",
     lastName: "One",
     isActive: true,
@@ -110,7 +93,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["receptionist"],
     defaultRole: "receptionist",
     organizationId: TestOrganizations.org1.id,
-    userId: "M2EEgL39LMV06URjO2eaaNACGHeNUvjv",
+    userId: "5QPtVmZcr5BP8PIiC857t9vY8IvKw5Jm",
     firstName: "Reception",
     lastName: "One",
     isActive: true,
@@ -123,7 +106,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["org_admin"],
     defaultRole: "org_admin",
     organizationId: TestOrganizations.org2.id,
-    userId: "35Npuj7FxeVvz3zZoT2IQdMGlJTRIvA9",
+    userId: "tTCZiLMVjxYP5Wrez4pLdUxmkTN5eg9G",
     firstName: "Admin",
     lastName: "Two",
     isActive: true,
@@ -136,7 +119,7 @@ export const TestUsers: Record<string, TestUser> = {
     roles: ["physician", "receptionist"],
     defaultRole: "physician",
     organizationId: TestOrganizations.org2.id,
-    userId: "2JxSkLgZz2qAlgPFjyZVLmNg6ppvkiT7",
+    userId: "6QKaX1K6pEqILvHwGVkhwN0HICMqDKFW",
     firstName: "Doctor",
     lastName: "Two",
     isActive: true,
@@ -144,53 +127,6 @@ export const TestUsers: Record<string, TestUser> = {
   },
 };
 
-// =============================================================================
-// TEST PATIENTS
-// =============================================================================
-
-export const TestPatients: Record<string, TestPatient> = {
-  org1Patient1: {
-    id: "f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1",
-    organizationId: TestOrganizations.org1.id,
-    clinicInternalId: "P001",
-    firstNameEncrypted: "encrypted_john",
-    lastNameEncrypted: "encrypted_doe",
-    dateOfBirthEncrypted: "encrypted_1990-01-01",
-    genderEncrypted: "encrypted_male",
-  },
-
-  org1Patient2: {
-    id: "f2f2f2f2-f2f2-f2f2-f2f2-f2f2f2f2f2f2",
-    organizationId: TestOrganizations.org1.id,
-    clinicInternalId: "P002",
-    firstNameEncrypted: "encrypted_jane",
-    lastNameEncrypted: "encrypted_smith",
-    dateOfBirthEncrypted: "encrypted_1985-05-15",
-    genderEncrypted: "encrypted_female",
-  },
-
-  org2Patient1: {
-    id: "f3f3f3f3-f3f3-f3f3-f3f3-f3f3f3f3f3f3",
-    organizationId: TestOrganizations.org2.id,
-    clinicInternalId: "P101",
-    firstNameEncrypted: "encrypted_alice",
-    lastNameEncrypted: "encrypted_wilson",
-    dateOfBirthEncrypted: "encrypted_1982-12-10",
-    genderEncrypted: "encrypted_female",
-  },
-};
-
-// =============================================================================
-// TEST PATIENT RECORDS
-// =============================================================================
-
-export const TestPatientRecords: Record<string, TestPatientRecord> = {
-  org1PatientRecord1: {
-    organizationId: TestOrganizations.org1.id,
-    createdBy: TestUsers.org1Receptionist.userId,
-    assignedTo: TestUsers.org1Physician.userId,
-  },
-};
 
 // =============================================================================
 // CONVENIENCE EXPORTS
@@ -201,6 +137,7 @@ export const TestDataIds = {
   organizations: {
     org1: TestOrganizations.org1.id,
     org2: TestOrganizations.org2.id,
+    org3: TestOrganizations.org3.id,
   },
   users: {
     org1Admin: TestUsers.org1Admin.userId,
@@ -208,11 +145,6 @@ export const TestDataIds = {
     org1Receptionist: TestUsers.org1Receptionist.userId,
     org2Admin: TestUsers.org2Admin.userId,
     org2Physician: TestUsers.org2Physician.userId,
-  },
-  patients: {
-    org1Patient1: TestPatients.org1Patient1.id,
-    org1Patient2: TestPatients.org1Patient2.id,
-    org2Patient1: TestPatients.org2Patient1.id,
   },
 };
 
@@ -232,17 +164,6 @@ export function getUsersForOrganization(
   );
 }
 
-/**
- * Get all patients for a specific organization
- */
-export function getPatientsForOrganization(
-  orgKey: keyof typeof TestOrganizations
-): TestPatient[] {
-  const orgId = TestOrganizations[orgKey].id;
-  return Object.values(TestPatients).filter(
-    (patient) => patient.organizationId === orgId
-  );
-}
 
 /**
  * Get user by email

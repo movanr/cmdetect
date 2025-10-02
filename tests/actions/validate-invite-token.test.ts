@@ -32,9 +32,9 @@ describe("Validate Invite Token Action Handler", () => {
   });
 
   const setupPatientRecord = async () => {
-    // First, add a public key to the test organization
-    const testPublicKey = "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1234567890abcdef\\n-----END PUBLIC KEY-----";
-    
+    // Add a test public key to the organization (pseudo key for testing only)
+    const testPublicKey = "-----BEGIN PUBLIC KEY-----\\nBGRvTm90VXNlVGhpc0tleUluUHJvZHVjdGlvbkl0SXNPbmx5Rm9yVGVzdGluZ1B1cnBvc2VzT25seQ==\\n-----END PUBLIC KEY-----";
+
     await adminClient.request(`
       mutation {
         update_organization_by_pk(

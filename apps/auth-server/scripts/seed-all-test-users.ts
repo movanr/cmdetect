@@ -33,6 +33,11 @@ const TEST_ORGANIZATIONS = [
     name: "Test Medical Practice 2",
     city: "Test City 2",
   },
+  {
+    id: "33333333-3333-3333-3333-333333333333",
+    name: "Manual Test Medical Practice",
+    city: "Test City 3",
+  },
 ];
 
 interface TestUser {
@@ -85,10 +90,34 @@ const TEST_USERS: TestUser[] = [
     organizationId: TEST_ORGANIZATIONS[1].id,
   },
 
+  // Organization 3 users - Manual Testing
+  {
+    email: "admin@test.com",
+    password: "TestPassword123!",
+    name: "Admin Manual",
+    roles: ["org_admin"],
+    organizationId: TEST_ORGANIZATIONS[2].id,
+  },
+  {
+    email: "physician@test.com",
+    password: "TestPassword123!",
+    name: "Dr. Physician Manual",
+    roles: ["physician", "receptionist"], // Multi-role user for testing
+    defaultRole: "physician",
+    organizationId: TEST_ORGANIZATIONS[2].id,
+  },
+  {
+    email: "receptionist@test.com",
+    password: "TestPassword123!",
+    name: "Reception Manual",
+    roles: ["receptionist"],
+    organizationId: TEST_ORGANIZATIONS[2].id,
+  },
+
   // Unverified user (no organization)
   {
     email: "unverified@test.com",
-    password: "testPassword123!",
+    password: "TestPassword123!",
     name: "Test Unverified",
     roles: [],
     organizationId: null,

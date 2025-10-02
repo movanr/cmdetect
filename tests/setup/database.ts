@@ -1,5 +1,4 @@
 import { createAdminClient } from "./graphql-client";
-import { TestPatientRecords } from "./test-data";
 
 const adminClient = createAdminClient();
 
@@ -53,26 +52,7 @@ export async function clearTestData(): Promise<void> {
  */
 export async function setupTestData(): Promise<void> {
   // Note: Organizations and auth users are created separately via auth server seed script
-
-  // Create test patient records (patient data is now part of patient_record)
-  await adminClient.request(`
-    mutation {
-      insert_patient_record(objects: [
-        {
-          organization_id: "${TestPatientRecords.org1PatientRecord1.organizationId}",
-          clinic_internal_id: "P001",
-          created_by: "${TestPatientRecords.org1PatientRecord1.createdBy}",
-          assigned_to: "${TestPatientRecords.org1PatientRecord1.assignedTo}"
-        }
-      ]) {
-        affected_rows
-        returning {
-          id
-          invite_token
-        }
-      }
-    }
-  `);
+  // No default test patient records needed - tests create their own as needed
 }
 
 /**
