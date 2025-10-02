@@ -122,10 +122,6 @@ export function validatePatientPersonalData(patient_data: any): ValidationResult
     return { valid: false, error: "last_name_encrypted is required and must be a non-empty string" };
   }
 
-  if (!patient_data.gender_encrypted || typeof patient_data.gender_encrypted !== "string" || patient_data.gender_encrypted.trim().length === 0) {
-    return { valid: false, error: "gender_encrypted is required and must be a non-empty string" };
-  }
-
   if (!patient_data.date_of_birth_encrypted || typeof patient_data.date_of_birth_encrypted !== "string" || patient_data.date_of_birth_encrypted.trim().length === 0) {
     return { valid: false, error: "date_of_birth_encrypted is required and must be a non-empty string" };
   }

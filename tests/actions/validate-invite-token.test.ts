@@ -53,7 +53,6 @@ describe("Validate Invite Token Action Handler", () => {
           organization_id: "${TestDataIds.organizations.org1}",
           clinic_internal_id: "P001-INVITE-VALIDATION-TEST",
           created_by: "${TestDataIds.users.org1Receptionist}",
-          assigned_to: "${TestDataIds.users.org1Physician}",
           invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
         }]) {
           returning {
@@ -127,7 +126,6 @@ describe("Validate Invite Token Action Handler", () => {
             organization_id: "${TestDataIds.organizations.org1}",
             clinic_internal_id: "P002-EXPIRED-TEST",
             created_by: "${TestDataIds.users.org1Receptionist}",
-            assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 1000).toISOString()}"
           }]) {
             returning {
@@ -238,7 +236,6 @@ describe("Validate Invite Token Action Handler", () => {
             organization_id: "${orgWithoutKeyId}",
             clinic_internal_id: "P003-NO-KEY-TEST",
             created_by: "${TestDataIds.users.org1Receptionist}",
-            assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
           }]) {
             returning {

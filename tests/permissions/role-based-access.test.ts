@@ -34,8 +34,8 @@ describe("Role-Based Access Control", () => {
   });
 
   describe("Physician Permissions", () => {
-    it("physician can access patient records assigned to them", async () => {
-      // First, create a patient record assigned to the physician
+    it("physician can access patient records created by them", async () => {
+      // First, create a patient record created by the physician
       const createdRecord = await clients.admin.request<{
         insert_patient_record_one: { id: string };
       }>(`
@@ -43,8 +43,7 @@ describe("Role-Based Access Control", () => {
           insert_patient_record_one(object: {
             organization_id: "${TestDataIds.organizations.org1}"
             clinic_internal_id: "P-PHYSICIAN-ACCESS-TEST"
-            created_by: "${TestDataIds.users.org1Admin}"
-            assigned_to: "${TestDataIds.users.org1Physician}"
+            created_by: "${TestDataIds.users.org1Physician}"
             notes: "Test record for physician access"
           }) {
             id
@@ -54,25 +53,23 @@ describe("Role-Based Access Control", () => {
 
       // Now the physician should be able to access this patient record
       const records = await clients.org1Physician.request<{
-        patient_record: Array<{ id: string; organization_id: string; assigned_to: string }>;
+        patient_record: Array<{ id: string; organization_id: string }>;
       }>(`
         query {
           patient_record {
             id
             organization_id
-            assigned_to
           }
         }
       `);
 
-      // Physician should only see records assigned to them in their organization
+      // Physician should only see records created by them in their organization
       expect(
         records.patient_record.some((r) => r.id === createdRecord.insert_patient_record_one.id)
       ).toBe(true);
       expect(
         records.patient_record.every(
-          (r) => r.organization_id === TestDataIds.organizations.org1 &&
-                r.assigned_to === TestDataIds.users.org1Physician
+          (r) => r.organization_id === TestDataIds.organizations.org1
         )
       ).toBe(true);
     });
@@ -104,7 +101,6 @@ describe("Role-Based Access Control", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P999-RECEPTIONIST-TEST"
-            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created record"
           }) {
             id
@@ -157,7 +153,6 @@ describe("Role-Based Access Control", () => {
         mutation {
           insert_patient_record(objects: [{
             clinic_internal_id: "P-AUTO-FIELDS-TEST"
-            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created patient record"
           }]) {
             affected_rows

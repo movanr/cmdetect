@@ -47,7 +47,6 @@ describe("Hasura Actions Integration", () => {
           organization_id: "${TestDataIds.organizations.org1}",
           clinic_internal_id: "P001-HASURA-ACTION-TEST",
           created_by: "${TestDataIds.users.org1Receptionist}",
-          assigned_to: "${TestDataIds.users.org1Physician}",
           invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
         }]) {
           returning {

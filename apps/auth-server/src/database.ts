@@ -150,15 +150,13 @@ export class DatabaseService {
     patientRecordId: string,
     firstNameEncrypted: string,
     lastNameEncrypted: string,
-    genderEncrypted: string,
     dateOfBirthEncrypted: string
   ): Promise<void> {
     const query = `
-      UPDATE patient_record 
+      UPDATE patient_record
       SET first_name_encrypted = $2,
           last_name_encrypted = $3,
-          gender_encrypted = $4,
-          date_of_birth_encrypted = $5,
+          date_of_birth_encrypted = $4,
           patient_data_completed_at = NOW(),
           updated_at = NOW()
       WHERE id = $1
@@ -169,7 +167,6 @@ export class DatabaseService {
       patientRecordId,
       firstNameEncrypted,
       lastNameEncrypted,
-      genderEncrypted,
       dateOfBirthEncrypted,
     ]);
   }

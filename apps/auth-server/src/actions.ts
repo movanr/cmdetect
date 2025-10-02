@@ -133,7 +133,6 @@ export class ActionHandlers {
       patientRecord.id,
       patient_data.first_name_encrypted,
       patient_data.last_name_encrypted,
-      patient_data.gender_encrypted,
       patient_data.date_of_birth_encrypted
     );
 

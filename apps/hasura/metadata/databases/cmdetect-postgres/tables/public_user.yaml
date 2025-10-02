@@ -27,13 +27,6 @@ array_relationships:
         table:
           name: patient_record
           schema: public
-  - name: patient_records
-    using:
-      foreign_key_constraint_on:
-        column: assigned_to
-        table:
-          name: patient_record
-          schema: public
 insert_permissions:
   - role: org_admin
     permission:
@@ -109,9 +102,7 @@ select_permissions:
               _eq: X-Hasura-Organization-Id
           - deletedAt:
               _is_null: true
-          - roles:
-              _contains: physician
-    comment: This ensures receptionists only see users who have the physician role when creating assignments
+    comment: ""
 update_permissions:
   - role: org_admin
     permission:

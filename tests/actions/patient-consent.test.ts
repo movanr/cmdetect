@@ -39,7 +39,6 @@ describe("Patient Consent Action Handler", () => {
           organization_id: "${TestDataIds.organizations.org1}",
           clinic_internal_id: "P001-TEST",
           created_by: "${TestDataIds.users.org1Receptionist}",
-          assigned_to: "${TestDataIds.users.org1Physician}",
           invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
         }]) {
           returning {
@@ -275,7 +274,6 @@ describe("Patient Consent Action Handler", () => {
             organization_id: "${TestDataIds.organizations.org1}",
             clinic_internal_id: "P002-TEST",
             created_by: "${TestDataIds.users.org1Receptionist}",
-            assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
           }]) {
             returning {
@@ -384,7 +382,6 @@ describe("Patient Consent Action Handler", () => {
             organization_id: "${TestDataIds.organizations.org1}",
             clinic_internal_id: "P-MINIMAL",
             created_by: "${TestDataIds.users.org1Receptionist}",
-            assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
           }]) {
             returning {

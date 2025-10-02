@@ -2,15 +2,6 @@ table:
   name: patient_record
   schema: public
 object_relationships:
-  - name: assignedTo
-    using:
-      manual_configuration:
-        column_mapping:
-          assigned_to: id
-        insertion_order: null
-        remote_table:
-          name: user
-          schema: public
   - name: organization
     using:
       foreign_key_constraint_on: organization_id
@@ -21,9 +12,6 @@ object_relationships:
         table:
           name: patient_consent
           schema: public
-  - name: user
-    using:
-      foreign_key_constraint_on: assigned_to
   - name: userByCreatedBy
     using:
       foreign_key_constraint_on: created_by
@@ -44,15 +32,11 @@ array_relationships:
 insert_permissions:
   - role: org_admin
     permission:
-      check:
-        assignedTo:
-          organizationId:
-            _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
-        - assigned_to
         - clinic_internal_id
         - notes
     comment: ""
@@ -60,7 +44,6 @@ insert_permissions:
     permission:
       check: {}
       set:
-        assigned_to: x-hasura-User-Id
         created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
@@ -69,15 +52,11 @@ insert_permissions:
     comment: ""
   - role: receptionist
     permission:
-      check:
-        assignedTo:
-          organizationId:
-            _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         created_by: x-hasura-User-Id
         organization_id: x-hasura-Organization-Id
       columns:
-        - assigned_to
         - clinic_internal_id
         - notes
     comment: ""
@@ -85,7 +64,6 @@ select_permissions:
   - role: org_admin
     permission:
       columns:
-        - assigned_to
         - clinic_internal_id
         - created_at
         - created_by
@@ -93,7 +71,6 @@ select_permissions:
         - first_name_encrypted
         - first_viewed_at
         - first_viewed_by
-        - gender_encrypted
         - id
         - invite_expires_at
         - invite_token
@@ -114,7 +91,6 @@ select_permissions:
   - role: physician
     permission:
       columns:
-        - assigned_to
         - clinic_internal_id
         - created_at
         - created_by
@@ -122,7 +98,6 @@ select_permissions:
         - first_name_encrypted
         - first_viewed_at
         - first_viewed_by
-        - gender_encrypted
         - id
         - invite_expires_at
         - invite_token
@@ -139,13 +114,10 @@ select_permissions:
               _eq: X-Hasura-Organization-Id
           - deleted_at:
               _is_null: true
-          - assigned_to:
-              _eq: X-Hasura-User-Id
     comment: ""
   - role: receptionist
     permission:
       columns:
-        - assigned_to
         - clinic_internal_id
         - created_at
         - created_by
@@ -153,7 +125,6 @@ select_permissions:
         - first_name_encrypted
         - first_viewed_at
         - first_viewed_by
-        - gender_encrypted
         - id
         - invite_expires_at
         - invite_token
@@ -175,12 +146,10 @@ update_permissions:
   - role: org_admin
     permission:
       columns:
-        - assigned_to
         - clinic_internal_id
         - date_of_birth_encrypted
         - deleted_at
         - first_name_encrypted
-        - gender_encrypted
         - last_name_encrypted
         - notes
       filter:
@@ -189,10 +158,7 @@ update_permissions:
               _eq: X-Hasura-Organization-Id
           - deleted_at:
               _is_null: true
-      check:
-        assignedTo:
-          organizationId:
-            _eq: X-Hasura-Organization-Id
+      check: {}
       set:
         last_activity_by: x-hasura-User-Id
         updated_at: now()
@@ -210,8 +176,6 @@ update_permissions:
         _and:
           - organization_id:
               _eq: X-Hasura-Organization-Id
-          - assigned_to:
-              _eq: X-Hasura-User-Id
           - deleted_at:
               _is_null: true
       check: null
@@ -222,16 +186,13 @@ update_permissions:
   - role: receptionist
     permission:
       columns:
-        - assigned_to
         - clinic_internal_id
+        - notes
       filter:
         _and:
           - organization_id:
               _eq: X-Hasura-Organization-Id
           - deleted_at:
               _is_null: true
-      check:
-        assignedTo:
-          organizationId:
-            _eq: X-Hasura-Organization-Id
+      check: {}
     comment: ""

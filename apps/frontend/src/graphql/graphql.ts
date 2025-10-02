@@ -64,7 +64,6 @@ export type Int_Comparison_Exp = {
 export type PatientPersonalDataInput = {
   date_of_birth_encrypted: Scalars['String']['input'];
   first_name_encrypted: Scalars['String']['input'];
-  gender_encrypted: Scalars['String']['input'];
   last_name_encrypted: Scalars['String']['input'];
 };
 
@@ -1316,9 +1315,6 @@ export type Patient_Consent_Updates = {
 /** columns and relationships of "patient_record" */
 export type Patient_Record = {
   __typename?: 'patient_record';
-  /** An object relationship */
-  assignedTo?: Maybe<User>;
-  assigned_to: Scalars['String']['output'];
   clinic_internal_id: Scalars['String']['output'];
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   created_by: Scalars['String']['output'];
@@ -1327,7 +1323,6 @@ export type Patient_Record = {
   first_name_encrypted?: Maybe<Scalars['String']['output']>;
   first_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
   first_viewed_by?: Maybe<Scalars['String']['output']>;
-  gender_encrypted?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   invite_expires_at: Scalars['timestamptz']['output'];
   invite_token: Scalars['String']['output'];
@@ -1346,8 +1341,6 @@ export type Patient_Record = {
   /** An aggregate relationship */
   questionnaire_responses_aggregate: Questionnaire_Response_Aggregate;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
-  /** An object relationship */
-  user: User;
   /** An object relationship */
   userByCreatedBy: User;
   /** An object relationship */
@@ -1428,8 +1421,6 @@ export type Patient_Record_Bool_Exp = {
   _and?: InputMaybe<Array<Patient_Record_Bool_Exp>>;
   _not?: InputMaybe<Patient_Record_Bool_Exp>;
   _or?: InputMaybe<Array<Patient_Record_Bool_Exp>>;
-  assignedTo?: InputMaybe<User_Bool_Exp>;
-  assigned_to?: InputMaybe<String_Comparison_Exp>;
   clinic_internal_id?: InputMaybe<String_Comparison_Exp>;
   created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   created_by?: InputMaybe<String_Comparison_Exp>;
@@ -1438,7 +1429,6 @@ export type Patient_Record_Bool_Exp = {
   first_name_encrypted?: InputMaybe<String_Comparison_Exp>;
   first_viewed_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   first_viewed_by?: InputMaybe<String_Comparison_Exp>;
-  gender_encrypted?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
   invite_expires_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   invite_token?: InputMaybe<String_Comparison_Exp>;
@@ -1453,7 +1443,6 @@ export type Patient_Record_Bool_Exp = {
   questionnaire_responses?: InputMaybe<Questionnaire_Response_Bool_Exp>;
   questionnaire_responses_aggregate?: InputMaybe<Questionnaire_Response_Aggregate_Bool_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  user?: InputMaybe<User_Bool_Exp>;
   userByCreatedBy?: InputMaybe<User_Bool_Exp>;
   userByFirstViewedBy?: InputMaybe<User_Bool_Exp>;
   userByLastActivityBy?: InputMaybe<User_Bool_Exp>;
@@ -1469,8 +1458,6 @@ export enum Patient_Record_Constraint {
 
 /** input type for inserting data into table "patient_record" */
 export type Patient_Record_Insert_Input = {
-  assignedTo?: InputMaybe<User_Obj_Rel_Insert_Input>;
-  assigned_to?: InputMaybe<Scalars['String']['input']>;
   clinic_internal_id?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   created_by?: InputMaybe<Scalars['String']['input']>;
@@ -1479,7 +1466,6 @@ export type Patient_Record_Insert_Input = {
   first_name_encrypted?: InputMaybe<Scalars['String']['input']>;
   first_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   first_viewed_by?: InputMaybe<Scalars['String']['input']>;
-  gender_encrypted?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
   invite_token?: InputMaybe<Scalars['String']['input']>;
@@ -1493,7 +1479,6 @@ export type Patient_Record_Insert_Input = {
   patient_data_completed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   questionnaire_responses?: InputMaybe<Questionnaire_Response_Arr_Rel_Insert_Input>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  user?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userByCreatedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userByFirstViewedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userByLastActivityBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
@@ -1502,7 +1487,6 @@ export type Patient_Record_Insert_Input = {
 /** aggregate max on columns */
 export type Patient_Record_Max_Fields = {
   __typename?: 'patient_record_max_fields';
-  assigned_to?: Maybe<Scalars['String']['output']>;
   clinic_internal_id?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   created_by?: Maybe<Scalars['String']['output']>;
@@ -1511,7 +1495,6 @@ export type Patient_Record_Max_Fields = {
   first_name_encrypted?: Maybe<Scalars['String']['output']>;
   first_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
   first_viewed_by?: Maybe<Scalars['String']['output']>;
-  gender_encrypted?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
   invite_token?: Maybe<Scalars['String']['output']>;
@@ -1526,7 +1509,6 @@ export type Patient_Record_Max_Fields = {
 
 /** order by max() on columns of table "patient_record" */
 export type Patient_Record_Max_Order_By = {
-  assigned_to?: InputMaybe<Order_By>;
   clinic_internal_id?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
   created_by?: InputMaybe<Order_By>;
@@ -1535,7 +1517,6 @@ export type Patient_Record_Max_Order_By = {
   first_name_encrypted?: InputMaybe<Order_By>;
   first_viewed_at?: InputMaybe<Order_By>;
   first_viewed_by?: InputMaybe<Order_By>;
-  gender_encrypted?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
@@ -1551,7 +1532,6 @@ export type Patient_Record_Max_Order_By = {
 /** aggregate min on columns */
 export type Patient_Record_Min_Fields = {
   __typename?: 'patient_record_min_fields';
-  assigned_to?: Maybe<Scalars['String']['output']>;
   clinic_internal_id?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamptz']['output']>;
   created_by?: Maybe<Scalars['String']['output']>;
@@ -1560,7 +1540,6 @@ export type Patient_Record_Min_Fields = {
   first_name_encrypted?: Maybe<Scalars['String']['output']>;
   first_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
   first_viewed_by?: Maybe<Scalars['String']['output']>;
-  gender_encrypted?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
   invite_token?: Maybe<Scalars['String']['output']>;
@@ -1575,7 +1554,6 @@ export type Patient_Record_Min_Fields = {
 
 /** order by min() on columns of table "patient_record" */
 export type Patient_Record_Min_Order_By = {
-  assigned_to?: InputMaybe<Order_By>;
   clinic_internal_id?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
   created_by?: InputMaybe<Order_By>;
@@ -1584,7 +1562,6 @@ export type Patient_Record_Min_Order_By = {
   first_name_encrypted?: InputMaybe<Order_By>;
   first_viewed_at?: InputMaybe<Order_By>;
   first_viewed_by?: InputMaybe<Order_By>;
-  gender_encrypted?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
@@ -1622,8 +1599,6 @@ export type Patient_Record_On_Conflict = {
 
 /** Ordering options when selecting data from "patient_record". */
 export type Patient_Record_Order_By = {
-  assignedTo?: InputMaybe<User_Order_By>;
-  assigned_to?: InputMaybe<Order_By>;
   clinic_internal_id?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
   created_by?: InputMaybe<Order_By>;
@@ -1632,7 +1607,6 @@ export type Patient_Record_Order_By = {
   first_name_encrypted?: InputMaybe<Order_By>;
   first_viewed_at?: InputMaybe<Order_By>;
   first_viewed_by?: InputMaybe<Order_By>;
-  gender_encrypted?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
@@ -1646,7 +1620,6 @@ export type Patient_Record_Order_By = {
   patient_data_completed_at?: InputMaybe<Order_By>;
   questionnaire_responses_aggregate?: InputMaybe<Questionnaire_Response_Aggregate_Order_By>;
   updated_at?: InputMaybe<Order_By>;
-  user?: InputMaybe<User_Order_By>;
   userByCreatedBy?: InputMaybe<User_Order_By>;
   userByFirstViewedBy?: InputMaybe<User_Order_By>;
   userByLastActivityBy?: InputMaybe<User_Order_By>;
@@ -1659,8 +1632,6 @@ export type Patient_Record_Pk_Columns_Input = {
 
 /** select columns of table "patient_record" */
 export enum Patient_Record_Select_Column {
-  /** column name */
-  AssignedTo = 'assigned_to',
   /** column name */
   ClinicInternalId = 'clinic_internal_id',
   /** column name */
@@ -1677,8 +1648,6 @@ export enum Patient_Record_Select_Column {
   FirstViewedAt = 'first_viewed_at',
   /** column name */
   FirstViewedBy = 'first_viewed_by',
-  /** column name */
-  GenderEncrypted = 'gender_encrypted',
   /** column name */
   Id = 'id',
   /** column name */
@@ -1703,7 +1672,6 @@ export enum Patient_Record_Select_Column {
 
 /** input type for updating data in table "patient_record" */
 export type Patient_Record_Set_Input = {
-  assigned_to?: InputMaybe<Scalars['String']['input']>;
   clinic_internal_id?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   created_by?: InputMaybe<Scalars['String']['input']>;
@@ -1712,7 +1680,6 @@ export type Patient_Record_Set_Input = {
   first_name_encrypted?: InputMaybe<Scalars['String']['input']>;
   first_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   first_viewed_by?: InputMaybe<Scalars['String']['input']>;
-  gender_encrypted?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
   invite_token?: InputMaybe<Scalars['String']['input']>;
@@ -1735,7 +1702,6 @@ export type Patient_Record_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Patient_Record_Stream_Cursor_Value_Input = {
-  assigned_to?: InputMaybe<Scalars['String']['input']>;
   clinic_internal_id?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamptz']['input']>;
   created_by?: InputMaybe<Scalars['String']['input']>;
@@ -1744,7 +1710,6 @@ export type Patient_Record_Stream_Cursor_Value_Input = {
   first_name_encrypted?: InputMaybe<Scalars['String']['input']>;
   first_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   first_viewed_by?: InputMaybe<Scalars['String']['input']>;
-  gender_encrypted?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
   invite_token?: InputMaybe<Scalars['String']['input']>;
@@ -1759,8 +1724,6 @@ export type Patient_Record_Stream_Cursor_Value_Input = {
 
 /** update columns of table "patient_record" */
 export enum Patient_Record_Update_Column {
-  /** column name */
-  AssignedTo = 'assigned_to',
   /** column name */
   ClinicInternalId = 'clinic_internal_id',
   /** column name */
@@ -1777,8 +1740,6 @@ export enum Patient_Record_Update_Column {
   FirstViewedAt = 'first_viewed_at',
   /** column name */
   FirstViewedBy = 'first_viewed_by',
-  /** column name */
-  GenderEncrypted = 'gender_encrypted',
   /** column name */
   Id = 'id',
   /** column name */
@@ -2530,10 +2491,6 @@ export type User = {
   patientRecordsByLastActivityBy: Array<Patient_Record>;
   /** An aggregate relationship */
   patientRecordsByLastActivityBy_aggregate: Patient_Record_Aggregate;
-  /** An array relationship */
-  patient_records: Array<Patient_Record>;
-  /** An aggregate relationship */
-  patient_records_aggregate: Patient_Record_Aggregate;
   roles?: Maybe<Scalars['jsonb']['output']>;
   updatedAt: Scalars['timestamp']['output'];
 };
@@ -2591,26 +2548,6 @@ export type UserPatientRecordsByLastActivityByArgs = {
 
 /** columns and relationships of "user" */
 export type UserPatientRecordsByLastActivityBy_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Patient_Record_Order_By>>;
-  where?: InputMaybe<Patient_Record_Bool_Exp>;
-};
-
-
-/** columns and relationships of "user" */
-export type UserPatient_RecordsArgs = {
-  distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Patient_Record_Order_By>>;
-  where?: InputMaybe<Patient_Record_Bool_Exp>;
-};
-
-
-/** columns and relationships of "user" */
-export type UserPatient_Records_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -2717,8 +2654,6 @@ export type User_Bool_Exp = {
   patientRecordsByFirstViewedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
   patientRecordsByLastActivityBy?: InputMaybe<Patient_Record_Bool_Exp>;
   patientRecordsByLastActivityBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
-  patient_records?: InputMaybe<Patient_Record_Bool_Exp>;
-  patient_records_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
   roles?: InputMaybe<Jsonb_Comparison_Exp>;
   updatedAt?: InputMaybe<Timestamp_Comparison_Exp>;
 };
@@ -2767,7 +2702,6 @@ export type User_Insert_Input = {
   patientRecordsByCreatedBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
   patientRecordsByFirstViewedBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
   patientRecordsByLastActivityBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
-  patient_records?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
   roles?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamp']['input']>;
 };
@@ -2876,7 +2810,6 @@ export type User_Order_By = {
   patientRecordsByCreatedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
   patientRecordsByFirstViewedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
   patientRecordsByLastActivityBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
-  patient_records_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
   roles?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
 };

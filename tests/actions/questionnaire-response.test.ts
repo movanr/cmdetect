@@ -45,7 +45,6 @@ describe("Questionnaire Response Action Handler", () => {
           organization_id: "${TestDataIds.organizations.org1}",
           clinic_internal_id: "P001-QR-TEST",
           created_by: "${TestDataIds.users.org1Receptionist}",
-          assigned_to: "${TestDataIds.users.org1Physician}",
           invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
         }]) {
           returning {
@@ -376,7 +375,6 @@ describe("Questionnaire Response Action Handler", () => {
               organization_id: "${TestDataIds.organizations.org1}",
               clinic_internal_id: "P-${status.toUpperCase()}",
               created_by: "${TestDataIds.users.org1Receptionist}",
-              assigned_to: "${TestDataIds.users.org1Physician}",
               invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
             }]) {
               returning {
@@ -478,7 +476,6 @@ describe("Questionnaire Response Action Handler", () => {
             organization_id: "${TestDataIds.organizations.org1}",
             clinic_internal_id: "P-NO-CONSENT",
             created_by: "${TestDataIds.users.org1Receptionist}",
-            assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
           }]) {
             returning {
@@ -612,7 +609,6 @@ describe("Questionnaire Response Action Handler", () => {
             organization_id: "${TestDataIds.organizations.org1}",
             clinic_internal_id: "P-MINIMAL-FHIR",
             created_by: "${TestDataIds.users.org1Receptionist}",
-            assigned_to: "${TestDataIds.users.org1Physician}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
           }]) {
             returning {

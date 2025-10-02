@@ -250,7 +250,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P001-ISOLATION-TEST"
-            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Test record"
           }) {
             id
@@ -273,7 +272,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P002-RECEPTIONIST-TEST"
-            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Receptionist created registration"
           }) {
             id
@@ -288,33 +286,16 @@ describe("Organization Isolation", () => {
       );
     });
 
-    it("cannot create registration with cross-organization practitioner", async () => {
-      // Try to assign org2 practitioner to org1 patient record
-      await expect(
-        clients.org1Admin.request(`
-          mutation {
-            insert_patient_record_one(object: {
-              clinic_internal_id: "P003-CROSS-ORG-TEST"
-              assigned_to: "${TestDataIds.users.org2Physician}"
-              notes: "Cross-org practitioner attempt"
-            }) {
-              id
-            }
-          }
-        `)
-      ).rejects.toThrow();
-    });
 
-    it("physician can only see patient records assigned to them or created by them", async () => {
-      // First create a registration assigned to physician
+    it("physician can only see patient records created by them", async () => {
+      // First create a registration created by physician
       await clients.admin.request(`
         mutation {
           insert_patient_record_one(object: {
             organization_id: "${TestDataIds.organizations.org1}"
             clinic_internal_id: "P004-PHYSICIAN-TEST"
-            assigned_to: "${TestDataIds.users.org1Physician}"
-            created_by: "${TestDataIds.users.org1Admin}"
-            notes: "Assigned to physician"
+            created_by: "${TestDataIds.users.org1Physician}"
+            notes: "Created by physician"
           }) {
             id
           }
@@ -325,14 +306,12 @@ describe("Organization Isolation", () => {
       const result = await clients.org1Physician.request<{
         patient_record: Array<{
           id: string;
-          assigned_to: string;
           organization_id: string;
         }>;
       }>(`
         query {
           patient_record {
             id
-            assigned_to
             organization_id
           }
         }
@@ -341,9 +320,7 @@ describe("Organization Isolation", () => {
       expect(result.patient_record.length).toBeGreaterThan(0);
       expect(
         result.patient_record.every(
-          (r) =>
-            r.organization_id === TestDataIds.organizations.org1 &&
-            r.assigned_to === TestDataIds.users.org1Physician
+          (r) => r.organization_id === TestDataIds.organizations.org1
         )
       ).toBe(true);
     });
@@ -356,7 +333,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P005-DELETE-TEST"
-            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "To be soft deleted"
           }) {
             id
@@ -454,7 +430,6 @@ describe("Organization Isolation", () => {
             insert_patient_record_one(object: {
               organization_id: "${TestDataIds.organizations.org2}"
               clinic_internal_id: "HACK001"
-              assigned_to: "${TestDataIds.users.org1Physician}"
               notes: "Cross-org hack attempt"
             }) {
               id
@@ -486,7 +461,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P006-ORG1-ISOLATION"
-            assigned_to: "${TestDataIds.users.org1Physician}"
             notes: "Org1 registration"
           }) {
             id
