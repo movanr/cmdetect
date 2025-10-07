@@ -10,27 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnverifiedRouteImport } from './routes/unverified'
-import { Route as ReceptionistRouteImport } from './routes/receptionist'
-import { Route as PhysicianRouteImport } from './routes/physician'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KeySetupRouteImport } from './routes/key-setup'
-import { Route as AdminRouteImport } from './routes/admin'
+import { Route as InvitesRouteImport } from './routes/invites'
+import { Route as CasesRouteImport } from './routes/cases'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsSecurityRouteImport } from './routes/settings/security'
+import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
+import { Route as SettingsOrganizationRouteImport } from './routes/settings/organization'
 
 const UnverifiedRoute = UnverifiedRouteImport.update({
   id: '/unverified',
   path: '/unverified',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReceptionistRoute = ReceptionistRouteImport.update({
-  id: '/receptionist',
-  path: '/receptionist',
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PhysicianRoute = PhysicianRouteImport.update({
-  id: '/physician',
-  path: '/physician',
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PatientRoute = PatientRouteImport.update({
@@ -48,9 +52,14 @@ const KeySetupRoute = KeySetupRouteImport.update({
   path: '/key-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const InvitesRoute = InvitesRouteImport.update({
+  id: '/invites',
+  path: '/invites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasesRoute = CasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -58,79 +67,119 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsProfileRoute = SettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsOrganizationRoute = SettingsOrganizationRouteImport.update({
+  id: '/organization',
+  path: '/organization',
+  getParentRoute: () => SettingsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/cases': typeof CasesRoute
+  '/invites': typeof InvitesRoute
   '/key-setup': typeof KeySetupRoute
   '/login': typeof LoginRoute
   '/patient': typeof PatientRoute
-  '/physician': typeof PhysicianRoute
-  '/receptionist': typeof ReceptionistRoute
+  '/settings': typeof SettingsRouteWithChildren
+  '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/settings/organization': typeof SettingsOrganizationRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/settings/security': typeof SettingsSecurityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/cases': typeof CasesRoute
+  '/invites': typeof InvitesRoute
   '/key-setup': typeof KeySetupRoute
   '/login': typeof LoginRoute
   '/patient': typeof PatientRoute
-  '/physician': typeof PhysicianRoute
-  '/receptionist': typeof ReceptionistRoute
+  '/settings': typeof SettingsRouteWithChildren
+  '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/settings/organization': typeof SettingsOrganizationRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/settings/security': typeof SettingsSecurityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/cases': typeof CasesRoute
+  '/invites': typeof InvitesRoute
   '/key-setup': typeof KeySetupRoute
   '/login': typeof LoginRoute
   '/patient': typeof PatientRoute
-  '/physician': typeof PhysicianRoute
-  '/receptionist': typeof ReceptionistRoute
+  '/settings': typeof SettingsRouteWithChildren
+  '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/settings/organization': typeof SettingsOrganizationRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/settings/security': typeof SettingsSecurityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
+    | '/cases'
+    | '/invites'
     | '/key-setup'
     | '/login'
     | '/patient'
-    | '/physician'
-    | '/receptionist'
+    | '/settings'
+    | '/team'
     | '/unverified'
+    | '/settings/organization'
+    | '/settings/profile'
+    | '/settings/security'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
+    | '/cases'
+    | '/invites'
     | '/key-setup'
     | '/login'
     | '/patient'
-    | '/physician'
-    | '/receptionist'
+    | '/settings'
+    | '/team'
     | '/unverified'
+    | '/settings/organization'
+    | '/settings/profile'
+    | '/settings/security'
   id:
     | '__root__'
     | '/'
-    | '/admin'
+    | '/cases'
+    | '/invites'
     | '/key-setup'
     | '/login'
     | '/patient'
-    | '/physician'
-    | '/receptionist'
+    | '/settings'
+    | '/team'
     | '/unverified'
+    | '/settings/organization'
+    | '/settings/profile'
+    | '/settings/security'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  CasesRoute: typeof CasesRoute
+  InvitesRoute: typeof InvitesRoute
   KeySetupRoute: typeof KeySetupRoute
   LoginRoute: typeof LoginRoute
   PatientRoute: typeof PatientRoute
-  PhysicianRoute: typeof PhysicianRoute
-  ReceptionistRoute: typeof ReceptionistRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
+  TeamRoute: typeof TeamRoute
   UnverifiedRoute: typeof UnverifiedRoute
 }
 
@@ -143,18 +192,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnverifiedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/receptionist': {
-      id: '/receptionist'
-      path: '/receptionist'
-      fullPath: '/receptionist'
-      preLoaderRoute: typeof ReceptionistRouteImport
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/physician': {
-      id: '/physician'
-      path: '/physician'
-      fullPath: '/physician'
-      preLoaderRoute: typeof PhysicianRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/patient': {
@@ -178,11 +227,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KeySetupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/invites': {
+      id: '/invites'
+      path: '/invites'
+      fullPath: '/invites'
+      preLoaderRoute: typeof InvitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cases': {
+      id: '/cases'
+      path: '/cases'
+      fullPath: '/cases'
+      preLoaderRoute: typeof CasesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -192,17 +248,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/security': {
+      id: '/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/organization': {
+      id: '/settings/organization'
+      path: '/organization'
+      fullPath: '/settings/organization'
+      preLoaderRoute: typeof SettingsOrganizationRouteImport
+      parentRoute: typeof SettingsRoute
+    }
   }
 }
 
+interface SettingsRouteChildren {
+  SettingsOrganizationRoute: typeof SettingsOrganizationRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsOrganizationRoute: SettingsOrganizationRoute,
+  SettingsProfileRoute: SettingsProfileRoute,
+  SettingsSecurityRoute: SettingsSecurityRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  CasesRoute: CasesRoute,
+  InvitesRoute: InvitesRoute,
   KeySetupRoute: KeySetupRoute,
   LoginRoute: LoginRoute,
   PatientRoute: PatientRoute,
-  PhysicianRoute: PhysicianRoute,
-  ReceptionistRoute: ReceptionistRoute,
+  SettingsRoute: SettingsRouteWithChildren,
+  TeamRoute: TeamRoute,
   UnverifiedRoute: UnverifiedRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSession } from "../lib/auth";
-import { KeySetup } from "../key-setup/components/KeySetup";
-import { DashboardLayout } from "../components/Navigation";
+import { KeySetup } from "../features/key-setup/components/KeySetup";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield } from "lucide-react";
 import { useEffect } from "react";
@@ -31,26 +30,25 @@ function KeySetupPage() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="container py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Encryption Setup Required</h1>
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Shield className="h-4 w-4" />
-              <span>Complete setup to secure patient data</span>
-            </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">
+            Encryption Setup Required
+          </h1>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Shield className="h-4 w-4" />
+            <span>Complete setup to secure patient data</span>
           </div>
-
-          <Card>
-            <CardContent className="p-8">
-              <KeySetup onSetupComplete={handleSetupComplete} />
-            </CardContent>
-          </Card>
-
         </div>
+
+        <Card>
+          <CardContent className="p-8">
+            <KeySetup onSetupComplete={handleSetupComplete} />
+          </CardContent>
+        </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

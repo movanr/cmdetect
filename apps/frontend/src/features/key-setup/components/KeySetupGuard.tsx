@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import { useKeySetup } from '../hooks/useKeySetup';
-import { DashboardLayout } from '../../components/Navigation';
 import { LoadingStep } from '../components/steps/LoadingStep';
 
 interface KeySetupGuardProps {
@@ -26,11 +25,11 @@ export function KeySetupGuard({ children }: KeySetupGuardProps) {
 
   if (state.type === 'loading') {
     return (
-      <DashboardLayout>
-        <div className="container py-8">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
           <LoadingStep organizationName="your organization" />
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 

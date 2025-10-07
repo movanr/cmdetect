@@ -1,5 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { hasStoredPrivateKey, loadPrivateKey, testKeyCompatibility } from '../../crypto';
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  hasStoredPrivateKey,
+  loadPrivateKey,
+  testKeyCompatibility,
+} from "../../../crypto";
 
 interface UseKeyValidationProps {
   organizationPublicKey?: string | null;
@@ -13,7 +17,10 @@ interface UseKeyValidationProps {
   ) => void;
 }
 
-export function useKeyValidation({ organizationPublicKey, onValidationComplete }: UseKeyValidationProps) {
+export function useKeyValidation({
+  organizationPublicKey,
+  onValidationComplete,
+}: UseKeyValidationProps) {
   const [hasLocalKey, setHasLocalKey] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -39,10 +46,13 @@ export function useKeyValidation({ organizationPublicKey, onValidationComplete }
         try {
           const privateKey = await loadPrivateKey();
           if (privateKey) {
-            isCompatible = await testKeyCompatibility(privateKey, organizationPublicKey);
+            isCompatible = await testKeyCompatibility(
+              privateKey,
+              organizationPublicKey
+            );
           }
         } catch (compatError) {
-          console.error('Compatibility test failed:', compatError);
+          console.error("Compatibility test failed:", compatError);
           isCompatible = false;
         }
       }
@@ -52,16 +62,16 @@ export function useKeyValidation({ organizationPublicKey, onValidationComplete }
       callbackRef.current?.(isValid, {
         hasLocalKey: hasLocal,
         hasPublicKey,
-        isCompatible
+        isCompatible,
       });
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Validation failed';
+      const errorMessage =
+        err instanceof Error ? err.message : "Validation failed";
       setError(errorMessage);
       callbackRef.current?.(false, {
         hasLocalKey: false,
         hasPublicKey: false,
-        isCompatible: null
+        isCompatible: null,
       });
     } finally {
       setIsLoading(false);
@@ -76,6 +86,6 @@ export function useKeyValidation({ organizationPublicKey, onValidationComplete }
     hasLocalKey,
     isLoading,
     error,
-    revalidate: validateKeys
+    revalidate: validateKeys,
   };
 }

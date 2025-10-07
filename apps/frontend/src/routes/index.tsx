@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSession } from "../lib/auth";
 import { useRole } from "../contexts/RoleContext";
-import { DashboardLayout, RoleNavigation } from "../components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import logoSvg from "../assets/logo.svg";
+import { getTranslations } from "../config/i18n";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -15,27 +15,25 @@ export const Route = createFileRoute("/")({
 function App() {
   const navigate = useNavigate();
   const { data: session, isPending } = useSession();
-  const { availableRoles, hasRole } = useRole();
+  const { availableRoles, activeRole } = useRole();
+  const t = getTranslations();
 
-  // Auto-redirect users with only one role
+  // Auto-redirect authenticated users based on role
   useEffect(() => {
-    if (session?.user && availableRoles.length === 1) {
-      const singleRole = availableRoles[0];
-
-      // Map roles to their routes
-      const roleRoutes = {
-        org_admin: "/admin",
-        physician: "/physician",
-        receptionist: "/receptionist",
-        unverified: "/unverified"
-      };
-
-      const targetRoute = roleRoutes[singleRole];
-      if (targetRoute) {
-        navigate({ to: targetRoute });
+    if (session?.user && availableRoles.length > 0 && activeRole) {
+      // Redirect based on active role
+      if (activeRole === "physician") {
+        navigate({ to: "/cases" });
+      } else if (activeRole === "receptionist") {
+        navigate({ to: "/invites" });
+      } else if (activeRole === "org_admin") {
+        navigate({ to: "/cases" });
+      } else {
+        // Fallback to invites for other roles
+        navigate({ to: "/invites" });
       }
     }
-  }, [session, availableRoles, navigate]);
+  }, [session, availableRoles, activeRole, navigate]);
 
   if (isPending) {
     return (
@@ -45,7 +43,7 @@ function App() {
             <img
               src={logoSvg}
               className="h-12 w-12 animate-pulse"
-              alt="CMDetect logo"
+              alt={`${t.nav.appName} logo`}
             />
           </div>
           <div className="space-y-2">
@@ -58,39 +56,35 @@ function App() {
   }
 
   return session ? (
-    <DashboardLayout>
-      {/* Only show role navigation if user has multiple roles */}
-      {availableRoles.length > 1 ? (
-        <RoleNavigation availableRoles={availableRoles} hasRole={hasRole} />
-      ) : (
-        <div className="container py-8">
-          <div className="text-center space-y-4">
-            <div className="space-y-2">
-              <div className="h-4 w-48 mx-auto bg-muted animate-pulse rounded" />
-              <div className="h-3 w-32 mx-auto bg-muted animate-pulse rounded" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Redirecting to your workspace...
-            </p>
-          </div>
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="flex justify-center">
+          <img
+            src={logoSvg}
+            className="h-12 w-12 animate-pulse"
+            alt={`${t.nav.appName} logo`}
+          />
         </div>
-      )}
-    </DashboardLayout>
+        <p className="text-sm text-muted-foreground">
+          Redirecting...
+        </p>
+      </div>
+    </div>
   ) : (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-6">
-            <img src={logoSvg} className="h-16 w-16" alt="CMDetect logo" />
+            <img src={logoSvg} className="h-16 w-16" alt={`${t.nav.appName} logo`} />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">CMDetect</h1>
-          <p className="text-muted-foreground">Please sign in to continue</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t.nav.appName}</h1>
+          <p className="text-muted-foreground">{t.auth.pleaseSignIn}</p>
         </div>
 
         <Card>
           <CardContent className="p-6">
             <Button asChild className="w-full">
-              <Link to="/login">Sign In</Link>
+              <Link to="/login">{t.auth.signIn}</Link>
             </Button>
           </CardContent>
         </Card>

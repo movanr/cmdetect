@@ -1,4 +1,4 @@
-import { graphql } from "../graphql";
+import { graphql } from "../../graphql";
 
 // Query single organization by ID
 export const getOrganizationById = graphql(`

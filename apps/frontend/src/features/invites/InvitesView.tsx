@@ -1,38 +1,40 @@
 import { DataTable, StatusBadge, ActionButtons } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/RoleLayout'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useInvites, getPatientRecordStatus } from '@/lib/patient-records'
 import { formatDistanceToNow } from 'date-fns'
 import { ExternalLink, Copy, Edit, Trash } from 'lucide-react'
 import type { GetAllPatientRecordsQuery } from '@/graphql/graphql'
+import { getTranslations } from '@/config/i18n'
 
 type PatientRecord = GetAllPatientRecordsQuery['patient_record'][number]
 
 export function InvitesView() {
   const { data: invites, isLoading } = useInvites()
+  const t = getTranslations()
 
   const columns = [
     {
       key: 'created_at' as keyof PatientRecord,
-      header: 'Created',
+      header: t.dashboard.columns.created,
       width: '120px',
       render: (value: string) => formatDistanceToNow(new Date(value), { addSuffix: true })
     },
     {
       key: 'created_by' as keyof PatientRecord,
-      header: 'Created By',
+      header: t.dashboard.columns.createdBy,
       width: '120px',
-      render: (value: string) => value || 'System'
+      render: (value: string) => value || t.dashboard.system
     },
     {
       key: 'clinic_internal_id' as keyof PatientRecord,
-      header: 'Internal ID',
+      header: t.dashboard.columns.internalId,
       width: '120px'
     },
     {
       key: 'invite_token' as keyof PatientRecord,
-      header: 'Invite URL',
+      header: t.dashboard.columns.inviteUrl,
       width: '140px',
       render: (token: string) => (
         <div className="flex items-center space-x-2">
@@ -43,6 +45,7 @@ export function InvitesView() {
             <Button
               size="sm"
               variant="ghost"
+              title={t.dashboard.actions.copyInviteUrl}
               onClick={() => {
                 const url = `${window.location.origin}/patient?token=${token}`
                 navigator.clipboard.writeText(url)
@@ -56,18 +59,18 @@ export function InvitesView() {
     },
     {
       key: 'invite_expires_at' as keyof PatientRecord,
-      header: 'Expires',
+      header: t.dashboard.columns.expires,
       width: '120px',
-      render: (value: string) => value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : 'Never'
+      render: (value: string) => value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : t.dashboard.never
     },
     {
       key: 'notes' as keyof PatientRecord,
-      header: 'Notes',
+      header: t.dashboard.columns.notes,
       render: (value: string) => value || '-'
     },
     {
       key: 'id' as keyof PatientRecord,
-      header: 'Status',
+      header: t.dashboard.columns.status,
       width: '100px',
       render: (_: any, record: PatientRecord) => (
         <StatusBadge status={getPatientRecordStatus(record)} />
@@ -75,20 +78,20 @@ export function InvitesView() {
     },
     {
       key: 'actions' as keyof PatientRecord,
-      header: 'Actions',
+      header: t.dashboard.columns.actions,
       width: '120px'
     }
   ]
 
   const renderActions = (_record: PatientRecord) => (
     <ActionButtons>
-      <Button size="sm" variant="ghost">
+      <Button size="sm" variant="ghost" title={t.dashboard.actions.editNotes}>
         <Edit className="h-3 w-3" />
       </Button>
-      <Button size="sm" variant="ghost">
+      <Button size="sm" variant="ghost" title={t.dashboard.actions.openInvite}>
         <ExternalLink className="h-3 w-3" />
       </Button>
-      <Button size="sm" variant="ghost">
+      <Button size="sm" variant="ghost" title={t.dashboard.actions.deleteInvite}>
         <Trash className="h-3 w-3" />
       </Button>
     </ActionButtons>
@@ -102,11 +105,11 @@ export function InvitesView() {
     return (
       <EmptyState
         icon={ExternalLink}
-        title="No invites found"
-        description="Patient invites will appear here. Create a new invite to get started."
+        title={t.dashboard.emptyStates.invites.title}
+        description={t.dashboard.emptyStates.invites.description}
         action={
           <Button>
-            Create New Invite
+            {t.dashboard.actions.createNewInvite}
           </Button>
         }
       />
