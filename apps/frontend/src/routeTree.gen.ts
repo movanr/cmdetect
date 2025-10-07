@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsSecurityRouteImport } from './routes/settings/security'
 import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as SettingsOrganizationRouteImport } from './routes/settings/organization'
+import { Route as InvitesNewRouteImport } from './routes/invites_.new'
 
 const UnverifiedRoute = UnverifiedRouteImport.update({
   id: '/unverified',
@@ -82,6 +83,11 @@ const SettingsOrganizationRoute = SettingsOrganizationRouteImport.update({
   path: '/organization',
   getParentRoute: () => SettingsRoute,
 } as any)
+const InvitesNewRoute = InvitesNewRouteImport.update({
+  id: '/invites_/new',
+  path: '/invites/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/invites/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/security': typeof SettingsSecurityRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/invites/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/security': typeof SettingsSecurityRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/invites_/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/security': typeof SettingsSecurityRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
+    | '/invites/new'
     | '/settings/organization'
     | '/settings/profile'
     | '/settings/security'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
+    | '/invites/new'
     | '/settings/organization'
     | '/settings/profile'
     | '/settings/security'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
+    | '/invites_/new'
     | '/settings/organization'
     | '/settings/profile'
     | '/settings/security'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRouteWithChildren
   TeamRoute: typeof TeamRoute
   UnverifiedRoute: typeof UnverifiedRoute
+  InvitesNewRoute: typeof InvitesNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -269,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsOrganizationRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/invites_/new': {
+      id: '/invites_/new'
+      path: '/invites/new'
+      fullPath: '/invites/new'
+      preLoaderRoute: typeof InvitesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -298,6 +318,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRouteWithChildren,
   TeamRoute: TeamRoute,
   UnverifiedRoute: UnverifiedRoute,
+  InvitesNewRoute: InvitesNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

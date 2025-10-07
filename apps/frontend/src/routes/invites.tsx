@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppLayout } from "../components/layouts/AppLayout";
 import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 import { InvitesView } from "../features/invites/InvitesView";
+import { Button } from "../components/ui/button";
 import { getTranslations } from "../config/i18n";
+import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/invites")({
   component: InvitesPage,
@@ -25,7 +27,12 @@ function InvitesPage() {
                 Manage patient invitations and track their status
               </p>
             </div>
-            {/* TODO: Add "Create Invite" button */}
+            <Button asChild>
+              <Link to="/invites/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Invite
+              </Link>
+            </Button>
           </div>
 
           {/* Content */}

@@ -1,10 +1,11 @@
+import { Link } from '@tanstack/react-router'
 import { DataTable, StatusBadge, ActionButtons } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { useInvites, getPatientRecordStatus } from '@/lib/patient-records'
 import { formatDistanceToNow } from 'date-fns'
-import { ExternalLink, Copy, Edit, Trash } from 'lucide-react'
+import { ExternalLink, Copy, Edit, Trash, Plus } from 'lucide-react'
 import type { GetAllPatientRecordsQuery } from '@/graphql/graphql'
 import { getTranslations } from '@/config/i18n'
 
@@ -108,8 +109,11 @@ export function InvitesView() {
         title={t.dashboard.emptyStates.invites.title}
         description={t.dashboard.emptyStates.invites.description}
         action={
-          <Button>
-            {t.dashboard.actions.createNewInvite}
+          <Button asChild>
+            <Link to="/invites/new">
+              <Plus className="h-4 w-4 mr-2" />
+              {t.dashboard.actions.createNewInvite}
+            </Link>
           </Button>
         }
       />

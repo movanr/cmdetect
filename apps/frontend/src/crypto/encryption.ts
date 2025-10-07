@@ -162,7 +162,7 @@ function validatePatientPII(data: any): asserts data is PatientPII {
     throw new Error("Invalid patient data: must be an object");
   }
 
-  const required = ["firstName", "lastName", "dateOfBirth", "gender"];
+  const required = ["firstName", "lastName", "dateOfBirth"];
   for (const field of required) {
     if (typeof data[field] !== "string" || !data[field].trim()) {
       throw new Error(
@@ -175,13 +175,6 @@ function validatePatientPII(data: any): asserts data is PatientPII {
   if (!isoDateRegex.test(data.dateOfBirth)) {
     throw new Error(
       "Invalid patient data: dateOfBirth must be in YYYY-MM-DD format"
-    );
-  }
-
-  const validGenders = ["male", "female", "other", "prefer-not-to-say"];
-  if (!validGenders.includes(data.gender.toLowerCase())) {
-    throw new Error(
-      `Invalid patient data: gender must be one of ${validGenders.join(", ")}`
     );
   }
 }

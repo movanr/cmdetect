@@ -11,13 +11,16 @@ describe("Hasura Actions Integration", () => {
   let patientRecordId: string;
   let inviteToken: string;
   const adminClient = createAdminClient();
-  const HASURA_URL = process.env.HASURA_URL || "http://localhost:8080/v1/graphql";
+  const HASURA_URL =
+    process.env.HASURA_URL || "http://localhost:8080/v1/graphql";
 
   beforeAll(async () => {
     // Check services availability
     const hasuraAvailable = await testDatabaseConnection();
     if (!hasuraAvailable) {
-      throw new Error("Hasura is not available. Please start Hasura before running tests.");
+      throw new Error(
+        "Hasura is not available. Please start Hasura before running tests."
+      );
     }
 
     // Reset test data and create fresh patient record
@@ -27,7 +30,8 @@ describe("Hasura Actions Integration", () => {
 
   const setupPatientRecord = async () => {
     // Add a test public key to the organization (pseudo key for testing only)
-    const testPublicKey = "-----BEGIN PUBLIC KEY-----\\nBGRvTm90VXNlVGhpc0tleUluUHJvZHVjdGlvbkl0SXNPbmx5Rm9yVGVzdGluZ1B1cnBvc2VzT25seQ==\\n-----END PUBLIC KEY-----";
+    const testPublicKey =
+      "-----BEGIN PUBLIC KEY-----\\nBGRvTm90VXNlVGhpc0tleUluUHJvZHVjdGlvbkl0SXNPbmx5Rm9yVGVzdGluZ1B1cnBvc2VzT25seQ==\\n-----END PUBLIC KEY-----";
 
     await adminClient.request(`
       mutation {
@@ -41,7 +45,7 @@ describe("Hasura Actions Integration", () => {
     `);
 
     // Create a patient record with invite token for testing
-    const result = await adminClient.request(`
+    const result = (await adminClient.request(`
       mutation {
         insert_patient_record(objects: [{
           organization_id: "${TestDataIds.organizations.org1}",
@@ -55,24 +59,24 @@ describe("Hasura Actions Integration", () => {
           }
         }
       }
-    `) as any;
-    
+    `)) as any;
+
     patientRecordId = result.insert_patient_record.returning[0].id;
     inviteToken = result.insert_patient_record.returning[0].invite_token;
   };
 
   const hasuraGraphQLRequest = async (query: string, variables?: any) => {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     const response = await fetch(HASURA_URL, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify({
         query,
-        variables
-      })
+        variables,
+      }),
     });
 
     const data = await response.json();
@@ -95,10 +99,14 @@ describe("Hasura Actions Integration", () => {
         }
       `;
 
-      const result = await hasuraGraphQLRequest(query, { token: "invalid-token-123" });
+      const result = await hasuraGraphQLRequest(query, {
+        token: "invalid-token-123",
+      });
 
       expect(result.validateInviteToken.valid).toBe(false);
-      expect(result.validateInviteToken.error_message).toBe("Invalid invite token format");
+      expect(result.validateInviteToken.error_message).toBe(
+        "Invalid invite token format"
+      );
       expect(result.validateInviteToken.organization_name).toBeNull();
       expect(result.validateInviteToken.public_key_pem).toBeNull();
     });
@@ -120,9 +128,15 @@ describe("Hasura Actions Integration", () => {
       const result = await hasuraGraphQLRequest(query, { token: inviteToken });
 
       expect(result.validateInviteToken.valid).toBe(true);
-      expect(result.validateInviteToken.organization_name).toBe("Test Medical Practice 1");
-      expect(result.validateInviteToken.public_key_pem).toContain("BEGIN PUBLIC KEY");
-      expect(result.validateInviteToken.patient_record_id).toBe(patientRecordId);
+      expect(result.validateInviteToken.organization_name).toBe(
+        "Test Medical Practice 1"
+      );
+      expect(result.validateInviteToken.public_key_pem).toContain(
+        "BEGIN PUBLIC KEY"
+      );
+      expect(result.validateInviteToken.patient_record_id).toBe(
+        patientRecordId
+      );
       expect(result.validateInviteToken.expires_at).toBeDefined();
       expect(result.validateInviteToken.error_message).toBeNull();
     });
@@ -137,10 +151,14 @@ describe("Hasura Actions Integration", () => {
         }
       `;
 
-      const result = await hasuraGraphQLRequest(query, { token: "not-a-valid-uuid" });
+      const result = await hasuraGraphQLRequest(query, {
+        token: "not-a-valid-uuid",
+      });
 
       expect(result.validateInviteToken.valid).toBe(false);
-      expect(result.validateInviteToken.error_message).toBe("Invalid invite token format");
+      expect(result.validateInviteToken.error_message).toBe(
+        "Invalid invite token format"
+      );
     });
   });
 
@@ -161,8 +179,8 @@ describe("Hasura Actions Integration", () => {
         consent: {
           consent_given: true,
           consent_text: "I agree to the terms and conditions",
-          consent_version: "v1.0"
-        }
+          consent_version: "v1.0",
+        },
       };
 
       const result = await hasuraGraphQLRequest(query, variables);
@@ -191,16 +209,19 @@ describe("Hasura Actions Integration", () => {
         data: {
           first_name_encrypted: "encrypted_jane",
           last_name_encrypted: "encrypted_doe",
-          gender_encrypted: "encrypted_female",
-          date_of_birth_encrypted: "encrypted_1990-01-01"
-        }
+          date_of_birth_encrypted: "encrypted_1990-01-01",
+        },
       };
 
       const result = await hasuraGraphQLRequest(query, variables);
 
       expect(result.submitPatientPersonalData.success).toBe(true);
-      expect(result.submitPatientPersonalData.patient_record_id).toBe(patientRecordId);
-      expect(result.submitPatientPersonalData.message).toBe("Patient personal data submitted successfully");
+      expect(result.submitPatientPersonalData.patient_record_id).toBe(
+        patientRecordId
+      );
+      expect(result.submitPatientPersonalData.message).toBe(
+        "Patient personal data submitted successfully"
+      );
       expect(result.submitPatientPersonalData.error).toBeNull();
     });
   });
@@ -248,7 +269,9 @@ describe("Hasura Actions Integration", () => {
       const result = await hasuraGraphQLRequest(query, { token: "test-token" });
 
       expect(result.validateInviteToken.valid).toBe(false);
-      expect(result.validateInviteToken.error_message).toBe("Invalid invite token format");
+      expect(result.validateInviteToken.error_message).toBe(
+        "Invalid invite token format"
+      );
     });
   });
 });

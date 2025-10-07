@@ -177,44 +177,45 @@ export class DatabaseService {
   async validateInviteTokenWithPublicKey(inviteToken: string): Promise<InviteValidationResult> {
     try {
       const query = `
-        SELECT 
+        SELECT
           pr.id as patient_record_id,
           pr.invite_expires_at,
+          pr.patient_data_completed_at,
           o.name as organization_name,
           o.public_key_pem
         FROM patient_record pr
         JOIN organization o ON pr.organization_id = o.id
-        WHERE pr.invite_token = $1 
-          AND pr.invite_expires_at > NOW()
+        WHERE pr.invite_token = $1
           AND pr.deleted_at IS NULL
           AND o.deleted_at IS NULL
       `;
 
       const result = await this.db.query(query, [inviteToken]);
-      
+
       if (result.rows.length === 0) {
-        // Check if token exists but is expired
-        const expiredQuery = `
-          SELECT pr.invite_expires_at 
-          FROM patient_record pr
-          WHERE pr.invite_token = $1 AND pr.deleted_at IS NULL
-        `;
-        const expiredResult = await this.db.query(expiredQuery, [inviteToken]);
-        
-        if (expiredResult.rows.length > 0) {
-          return {
-            valid: false,
-            error_message: "Invite link has expired"
-          };
-        } else {
-          return {
-            valid: false,
-            error_message: "Invalid invite link"
-          };
-        }
+        return {
+          valid: false,
+          error_message: "Invalid invite link"
+        };
       }
 
       const row = result.rows[0];
+
+      // Check if patient data has already been completed
+      if (row.patient_data_completed_at) {
+        return {
+          valid: false,
+          error_message: "This invite has already been used. Patient data has been submitted."
+        };
+      }
+
+      // Check if token has expired
+      if (new Date(row.invite_expires_at) <= new Date()) {
+        return {
+          valid: false,
+          error_message: "Invite link has expired"
+        };
+      }
 
       // Check if organization has a public key configured
       if (!row.public_key_pem) {

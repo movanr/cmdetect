@@ -2975,52 +2975,12 @@ export type User_Updates = {
   where: User_Bool_Exp;
 };
 
-export type CreatePatientRecordMutationVariables = Exact<{
-  clinic_internal_id: Scalars['String']['input'];
-  notes?: InputMaybe<Scalars['String']['input']>;
+export type ValidateInviteTokenMutationVariables = Exact<{
+  invite_token: Scalars['String']['input'];
 }>;
 
 
-export type CreatePatientRecordMutation = { __typename?: 'mutation_root', insert_patient_record_one?: { __typename?: 'patient_record', id: string, clinic_internal_id: string, invite_token: string, invite_expires_at: any, created_at?: any | null, created_by: string, notes?: string | null } | null };
-
-export type GetOrganizationByIdQueryVariables = Exact<{
-  id: Scalars['String']['input'];
-}>;
-
-
-export type GetOrganizationByIdQuery = { __typename?: 'query_root', organization_by_pk?: { __typename?: 'organization', id: string, name: string, city?: string | null, created_at?: any | null, public_key_pem?: string | null, key_fingerprint?: string | null, key_created_at?: any | null } | null };
-
-export type UpdateOrganizationPublicKeyMutationVariables = Exact<{
-  id: Scalars['String']['input'];
-  public_key_pem: Scalars['String']['input'];
-  key_fingerprint: Scalars['String']['input'];
-  key_created_at: Scalars['timestamptz']['input'];
-}>;
-
-
-export type UpdateOrganizationPublicKeyMutation = { __typename?: 'mutation_root', update_organization_by_pk?: { __typename?: 'organization', id: string, public_key_pem?: string | null, key_fingerprint?: string | null, key_created_at?: any | null } | null };
-
-export type GetAllPatientRecordsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetAllPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: string, clinic_internal_id: string, invite_token: string, invite_expires_at: any, notes?: string | null, created_at?: any | null, created_by: string, first_viewed_at?: any | null, first_viewed_by?: string | null, last_activity_at?: any | null, last_activity_by?: string | null, patient_data_completed_at?: any | null, first_name_encrypted?: string | null, last_name_encrypted?: string | null, date_of_birth_encrypted?: string | null, patient_consent?: { __typename?: 'patient_consent', consent_given: boolean, created_at?: any | null } | null }> };
-
-export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetUsersQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: string, email: string, name: string, createdAt: any, emailVerified: boolean, organizationId?: string | null }> };
-
-export type GetOrganizationsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetOrganizationsQuery = { __typename?: 'query_root', organization: Array<{ __typename?: 'organization', id: string, name: string, city?: string | null, created_at?: any | null }> };
-
-export type GetPatientRecordsQueryVariables = Exact<{
-  organizationId: Scalars['String']['input'];
-}>;
-
-
-export type GetPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: string, created_at?: any | null, organization_id: string, notes?: string | null }> };
+export type ValidateInviteTokenMutation = { __typename?: 'mutation_root', validateInviteToken: { __typename?: 'ValidateInviteTokenResponse', valid: boolean, public_key_pem?: string | null, organization_name?: string | null, patient_record_id?: any | null, expires_at?: string | null, error_message?: string | null } };
 
 export type SubmitPatientConsentMutationVariables = Exact<{
   invite_token: Scalars['String']['input'];
@@ -3030,6 +2990,14 @@ export type SubmitPatientConsentMutationVariables = Exact<{
 
 export type SubmitPatientConsentMutation = { __typename?: 'mutation_root', submitPatientConsent: { __typename?: 'ConsentResponse', success: boolean, patient_consent_id?: any | null, error?: string | null } };
 
+export type SubmitPatientPersonalDataMutationVariables = Exact<{
+  invite_token: Scalars['String']['input'];
+  patient_data: PatientPersonalDataInput;
+}>;
+
+
+export type SubmitPatientPersonalDataMutation = { __typename?: 'mutation_root', submitPatientPersonalData: { __typename?: 'PatientPersonalDataResponse', success: boolean, patient_record_id?: any | null, message?: string | null, error?: string | null } };
+
 export type SubmitQuestionnaireResponseMutationVariables = Exact<{
   invite_token: Scalars['String']['input'];
   response_data: QuestionnaireResponseInput;
@@ -3037,11 +3005,6 @@ export type SubmitQuestionnaireResponseMutationVariables = Exact<{
 
 
 export type SubmitQuestionnaireResponseMutation = { __typename?: 'mutation_root', submitQuestionnaireResponse: { __typename?: 'QuestionnaireResponseResponse', success: boolean, questionnaire_response_id?: any | null, error?: string | null } };
-
-export type GetOrganizationPhysiciansQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetOrganizationPhysiciansQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: string, firstName?: string | null, lastName?: string | null, email: string }> };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -3062,107 +3025,18 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
-export const CreatePatientRecordDocument = new TypedDocumentString(`
-    mutation CreatePatientRecord($clinic_internal_id: String!, $notes: String) {
-  insert_patient_record_one(
-    object: {clinic_internal_id: $clinic_internal_id, notes: $notes}
-  ) {
-    id
-    clinic_internal_id
-    invite_token
-    invite_expires_at
-    created_at
-    created_by
-    notes
-  }
-}
-    `) as unknown as TypedDocumentString<CreatePatientRecordMutation, CreatePatientRecordMutationVariables>;
-export const GetOrganizationByIdDocument = new TypedDocumentString(`
-    query GetOrganizationById($id: String!) {
-  organization_by_pk(id: $id) {
-    id
-    name
-    city
-    created_at
+export const ValidateInviteTokenDocument = new TypedDocumentString(`
+    mutation ValidateInviteToken($invite_token: String!) {
+  validateInviteToken(invite_token: $invite_token) {
+    valid
     public_key_pem
-    key_fingerprint
-    key_created_at
+    organization_name
+    patient_record_id
+    expires_at
+    error_message
   }
 }
-    `) as unknown as TypedDocumentString<GetOrganizationByIdQuery, GetOrganizationByIdQueryVariables>;
-export const UpdateOrganizationPublicKeyDocument = new TypedDocumentString(`
-    mutation UpdateOrganizationPublicKey($id: String!, $public_key_pem: String!, $key_fingerprint: String!, $key_created_at: timestamptz!) {
-  update_organization_by_pk(
-    pk_columns: {id: $id}
-    _set: {public_key_pem: $public_key_pem, key_fingerprint: $key_fingerprint, key_created_at: $key_created_at}
-  ) {
-    id
-    public_key_pem
-    key_fingerprint
-    key_created_at
-  }
-}
-    `) as unknown as TypedDocumentString<UpdateOrganizationPublicKeyMutation, UpdateOrganizationPublicKeyMutationVariables>;
-export const GetAllPatientRecordsDocument = new TypedDocumentString(`
-    query GetAllPatientRecords {
-  patient_record(order_by: [{created_at: desc}]) {
-    id
-    clinic_internal_id
-    invite_token
-    invite_expires_at
-    notes
-    created_at
-    created_by
-    first_viewed_at
-    first_viewed_by
-    last_activity_at
-    last_activity_by
-    patient_data_completed_at
-    first_name_encrypted
-    last_name_encrypted
-    date_of_birth_encrypted
-    patient_consent {
-      consent_given
-      created_at
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<GetAllPatientRecordsQuery, GetAllPatientRecordsQueryVariables>;
-export const GetUsersDocument = new TypedDocumentString(`
-    query GetUsers {
-  user(where: {isAnonymous: {_eq: false}}, order_by: [{createdAt: desc}]) {
-    id
-    email
-    name
-    createdAt
-    emailVerified
-    organizationId
-  }
-}
-    `) as unknown as TypedDocumentString<GetUsersQuery, GetUsersQueryVariables>;
-export const GetOrganizationsDocument = new TypedDocumentString(`
-    query GetOrganizations {
-  organization {
-    id
-    name
-    city
-    created_at
-  }
-}
-    `) as unknown as TypedDocumentString<GetOrganizationsQuery, GetOrganizationsQueryVariables>;
-export const GetPatientRecordsDocument = new TypedDocumentString(`
-    query GetPatientRecords($organizationId: String!) {
-  patient_record(
-    where: {organization_id: {_eq: $organizationId}}
-    order_by: {created_at: desc}
-  ) {
-    id
-    created_at
-    organization_id
-    notes
-  }
-}
-    `) as unknown as TypedDocumentString<GetPatientRecordsQuery, GetPatientRecordsQueryVariables>;
+    `) as unknown as TypedDocumentString<ValidateInviteTokenMutation, ValidateInviteTokenMutationVariables>;
 export const SubmitPatientConsentDocument = new TypedDocumentString(`
     mutation SubmitPatientConsent($invite_token: String!, $consent_data: ConsentInput!) {
   submitPatientConsent(invite_token: $invite_token, consent_data: $consent_data) {
@@ -3172,6 +3046,19 @@ export const SubmitPatientConsentDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SubmitPatientConsentMutation, SubmitPatientConsentMutationVariables>;
+export const SubmitPatientPersonalDataDocument = new TypedDocumentString(`
+    mutation SubmitPatientPersonalData($invite_token: String!, $patient_data: PatientPersonalDataInput!) {
+  submitPatientPersonalData(
+    invite_token: $invite_token
+    patient_data: $patient_data
+  ) {
+    success
+    patient_record_id
+    message
+    error
+  }
+}
+    `) as unknown as TypedDocumentString<SubmitPatientPersonalDataMutation, SubmitPatientPersonalDataMutationVariables>;
 export const SubmitQuestionnaireResponseDocument = new TypedDocumentString(`
     mutation SubmitQuestionnaireResponse($invite_token: String!, $response_data: QuestionnaireResponseInput!) {
   submitQuestionnaireResponse(
@@ -3184,13 +3071,3 @@ export const SubmitQuestionnaireResponseDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<SubmitQuestionnaireResponseMutation, SubmitQuestionnaireResponseMutationVariables>;
-export const GetOrganizationPhysiciansDocument = new TypedDocumentString(`
-    query GetOrganizationPhysicians {
-  user {
-    id
-    firstName
-    lastName
-    email
-  }
-}
-    `) as unknown as TypedDocumentString<GetOrganizationPhysiciansQuery, GetOrganizationPhysiciansQueryVariables>;

@@ -15,6 +15,7 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "\n  mutation CreatePatientRecord(\n    $clinic_internal_id: String!\n    $notes: String\n  ) {\n    insert_patient_record_one(\n      object: {\n        clinic_internal_id: $clinic_internal_id\n        notes: $notes\n      }\n    ) {\n      id\n      clinic_internal_id\n      invite_token\n      invite_expires_at\n      created_at\n      created_by\n      notes\n    }\n  }\n": typeof types.CreatePatientRecordDocument,
     "\n  query GetOrganizationById($id: String!) {\n    organization_by_pk(id: $id) {\n      id\n      name\n      city\n      created_at\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": typeof types.GetOrganizationByIdDocument,
     "\n  mutation UpdateOrganizationPublicKey(\n    $id: String!\n    $public_key_pem: String!\n    $key_fingerprint: String!\n    $key_created_at: timestamptz!\n  ) {\n    update_organization_by_pk(\n      pk_columns: { id: $id }\n      _set: {\n        public_key_pem: $public_key_pem\n        key_fingerprint: $key_fingerprint\n        key_created_at: $key_created_at\n      }\n    ) {\n      id\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": typeof types.UpdateOrganizationPublicKeyDocument,
     "\n  query GetAllPatientRecords {\n    patient_record(\n      order_by: [{ created_at: desc }]\n    ) {\n      id\n      clinic_internal_id\n      invite_token\n      invite_expires_at\n      notes\n      created_at\n      created_by\n      first_viewed_at\n      first_viewed_by\n      last_activity_at\n      last_activity_by\n      patient_data_completed_at\n      first_name_encrypted\n      last_name_encrypted\n      date_of_birth_encrypted\n      patient_consent {\n        consent_given\n        created_at\n      }\n    }\n  }\n": typeof types.GetAllPatientRecordsDocument,
@@ -26,6 +27,7 @@ type Documents = {
     "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": typeof types.GetOrganizationPhysiciansDocument,
 };
 const documents: Documents = {
+    "\n  mutation CreatePatientRecord(\n    $clinic_internal_id: String!\n    $notes: String\n  ) {\n    insert_patient_record_one(\n      object: {\n        clinic_internal_id: $clinic_internal_id\n        notes: $notes\n      }\n    ) {\n      id\n      clinic_internal_id\n      invite_token\n      invite_expires_at\n      created_at\n      created_by\n      notes\n    }\n  }\n": types.CreatePatientRecordDocument,
     "\n  query GetOrganizationById($id: String!) {\n    organization_by_pk(id: $id) {\n      id\n      name\n      city\n      created_at\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": types.GetOrganizationByIdDocument,
     "\n  mutation UpdateOrganizationPublicKey(\n    $id: String!\n    $public_key_pem: String!\n    $key_fingerprint: String!\n    $key_created_at: timestamptz!\n  ) {\n    update_organization_by_pk(\n      pk_columns: { id: $id }\n      _set: {\n        public_key_pem: $public_key_pem\n        key_fingerprint: $key_fingerprint\n        key_created_at: $key_created_at\n      }\n    ) {\n      id\n      public_key_pem\n      key_fingerprint\n      key_created_at\n    }\n  }\n": types.UpdateOrganizationPublicKeyDocument,
     "\n  query GetAllPatientRecords {\n    patient_record(\n      order_by: [{ created_at: desc }]\n    ) {\n      id\n      clinic_internal_id\n      invite_token\n      invite_expires_at\n      notes\n      created_at\n      created_by\n      first_viewed_at\n      first_viewed_by\n      last_activity_at\n      last_activity_by\n      patient_data_completed_at\n      first_name_encrypted\n      last_name_encrypted\n      date_of_birth_encrypted\n      patient_consent {\n        consent_given\n        created_at\n      }\n    }\n  }\n": types.GetAllPatientRecordsDocument,
@@ -37,6 +39,10 @@ const documents: Documents = {
     "\n  query GetOrganizationPhysicians {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": types.GetOrganizationPhysiciansDocument,
 };
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreatePatientRecord(\n    $clinic_internal_id: String!\n    $notes: String\n  ) {\n    insert_patient_record_one(\n      object: {\n        clinic_internal_id: $clinic_internal_id\n        notes: $notes\n      }\n    ) {\n      id\n      clinic_internal_id\n      invite_token\n      invite_expires_at\n      created_at\n      created_by\n      notes\n    }\n  }\n"): typeof import('./graphql').CreatePatientRecordDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
