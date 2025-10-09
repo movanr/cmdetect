@@ -13,18 +13,13 @@ array_relationships:
         table:
           name: patient_record
           schema: public
-  - name: patientRecordsByFirstViewedBy
+  - name: patientRecordsByLastViewedBy
     using:
-      foreign_key_constraint_on:
-        column: first_viewed_by
-        table:
-          name: patient_record
-          schema: public
-  - name: patientRecordsByLastActivityBy
-    using:
-      foreign_key_constraint_on:
-        column: last_activity_by
-        table:
+      manual_configuration:
+        column_mapping:
+          id: last_viewed_by
+        insertion_order: null
+        remote_table:
           name: patient_record
           schema: public
 insert_permissions:
@@ -35,8 +30,7 @@ insert_permissions:
         organizationId: x-hasura-Organization-Id
       columns:
         - email
-        - firstName
-        - lastName
+        - name
         - roles
     comment: ""
 select_permissions:
@@ -48,12 +42,10 @@ select_permissions:
         - deletedAt
         - email
         - emailVerified
-        - firstName
         - id
         - image
         - isActive
         - isAnonymous
-        - lastName
         - name
         - organizationId
         - roles
@@ -70,11 +62,10 @@ select_permissions:
       columns:
         - activeRole
         - email
-        - firstName
         - id
         - image
         - isActive
-        - lastName
+        - name
         - organizationId
         - roles
       filter:
@@ -89,11 +80,10 @@ select_permissions:
       columns:
         - activeRole
         - email
-        - firstName
+        - name
         - id
         - image
         - isActive
-        - lastName
         - organizationId
         - roles
       filter:
@@ -109,9 +99,8 @@ update_permissions:
       columns:
         - deletedAt
         - email
-        - firstName
         - isActive
-        - lastName
+        - name
         - roles
       filter:
         _and:
@@ -125,8 +114,7 @@ update_permissions:
     permission:
       columns:
         - email
-        - firstName
-        - lastName
+        - name
       filter:
         _and:
           - organizationId:
@@ -143,8 +131,7 @@ update_permissions:
     permission:
       columns:
         - email
-        - firstName
-        - lastName
+        - name
       filter:
         _and:
           - organizationId:

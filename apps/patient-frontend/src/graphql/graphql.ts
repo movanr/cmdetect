@@ -1321,15 +1321,12 @@ export type Patient_Record = {
   date_of_birth_encrypted?: Maybe<Scalars['String']['output']>;
   deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   first_name_encrypted?: Maybe<Scalars['String']['output']>;
-  first_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
-  first_viewed_by?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   invite_expires_at: Scalars['timestamptz']['output'];
   invite_token: Scalars['String']['output'];
-  last_activity_at?: Maybe<Scalars['timestamptz']['output']>;
-  last_activity_by?: Maybe<Scalars['String']['output']>;
   last_name_encrypted?: Maybe<Scalars['String']['output']>;
-  notes?: Maybe<Scalars['String']['output']>;
+  last_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
+  last_viewed_by?: Maybe<Scalars['String']['output']>;
   /** An object relationship */
   organization: Organization;
   organization_id: Scalars['String']['output'];
@@ -1344,9 +1341,7 @@ export type Patient_Record = {
   /** An object relationship */
   userByCreatedBy: User;
   /** An object relationship */
-  userByFirstViewedBy?: Maybe<User>;
-  /** An object relationship */
-  userByLastActivityBy?: Maybe<User>;
+  userByLastViewedBy?: Maybe<User>;
 };
 
 
@@ -1427,15 +1422,12 @@ export type Patient_Record_Bool_Exp = {
   date_of_birth_encrypted?: InputMaybe<String_Comparison_Exp>;
   deleted_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   first_name_encrypted?: InputMaybe<String_Comparison_Exp>;
-  first_viewed_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  first_viewed_by?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
   invite_expires_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   invite_token?: InputMaybe<String_Comparison_Exp>;
-  last_activity_at?: InputMaybe<Timestamptz_Comparison_Exp>;
-  last_activity_by?: InputMaybe<String_Comparison_Exp>;
   last_name_encrypted?: InputMaybe<String_Comparison_Exp>;
-  notes?: InputMaybe<String_Comparison_Exp>;
+  last_viewed_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  last_viewed_by?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organization_id?: InputMaybe<String_Comparison_Exp>;
   patient_consent?: InputMaybe<Patient_Consent_Bool_Exp>;
@@ -1444,8 +1436,7 @@ export type Patient_Record_Bool_Exp = {
   questionnaire_responses_aggregate?: InputMaybe<Questionnaire_Response_Aggregate_Bool_Exp>;
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   userByCreatedBy?: InputMaybe<User_Bool_Exp>;
-  userByFirstViewedBy?: InputMaybe<User_Bool_Exp>;
-  userByLastActivityBy?: InputMaybe<User_Bool_Exp>;
+  userByLastViewedBy?: InputMaybe<User_Bool_Exp>;
 };
 
 /** unique or primary key constraints on table "patient_record" */
@@ -1464,15 +1455,12 @@ export type Patient_Record_Insert_Input = {
   date_of_birth_encrypted?: InputMaybe<Scalars['String']['input']>;
   deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   first_name_encrypted?: InputMaybe<Scalars['String']['input']>;
-  first_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  first_viewed_by?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
   invite_token?: InputMaybe<Scalars['String']['input']>;
-  last_activity_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  last_activity_by?: InputMaybe<Scalars['String']['input']>;
   last_name_encrypted?: InputMaybe<Scalars['String']['input']>;
-  notes?: InputMaybe<Scalars['String']['input']>;
+  last_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  last_viewed_by?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organization_id?: InputMaybe<Scalars['String']['input']>;
   patient_consent?: InputMaybe<Patient_Consent_Obj_Rel_Insert_Input>;
@@ -1480,8 +1468,7 @@ export type Patient_Record_Insert_Input = {
   questionnaire_responses?: InputMaybe<Questionnaire_Response_Arr_Rel_Insert_Input>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   userByCreatedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
-  userByFirstViewedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
-  userByLastActivityBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  userByLastViewedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
 };
 
 /** aggregate max on columns */
@@ -1493,15 +1480,12 @@ export type Patient_Record_Max_Fields = {
   date_of_birth_encrypted?: Maybe<Scalars['String']['output']>;
   deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   first_name_encrypted?: Maybe<Scalars['String']['output']>;
-  first_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
-  first_viewed_by?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
   invite_token?: Maybe<Scalars['String']['output']>;
-  last_activity_at?: Maybe<Scalars['timestamptz']['output']>;
-  last_activity_by?: Maybe<Scalars['String']['output']>;
   last_name_encrypted?: Maybe<Scalars['String']['output']>;
-  notes?: Maybe<Scalars['String']['output']>;
+  last_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
+  last_viewed_by?: Maybe<Scalars['String']['output']>;
   organization_id?: Maybe<Scalars['String']['output']>;
   patient_data_completed_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
@@ -1515,15 +1499,12 @@ export type Patient_Record_Max_Order_By = {
   date_of_birth_encrypted?: InputMaybe<Order_By>;
   deleted_at?: InputMaybe<Order_By>;
   first_name_encrypted?: InputMaybe<Order_By>;
-  first_viewed_at?: InputMaybe<Order_By>;
-  first_viewed_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
-  last_activity_at?: InputMaybe<Order_By>;
-  last_activity_by?: InputMaybe<Order_By>;
   last_name_encrypted?: InputMaybe<Order_By>;
-  notes?: InputMaybe<Order_By>;
+  last_viewed_at?: InputMaybe<Order_By>;
+  last_viewed_by?: InputMaybe<Order_By>;
   organization_id?: InputMaybe<Order_By>;
   patient_data_completed_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
@@ -1538,15 +1519,12 @@ export type Patient_Record_Min_Fields = {
   date_of_birth_encrypted?: Maybe<Scalars['String']['output']>;
   deleted_at?: Maybe<Scalars['timestamptz']['output']>;
   first_name_encrypted?: Maybe<Scalars['String']['output']>;
-  first_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
-  first_viewed_by?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   invite_expires_at?: Maybe<Scalars['timestamptz']['output']>;
   invite_token?: Maybe<Scalars['String']['output']>;
-  last_activity_at?: Maybe<Scalars['timestamptz']['output']>;
-  last_activity_by?: Maybe<Scalars['String']['output']>;
   last_name_encrypted?: Maybe<Scalars['String']['output']>;
-  notes?: Maybe<Scalars['String']['output']>;
+  last_viewed_at?: Maybe<Scalars['timestamptz']['output']>;
+  last_viewed_by?: Maybe<Scalars['String']['output']>;
   organization_id?: Maybe<Scalars['String']['output']>;
   patient_data_completed_at?: Maybe<Scalars['timestamptz']['output']>;
   updated_at?: Maybe<Scalars['timestamptz']['output']>;
@@ -1560,15 +1538,12 @@ export type Patient_Record_Min_Order_By = {
   date_of_birth_encrypted?: InputMaybe<Order_By>;
   deleted_at?: InputMaybe<Order_By>;
   first_name_encrypted?: InputMaybe<Order_By>;
-  first_viewed_at?: InputMaybe<Order_By>;
-  first_viewed_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
-  last_activity_at?: InputMaybe<Order_By>;
-  last_activity_by?: InputMaybe<Order_By>;
   last_name_encrypted?: InputMaybe<Order_By>;
-  notes?: InputMaybe<Order_By>;
+  last_viewed_at?: InputMaybe<Order_By>;
+  last_viewed_by?: InputMaybe<Order_By>;
   organization_id?: InputMaybe<Order_By>;
   patient_data_completed_at?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
@@ -1605,15 +1580,12 @@ export type Patient_Record_Order_By = {
   date_of_birth_encrypted?: InputMaybe<Order_By>;
   deleted_at?: InputMaybe<Order_By>;
   first_name_encrypted?: InputMaybe<Order_By>;
-  first_viewed_at?: InputMaybe<Order_By>;
-  first_viewed_by?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   invite_expires_at?: InputMaybe<Order_By>;
   invite_token?: InputMaybe<Order_By>;
-  last_activity_at?: InputMaybe<Order_By>;
-  last_activity_by?: InputMaybe<Order_By>;
   last_name_encrypted?: InputMaybe<Order_By>;
-  notes?: InputMaybe<Order_By>;
+  last_viewed_at?: InputMaybe<Order_By>;
+  last_viewed_by?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organization_id?: InputMaybe<Order_By>;
   patient_consent?: InputMaybe<Patient_Consent_Order_By>;
@@ -1621,8 +1593,7 @@ export type Patient_Record_Order_By = {
   questionnaire_responses_aggregate?: InputMaybe<Questionnaire_Response_Aggregate_Order_By>;
   updated_at?: InputMaybe<Order_By>;
   userByCreatedBy?: InputMaybe<User_Order_By>;
-  userByFirstViewedBy?: InputMaybe<User_Order_By>;
-  userByLastActivityBy?: InputMaybe<User_Order_By>;
+  userByLastViewedBy?: InputMaybe<User_Order_By>;
 };
 
 /** primary key columns input for table: patient_record */
@@ -1645,23 +1616,17 @@ export enum Patient_Record_Select_Column {
   /** column name */
   FirstNameEncrypted = 'first_name_encrypted',
   /** column name */
-  FirstViewedAt = 'first_viewed_at',
-  /** column name */
-  FirstViewedBy = 'first_viewed_by',
-  /** column name */
   Id = 'id',
   /** column name */
   InviteExpiresAt = 'invite_expires_at',
   /** column name */
   InviteToken = 'invite_token',
   /** column name */
-  LastActivityAt = 'last_activity_at',
-  /** column name */
-  LastActivityBy = 'last_activity_by',
-  /** column name */
   LastNameEncrypted = 'last_name_encrypted',
   /** column name */
-  Notes = 'notes',
+  LastViewedAt = 'last_viewed_at',
+  /** column name */
+  LastViewedBy = 'last_viewed_by',
   /** column name */
   OrganizationId = 'organization_id',
   /** column name */
@@ -1678,15 +1643,12 @@ export type Patient_Record_Set_Input = {
   date_of_birth_encrypted?: InputMaybe<Scalars['String']['input']>;
   deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   first_name_encrypted?: InputMaybe<Scalars['String']['input']>;
-  first_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  first_viewed_by?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
   invite_token?: InputMaybe<Scalars['String']['input']>;
-  last_activity_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  last_activity_by?: InputMaybe<Scalars['String']['input']>;
   last_name_encrypted?: InputMaybe<Scalars['String']['input']>;
-  notes?: InputMaybe<Scalars['String']['input']>;
+  last_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  last_viewed_by?: InputMaybe<Scalars['String']['input']>;
   organization_id?: InputMaybe<Scalars['String']['input']>;
   patient_data_completed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -1708,15 +1670,12 @@ export type Patient_Record_Stream_Cursor_Value_Input = {
   date_of_birth_encrypted?: InputMaybe<Scalars['String']['input']>;
   deleted_at?: InputMaybe<Scalars['timestamptz']['input']>;
   first_name_encrypted?: InputMaybe<Scalars['String']['input']>;
-  first_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  first_viewed_by?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   invite_expires_at?: InputMaybe<Scalars['timestamptz']['input']>;
   invite_token?: InputMaybe<Scalars['String']['input']>;
-  last_activity_at?: InputMaybe<Scalars['timestamptz']['input']>;
-  last_activity_by?: InputMaybe<Scalars['String']['input']>;
   last_name_encrypted?: InputMaybe<Scalars['String']['input']>;
-  notes?: InputMaybe<Scalars['String']['input']>;
+  last_viewed_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  last_viewed_by?: InputMaybe<Scalars['String']['input']>;
   organization_id?: InputMaybe<Scalars['String']['input']>;
   patient_data_completed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
@@ -1737,23 +1696,17 @@ export enum Patient_Record_Update_Column {
   /** column name */
   FirstNameEncrypted = 'first_name_encrypted',
   /** column name */
-  FirstViewedAt = 'first_viewed_at',
-  /** column name */
-  FirstViewedBy = 'first_viewed_by',
-  /** column name */
   Id = 'id',
   /** column name */
   InviteExpiresAt = 'invite_expires_at',
   /** column name */
   InviteToken = 'invite_token',
   /** column name */
-  LastActivityAt = 'last_activity_at',
-  /** column name */
-  LastActivityBy = 'last_activity_by',
-  /** column name */
   LastNameEncrypted = 'last_name_encrypted',
   /** column name */
-  Notes = 'notes',
+  LastViewedAt = 'last_viewed_at',
+  /** column name */
+  LastViewedBy = 'last_viewed_by',
   /** column name */
   OrganizationId = 'organization_id',
   /** column name */
@@ -2469,12 +2422,10 @@ export type User = {
   deletedAt?: Maybe<Scalars['timestamp']['output']>;
   email: Scalars['String']['output'];
   emailVerified: Scalars['Boolean']['output'];
-  firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
   image?: Maybe<Scalars['String']['output']>;
   isActive?: Maybe<Scalars['Boolean']['output']>;
   isAnonymous?: Maybe<Scalars['Boolean']['output']>;
-  lastName?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   /** An object relationship */
   organization?: Maybe<Organization>;
@@ -2484,13 +2435,9 @@ export type User = {
   /** An aggregate relationship */
   patientRecordsByCreatedBy_aggregate: Patient_Record_Aggregate;
   /** An array relationship */
-  patientRecordsByFirstViewedBy: Array<Patient_Record>;
+  patientRecordsByLastViewedBy: Array<Patient_Record>;
   /** An aggregate relationship */
-  patientRecordsByFirstViewedBy_aggregate: Patient_Record_Aggregate;
-  /** An array relationship */
-  patientRecordsByLastActivityBy: Array<Patient_Record>;
-  /** An aggregate relationship */
-  patientRecordsByLastActivityBy_aggregate: Patient_Record_Aggregate;
+  patientRecordsByLastViewedBy_aggregate: Patient_Record_Aggregate;
   roles?: Maybe<Scalars['jsonb']['output']>;
   updatedAt: Scalars['timestamp']['output'];
 };
@@ -2517,7 +2464,7 @@ export type UserPatientRecordsByCreatedBy_AggregateArgs = {
 
 
 /** columns and relationships of "user" */
-export type UserPatientRecordsByFirstViewedByArgs = {
+export type UserPatientRecordsByLastViewedByArgs = {
   distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -2527,27 +2474,7 @@ export type UserPatientRecordsByFirstViewedByArgs = {
 
 
 /** columns and relationships of "user" */
-export type UserPatientRecordsByFirstViewedBy_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Patient_Record_Order_By>>;
-  where?: InputMaybe<Patient_Record_Bool_Exp>;
-};
-
-
-/** columns and relationships of "user" */
-export type UserPatientRecordsByLastActivityByArgs = {
-  distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  order_by?: InputMaybe<Array<Patient_Record_Order_By>>;
-  where?: InputMaybe<Patient_Record_Bool_Exp>;
-};
-
-
-/** columns and relationships of "user" */
-export type UserPatientRecordsByLastActivityBy_AggregateArgs = {
+export type UserPatientRecordsByLastViewedBy_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Patient_Record_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -2639,21 +2566,17 @@ export type User_Bool_Exp = {
   deletedAt?: InputMaybe<Timestamp_Comparison_Exp>;
   email?: InputMaybe<String_Comparison_Exp>;
   emailVerified?: InputMaybe<Boolean_Comparison_Exp>;
-  firstName?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
   image?: InputMaybe<String_Comparison_Exp>;
   isActive?: InputMaybe<Boolean_Comparison_Exp>;
   isAnonymous?: InputMaybe<Boolean_Comparison_Exp>;
-  lastName?: InputMaybe<String_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
   organization?: InputMaybe<Organization_Bool_Exp>;
   organizationId?: InputMaybe<String_Comparison_Exp>;
   patientRecordsByCreatedBy?: InputMaybe<Patient_Record_Bool_Exp>;
   patientRecordsByCreatedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
-  patientRecordsByFirstViewedBy?: InputMaybe<Patient_Record_Bool_Exp>;
-  patientRecordsByFirstViewedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
-  patientRecordsByLastActivityBy?: InputMaybe<Patient_Record_Bool_Exp>;
-  patientRecordsByLastActivityBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
+  patientRecordsByLastViewedBy?: InputMaybe<Patient_Record_Bool_Exp>;
+  patientRecordsByLastViewedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Bool_Exp>;
   roles?: InputMaybe<Jsonb_Comparison_Exp>;
   updatedAt?: InputMaybe<Timestamp_Comparison_Exp>;
 };
@@ -2690,18 +2613,15 @@ export type User_Insert_Input = {
   deletedAt?: InputMaybe<Scalars['timestamp']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
   emailVerified?: InputMaybe<Scalars['Boolean']['input']>;
-  firstName?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   image?: InputMaybe<Scalars['String']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   isAnonymous?: InputMaybe<Scalars['Boolean']['input']>;
-  lastName?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Organization_Obj_Rel_Insert_Input>;
   organizationId?: InputMaybe<Scalars['String']['input']>;
   patientRecordsByCreatedBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
-  patientRecordsByFirstViewedBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
-  patientRecordsByLastActivityBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
+  patientRecordsByLastViewedBy?: InputMaybe<Patient_Record_Arr_Rel_Insert_Input>;
   roles?: InputMaybe<Scalars['jsonb']['input']>;
   updatedAt?: InputMaybe<Scalars['timestamp']['input']>;
 };
@@ -2713,10 +2633,8 @@ export type User_Max_Fields = {
   createdAt?: Maybe<Scalars['timestamp']['output']>;
   deletedAt?: Maybe<Scalars['timestamp']['output']>;
   email?: Maybe<Scalars['String']['output']>;
-  firstName?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   image?: Maybe<Scalars['String']['output']>;
-  lastName?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamp']['output']>;
@@ -2728,10 +2646,8 @@ export type User_Max_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   deletedAt?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
-  firstName?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   image?: InputMaybe<Order_By>;
-  lastName?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
@@ -2744,10 +2660,8 @@ export type User_Min_Fields = {
   createdAt?: Maybe<Scalars['timestamp']['output']>;
   deletedAt?: Maybe<Scalars['timestamp']['output']>;
   email?: Maybe<Scalars['String']['output']>;
-  firstName?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   image?: Maybe<Scalars['String']['output']>;
-  lastName?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   organizationId?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['timestamp']['output']>;
@@ -2759,10 +2673,8 @@ export type User_Min_Order_By = {
   createdAt?: InputMaybe<Order_By>;
   deletedAt?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
-  firstName?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   image?: InputMaybe<Order_By>;
-  lastName?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organizationId?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
@@ -2798,18 +2710,15 @@ export type User_Order_By = {
   deletedAt?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
   emailVerified?: InputMaybe<Order_By>;
-  firstName?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   image?: InputMaybe<Order_By>;
   isActive?: InputMaybe<Order_By>;
   isAnonymous?: InputMaybe<Order_By>;
-  lastName?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   organization?: InputMaybe<Organization_Order_By>;
   organizationId?: InputMaybe<Order_By>;
   patientRecordsByCreatedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
-  patientRecordsByFirstViewedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
-  patientRecordsByLastActivityBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
+  patientRecordsByLastViewedBy_aggregate?: InputMaybe<Patient_Record_Aggregate_Order_By>;
   roles?: InputMaybe<Order_By>;
   updatedAt?: InputMaybe<Order_By>;
 };
@@ -2837,8 +2746,6 @@ export enum User_Select_Column {
   /** column name */
   EmailVerified = 'emailVerified',
   /** column name */
-  FirstName = 'firstName',
-  /** column name */
   Id = 'id',
   /** column name */
   Image = 'image',
@@ -2846,8 +2753,6 @@ export enum User_Select_Column {
   IsActive = 'isActive',
   /** column name */
   IsAnonymous = 'isAnonymous',
-  /** column name */
-  LastName = 'lastName',
   /** column name */
   Name = 'name',
   /** column name */
@@ -2885,12 +2790,10 @@ export type User_Set_Input = {
   deletedAt?: InputMaybe<Scalars['timestamp']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
   emailVerified?: InputMaybe<Scalars['Boolean']['input']>;
-  firstName?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   image?: InputMaybe<Scalars['String']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   isAnonymous?: InputMaybe<Scalars['Boolean']['input']>;
-  lastName?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<Scalars['jsonb']['input']>;
@@ -2912,12 +2815,10 @@ export type User_Stream_Cursor_Value_Input = {
   deletedAt?: InputMaybe<Scalars['timestamp']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
   emailVerified?: InputMaybe<Scalars['Boolean']['input']>;
-  firstName?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   image?: InputMaybe<Scalars['String']['input']>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   isAnonymous?: InputMaybe<Scalars['Boolean']['input']>;
-  lastName?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   organizationId?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<Scalars['jsonb']['input']>;
@@ -2937,8 +2838,6 @@ export enum User_Update_Column {
   /** column name */
   EmailVerified = 'emailVerified',
   /** column name */
-  FirstName = 'firstName',
-  /** column name */
   Id = 'id',
   /** column name */
   Image = 'image',
@@ -2946,8 +2845,6 @@ export enum User_Update_Column {
   IsActive = 'isActive',
   /** column name */
   IsAnonymous = 'isAnonymous',
-  /** column name */
-  LastName = 'lastName',
   /** column name */
   Name = 'name',
   /** column name */

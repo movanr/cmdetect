@@ -15,12 +15,15 @@ object_relationships:
   - name: userByCreatedBy
     using:
       foreign_key_constraint_on: created_by
-  - name: userByFirstViewedBy
+  - name: userByLastViewedBy
     using:
-      foreign_key_constraint_on: first_viewed_by
-  - name: userByLastActivityBy
-    using:
-      foreign_key_constraint_on: last_activity_by
+      manual_configuration:
+        column_mapping:
+          last_viewed_by: id
+        insertion_order: null
+        remote_table:
+          name: user
+          schema: public
 array_relationships:
   - name: questionnaire_responses
     using:
@@ -38,7 +41,6 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
-        - notes
     comment: ""
   - role: physician
     permission:
@@ -48,7 +50,6 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
-        - notes
     comment: ""
   - role: receptionist
     permission:
@@ -58,7 +59,6 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
-        - notes
     comment: ""
 select_permissions:
   - role: org_admin
@@ -69,15 +69,14 @@ select_permissions:
         - created_by
         - date_of_birth_encrypted
         - first_name_encrypted
-        - first_viewed_at
-        - first_viewed_by
+        - last_viewed_at
+        - last_viewed_by
         - id
         - invite_expires_at
         - invite_token
-        - last_activity_at
-        - last_activity_by
+        - last_viewed_at
+        - last_viewed_by
         - last_name_encrypted
-        - notes
         - organization_id
         - patient_data_completed_at
         - updated_at
@@ -96,15 +95,14 @@ select_permissions:
         - created_by
         - date_of_birth_encrypted
         - first_name_encrypted
-        - first_viewed_at
-        - first_viewed_by
+        - last_viewed_at
+        - last_viewed_by
         - id
         - invite_expires_at
         - invite_token
-        - last_activity_at
-        - last_activity_by
+        - last_viewed_at
+        - last_viewed_by
         - last_name_encrypted
-        - notes
         - organization_id
         - patient_data_completed_at
         - updated_at
@@ -123,15 +121,14 @@ select_permissions:
         - created_by
         - date_of_birth_encrypted
         - first_name_encrypted
-        - first_viewed_at
-        - first_viewed_by
+        - last_viewed_at
+        - last_viewed_by
         - id
         - invite_expires_at
         - invite_token
-        - last_activity_at
-        - last_activity_by
+        - last_viewed_at
+        - last_viewed_by
         - last_name_encrypted
-        - notes
         - organization_id
         - patient_data_completed_at
         - updated_at
@@ -151,7 +148,6 @@ update_permissions:
         - deleted_at
         - first_name_encrypted
         - last_name_encrypted
-        - notes
       filter:
         _and:
           - organization_id:
@@ -160,18 +156,18 @@ update_permissions:
               _is_null: true
       check: {}
       set:
-        last_activity_by: x-hasura-User-Id
+        last_viewed_by: x-hasura-User-Id
         updated_at: now()
     comment: ""
   - role: physician
     permission:
       columns:
+        - clinic_internal_id
         - deleted_at
-        - first_viewed_at
-        - first_viewed_by
-        - last_activity_at
-        - last_activity_by
-        - notes
+        - last_viewed_at
+        - last_viewed_at
+        - last_viewed_by
+        - last_viewed_by
       filter:
         _and:
           - organization_id:
@@ -180,14 +176,14 @@ update_permissions:
               _is_null: true
       check: null
       set:
-        last_activity_by: x-hasura-User-Id
+        last_viewed_by: x-hasura-User-Id
         updated_at: now()
     comment: ""
   - role: receptionist
     permission:
       columns:
         - clinic_internal_id
-        - notes
+        - deleted_at
       filter:
         _and:
           - organization_id:

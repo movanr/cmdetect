@@ -1,108 +1,174 @@
-import { Link } from '@tanstack/react-router'
-import { DataTable, StatusBadge, ActionButtons } from '@/components/ui/data-table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { useInvites, getPatientRecordStatus } from '@/lib/patient-records'
-import { formatDistanceToNow } from 'date-fns'
-import { ExternalLink, Copy, Edit, Trash, Plus } from 'lucide-react'
-import type { GetAllPatientRecordsQuery } from '@/graphql/graphql'
-import { getTranslations } from '@/config/i18n'
+import { Link } from "@tanstack/react-router";
+import {
+  DataTable,
+  StatusBadge,
+  ActionButtons,
+} from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { usePatientRecords, getPatientRecordStatus } from "@/lib/patient-records";
+import { formatDistanceToNow } from "date-fns";
+import { MoreVertical, Trash, Plus, Copy, ExternalLink } from "lucide-react";
+import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
+import { getTranslations } from "@/config/i18n";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { execute } from "@/graphql/execute";
+import { DELETE_PATIENT_RECORD } from "./queries";
 
-type PatientRecord = GetAllPatientRecordsQuery['patient_record'][number]
+type PatientRecord = GetAllPatientRecordsQuery["patient_record"][number];
 
 export function InvitesView() {
-  const { data: invites, isLoading } = useInvites()
-  const t = getTranslations()
+  const { data: patientRecords, isLoading } = usePatientRecords();
+  const t = getTranslations();
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return execute(DELETE_PATIENT_RECORD, { id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patient-records"] });
+      toast.success("Invite deleted successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete invite: " + error.message);
+    },
+  });
 
   const columns = [
     {
-      key: 'created_at' as keyof PatientRecord,
+      key: "created_at" as keyof PatientRecord,
       header: t.dashboard.columns.created,
-      width: '120px',
-      render: (value: string) => formatDistanceToNow(new Date(value), { addSuffix: true })
+      width: "12%",
+      render: (value: string) =>
+        formatDistanceToNow(new Date(value), { addSuffix: true }),
     },
     {
-      key: 'created_by' as keyof PatientRecord,
+      key: "created_by" as keyof PatientRecord,
       header: t.dashboard.columns.createdBy,
-      width: '120px',
-      render: (value: string) => value || t.dashboard.system
+      width: "12%",
+      render: (_value: string, record: PatientRecord) => {
+        const userName = record.userByCreatedBy?.name || t.dashboard.system;
+        return (
+          <span className="truncate block" title={userName}>
+            {userName}
+          </span>
+        );
+      },
     },
     {
-      key: 'clinic_internal_id' as keyof PatientRecord,
+      key: "clinic_internal_id" as keyof PatientRecord,
       header: t.dashboard.columns.internalId,
-      width: '120px'
+      width: "12%",
+      render: (value: string) => (
+        <span className="truncate block" title={value || undefined}>
+          {value || "-"}
+        </span>
+      ),
     },
     {
-      key: 'invite_token' as keyof PatientRecord,
+      key: "invite_token" as keyof PatientRecord,
       header: t.dashboard.columns.inviteUrl,
-      width: '140px',
-      render: (token: string) => (
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="font-mono text-xs">
-            {token?.slice(-8) || 'N/A'}
-          </Badge>
-          {token && (
-            <Button
-              size="sm"
-              variant="ghost"
-              title={t.dashboard.actions.copyInviteUrl}
+      width: "15%",
+      render: (token: string) => {
+        const url = token
+          ? `${window.location.origin}/patient?token=${token}`
+          : "";
+
+        return (
+          <div className="flex items-center space-x-2">
+            <Badge
+              variant="outline"
+              className="font-mono text-xs cursor-pointer"
+              title={url}
               onClick={() => {
-                const url = `${window.location.origin}/patient?token=${token}`
-                navigator.clipboard.writeText(url)
+                navigator.clipboard.writeText(url);
+                toast.success("Invite link copied to clipboard.");
               }}
             >
-              <Copy className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
-      )
+              {"..." + token?.slice(-8) || "N/A"}
+            </Badge>
+            {token && (
+              <Button
+                size="sm"
+                variant="ghost"
+                title={url}
+                onClick={() => {
+                  navigator.clipboard.writeText(url);
+                  toast.success("Invite link copied to clipboard.");
+                }}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        );
+      },
     },
     {
-      key: 'invite_expires_at' as keyof PatientRecord,
+      key: "invite_expires_at" as keyof PatientRecord,
       header: t.dashboard.columns.expires,
-      width: '120px',
-      render: (value: string) => value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : t.dashboard.never
+      width: "12%",
+      render: (value: string) =>
+        value
+          ? formatDistanceToNow(new Date(value), { addSuffix: true })
+          : t.dashboard.never,
     },
     {
-      key: 'notes' as keyof PatientRecord,
-      header: t.dashboard.columns.notes,
-      render: (value: string) => value || '-'
-    },
-    {
-      key: 'id' as keyof PatientRecord,
+      key: "id" as keyof PatientRecord,
       header: t.dashboard.columns.status,
-      width: '100px',
+      width: "12%",
       render: (_: any, record: PatientRecord) => (
         <StatusBadge status={getPatientRecordStatus(record)} />
-      )
+      ),
     },
     {
-      key: 'actions' as keyof PatientRecord,
+      key: "actions" as keyof PatientRecord,
       header: t.dashboard.columns.actions,
-      width: '120px'
-    }
-  ]
+      width: "10%",
+    },
+  ];
 
-  const renderActions = (_record: PatientRecord) => (
-    <ActionButtons>
-      <Button size="sm" variant="ghost" title={t.dashboard.actions.editNotes}>
-        <Edit className="h-3 w-3" />
-      </Button>
-      <Button size="sm" variant="ghost" title={t.dashboard.actions.openInvite}>
-        <ExternalLink className="h-3 w-3" />
-      </Button>
-      <Button size="sm" variant="ghost" title={t.dashboard.actions.deleteInvite}>
-        <Trash className="h-3 w-3" />
-      </Button>
-    </ActionButtons>
-  )
+  const renderActions = (record: PatientRecord) => {
+    const status = getPatientRecordStatus(record);
+    const isSubmitted = status === "submitted" || status === "viewed";
+
+    return (
+      <ActionButtons>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="ghost" title="Actions">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => deleteMutation.mutate(record.id)}
+              disabled={deleteMutation.isPending || isSubmitted}
+            >
+              <Trash className="h-4 w-4" />
+              {deleteMutation.isPending ? "Deleting..." : t.dashboard.actions.deleteInvite}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </ActionButtons>
+    );
+  };
 
   if (isLoading) {
-    return <DataTable data={[]} columns={columns} loading={true} />
+    return <DataTable data={[]} columns={columns} loading={true} />;
   }
 
-  if (!invites || invites.length === 0) {
+  if (!patientRecords || patientRecords.length === 0) {
     return (
       <EmptyState
         icon={ExternalLink}
@@ -117,14 +183,8 @@ export function InvitesView() {
           </Button>
         }
       />
-    )
+    );
   }
 
-  return (
-    <DataTable
-      data={invites}
-      columns={columns}
-      actions={renderActions}
-    />
-  )
+  return <DataTable data={patientRecords} columns={columns} actions={renderActions} />;
 }

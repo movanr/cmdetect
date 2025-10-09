@@ -116,14 +116,6 @@ Falls Sie dieses Konto nicht erstellt haben, ignorieren Sie diese E-Mail.`,
   // Extended user schema with healthcare-specific fields
   user: {
     additionalFields: {
-      firstName: {
-        type: "string",
-        required: false,
-      },
-      lastName: {
-        type: "string",
-        required: false,
-      },
       roles: {
         type: "string[]",
         required: false,

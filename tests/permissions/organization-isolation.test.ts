@@ -250,7 +250,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P001-ISOLATION-TEST"
-            notes: "Test record"
           }) {
             id
             organization_id
@@ -272,7 +271,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P002-RECEPTIONIST-TEST"
-            notes: "Receptionist created registration"
           }) {
             id
             organization_id
@@ -286,7 +284,6 @@ describe("Organization Isolation", () => {
       );
     });
 
-
     it("physician can only see patient records created by them", async () => {
       // First create a registration created by physician
       await clients.admin.request(`
@@ -295,7 +292,6 @@ describe("Organization Isolation", () => {
             organization_id: "${TestDataIds.organizations.org1}"
             clinic_internal_id: "P004-PHYSICIAN-TEST"
             created_by: "${TestDataIds.users.org1Physician}"
-            notes: "Created by physician"
           }) {
             id
           }
@@ -333,7 +329,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P005-DELETE-TEST"
-            notes: "To be soft deleted"
           }) {
             id
           }
@@ -430,7 +425,6 @@ describe("Organization Isolation", () => {
             insert_patient_record_one(object: {
               organization_id: "${TestDataIds.organizations.org2}"
               clinic_internal_id: "HACK001"
-              notes: "Cross-org hack attempt"
             }) {
               id
               organization_id
@@ -461,7 +455,6 @@ describe("Organization Isolation", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P006-ORG1-ISOLATION"
-            notes: "Org1 registration"
           }) {
             id
           }

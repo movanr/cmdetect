@@ -38,10 +38,15 @@ export function DataTable<T extends Record<string, any>>({
       <Card>
         <CardContent className="p-0">
           <Table>
+            <colgroup>
+              {columns.map((column) => (
+                <col key={String(column.key)} style={{ width: column.width }} />
+              ))}
+            </colgroup>
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
-                  <TableHead key={String(column.key)} style={{ width: column.width }}>
+                  <TableHead key={String(column.key)}>
                     {column.header}
                   </TableHead>
                 ))}
@@ -72,10 +77,15 @@ export function DataTable<T extends Record<string, any>>({
     <Card>
       <CardContent className="p-0">
         <Table>
+          <colgroup>
+            {columns.map((column) => (
+              <col key={String(column.key)} style={{ width: column.width }} />
+            ))}
+          </colgroup>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={String(column.key)} style={{ width: column.width }}>
+                <TableHead key={String(column.key)}>
                   {column.header}
                 </TableHead>
               ))}

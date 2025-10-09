@@ -9,7 +9,6 @@
 export type Language = "en" | "de";
 
 export interface I18nStrings {
-
   // Roles
   roles: {
     org_admin: {
@@ -62,7 +61,6 @@ export interface I18nStrings {
       submitted: string;
       patientName: string;
       dob: string;
-      notes: string;
       firstViewed: string;
       status: string;
       actions: string;
@@ -105,7 +103,7 @@ export interface I18nStrings {
       createNewInvite: string;
       createNewUser: string;
       openPatientRecord: string;
-      editNotes: string;
+      deletePatientRecord: string;
       editUser: string;
       deleteUser: string;
       copyInviteUrl: string;
@@ -190,12 +188,11 @@ export const translations: Record<Language, I18nStrings> = {
 
       columns: {
         submitted: "Submitted",
-        patientName: "Patient Name",
+        patientName: "Patient",
         dob: "DOB",
-        notes: "Notes",
         firstViewed: "First Viewed",
         status: "Status",
-        actions: "Actions",
+        actions: "",
         created: "Created",
         createdBy: "Created By",
         internalId: "Internal ID",
@@ -235,7 +232,7 @@ export const translations: Record<Language, I18nStrings> = {
         createNewInvite: "Create New Invite",
         createNewUser: "Create New User",
         openPatientRecord: "Open Patient Record",
-        editNotes: "Edit Notes",
+        deletePatientRecord: "delete case",
         editUser: "Edit User",
         deleteUser: "Delete User",
         copyInviteUrl: "Copy Invite URL",
@@ -318,12 +315,11 @@ export const translations: Record<Language, I18nStrings> = {
 
       columns: {
         submitted: "Eingereicht",
-        patientName: "Patientenname",
+        patientName: "Patient",
         dob: "Geburtsdatum",
-        notes: "Notizen",
         firstViewed: "Erstmals angesehen",
         status: "Status",
-        actions: "Aktionen",
+        actions: "",
         created: "Erstellt",
         createdBy: "Erstellt von",
         internalId: "Interne ID",
@@ -362,8 +358,8 @@ export const translations: Record<Language, I18nStrings> = {
       actions: {
         createNewInvite: "Neue Einladung erstellen",
         createNewUser: "Neuen Benutzer erstellen",
-        openPatientRecord: "Patientenakte öffnen",
-        editNotes: "Notizen bearbeiten",
+        openPatientRecord: "Fall öffnen",
+        deletePatientRecord: "Fall löschen",
         editUser: "Benutzer bearbeiten",
         deleteUser: "Benutzer löschen",
         copyInviteUrl: "Einladungs-URL kopieren",

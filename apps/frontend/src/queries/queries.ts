@@ -22,7 +22,6 @@ export const getPatientRecords = graphql(`
       id
       created_at
       organization_id
-      notes
     }
   }
 `);

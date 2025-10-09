@@ -20,7 +20,9 @@ type Mutation {
 }
 
 type Mutation {
-  validateInviteToken(invite_token: String!): ValidateInviteTokenResponse!
+  validateInviteToken(
+    invite_token: String!
+  ): ValidateInviteTokenResponse!
 }
 
 input ConsentInput {
@@ -72,3 +74,4 @@ type PatientPersonalDataResponse {
   message: String
   error: String
 }
+

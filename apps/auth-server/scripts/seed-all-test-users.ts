@@ -198,20 +198,16 @@ async function seedAllTestUsers() {
         try {
           // Update the user table columns directly instead of using metadata
           await updateClient.query(
-            `UPDATE "user" 
-             SET "emailVerified" = $1, 
-                 roles = $2, 
+            `UPDATE "user"
+             SET "emailVerified" = $1,
+                 roles = $2,
                  "organizationId" = $3,
-                 "firstName" = $4,
-                 "lastName" = $5,
-                 "isActive" = $6
-             WHERE id = $7`,
+                 "isActive" = $4
+             WHERE id = $5`,
             [
               true, // emailVerified
               JSON.stringify(userData.roles), // roles as JSON array
               userData.organizationId, // organizationId
-              userData.name.split(' ')[0], // firstName (first part of name)
-              userData.name.split(' ').slice(1).join(' '), // lastName (rest of name)
               true, // isActive
               signupResult.user.id
             ]

@@ -5,8 +5,7 @@ export const getOrganizationPhysicians = graphql(`
   query GetOrganizationPhysicians {
     user {
       id
-      firstName
-      lastName
+      name
       email
     }
   }

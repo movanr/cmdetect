@@ -1363,15 +1363,12 @@ type patient_record {
   date_of_birth_encrypted: String
   deleted_at: timestamptz
   first_name_encrypted: String
-  first_viewed_at: timestamptz
-  first_viewed_by: String
   id: String!
   invite_expires_at: timestamptz!
   invite_token: String!
-  last_activity_at: timestamptz
-  last_activity_by: String
   last_name_encrypted: String
-  notes: String
+  last_viewed_at: timestamptz
+  last_viewed_by: String
   """An object relationship"""
   organization: organization!
   organization_id: String!
@@ -1408,9 +1405,7 @@ type patient_record {
   """An object relationship"""
   userByCreatedBy: user!
   """An object relationship"""
-  userByFirstViewedBy: user
-  """An object relationship"""
-  userByLastActivityBy: user
+  userByLastViewedBy: user
 }
 
 """
@@ -1472,15 +1467,12 @@ input patient_record_bool_exp {
   date_of_birth_encrypted: String_comparison_exp
   deleted_at: timestamptz_comparison_exp
   first_name_encrypted: String_comparison_exp
-  first_viewed_at: timestamptz_comparison_exp
-  first_viewed_by: String_comparison_exp
   id: String_comparison_exp
   invite_expires_at: timestamptz_comparison_exp
   invite_token: String_comparison_exp
-  last_activity_at: timestamptz_comparison_exp
-  last_activity_by: String_comparison_exp
   last_name_encrypted: String_comparison_exp
-  notes: String_comparison_exp
+  last_viewed_at: timestamptz_comparison_exp
+  last_viewed_by: String_comparison_exp
   organization: organization_bool_exp
   organization_id: String_comparison_exp
   patient_consent: patient_consent_bool_exp
@@ -1489,8 +1481,7 @@ input patient_record_bool_exp {
   questionnaire_responses_aggregate: questionnaire_response_aggregate_bool_exp
   updated_at: timestamptz_comparison_exp
   userByCreatedBy: user_bool_exp
-  userByFirstViewedBy: user_bool_exp
-  userByLastActivityBy: user_bool_exp
+  userByLastViewedBy: user_bool_exp
 }
 
 """
@@ -1517,15 +1508,12 @@ input patient_record_insert_input {
   date_of_birth_encrypted: String
   deleted_at: timestamptz
   first_name_encrypted: String
-  first_viewed_at: timestamptz
-  first_viewed_by: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
-  last_activity_at: timestamptz
-  last_activity_by: String
   last_name_encrypted: String
-  notes: String
+  last_viewed_at: timestamptz
+  last_viewed_by: String
   organization: organization_obj_rel_insert_input
   organization_id: String
   patient_consent: patient_consent_obj_rel_insert_input
@@ -1533,8 +1521,7 @@ input patient_record_insert_input {
   questionnaire_responses: questionnaire_response_arr_rel_insert_input
   updated_at: timestamptz
   userByCreatedBy: user_obj_rel_insert_input
-  userByFirstViewedBy: user_obj_rel_insert_input
-  userByLastActivityBy: user_obj_rel_insert_input
+  userByLastViewedBy: user_obj_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -1545,15 +1532,12 @@ type patient_record_max_fields {
   date_of_birth_encrypted: String
   deleted_at: timestamptz
   first_name_encrypted: String
-  first_viewed_at: timestamptz
-  first_viewed_by: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
-  last_activity_at: timestamptz
-  last_activity_by: String
   last_name_encrypted: String
-  notes: String
+  last_viewed_at: timestamptz
+  last_viewed_by: String
   organization_id: String
   patient_data_completed_at: timestamptz
   updated_at: timestamptz
@@ -1569,15 +1553,12 @@ input patient_record_max_order_by {
   date_of_birth_encrypted: order_by
   deleted_at: order_by
   first_name_encrypted: order_by
-  first_viewed_at: order_by
-  first_viewed_by: order_by
   id: order_by
   invite_expires_at: order_by
   invite_token: order_by
-  last_activity_at: order_by
-  last_activity_by: order_by
   last_name_encrypted: order_by
-  notes: order_by
+  last_viewed_at: order_by
+  last_viewed_by: order_by
   organization_id: order_by
   patient_data_completed_at: order_by
   updated_at: order_by
@@ -1591,15 +1572,12 @@ type patient_record_min_fields {
   date_of_birth_encrypted: String
   deleted_at: timestamptz
   first_name_encrypted: String
-  first_viewed_at: timestamptz
-  first_viewed_by: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
-  last_activity_at: timestamptz
-  last_activity_by: String
   last_name_encrypted: String
-  notes: String
+  last_viewed_at: timestamptz
+  last_viewed_by: String
   organization_id: String
   patient_data_completed_at: timestamptz
   updated_at: timestamptz
@@ -1615,15 +1593,12 @@ input patient_record_min_order_by {
   date_of_birth_encrypted: order_by
   deleted_at: order_by
   first_name_encrypted: order_by
-  first_viewed_at: order_by
-  first_viewed_by: order_by
   id: order_by
   invite_expires_at: order_by
   invite_token: order_by
-  last_activity_at: order_by
-  last_activity_by: order_by
   last_name_encrypted: order_by
-  notes: order_by
+  last_viewed_at: order_by
+  last_viewed_by: order_by
   organization_id: order_by
   patient_data_completed_at: order_by
   updated_at: order_by
@@ -1665,15 +1640,12 @@ input patient_record_order_by {
   date_of_birth_encrypted: order_by
   deleted_at: order_by
   first_name_encrypted: order_by
-  first_viewed_at: order_by
-  first_viewed_by: order_by
   id: order_by
   invite_expires_at: order_by
   invite_token: order_by
-  last_activity_at: order_by
-  last_activity_by: order_by
   last_name_encrypted: order_by
-  notes: order_by
+  last_viewed_at: order_by
+  last_viewed_by: order_by
   organization: organization_order_by
   organization_id: order_by
   patient_consent: patient_consent_order_by
@@ -1681,8 +1653,7 @@ input patient_record_order_by {
   questionnaire_responses_aggregate: questionnaire_response_aggregate_order_by
   updated_at: order_by
   userByCreatedBy: user_order_by
-  userByFirstViewedBy: user_order_by
-  userByLastActivityBy: user_order_by
+  userByLastViewedBy: user_order_by
 }
 
 """primary key columns input for table: patient_record"""
@@ -1707,23 +1678,17 @@ enum patient_record_select_column {
   """column name"""
   first_name_encrypted
   """column name"""
-  first_viewed_at
-  """column name"""
-  first_viewed_by
-  """column name"""
   id
   """column name"""
   invite_expires_at
   """column name"""
   invite_token
   """column name"""
-  last_activity_at
-  """column name"""
-  last_activity_by
-  """column name"""
   last_name_encrypted
   """column name"""
-  notes
+  last_viewed_at
+  """column name"""
+  last_viewed_by
   """column name"""
   organization_id
   """column name"""
@@ -1742,15 +1707,12 @@ input patient_record_set_input {
   date_of_birth_encrypted: String
   deleted_at: timestamptz
   first_name_encrypted: String
-  first_viewed_at: timestamptz
-  first_viewed_by: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
-  last_activity_at: timestamptz
-  last_activity_by: String
   last_name_encrypted: String
-  notes: String
+  last_viewed_at: timestamptz
+  last_viewed_by: String
   organization_id: String
   patient_data_completed_at: timestamptz
   updated_at: timestamptz
@@ -1774,15 +1736,12 @@ input patient_record_stream_cursor_value_input {
   date_of_birth_encrypted: String
   deleted_at: timestamptz
   first_name_encrypted: String
-  first_viewed_at: timestamptz
-  first_viewed_by: String
   id: String
   invite_expires_at: timestamptz
   invite_token: String
-  last_activity_at: timestamptz
-  last_activity_by: String
   last_name_encrypted: String
-  notes: String
+  last_viewed_at: timestamptz
+  last_viewed_by: String
   organization_id: String
   patient_data_completed_at: timestamptz
   updated_at: timestamptz
@@ -1805,23 +1764,17 @@ enum patient_record_update_column {
   """column name"""
   first_name_encrypted
   """column name"""
-  first_viewed_at
-  """column name"""
-  first_viewed_by
-  """column name"""
   id
   """column name"""
   invite_expires_at
   """column name"""
   invite_token
   """column name"""
-  last_activity_at
-  """column name"""
-  last_activity_by
-  """column name"""
   last_name_encrypted
   """column name"""
-  notes
+  last_viewed_at
+  """column name"""
+  last_viewed_by
   """column name"""
   organization_id
   """column name"""
@@ -2620,12 +2573,10 @@ type user {
   deletedAt: timestamp
   email: String!
   emailVerified: Boolean!
-  firstName: String
   id: String!
   image: String
   isActive: Boolean
   isAnonymous: Boolean
-  lastName: String
   name: String!
   """An object relationship"""
   organization: organization
@@ -2657,7 +2608,7 @@ type user {
     where: patient_record_bool_exp
   ): patient_record_aggregate!
   """An array relationship"""
-  patientRecordsByFirstViewedBy(
+  patientRecordsByLastViewedBy(
     """distinct select on columns"""
     distinct_on: [patient_record_select_column!]
     """limit the number of rows returned"""
@@ -2670,33 +2621,7 @@ type user {
     where: patient_record_bool_exp
   ): [patient_record!]!
   """An aggregate relationship"""
-  patientRecordsByFirstViewedBy_aggregate(
-    """distinct select on columns"""
-    distinct_on: [patient_record_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_record_order_by!]
-    """filter the rows returned"""
-    where: patient_record_bool_exp
-  ): patient_record_aggregate!
-  """An array relationship"""
-  patientRecordsByLastActivityBy(
-    """distinct select on columns"""
-    distinct_on: [patient_record_select_column!]
-    """limit the number of rows returned"""
-    limit: Int
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-    """sort the rows by one or more columns"""
-    order_by: [patient_record_order_by!]
-    """filter the rows returned"""
-    where: patient_record_bool_exp
-  ): [patient_record!]!
-  """An aggregate relationship"""
-  patientRecordsByLastActivityBy_aggregate(
+  patientRecordsByLastViewedBy_aggregate(
     """distinct select on columns"""
     distinct_on: [patient_record_select_column!]
     """limit the number of rows returned"""
@@ -2794,21 +2719,17 @@ input user_bool_exp {
   deletedAt: timestamp_comparison_exp
   email: String_comparison_exp
   emailVerified: Boolean_comparison_exp
-  firstName: String_comparison_exp
   id: String_comparison_exp
   image: String_comparison_exp
   isActive: Boolean_comparison_exp
   isAnonymous: Boolean_comparison_exp
-  lastName: String_comparison_exp
   name: String_comparison_exp
   organization: organization_bool_exp
   organizationId: String_comparison_exp
   patientRecordsByCreatedBy: patient_record_bool_exp
   patientRecordsByCreatedBy_aggregate: patient_record_aggregate_bool_exp
-  patientRecordsByFirstViewedBy: patient_record_bool_exp
-  patientRecordsByFirstViewedBy_aggregate: patient_record_aggregate_bool_exp
-  patientRecordsByLastActivityBy: patient_record_bool_exp
-  patientRecordsByLastActivityBy_aggregate: patient_record_aggregate_bool_exp
+  patientRecordsByLastViewedBy: patient_record_bool_exp
+  patientRecordsByLastViewedBy_aggregate: patient_record_aggregate_bool_exp
   roles: jsonb_comparison_exp
   updatedAt: timestamp_comparison_exp
 }
@@ -2861,18 +2782,15 @@ input user_insert_input {
   deletedAt: timestamp
   email: String
   emailVerified: Boolean
-  firstName: String
   id: String
   image: String
   isActive: Boolean
   isAnonymous: Boolean
-  lastName: String
   name: String
   organization: organization_obj_rel_insert_input
   organizationId: String
   patientRecordsByCreatedBy: patient_record_arr_rel_insert_input
-  patientRecordsByFirstViewedBy: patient_record_arr_rel_insert_input
-  patientRecordsByLastActivityBy: patient_record_arr_rel_insert_input
+  patientRecordsByLastViewedBy: patient_record_arr_rel_insert_input
   roles: jsonb
   updatedAt: timestamp
 }
@@ -2883,10 +2801,8 @@ type user_max_fields {
   createdAt: timestamp
   deletedAt: timestamp
   email: String
-  firstName: String
   id: String
   image: String
-  lastName: String
   name: String
   organizationId: String
   updatedAt: timestamp
@@ -2900,10 +2816,8 @@ input user_max_order_by {
   createdAt: order_by
   deletedAt: order_by
   email: order_by
-  firstName: order_by
   id: order_by
   image: order_by
-  lastName: order_by
   name: order_by
   organizationId: order_by
   updatedAt: order_by
@@ -2915,10 +2829,8 @@ type user_min_fields {
   createdAt: timestamp
   deletedAt: timestamp
   email: String
-  firstName: String
   id: String
   image: String
-  lastName: String
   name: String
   organizationId: String
   updatedAt: timestamp
@@ -2932,10 +2844,8 @@ input user_min_order_by {
   createdAt: order_by
   deletedAt: order_by
   email: order_by
-  firstName: order_by
   id: order_by
   image: order_by
-  lastName: order_by
   name: order_by
   organizationId: order_by
   updatedAt: order_by
@@ -2976,18 +2886,15 @@ input user_order_by {
   deletedAt: order_by
   email: order_by
   emailVerified: order_by
-  firstName: order_by
   id: order_by
   image: order_by
   isActive: order_by
   isAnonymous: order_by
-  lastName: order_by
   name: order_by
   organization: organization_order_by
   organizationId: order_by
   patientRecordsByCreatedBy_aggregate: patient_record_aggregate_order_by
-  patientRecordsByFirstViewedBy_aggregate: patient_record_aggregate_order_by
-  patientRecordsByLastActivityBy_aggregate: patient_record_aggregate_order_by
+  patientRecordsByLastViewedBy_aggregate: patient_record_aggregate_order_by
   roles: order_by
   updatedAt: order_by
 }
@@ -3017,8 +2924,6 @@ enum user_select_column {
   """column name"""
   emailVerified
   """column name"""
-  firstName
-  """column name"""
   id
   """column name"""
   image
@@ -3026,8 +2931,6 @@ enum user_select_column {
   isActive
   """column name"""
   isAnonymous
-  """column name"""
-  lastName
   """column name"""
   name
   """column name"""
@@ -3071,12 +2974,10 @@ input user_set_input {
   deletedAt: timestamp
   email: String
   emailVerified: Boolean
-  firstName: String
   id: String
   image: String
   isActive: Boolean
   isAnonymous: Boolean
-  lastName: String
   name: String
   organizationId: String
   roles: jsonb
@@ -3100,12 +3001,10 @@ input user_stream_cursor_value_input {
   deletedAt: timestamp
   email: String
   emailVerified: Boolean
-  firstName: String
   id: String
   image: String
   isActive: Boolean
   isAnonymous: Boolean
-  lastName: String
   name: String
   organizationId: String
   roles: jsonb
@@ -3127,8 +3026,6 @@ enum user_update_column {
   """column name"""
   emailVerified
   """column name"""
-  firstName
-  """column name"""
   id
   """column name"""
   image
@@ -3136,8 +3033,6 @@ enum user_update_column {
   isActive
   """column name"""
   isAnonymous
-  """column name"""
-  lastName
   """column name"""
   name
   """column name"""

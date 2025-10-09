@@ -1,9 +1,15 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { deleteStoredPrivateKey } from "../../../crypto";
+import { deleteStoredPrivateKey } from "@/crypto";
 import { toast } from "sonner";
 
 interface ErrorStepProps {
@@ -13,11 +19,17 @@ interface ErrorStepProps {
   onStartRecovery?: () => void;
 }
 
-export function ErrorStep({ error, onRetry, onRevalidate, onStartRecovery }: ErrorStepProps) {
+export function ErrorStep({
+  error,
+  onRetry,
+  onRevalidate,
+  onStartRecovery,
+}: ErrorStepProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isOrphanedKeyError = error.includes("Orphaned private key");
-  const isKeyMismatchError = error.includes("incompatible") || error.includes("mismatch");
+  const isKeyMismatchError =
+    error.includes("incompatible") || error.includes("mismatch");
 
   const handleDeleteKeys = async () => {
     setIsDeleting(true);
@@ -52,9 +64,7 @@ export function ErrorStep({ error, onRetry, onRevalidate, onStartRecovery }: Err
       <CardContent className="space-y-4">
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            {error}
-          </AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
         <div className="flex gap-2">
           {isOrphanedKeyError ? (
@@ -77,7 +87,11 @@ export function ErrorStep({ error, onRetry, onRevalidate, onStartRecovery }: Err
                   </>
                 )}
               </Button>
-              <Button onClick={onRevalidate || onRetry} variant="outline" className="flex-1">
+              <Button
+                onClick={onRevalidate || onRetry}
+                variant="outline"
+                className="flex-1"
+              >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Revalidate
               </Button>
@@ -100,7 +114,11 @@ export function ErrorStep({ error, onRetry, onRevalidate, onStartRecovery }: Err
                 </Button>
               )}
               {onRevalidate && (
-                <Button onClick={onRevalidate} variant="outline" className="flex-1">
+                <Button
+                  onClick={onRevalidate}
+                  variant="outline"
+                  className="flex-1"
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Check Keys Again
                 </Button>
@@ -113,7 +131,11 @@ export function ErrorStep({ error, onRetry, onRevalidate, onStartRecovery }: Err
                 Retry Setup
               </Button>
               {onRevalidate && (
-                <Button onClick={onRevalidate} variant="outline" className="flex-1">
+                <Button
+                  onClick={onRevalidate}
+                  variant="outline"
+                  className="flex-1"
+                >
                   Revalidate Keys
                 </Button>
               )}

@@ -1,21 +1,16 @@
-import { graphql } from '@/graphql/gql'
+import { graphql } from "@/graphql/gql";
 
 export const GET_ALL_PATIENT_RECORDS = graphql(`
   query GetAllPatientRecords {
-    patient_record(
-      order_by: [{ created_at: desc }]
-    ) {
+    patient_record(order_by: [{ created_at: desc }]) {
       id
       clinic_internal_id
       invite_token
       invite_expires_at
-      notes
       created_at
       created_by
-      first_viewed_at
-      first_viewed_by
-      last_activity_at
-      last_activity_by
+      last_viewed_at
+      last_viewed_by
       patient_data_completed_at
       first_name_encrypted
       last_name_encrypted
@@ -24,9 +19,19 @@ export const GET_ALL_PATIENT_RECORDS = graphql(`
         consent_given
         created_at
       }
+      userByCreatedBy {
+        id
+        name
+        email
+      }
+      userByLastViewedBy {
+        id
+        name
+        email
+      }
     }
   }
-`)
+`);
 
 export const GET_USERS = graphql(`
   query GetUsers {
@@ -42,4 +47,4 @@ export const GET_USERS = graphql(`
       organizationId
     }
   }
-`)
+`);

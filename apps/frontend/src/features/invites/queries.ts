@@ -1,15 +1,9 @@
-import { graphql } from '@/graphql/gql'
+import { graphql } from "@/graphql/gql";
 
 export const CREATE_PATIENT_RECORD = graphql(`
-  mutation CreatePatientRecord(
-    $clinic_internal_id: String!
-    $notes: String
-  ) {
+  mutation CreatePatientRecord($clinic_internal_id: String!) {
     insert_patient_record_one(
-      object: {
-        clinic_internal_id: $clinic_internal_id
-        notes: $notes
-      }
+      object: { clinic_internal_id: $clinic_internal_id }
     ) {
       id
       clinic_internal_id
@@ -17,7 +11,17 @@ export const CREATE_PATIENT_RECORD = graphql(`
       invite_expires_at
       created_at
       created_by
-      notes
     }
   }
-`)
+`);
+
+export const DELETE_PATIENT_RECORD = graphql(`
+  mutation DeletePatientRecord($id: String!) {
+    update_patient_record_by_pk(
+      pk_columns: { id: $id }
+      _set: { deleted_at: "now()" }
+    ) {
+      id
+    }
+  }
+`);

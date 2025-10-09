@@ -3,7 +3,7 @@ import {
   recoverKeysFromMnemonic,
   storePrivateKey,
   testKeyCompatibility,
-} from "../../crypto";
+} from "@/crypto";
 
 export interface KeyValidationOptions {
   isAdmin: boolean;

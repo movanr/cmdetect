@@ -1,22 +1,35 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Download, Eye, CheckCircle, AlertTriangle, Copy, RefreshCw } from "lucide-react";
+import {
+  Download,
+  Eye,
+  CheckCircle,
+  AlertTriangle,
+  Copy,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   generateOrganizationKeys,
   createAndDownloadRecoveryFile,
   storePrivateKey,
-  generateKeyFingerprint
-} from "../../../crypto";
+  generateKeyFingerprint,
+} from "@/crypto";
 import type { KeySetupState, GeneratedKeys } from "../../types/keySetup";
 import { useMutation } from "@tanstack/react-query";
 import { updateOrganizationPublicKey } from "../../queries";
-import { execute } from "../../../graphql/execute";
+import { execute } from "@/graphql/execute";
 
 interface AdminGeneratingStepProps {
-  state: Extract<KeySetupState, { type: 'admin-generating' }>;
+  state: Extract<KeySetupState, { type: "admin-generating" }>;
   context: {
     organizationId: string;
     organizationName: string;
@@ -32,7 +45,12 @@ interface AdminGeneratingStepProps {
   onComplete?: () => void;
 }
 
-export function AdminGeneratingStep({ state, context, actions, onComplete }: AdminGeneratingStepProps) {
+export function AdminGeneratingStep({
+  state,
+  context,
+  actions,
+  onComplete,
+}: AdminGeneratingStepProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showMnemonic, setShowMnemonic] = useState(false);
 
@@ -158,15 +176,19 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
       onComplete?.();
     } catch (error) {
       console.error("Failed to complete setup:", error);
-      toast.error(`Failed to complete setup: ${error instanceof Error ? error.message : "Unknown error"}`);
-      actions.setError(`Failed to complete setup: ${error instanceof Error ? error.message : "Unknown error"}`);
+      toast.error(
+        `Failed to complete setup: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+      actions.setError(
+        `Failed to complete setup: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     } finally {
       setIsProcessing(false);
     }
   };
 
   switch (state.step) {
-    case 'generate':
+    case "generate":
       return (
         <Card>
           <CardHeader>
@@ -181,8 +203,9 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground">
               <p>
-                This will generate cryptographic keys that enable secure, encrypted storage
-                and transmission of sensitive patient information.
+                This will generate cryptographic keys that enable secure,
+                encrypted storage and transmission of sensitive patient
+                information.
               </p>
             </div>
             <Button onClick={handleGenerateKeys} disabled={isProcessing}>
@@ -202,7 +225,7 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
         </Card>
       );
 
-    case 'download':
+    case "download":
       return (
         <Card>
           <CardHeader>
@@ -218,11 +241,16 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                You must download your recovery file before proceeding. This is the only way
-                to recover your keys if you lose access to this device.
+                You must download your recovery file before proceeding. This is
+                the only way to recover your keys if you lose access to this
+                device.
               </AlertDescription>
             </Alert>
-            <Button onClick={handleDownloadRecoveryFile} variant="outline" className="w-full">
+            <Button
+              onClick={handleDownloadRecoveryFile}
+              variant="outline"
+              className="w-full"
+            >
               <Download className="h-4 w-4 mr-2" />
               Download Recovery File
             </Button>
@@ -237,7 +265,7 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
         </Card>
       );
 
-    case 'mnemonic':
+    case "mnemonic":
       return (
         <Card>
           <CardHeader>
@@ -253,12 +281,16 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                This mnemonic phrase can be used to recover your keys. Store it in a secure
-                location separate from your recovery file.
+                This mnemonic phrase can be used to recover your keys. Store it
+                in a secure location separate from your recovery file.
               </AlertDescription>
             </Alert>
             {!showMnemonic ? (
-              <Button onClick={handleViewMnemonic} variant="outline" className="w-full">
+              <Button
+                onClick={handleViewMnemonic}
+                variant="outline"
+                className="w-full"
+              >
                 <Eye className="h-4 w-4 mr-2" />
                 Reveal Mnemonic Phrase
               </Button>
@@ -267,7 +299,11 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
                 <div className="bg-muted p-4 rounded-lg font-mono text-sm">
                   {state.keys?.mnemonic}
                 </div>
-                <Button onClick={handleCopyMnemonic} variant="outline" className="w-full">
+                <Button
+                  onClick={handleCopyMnemonic}
+                  variant="outline"
+                  className="w-full"
+                >
                   <Copy className="h-4 w-4 mr-2" />
                   Copy to Clipboard
                 </Button>
@@ -284,7 +320,7 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
         </Card>
       );
 
-    case 'finalizing':
+    case "finalizing":
       return (
         <Card>
           <CardHeader>
@@ -298,9 +334,16 @@ export function AdminGeneratingStep({ state, context, actions, onComplete }: Adm
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground">
-              <p>Click below to store your keys and complete the encryption setup.</p>
+              <p>
+                Click below to store your keys and complete the encryption
+                setup.
+              </p>
             </div>
-            <Button onClick={handleCompleteSetup} disabled={isProcessing} className="w-full">
+            <Button
+              onClick={handleCompleteSetup}
+              disabled={isProcessing}
+              className="w-full"
+            >
               {isProcessing ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />

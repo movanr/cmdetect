@@ -44,7 +44,6 @@ describe("Role-Based Access Control", () => {
             organization_id: "${TestDataIds.organizations.org1}"
             clinic_internal_id: "P-PHYSICIAN-ACCESS-TEST"
             created_by: "${TestDataIds.users.org1Physician}"
-            notes: "Test record for physician access"
           }) {
             id
           }
@@ -65,7 +64,9 @@ describe("Role-Based Access Control", () => {
 
       // Physician should only see records created by them in their organization
       expect(
-        records.patient_record.some((r) => r.id === createdRecord.insert_patient_record_one.id)
+        records.patient_record.some(
+          (r) => r.id === createdRecord.insert_patient_record_one.id
+        )
       ).toBe(true);
       expect(
         records.patient_record.every(
@@ -81,8 +82,7 @@ describe("Role-Based Access Control", () => {
           mutation {
             insert_user_one(object: {
               email: "unauthorized@test.com"
-              firstName: "Unauthorized"
-              lastName: "User"
+              name: "Unauthorized User"
               roles: ["physician"]
             }) {
               id
@@ -101,7 +101,6 @@ describe("Role-Based Access Control", () => {
         mutation {
           insert_patient_record_one(object: {
             clinic_internal_id: "P999-RECEPTIONIST-TEST"
-            notes: "Receptionist created record"
           }) {
             id
             organization_id
@@ -146,14 +145,12 @@ describe("Role-Based Access Control", () => {
             organization_id: string;
             clinic_internal_id: string;
             created_by: string;
-            notes: string;
           }>;
         };
       }>(`
         mutation {
           insert_patient_record(objects: [{
             clinic_internal_id: "P-AUTO-FIELDS-TEST"
-            notes: "Receptionist created patient record"
           }]) {
             affected_rows
             returning {
@@ -161,7 +158,6 @@ describe("Role-Based Access Control", () => {
               organization_id
               clinic_internal_id
               created_by
-              notes
             }
           }
         }
