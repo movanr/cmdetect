@@ -320,7 +320,7 @@ export const translations: Record<Language, I18nStrings> = {
     search: {
       searchByInternalId: "Search by internal ID...",
       clear: "Clear",
-      noResultsFound: "No cases found matching \"{query}\"",
+      noResultsFound: 'No cases found matching "{query}"',
     },
 
     indicators: {
@@ -329,7 +329,7 @@ export const translations: Record<Language, I18nStrings> = {
 
     passwordConfirmation: {
       title: "Confirm Password",
-      description: "Please enter your password to switch to role \"{role}\".",
+      description: 'Please enter your password to switch to role "{role}".',
       passwordLabel: "Password",
       passwordPlaceholder: "Enter password",
       cancel: "Cancel",
@@ -354,7 +354,8 @@ export const translations: Record<Language, I18nStrings> = {
 
     accessControl: {
       accessDenied: "Access Denied",
-      adminPrivilegesRequired: "You need administrator privileges to access team management.",
+      adminPrivilegesRequired:
+        "You need administrator privileges to access team management.",
     },
   },
 
@@ -489,7 +490,7 @@ export const translations: Record<Language, I18nStrings> = {
     search: {
       searchByInternalId: "Nach interner ID suchen...",
       clear: "Löschen",
-      noResultsFound: "Keine Fälle gefunden für \"{query}\"",
+      noResultsFound: 'Keine Fälle gefunden für "{query}"',
     },
 
     indicators: {
@@ -498,7 +499,8 @@ export const translations: Record<Language, I18nStrings> = {
 
     passwordConfirmation: {
       title: "Passwort bestätigen",
-      description: "Bitte geben Sie Ihr Passwort ein, um zur Rolle \"{role}\" zu wechseln.",
+      description:
+        'Bitte geben Sie Ihr Passwort ein, um zur Rolle "{role}" zu wechseln.',
       passwordLabel: "Passwort",
       passwordPlaceholder: "Passwort eingeben",
       cancel: "Abbrechen",
@@ -509,7 +511,7 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     pageDescriptions: {
-      cases: "Patienteneinreichungen überprüfen und Fälle verwalten",
+      cases: "Patientenfälle einsehen und verwalten",
       invites: "Patienteneinladungen verwalten und Status verfolgen",
       team: "Teammitglieder und ihre Rollen verwalten",
       settings: "Kontoeinstellungen und Präferenzen verwalten",
@@ -523,7 +525,8 @@ export const translations: Record<Language, I18nStrings> = {
 
     accessControl: {
       accessDenied: "Zugriff verweigert",
-      adminPrivilegesRequired: "Sie benötigen Administratorrechte, um auf die Teamverwaltung zuzugreifen.",
+      adminPrivilegesRequired:
+        "Sie benötigen Administratorrechte, um auf die Teamverwaltung zuzugreifen.",
     },
   },
 };
