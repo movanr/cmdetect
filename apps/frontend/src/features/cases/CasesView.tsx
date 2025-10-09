@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useSubmissions, getPatientRecordStatus } from "@/lib/patient-records";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, formatDate } from "@/lib/date-utils";
 import { FileText, Search } from "lucide-react";
 import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
 import { getTranslations, interpolate } from "@/config/i18n";
@@ -104,7 +104,7 @@ export function CasesView() {
 
         if (patientData) {
           const dob = patientData.dateOfBirth
-            ? new Date(patientData.dateOfBirth).toLocaleDateString()
+            ? formatDate(new Date(patientData.dateOfBirth))
             : null;
 
           return (

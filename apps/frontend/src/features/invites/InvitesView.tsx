@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePatientRecords, getPatientRecordStatus } from "@/lib/patient-records";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/lib/date-utils";
 import { MoreVertical, Trash, Plus, Copy, ExternalLink } from "lucide-react";
 import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
 import { getTranslations } from "@/config/i18n";

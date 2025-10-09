@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useUsers, type User } from "@/lib/patient-records";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/lib/date-utils";
 import { Users, Edit, Trash, UserPlus } from "lucide-react";
 import { getTranslations } from "@/config/i18n";
 
