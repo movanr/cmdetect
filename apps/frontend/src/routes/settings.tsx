@@ -15,17 +15,17 @@ function SettingsLayout() {
 
   const settingsNav = [
     {
-      label: "Profile",
+      label: t.settingsSections.profile,
       href: "/settings/profile",
       icon: User,
     },
     {
-      label: "Security",
+      label: t.settingsSections.security,
       href: "/settings/security",
       icon: Lock,
     },
     {
-      label: "Organization",
+      label: t.settingsSections.organization,
       href: "/settings/organization",
       icon: Building,
       roles: ["org_admin"],
@@ -46,7 +46,7 @@ function SettingsLayout() {
             {t.nav.settings}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your account settings and preferences
+            {t.pageDescriptions.settings}
           </p>
         </div>
 

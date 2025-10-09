@@ -14,45 +14,45 @@ export function TeamView() {
   const columns = [
     {
       key: "createdAt" as keyof User,
-      header: t.dashboard.columns.created,
+      header: t.columns.created,
       width: "120px",
       render: (value: string) =>
         formatDistanceToNow(new Date(value), { addSuffix: true }),
     },
     {
       key: "name" as keyof User,
-      header: t.dashboard.columns.name,
+      header: t.columns.name,
       width: "160px",
       render: (value: string) => value || "-",
     },
     {
       key: "email" as keyof User,
-      header: t.dashboard.columns.email,
+      header: t.columns.email,
       render: (value: string) => value,
     },
     {
       key: "emailVerified" as keyof User,
-      header: t.dashboard.columns.status,
+      header: t.columns.status,
       width: "100px",
       render: (value: boolean) => (
         <Badge variant={value ? "default" : "destructive"}>
-          {value ? t.dashboard.verified : t.dashboard.unverified}
+          {value ? t.commonValues.verified : t.commonValues.unverified}
         </Badge>
       ),
     },
     {
       key: "actions" as keyof User,
-      header: t.dashboard.columns.actions,
+      header: t.columns.actions,
       width: "120px",
     },
   ];
 
   const renderActions = (_user: User) => (
     <ActionButtons>
-      <Button size="sm" variant="ghost" title={t.dashboard.actions.editUser}>
+      <Button size="sm" variant="ghost" title={t.actions.editUser}>
         <Edit className="h-3 w-3" />
       </Button>
-      <Button size="sm" variant="ghost" title={t.dashboard.actions.deleteUser}>
+      <Button size="sm" variant="ghost" title={t.actions.deleteUser}>
         <Trash className="h-3 w-3" />
       </Button>
     </ActionButtons>
@@ -66,12 +66,12 @@ export function TeamView() {
     return (
       <EmptyState
         icon={Users}
-        title={t.dashboard.emptyStates.users.title}
-        description={t.dashboard.emptyStates.users.description}
+        title={t.emptyStates.team.title}
+        description={t.emptyStates.team.description}
         action={
           <Button>
             <UserPlus className="h-4 w-4 mr-2" />
-            {t.dashboard.actions.createNewUser}
+            {t.actions.createNewUser}
           </Button>
         }
       />

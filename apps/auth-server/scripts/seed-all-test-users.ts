@@ -95,7 +95,7 @@ const TEST_USERS: TestUser[] = [
     email: "admin@test.com",
     password: "TestPassword123!",
     name: "Admin Manual",
-    roles: ["org_admin"],
+    roles: ["physician", "org_admin"], // Multi-role: physician + admin
     organizationId: TEST_ORGANIZATIONS[2].id,
   },
   {

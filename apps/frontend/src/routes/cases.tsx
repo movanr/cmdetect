@@ -22,7 +22,7 @@ function CasesPage() {
                 {t.nav.cases}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Review patient submissions and manage cases
+                {t.pageDescriptions.cases}
               </p>
             </div>
           </div>

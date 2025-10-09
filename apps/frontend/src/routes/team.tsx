@@ -24,9 +24,9 @@ function TeamPage() {
             <div className="flex items-start space-x-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
               <div>
-                <h3 className="font-medium text-amber-900">Access Denied</h3>
+                <h3 className="font-medium text-amber-900">{t.accessControl.accessDenied}</h3>
                 <p className="text-sm text-amber-700 mt-1">
-                  You need administrator privileges to access team management.
+                  {t.accessControl.adminPrivilegesRequired}
                 </p>
               </div>
             </div>
@@ -47,7 +47,7 @@ function TeamPage() {
                 {t.nav.team}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Manage team members and their roles
+                {t.pageDescriptions.team}
               </p>
             </div>
             {/* TODO: Add "Invite User" button */}

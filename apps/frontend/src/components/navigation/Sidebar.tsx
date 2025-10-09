@@ -14,7 +14,7 @@ interface NavItem {
 
 export function Sidebar() {
   const t = getTranslations();
-  const { activeRole, hasRole } = useRole();
+  const { activeRole } = useRole();
   const router = useRouterState();
   const currentPath = router.location.pathname;
 
@@ -58,7 +58,8 @@ export function Sidebar() {
 
   const filterByRole = (item: NavItem) => {
     if (!item.roles) return true;
-    return item.roles.some((role) => hasRole(role as any));
+    // Check if the active role matches any of the required roles
+    return activeRole ? item.roles.includes(activeRole) : false;
   };
 
   return (

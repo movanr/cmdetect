@@ -24,13 +24,13 @@ function InvitesPage() {
                 {t.nav.invites}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Manage patient invitations and track their status
+                {t.pageDescriptions.invites}
               </p>
             </div>
             <Button asChild>
               <Link to="/invites/new">
                 <Plus className="h-4 w-4 mr-2" />
-                Create Invite
+                {t.actions.createNewInvite}
               </Link>
             </Button>
           </div>

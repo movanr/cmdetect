@@ -32,7 +32,8 @@ export const auth = betterAuth({
         expirationTime: "8h", // Longer session for healthcare workflow
         definePayload: ({ user }) => {
           // Validate roles array and apply hierarchy for authenticated users
-          const roleHierarchy = ["org_admin", "physician", "receptionist"];
+          // Clinical roles (physician, receptionist) have priority over admin role
+          const roleHierarchy = ["physician", "receptionist", "org_admin"];
           const userRoles = (user.roles as string[]) || [];
           const validRoles = userRoles.filter((role) =>
             roleHierarchy.includes(role)

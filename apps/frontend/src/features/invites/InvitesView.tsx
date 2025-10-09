@@ -36,7 +36,7 @@ export function InvitesView() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patient-records"] });
-      toast.success("Invite deleted successfully");
+      toast.success(t.messages.deletedSuccessfully);
     },
     onError: (error) => {
       toast.error("Failed to delete invite: " + error.message);
@@ -46,17 +46,17 @@ export function InvitesView() {
   const columns = [
     {
       key: "created_at" as keyof PatientRecord,
-      header: t.dashboard.columns.created,
+      header: t.columns.created,
       width: "12%",
       render: (value: string) =>
         formatDistanceToNow(new Date(value), { addSuffix: true }),
     },
     {
       key: "created_by" as keyof PatientRecord,
-      header: t.dashboard.columns.createdBy,
+      header: t.columns.createdBy,
       width: "12%",
       render: (_value: string, record: PatientRecord) => {
-        const userName = record.userByCreatedBy?.name || t.dashboard.system;
+        const userName = record.userByCreatedBy?.name || t.commonValues.system;
         return (
           <span className="truncate block" title={userName}>
             {userName}
@@ -66,7 +66,7 @@ export function InvitesView() {
     },
     {
       key: "clinic_internal_id" as keyof PatientRecord,
-      header: t.dashboard.columns.internalId,
+      header: t.columns.internalId,
       width: "12%",
       render: (value: string) => (
         <span className="truncate block" title={value || undefined}>
@@ -76,7 +76,7 @@ export function InvitesView() {
     },
     {
       key: "invite_token" as keyof PatientRecord,
-      header: t.dashboard.columns.inviteUrl,
+      header: t.columns.inviteUrl,
       width: "15%",
       render: (token: string) => {
         const url = token
@@ -91,7 +91,7 @@ export function InvitesView() {
               title={url}
               onClick={() => {
                 navigator.clipboard.writeText(url);
-                toast.success("Invite link copied to clipboard.");
+                toast.success(t.messages.copiedToClipboard);
               }}
             >
               {"..." + token?.slice(-8) || "N/A"}
@@ -103,7 +103,7 @@ export function InvitesView() {
                 title={url}
                 onClick={() => {
                   navigator.clipboard.writeText(url);
-                  toast.success("Invite link copied to clipboard.");
+                  toast.success(t.messages.copiedToClipboard);
                 }}
               >
                 <Copy className="h-3 w-3" />
@@ -115,16 +115,16 @@ export function InvitesView() {
     },
     {
       key: "invite_expires_at" as keyof PatientRecord,
-      header: t.dashboard.columns.expires,
+      header: t.columns.expires,
       width: "12%",
       render: (value: string) =>
         value
           ? formatDistanceToNow(new Date(value), { addSuffix: true })
-          : t.dashboard.never,
+          : t.commonValues.never,
     },
     {
       key: "id" as keyof PatientRecord,
-      header: t.dashboard.columns.status,
+      header: t.columns.status,
       width: "12%",
       render: (_: any, record: PatientRecord) => (
         <StatusBadge status={getPatientRecordStatus(record)} />
@@ -132,7 +132,7 @@ export function InvitesView() {
     },
     {
       key: "actions" as keyof PatientRecord,
-      header: t.dashboard.columns.actions,
+      header: t.columns.actions,
       width: "10%",
     },
   ];
@@ -156,7 +156,7 @@ export function InvitesView() {
               disabled={deleteMutation.isPending || isSubmitted}
             >
               <Trash className="h-4 w-4" />
-              {deleteMutation.isPending ? "Deleting..." : t.dashboard.actions.deleteInvite}
+              {deleteMutation.isPending ? t.loadingStates.deleting : t.actions.deleteInvite}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -172,13 +172,13 @@ export function InvitesView() {
     return (
       <EmptyState
         icon={ExternalLink}
-        title={t.dashboard.emptyStates.invites.title}
-        description={t.dashboard.emptyStates.invites.description}
+        title={t.emptyStates.invites.title}
+        description={t.emptyStates.invites.description}
         action={
           <Button asChild>
             <Link to="/invites/new">
               <Plus className="h-4 w-4 mr-2" />
-              {t.dashboard.actions.createNewInvite}
+              {t.actions.createNewInvite}
             </Link>
           </Button>
         }

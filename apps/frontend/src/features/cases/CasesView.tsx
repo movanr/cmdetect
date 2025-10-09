@@ -8,7 +8,7 @@ import { useSubmissions, getPatientRecordStatus } from "@/lib/patient-records";
 import { formatDistanceToNow } from "date-fns";
 import { FileText, Search } from "lucide-react";
 import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
-import { getTranslations } from "@/config/i18n";
+import { getTranslations, interpolate } from "@/config/i18n";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
 
@@ -79,7 +79,7 @@ export function CasesView() {
           <div className="flex items-center justify-center">
             <div
               className="w-2 h-2 bg-blue-500 rounded-full"
-              title="New submission"
+              title={t.indicators.newSubmission}
             />
           </div>
         ) : null;
@@ -87,7 +87,7 @@ export function CasesView() {
     },
     {
       key: "first_name_encrypted" as keyof PatientRecord,
-      header: t.dashboard.columns.patientName,
+      header: t.columns.patientName,
       width: "24%",
       render: (_: any, record: PatientRecord) => {
         const patientData = decryptedData[record.id];
@@ -96,7 +96,7 @@ export function CasesView() {
           return (
             <div className="flex items-center space-x-2">
               <Badge variant="outline" className="text-xs">
-                Decrypting...
+                {t.loadingStates.decrypting}
               </Badge>
             </div>
           );
@@ -134,13 +134,13 @@ export function CasesView() {
         return (
           <div className="flex items-center space-x-2 min-w-0">
             <Badge variant="outline" className="text-xs flex-shrink-0">
-              {t.dashboard.encrypted}
+              {t.commonValues.encrypted}
             </Badge>
             <span
               className="text-muted-foreground text-sm truncate block"
-              title={record.clinic_internal_id || t.dashboard.noId}
+              title={record.clinic_internal_id || t.commonValues.noId}
             >
-              {record.clinic_internal_id || t.dashboard.noId}
+              {record.clinic_internal_id || t.commonValues.noId}
             </span>
           </div>
         );
@@ -148,14 +148,14 @@ export function CasesView() {
     },
     {
       key: "patient_data_completed_at" as keyof PatientRecord,
-      header: t.dashboard.columns.submitted,
+      header: t.columns.submitted,
       width: "24%",
       render: (value: string) =>
         value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : "-",
     },
     {
       key: "last_viewed_at" as keyof PatientRecord,
-      header: "Zuletzt geöffnet",
+      header: t.columns.lastViewed,
       width: "25%",
       render: (_: any, record: PatientRecord) => {
         if (!record.last_viewed_at) {
@@ -168,13 +168,13 @@ export function CasesView() {
         const userName =
           record.userByLastViewedBy?.name ||
           record.userByLastViewedBy?.email ||
-          "Unknown";
+          t.common.unknown;
 
         return (
           <div className="flex flex-col min-w-0">
             <span
               className="text-sm truncate block"
-              title={`${timeAgo} von ${userName}`}
+              title={`${timeAgo} ${t.common.by} ${userName}`}
             >
               {timeAgo}
             </span>
@@ -182,7 +182,7 @@ export function CasesView() {
               className="text-xs text-muted-foreground truncate block"
               title={userName}
             >
-              von {userName}
+              {t.common.by} {userName}
             </span>
           </div>
         );
@@ -209,8 +209,8 @@ export function CasesView() {
     return (
       <EmptyState
         icon={FileText}
-        title={t.dashboard.emptyStates.submissions.title}
-        description={t.dashboard.emptyStates.submissions.description}
+        title={t.emptyStates.cases.title}
+        description={t.emptyStates.cases.description}
       />
     );
   }
@@ -223,7 +223,7 @@ export function CasesView() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search by internal ID..."
+            placeholder={t.search.searchByInternalId}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -231,7 +231,7 @@ export function CasesView() {
         </div>
         {searchQuery && (
           <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")}>
-            Clear
+            {t.search.clear}
           </Button>
         )}
       </div>
@@ -239,7 +239,7 @@ export function CasesView() {
       {/* Table */}
       {filteredSubmissions.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          No cases found matching "{searchQuery}"
+          {interpolate(t.search.noResultsFound, { query: searchQuery })}
         </div>
       ) : (
         <DataTable
