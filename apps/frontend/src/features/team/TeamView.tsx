@@ -2,7 +2,7 @@ import { DataTable, ActionButtons } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useUsers, type User } from "@/lib/patient-records";
+import { useUsers, type User } from "./hooks/useUsers";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { Users, Edit, Trash, UserPlus } from "lucide-react";
 import { getTranslations } from "@/config/i18n";

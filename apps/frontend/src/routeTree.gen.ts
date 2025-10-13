@@ -22,6 +22,7 @@ import { Route as SettingsSecurityRouteImport } from './routes/settings/security
 import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as SettingsOrganizationRouteImport } from './routes/settings/organization'
 import { Route as InvitesNewRouteImport } from './routes/invites_.new'
+import { Route as CasesIdRouteImport } from './routes/cases_.$id'
 
 const UnverifiedRoute = UnverifiedRouteImport.update({
   id: '/unverified',
@@ -88,6 +89,11 @@ const InvitesNewRoute = InvitesNewRouteImport.update({
   path: '/invites/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasesIdRoute = CasesIdRouteImport.update({
+  id: '/cases_/$id',
+  path: '/cases/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/cases/$id': typeof CasesIdRoute
   '/invites/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/cases/$id': typeof CasesIdRoute
   '/invites/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
+  '/cases_/$id': typeof CasesIdRoute
   '/invites_/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
+    | '/cases/$id'
     | '/invites/new'
     | '/settings/organization'
     | '/settings/profile'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
+    | '/cases/$id'
     | '/invites/new'
     | '/settings/organization'
     | '/settings/profile'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
+    | '/cases_/$id'
     | '/invites_/new'
     | '/settings/organization'
     | '/settings/profile'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRouteWithChildren
   TeamRoute: typeof TeamRoute
   UnverifiedRoute: typeof UnverifiedRoute
+  CasesIdRoute: typeof CasesIdRoute
   InvitesNewRoute: typeof InvitesNewRoute
 }
 
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cases_/$id': {
+      id: '/cases_/$id'
+      path: '/cases/$id'
+      fullPath: '/cases/$id'
+      preLoaderRoute: typeof CasesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -318,6 +338,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRouteWithChildren,
   TeamRoute: TeamRoute,
   UnverifiedRoute: UnverifiedRoute,
+  CasesIdRoute: CasesIdRoute,
   InvitesNewRoute: InvitesNewRoute,
 }
 export const routeTree = rootRouteImport

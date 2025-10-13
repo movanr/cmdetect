@@ -69,17 +69,18 @@ select_permissions:
         - created_by
         - date_of_birth_encrypted
         - first_name_encrypted
-        - last_viewed_at
-        - last_viewed_by
         - id
         - invite_expires_at
         - invite_token
+        - last_name_encrypted
+        - last_viewed_at
         - last_viewed_at
         - last_viewed_by
-        - last_name_encrypted
+        - last_viewed_by
         - organization_id
         - patient_data_completed_at
         - updated_at
+        - viewed
       filter:
         _and:
           - organization_id:
@@ -95,17 +96,18 @@ select_permissions:
         - created_by
         - date_of_birth_encrypted
         - first_name_encrypted
-        - last_viewed_at
-        - last_viewed_by
         - id
         - invite_expires_at
         - invite_token
+        - last_name_encrypted
+        - last_viewed_at
         - last_viewed_at
         - last_viewed_by
-        - last_name_encrypted
+        - last_viewed_by
         - organization_id
         - patient_data_completed_at
         - updated_at
+        - viewed
       filter:
         _and:
           - organization_id:
@@ -121,17 +123,18 @@ select_permissions:
         - created_by
         - date_of_birth_encrypted
         - first_name_encrypted
-        - last_viewed_at
-        - last_viewed_by
         - id
         - invite_expires_at
         - invite_token
+        - last_name_encrypted
+        - last_viewed_at
         - last_viewed_at
         - last_viewed_by
-        - last_name_encrypted
+        - last_viewed_by
         - organization_id
         - patient_data_completed_at
         - updated_at
+        - viewed
       filter:
         _and:
           - organization_id:
@@ -148,6 +151,7 @@ update_permissions:
         - deleted_at
         - first_name_encrypted
         - last_name_encrypted
+        - viewed
       filter:
         _and:
           - organization_id:
@@ -156,6 +160,7 @@ update_permissions:
               _is_null: true
       check: {}
       set:
+        last_viewed_at: now()
         last_viewed_by: x-hasura-User-Id
         updated_at: now()
     comment: ""
@@ -164,10 +169,8 @@ update_permissions:
       columns:
         - clinic_internal_id
         - deleted_at
-        - last_viewed_at
-        - last_viewed_at
         - last_viewed_by
-        - last_viewed_by
+        - viewed
       filter:
         _and:
           - organization_id:
@@ -176,6 +179,7 @@ update_permissions:
               _is_null: true
       check: null
       set:
+        last_viewed_at: now()
         last_viewed_by: x-hasura-User-Id
         updated_at: now()
     comment: ""
@@ -184,6 +188,7 @@ update_permissions:
       columns:
         - clinic_internal_id
         - deleted_at
+        - viewed
       filter:
         _and:
           - organization_id:

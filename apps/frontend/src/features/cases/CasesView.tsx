@@ -1,18 +1,20 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useSubmissions, getPatientRecordStatus } from "@/lib/patient-records";
+import {
+  useSubmissions,
+  getCaseStatus,
+  type PatientRecord,
+} from "@/features/patient-records";
 import { formatDistanceToNow, formatDate } from "@/lib/date-utils";
 import { FileText, Search } from "lucide-react";
-import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
 import { getTranslations, interpolate } from "@/config/i18n";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
-
-type PatientRecord = GetAllPatientRecordsQuery["patient_record"][number];
 
 interface DecryptedPatientData {
   [recordId: string]: PatientPII | null;
@@ -21,9 +23,14 @@ interface DecryptedPatientData {
 export function CasesView() {
   const { data: submissions, isLoading } = useSubmissions();
   const t = getTranslations();
+  const navigate = useNavigate();
   const [decryptedData, setDecryptedData] = useState<DecryptedPatientData>({});
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleRowClick = (record: PatientRecord) => {
+    navigate({ to: "/cases/$id", params: { id: record.id } });
+  };
 
   // Decrypt patient data when submissions load
   useEffect(() => {
@@ -74,7 +81,7 @@ export function CasesView() {
       header: "",
       width: "3%",
       render: (_: any, record: PatientRecord) => {
-        const status = getPatientRecordStatus(record);
+        const status = getCaseStatus(record);
         return status === "submitted" ? (
           <div className="flex items-center justify-center">
             <div
@@ -88,103 +95,93 @@ export function CasesView() {
     {
       key: "first_name_encrypted" as keyof PatientRecord,
       header: t.columns.patientName,
-      width: "24%",
+      width: "15%",
       render: (_: any, record: PatientRecord) => {
         const patientData = decryptedData[record.id];
 
         if (isDecrypting) {
           return (
-            <div className="flex items-center space-x-2">
-              <Badge variant="outline" className="text-xs">
-                {t.loadingStates.decrypting}
-              </Badge>
-            </div>
+            <Badge variant="outline" className="text-xs">
+              {t.loadingStates.decrypting}
+            </Badge>
           );
         }
 
         if (patientData) {
-          const dob = patientData.dateOfBirth
-            ? formatDate(new Date(patientData.dateOfBirth))
-            : null;
-
           return (
-            <div className="flex flex-col min-w-0">
-              <span
-                className="font-medium truncate block"
-                title={`${patientData.firstName} ${patientData.lastName}`}
-              >
-                {patientData.firstName} {patientData.lastName}
-              </span>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {dob && <span>{dob}</span>}
-                {dob && record.clinic_internal_id && <span>•</span>}
-                {record.clinic_internal_id && (
-                  <span
-                    className="truncate block"
-                    title={record.clinic_internal_id}
-                  >
-                    {record.clinic_internal_id}
-                  </span>
-                )}
-              </div>
-            </div>
+            <span
+              className="font-medium truncate block"
+              title={`${patientData.firstName} ${patientData.lastName}`}
+            >
+              {patientData.firstName} {patientData.lastName}
+            </span>
           );
         }
 
         return (
-          <div className="flex items-center space-x-2 min-w-0">
-            <Badge variant="outline" className="text-xs flex-shrink-0">
-              {t.commonValues.encrypted}
-            </Badge>
-            <span
-              className="text-muted-foreground text-sm truncate block"
-              title={record.clinic_internal_id || t.commonValues.noId}
-            >
-              {record.clinic_internal_id || t.commonValues.noId}
-            </span>
-          </div>
+          <Badge variant="outline" className="text-xs">
+            {t.commonValues.encrypted}
+          </Badge>
         );
       },
     },
     {
+      key: "date_of_birth_encrypted" as keyof PatientRecord,
+      header: t.columns.dob,
+      width: "15%",
+      render: (_: any, record: PatientRecord) => {
+        const patientData = decryptedData[record.id];
+
+        if (isDecrypting || !patientData?.dateOfBirth) {
+          return <span className="text-muted-foreground">-</span>;
+        }
+
+        const dob = formatDate(new Date(patientData.dateOfBirth));
+        return <span title={dob}>{dob}</span>;
+      },
+    },
+    {
+      key: "clinic_internal_id" as keyof PatientRecord,
+      header: t.columns.internalId,
+      width: "15%",
+      render: (value: string) => (
+        <span className="truncate block" title={value || undefined}>
+          {value || "-"}
+        </span>
+      ),
+    },
+    {
       key: "patient_data_completed_at" as keyof PatientRecord,
       header: t.columns.submitted,
-      width: "24%",
+      width: "15%",
       render: (value: string) =>
         value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : "-",
     },
     {
       key: "last_viewed_at" as keyof PatientRecord,
       header: t.columns.lastViewed,
-      width: "25%",
+      width: "15%",
+      render: (value: string) =>
+        value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : "-",
+    },
+    {
+      key: "last_viewed_by" as keyof PatientRecord,
+      header: t.columns.lastViewedBy,
+      width: "15%",
       render: (_: any, record: PatientRecord) => {
-        if (!record.last_viewed_at) {
+        if (!record.last_viewed_by) {
           return <span className="text-muted-foreground">-</span>;
         }
 
-        const timeAgo = formatDistanceToNow(new Date(record.last_viewed_at), {
-          addSuffix: true,
-        });
         const userName =
           record.userByLastViewedBy?.name ||
           record.userByLastViewedBy?.email ||
           t.common.unknown;
 
         return (
-          <div className="flex flex-col min-w-0">
-            <span
-              className="text-sm truncate block"
-              title={`${timeAgo} ${t.common.by} ${userName}`}
-            >
-              {timeAgo}
-            </span>
-            <span
-              className="text-xs text-muted-foreground truncate block"
-              title={userName}
-            >
-              {t.common.by} {userName}
-            </span>
-          </div>
+          <span className="truncate block" title={userName}>
+            {userName}
+          </span>
         );
       },
     },
@@ -245,6 +242,7 @@ export function CasesView() {
         <DataTable
           data={filteredSubmissions}
           columns={columns}
+          onRowClick={handleRowClick}
         />
       )}
     </div>

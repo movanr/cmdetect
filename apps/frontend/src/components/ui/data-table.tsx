@@ -8,7 +8,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface Column<T> {
@@ -24,6 +23,7 @@ interface DataTableProps<T> {
   loading?: boolean
   emptyState?: ReactNode
   actions?: (row: T) => ReactNode
+  onRowClick?: (row: T) => void
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -32,6 +32,7 @@ export function DataTable<T extends Record<string, any>>({
   loading = false,
   emptyState,
   actions,
+  onRowClick,
 }: DataTableProps<T>) {
   if (loading) {
     return (
@@ -93,7 +94,11 @@ export function DataTable<T extends Record<string, any>>({
           </TableHeader>
           <TableBody>
             {data.map((row, index) => (
-              <TableRow key={row.id || index}>
+              <TableRow
+                key={row.id || index}
+                onClick={() => onRowClick?.(row)}
+                className={onRowClick ? "cursor-pointer hover:bg-muted/50" : undefined}
+              >
                 {columns.map((column) => (
                   <TableCell key={String(column.key)}>
                     {column.key === 'actions' && actions ? (
@@ -111,34 +116,6 @@ export function DataTable<T extends Record<string, any>>({
         </Table>
       </CardContent>
     </Card>
-  )
-}
-
-interface StatusBadgeProps {
-  status: string
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline'
-}
-
-export function StatusBadge({ status, variant = 'secondary' }: StatusBadgeProps) {
-  const getVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'outline'
-      case 'submitted':
-      case 'viewed':
-        return 'default'
-      case 'expired':
-      case 'consent_denied':
-        return 'destructive'
-      default:
-        return variant
-    }
-  }
-
-  return (
-    <Badge variant={getVariant(status)}>
-      {status.replace('_', ' ')}
-    </Badge>
   )
 }
 

@@ -1406,6 +1406,7 @@ type patient_record {
   userByCreatedBy: user!
   """An object relationship"""
   userByLastViewedBy: user
+  viewed: Boolean!
 }
 
 """
@@ -1417,7 +1418,23 @@ type patient_record_aggregate {
 }
 
 input patient_record_aggregate_bool_exp {
+  bool_and: patient_record_aggregate_bool_exp_bool_and
+  bool_or: patient_record_aggregate_bool_exp_bool_or
   count: patient_record_aggregate_bool_exp_count
+}
+
+input patient_record_aggregate_bool_exp_bool_and {
+  arguments: patient_record_select_column_patient_record_aggregate_bool_exp_bool_and_arguments_columns!
+  distinct: Boolean
+  filter: patient_record_bool_exp
+  predicate: Boolean_comparison_exp!
+}
+
+input patient_record_aggregate_bool_exp_bool_or {
+  arguments: patient_record_select_column_patient_record_aggregate_bool_exp_bool_or_arguments_columns!
+  distinct: Boolean
+  filter: patient_record_bool_exp
+  predicate: Boolean_comparison_exp!
 }
 
 input patient_record_aggregate_bool_exp_count {
@@ -1482,6 +1499,7 @@ input patient_record_bool_exp {
   updated_at: timestamptz_comparison_exp
   userByCreatedBy: user_bool_exp
   userByLastViewedBy: user_bool_exp
+  viewed: Boolean_comparison_exp
 }
 
 """
@@ -1522,6 +1540,7 @@ input patient_record_insert_input {
   updated_at: timestamptz
   userByCreatedBy: user_obj_rel_insert_input
   userByLastViewedBy: user_obj_rel_insert_input
+  viewed: Boolean
 }
 
 """aggregate max on columns"""
@@ -1654,6 +1673,7 @@ input patient_record_order_by {
   updated_at: order_by
   userByCreatedBy: user_order_by
   userByLastViewedBy: user_order_by
+  viewed: order_by
 }
 
 """primary key columns input for table: patient_record"""
@@ -1695,6 +1715,24 @@ enum patient_record_select_column {
   patient_data_completed_at
   """column name"""
   updated_at
+  """column name"""
+  viewed
+}
+
+"""
+select "patient_record_aggregate_bool_exp_bool_and_arguments_columns" columns of table "patient_record"
+"""
+enum patient_record_select_column_patient_record_aggregate_bool_exp_bool_and_arguments_columns {
+  """column name"""
+  viewed
+}
+
+"""
+select "patient_record_aggregate_bool_exp_bool_or_arguments_columns" columns of table "patient_record"
+"""
+enum patient_record_select_column_patient_record_aggregate_bool_exp_bool_or_arguments_columns {
+  """column name"""
+  viewed
 }
 
 """
@@ -1716,6 +1754,7 @@ input patient_record_set_input {
   organization_id: String
   patient_data_completed_at: timestamptz
   updated_at: timestamptz
+  viewed: Boolean
 }
 
 """
@@ -1745,6 +1784,7 @@ input patient_record_stream_cursor_value_input {
   organization_id: String
   patient_data_completed_at: timestamptz
   updated_at: timestamptz
+  viewed: Boolean
 }
 
 """
@@ -1781,6 +1821,8 @@ enum patient_record_update_column {
   patient_data_completed_at
   """column name"""
   updated_at
+  """column name"""
+  viewed
 }
 
 input patient_record_updates {

@@ -1,33 +1,16 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { execute } from "@/graphql/execute";
-import { CREATE_PATIENT_RECORD } from "./queries";
+import { useCreatePatientRecord } from "@/features/patient-records";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "@/config/i18n";
 
 export function CreateInviteForm() {
   const t = getTranslations();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
   const [clinicInternalId, setClinicInternalId] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const createMutation = useMutation({
-    mutationFn: async (data: { clinic_internal_id: string }) => {
-      return execute(CREATE_PATIENT_RECORD, data);
-    },
-    onSuccess: () => {
-      // Invalidate patient records cache to refetch data
-      queryClient.invalidateQueries({ queryKey: ["patient-records"] });
-      // Navigate back to invites list
-      navigate({ to: "/invites" });
-    },
-    onError: (err) => {
-      setError(err instanceof Error ? err.message : "Failed to create invite");
-    },
-  });
+  const createMutation = useCreatePatientRecord();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +21,13 @@ export function CreateInviteForm() {
       return;
     }
 
-    await createMutation.mutateAsync({
-      clinic_internal_id: clinicInternalId.trim(),
+    createMutation.mutate(clinicInternalId.trim(), {
+      onSuccess: () => {
+        navigate({ to: "/invites" });
+      },
+      onError: (err) => {
+        setError(err instanceof Error ? err.message : "Failed to create invite");
+      },
     });
   };
 

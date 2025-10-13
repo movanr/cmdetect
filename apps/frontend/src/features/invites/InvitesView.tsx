@@ -1,9 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import {
-  DataTable,
-  StatusBadge,
-  ActionButtons,
-} from "@/components/ui/data-table";
+import { DataTable, ActionButtons } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -13,35 +9,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { usePatientRecords, getPatientRecordStatus } from "@/lib/patient-records";
+import {
+  useInvites,
+  getCaseStatus,
+  getInviteStatus,
+  useDeletePatientRecord,
+  StatusBadge,
+  type PatientRecord,
+} from "@/features/patient-records";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { MoreVertical, Trash, Plus, Copy, ExternalLink } from "lucide-react";
-import type { GetAllPatientRecordsQuery } from "@/graphql/graphql";
 import { getTranslations } from "@/config/i18n";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { execute } from "@/graphql/execute";
-import { DELETE_PATIENT_RECORD } from "./queries";
-
-type PatientRecord = GetAllPatientRecordsQuery["patient_record"][number];
 
 export function InvitesView() {
-  const { data: patientRecords, isLoading } = usePatientRecords();
+  const { data: patientRecords, isLoading } = useInvites();
   const t = getTranslations();
-  const queryClient = useQueryClient();
+  const deleteMutation = useDeletePatientRecord();
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return execute(DELETE_PATIENT_RECORD, { id });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["patient-records"] });
-      toast.success(t.messages.deletedSuccessfully);
-    },
-    onError: (error) => {
-      toast.error("Failed to delete invite: " + error.message);
-    },
-  });
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success(t.messages.deletedSuccessfully);
+      },
+      onError: (error) => {
+        toast.error("Failed to delete invite: " + error.message);
+      },
+    });
+  };
 
   const columns = [
     {
@@ -56,7 +51,10 @@ export function InvitesView() {
       header: t.columns.createdBy,
       width: "12%",
       render: (_value: string, record: PatientRecord) => {
-        const userName = record.userByCreatedBy?.name || t.commonValues.system;
+        const userName =
+          record.userByCreatedBy?.name ||
+          record.userByCreatedBy?.email ||
+          t.commonValues.system;
         return (
           <span className="truncate block" title={userName}>
             {userName}
@@ -127,7 +125,7 @@ export function InvitesView() {
       header: t.columns.status,
       width: "12%",
       render: (_: any, record: PatientRecord) => (
-        <StatusBadge status={getPatientRecordStatus(record)} />
+        <StatusBadge status={getInviteStatus(record)} />
       ),
     },
     {
@@ -138,7 +136,7 @@ export function InvitesView() {
   ];
 
   const renderActions = (record: PatientRecord) => {
-    const status = getPatientRecordStatus(record);
+    const status = getCaseStatus(record);
     const isSubmitted = status === "submitted" || status === "viewed";
 
     return (
@@ -152,11 +150,13 @@ export function InvitesView() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               variant="destructive"
-              onClick={() => deleteMutation.mutate(record.id)}
+              onClick={() => handleDelete(record.id)}
               disabled={deleteMutation.isPending || isSubmitted}
             >
               <Trash className="h-4 w-4" />
-              {deleteMutation.isPending ? t.loadingStates.deleting : t.actions.deleteInvite}
+              {deleteMutation.isPending
+                ? t.loadingStates.deleting
+                : t.actions.deleteInvite}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -186,5 +186,11 @@ export function InvitesView() {
     );
   }
 
-  return <DataTable data={patientRecords} columns={columns} actions={renderActions} />;
+  return (
+    <DataTable
+      data={patientRecords}
+      columns={columns}
+      actions={renderActions}
+    />
+  );
 }

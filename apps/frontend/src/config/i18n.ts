@@ -44,6 +44,7 @@ export interface I18nStrings {
     dob: string;
     firstViewed: string;
     lastViewed: string;
+    lastViewedBy: string;
     status: string;
     actions: string;
     created: string;
@@ -69,9 +70,11 @@ export interface I18nStrings {
 
   // Status values
   status: {
-    invited: string;
+    pending: string;
     submitted: string;
     viewed: string;
+    expired: string;
+    consent_denied: string;
   };
 
   // Empty states (shared across views)
@@ -219,10 +222,11 @@ export const translations: Record<Language, I18nStrings> = {
 
     columns: {
       submitted: "Submitted",
-      patientName: "Patient",
+      patientName: "Name",
       dob: "DOB",
       firstViewed: "First Viewed",
       lastViewed: "Last Viewed",
+      lastViewedBy: "Last Viewed By",
       status: "Status",
       actions: "",
       created: "Created",
@@ -246,9 +250,11 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     status: {
-      invited: "Invited",
-      submitted: "Submitted",
-      viewed: "Viewed",
+      pending: "pending",
+      consent_denied: "consent denied",
+      submitted: "submitted",
+      viewed: "viewed",
+      expired: "expired",
     },
 
     emptyStates: {
@@ -388,10 +394,11 @@ export const translations: Record<Language, I18nStrings> = {
 
     columns: {
       submitted: "Eingereicht",
-      patientName: "Patient",
+      patientName: "Name",
       dob: "Geburtsdatum",
       firstViewed: "Erstmals angesehen",
       lastViewed: "Zuletzt angesehen",
+      lastViewedBy: "Zuletzt angesehen von",
       status: "Status",
       actions: "",
       created: "Erstellt",
@@ -415,9 +422,11 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     status: {
-      invited: "Eingeladen",
-      submitted: "Eingereicht",
-      viewed: "Angesehen",
+      pending: "ausstehend",
+      expired: "abgelaufen",
+      submitted: "eingereicht",
+      viewed: "angesehen",
+      consent_denied: "Einwilligung abgelehnt",
     },
 
     emptyStates: {

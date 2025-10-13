@@ -1342,6 +1342,7 @@ export type Patient_Record = {
   userByCreatedBy: User;
   /** An object relationship */
   userByLastViewedBy?: Maybe<User>;
+  viewed: Scalars['Boolean']['output'];
 };
 
 
@@ -1372,7 +1373,23 @@ export type Patient_Record_Aggregate = {
 };
 
 export type Patient_Record_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Patient_Record_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Patient_Record_Aggregate_Bool_Exp_Bool_Or>;
   count?: InputMaybe<Patient_Record_Aggregate_Bool_Exp_Count>;
+};
+
+export type Patient_Record_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Patient_Record_Select_Column_Patient_Record_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Patient_Record_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Patient_Record_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Patient_Record_Select_Column_Patient_Record_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Patient_Record_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
 };
 
 export type Patient_Record_Aggregate_Bool_Exp_Count = {
@@ -1437,6 +1454,7 @@ export type Patient_Record_Bool_Exp = {
   updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
   userByCreatedBy?: InputMaybe<User_Bool_Exp>;
   userByLastViewedBy?: InputMaybe<User_Bool_Exp>;
+  viewed?: InputMaybe<Boolean_Comparison_Exp>;
 };
 
 /** unique or primary key constraints on table "patient_record" */
@@ -1469,6 +1487,7 @@ export type Patient_Record_Insert_Input = {
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
   userByCreatedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
   userByLastViewedBy?: InputMaybe<User_Obj_Rel_Insert_Input>;
+  viewed?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** aggregate max on columns */
@@ -1594,6 +1613,7 @@ export type Patient_Record_Order_By = {
   updated_at?: InputMaybe<Order_By>;
   userByCreatedBy?: InputMaybe<User_Order_By>;
   userByLastViewedBy?: InputMaybe<User_Order_By>;
+  viewed?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: patient_record */
@@ -1632,7 +1652,21 @@ export enum Patient_Record_Select_Column {
   /** column name */
   PatientDataCompletedAt = 'patient_data_completed_at',
   /** column name */
-  UpdatedAt = 'updated_at'
+  UpdatedAt = 'updated_at',
+  /** column name */
+  Viewed = 'viewed'
+}
+
+/** select "patient_record_aggregate_bool_exp_bool_and_arguments_columns" columns of table "patient_record" */
+export enum Patient_Record_Select_Column_Patient_Record_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  Viewed = 'viewed'
+}
+
+/** select "patient_record_aggregate_bool_exp_bool_or_arguments_columns" columns of table "patient_record" */
+export enum Patient_Record_Select_Column_Patient_Record_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  Viewed = 'viewed'
 }
 
 /** input type for updating data in table "patient_record" */
@@ -1652,6 +1686,7 @@ export type Patient_Record_Set_Input = {
   organization_id?: InputMaybe<Scalars['String']['input']>;
   patient_data_completed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  viewed?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Streaming cursor of the table "patient_record" */
@@ -1679,6 +1714,7 @@ export type Patient_Record_Stream_Cursor_Value_Input = {
   organization_id?: InputMaybe<Scalars['String']['input']>;
   patient_data_completed_at?: InputMaybe<Scalars['timestamptz']['input']>;
   updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  viewed?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** update columns of table "patient_record" */
@@ -1712,7 +1748,9 @@ export enum Patient_Record_Update_Column {
   /** column name */
   PatientDataCompletedAt = 'patient_data_completed_at',
   /** column name */
-  UpdatedAt = 'updated_at'
+  UpdatedAt = 'updated_at',
+  /** column name */
+  Viewed = 'viewed'
 }
 
 export type Patient_Record_Updates = {
@@ -2906,7 +2944,7 @@ export type UpdateOrganizationPublicKeyMutation = { __typename?: 'mutation_root'
 export type GetAllPatientRecordsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAllPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: string, clinic_internal_id: string, invite_token: string, invite_expires_at: any, created_at?: any | null, created_by: string, last_viewed_at?: any | null, last_viewed_by?: string | null, patient_data_completed_at?: any | null, first_name_encrypted?: string | null, last_name_encrypted?: string | null, date_of_birth_encrypted?: string | null, patient_consent?: { __typename?: 'patient_consent', consent_given: boolean, created_at?: any | null } | null, userByCreatedBy: { __typename?: 'user', id: string, name: string, email: string }, userByLastViewedBy?: { __typename?: 'user', id: string, name: string, email: string } | null }> };
+export type GetAllPatientRecordsQuery = { __typename?: 'query_root', patient_record: Array<{ __typename?: 'patient_record', id: string, clinic_internal_id: string, invite_token: string, invite_expires_at: any, created_at?: any | null, created_by: string, last_viewed_at?: any | null, last_viewed_by?: string | null, viewed: boolean, patient_data_completed_at?: any | null, first_name_encrypted?: string | null, last_name_encrypted?: string | null, date_of_birth_encrypted?: string | null, patient_consent?: { __typename?: 'patient_consent', consent_given: boolean, created_at?: any | null } | null, userByCreatedBy: { __typename?: 'user', id: string, name: string, email: string }, userByLastViewedBy?: { __typename?: 'user', id: string, name: string, email: string } | null }> };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2945,6 +2983,20 @@ export type GetOrganizationPhysiciansQueryVariables = Exact<{ [key: string]: nev
 
 
 export type GetOrganizationPhysiciansQuery = { __typename?: 'query_root', user: Array<{ __typename?: 'user', id: string, name: string, email: string }> };
+
+export type GetPatientRecordQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetPatientRecordQuery = { __typename?: 'query_root', patient_record_by_pk?: { __typename?: 'patient_record', id: string, clinic_internal_id: string, first_name_encrypted?: string | null, created_at?: any | null, patient_data_completed_at?: any | null, viewed: boolean, invite_expires_at: any, patient_consent?: { __typename?: 'patient_consent', consent_given: boolean } | null, userByLastViewedBy?: { __typename?: 'user', id: string, name: string, email: string } | null } | null };
+
+export type UpdateViewedMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type UpdateViewedMutation = { __typename?: 'mutation_root', update_patient_record_by_pk?: { __typename?: 'patient_record', id: string, viewed: boolean } | null };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -3021,6 +3073,7 @@ export const GetAllPatientRecordsDocument = new TypedDocumentString(`
     created_by
     last_viewed_at
     last_viewed_by
+    viewed
     patient_data_completed_at
     first_name_encrypted
     last_name_encrypted
@@ -3106,3 +3159,32 @@ export const GetOrganizationPhysiciansDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetOrganizationPhysiciansQuery, GetOrganizationPhysiciansQueryVariables>;
+export const GetPatientRecordDocument = new TypedDocumentString(`
+    query GetPatientRecord($id: String!) {
+  patient_record_by_pk(id: $id) {
+    id
+    clinic_internal_id
+    first_name_encrypted
+    created_at
+    patient_data_completed_at
+    viewed
+    invite_expires_at
+    patient_consent {
+      consent_given
+    }
+    userByLastViewedBy {
+      id
+      name
+      email
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<GetPatientRecordQuery, GetPatientRecordQueryVariables>;
+export const UpdateViewedDocument = new TypedDocumentString(`
+    mutation UpdateViewed($id: String!) {
+  update_patient_record_by_pk(pk_columns: {id: $id}, _set: {viewed: true}) {
+    id
+    viewed
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateViewedMutation, UpdateViewedMutationVariables>;
