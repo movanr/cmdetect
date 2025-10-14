@@ -35,7 +35,7 @@ export {
   isInviteStatus,
   isSubmissionStatus,
 } from "./utils/status";
-export { filterInvites, filterSubmissions } from "./utils/filters";
+export { filterSubmissions } from "./utils/filters";
 
 // Components
 export { StatusBadge } from "./components/StatusBadge";

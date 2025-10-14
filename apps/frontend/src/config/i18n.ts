@@ -75,6 +75,7 @@ export interface I18nStrings {
     viewed: string;
     expired: string;
     consent_denied: string;
+    new: string;
   };
 
   // Empty states (shared across views)
@@ -148,8 +149,10 @@ export interface I18nStrings {
   // Search and filters
   search: {
     searchByInternalId: string;
+    searchByIdOrName: string;
     clear: string;
     noResultsFound: string; // "No cases found matching {query}"
+    noResultsForFilter: string; // "No results for the selected filter"
   };
 
   // Indicators
@@ -255,6 +258,7 @@ export const translations: Record<Language, I18nStrings> = {
       submitted: "submitted",
       viewed: "viewed",
       expired: "expired",
+      new: "new",
     },
 
     emptyStates: {
@@ -325,8 +329,10 @@ export const translations: Record<Language, I18nStrings> = {
 
     search: {
       searchByInternalId: "Search by internal ID...",
+      searchByIdOrName: "Search by internal ID or name...",
       clear: "Clear",
       noResultsFound: 'No cases found matching "{query}"',
+      noResultsForFilter: "No results for the selected filter",
     },
 
     indicators: {
@@ -427,6 +433,7 @@ export const translations: Record<Language, I18nStrings> = {
       submitted: "eingereicht",
       viewed: "angesehen",
       consent_denied: "Einwilligung abgelehnt",
+      new: "neu",
     },
 
     emptyStates: {
@@ -498,8 +505,10 @@ export const translations: Record<Language, I18nStrings> = {
 
     search: {
       searchByInternalId: "Nach interner ID suchen...",
+      searchByIdOrName: "Nach interner ID oder Name suchen...",
       clear: "Löschen",
       noResultsFound: 'Keine Fälle gefunden für "{query}"',
+      noResultsForFilter: "Keine Ergebnisse für den gewählten Filter",
     },
 
     indicators: {

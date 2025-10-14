@@ -13,7 +13,7 @@ export function getCaseStatus(record: PatientRecord): CaseStatus {
   }
   if (record.patient_data_completed_at) {
     if (record.viewed) return "viewed";
-    return "submitted";
+    return "new";
   }
   if (
     record.invite_expires_at &&
@@ -42,19 +42,13 @@ export function getInviteStatus(record: PatientRecord): InviteStatus {
 /**
  * Check if a status is an invite status (not yet submitted)
  */
-export function isInviteStatus(status: string): boolean {
-  return [
-    "consent_denied",
-    "expired",
-    "pending",
-    "submitted",
-    "viewed",
-  ].includes(status);
+export function isInviteStatus(): boolean {
+  return true;
 }
 
 /**
  * Check if a status is a submission status (submitted/viewed)
  */
 export function isSubmissionStatus(status: string): boolean {
-  return ["submitted", "viewed"].includes(status);
+  return ["new", "viewed"].includes(status);
 }

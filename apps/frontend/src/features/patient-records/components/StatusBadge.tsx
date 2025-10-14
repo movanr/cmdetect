@@ -19,10 +19,13 @@ export function StatusBadge({
   const getVariant = (status: CaseStatus | InviteStatus) => {
     switch (status) {
       case "pending":
-        return "outline";
-      case "submitted":
-      case "viewed":
         return "default";
+      case "submitted":
+        return "outline";
+      case "new":
+        return "default";
+      case "viewed":
+        return "outline";
       case "expired":
       case "consent_denied":
         return "destructive";

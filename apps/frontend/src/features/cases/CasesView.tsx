@@ -1,17 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { SearchField } from "@/components/ui/search-field";
+import { StatusFilterDropdown } from "@/components/ui/status-filter-dropdown";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   useSubmissions,
   getCaseStatus,
+  StatusBadge,
   type PatientRecord,
+  type CaseStatus,
 } from "@/features/patient-records";
 import { formatDistanceToNow, formatDate } from "@/lib/date-utils";
-import { FileText, Search } from "lucide-react";
+import { FileText } from "lucide-react";
 import { getTranslations, interpolate } from "@/config/i18n";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
@@ -20,6 +22,8 @@ interface DecryptedPatientData {
   [recordId: string]: PatientPII | null;
 }
 
+const CASE_STATUSES: readonly CaseStatus[] = ["new", "viewed"] as const;
+
 export function CasesView() {
   const { data: submissions, isLoading } = useSubmissions();
   const t = getTranslations();
@@ -27,6 +31,7 @@ export function CasesView() {
   const [decryptedData, setDecryptedData] = useState<DecryptedPatientData>({});
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<CaseStatus | "all">("all");
 
   const handleRowClick = (record: PatientRecord) => {
     navigate({ to: "/cases/$id", params: { id: record.id } });
@@ -77,12 +82,12 @@ export function CasesView() {
 
   const columns = [
     {
-      key: "id" as keyof PatientRecord,
+      key: "new_indicator" as keyof PatientRecord,
       header: "",
       width: "3%",
       render: (_: any, record: PatientRecord) => {
         const status = getCaseStatus(record);
-        return status === "submitted" ? (
+        return status === "new" ? (
           <div className="flex items-center justify-center">
             <div
               className="w-2 h-2 bg-blue-500 rounded-full"
@@ -158,6 +163,14 @@ export function CasesView() {
         value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : "-",
     },
     {
+      key: "status" as keyof PatientRecord,
+      header: t.columns.status,
+      width: "10%",
+      render: (_: any, record: PatientRecord) => (
+        <StatusBadge status={getCaseStatus(record)} />
+      ),
+    },
+    {
       key: "last_viewed_at" as keyof PatientRecord,
       header: t.columns.lastViewed,
       width: "15%",
@@ -167,7 +180,7 @@ export function CasesView() {
     {
       key: "last_viewed_by" as keyof PatientRecord,
       header: t.columns.lastViewedBy,
-      width: "15%",
+      width: "12%",
       render: (_: any, record: PatientRecord) => {
         if (!record.last_viewed_by) {
           return <span className="text-muted-foreground">-</span>;
@@ -187,16 +200,43 @@ export function CasesView() {
     },
   ];
 
-  // Filter submissions by search query
+  // Filter submissions by search query and status
   const filteredSubmissions = useMemo(() => {
     if (!submissions) return [];
-    if (!searchQuery.trim()) return submissions;
 
-    const query = searchQuery.toLowerCase().trim();
-    return submissions.filter((record) => {
-      return record.clinic_internal_id?.toLowerCase().includes(query);
-    });
-  }, [submissions, searchQuery]);
+    let filtered = submissions;
+
+    // Filter by status
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter((record) => {
+        const status = getCaseStatus(record);
+        return status === selectedStatus;
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((record) => {
+        // Search in internal ID
+        const matchesId = record.clinic_internal_id
+          ?.toLowerCase()
+          .includes(query);
+
+        // Search in decrypted patient name (if available)
+        const patientData = decryptedData[record.id];
+        const matchesName = patientData
+          ? `${patientData.firstName} ${patientData.lastName}`
+              .toLowerCase()
+              .includes(query)
+          : false;
+
+        return matchesId || matchesName;
+      });
+    }
+
+    return filtered;
+  }, [submissions, searchQuery, decryptedData, selectedStatus]);
 
   if (isLoading) {
     return <DataTable data={[]} columns={columns} loading={true} />;
@@ -214,29 +254,25 @@ export function CasesView() {
 
   return (
     <div className="space-y-4">
-      {/* Search field */}
-      <div className="flex items-center gap-2 max-w-sm">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder={t.search.searchByInternalId}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        {searchQuery && (
-          <Button variant="ghost" size="sm" onClick={() => setSearchQuery("")}>
-            {t.search.clear}
-          </Button>
-        )}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <SearchField
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder={t.search.searchByIdOrName}
+        />
+        <StatusFilterDropdown
+          statuses={CASE_STATUSES}
+          selectedStatus={selectedStatus}
+          onChange={setSelectedStatus}
+        />
       </div>
 
       {/* Table */}
       {filteredSubmissions.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          {interpolate(t.search.noResultsFound, { query: searchQuery })}
+          {searchQuery.trim()
+            ? interpolate(t.search.noResultsFound, { query: searchQuery })
+            : t.search.noResultsForFilter}
         </div>
       ) : (
         <DataTable

@@ -4,7 +4,6 @@
 
 import { useMemo } from "react";
 import { usePatientRecords } from "./usePatientRecords";
-import { filterInvites } from "../utils/filters";
 
 export function useInvites() {
   const { data, ...rest } = usePatientRecords();
@@ -15,7 +14,7 @@ export function useInvites() {
       data?.length || 0,
       "records"
     );
-    return data ? filterInvites(data) : [];
+    return data || [];
   }, [data]);
 
   return { data: invites, ...rest };

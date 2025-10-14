@@ -1,7 +1,10 @@
+import { useState, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { DataTable, ActionButtons } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SearchField } from "@/components/ui/search-field";
+import { StatusFilterDropdown } from "@/components/ui/status-filter-dropdown";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   DropdownMenu,
@@ -11,21 +14,38 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   useInvites,
-  getCaseStatus,
   getInviteStatus,
   useDeletePatientRecord,
   StatusBadge,
   type PatientRecord,
+  type InviteStatus,
 } from "@/features/patient-records";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { MoreVertical, Trash, Plus, Copy, ExternalLink } from "lucide-react";
-import { getTranslations } from "@/config/i18n";
+import {
+  MoreVertical,
+  Trash,
+  Plus,
+  Copy,
+  ExternalLink,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+import { getTranslations, interpolate } from "@/config/i18n";
 import { toast } from "sonner";
+
+const INVITE_STATUSES: readonly InviteStatus[] = [
+  "pending",
+  "submitted",
+  "expired",
+  "consent_denied",
+] as const;
 
 export function InvitesView() {
   const { data: patientRecords, isLoading } = useInvites();
   const t = getTranslations();
   const deleteMutation = useDeletePatientRecord();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<InviteStatus | "all">("all");
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id, {
@@ -76,7 +96,11 @@ export function InvitesView() {
       key: "invite_token" as keyof PatientRecord,
       header: t.columns.inviteUrl,
       width: "15%",
-      render: (token: string) => {
+      render: (token: string, record: PatientRecord) => {
+        const status = getInviteStatus(record);
+        const isPending = status === "pending";
+        const isSuccess = status === "submitted";
+        const isFailure = status === "expired" || status === "consent_denied";
         const url = token
           ? `${window.location.origin}/patient?token=${token}`
           : "";
@@ -85,16 +109,30 @@ export function InvitesView() {
           <div className="flex items-center space-x-2">
             <Badge
               variant="outline"
-              className="font-mono text-xs cursor-pointer"
-              title={url}
+              className={`font-mono text-xs ${
+                isPending ? "cursor-pointer" : "opacity-50 cursor-not-allowed"
+              }`}
+              title={isPending ? url : undefined}
               onClick={() => {
-                navigator.clipboard.writeText(url);
-                toast.success(t.messages.copiedToClipboard);
+                if (isPending) {
+                  navigator.clipboard.writeText(url);
+                  toast.success(t.messages.copiedToClipboard);
+                }
               }}
             >
               {"..." + token?.slice(-8) || "N/A"}
             </Badge>
-            {token && (
+            {isSuccess && (
+              <div title="Submitted successfully">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+              </div>
+            )}
+            {isFailure && (
+              <div title={status === "expired" ? "Expired" : "Consent denied"}>
+                <XCircle className="h-4 w-4 text-red-600" />
+              </div>
+            )}
+            {token && isPending && (
               <Button
                 size="sm"
                 variant="ghost"
@@ -136,8 +174,8 @@ export function InvitesView() {
   ];
 
   const renderActions = (record: PatientRecord) => {
-    const status = getCaseStatus(record);
-    const isSubmitted = status === "submitted" || status === "viewed";
+    const status = getInviteStatus(record);
+    const isSubmitted = status === "submitted";
 
     return (
       <ActionButtons>
@@ -164,6 +202,31 @@ export function InvitesView() {
     );
   };
 
+  // Filter invites by search query and status
+  const filteredInvites = useMemo(() => {
+    if (!patientRecords) return [];
+
+    let filtered = patientRecords;
+
+    // Filter by status
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter((record) => {
+        const status = getInviteStatus(record);
+        return status === selectedStatus;
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((record) => {
+        return record.clinic_internal_id?.toLowerCase().includes(query);
+      });
+    }
+
+    return filtered;
+  }, [patientRecords, searchQuery, selectedStatus]);
+
   if (isLoading) {
     return <DataTable data={[]} columns={columns} loading={true} />;
   }
@@ -187,10 +250,30 @@ export function InvitesView() {
   }
 
   return (
-    <DataTable
-      data={patientRecords}
-      columns={columns}
-      actions={renderActions}
-    />
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <SearchField value={searchQuery} onChange={setSearchQuery} />
+        <StatusFilterDropdown
+          statuses={INVITE_STATUSES}
+          selectedStatus={selectedStatus}
+          onChange={setSelectedStatus}
+        />
+      </div>
+
+      {/* Table */}
+      {filteredInvites.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          {searchQuery.trim()
+            ? interpolate(t.search.noResultsFound, { query: searchQuery })
+            : t.search.noResultsForFilter}
+        </div>
+      ) : (
+        <DataTable
+          data={filteredInvites}
+          columns={columns}
+          actions={renderActions}
+        />
+      )}
+    </div>
   );
 }
