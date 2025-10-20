@@ -7,6 +7,7 @@ import { execute } from "../../../graphql/execute";
 import { useKeyValidation } from "./useKeyValidation";
 import { useKeySetupState } from "./useKeySetupState";
 import type { KeySetupContext } from "../types/keySetup";
+import { roles } from "@cmdetect/config";
 
 export function useKeySetup() {
   const { data: session } = useSession();
@@ -43,7 +44,7 @@ export function useKeySetup() {
         const context: KeySetupContext = {
           organizationId,
           organizationName,
-          isAdmin: activeRole === "org_admin",
+          isAdmin: activeRole === roles.ORG_ADMIN,
           hasPublicKey: !!organizationPublicKey,
           hasPrivateKey: validationData.hasLocalKey,
           isCompatible: validationData.isCompatible,
@@ -81,7 +82,7 @@ export function useKeySetup() {
       organizationId,
       organizationName,
       organizationPublicKey,
-      isAdmin: activeRole === "org_admin",
+      isAdmin: activeRole === roles.ORG_ADMIN,
     },
     revalidate,
   };

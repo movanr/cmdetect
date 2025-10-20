@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { Pool } from "pg";
 import { betterAuth } from "better-auth";
+import { roles } from "@cmdetect/config";
 
 dotenv.config();
 
@@ -55,21 +56,21 @@ const TEST_USERS: TestUser[] = [
     email: "admin1@test.com",
     password: "testPassword123!",
     name: "Test Admin One",
-    roles: ["org_admin"],
+    roles: [roles.ORG_ADMIN],
     organizationId: TEST_ORGANIZATIONS[0].id,
   },
   {
     email: "doctor1@test.com",
     password: "testPassword123!",
     name: "Dr. Test Doctor One",
-    roles: ["physician"],
+    roles: [roles.PHYSICIAN],
     organizationId: TEST_ORGANIZATIONS[0].id,
   },
   {
     email: "reception1@test.com",
     password: "testPassword123!",
     name: "Test Reception One",
-    roles: ["receptionist"],
+    roles: [roles.RECEPTIONIST],
     organizationId: TEST_ORGANIZATIONS[0].id,
   },
 
@@ -78,15 +79,15 @@ const TEST_USERS: TestUser[] = [
     email: "admin2@test.com",
     password: "testPassword123!",
     name: "Test Admin Two",
-    roles: ["org_admin"],
+    roles: [roles.ORG_ADMIN],
     organizationId: TEST_ORGANIZATIONS[1].id,
   },
   {
     email: "doctor2@test.com",
     password: "testPassword123!",
     name: "Dr. Test Doctor Two",
-    roles: ["physician", "receptionist"], // Multi-role example
-    defaultRole: "physician",
+    roles: [roles.PHYSICIAN, roles.RECEPTIONIST], // Multi-role example
+    defaultRole: roles.PHYSICIAN,
     organizationId: TEST_ORGANIZATIONS[1].id,
   },
 
@@ -95,22 +96,22 @@ const TEST_USERS: TestUser[] = [
     email: "admin@test.com",
     password: "TestPassword123!",
     name: "Admin Manual",
-    roles: ["physician", "org_admin"], // Multi-role: physician + admin
+    roles: [roles.PHYSICIAN, roles.ORG_ADMIN], // Multi-role: physician + admin
     organizationId: TEST_ORGANIZATIONS[2].id,
   },
   {
     email: "physician@test.com",
     password: "TestPassword123!",
     name: "Dr. Physician Manual",
-    roles: ["physician", "receptionist"], // Multi-role user for testing
-    defaultRole: "physician",
+    roles: [roles.PHYSICIAN, roles.RECEPTIONIST], // Multi-role user for testing
+    defaultRole: roles.PHYSICIAN,
     organizationId: TEST_ORGANIZATIONS[2].id,
   },
   {
     email: "receptionist@test.com",
     password: "TestPassword123!",
     name: "Reception Manual",
-    roles: ["receptionist"],
+    roles: [roles.RECEPTIONIST],
     organizationId: TEST_ORGANIZATIONS[2].id,
   },
 
@@ -209,7 +210,7 @@ async function seedAllTestUsers() {
               JSON.stringify(userData.roles), // roles as JSON array
               userData.organizationId, // organizationId
               true, // isActive
-              signupResult.user.id
+              signupResult.user.id,
             ]
           );
           console.log(`   ✅ User fields updated for ${userData.email}`);
@@ -323,10 +324,10 @@ async function cleanupAllTestUsers() {
 
     // Also clean up test organizations
     const orgResult = await client.query(
-      'DELETE FROM organization WHERE id = ANY($1) RETURNING name',
-      [TEST_ORGANIZATIONS.map(org => org.id)]
+      "DELETE FROM organization WHERE id = ANY($1) RETURNING name",
+      [TEST_ORGANIZATIONS.map((org) => org.id)]
     );
-    
+
     console.log(`✅ Deleted ${orgResult.rows.length} test organizations`);
     orgResult.rows.forEach((row) => console.log(`   - ${row.name}`));
   } catch (error) {

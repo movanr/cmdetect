@@ -1,5 +1,5 @@
 import { createTestClients } from "../setup/graphql-client";
-import { TestDataIds } from "../setup/test-data";
+import { TestDataIds } from "@cmdetect/test-utils";
 
 describe("Role-Based Access Control", () => {
   let clients: Awaited<ReturnType<typeof createTestClients>>;

@@ -1,5 +1,5 @@
 import { createAuthenticatedClient, isAuthServerAvailable } from './setup/auth-server';
-import { TestDataIds, TestUsers } from './setup/test-data';
+import { TestDataIds, TestUsers } from '@cmdetect/test-utils';
 
 describe('Auth Server Integration', () => {
   beforeAll(async () => {

@@ -6,6 +6,10 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  moduleNameMapper: {
+    '^@cmdetect/config$': '<rootDir>/packages/config/src/index.ts',
+    '^@cmdetect/test-utils$': '<rootDir>/packages/test-utils/src/index.ts',
+  },
   setupFilesAfterEnv: ['<rootDir>/tests/setup/jest.setup.ts'],
   collectCoverageFrom: [
     'tests/**/*.ts',

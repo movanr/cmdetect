@@ -87,6 +87,24 @@ app.get("/health", (_, res) => {
   res.json({ status: "OK", service: "hasura-auth-server" });
 });
 
+// Global error handler for Express middleware errors (including JSON parsing)
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Handle JSON parsing errors from express.json() middleware
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({
+      error: "Invalid JSON format in request body"
+    });
+  }
+
+  // Log unexpected errors
+  console.error('Unexpected server error:', err);
+
+  // Send generic error response
+  res.status(500).json({
+    error: "Internal server error"
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Auth server running on port ${PORT}`);
 });

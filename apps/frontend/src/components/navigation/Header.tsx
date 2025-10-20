@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import logoSvg from "../../assets/logo.svg";
+import { roles } from "@cmdetect/config";
 
 export function Header() {
   const navigate = useNavigate();
@@ -29,14 +30,14 @@ export function Header() {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const roleLabels: Record<UserRole, string> = {
-    org_admin: t.roles.org_admin.title,
-    physician: t.roles.physician.title,
-    receptionist: t.roles.receptionist.title,
-    unverified: t.roles.unverified.title,
+    [roles.ORG_ADMIN]: t.roles[roles.ORG_ADMIN].title,
+    [roles.PHYSICIAN]: t.roles[roles.PHYSICIAN].title,
+    [roles.RECEPTIONIST]: t.roles[roles.RECEPTIONIST].title,
+    [roles.UNVERIFIED]: t.roles[roles.UNVERIFIED].title,
   };
 
   // Roles that require password confirmation
-  const privilegedRoles: UserRole[] = ["org_admin"];
+  const privilegedRoles: UserRole[] = [roles.ORG_ADMIN];
 
   const handleSignOut = async () => {
     try {
@@ -214,7 +215,7 @@ export function Header() {
                 <DropdownMenuSeparator />
 
                 {/* Team - only show for org_admin */}
-                {activeRole === "org_admin" && (
+                {activeRole === roles.ORG_ADMIN && (
                   <DropdownMenuItem onClick={() => navigate({ to: "/team" })}>
                     <Users className="h-4 w-4 mr-2" />
                     <span>{t.nav.team}</span>

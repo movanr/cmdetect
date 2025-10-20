@@ -13,8 +13,7 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 - **apps/auth-server**: Better Auth v1.3.4 authentication service with JWT integration and action handlers
 - **apps/frontend**: React 19 + TanStack Router v1.131 + TanStack Query v5.83 + Vite 6.1 + Tailwind CSS v4.1
 - **apps/hasura**: Hasura GraphQL Engine v2.46.0 with PostgreSQL, metadata, and migrations
-- **packages/config**: Shared configuration and validation schemas
-- **packages/database**: Database utilities and shared database logic
+- **packages/config**: Shared configuration, role constants, and validation schemas (TypeScript)
 - **tests/**: Integration tests focusing on Hasura permissions and organization isolation
 
 ## Development Commands
@@ -250,6 +249,7 @@ All test users use password: `TestPassword123!`
 - **GraphQL Generated Types**: `apps/frontend/src/graphql/`
 - **Crypto Module**: `apps/frontend/src/lib/crypto/` (encryption utilities)
 - **Action Handlers**: `apps/auth-server/src/routes/actions/` (Hasura action endpoints)
+- **Shared Config Package**: `packages/config/src/index.ts` (role constants, env schemas, shared types)
 
 ## Best practices
 

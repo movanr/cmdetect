@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRole } from "../../contexts/RoleContext";
 import { AlertTriangle } from "lucide-react";
+import { roles } from "@cmdetect/config";
 
 export const Route = createFileRoute("/settings/organization")({
   component: OrganizationSettings,
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/settings/organization")({
 function OrganizationSettings() {
   const { hasRole } = useRole();
 
-  if (!hasRole("org_admin")) {
+  if (!hasRole(roles.ORG_ADMIN)) {
     return (
       <Card className="border-amber-200 bg-amber-50/50">
         <CardContent className="p-6">

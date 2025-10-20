@@ -1,12 +1,13 @@
 import { createTestClients } from "./setup/graphql-client";
-import { TestDataIds, TestUsers } from "./setup/test-data";
+import { TestDataIds, TestUsers } from "@cmdetect/test-utils";
+import { roles } from "@cmdetect/config";
 
 describe("Test Setup Verification", () => {
   it("should have test accounts configured", () => {
     expect(TestUsers.org1Admin.email).toBe("admin1@test.com");
-    expect(TestUsers.org1Admin.roles[0]).toBe("org_admin");
+    expect(TestUsers.org1Admin.roles[0]).toBe(roles.ORG_ADMIN);
     expect(TestUsers.org1Physician.email).toBe("doctor1@test.com");
-    expect(TestUsers.org1Physician.roles[0]).toBe("physician");
+    expect(TestUsers.org1Physician.roles[0]).toBe(roles.PHYSICIAN);
   });
 
   it("should create authenticated GraphQL clients", async () => {

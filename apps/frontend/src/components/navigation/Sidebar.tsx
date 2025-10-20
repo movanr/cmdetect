@@ -3,6 +3,7 @@ import { useRole } from "../../contexts/RoleContext";
 import { getTranslations } from "../../config/i18n";
 import { cn } from "@/lib/utils";
 import { FolderOpen, Mail } from "lucide-react";
+import { roles } from "@cmdetect/config";
 
 interface NavItem {
   label: string;
@@ -22,7 +23,7 @@ export function Sidebar() {
       label: t.nav.cases,
       href: "/cases",
       icon: FolderOpen,
-      roles: ["org_admin", "physician"],
+      roles: [roles.ORG_ADMIN, roles.PHYSICIAN],
     },
     {
       label: t.nav.invites,

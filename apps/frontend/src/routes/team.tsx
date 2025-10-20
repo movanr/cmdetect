@@ -6,6 +6,7 @@ import { getTranslations } from "../config/i18n";
 import { useRole } from "../contexts/RoleContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
+import { roles } from "@cmdetect/config";
 
 export const Route = createFileRoute("/team")({
   component: TeamPage,
@@ -16,7 +17,7 @@ function TeamPage() {
   const { hasRole } = useRole();
 
   // Only org_admin can access this page
-  if (!hasRole("org_admin")) {
+  if (!hasRole(roles.ORG_ADMIN)) {
     return (
       <AppLayout>
         <Card className="border-amber-200 bg-amber-50/50">
@@ -24,7 +25,9 @@ function TeamPage() {
             <div className="flex items-start space-x-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
               <div>
-                <h3 className="font-medium text-amber-900">{t.accessControl.accessDenied}</h3>
+                <h3 className="font-medium text-amber-900">
+                  {t.accessControl.accessDenied}
+                </h3>
                 <p className="text-sm text-amber-700 mt-1">
                   {t.accessControl.adminPrivilegesRequired}
                 </p>

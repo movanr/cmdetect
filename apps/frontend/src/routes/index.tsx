@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import logoSvg from "../assets/logo.svg";
 import { getTranslations } from "../config/i18n";
+import { roles } from "@cmdetect/config";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -22,7 +23,7 @@ function App() {
   useEffect(() => {
     if (session?.user && availableRoles.length > 0 && activeRole) {
       // Redirect based on active role
-      if (activeRole === "receptionist") {
+      if (activeRole === roles.RECEPTIONIST) {
         navigate({ to: "/invites" });
       } else {
         navigate({ to: "/cases" });

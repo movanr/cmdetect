@@ -4,7 +4,7 @@ import { GraphQLClient } from "graphql-request";
 const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || "http://localhost:3001";
 
 // Import centralized test data
-import { TestUsers } from "./test-data";
+import { TestUsers } from "@cmdetect/test-utils";
 
 interface CachedToken {
   token: string;

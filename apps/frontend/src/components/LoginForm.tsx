@@ -16,24 +16,25 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import logoSvg from "../assets/logo.svg";
+import { roles } from "@cmdetect/config";
 
 const testAccounts = [
   // Organization 3 - Manual Testing (Use these for frontend testing!)
-  { email: "admin@test.com", role: "org_admin", label: "Admin", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
-  { email: "physician@test.com", role: "physician", label: "Physician (Multi-role)", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
-  { email: "receptionist@test.com", role: "receptionist", label: "Receptionist", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
+  { email: "admin@test.com", role: roles.ORG_ADMIN, label: "Admin", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
+  { email: "physician@test.com", role: roles.PHYSICIAN, label: "Physician (Multi-role)", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
+  { email: "receptionist@test.com", role: roles.RECEPTIONIST, label: "Receptionist", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
 
   // Organization 1 - Integration Tests Only (DO NOT use for manual testing)
-  { email: "admin1@test.com", role: "org_admin", label: "Test Admin One", password: "testPassword123!", org: "Org 1 - Tests Only" },
-  { email: "doctor1@test.com", role: "physician", label: "Dr. One", password: "testPassword123!", org: "Org 1 - Tests Only" },
-  { email: "reception1@test.com", role: "receptionist", label: "Reception One", password: "testPassword123!", org: "Org 1 - Tests Only" },
+  { email: "admin1@test.com", role: roles.ORG_ADMIN, label: "Test Admin One", password: "testPassword123!", org: "Org 1 - Tests Only" },
+  { email: "doctor1@test.com", role: roles.PHYSICIAN, label: "Dr. One", password: "testPassword123!", org: "Org 1 - Tests Only" },
+  { email: "reception1@test.com", role: roles.RECEPTIONIST, label: "Reception One", password: "testPassword123!", org: "Org 1 - Tests Only" },
 
   // Organization 2 - Integration Tests Only (DO NOT use for manual testing)
-  { email: "admin2@test.com", role: "org_admin", label: "Test Admin Two", password: "testPassword123!", org: "Org 2 - Tests Only" },
-  { email: "doctor2@test.com", role: "physician", label: "Dr. Two (Multi-role)", password: "testPassword123!", org: "Org 2 - Tests Only" },
+  { email: "admin2@test.com", role: roles.ORG_ADMIN, label: "Test Admin Two", password: "testPassword123!", org: "Org 2 - Tests Only" },
+  { email: "doctor2@test.com", role: roles.PHYSICIAN, label: "Dr. Two (Multi-role)", password: "testPassword123!", org: "Org 2 - Tests Only" },
 
   // Unverified user
-  { email: "unverified@test.com", role: "unverified", label: "Unverified", password: "testPassword123!", org: "No Org" },
+  { email: "unverified@test.com", role: roles.UNVERIFIED, label: "Unverified", password: "testPassword123!", org: "No Org" },
 ];
 
 export function LoginForm() {

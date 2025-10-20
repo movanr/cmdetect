@@ -123,6 +123,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@cmdetect/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.11.0)
@@ -391,10 +394,16 @@ importers:
         version: 3.2.4(@types/node@24.3.1)(jsdom@26.1.0)(tsx@4.20.5)
 
   packages/config:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
+  packages/test-utils:
     dependencies:
-      zod:
-        specifier: ^4.1.7
-        version: 4.1.7
+      '@cmdetect/config':
+        specifier: workspace:*
+        version: link:../config
     devDependencies:
       typescript:
         specifier: ^5.9.2

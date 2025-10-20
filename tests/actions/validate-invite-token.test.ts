@@ -6,7 +6,7 @@
 import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
 import { isAuthServerAvailable } from "../setup/auth-server";
 import { createAdminClient } from "../setup/graphql-client";
-import { TestDataIds } from "../setup/test-data";
+import { TestDataIds } from "@cmdetect/test-utils";
 
 describe("Validate Invite Token Action Handler", () => {
   const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || "http://localhost:3001";

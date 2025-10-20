@@ -3,9 +3,16 @@
  * Single source of truth for all test entities
  */
 
+import { roles } from "@cmdetect/config";
+
 // =============================================================================
 // TYPE DEFINITIONS
 // =============================================================================
+
+export type TestRole =
+  | typeof roles.ORG_ADMIN
+  | typeof roles.PHYSICIAN
+  | typeof roles.RECEPTIONIST;
 
 export interface TestUser {
   // Auth server credentials
@@ -15,8 +22,8 @@ export interface TestUser {
   // Hasura user data
   userId: string;
   organizationId: string;
-  roles: ("org_admin" | "physician" | "receptionist")[];
-  defaultRole?: "org_admin" | "physician" | "receptionist";
+  roles: TestRole[];
+  defaultRole?: TestRole;
   firstName: string;
   lastName: string;
   isActive: boolean;
@@ -64,10 +71,10 @@ export const TestUsers: Record<string, TestUser> = {
   org1Admin: {
     email: "admin1@test.com",
     password: "testPassword123!",
-    roles: ["org_admin"],
-    defaultRole: "org_admin",
+    roles: [roles.ORG_ADMIN],
+    defaultRole: roles.ORG_ADMIN,
     organizationId: TestOrganizations.org1.id,
-    userId: "4gLI1mnAaxP91SdpIDWmPf8RDKou5vHC",
+    userId: "8zfoUXwLajI1gI0L4BAW6os3y8fJzwXL",
     firstName: "Admin",
     lastName: "One",
     isActive: true,
@@ -77,10 +84,10 @@ export const TestUsers: Record<string, TestUser> = {
   org1Physician: {
     email: "doctor1@test.com",
     password: "testPassword123!",
-    roles: ["physician"],
-    defaultRole: "physician",
+    roles: [roles.PHYSICIAN],
+    defaultRole: roles.PHYSICIAN,
     organizationId: TestOrganizations.org1.id,
-    userId: "zm8ZjF4Cg4MXLV0Zr8OrnwLBR6uk3WFH",
+    userId: "q2Lo5gunCw5gu0qrBR14qKoPZjDzfeiB",
     firstName: "Doctor",
     lastName: "One",
     isActive: true,
@@ -90,10 +97,10 @@ export const TestUsers: Record<string, TestUser> = {
   org1Receptionist: {
     email: "reception1@test.com",
     password: "testPassword123!",
-    roles: ["receptionist"],
-    defaultRole: "receptionist",
+    roles: [roles.RECEPTIONIST],
+    defaultRole: roles.RECEPTIONIST,
     organizationId: TestOrganizations.org1.id,
-    userId: "5QPtVmZcr5BP8PIiC857t9vY8IvKw5Jm",
+    userId: "6isMAY5VuGQ4oJsyFctqyeQRk900Kaq1",
     firstName: "Reception",
     lastName: "One",
     isActive: true,
@@ -103,10 +110,10 @@ export const TestUsers: Record<string, TestUser> = {
   org2Admin: {
     email: "admin2@test.com",
     password: "testPassword123!",
-    roles: ["org_admin"],
-    defaultRole: "org_admin",
+    roles: [roles.ORG_ADMIN],
+    defaultRole: roles.ORG_ADMIN,
     organizationId: TestOrganizations.org2.id,
-    userId: "tTCZiLMVjxYP5Wrez4pLdUxmkTN5eg9G",
+    userId: "gNPfYwVrE078HxDo9CQwFxbTIzm3uOmq",
     firstName: "Admin",
     lastName: "Two",
     isActive: true,
@@ -116,17 +123,16 @@ export const TestUsers: Record<string, TestUser> = {
   org2Physician: {
     email: "doctor2@test.com",
     password: "testPassword123!",
-    roles: ["physician", "receptionist"],
-    defaultRole: "physician",
+    roles: [roles.PHYSICIAN, roles.RECEPTIONIST],
+    defaultRole: roles.PHYSICIAN,
     organizationId: TestOrganizations.org2.id,
-    userId: "6QKaX1K6pEqILvHwGVkhwN0HICMqDKFW",
+    userId: "ZUS4p8gKfWkGtFsAFK7rrlyJhMB0vU2q",
     firstName: "Doctor",
     lastName: "Two",
     isActive: true,
     displayName: "Dr. Two (Org 2)",
   },
 };
-
 
 // =============================================================================
 // CONVENIENCE EXPORTS
@@ -164,7 +170,6 @@ export function getUsersForOrganization(
   );
 }
 
-
 /**
  * Get user by email
  */
@@ -175,8 +180,6 @@ export function getUserByEmail(email: string): TestUser | undefined {
 /**
  * Get users by role
  */
-export function getUsersByRole(
-  role: "org_admin" | "physician" | "receptionist"
-): TestUser[] {
+export function getUsersByRole(role: TestRole): TestUser[] {
   return Object.values(TestUsers).filter((user) => user.roles.includes(role));
 }

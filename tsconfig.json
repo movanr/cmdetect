@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@cmdetect/config": ["packages/config/src/index.ts"],
+      "@cmdetect/test-utils": ["packages/test-utils/src/index.ts"]
+    }
+  },
+  "include": ["tests/**/*"],
+  "exclude": ["node_modules", "**/dist", "**/node_modules"]
+}

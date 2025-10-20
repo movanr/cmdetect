@@ -4,6 +4,7 @@ import { getTranslations } from "../config/i18n";
 import { cn } from "@/lib/utils";
 import { User, Lock, Building } from "lucide-react";
 import { useRole } from "../contexts/RoleContext";
+import { roles } from "@cmdetect/config";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsLayout,
@@ -28,7 +29,7 @@ function SettingsLayout() {
       label: t.settingsSections.organization,
       href: "/settings/organization",
       icon: Building,
-      roles: ["org_admin"],
+      roles: [roles.ORG_ADMIN],
     },
   ];
 

@@ -6,21 +6,23 @@
  * the same structure as `en`.
  */
 
+import { roles } from "@cmdetect/config";
+
 export type Language = "en" | "de";
 
 export interface I18nStrings {
   // Roles
   roles: {
-    org_admin: {
+    [roles.ORG_ADMIN]: {
       title: string;
     };
-    physician: {
+    [roles.PHYSICIAN]: {
       title: string;
     };
-    receptionist: {
+    [roles.RECEPTIONIST]: {
       title: string;
     };
-    unverified: {
+    [roles.UNVERIFIED]: {
       title: string;
     };
   };
@@ -224,16 +226,16 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     roles: {
-      org_admin: {
+      [roles.ORG_ADMIN]: {
         title: "Organization Admin",
       },
-      physician: {
+      [roles.PHYSICIAN]: {
         title: "Practitioner",
       },
-      receptionist: {
+      [roles.RECEPTIONIST]: {
         title: "Receptionist",
       },
-      unverified: {
+      [roles.UNVERIFIED]: {
         title: "Unverified",
       },
     },
@@ -412,16 +414,16 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     roles: {
-      org_admin: {
+      [roles.ORG_ADMIN]: {
         title: "Administrator",
       },
-      physician: {
+      [roles.PHYSICIAN]: {
         title: "Behandler",
       },
-      receptionist: {
+      [roles.RECEPTIONIST]: {
         title: "Rezeption",
       },
-      unverified: {
+      [roles.UNVERIFIED]: {
         title: "Nicht verifiziert",
       },
     },

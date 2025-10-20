@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
+import { roles, roleHierarchy } from "@cmdetect/config";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -33,10 +34,9 @@ export const auth = betterAuth({
         definePayload: ({ user }) => {
           // Validate roles array and apply hierarchy for authenticated users
           // Clinical roles (physician, receptionist) have priority over admin role
-          const roleHierarchy = ["physician", "receptionist", "org_admin"];
           const userRoles = (user.roles as string[]) || [];
           const validRoles = userRoles.filter((role) =>
-            roleHierarchy.includes(role)
+            roleHierarchy.includes(role as any)
           );
 
           if (validRoles.length > 0 && user.organizationId) {
@@ -65,8 +65,8 @@ export const auth = betterAuth({
             return {
               ...user,
               "https://hasura.io/jwt/claims": {
-                "x-hasura-default-role": "unverified",
-                "x-hasura-allowed-roles": ["unverified"],
+                "x-hasura-default-role": roles.UNVERIFIED,
+                "x-hasura-allowed-roles": [roles.UNVERIFIED],
                 "x-hasura-user-id": user.id,
               },
             };

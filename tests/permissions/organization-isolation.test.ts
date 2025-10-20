@@ -1,5 +1,5 @@
 import { createTestClients } from "../setup/graphql-client";
-import { TestDataIds } from "../setup/test-data";
+import { TestDataIds } from "@cmdetect/test-utils";
 
 describe("Organization Isolation", () => {
   let clients: Awaited<ReturnType<typeof createTestClients>>;

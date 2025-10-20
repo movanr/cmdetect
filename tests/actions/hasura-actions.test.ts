@@ -5,7 +5,7 @@
 
 import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
 import { createAdminClient } from "../setup/graphql-client";
-import { TestDataIds } from "../setup/test-data";
+import { TestDataIds } from "@cmdetect/test-utils";
 
 describe("Hasura Actions Integration", () => {
   let patientRecordId: string;
