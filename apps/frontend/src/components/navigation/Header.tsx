@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 import { useSession, signOut } from "../../lib/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { LogOut, Shield, ChevronDown } from "lucide-react";
+import { LogOut, Shield, ChevronDown, Users, Settings } from "lucide-react";
 import { getTranslations, interpolate } from "../../config/i18n";
 import { useRole, type UserRole } from "../../contexts/RoleContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import logoSvg from "../../assets/logo.svg";
 
 export function Header() {
   const navigate = useNavigate();
@@ -171,11 +172,18 @@ export function Header() {
 
       <header className="sticky top-0 z-40 border-b bg-background">
         <div className="flex h-16 items-center justify-between px-4 lg:px-8">
-          {/* Left side - Mobile menu button (TODO) */}
-          <div className="lg:hidden">{/* Mobile menu button */}</div>
+          {/* Left side - Logo and Brand */}
+          <Link to="/cases" className="flex items-center space-x-3">
+            <img
+              src={logoSvg}
+              className="h-8 w-8"
+              alt={`${t.nav.appName} logo`}
+            />
+            <span className="text-xl font-semibold">{t.nav.appName}</span>
+          </Link>
 
           {/* Right side - User menu */}
-          <div className="ml-auto flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             {/* Language switcher - TODO */}
 
             {/* Notifications - TODO */}
@@ -202,6 +210,22 @@ export function Header() {
                     </p>
                   </div>
                 </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                {/* Team - only show for org_admin */}
+                {activeRole === "org_admin" && (
+                  <DropdownMenuItem onClick={() => navigate({ to: "/team" })}>
+                    <Users className="h-4 w-4 mr-2" />
+                    <span>{t.nav.team}</span>
+                  </DropdownMenuItem>
+                )}
+
+                {/* Settings */}
+                <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  <span>{t.nav.settings}</span>
+                </DropdownMenuItem>
 
                 {/* Role Switcher - only show if user has multiple roles */}
                 {availableRoles.length > 1 && (

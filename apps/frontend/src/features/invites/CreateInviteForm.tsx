@@ -23,7 +23,7 @@ export function CreateInviteForm() {
 
     createMutation.mutate(clinicInternalId.trim(), {
       onSuccess: () => {
-        navigate({ to: "/invites" });
+        navigate({ to: "/cases" });
       },
       onError: (err) => {
         setError(err instanceof Error ? err.message : "Failed to create invite");
@@ -32,7 +32,7 @@ export function CreateInviteForm() {
   };
 
   const handleCancel = () => {
-    navigate({ to: "/invites" });
+    navigate({ to: "/cases" });
   };
 
   return (

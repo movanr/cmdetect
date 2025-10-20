@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useSession } from "../../lib/auth";
-import { Sidebar } from "../navigation/Sidebar";
 import { Header } from "../navigation/Header";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,19 +20,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar - Fixed on desktop */}
-      <Sidebar />
+      {/* Header - Sticky */}
+      <Header />
 
-      {/* Main content area with offset for sidebar on desktop */}
-      <div className="lg:pl-64">
-        {/* Header - Sticky */}
-        <Header />
-
-        {/* Page content */}
-        <main className="p-4 lg:p-8">
-          {children}
-        </main>
-      </div>
+      {/* Page content */}
+      <main className="p-4 lg:p-8">
+        {children}
+      </main>
     </div>
   );
 }

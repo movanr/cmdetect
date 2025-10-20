@@ -22,15 +22,10 @@ function App() {
   useEffect(() => {
     if (session?.user && availableRoles.length > 0 && activeRole) {
       // Redirect based on active role
-      if (activeRole === "physician") {
-        navigate({ to: "/cases" });
-      } else if (activeRole === "receptionist") {
+      if (activeRole === "receptionist") {
         navigate({ to: "/invites" });
-      } else if (activeRole === "org_admin") {
-        navigate({ to: "/cases" });
       } else {
-        // Fallback to invites for other roles
-        navigate({ to: "/invites" });
+        navigate({ to: "/cases" });
       }
     }
   }, [session, availableRoles, activeRole, navigate]);

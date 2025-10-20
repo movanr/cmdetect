@@ -23,6 +23,8 @@ import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as SettingsOrganizationRouteImport } from './routes/settings/organization'
 import { Route as InvitesNewRouteImport } from './routes/invites_.new'
 import { Route as CasesIdRouteImport } from './routes/cases_.$id'
+import { Route as CasesIdIndexRouteImport } from './routes/cases_.$id.index'
+import { Route as CasesIdAnamnesisRouteImport } from './routes/cases_.$id.anamnesis'
 
 const UnverifiedRoute = UnverifiedRouteImport.update({
   id: '/unverified',
@@ -94,6 +96,16 @@ const CasesIdRoute = CasesIdRouteImport.update({
   path: '/cases/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CasesIdIndexRoute = CasesIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CasesIdRoute,
+} as any)
+const CasesIdAnamnesisRoute = CasesIdAnamnesisRouteImport.update({
+  id: '/anamnesis',
+  path: '/anamnesis',
+  getParentRoute: () => CasesIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -105,11 +117,13 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
-  '/cases/$id': typeof CasesIdRoute
+  '/cases/$id': typeof CasesIdRouteWithChildren
   '/invites/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/security': typeof SettingsSecurityRoute
+  '/cases/$id/anamnesis': typeof CasesIdAnamnesisRoute
+  '/cases/$id/': typeof CasesIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -121,11 +135,12 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
-  '/cases/$id': typeof CasesIdRoute
   '/invites/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/security': typeof SettingsSecurityRoute
+  '/cases/$id/anamnesis': typeof CasesIdAnamnesisRoute
+  '/cases/$id': typeof CasesIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,11 +153,13 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/team': typeof TeamRoute
   '/unverified': typeof UnverifiedRoute
-  '/cases_/$id': typeof CasesIdRoute
+  '/cases_/$id': typeof CasesIdRouteWithChildren
   '/invites_/new': typeof InvitesNewRoute
   '/settings/organization': typeof SettingsOrganizationRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/settings/security': typeof SettingsSecurityRoute
+  '/cases_/$id/anamnesis': typeof CasesIdAnamnesisRoute
+  '/cases_/$id/': typeof CasesIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +178,8 @@ export interface FileRouteTypes {
     | '/settings/organization'
     | '/settings/profile'
     | '/settings/security'
+    | '/cases/$id/anamnesis'
+    | '/cases/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,11 +191,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/unverified'
-    | '/cases/$id'
     | '/invites/new'
     | '/settings/organization'
     | '/settings/profile'
     | '/settings/security'
+    | '/cases/$id/anamnesis'
+    | '/cases/$id'
   id:
     | '__root__'
     | '/'
@@ -193,6 +213,8 @@ export interface FileRouteTypes {
     | '/settings/organization'
     | '/settings/profile'
     | '/settings/security'
+    | '/cases_/$id/anamnesis'
+    | '/cases_/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -205,7 +227,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRouteWithChildren
   TeamRoute: typeof TeamRoute
   UnverifiedRoute: typeof UnverifiedRoute
-  CasesIdRoute: typeof CasesIdRoute
+  CasesIdRoute: typeof CasesIdRouteWithChildren
   InvitesNewRoute: typeof InvitesNewRoute
 }
 
@@ -309,6 +331,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CasesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cases_/$id/': {
+      id: '/cases_/$id/'
+      path: '/'
+      fullPath: '/cases/$id/'
+      preLoaderRoute: typeof CasesIdIndexRouteImport
+      parentRoute: typeof CasesIdRoute
+    }
+    '/cases_/$id/anamnesis': {
+      id: '/cases_/$id/anamnesis'
+      path: '/anamnesis'
+      fullPath: '/cases/$id/anamnesis'
+      preLoaderRoute: typeof CasesIdAnamnesisRouteImport
+      parentRoute: typeof CasesIdRoute
+    }
   }
 }
 
@@ -328,6 +364,19 @@ const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
   SettingsRouteChildren,
 )
 
+interface CasesIdRouteChildren {
+  CasesIdAnamnesisRoute: typeof CasesIdAnamnesisRoute
+  CasesIdIndexRoute: typeof CasesIdIndexRoute
+}
+
+const CasesIdRouteChildren: CasesIdRouteChildren = {
+  CasesIdAnamnesisRoute: CasesIdAnamnesisRoute,
+  CasesIdIndexRoute: CasesIdIndexRoute,
+}
+
+const CasesIdRouteWithChildren =
+  CasesIdRoute._addFileChildren(CasesIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CasesRoute: CasesRoute,
@@ -338,7 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRouteWithChildren,
   TeamRoute: TeamRoute,
   UnverifiedRoute: UnverifiedRoute,
-  CasesIdRoute: CasesIdRoute,
+  CasesIdRoute: CasesIdRouteWithChildren,
   InvitesNewRoute: InvitesNewRoute,
 }
 export const routeTree = rootRouteImport

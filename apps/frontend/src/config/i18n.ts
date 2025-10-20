@@ -32,6 +32,7 @@ export interface I18nStrings {
     switchRole: string;
     invites: string;
     cases: string;
+    patients: string;
     team: string;
     settings: string;
     admin: string;
@@ -177,6 +178,7 @@ export interface I18nStrings {
   pageDescriptions: {
     cases: string;
     invites: string;
+    patients: string;
     team: string;
     settings: string;
   };
@@ -193,6 +195,18 @@ export interface I18nStrings {
     accessDenied: string;
     adminPrivilegesRequired: string;
   };
+
+  // Case workflow steps
+  caseSteps: {
+    caseLabel: string;
+    patientIdLabel: string;
+    closeCase: string;
+    anamnesis: string;
+    examination: string;
+    evaluation: string;
+    documentation: string;
+    export: string;
+  };
 }
 
 export const translations: Record<Language, I18nStrings> = {
@@ -203,6 +217,7 @@ export const translations: Record<Language, I18nStrings> = {
       switchRole: "Switch Role",
       invites: "Invites",
       cases: "Cases",
+      patients: "Patients",
       team: "Team",
       settings: "Settings",
       admin: "Admin",
@@ -355,6 +370,7 @@ export const translations: Record<Language, I18nStrings> = {
       cases: "Review patient submissions and manage cases",
       invites: "Manage patient invitations and track their status",
       team: "Manage team members and their roles",
+      patients: "Manage patient cases and invites",
       settings: "Manage your account settings and preferences",
     },
 
@@ -369,6 +385,17 @@ export const translations: Record<Language, I18nStrings> = {
       adminPrivilegesRequired:
         "You need administrator privileges to access team management.",
     },
+
+    caseSteps: {
+      caseLabel: "Case",
+      patientIdLabel: "Patient ID",
+      closeCase: "Close Case",
+      anamnesis: "Anamnesis",
+      examination: "Examination",
+      evaluation: "Evaluation",
+      documentation: "Documentation",
+      export: "Export",
+    },
   },
 
   de: {
@@ -378,6 +405,7 @@ export const translations: Record<Language, I18nStrings> = {
       switchRole: "Rolle wechseln",
       invites: "Einladungen",
       cases: "Fälle",
+      patients: "Patienten",
       team: "Team",
       settings: "Einstellungen",
       admin: "Admin",
@@ -532,6 +560,7 @@ export const translations: Record<Language, I18nStrings> = {
       cases: "Patientenfälle einsehen und verwalten",
       invites: "Patienteneinladungen verwalten und Status verfolgen",
       team: "Teammitglieder und ihre Rollen verwalten",
+      patients: "Patientenfälle und Einladungen verwalten",
       settings: "Kontoeinstellungen und Präferenzen verwalten",
     },
 
@@ -545,6 +574,17 @@ export const translations: Record<Language, I18nStrings> = {
       accessDenied: "Zugriff verweigert",
       adminPrivilegesRequired:
         "Sie benötigen Administratorrechte, um auf die Teamverwaltung zuzugreifen.",
+    },
+
+    caseSteps: {
+      caseLabel: "Fall",
+      patientIdLabel: "Patienten-ID",
+      closeCase: "Fall schließen",
+      anamnesis: "Anamnese",
+      examination: "Untersuchung",
+      evaluation: "Bewertung",
+      documentation: "Dokumentation",
+      export: "Export",
     },
   },
 };

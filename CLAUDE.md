@@ -198,7 +198,7 @@ pnpm test tests/permissions/specific-test.test.ts
 
 **Hybrid Encryption Strategy:**
 
-- **Organization Level**: ECDSA P-256 key pairs for each organization  
+- **Organization Level**: ECDSA P-256 key pairs for each organization
 - **Data Level**: ECIES (ECDH + AES-256-GCM) for encrypting patient PII
 - **Key Storage**: Organization public keys in database, private keys via BIP39 mnemonic
 - **Browser Implementation**: Noble Curves library (@noble/curves, @scure/bip39)
@@ -253,4 +253,4 @@ All test users use password: `TestPassword123!`
 
 ## Best practices
 
-when implementing a solution, explicitly verify reasonableness of your solution as you implement pieces of the solution
+- when implementing a solution, explicitly verify reasonableness of your solution as you implement pieces of the solution

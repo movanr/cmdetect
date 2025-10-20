@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from '@tanstack/react-router';
-import { useKeySetup } from '../hooks/useKeySetup';
-import { LoadingStep } from '../components/steps/LoadingStep';
+import React, { useEffect } from "react";
+import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useKeySetup } from "../hooks/useKeySetup";
+import { LoadingStep } from "./steps/LoadingStep";
 
 interface KeySetupGuardProps {
   children: React.ReactNode;
@@ -13,17 +13,18 @@ export function KeySetupGuard({ children }: KeySetupGuardProps) {
   const { state } = useKeySetup();
 
   useEffect(() => {
-    const needsSetup = state.type !== 'setup-complete' && state.type !== 'loading';
+    const needsSetup =
+      state.type !== "setup-complete" && state.type !== "loading";
 
-    if (needsSetup && location.pathname !== '/key-setup') {
+    if (needsSetup && location.pathname !== "/key-setup") {
       // Use setTimeout to defer navigation until after render
       setTimeout(() => {
-        navigate({ to: '/key-setup' });
+        navigate({ to: "/key-setup" });
       }, 0);
     }
   }, [state.type, location.pathname, navigate]);
 
-  if (state.type === 'loading') {
+  if (state.type === "loading") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
@@ -33,7 +34,7 @@ export function KeySetupGuard({ children }: KeySetupGuardProps) {
     );
   }
 
-  if (state.type === 'setup-complete') {
+  if (state.type === "setup-complete") {
     return <>{children}</>;
   }
 
