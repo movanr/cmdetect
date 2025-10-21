@@ -41,6 +41,13 @@ Thumbs.db
 # Testing
 coverage/
 
+# GraphQL Code Generator outputs
+# Keep execute.ts and index.ts (custom code), ignore generated files
+apps/*/src/graphql/gql.ts
+apps/*/src/graphql/graphql.ts
+apps/*/src/graphql/fragment-masking.ts
+apps/*/schema.graphql
+
 # Database
 *.db
 *.sqlite

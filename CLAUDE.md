@@ -38,6 +38,7 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 - `pnpm build:deps` - Build only shared packages (run before first dev)
 - `pnpm type-check` - Type check all packages
 - `pnpm lint` - Run linting across all packages
+- `pnpm codegen` - Generate GraphQL types from Hasura schema (both frontends)
 - `pnpm test` - Run integration tests (requires running Hasura/PostgreSQL)
 - `pnpm test:permissions` - Run specific permission tests
 - `pnpm test:watch` - Run tests in watch mode
@@ -112,9 +113,33 @@ The system consists of four main services:
 
 ### Code Generation
 
-- `pnpm --filter @cmdetect/frontend codegen` - Generate types from Hasura schema
-- GraphQL schema auto-downloaded from running Hasura instance
-- Generated types in `apps/frontend/src/graphql/`
+GraphQL types are automatically generated from the Hasura schema using GraphQL Code Generator:
+
+- `pnpm codegen` - Generate types for all frontends (practitioner + patient)
+- `pnpm --filter @cmdetect/frontend codegen` - Generate types for practitioner frontend only
+- `pnpm --filter @cmdetect/patient-frontend codegen` - Generate types for patient frontend only
+
+**When to run codegen:**
+- After adding/modifying GraphQL queries or mutations in frontend code
+- After changing Hasura schema (tables, permissions, relationships)
+- After pulling changes that include Hasura metadata updates
+- Requires running Hasura instance (schema is fetched from `http://localhost:8080/v1/graphql`)
+
+**Generated files (NOT tracked in git):**
+- `apps/frontend/src/graphql/gql.ts` - Generated query map
+- `apps/frontend/src/graphql/graphql.ts` - Generated TypeScript types (121KB)
+- `apps/frontend/src/graphql/fragment-masking.ts` - Generated fragment utilities
+- `apps/patient-frontend/src/graphql/gql.ts` - Generated query map
+- `apps/patient-frontend/src/graphql/graphql.ts` - Generated TypeScript types (114KB)
+- `apps/patient-frontend/src/graphql/fragment-masking.ts` - Generated fragment utilities
+
+**Custom files (tracked in git):**
+- `apps/frontend/src/graphql/execute.ts` - Custom GraphQL execution with JWT auth
+- `apps/frontend/src/graphql/index.ts` - Custom exports
+- `apps/patient-frontend/src/graphql/execute.ts` - Custom GraphQL execution (no auth)
+- `apps/patient-frontend/src/graphql/index.ts` - Custom exports
+
+**Note:** Auth-server does NOT need codegen because it only receives HTTP requests from Hasura actions and doesn't make GraphQL queries.
 
 ### Key GraphQL Patterns
 
