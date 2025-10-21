@@ -15,6 +15,11 @@ build/
 .env.local
 .env.production
 
+# Secrets and keys
+.keys/
+*.pem
+*.key
+
 # Logs
 *.log
 npm-debug.log*
@@ -40,6 +45,8 @@ Thumbs.db
 
 # Testing
 coverage/
+*cookies.txt
+cookies*.txt
 
 # GraphQL Code Generator outputs
 # Keep execute.ts and index.ts (custom code), ignore generated files
