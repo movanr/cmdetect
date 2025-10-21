@@ -11,9 +11,10 @@ CMDetect is a healthcare application monorepo built with TypeScript, featuring a
 This is a **pnpm workspace** with **Turbo** for build orchestration:
 
 - **apps/auth-server**: Better Auth v1.3.4 authentication service with JWT integration and action handlers
-- **apps/frontend**: React 19 + TanStack Router v1.131 + TanStack Query v5.83 + Vite 6.1 + Tailwind CSS v4.1
+- **apps/frontend**: Practitioner frontend - React 19 + TanStack Router + TanStack Query (port 3000)
+- **apps/patient-frontend**: Patient questionnaire frontend - React 19 + TanStack Router (port 3002)
 - **apps/hasura**: Hasura GraphQL Engine v2.46.0 with PostgreSQL, metadata, and migrations
-- **packages/config**: Shared configuration, role constants, and validation schemas (TypeScript)
+- **packages/config**: Shared configuration, role constants, and Zod environment validation (TypeScript)
 - **tests/**: Integration tests focusing on Hasura permissions and organization isolation
 
 ## Development Commands
@@ -26,8 +27,9 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 
 ### Development Workflows
 
-- `pnpm auth:dev` - Start auth server only
-- `pnpm frontend:dev` - Start frontend only
+- `pnpm auth:dev` - Start auth server only (port 3001)
+- `pnpm frontend:dev` - Start practitioner frontend only (port 3000)
+- `pnpm --filter @cmdetect/patient-frontend dev` - Start patient frontend only (port 3002)
 - `pnpm hasura:console` - Open Hasura console for metadata/migration management
 
 ### Building and Testing
@@ -52,21 +54,34 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 
 ### Multi-Service Architecture
 
-The system consists of three main services that must run together:
+The system consists of four main services:
 
 1. **Hasura GraphQL Engine** (port 8080)
    - PostgreSQL backend for patient/practice data
    - JWT authentication integration
    - Role-based permissions and organization isolation
+   - Public role for anonymous patient questionnaire access
+
 2. **Authentication Server** (port 3001)
    - Better Auth with JWT tokens
    - Email verification workflow
    - Hasura action handlers for anonymous operations
-3. **React Frontend** (port 3000)
+   - CORS configured for both frontends
+
+3. **Practitioner Frontend** (port 3000) - `apps/frontend`
+   - Authenticated application for doctors, reception, and admins
    - TanStack Router for routing with type safety
    - TanStack Query for GraphQL data fetching
    - GraphQL Code Generator for type-safe operations
-   - End-to-end encryption for patient PII using WebCrypto API
+   - Organization key management and patient data decryption
+   - Requires authentication via Better Auth
+
+4. **Patient Frontend** (port 3002) - `apps/patient-frontend`
+   - Public-facing patient questionnaire application
+   - No authentication required (uses public role)
+   - Accesses Hasura via anonymous actions with invite tokens
+   - Client-side encryption of patient PII before submission
+   - Validates invite tokens to get organization public keys
 
 ### Authentication Flow
 
@@ -138,6 +153,26 @@ pnpm test tests/permissions/specific-test.test.ts
 # Each test starts with clean database state
 ```
 
+## Local Development Port Configuration
+
+**Port Assignment:**
+- **3000** - Practitioner Frontend (`apps/frontend`) - Authenticated users
+- **3001** - Auth Server (`apps/auth-server`) - Better Auth + Action handlers
+- **3002** - Patient Frontend (`apps/patient-frontend`) - Public access
+- **8080** - Hasura GraphQL Engine - Database API
+
+**CORS Configuration:**
+- **Auth Server**: Only needs CORS for practitioner frontend (port 3000)
+  - Patient frontend doesn't call auth server directly
+- **Hasura**: Needs CORS for BOTH frontends (ports 3000 and 3002)
+  - Already configured in `docker-compose.yml`
+
+**Important Notes:**
+- Patient frontend uses **public role** (no authentication)
+- Patient frontend accesses Hasura via **anonymous actions** only
+- Practitioner frontend requires **JWT authentication**
+- In production, use subdomains: `app.domain.com`, `patient.domain.com`, `api.domain.com`
+
 ## Environment Configuration
 
 ### Required Environment Variables
@@ -148,8 +183,12 @@ pnpm test tests/permissions/specific-test.test.ts
 - `HASURA_DATABASE_URL` - Application database connection
 - `BETTER_AUTH_SECRET` - Session encryption key (32+ characters)
 - `HASURA_GRAPHQL_ADMIN_SECRET` - Admin access to Hasura
-- `AUTH_SERVER_URL` - Service discovery URL for JWT keys
+- `AUTH_SERVER_URL` - Auth server URL (http://localhost:3001)
+- `FRONTEND_URL` - Practitioner frontend URL (http://localhost:3000)
+- `PATIENT_FRONTEND_URL` - Patient frontend URL (http://localhost:3002) - Optional
+- `HASURA_GRAPHQL_ENDPOINT` - Hasura endpoint (http://localhost:8080/v1/graphql)
 - `HASURA_GRAPHQL_JWT_SECRET` - JWT verification configuration
+- `SMTP_*` - Email configuration (optional for development)
 
 **Hasura .env** (apps/hasura/.env):
 
