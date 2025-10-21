@@ -1,23 +1,21 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import dotenv from "dotenv";
 import { Pool } from "pg";
 import { toNodeHandler } from "better-auth/node";
+import { env } from "./env";
 import { auth } from "./auth";
 import { DatabaseService } from "./database";
 import { ActionHandlers } from "./actions";
 import { AuthEndpoints } from "./auth-endpoints";
 import { handleAsyncError } from "./errors";
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Database connection
 const dbPool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: env.DATABASE_URL,
 });
 
 // Initialize services
@@ -29,7 +27,7 @@ const authEndpoints = new AuthEndpoints(databaseService);
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: env.FRONTEND_URL,
     credentials: true,
   })
 );

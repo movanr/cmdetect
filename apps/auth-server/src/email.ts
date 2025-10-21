@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { env } from "./env";
 
 interface EmailOptions {
   to: string;
@@ -8,20 +9,29 @@ interface EmailOptions {
 }
 
 // Create reusable transporter object using SMTP configuration
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Only if SMTP is configured
+const transporter = env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS
+  ? nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_PORT === 465, // true for 465, false for other ports
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      },
+    })
+  : null;
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
+  if (!transporter) {
+    console.warn("⚠️  SMTP not configured - email sending is disabled");
+    console.log(`Would send email to ${options.to}: ${options.subject}`);
+    return;
+  }
+
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: env.SMTP_FROM || env.SMTP_USER,
       to: options.to,
       subject: options.subject,
       text: options.text,

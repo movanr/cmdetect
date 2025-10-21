@@ -3,23 +3,21 @@ import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
 import { roles, roleHierarchy } from "@cmdetect/config";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { env } from "./env";
 
 // Better Auth user will now have these fields directly instead of JSON metadata
 
 export const auth = betterAuth({
   database: new Pool({
-    connectionString: process.env.DATABASE_URL!,
+    connectionString: env.DATABASE_URL,
   }),
 
   // Better Auth session secret (separate from JWT signing key)
-  secret: process.env.BETTER_AUTH_SECRET!,
+  secret: env.BETTER_AUTH_SECRET,
 
   // Trusted origins for CORS
   trustedOrigins: [
-    process.env.FRONTEND_URL || "http://localhost:3000",
+    env.FRONTEND_URL,
     "http://localhost:3000",
   ],
 
