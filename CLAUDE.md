@@ -274,6 +274,26 @@ All test users use password: `TestPassword123!`
 - pnpm >= 8.15.0 required (for latest workspace features)
 - Turbo v1.13.4+ for build orchestration
 
+## Module System Configuration
+
+**Intentional Mix of CommonJS and ESM:**
+
+- **Auth Server** (`apps/auth-server`): CommonJS (`"type": "commonjs"`)
+  - Better Auth and Node.js backend work best with CommonJS
+  - Compiles TypeScript to CommonJS for production
+  - Uses `tsx` for development with TypeScript support
+
+- **Frontends** (`apps/frontend`, `apps/patient-frontend`): ESM (`"type": "module"`)
+  - Required by Vite bundler
+  - Modern React with ESM imports
+  - Browser-native module system
+
+- **Shared Packages** (`packages/config`): ESM (`"type": "module"`)
+  - Uses ESM but consumable by both CommonJS and ESM packages
+  - TypeScript compiles to ESM with proper extensions
+
+This configuration is intentional and allows each package to use the optimal module system for its runtime environment.
+
 ### Database Connection Details
 
 - **Auth Database**: Better Auth uses separate PostgreSQL database
