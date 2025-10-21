@@ -210,9 +210,6 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      graphql:
-        specifier: ^16.11.0
-        version: 16.11.0
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.1)
@@ -340,12 +337,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      graphql:
-        specifier: ^16.11.0
-        version: 16.11.0
-      graphql-request:
-        specifier: 6.1.0
-        version: 6.1.0(graphql@16.11.0)
       lucide-react:
         specifier: ^0.544.0
         version: 0.544.0(react@19.1.1)
@@ -6319,6 +6310,7 @@ packages:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /cross-inspect@1.0.1:
     resolution: {integrity: sha512-Pcw1JTvZLSJH83iiGWt6fRcT+BjZlCDRVwYLbUcHzv/CRpB7r0MlSrGbIyQvVSNyGnbt7G4AXuyCiDR3POvZ1A==}
@@ -7431,6 +7423,7 @@ packages:
       graphql: 16.11.0
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /graphql-tag@2.12.6(graphql@16.11.0):
     resolution: {integrity: sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==}
@@ -9069,6 +9062,7 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: true
 
   /node-fetch@3.3.2:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
@@ -10513,6 +10507,7 @@ packages:
 
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+    dev: true
 
   /tr46@5.1.1:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
@@ -11090,6 +11085,7 @@ packages:
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+    dev: true
 
   /webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
@@ -11125,6 +11121,7 @@ packages:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
+    dev: true
 
   /which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
