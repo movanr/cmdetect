@@ -9,7 +9,7 @@
     "serve": "vite preview",
     "test": "vitest run",
     "codegen": "graphql-codegen --config codegen.ts",
-    "lint": "echo 'No linting configured'",
+    "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist node_modules/.vite"
   },

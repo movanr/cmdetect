@@ -3,14 +3,13 @@
  * Tests the /api/auth/switch-role endpoint
  */
 
-import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
-import { isAuthServerAvailable } from "../setup/auth-server";
-import { TestUsers } from "@cmdetect/test-utils";
 import { roles } from "@cmdetect/config";
+import { TestUsers } from "@cmdetect/test-utils";
+import { isAuthServerAvailable } from "../setup/auth-server";
+import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
 
 describe("Role Switching Endpoint", () => {
-  const AUTH_SERVER_URL =
-    process.env.AUTH_SERVER_URL || "http://localhost:3001";
+  const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || "http://localhost:3001";
 
   beforeAll(async () => {
     // Check services availability
@@ -18,9 +17,7 @@ describe("Role Switching Endpoint", () => {
     const authServerAvailable = await isAuthServerAvailable();
 
     if (!hasuraAvailable) {
-      throw new Error(
-        "Hasura is not available. Please start Hasura before running tests."
-      );
+      throw new Error("Hasura is not available. Please start Hasura before running tests.");
     }
     if (!authServerAvailable) {
       throw new Error(
@@ -70,24 +67,19 @@ describe("Role Switching Endpoint", () => {
 
     beforeAll(async () => {
       // Get a valid session token for org2Physician who has multiple roles
-      const signInResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/sign-in/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: TestUsers.org2Physician.email,
-            password: TestUsers.org2Physician.password,
-          }),
-        }
-      );
+      const signInResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: TestUsers.org2Physician.email,
+          password: TestUsers.org2Physician.password,
+        }),
+      });
 
       expect(signInResponse.ok).toBe(true);
 
       const setCookieHeader = signInResponse.headers.get("set-cookie");
-      const sessionTokenMatch = setCookieHeader?.match(
-        /better-auth\.session_token=([^;]+)/
-      );
+      const sessionTokenMatch = setCookieHeader?.match(/better-auth\.session_token=([^;]+)/);
       sessionToken = sessionTokenMatch?.[1] || "";
       expect(sessionToken).toBeTruthy();
     });
@@ -138,9 +130,7 @@ describe("Role Switching Endpoint", () => {
 
       expect(response.status).toBe(403);
       const data = await response.json();
-      expect(data.error).toBe(
-        "You don't have permission to switch to role: org_admin"
-      );
+      expect(data.error).toBe("You don't have permission to switch to role: org_admin");
     });
 
     it("should allow switching to a role user has", async () => {
@@ -192,24 +182,19 @@ describe("Role Switching Endpoint", () => {
   describe("Single Role Users", () => {
     it("should allow single-role user to switch to their own role", async () => {
       // org1Admin has only "org_admin" role
-      const signInResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/sign-in/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: TestUsers.org1Admin.email,
-            password: TestUsers.org1Admin.password,
-          }),
-        }
-      );
+      const signInResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: TestUsers.org1Admin.email,
+          password: TestUsers.org1Admin.password,
+        }),
+      });
 
       expect(signInResponse.ok).toBe(true);
 
       const setCookieHeader = signInResponse.headers.get("set-cookie");
-      const sessionTokenMatch = setCookieHeader?.match(
-        /better-auth\.session_token=([^;]+)/
-      );
+      const sessionTokenMatch = setCookieHeader?.match(/better-auth\.session_token=([^;]+)/);
       const sessionToken = sessionTokenMatch?.[1] || "";
 
       const response = await fetch(`${AUTH_SERVER_URL}/api/auth/switch-role`, {
@@ -232,24 +217,19 @@ describe("Role Switching Endpoint", () => {
 
     it("should reject single-role user attempting to switch to different role", async () => {
       // org1Physician has only roles.PHYSICIAN role
-      const signInResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/sign-in/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: TestUsers.org1Physician.email,
-            password: TestUsers.org1Physician.password,
-          }),
-        }
-      );
+      const signInResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: TestUsers.org1Physician.email,
+          password: TestUsers.org1Physician.password,
+        }),
+      });
 
       expect(signInResponse.ok).toBe(true);
 
       const setCookieHeader = signInResponse.headers.get("set-cookie");
-      const sessionTokenMatch = setCookieHeader?.match(
-        /better-auth\.session_token=([^;]+)/
-      );
+      const sessionTokenMatch = setCookieHeader?.match(/better-auth\.session_token=([^;]+)/);
       const sessionToken = sessionTokenMatch?.[1] || "";
 
       const response = await fetch(`${AUTH_SERVER_URL}/api/auth/switch-role`, {
@@ -265,47 +245,37 @@ describe("Role Switching Endpoint", () => {
 
       expect(response.status).toBe(403);
       const data = await response.json();
-      expect(data.error).toBe(
-        "You don't have permission to switch to role: org_admin"
-      );
+      expect(data.error).toBe("You don't have permission to switch to role: org_admin");
     });
   });
 
   describe("Database Persistence", () => {
     it("should persist activeRole change in database", async () => {
       // Get session for org2Physician
-      const signInResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/sign-in/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: TestUsers.org2Physician.email,
-            password: TestUsers.org2Physician.password,
-          }),
-        }
-      );
+      const signInResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: TestUsers.org2Physician.email,
+          password: TestUsers.org2Physician.password,
+        }),
+      });
 
       const setCookieHeader = signInResponse.headers.get("set-cookie");
-      const sessionTokenMatch = setCookieHeader?.match(
-        /better-auth\.session_token=([^;]+)/
-      );
+      const sessionTokenMatch = setCookieHeader?.match(/better-auth\.session_token=([^;]+)/);
       const sessionToken = sessionTokenMatch?.[1] || "";
 
       // Switch to receptionist role
-      const switchResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/switch-role`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Cookie: `better-auth.session_token=${sessionToken}`,
-          },
-          body: JSON.stringify({
-            role: roles.RECEPTIONIST,
-          }),
-        }
-      );
+      const switchResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/switch-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `better-auth.session_token=${sessionToken}`,
+        },
+        body: JSON.stringify({
+          role: roles.RECEPTIONIST,
+        }),
+      });
 
       expect(switchResponse.status).toBe(200);
 
@@ -325,9 +295,9 @@ describe("Role Switching Endpoint", () => {
 
       // Decode JWT to verify the activeRole
       const payload = JSON.parse(atob(tokenData.token.split(".")[1]));
-      expect(
-        payload["https://hasura.io/jwt/claims"]["x-hasura-default-role"]
-      ).toBe(roles.RECEPTIONIST);
+      expect(payload["https://hasura.io/jwt/claims"]["x-hasura-default-role"]).toBe(
+        roles.RECEPTIONIST
+      );
     });
   });
 
@@ -365,57 +335,46 @@ describe("Role Switching Endpoint", () => {
   describe("Multiple Role Scenarios", () => {
     it("should handle user with multiple roles correctly", async () => {
       // Test org2Physician who has ["physician", "receptionist"]
-      const signInResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/sign-in/email`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: TestUsers.org2Physician.email,
-            password: TestUsers.org2Physician.password,
-          }),
-        }
-      );
+      const signInResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: TestUsers.org2Physician.email,
+          password: TestUsers.org2Physician.password,
+        }),
+      });
 
       const setCookieHeader = signInResponse.headers.get("set-cookie");
-      const sessionTokenMatch = setCookieHeader?.match(
-        /better-auth\.session_token=([^;]+)/
-      );
+      const sessionTokenMatch = setCookieHeader?.match(/better-auth\.session_token=([^;]+)/);
       const sessionToken = sessionTokenMatch?.[1] || "";
 
       // Should be able to switch to receptionist
-      const switchToReceptionistResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/switch-role`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Cookie: `better-auth.session_token=${sessionToken}`,
-          },
-          body: JSON.stringify({
-            role: roles.RECEPTIONIST,
-          }),
-        }
-      );
+      const switchToReceptionistResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/switch-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `better-auth.session_token=${sessionToken}`,
+        },
+        body: JSON.stringify({
+          role: roles.RECEPTIONIST,
+        }),
+      });
 
       expect(switchToReceptionistResponse.status).toBe(200);
       const receptionistData = await switchToReceptionistResponse.json();
       expect(receptionistData.activeRole).toBe(roles.RECEPTIONIST);
 
       // Should be able to switch back to physician
-      const switchToPhysicianResponse = await fetch(
-        `${AUTH_SERVER_URL}/api/auth/switch-role`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Cookie: `better-auth.session_token=${sessionToken}`,
-          },
-          body: JSON.stringify({
-            role: roles.PHYSICIAN,
-          }),
-        }
-      );
+      const switchToPhysicianResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/switch-role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `better-auth.session_token=${sessionToken}`,
+        },
+        body: JSON.stringify({
+          role: roles.PHYSICIAN,
+        }),
+      });
 
       expect(switchToPhysicianResponse.status).toBe(200);
       const physicianData = await switchToPhysicianResponse.json();

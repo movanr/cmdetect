@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
+    "lint": "eslint src scripts",
     "migrate": "npx @better-auth/cli migrate",
     "seed:users": "tsx scripts/seed-all-test-users.ts",
     "seed:users:cleanup": "tsx scripts/seed-all-test-users.ts cleanup"

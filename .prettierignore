@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+build
+.turbo
+coverage
+
+# Generated files
+*.gen.ts
+*.generated.ts
+routeTree.gen.ts
+
+# Package manager
+pnpm-lock.yaml
+
+# Environment
+.env
+.env.*
+
+# Database
+apps/hasura/migrations
+apps/hasura/metadata
+
+# Logs
+*.log
+npm-debug.log*
