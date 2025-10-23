@@ -21,9 +21,12 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 
 ### Getting Started
 
-- `pnpm install` - Install all dependencies across workspace
-- `./scripts/setup-dev.sh` - Initial development setup (generates JWT keys, creates .env)
-- `pnpm dev` - Start all services in parallel (frontend, auth server)
+1. **Install dependencies**: `pnpm install`
+2. **Create .env file**: Copy `.env.example` to `.env` and configure environment variables
+3. **Start PostgreSQL and Hasura**: `cd apps/hasura && docker-compose up -d`
+4. **Run Better Auth migrations**: `pnpm --filter @cmdetect/auth-server migrate`
+5. **Build shared packages**: `pnpm build:deps`
+6. **Start development servers**: `pnpm dev` (starts all services in parallel)
 
 ### Development Workflows
 
@@ -202,7 +205,7 @@ pnpm test tests/permissions/specific-test.test.ts
 
 ### Required Environment Variables
 
-**Root .env** (created by setup-dev.sh):
+**Root .env** (copy from `.env.example`):
 
 - `DATABASE_URL` - PostgreSQL connection for Better Auth
 - `HASURA_DATABASE_URL` - Application database connection
@@ -327,7 +330,7 @@ This configuration is intentional and allows each package to use the optimal mod
 
 ### Key File Locations
 
-- **JWT Keys**: Generated in `.keys/` directory by setup script
+- **JWT Keys**: Better Auth generates JWKS keys automatically (exposed at `/api/auth/jwks`)
 - **Hasura Metadata**: `apps/hasura/metadata/` directory
 - **Hasura Migrations**: `apps/hasura/migrations/cmdetect-postgres/`
 - **GraphQL Generated Types**: `apps/frontend/src/graphql/`
