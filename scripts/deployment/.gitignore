@@ -1,0 +1,15 @@
+# Ignore environment-specific configuration
+*.local
+.env
+.env.*
+
+# Ignore log files
+*.log
+
+# Ignore backup files
+*.backup
+*.bak
+
+# Ignore temporary files
+*.tmp
+.DS_Store
