@@ -3,7 +3,7 @@ module.exports = {
   apps: [
     {
       name: "auth-server",
-      script: "/opt/cmdetect/apps/auth-server/dist/index.js",
+      script: "/opt/cmdetect/apps/auth-server/dist/server.js",
 
       // Process Management
       instances: 1,
@@ -27,7 +27,6 @@ module.exports = {
       // Logs
       error_file: "/opt/cmdetect/logs/pm2-auth-error.log",
       out_file: "/opt/cmdetect/logs/pm2-auth-out.log",
-      log_file: "/opt/cmdetect/logs/pm2-auth.log",
       time: true,
 
       // Merge logs (single file per type)

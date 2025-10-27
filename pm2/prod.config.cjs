@@ -3,7 +3,7 @@ module.exports = {
   apps: [
     {
       name: "auth-server",
-      script: "/opt/cmdetect/apps/auth-server/dist/index.js",
+      script: "/opt/cmdetect/apps/auth-server/dist/server.js",
 
       // Production: Could use cluster mode later
       instances: 1,
@@ -28,7 +28,6 @@ module.exports = {
       // Logs with rotation
       error_file: "/opt/cmdetect/logs/pm2-auth-error.log",
       out_file: "/opt/cmdetect/logs/pm2-auth-out.log",
-      log_file: "/opt/cmdetect/logs/pm2-auth.log",
       time: true,
       merge_logs: true,
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
