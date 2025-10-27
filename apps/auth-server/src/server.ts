@@ -11,7 +11,6 @@ import { env } from "./env";
 import { handleAsyncError } from "./errors";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 // Database connection
 const dbPool = new Pool({
@@ -100,6 +99,6 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Auth server running on port ${PORT}`);
+app.listen(3001, "0.0.0.0", () => {
+  console.log(`Auth server running on 0.0.0.0:3001`);
 });
