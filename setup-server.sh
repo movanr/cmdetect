@@ -9,10 +9,10 @@
 #   sudo ./scripts/deployment/setup-server.sh
 #
 # What this script does:
-#   - Installs Node.js 22, PM2, nginx, Docker, Docker Compose, UFW, Fail2ban, rclone
+#   - Installs Node.js 22, PM2, Caddy, Docker, Docker Compose, UFW, Fail2ban, rclone
 #   - Configures firewall with UFW
 #   - Configures Fail2ban for SSH protection
-#   - Creates /opt/cmdetect directory structure
+#   - Creates /opt/cmdetect directory
 #   - Sets up system user for deployment
 #
 ################################################################################
@@ -26,7 +26,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Script configuration
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="1.0.1"
 LOG_FILE="/var/log/cmdetect-setup.log"
 CMDETECT_USER="cmdetect"
 CMDETECT_HOME="/opt/cmdetect"
@@ -152,35 +152,32 @@ install_pm2() {
     # Install PM2 globally
     npm install -g pm2
 
-    # Setup PM2 to start on boot
-    pm2 startup systemd -u "$CMDETECT_USER" --hp "/home/$CMDETECT_USER" || true
-
     PM2_VERSION=$(pm2 --version)
     log "PM2 installed: $PM2_VERSION"
 }
 
 ################################################################################
-# Nginx installation
+# Caddy installation
 ################################################################################
 
-install_nginx() {
-    log "Installing nginx..."
+install_caddy() {
+    log "Installing Caddy..."
 
-    if command -v nginx &> /dev/null; then
-        NGINX_VERSION=$(nginx -v 2>&1 | cut -d'/' -f2)
-        log_warn "nginx already installed: $NGINX_VERSION"
+    if command -v caddy &> /dev/null; then
+        CADDY_VERSION=$(caddy version | cut -d' ' -f1)
+        log_warn "Caddy already installed: $CADDY_VERSION"
         return 0
     fi
 
-    # Install nginx
-    apt-get install -y -qq nginx
+    # Install Caddy
+    apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https curl
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+    apt-get update -qq
+    apt-get install -y -qq caddy
 
-    # Stop nginx (we'll configure it later)
-    systemctl stop nginx
-    systemctl disable nginx
-
-    NGINX_VERSION=$(nginx -v 2>&1 | cut -d'/' -f2)
-    log "nginx installed: $NGINX_VERSION"
+    CADDY_VERSION=$(caddy version | cut -d' ' -f1)
+    log "Caddy installed: $CADDY_VERSION"
 }
 
 ################################################################################
@@ -210,12 +207,6 @@ install_docker() {
 
         DOCKER_VERSION=$(docker --version | cut -d' ' -f3 | tr -d ',')
         log "Docker installed: $DOCKER_VERSION"
-    fi
-
-    # Add cmdetect user to docker group
-    if id "$CMDETECT_USER" &>/dev/null; then
-        usermod -aG docker "$CMDETECT_USER" || true
-        log "Added $CMDETECT_USER to docker group"
     fi
 
     # Enable Docker service
@@ -285,7 +276,6 @@ install_configure_ufw() {
     ufw allow 443/tcp comment 'HTTPS'
 
     log "Firewall rules added (22, 80, 443)"
-
 
     # Enable UFW
     ufw --force enable
@@ -361,10 +351,10 @@ EOF
     systemctl restart fail2ban
 
     # Wait for Fail2ban to fully start
-    sleep 3 
+    sleep 3
 
     log "Fail2ban configured and started"
-    fail2ban-client status | tee -a "$LOG_FILE"
+    fail2ban-client status 2>&1 | tee -a "$LOG_FILE" || log_warn "Fail2ban status check failed (may need more time to start)"
 }
 
 ################################################################################
@@ -402,22 +392,28 @@ create_deployment_structure() {
         log "Created system user: $CMDETECT_USER"
     fi
 
-    # Create /opt/cmdetect directory structure
-    mkdir -p "$CMDETECT_HOME"/{app,logs,backups,ssl,config}
-    mkdir -p "$CMDETECT_HOME"/app/{frontend,auth-server,patient-frontend}
+    # Create /opt/cmdetect directory
+    mkdir -p "$CMDETECT_HOME"
 
-    # Set ownership
+    # Set ownership to cmdetect user
     chown -R "$CMDETECT_USER":"$CMDETECT_USER" "$CMDETECT_HOME"
 
     # Set permissions
     chmod 755 "$CMDETECT_HOME"
-    chmod 750 "$CMDETECT_HOME"/{logs,backups,config}
-    chmod 700 "$CMDETECT_HOME"/ssl
 
-    log "Directory structure created at $CMDETECT_HOME"
-    tree -L 2 "$CMDETECT_HOME" 2>/dev/null || ls -la "$CMDETECT_HOME"
+    log "Directory created at $CMDETECT_HOME"
+    log "Owner: $CMDETECT_USER:$CMDETECT_USER"
+    log "Git repository should be cloned directly to $CMDETECT_HOME"
+    log "Subdirectories (logs/, backups/) will be created as needed"
+    
+    ls -la "$CMDETECT_HOME" | tee -a "$LOG_FILE"
+    
+    # Add cmdetect user to docker group (if docker is installed)
+    if command -v docker &> /dev/null; then
+        usermod -aG docker "$CMDETECT_USER" || true
+        log "Added $CMDETECT_USER to docker group"
+    fi
 }
-
 
 ################################################################################
 # System optimization for production
@@ -462,21 +458,26 @@ EOF
 print_summary() {
     log ""
     log "================================================================"
-    log "CMDetect Server Setup Complete! Check $LOG_FILE for details."
+    log "CMDetect Server Setup Complete!"
     log "================================================================"
-    log "Installed dependencies and configurations:"
-    log "Node.js 22"
-    log "PM2" 
-    log "nginx" 
-    log "Docker" 
-    log "Docker Compose" 
-    log "UFW"
-    log "Fail2ban"
-    log "rclone"
-    log "Configured Firewall with UFW"
-    log "Configured Fail2ban for SSH protection"
-    log "Created /opt/cmdetect directory structure"
-    log "Set up system user for deployment"
+    log ""
+    log "Installed:"
+    log "  - Node.js $(node --version 2>/dev/null || echo 'N/A')"
+    log "  - pnpm $(pnpm --version 2>/dev/null || echo 'N/A')"
+    log "  - PM2 $(pm2 --version 2>/dev/null || echo 'N/A')"
+    log "  - Caddy $(caddy version 2>/dev/null | cut -d' ' -f1 || echo 'N/A')"
+    log "  - Docker $(docker --version 2>/dev/null | cut -d' ' -f3 | tr -d ',' || echo 'N/A')"
+    log "  - Docker Compose $(docker compose version 2>/dev/null | cut -d' ' -f4 | tr -d 'v' || echo 'N/A')"
+    log "  - rclone $(rclone version 2>/dev/null | head -n1 | cut -d' ' -f2 || echo 'N/A')"
+    log ""
+    log "Configuration:"
+    log "  - UFW Firewall: Enabled (ports 22, 80, 443)"
+    log "  - Fail2ban: Configured for SSH protection"
+    log "  - System User: $CMDETECT_USER"
+    log "  - Base Directory: $CMDETECT_HOME (owned by $CMDETECT_USER)"
+    log ""
+    log "Full log: $LOG_FILE"
+    log "================================================================"
 }
 
 ################################################################################
@@ -492,7 +493,7 @@ main() {
     update_system
     install_nodejs
     install_pm2
-    install_nginx
+    install_caddy
     install_docker
     install_docker_compose
     install_configure_ufw
