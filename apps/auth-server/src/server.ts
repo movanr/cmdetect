@@ -1,13 +1,13 @@
-import express from "express";
+import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
+import express from "express";
 import helmet from "helmet";
 import { Pool } from "pg";
-import { toNodeHandler } from "better-auth/node";
-import { env } from "./env";
-import { auth } from "./auth";
-import { DatabaseService } from "./database";
 import { ActionHandlers } from "./actions";
+import { auth } from "./auth";
 import { AuthEndpoints } from "./auth-endpoints";
+import { DatabaseService } from "./database";
+import { env } from "./env";
 import { handleAsyncError } from "./errors";
 
 const app = express();
@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3001;
 
 // Database connection
 const dbPool = new Pool({
-  connectionString: env.DATABASE_URL,
+  connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@localhost:5432/${env.POSTGRES_DB}`,
 });
 
 // Initialize services
@@ -71,10 +71,7 @@ app.post(
 // Authentication endpoints
 app.post(
   "/api/auth/switch-role",
-  handleAsyncError(
-    (req, res) => authEndpoints.switchRole(req, res),
-    "Failed to switch role"
-  )
+  handleAsyncError((req, res) => authEndpoints.switchRole(req, res), "Failed to switch role")
 );
 
 // Auth routes (must be after custom routes)
@@ -88,18 +85,18 @@ app.get("/health", (_, res) => {
 // Global error handler for Express middleware errors (including JSON parsing)
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   // Handle JSON parsing errors from express.json() middleware
-  if (err instanceof SyntaxError && 'body' in err) {
+  if (err instanceof SyntaxError && "body" in err) {
     return res.status(400).json({
-      error: "Invalid JSON format in request body"
+      error: "Invalid JSON format in request body",
     });
   }
 
   // Log unexpected errors
-  console.error('Unexpected server error:', err);
+  console.error("Unexpected server error:", err);
 
   // Send generic error response
   res.status(500).json({
-    error: "Internal server error"
+    error: "Internal server error",
   });
 });
 

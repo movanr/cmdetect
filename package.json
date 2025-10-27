@@ -18,7 +18,6 @@
     "auth:dev": "pnpm --filter @cmdetect/auth-server dev",
     "auth:migrate": "pnpm --filter @cmdetect/auth-server migrate",
     "frontend:dev": "pnpm --filter @cmdetect/frontend dev",
-    "hasura:console": "cd apps/hasura && hasura console",
     "setup": "pnpm install && pnpm build:deps",
     "build:deps": "pnpm --filter @cmdetect/config build"
   },

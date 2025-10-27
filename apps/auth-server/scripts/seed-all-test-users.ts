@@ -1,14 +1,16 @@
-import dotenv from "dotenv";
-import { Pool } from "pg";
-import { betterAuth } from "better-auth";
 import { roles } from "@cmdetect/config";
+import { betterAuth } from "better-auth";
+import dotenv from "dotenv";
+import { resolve } from "path";
+import { Pool } from "pg";
 
-dotenv.config();
+// Load environment from root .env file
+dotenv.config({ path: resolve(__dirname, "../../../.env") });
 
 // Create a minimal Better Auth instance for testing
 const testAuth = betterAuth({
   database: new Pool({
-    connectionString: process.env.DATABASE_URL!,
+    connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:5432/${process.env.POSTGRES_DB}`,
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
   emailAndPassword: {
@@ -19,7 +21,7 @@ const testAuth = betterAuth({
 
 // Initialize database pool for metadata operations
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:5432/${process.env.POSTGRES_DB}`,
 });
 
 // Test organizations from your data
@@ -136,10 +138,9 @@ async function seedAllTestUsers() {
     // Check if any users already exist
     let client = await pool.connect();
     try {
-      const existingUsers = await client.query(
-        'SELECT email FROM "user" WHERE email = ANY($1)',
-        [TEST_USERS.map((u) => u.email)]
-      );
+      const existingUsers = await client.query('SELECT email FROM "user" WHERE email = ANY($1)', [
+        TEST_USERS.map((u) => u.email),
+      ]);
 
       if (existingUsers.rows.length > 0) {
         console.log("⚠️  Some test users already exist:");
@@ -186,9 +187,7 @@ async function seedAllTestUsers() {
         });
 
         if (!signupResult || !signupResult.user) {
-          console.log(
-            `❌ Failed to create ${userData.email} - no user returned`
-          );
+          console.log(`❌ Failed to create ${userData.email} - no user returned`);
           continue;
         }
 
@@ -253,16 +252,13 @@ async function seedAllTestUsers() {
     console.log("\n🎉 Test user seeding completed successfully!");
     console.log("\n📋 Test Account Summary:");
     console.log("=======================");
-    console.log(
-      `Created ${createdUsers.length} out of ${TEST_USERS.length} users\n`
-    );
+    console.log(`Created ${createdUsers.length} out of ${TEST_USERS.length} users\n`);
 
     TEST_USERS.forEach((user) => {
       const wasCreated = createdUsers.some((cu) => cu.email === user.email);
       const status = wasCreated ? "✅" : "❌";
       const orgName =
-        TEST_ORGANIZATIONS.find((org) => org.id === user.organizationId)
-          ?.name || "No Organization";
+        TEST_ORGANIZATIONS.find((org) => org.id === user.organizationId)?.name || "No Organization";
 
       console.log(`${status} ${user.email}`);
       console.log(`   🔑 Password: ${user.password}`);
@@ -278,9 +274,7 @@ async function seedAllTestUsers() {
       console.log("");
     });
 
-    console.log(
-      "💡 You can now use these accounts to test the authentication system"
-    );
+    console.log("💡 You can now use these accounts to test the authentication system");
     console.log("💡 All accounts are pre-verified and ready to use");
   } catch (error) {
     console.error("❌ Error seeding test users:", error);
@@ -310,10 +304,9 @@ async function cleanupAllTestUsers() {
     console.log("✅ Deleted user accounts");
 
     // Then delete the users
-    const result = await client.query(
-      'DELETE FROM "user" WHERE email = ANY($1) RETURNING email',
-      [TEST_USERS.map((u) => u.email)]
-    );
+    const result = await client.query('DELETE FROM "user" WHERE email = ANY($1) RETURNING email', [
+      TEST_USERS.map((u) => u.email),
+    ]);
 
     console.log(`✅ Deleted ${result.rows.length} test users`);
     result.rows.forEach((row) => console.log(`   - ${row.email}`));

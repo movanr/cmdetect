@@ -1,0 +1,122 @@
+# Local development server configuration
+
+{
+    # Disable automatic HTTPS for local development
+    auto_https off
+    
+    # Disable admin API
+    admin off
+}
+
+################################################################################
+# Practitioner Frontend (React SPA)
+################################################################################
+
+app.cmdetect.local {
+    root * /opt/cmdetect/apps/frontend/dist
+    
+    file_server
+    
+    try_files {path} /index.html
+    
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-frontend.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format console
+    }
+}
+
+################################################################################
+# Patient Frontend (React SPA)
+################################################################################
+
+patient.cmdetect.local {
+    root * /opt/cmdetect/apps/patient-frontend/dist
+    
+    file_server
+    try_files {path} /index.html
+    
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-patient.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format console
+    }
+}
+
+################################################################################
+# Auth API
+################################################################################
+
+auth.cmdetect.local {
+    # Reverse proxy to local PM2 process
+    reverse_proxy localhost:3001 {
+        # Forward headers
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    
+    header {
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-auth.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format console
+    }
+}
+
+################################################################################
+# GraphQL API (Hasura)
+################################################################################
+
+api.cmdetect.local {
+    # Reverse proxy to Hasura Docker container
+    reverse_proxy localhost:8080 {
+        # WebSocket support for GraphQL subscriptions
+        header_up Connection {>Connection}
+        header_up Upgrade {>Upgrade}
+        
+        # Forward headers
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    
+    header {
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-api.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format console
+    }
+}

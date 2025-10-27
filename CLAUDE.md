@@ -214,15 +214,30 @@ pnpm test tests/permissions/specific-test.test.ts
 - `AUTH_SERVER_URL` - Auth server URL (http://localhost:3001)
 - `FRONTEND_URL` - Practitioner frontend URL (http://localhost:3000)
 - `PATIENT_FRONTEND_URL` - Patient frontend URL (http://localhost:3002) - Optional
-- `HASURA_GRAPHQL_ENDPOINT` - Hasura endpoint (http://localhost:8080/v1/graphql)
+- `API_URL` - API endpoint (http://api.cmdetect.local for local dev with Caddy, or http://localhost:8080 for direct access)
 - `HASURA_GRAPHQL_JWT_SECRET` - JWT verification configuration
 - `SMTP_*` - Email configuration (optional for development)
 
 **Hasura .env** (apps/hasura/.env):
 
 - `DB_URL` - PostgreSQL connection string
-- `HASURA_ADMIN_SECRET` - Must match root .env
+- `HASURA_GRAPHQL_ADMIN_SECRET` - Must match root .env
 - `AUTH_SERVER_URL` - Must match auth server URL
+
+**Frontend Environment Variables** (Vite apps):
+
+- Frontends use `VITE_HASURA_GRAPHQL_URL` instead of `API_URL`
+- For local dev with Caddy: `VITE_HASURA_GRAPHQL_URL=http://api.cmdetect.local/v1/graphql`
+- For direct access: `VITE_HASURA_GRAPHQL_URL=http://localhost:8080/v1/graphql`
+- Note: Frontend .env files are separate from root .env (Vite-specific requirement)
+- Both practitioner and patient frontends use the same variable
+
+**Environment Variable Usage:**
+
+- **Backend/Node.js** (auth-server, tests): Use `API_URL` from root .env
+- **Frontend/Vite** (practitioner, patient): Use `VITE_HASURA_GRAPHQL_URL` from app-specific .env
+- `API_URL` is validated via `@cmdetect/config` Zod schemas
+- Frontend env vars are not validated (Vite handles them)
 
 ## Development Patterns
 

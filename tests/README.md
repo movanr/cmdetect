@@ -21,7 +21,7 @@ This directory contains comprehensive tests for verifying Hasura permission conf
 
    ```bash
    export HASURA_TEST_ENDPOINT="http://localhost:8080/v1/graphql"
-   export HASURA_ADMIN_SECRET="your_test_admin_secret"
+   export HASURA_GRAPHQL_ADMIN_SECRET="your_test_admin_secret"
    ```
 
 4. **Generate GraphQL types (optional but recommended):**
@@ -116,6 +116,6 @@ describe("New Feature Permissions", () => {
 The tests expect the following environment variables:
 
 - `HASURA_TEST_ENDPOINT`: GraphQL endpoint (default: http://localhost:8080/v1/graphql)
-- `HASURA_ADMIN_SECRET`: Admin secret for test database operations
+- `HASURA_GRAPHQL_ADMIN_SECRET`: Admin secret for test database operations
 
 For production-like testing, use a separate test database and configure JWT secret to match your test setup.

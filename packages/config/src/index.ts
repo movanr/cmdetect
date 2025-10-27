@@ -15,6 +15,3 @@ export const roleHierarchy = [
   roles.RECEPTIONIST,
   roles.ORG_ADMIN,
 ];
-
-// Export environment validation
-export * from "./env.js";

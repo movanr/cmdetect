@@ -2,10 +2,10 @@ import { GraphQLClient } from "graphql-request";
 import { createAuthenticatedClient } from "./auth-server";
 
 // Test Hasura endpoint - should point to your test instance
-const HASURA_ENDPOINT =
-  process.env.HASURA_GRAPHQL_ENDPOINT || "http://localhost:8080/v1/graphql";
-const HASURA_ADMIN_SECRET =
-  process.env.HASURA_GRAPHQL_ADMIN_SECRET || "your_test_admin_secret";
+const HASURA_ENDPOINT = process.env.API_URL
+  ? `${process.env.HASURA_API_URL}/v1/graphql`
+  : "http://localhost:8080/v1/graphql";
+const HASURA_ADMIN_SECRET = process.env.HASURA_GRAPHQL_ADMIN_SECRET || "your_test_admin_secret";
 
 /**
  * Create a GraphQL client with admin privileges (bypasses all permissions)

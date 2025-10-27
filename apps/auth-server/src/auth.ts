@@ -1,25 +1,22 @@
+import { roleHierarchy, roles } from "@cmdetect/config";
 import { betterAuth } from "better-auth";
 import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email";
-import { roles, roleHierarchy } from "@cmdetect/config";
 import { env } from "./env";
 
 // Better Auth user will now have these fields directly instead of JSON metadata
 
 export const auth = betterAuth({
   database: new Pool({
-    connectionString: env.DATABASE_URL,
+    connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@localhost:5432/${env.POSTGRES_DB}`,
   }),
 
   // Better Auth session secret (separate from JWT signing key)
   secret: env.BETTER_AUTH_SECRET,
 
   // Trusted origins for CORS
-  trustedOrigins: [
-    env.FRONTEND_URL,
-    "http://localhost:3000",
-  ],
+  trustedOrigins: [env.FRONTEND_URL || "http://localhost:3000"],
 
   // Plugins
   plugins: [
@@ -33,17 +30,14 @@ export const auth = betterAuth({
           // Validate roles array and apply hierarchy for authenticated users
           // Clinical roles (physician, receptionist) have priority over admin role
           const userRoles = (user.roles as string[]) || [];
-          const validRoles = userRoles.filter((role) =>
-            roleHierarchy.includes(role as any)
-          );
+          const validRoles = userRoles.filter((role) => roleHierarchy.includes(role as any));
 
           if (validRoles.length > 0 && user.organizationId) {
             // Use activeRole from user if set, otherwise use hierarchy default
             const activeRole =
               user.activeRole && validRoles.includes(user.activeRole)
                 ? user.activeRole
-                : roleHierarchy.find((role) => validRoles.includes(role)) ||
-                  validRoles[0];
+                : roleHierarchy.find((role) => validRoles.includes(role)) || validRoles[0];
 
             const defaultRole = activeRole;
 
