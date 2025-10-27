@@ -242,6 +242,28 @@ install_docker_compose() {
 }
 
 ################################################################################
+# Hasura CLI installation
+################################################################################
+
+install_hasura_cli() {
+    log "Installing Hasura CLI..."
+
+    if command -v hasura &> /dev/null; then
+        HASURA_VERSION=$(hasura version | head -n1)
+        log_warn "Hasura CLI already installed: $HASURA_VERSION"
+        return 0
+    fi
+
+    # Install latest stable version
+    curl -L https://github.com/hasura/graphql-engine/raw/stable/cli/get.sh | bash
+
+    HASURA_VERSION=$(hasura version | head -n1)
+    log "Hasura CLI installed: $HASURA_VERSION"
+}
+
+
+
+################################################################################
 # UFW (Firewall) installation and configuration
 ################################################################################
 
@@ -377,6 +399,7 @@ install_rclone() {
     log "rclone installed: $RCLONE_VERSION"
 }
 
+
 ################################################################################
 # Create deployment user and directory structure
 ################################################################################
@@ -496,6 +519,7 @@ main() {
     install_caddy
     install_docker
     install_docker_compose
+    install_hasura_cli
     install_configure_ufw
     install_configure_fail2ban
     install_rclone
