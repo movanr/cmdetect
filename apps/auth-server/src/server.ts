@@ -83,7 +83,7 @@ app.get("/health", (_, res) => {
 });
 
 // Global error handler for Express middleware errors (including JSON parsing)
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   // Handle JSON parsing errors from express.json() middleware
   if (err instanceof SyntaxError && "body" in err) {
     return res.status(400).json({

@@ -9,12 +9,12 @@ export interface ApiError {
   error: string;
 }
 
-export interface ApiSuccess<T = any> {
+export interface ApiSuccess {
   success: true;
   [key: string]: any;
 }
 
-export type ApiResponse<T = any> = ApiSuccess<T> | ApiError;
+export type ApiResponse = ApiSuccess | ApiError;
 
 /**
  * Sends a standardized error response for Hasura actions

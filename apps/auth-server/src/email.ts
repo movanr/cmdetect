@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { env } from "./env";
 
 interface EmailOptions {
@@ -13,13 +14,13 @@ interface EmailOptions {
 const transporter = env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS
   ? nodemailer.createTransport({
       host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_PORT === 465, // true for 465, false for other ports
+      port: env.SMTP_PORT ? parseInt(env.SMTP_PORT, 10) : 587,
+      secure: env.SMTP_PORT ? parseInt(env.SMTP_PORT, 10) === 465 : false, // true for 465, false for other ports
       auth: {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
       },
-    })
+    } as SMTPTransport.Options)
   : null;
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
