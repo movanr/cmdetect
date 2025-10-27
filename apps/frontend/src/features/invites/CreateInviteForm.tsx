@@ -2,10 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useCreatePatientRecord } from "@/features/patient-records";
 import { Button } from "@/components/ui/button";
-import { getTranslations } from "@/config/i18n";
 
 export function CreateInviteForm() {
-  const t = getTranslations();
   const navigate = useNavigate();
   const [clinicInternalId, setClinicInternalId] = useState("");
   const [error, setError] = useState<string | null>(null);

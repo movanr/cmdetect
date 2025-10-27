@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSession, signOut } from "../lib/auth";
-import { KeySetupGuard } from "../key-setup/components/KeySetupGuard";
+import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 
 export const Route = createFileRoute("/unverified")({
   component: UnverifiedPage,

@@ -2,15 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "../components/layouts/AppLayout";
 import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 import { CreateInviteForm } from "../features/invites/CreateInviteForm";
-import { getTranslations } from "../config/i18n";
 
 export const Route = createFileRoute("/invites_/new")({
   component: CreateInvitePage,
 });
 
 function CreateInvitePage() {
-  const t = getTranslations();
-
   return (
     <KeySetupGuard>
       <AppLayout>
