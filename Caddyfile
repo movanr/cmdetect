@@ -26,7 +26,7 @@
 }
 
 # Marketing Website (Protected in Dev)
-{$DOMAIN}, www.{$DOMAIN} {
+cmdetect-dev.de, www.cmdetect-dev.de {
     import dev_auth
     import security_headers
     
@@ -44,7 +44,7 @@
 }
 
 # Practitioner Frontend (Basic Auth for MVP - add VPN later)
-app.{$DOMAIN} {
+app.cmdetect-dev.de {
     import dev_auth
     import security_headers
 
@@ -53,7 +53,7 @@ app.{$DOMAIN} {
     try_files {path} /index.html
     encode gzip zstd
 
-    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN} wss://api.{$DOMAIN}; font-src 'self' data:;"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.cmdetect-dev.de https://auth.cmdetect-dev.de wss://api.cmdetect-dev.de; font-src 'self' data:;"
 
     log {
         output file /opt/cmdetect/logs/caddy-app.log {
@@ -64,7 +64,7 @@ app.{$DOMAIN} {
 }
 
 # Patient Frontend
-patient.{$DOMAIN} {
+patient.cmdetect-dev.de {
     import dev_auth
     import security_headers
 
@@ -77,7 +77,7 @@ patient.{$DOMAIN} {
 
     header {
         X-Frame-Options "SAMEORIGIN"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN}; font-src 'self' data:;"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.cmdetect-dev.de https://auth.cmdetect-dev.de; font-src 'self' data:;"
     }
 
     log {
@@ -89,7 +89,7 @@ patient.{$DOMAIN} {
 }
 
 # Auth Server (PUBLIC - NO BASIC AUTH!)
-auth.{$DOMAIN} {
+auth.cmdetect-dev.de {
     import security_headers
 
     # TODO: Add rate limiting plugin later if needed
@@ -115,7 +115,7 @@ auth.{$DOMAIN} {
 }
 
 # Hasura API (PUBLIC - NO BASIC AUTH!)
-api.{$DOMAIN} {
+api.cmdetect-dev.de {
     import security_headers
 
     # TODO: Add rate limiting plugin later if needed
