@@ -33,6 +33,7 @@ COPY --from=deps /app/packages/config/node_modules ./packages/config/node_module
 COPY packages/config ./packages/config
 COPY apps/auth-server ./apps/auth-server
 COPY tsconfig.json ./
+COPY tsconfig.base.json ./
 
 # Build shared config package
 RUN pnpm --filter @cmdetect/config build
