@@ -60,7 +60,7 @@ POSTGRES_PORT=5432
 
 HASURA_PORT=8080
 HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
-HASURA_GRAPHQL_JWT_SECRET={"jwk_url":"http://host.docker.internal:3001/api/auth/jwks"}
+HASURA_GRAPHQL_JWT_SECRET={"jwk_url":"http://auth-server:3001/api/auth/jwks"}
 HASURA_GRAPHQL_UNAUTHORIZED_ROLE=public
 HASURA_GRAPHQL_ENABLE_CONSOLE=false
 HASURA_GRAPHQL_DEV_MODE=false
@@ -70,7 +70,7 @@ DATA_CONNECTOR_PORT=8081
 DATA_CONNECTOR_LOG_LEVEL=ERROR
 
 ################################################################################
-# AUTH SERVER CONFIGURATION (PM2 on Host)
+# AUTH SERVER CONFIGURATION (Docker Container)
 ################################################################################
 
 # Better Auth Secret

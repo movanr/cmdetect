@@ -2,14 +2,13 @@ name: cmdetect
 
 # Production Docker Compose Configuration
 #
-# This setup runs:
-# - PostgreSQL (Docker)
-# - Hasura GraphQL Engine (Docker)
-# - Data Connector Agent (Docker)
+# This setup runs all services in Docker:
+# - PostgreSQL
+# - Hasura GraphQL Engine
+# - Data Connector Agent
+# - Auth Server (Better Auth)
 #
-# Auth Server runs separately with PM2 on the host (not in Docker)
-# - Start Auth Server: pm2 start ecosystem.config.js
-# - Hasura accesses it via host.docker.internal:3001
+# Start all: docker compose -f docker-compose.prod.yml up -d
 #
 
 services:
@@ -44,8 +43,6 @@ services:
     ports:
       # SECURITY: Only bind to localhost (Caddy proxies to it)
       - "127.0.0.1:${HASURA_PORT:-8080}:8080"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     environment:
       HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cmdetect}
       HASURA_GRAPHQL_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cmdetect}
@@ -62,9 +59,10 @@ services:
         condition: service_healthy
       data-connector-agent:
         condition: service_healthy
+      auth-server:
+        condition: service_healthy
     networks:
       - internal
-      - web
     healthcheck:
       test: ["CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
       interval: 10s
@@ -92,11 +90,42 @@ services:
       retries: 5
       start_period: 10s
 
-  # NOTE: Auth Server runs with PM2 on host (not in Docker)
-  # - Listens on localhost:3001
-  # - Hasura accesses it via host.docker.internal:3001
-  # - Managed by PM2 process manager
-  # - See deployment scripts for PM2 setup
+  # Auth Server
+  auth-server:
+    build:
+      context: .
+      dockerfile: apps/auth-server/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-cmdetect}_auth_server
+    restart: unless-stopped
+    ports:
+      # SECURITY: Only bind to localhost (Caddy proxies to it)
+      - "127.0.0.1:3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      POSTGRES_DB: ${POSTGRES_DB:-cmdetect}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET required}
+      FRONTEND_URL: https://app.${DOMAIN}
+      PATIENT_FRONTEND_URL: https://patient.${DOMAIN}
+      # SMTP (optional)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@${DOMAIN}}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/auth/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   postgres_data:
@@ -104,15 +133,10 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME:-cmdetect}_postgres_data
 
 networks:
-  # Internal network - no internet access, only inter-container communication
-  # Used by: PostgreSQL, Data Connector, Hasura
+  # Internal network - isolated network for all services
+  # Used by: PostgreSQL, Hasura, Data Connector, Auth Server
+  # Services communicate via service names (e.g., postgres:5432, auth-server:3001)
   internal:
     name: ${COMPOSE_PROJECT_NAME:-cmdetect}_internal
     driver: bridge
     internal: true
-
-  # Web network - allows Hasura to access host via host.docker.internal
-  # Used by: Hasura (to reach PM2 Auth Server on host)
-  web:
-    name: ${COMPOSE_PROJECT_NAME:-cmdetect}_web
-    driver: bridge

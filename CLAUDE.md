@@ -216,13 +216,13 @@ pnpm test tests/permissions/specific-test.test.ts
 **Hasura Configuration:**
 - `HASURA_PORT` - Hasura GraphQL Engine port (default: 8080)
 - `HASURA_GRAPHQL_ADMIN_SECRET` - Admin access to Hasura (required, 32+ chars)
-- `HASURA_GRAPHQL_JWT_SECRET` - JWT verification config: `{"jwk_url":"http://host.docker.internal:3001/api/auth/jwks"}`
+- `HASURA_GRAPHQL_JWT_SECRET` - JWT verification config: `{"jwk_url":"http://auth-server:3001/api/auth/jwks"}`
 - `HASURA_GRAPHQL_UNAUTHORIZED_ROLE` - Default role for unauthenticated requests (default: public)
 - `HASURA_GRAPHQL_ENABLE_CONSOLE` - Enable Hasura Console (true for dev, false for production)
 - `HASURA_GRAPHQL_DEV_MODE` - Enable dev mode (true for dev, false for production)
 - `HASURA_GRAPHQL_CORS_DOMAIN` - CORS domains (dev: *, prod: https://*.yourdomain.com)
 
-**Auth Server Configuration (PM2 on Host):**
+**Auth Server Configuration (Docker Container):**
 - `BETTER_AUTH_SECRET` - Better Auth session encryption key (required, 32+ chars)
 - `FRONTEND_URL` - Practitioner frontend URL for CORS (dev: http://localhost:3000, prod: https://app.yourdomain.com)
 - `PATIENT_FRONTEND_URL` - Patient frontend URL for CORS (dev: http://localhost:3002, prod: https://patient.yourdomain.com)
@@ -246,7 +246,8 @@ pnpm test tests/permissions/specific-test.test.ts
 **Important Notes:**
 
 - **Shared Database**: Better Auth and Hasura use the same PostgreSQL database (cmdetect)
-- **Auth Server Access**: Hasura accesses Auth Server via `host.docker.internal:3001` (Docker → Host)
+- **All Services in Docker**: PostgreSQL, Hasura, Auth Server, Data Connector all run in Docker
+- **Service Names**: Services communicate via Docker service names (e.g., `postgres:5432`, `auth-server:3001`)
 - **Direct DB Access**: Auth Server action handlers query PostgreSQL directly (not through Hasura)
 - **JWKS Authentication**: Better Auth generates JWT keys automatically, exposed at `/api/auth/jwks`
 
