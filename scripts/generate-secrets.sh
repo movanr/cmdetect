@@ -18,8 +18,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}Generating secure secrets for CMDetect...${NC}\n"
-
 # Generate PostgreSQL password (32 chars, alphanumeric)
 POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 
@@ -33,7 +31,7 @@ BETTER_AUTH_SECRET=$(openssl rand -hex 32)
 JWT_SECRET_KEY=$(openssl rand -hex 32)
 
 # Output .env template
-cat <<EOF > .env
+cat <<EOF > /opt/cmdetect/.env
 # Node Environment
 NODE_ENV=production
 
@@ -62,4 +60,9 @@ PATIENT_FRONTEND_URL=http://localhost:3002
 
 EOF
 
-echo -e "\n${GREEN}✓ Secrets generated successfully!${NC}"
+cat <<EOF > /opt/cmdetect/apps/hasura/.env
+# Hasura Admin Secret
+HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
+EOF
+
+echo -e "\n${GREEN}✓ Secrets and .env files generated successfully!${NC}"
