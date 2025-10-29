@@ -18,8 +18,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}Generating secure secrets for CMDetect...${NC}\n"
-
 # Generate PostgreSQL password (32 chars, alphanumeric)
 POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 
@@ -103,12 +101,3 @@ PATIENT_FRONTEND_URL=https://patient.\${DOMAIN}
 # RCLONE_PATH=backups/cmdetect
 
 EOF
-
-echo ""
-echo -e "${GREEN}SUCCESS: Secrets generated successfully!${NC}"
-echo -e "${YELLOW}Remember to:${NC}"
-echo -e "  1. Save output to file: ./scripts/generate-secrets.sh > .env"
-echo -e "  2. Update DOMAIN to your actual domain"
-echo -e "  3. Uncomment and configure SMTP if you want email verification"
-echo -e "  4. Set file permissions: chmod 600 .env"
-echo -e "  5. NEVER commit .env to git"
