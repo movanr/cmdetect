@@ -63,29 +63,23 @@ app.{$DOMAIN} {
     }
 }
 
-# Patient Frontend 
+# Patient Frontend
 patient.{$DOMAIN} {
     import dev_auth
     import security_headers
-    
+
     root * /opt/cmdetect/apps/patient-frontend/dist
     file_server
     try_files {path} /index.html
     encode gzip zstd
-    
-    rate_limit {
-        zone patient {
-            key {remote_host}
-            events 120
-            window 1m
-        }
-    }
-    
+
+    # TODO: Add rate limiting plugin later if needed
+
     header {
         X-Frame-Options "SAMEORIGIN"
         Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN}; font-src 'self' data:;"
     }
-    
+
     log {
         output file /opt/cmdetect/logs/caddy-patient.log {
             roll_size 10mb
@@ -97,15 +91,9 @@ patient.{$DOMAIN} {
 # Auth Server (PUBLIC - NO BASIC AUTH!)
 auth.{$DOMAIN} {
     import security_headers
-    
-    rate_limit {
-        zone auth {
-            key {remote_host}
-            events 60
-            window 1m
-        }
-    }
-    
+
+    # TODO: Add rate limiting plugin later if needed
+
     reverse_proxy localhost:3001 {
         header_up Host {host}
         header_up X-Real-IP {remote_host}
@@ -129,15 +117,9 @@ auth.{$DOMAIN} {
 # Hasura API (PUBLIC - NO BASIC AUTH!)
 api.{$DOMAIN} {
     import security_headers
-    
-    rate_limit {
-        zone api {
-            key {remote_host}
-            events 200
-            window 1m
-        }
-    }
-    
+
+    # TODO: Add rate limiting plugin later if needed
+
     # Block Admin Secret from browsers
     @has_admin_secret {
         header X-Hasura-Admin-Secret *
