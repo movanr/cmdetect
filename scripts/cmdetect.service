@@ -1,0 +1,35 @@
+[Unit]
+Description=CMDetect Docker Stack
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/cmdetect
+User=root
+Group=docker
+
+# Environment file
+EnvironmentFile=/opt/cmdetect/.env
+
+# Start command
+ExecStart=/usr/bin/docker compose -f /opt/cmdetect/docker-compose.prod.yml up -d
+
+# Stop command
+ExecStop=/usr/bin/docker compose -f /opt/cmdetect/docker-compose.prod.yml down
+
+# Reload command (for updates without downtime)
+ExecReload=/usr/bin/docker compose -f /opt/cmdetect/docker-compose.prod.yml up -d --force-recreate
+
+# Restart policy
+Restart=on-failure
+RestartSec=10s
+
+# Timeout settings
+TimeoutStartSec=300
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,138 @@
+name: cmdetect
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-cmdetect}_postgres
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cmdetect}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+    ports:
+      # SECURITY: Only bind to localhost (not exposed to internet)
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-cmdetect}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Hasura GraphQL Engine
+  hasura:
+    image: hasura/graphql-engine:v2.46.0
+    container_name: ${COMPOSE_PROJECT_NAME:-cmdetect}_hasura
+    restart: unless-stopped
+    ports:
+      # SECURITY: Only bind to localhost (Caddy proxies to it)
+      - "127.0.0.1:${HASURA_PORT:-8080}:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cmdetect}
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cmdetect}
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET:?HASURA_GRAPHQL_ADMIN_SECRET required}
+      HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET:?HASURA_GRAPHQL_JWT_SECRET required}
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: ${HASURA_GRAPHQL_UNAUTHORIZED_ROLE:-public}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: ${HASURA_GRAPHQL_ENABLE_CONSOLE:-false}
+      HASURA_GRAPHQL_DEV_MODE: ${HASURA_GRAPHQL_DEV_MODE:-false}
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: ${HASURA_GRAPHQL_ENABLED_LOG_TYPES:-startup,http-log,webhook-log}
+      HASURA_GRAPHQL_CORS_DOMAIN: ${HASURA_GRAPHQL_CORS_DOMAIN:-https://*.${DOMAIN}}
+      HASURA_GRAPHQL_METADATA_DEFAULTS: '{"backend_configs":{"dataconnector":{"athena":{"uri":"http://data-connector-agent:8081/api/v1/athena"},"mariadb":{"uri":"http://data-connector-agent:8081/api/v1/mariadb"},"mysql8":{"uri":"http://data-connector-agent:8081/api/v1/mysql"},"oracle":{"uri":"http://data-connector-agent:8081/api/v1/oracle"},"snowflake":{"uri":"http://data-connector-agent:8081/api/v1/snowflake"}}}}'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      data-connector-agent:
+        condition: service_healthy
+    networks:
+      - internal
+      - web
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Hasura Data Connector Agent
+  data-connector-agent:
+    image: hasura/graphql-data-connector:v2.46.0
+    container_name: ${COMPOSE_PROJECT_NAME:-cmdetect}_data_connector
+    restart: unless-stopped
+    ports:
+      # SECURITY: Only bind to localhost
+      - "127.0.0.1:${DATA_CONNECTOR_PORT:-8081}:8081"
+    environment:
+      QUARKUS_LOG_LEVEL: ${DATA_CONNECTOR_LOG_LEVEL:-ERROR}
+      QUARKUS_OPENTELEMETRY_ENABLED: "false"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/v1/athena/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Better Auth Server
+  auth-server:
+    build:
+      context: .
+      dockerfile: apps/auth-server/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-cmdetect}_auth_server
+    restart: unless-stopped
+    ports:
+      # SECURITY: Only bind to localhost (Caddy proxies to it)
+      - "127.0.0.1:${AUTH_SERVER_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET required}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cmdetect}
+      HASURA_API_URL: http://hasura:8080/v1/graphql
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
+      FRONTEND_URL: https://app.${DOMAIN}
+      PATIENT_FRONTEND_URL: https://patient.${DOMAIN}
+      # SMTP (optional)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@${DOMAIN}}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      hasura:
+        condition: service_healthy
+    networks:
+      - internal
+      - web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/auth/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_data:
+    driver: local
+    name: ${COMPOSE_PROJECT_NAME:-cmdetect}_postgres_data
+
+networks:
+  # Internal network - no internet access, only inter-container communication
+  internal:
+    name: ${COMPOSE_PROJECT_NAME:-cmdetect}_internal
+    driver: bridge
+    internal: true
+
+  # Web network - for containers that need Caddy reverse proxy access
+  web:
+    name: ${COMPOSE_PROJECT_NAME:-cmdetect}_web
+    driver: bridge
