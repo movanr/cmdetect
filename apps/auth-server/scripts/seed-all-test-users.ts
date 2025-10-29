@@ -10,7 +10,7 @@ dotenv.config({ path: resolve(__dirname, "../../../.env") });
 // Create a minimal Better Auth instance for testing
 const testAuth = betterAuth({
   database: new Pool({
-    connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:5432/${process.env.POSTGRES_DB}`,
+    connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || 5432}/${process.env.POSTGRES_DB}`,
   }),
   secret: process.env.BETTER_AUTH_SECRET!,
   emailAndPassword: {
@@ -21,7 +21,7 @@ const testAuth = betterAuth({
 
 // Initialize database pool for metadata operations
 const pool = new Pool({
-  connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@localhost:5432/${process.env.POSTGRES_DB}`,
+  connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || 5432}/${process.env.POSTGRES_DB}`,
 });
 
 // Test organizations from your data
