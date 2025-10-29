@@ -1,0 +1,228 @@
+{
+    email admin@cmdetect.de
+
+    # Global Options
+    servers {
+        protocol {
+            experimental_http3
+        }
+    }
+}
+
+# Global Basic Auth Snippet für Entwicklung
+(dev_auth) {
+    basic_auth {
+        # Username: dev, Password: your-password
+        # Generate hash: caddy hash-password --plaintext 'your-password'
+        dev $2a$14$/dZPeItIHcfpa14LFLHLeun86uccqZghpH5YLJa5wysMgI778usjS
+    }
+}
+
+# Marketing Website
+{$DOMAIN}, www.{$DOMAIN} {
+    import dev_auth
+
+    root * /opt/cmdetect/apps/marketing/dist
+
+    # Nur sichere Dateitypen erlauben
+    @allowed_files {
+        path *.html *.css *.js *.json *.svg *.png *.jpg *.jpeg *.gif *.webp *.woff *.woff2 *.ttf *.ico /
+    }
+
+    file_server
+    try_files {path} /index.html
+    encode gzip zstd
+    
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-marketing.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+# Practitioner Frontend (VPN only)
+app.{$DOMAIN} {
+    import dev_auth
+
+    @vpn_only {
+        remote_ip 10.0.0.0/24
+    }
+    
+    handle @vpn_only {
+        root * /opt/cmdetect/apps/frontend/dist
+        file_server
+        try_files {path} /index.html
+        encode gzip zstd
+        
+        header {
+            Strict-Transport-Security "max-age=31536000; includeSubDomains"
+            X-Frame-Options "DENY"
+            X-Content-Type-Options "nosniff"
+            X-XSS-Protection "1; mode=block"
+            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN}"
+            -Server
+        }
+    }
+    
+    handle {
+        respond "Access Denied - VPN Required" 403
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-app.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+# Patient Frontend (Public)
+patient.{$DOMAIN} {
+    import dev_auth
+
+    root * /opt/cmdetect/apps/patient-frontend/dist
+    file_server
+    try_files {path} /index.html
+    encode gzip zstd
+    
+    # Rate limiting gegen DoS
+    rate_limit {
+        zone patient {
+            key {remote_host}
+            events 60
+            window 1m
+        }
+    }
+    
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN}"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-patient.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+# Auth Server (Public but rate limited)
+auth.{$DOMAIN} {
+
+    # Aggressive Rate Limiting
+    rate_limit {
+        zone auth {
+            key {remote_host}
+            events 20
+            window 1m
+        }
+    }
+    
+    reverse_proxy localhost:3001 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        
+        # Timeouts
+        transport http {
+            dial_timeout 5s
+            response_header_timeout 10s
+        }
+    }
+    
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+    
+    log {
+        output file /opt/cmdetect/logs/caddy-auth.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+api.{$DOMAIN} {
+    # Rate limiting für API
+    rate_limit {
+        zone api {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
+
+    # SECURITY: Admin Secret darf nicht von Frontends verwendet werden
+    @has_admin_secret {
+        header X-Hasura-Admin-Secret *
+    }
+    handle @has_admin_secret {
+        respond "Forbidden: Admin Secret not allowed from browser" 403
+    }
+
+    # CORS für Frontends (nur eigene Domains)
+    @cors_preflight method OPTIONS
+    handle @cors_preflight {
+        header Access-Control-Allow-Origin "https://app.{$DOMAIN}"
+        header Vary Origin
+        header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+        header Access-Control-Allow-Headers "Content-Type, Authorization"
+        header Access-Control-Max-Age "86400"
+        respond 204
+    }
+
+    reverse_proxy localhost:8080 {
+        header_up Connection {>Connection}
+        header_up Upgrade {>Upgrade}
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        transport http {
+            dial_timeout 5s
+            response_header_timeout 30s
+        }
+    }
+
+    # CORS Header für Responses (nur eigene Domains)
+    @cors_origin {
+        header Origin https://app.{$DOMAIN}
+        header Origin https://patient.{$DOMAIN}
+    }
+    header @cors_origin Access-Control-Allow-Origin "{http.request.header.Origin}"
+    header Vary Origin
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+
+    log {
+        output file /opt/cmdetect/logs/caddy-api.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
