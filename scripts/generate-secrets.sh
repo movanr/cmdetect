@@ -24,7 +24,7 @@ echo -e "${GREEN}Generating secure secrets for CMDetect...${NC}\n"
 POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 
 # Generate Hasura Admin Secret (64 chars hex)
-HASURA_ADMIN_SECRET=$(openssl rand -hex 32)
+HASURA_ADMIN_SECRET=$(openssl rand -hex 64)
 
 # Generate Better Auth Secret (64 chars hex)
 BETTER_AUTH_SECRET=$(openssl rand -hex 32)
@@ -34,76 +34,32 @@ JWT_SECRET_KEY=$(openssl rand -hex 32)
 
 # Output .env template
 cat <<EOF
-# CMDetect Production Environment Variables
-# Generated on $(date)
-
-################################################################################
-# DEPLOYMENT CONFIGURATION
-################################################################################
-
-# Domain (CHANGE THIS!)
-DOMAIN=staging.cmdetect.de
-
 # Node Environment
 NODE_ENV=production
 
-# Compose Project
-COMPOSE_PROJECT_NAME=cmdetect
-
-################################################################################
-# DATABASE CONFIGURATION (AUTO-GENERATED)
-################################################################################
-
+# Database
 POSTGRES_DB=cmdetect
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_PORT=5432
 
-################################################################################
-# HASURA CONFIGURATION (AUTO-GENERATED)
-################################################################################
+# Service URLs
+AUTH_SERVER_URL=http://localhost:3001
+HASURA_API_URL=http://localhost:8080
+HASURA_TEST_ENDPOINT=http://localhost:8080/v1/graphql
+FRONTEND_URL=http://localhost:3000
 
-HASURA_PORT=8080
+# Hasura Admin Secret
 HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
-HASURA_GRAPHQL_JWT_SECRET={"type":"HS256","key":"${JWT_SECRET_KEY}"}
-HASURA_GRAPHQL_UNAUTHORIZED_ROLE=public
-HASURA_GRAPHQL_ENABLE_CONSOLE=false
-HASURA_GRAPHQL_DEV_MODE=false
-HASURA_GRAPHQL_ENABLED_LOG_TYPES=startup,http-log,webhook-log
-DATA_CONNECTOR_PORT=8081
-DATA_CONNECTOR_LOG_LEVEL=ERROR
 
-################################################################################
-# AUTH SERVER CONFIGURATION (AUTO-GENERATED)
-################################################################################
-
-AUTH_SERVER_PORT=3001
+# Better Auth Configuration
 BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
 
-################################################################################
-# SMTP CONFIGURATION (OPTIONAL - CONFIGURE MANUALLY)
-################################################################################
+# JWT Configuration (using JWKS endpoint)
+HASURA_GRAPHQL_JWT_SECRET={"jwk_url":"http://auth.cmdetect-dev.de:3001/api/auth/jwks"}
 
-# Email service (Gmail, SendGrid, AWS SES, etc.)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=noreply@staging.cmdetect.de
 
-################################################################################
-# BACKUP CONFIGURATION (OPTIONAL)
-################################################################################
-
-# Hetzner Storage Box (for rclone backups)
-# RCLONE_REMOTE=hetzner
-# RCLONE_PATH=backups/cmdetect
+PATIENT_FRONTEND_URL=http://localhost:3002
 
 EOF
 
 echo -e "\n${GREEN}✓ Secrets generated successfully!${NC}"
-echo -e "${YELLOW}⚠ Remember to:${NC}"
-echo -e "  1. Update DOMAIN to your actual domain"
-echo -e "  2. Configure SMTP settings if you want email verification"
-echo -e "  3. Keep this .env file secure (chmod 600)"
-echo -e "  4. NEVER commit .env to git"
