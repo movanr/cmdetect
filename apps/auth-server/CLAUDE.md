@@ -83,13 +83,28 @@ All test users use password: `TestPassword123!`
 ## Environment Variables Required
 
 ### Authentication Server
-- `DATABASE_URL`: PostgreSQL connection string for Better Auth
+
+The auth server reads environment variables from the root `.env` file (not from `apps/auth-server/.env`).
+
+**Required:**
+- `POSTGRES_DB`: Database name (e.g., cmdetect)
+- `POSTGRES_USER`: Database username (e.g., postgres)
+- `POSTGRES_PASSWORD`: Database password
 - `BETTER_AUTH_SECRET`: Better Auth session secret (minimum 32 characters)
-- `JWT_PRIVATE_KEY`: RS256 private key for JWT signing
-- `PORT`: Server port (defaults to 3001)
-- `FRONTEND_URL`: CORS origin (defaults to http://localhost:3000)
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`: Email configuration
-- `POSTGRES_PASSWORD`: Database password for Docker setup
+- `FRONTEND_URL`: Practitioner frontend URL for CORS (e.g., http://localhost:3000 or https://app.yourdomain.com)
+
+**Optional:**
+- `PATIENT_FRONTEND_URL`: Patient frontend URL for additional CORS (e.g., http://localhost:3002)
+- `SMTP_HOST`: SMTP server hostname (e.g., smtp.gmail.com)
+- `SMTP_PORT`: SMTP port (587 for TLS, 465 for SSL)
+- `SMTP_USER`: SMTP username/email
+- `SMTP_PASS`: SMTP password/app password
+- `SMTP_FROM`: From email address (optional, defaults to SMTP_USER)
+
+**Note:**
+- The auth server connects directly to PostgreSQL (shared database with Hasura)
+- Better Auth generates JWT keys automatically (JWKS endpoint: `/api/auth/jwks`)
+- No `HASURA_API_URL` or `HASURA_GRAPHQL_ADMIN_SECRET` needed - action handlers query PostgreSQL directly
 
 
 ## Development Setup

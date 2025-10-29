@@ -207,37 +207,48 @@ pnpm test tests/permissions/specific-test.test.ts
 
 **Root .env** (copy from `.env.example`):
 
-- `DATABASE_URL` - PostgreSQL connection for Better Auth
-- `HASURA_DATABASE_URL` - Application database connection
-- `BETTER_AUTH_SECRET` - Session encryption key (32+ characters)
-- `HASURA_GRAPHQL_ADMIN_SECRET` - Admin access to Hasura
-- `AUTH_SERVER_URL` - Auth server URL (http://localhost:3001)
-- `FRONTEND_URL` - Practitioner frontend URL (http://localhost:3000)
-- `PATIENT_FRONTEND_URL` - Patient frontend URL (http://localhost:3002) - Optional
-- `API_URL` - API endpoint (http://api.cmdetect.local for local dev with Caddy, or http://localhost:8080 for direct access)
-- `HASURA_GRAPHQL_JWT_SECRET` - JWT verification configuration
-- `SMTP_*` - Email configuration (optional for development)
+**Database Configuration (Shared by Better Auth + Hasura):**
+- `POSTGRES_DB` - PostgreSQL database name (default: cmdetect)
+- `POSTGRES_USER` - PostgreSQL username (default: postgres)
+- `POSTGRES_PASSWORD` - PostgreSQL password (required)
+- `POSTGRES_PORT` - PostgreSQL port (default: 5432)
 
-**Hasura .env** (apps/hasura/.env):
+**Hasura Configuration:**
+- `HASURA_PORT` - Hasura GraphQL Engine port (default: 8080)
+- `HASURA_GRAPHQL_ADMIN_SECRET` - Admin access to Hasura (required, 32+ chars)
+- `HASURA_GRAPHQL_JWT_SECRET` - JWT verification config: `{"jwk_url":"http://host.docker.internal:3001/api/auth/jwks"}`
+- `HASURA_GRAPHQL_UNAUTHORIZED_ROLE` - Default role for unauthenticated requests (default: public)
+- `HASURA_GRAPHQL_ENABLE_CONSOLE` - Enable Hasura Console (true for dev, false for production)
+- `HASURA_GRAPHQL_DEV_MODE` - Enable dev mode (true for dev, false for production)
+- `HASURA_GRAPHQL_CORS_DOMAIN` - CORS domains (dev: *, prod: https://*.yourdomain.com)
 
-- `DB_URL` - PostgreSQL connection string
-- `HASURA_GRAPHQL_ADMIN_SECRET` - Must match root .env
-- `AUTH_SERVER_URL` - Must match auth server URL
+**Auth Server Configuration (PM2 on Host):**
+- `BETTER_AUTH_SECRET` - Better Auth session encryption key (required, 32+ chars)
+- `FRONTEND_URL` - Practitioner frontend URL for CORS (dev: http://localhost:3000, prod: https://app.yourdomain.com)
+- `PATIENT_FRONTEND_URL` - Patient frontend URL for CORS (dev: http://localhost:3002, prod: https://patient.yourdomain.com)
+
+**SMTP Configuration (Optional - for Email Verification):**
+- `SMTP_HOST` - SMTP server hostname (e.g., smtp.gmail.com)
+- `SMTP_PORT` - SMTP port (587 for TLS, 465 for SSL)
+- `SMTP_USER` - SMTP username/email
+- `SMTP_PASS` - SMTP password/app password
+- `SMTP_FROM` - From email address (optional, defaults to SMTP_USER)
 
 **Frontend Environment Variables** (Vite apps):
 
-- Frontends use `VITE_HASURA_GRAPHQL_URL` instead of `API_URL`
+- Frontends use `VITE_HASURA_GRAPHQL_URL` instead of direct database URLs
 - For local dev with Caddy: `VITE_HASURA_GRAPHQL_URL=http://api.cmdetect.local/v1/graphql`
 - For direct access: `VITE_HASURA_GRAPHQL_URL=http://localhost:8080/v1/graphql`
+- For production: `VITE_HASURA_GRAPHQL_URL=https://api.yourdomain.com/v1/graphql`
 - Note: Frontend .env files are separate from root .env (Vite-specific requirement)
 - Both practitioner and patient frontends use the same variable
 
-**Environment Variable Usage:**
+**Important Notes:**
 
-- **Backend/Node.js** (auth-server, tests): Use `API_URL` from root .env
-- **Frontend/Vite** (practitioner, patient): Use `VITE_HASURA_GRAPHQL_URL` from app-specific .env
-- `API_URL` is validated via `@cmdetect/config` Zod schemas
-- Frontend env vars are not validated (Vite handles them)
+- **Shared Database**: Better Auth and Hasura use the same PostgreSQL database (cmdetect)
+- **Auth Server Access**: Hasura accesses Auth Server via `host.docker.internal:3001` (Docker → Host)
+- **Direct DB Access**: Auth Server action handlers query PostgreSQL directly (not through Hasura)
+- **JWKS Authentication**: Better Auth generates JWT keys automatically, exposed at `/api/auth/jwks`
 
 ## Development Patterns
 
