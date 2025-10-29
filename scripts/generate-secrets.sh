@@ -33,7 +33,7 @@ BETTER_AUTH_SECRET=$(openssl rand -hex 32)
 JWT_SECRET_KEY=$(openssl rand -hex 32)
 
 # Output .env template
-cat <<EOF
+cat <<EOF > .env
 # Node Environment
 NODE_ENV=production
 
