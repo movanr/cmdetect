@@ -14,7 +14,7 @@ const app = express();
 
 // Database connection
 const dbPool = new Pool({
-  connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@localhost:5432/${env.POSTGRES_DB}`,
+  connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST || 'localhost'}:${env.POSTGRES_PORT || 5432}/${env.POSTGRES_DB}`,
 });
 
 // Initialize services

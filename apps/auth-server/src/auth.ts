@@ -9,7 +9,7 @@ import { env } from "./env";
 
 export const auth = betterAuth({
   database: new Pool({
-    connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@localhost:5432/${env.POSTGRES_DB}`,
+    connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST || 'localhost'}:${env.POSTGRES_PORT || 5432}/${env.POSTGRES_DB}`,
   }),
 
   // Better Auth session secret (separate from JWT signing key)
