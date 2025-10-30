@@ -63,6 +63,7 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - default
     healthcheck:
       test: ["CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
       interval: 10s
@@ -122,6 +123,7 @@ services:
         condition: service_healthy
     networks:
       - internal
+      - default
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1))"]
       interval: 10s
