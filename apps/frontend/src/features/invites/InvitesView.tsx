@@ -102,7 +102,7 @@ export function InvitesView() {
         const isSuccess = status === "submitted";
         const isFailure = status === "expired" || status === "consent_denied";
         const url = token
-          ? `${window.location.origin}/patient?token=${token}`
+          ? `${window.location.protocol}//${window.location.hostname.replace(/^app\./, 'patient.')}?token=${token}`
           : "";
 
         return (
