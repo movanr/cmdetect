@@ -2,28 +2,28 @@ actions:
   - name: submitPatientConsent
     definition:
       kind: synchronous
-      handler: http://host.docker.internal:3001/actions/submit-patient-consent
+      handler: http://auth-server:3001/actions/submit-patient-consent
       forward_client_headers: true
     permissions:
       - role: public
   - name: submitPatientPersonalData
     definition:
       kind: synchronous
-      handler: http://host.docker.internal:3001/actions/submit-patient-personal-data
+      handler: http://auth-server:3001/actions/submit-patient-personal-data
       forward_client_headers: true
     permissions:
       - role: public
   - name: submitQuestionnaireResponse
     definition:
       kind: synchronous
-      handler: http://host.docker.internal:3001/actions/submit-questionnaire-response
+      handler: http://auth-server:3001/actions/submit-questionnaire-response
       forward_client_headers: true
     permissions:
       - role: public
   - name: validateInviteToken
     definition:
       kind: synchronous
-      handler: http://host.docker.internal:3001/actions/validate-invite-token
+      handler: http://auth-server:3001/actions/validate-invite-token
       forward_client_headers: true
     permissions:
       - role: public
