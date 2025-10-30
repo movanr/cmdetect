@@ -153,14 +153,7 @@ api.{$DOMAIN} {
             response_header_timeout 30s
         }
     }
-    
-    # CORS Response Headers (Dev: wildcard)
-    header {
-        Access-Control-Allow-Origin "*"
-        Access-Control-Allow-Credentials "true"
-        Vary "Origin"
-    }
-    
+
     log {
         output file /opt/cmdetect/logs/caddy-api.log {
             roll_size 10mb
