@@ -6,17 +6,25 @@
 # Generates secure random secrets for production deployment
 #
 # Usage:
-#   ./scripts/generate-secrets.sh > .env.production
-#   # Then manually edit DOMAIN and SMTP settings
+#   ./scripts/generate-secrets.sh [DOMAIN] > .env
+#
+# Examples:
+#   ./scripts/generate-secrets.sh cmdetect-dev.de > .env
 #
 ################################################################################
 
 set -euo pipefail
 
+# Get domain from command line argument or use default
+DOMAIN="${1:-cmdetect-dev.de}"
+
 # Color codes
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
+# Output info to stderr so it doesn't end up in .env file
+>&2 echo -e "${GREEN}Generating secrets for domain: ${DOMAIN}${NC}"
 
 # Generate PostgreSQL password (32 chars, alphanumeric)
 POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
@@ -30,14 +38,14 @@ BETTER_AUTH_SECRET=$(openssl rand -hex 32)
 # Output .env template
 cat <<EOF
 # CMDetect Production Environment Variables
-# Generated on $(date)
+# Generated on $(date) for domain: ${DOMAIN}
 
 ################################################################################
 # DEPLOYMENT CONFIGURATION
 ################################################################################
 
 # Domain
-DOMAIN=cmdetect-dev.de
+DOMAIN=${DOMAIN}
 
 # Node Environment
 NODE_ENV=production
