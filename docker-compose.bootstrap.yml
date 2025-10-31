@@ -1,5 +1,16 @@
 name: cmdetect
 
+# Bootstrap Docker Compose Configuration
+#
+# Used for initial migrations and metadata application
+# Runs PostgreSQL and Hasura temporarily for setup
+#
+# Environment Variables:
+# - Loaded from /opt/cmdetect/.env (portable config)
+# - Overridden by /var/www/cmdetect/.env (server-specific secrets)
+# - Scripts source these files before calling docker-compose
+#
+
 services:
   postgres:
     image: postgres:15-alpine

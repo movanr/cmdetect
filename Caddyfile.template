@@ -1,5 +1,5 @@
 {
-    email admin@cmdetect.de
+    email ${EMAIL}
 
     # Enable HTTP/3
     servers {
@@ -7,18 +7,14 @@
     }
 }
 
-# Protected snippet (will be configured based on ENV)
-# For dev: includes basic auth
-# For prod: empty
-(protected) {
-    # ENV_PLACEHOLDER
+# Development Basic Auth snippet (injected via env var)
+(dev_auth) {
+    ${CADDY_BASIC_AUTH_BLOCK}
 }
 
-# Development Basic Auth snippet
-(dev_auth) {
-    basic_auth {
-        dev $2a$14$/dZPeItIHcfpa14LFLHLeun86uccqZghpH5YLJa5wysMgI778usjS
-    }
+# Protected snippet - imports dev_auth (which is empty in production)
+(protected) {
+    import dev_auth
 }
 
 # Common Security Headers
@@ -33,15 +29,15 @@
 }
 
 # Marketing Website (Protected in Dev)
-{$DOMAIN}, www.{$DOMAIN} {
+${DOMAIN}, www.${DOMAIN} {
     import protected
     import security_headers
-    
+
     root * /opt/cmdetect/apps/marketing/dist
     file_server
     try_files {path} /index.html
     encode gzip zstd
-    
+
     log {
         output file /opt/cmdetect/logs/caddy-marketing.log {
             roll_size 10mb
@@ -51,7 +47,7 @@
 }
 
 # Practitioner Frontend (Protected in Dev)
-app.{$DOMAIN} {
+app.${DOMAIN} {
     import protected
     import security_headers
 
@@ -60,7 +56,7 @@ app.{$DOMAIN} {
     try_files {path} /index.html
     encode gzip zstd
 
-    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN} wss://api.{$DOMAIN}; font-src 'self' data:;"
+    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.${DOMAIN} https://auth.${DOMAIN} wss://api.${DOMAIN}; font-src 'self' data:;"
 
     log {
         output file /opt/cmdetect/logs/caddy-app.log {
@@ -71,7 +67,7 @@ app.{$DOMAIN} {
 }
 
 # Patient Frontend (Protected in Dev)
-patient.{$DOMAIN} {
+patient.${DOMAIN} {
     import protected
     import security_headers
 
@@ -84,7 +80,7 @@ patient.{$DOMAIN} {
 
     header {
         X-Frame-Options "SAMEORIGIN"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.{$DOMAIN} https://auth.{$DOMAIN}; font-src 'self' data:;"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.${DOMAIN} https://auth.${DOMAIN}; font-src 'self' data:;"
     }
 
     log {
@@ -96,7 +92,7 @@ patient.{$DOMAIN} {
 }
 
 # Auth Server (PUBLIC - NO BASIC AUTH!)
-auth.{$DOMAIN} {
+auth.${DOMAIN} {
     import security_headers
 
     # TODO: Add rate limiting plugin later if needed
@@ -106,13 +102,13 @@ auth.{$DOMAIN} {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
-        
+
         transport http {
             dial_timeout 5s
             response_header_timeout 10s
         }
     }
-    
+
     log {
         output file /opt/cmdetect/logs/caddy-auth.log {
             roll_size 10mb
@@ -122,7 +118,7 @@ auth.{$DOMAIN} {
 }
 
 # Hasura API (PUBLIC - NO BASIC AUTH!)
-api.{$DOMAIN} {
+api.${DOMAIN} {
     import security_headers
 
     # TODO: Add rate limiting plugin later if needed
@@ -134,7 +130,7 @@ api.{$DOMAIN} {
     handle @has_admin_secret {
         respond "Forbidden" 403
     }
-    
+
     # CORS Preflight
     @cors_preflight method OPTIONS
     handle @cors_preflight {
@@ -145,7 +141,7 @@ api.{$DOMAIN} {
         header Access-Control-Max-Age "86400"
         respond 204
     }
-    
+
     # Hasura Reverse Proxy
     reverse_proxy localhost:8080 {
         header_up Connection {>Connection}
@@ -154,7 +150,7 @@ api.{$DOMAIN} {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
-        
+
         transport http {
             dial_timeout 5s
             response_header_timeout 30s

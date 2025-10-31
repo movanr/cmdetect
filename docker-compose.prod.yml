@@ -8,6 +8,11 @@ name: cmdetect
 # - Data Connector Agent
 # - Auth Server (Better Auth)
 #
+# Environment Variables:
+# - Loaded from /opt/cmdetect/.env (portable config)
+# - Overridden by /var/www/cmdetect/.env (server-specific secrets)
+# - Scripts source these files before calling docker-compose
+#
 # Start all: docker compose -f docker-compose.prod.yml up -d
 #
 

@@ -10,10 +10,14 @@ build/
 *.tsbuildinfo
 .turbo/
 
-# Environment files
+# Environment files (generated, not tracked)
 .env
 .env.local
 .env.production
+
+# Environment templates (tracked in git)
+!.env.template
+!*.env.template
 
 # Secrets and keys
 .keys/

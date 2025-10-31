@@ -1,5 +1,13 @@
 name: cmdetect
 
+# Development Docker Compose Configuration
+#
+# Environment Variables:
+# - Loaded from /opt/cmdetect/.env (portable config)
+# - Overridden by /var/www/cmdetect/.env (server-specific secrets) if exists
+# - For local development, typically just uses .env in project root
+#
+
 services:
   postgres:
     image: postgres:15-alpine

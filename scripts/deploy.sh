@@ -6,14 +6,13 @@
 # This script orchestrates the complete deployment of CMDetect
 #
 # Usage (as root):
-#   sudo ./scripts/deploy.sh [ENV] [DOMAIN]
+#   sudo ./scripts/deploy.sh
 #
-# Example:
-#   sudo ./scripts/deploy.sh dev cmdetect-dev.de
-#   sudo ./scripts/deploy.sh prod cmdetect.de
+# Prerequisites:
+#   - Server configuration in /var/www/cmdetect/.env (DOMAIN, ENVIRONMENT, etc.)
 #
 # What this script does:
-#   1. Runs setup-server.sh (installs prerequisites)
+#   1. Runs setup-server.sh (installs prerequisites) if needed
 #   2. Clones repository as cmdetect user (if not exists)
 #   3. Runs deploy-app.sh as cmdetect user (builds and deploys app)
 #   4. Runs setup-caddy.sh (configures reverse proxy with SSL)
@@ -22,22 +21,27 @@
 
 set -euo pipefail
 
-# Check required arguments
-if [ $# -lt 2 ]; then
-  echo "ERROR: Missing required arguments"
-  echo "Usage: $0 [ENV] [DOMAIN]"
-  echo "Example: $0 dev cmdetect-dev.de"
-  echo "Example: $0 prod cmdetect.com"
+# Load environment variables
+if [ ! -f "/var/www/cmdetect/.env" ]; then
+  echo "ERROR: /var/www/cmdetect/.env not found"
+  echo "Please create it from server.env.example and configure DOMAIN, ENVIRONMENT, etc."
   exit 1
 fi
 
-# Get environment and domain from command line arguments
-ENV="${1}"
-DOMAIN="${2}"
+# Source environment files (server-specific overrides portable config)
+set -a
+[ -f "/opt/cmdetect/.env" ] && source /opt/cmdetect/.env 2>/dev/null || true
+source /var/www/cmdetect/.env
+set +a
 
-# Validate ENV
-if [[ "$ENV" != "dev" && "$ENV" != "prod" ]]; then
-  echo "ERROR: ENV must be 'dev' or 'prod', got: $ENV"
+# Validate required variables
+if [ -z "${DOMAIN:-}" ]; then
+  echo "ERROR: DOMAIN not set in /var/www/cmdetect/.env"
+  exit 1
+fi
+
+if [ -z "${ENVIRONMENT:-}" ]; then
+  echo "ERROR: ENVIRONMENT not set in /var/www/cmdetect/.env"
   exit 1
 fi
 
@@ -77,7 +81,7 @@ cat <<'EOF'
 ╚═══════════════════════════════════════════════════╝
 EOF
 echo -e "${NC}"
-echo "Environment: ${ENV}"
+echo "Environment: ${ENVIRONMENT}"
 echo "Domain: ${DOMAIN}"
 echo ""
 
@@ -133,17 +137,8 @@ log "Building and deploying application..."
 
 cd "${CMDETECT_HOME}"
 
-# Determine if we should apply seeds
-SEED_FLAG=""
-if [ "$ENV" = "dev" ]; then
-  SEED_FLAG="--with-seeds"
-  log "Dev environment: will apply database seeds"
-else
-  log "Production environment: skipping database seeds"
-fi
-
 if [ -f "${CMDETECT_HOME}/scripts/deploy-app.sh" ]; then
-  sudo -u ${CMDETECT_USER} bash "${CMDETECT_HOME}/scripts/deploy-app.sh" "${ENV}" "${DOMAIN}" ${SEED_FLAG}
+  sudo -u ${CMDETECT_USER} bash "${CMDETECT_HOME}/scripts/deploy-app.sh"
   log "✓ Application deployed"
 else
   log_error "deploy-app.sh not found at ${CMDETECT_HOME}/scripts/deploy-app.sh"
@@ -155,7 +150,7 @@ log_step "[4/4] Caddy Reverse Proxy Setup"
 log "Configuring Caddy with SSL..."
 
 if [ -f "${CMDETECT_HOME}/scripts/setup-caddy.sh" ]; then
-  bash "${CMDETECT_HOME}/scripts/setup-caddy.sh" "${ENV}" "${DOMAIN}"
+  bash "${CMDETECT_HOME}/scripts/setup-caddy.sh"
   log "✓ Caddy configured"
 else
   log_error "setup-caddy.sh not found at ${CMDETECT_HOME}/scripts/setup-caddy.sh"
@@ -166,11 +161,11 @@ fi
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                                                   ║${NC}"
-echo -e "${GREEN}║           Deployment Complete! 🎉                 ║${NC}"
+echo -e "${GREEN}║           Deployment Complete!                    ║${NC}"
 echo -e "${GREEN}║                                                   ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${YELLOW}Environment: ${ENV}${NC}"
+echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
 echo -e "${YELLOW}Domain: ${DOMAIN}${NC}"
 echo ""
 echo -e "${YELLOW}Access Your Application:${NC}"
@@ -178,7 +173,7 @@ echo "  - Marketing:       https://${DOMAIN}"
 echo "  - Practitioner:    https://app.${DOMAIN}"
 echo "  - Patient:         https://patient.${DOMAIN}"
 echo ""
-if [ "$ENV" = "dev" ]; then
+if [ "$ENVIRONMENT" = "development" ]; then
   echo -e "${YELLOW}Basic Auth Credentials (Dev):${NC}"
   echo "  - Username: dev"
   echo "  - Password: dev"

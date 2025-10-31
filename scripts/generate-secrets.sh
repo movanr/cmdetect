@@ -1,111 +1,164 @@
 #!/bin/bash
 
 ################################################################################
-# CMDetect Secrets Generator
+# Generate Secrets
 #
-# Generates secure random secrets for production deployment
+# Generates random secrets and adds them to /var/www/cmdetect/.env
 #
-# Usage:
-#   ./scripts/generate-secrets.sh [DOMAIN] > .env
-#
-# Examples:
-#   ./scripts/generate-secrets.sh cmdetect-dev.de > .env
+# Generates:
+#   - POSTGRES_PASSWORD (32 chars)
+#   - HASURA_GRAPHQL_ADMIN_SECRET (64 chars)
+#   - BETTER_AUTH_SECRET (64 chars)
 #
 ################################################################################
 
 set -euo pipefail
 
-# Get domain from command line argument or use default
-DOMAIN="${1:-cmdetect-dev.de}"
-
-# Color codes
+# Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Output info to stderr so it doesn't end up in .env file
->&2 echo -e "${GREEN}Generating secrets for domain: ${DOMAIN}${NC}"
+log() {
+    echo -e "${GREEN}[$(date +'%H:%M:%S')]${NC} $*"
+}
 
-# Generate PostgreSQL password (32 chars, alphanumeric)
-POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $*"
+}
 
-# Generate Hasura Admin Secret (64 chars hex)
-HASURA_ADMIN_SECRET=$(openssl rand -hex 32)
+log_warn() {
+    echo -e "${YELLOW}[WARNING]${NC} $*"
+}
 
-# Generate Better Auth Secret (64 chars hex)
-BETTER_AUTH_SECRET=$(openssl rand -hex 32)
+log_step() {
+    echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}$*${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
 
-# Output .env template
-cat <<EOF
-# CMDetect Production Environment Variables
-# Generated on $(date) for domain: ${DOMAIN}
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+  log_error "This script must be run as root"
+  exit 1
+fi
 
-################################################################################
-# DEPLOYMENT CONFIGURATION
-################################################################################
+# Get script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Domain
-DOMAIN=${DOMAIN}
+# Load helper functions
+source "${SCRIPT_DIR}/lib/append-env.sh"
 
-# Node Environment
-NODE_ENV=production
+# Check if server env exists
+if [ ! -f "/var/www/cmdetect/.env" ]; then
+  log_error "/var/www/cmdetect/.env not found"
+  log_error "Run ./scripts/generate-server-env.sh first"
+  exit 1
+fi
 
-# Compose Project
-COMPOSE_PROJECT_NAME=cmdetect
+log_step "CMDetect Secret Generation"
 
-################################################################################
-# DATABASE CONFIGURATION (Shared by Better Auth + Hasura)
-################################################################################
+# Function to generate secure random string
+generate_secret() {
+    local length=$1
+    openssl rand -base64 $((length * 3 / 4)) | tr -d '\n' | head -c "$length"
+}
 
-POSTGRES_DB=cmdetect
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_PORT=5432
+# Check if secrets already exist
+REGENERATE=false
+if grep -q "^POSTGRES_PASSWORD=" /var/www/cmdetect/.env 2>/dev/null; then
+  log_warn "Secrets already exist in /var/www/cmdetect/.env"
+  echo ""
+  read -p "Regenerate all secrets? This will require updating all services! (y/N): " -n 1 -r
+  echo ""
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    REGENERATE=true
+    # Backup
+    cp /var/www/cmdetect/.env /var/www/cmdetect/.env.backup.$(date +%Y%m%d_%H%M%S)
+    log "✓ Backup created"
+  else
+    log "Keeping existing secrets. Exiting."
+    exit 0
+  fi
+fi
 
-################################################################################
-# HASURA CONFIGURATION
-################################################################################
+log_step "Generating Secrets"
 
-HASURA_PORT=8080
-HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
-HASURA_GRAPHQL_JWT_SECRET={"jwk_url":"http://auth-server:3001/api/auth/jwks"}
-HASURA_GRAPHQL_UNAUTHORIZED_ROLE=public
-HASURA_GRAPHQL_ENABLE_CONSOLE=false
-HASURA_GRAPHQL_DEV_MODE=false
-HASURA_GRAPHQL_ENABLED_LOG_TYPES=startup,http-log,webhook-log
-HASURA_GRAPHQL_CORS_DOMAIN=https://*.\${DOMAIN}
-DATA_CONNECTOR_PORT=8081
-DATA_CONNECTOR_LOG_LEVEL=ERROR
+# Generate PostgreSQL password
+POSTGRES_PASSWORD=$(generate_secret 32)
+append_env "POSTGRES_PASSWORD" "$POSTGRES_PASSWORD"
+log "✓ POSTGRES_PASSWORD generated (32 chars)"
 
-################################################################################
-# AUTH SERVER CONFIGURATION (Docker Container)
-################################################################################
+# Generate Hasura admin secret
+HASURA_ADMIN_SECRET=$(generate_secret 64)
+append_env "HASURA_GRAPHQL_ADMIN_SECRET" "$HASURA_ADMIN_SECRET"
+log "✓ HASURA_GRAPHQL_ADMIN_SECRET generated (64 chars)"
 
-# Better Auth Secret
-BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+# Generate Better Auth secret
+BETTER_AUTH_SECRET=$(generate_secret 64)
+append_env "BETTER_AUTH_SECRET" "$BETTER_AUTH_SECRET"
+log "✓ BETTER_AUTH_SECRET generated (64 chars)"
 
-# CORS Origins
-FRONTEND_URL=https://app.\${DOMAIN}
-PATIENT_FRONTEND_URL=https://patient.\${DOMAIN}
+# Optional: Prompt for SMTP configuration
+log_step "SMTP Configuration (Optional)"
+echo ""
+echo "Configure SMTP for email verification?"
+echo "Press Enter to skip, or 'y' to configure"
+read -p "Configure SMTP? (y/N): " -n 1 -r
+echo ""
 
-################################################################################
-# SMTP CONFIGURATION (Optional - for Email Verification)
-################################################################################
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo ""
+  read -p "SMTP Host (e.g., smtp.gmail.com): " SMTP_HOST
+  read -p "SMTP Port (e.g., 587): " SMTP_PORT
+  read -p "SMTP User (e.g., your-email@gmail.com): " SMTP_USER
+  read -s -p "SMTP Password: " SMTP_PASS
+  echo ""
+  read -p "SMTP From (e.g., noreply@yourdomain.com): " SMTP_FROM
 
-# Email service (Gmail, SendGrid, AWS SES, etc.)
-# Uncomment and configure if you want email verification:
-# SMTP_HOST=smtp.gmail.com
-# SMTP_PORT=587
-# SMTP_USER=your-email@gmail.com
-# SMTP_PASS=your-app-password
-# SMTP_FROM=noreply@\${DOMAIN}
+  if [ -n "$SMTP_HOST" ]; then
+    append_env "SMTP_HOST" "$SMTP_HOST"
+    log "✓ SMTP_HOST set"
+  fi
 
-################################################################################
-# BACKUP CONFIGURATION (Optional)
-################################################################################
+  if [ -n "$SMTP_PORT" ]; then
+    append_env "SMTP_PORT" "$SMTP_PORT"
+    log "✓ SMTP_PORT set"
+  fi
 
-# Hetzner Storage Box (for rclone backups)
-# RCLONE_REMOTE=hetzner
-# RCLONE_PATH=backups/cmdetect
+  if [ -n "$SMTP_USER" ]; then
+    append_env "SMTP_USER" "$SMTP_USER"
+    log "✓ SMTP_USER set"
+  fi
 
-EOF
+  if [ -n "$SMTP_PASS" ]; then
+    append_env "SMTP_PASS" "$SMTP_PASS"
+    log "✓ SMTP_PASS set"
+  fi
+
+  if [ -n "$SMTP_FROM" ]; then
+    append_env "SMTP_FROM" "$SMTP_FROM"
+    log "✓ SMTP_FROM set"
+  fi
+else
+  log "Skipping SMTP configuration (emails disabled)"
+fi
+
+log_step "Secrets Generated Successfully"
+log ""
+log "✓ All secrets saved to: /var/www/cmdetect/.env"
+log "✓ File permissions: 600 (root only)"
+log ""
+
+if [ "$REGENERATE" = true ]; then
+  log_warn "Secrets have been regenerated!"
+  log_warn "You must restart all services for changes to take effect:"
+  log_warn "  sudo ./scripts/deploy.sh"
+  log ""
+fi
+
+log "Next steps:"
+log "  1. Deploy application: sudo ./scripts/deploy.sh"
+log ""

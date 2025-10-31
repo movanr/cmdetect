@@ -390,9 +390,15 @@ create_deployment_structure() {
     log "Owner: $CMDETECT_USER:$CMDETECT_USER"
     log "Git repository should be cloned directly to $CMDETECT_HOME"
     log "Subdirectories (logs/, backups/) will be created as needed"
-    
+
     ls -la "$CMDETECT_HOME" | tee -a "$LOG_FILE"
-    
+
+    # Create /var/www/cmdetect directory for server-specific configuration
+    mkdir -p /var/www/cmdetect
+    chown root:root /var/www/cmdetect
+    chmod 755 /var/www/cmdetect
+    log "Created /var/www/cmdetect for server configuration"
+
     # Add cmdetect user to docker group (if docker is installed)
     if command -v docker &> /dev/null; then
         usermod -aG docker "$CMDETECT_USER" || true

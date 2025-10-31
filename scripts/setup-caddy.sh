@@ -6,37 +6,39 @@
 # This script configures Caddy reverse proxy with SSL certificates
 #
 # Usage (as root):
-#   sudo ./scripts/setup-caddy.sh [ENV] [DOMAIN]
-#
-# Example:
-#   sudo ./scripts/setup-caddy.sh dev cmdetect-dev.de
-#   sudo ./scripts/setup-caddy.sh prod cmdetect.com
+#   sudo ./scripts/setup-caddy.sh
 #
 # Prerequisites:
 #   - Caddy installed as systemd service
 #   - Repository at /opt/cmdetect
+#   - Environment configured in /var/www/cmdetect/.env
 #   - Logs directory exists at /opt/cmdetect/logs
 #
 ################################################################################
 
 set -euo pipefail
 
-# Check required arguments
-if [ $# -lt 2 ]; then
-  echo "ERROR: Missing required arguments"
-  echo "Usage: $0 [ENV] [DOMAIN]"
-  echo "Example: $0 dev cmdetect-dev.de"
-  echo "Example: $0 prod cmdetect.com"
+# Load environment variables
+if [ ! -f "/var/www/cmdetect/.env" ]; then
+  echo "ERROR: /var/www/cmdetect/.env not found"
+  echo "Please create it from server.env.example and configure DOMAIN, ENVIRONMENT, etc."
   exit 1
 fi
 
-# Get environment and domain from command line arguments
-ENV="${1}"
-DOMAIN="${2}"
+# Source environment files (server-specific overrides portable config)
+set -a
+[ -f "/opt/cmdetect/.env" ] && source /opt/cmdetect/.env
+source /var/www/cmdetect/.env
+set +a
 
-# Validate ENV
-if [[ "$ENV" != "dev" && "$ENV" != "prod" ]]; then
-  echo "ERROR: ENV must be 'dev' or 'prod', got: $ENV"
+# Validate required variables
+if [ -z "${DOMAIN:-}" ]; then
+  echo "ERROR: DOMAIN not set in /var/www/cmdetect/.env"
+  exit 1
+fi
+
+if [ -z "${ENVIRONMENT:-}" ]; then
+  echo "ERROR: ENVIRONMENT not set in /var/www/cmdetect/.env"
   exit 1
 fi
 
@@ -71,45 +73,38 @@ cat <<'EOF'
 ╚═══════════════════════════════════════════════════╝
 EOF
 echo -e "${NC}"
-echo "Environment: ${ENV}"
+echo "Environment: ${ENVIRONMENT}"
 echo "Domain: ${DOMAIN}"
 echo ""
 
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
   log_error "This script MUST be run as root!"
-  log_error "Run with: sudo ./scripts/setup-caddy.sh ${DOMAIN}"
   exit 1
 fi
 
-# Check Caddyfile exists
-if [ ! -f "/opt/cmdetect/Caddyfile" ]; then
-  log_error "Caddyfile not found at /opt/cmdetect/Caddyfile"
+# Check Caddyfile.template exists
+if [ ! -f "/opt/cmdetect/Caddyfile.template" ]; then
+  log_error "Caddyfile.template not found at /opt/cmdetect/Caddyfile.template"
   exit 1
 fi
 
-# Step 1: Copy and configure Caddyfile
-log_step "[1/5] Deploy Caddyfile"
-log "Copying Caddyfile to /etc/caddy/Caddyfile..."
-cp /opt/cmdetect/Caddyfile /etc/caddy/Caddyfile
-
-# Configure protected snippet based on environment
-if [ "$ENV" = "dev" ]; then
-  log "Configuring Basic Auth for development environment..."
-  sed -i 's|# ENV_PLACEHOLDER|import dev_auth|' /etc/caddy/Caddyfile
-  log "✓ Basic Auth enabled (dev environment)"
-else
-  log "Disabling Basic Auth for production environment..."
-  sed -i 's|# ENV_PLACEHOLDER|# Production - no basic auth|' /etc/caddy/Caddyfile
-  log "✓ Basic Auth disabled (prod environment)"
+# Check envsubst is installed
+if ! command -v envsubst &> /dev/null; then
+  log_error "envsubst not found. Please install gettext-base package."
+  exit 1
 fi
 
-log "✓ Caddyfile configured for ${ENV} environment"
+# Step 1: Generate Caddyfile from template
+log_step "[1/4] Generate Caddyfile"
+log "Processing Caddyfile.template with environment variables..."
+envsubst < /opt/cmdetect/Caddyfile.template > /etc/caddy/Caddyfile
+log "✓ Caddyfile generated for ${ENVIRONMENT} environment"
 
 # Step 2: Validate Caddyfile
-log_step "[2/5] Validate Caddyfile"
-log "Running validation with DOMAIN=${DOMAIN}..."
-if DOMAIN="${DOMAIN}" caddy validate --config /etc/caddy/Caddyfile; then
+log_step "[2/4] Validate Caddyfile"
+log "Running Caddy validation..."
+if caddy validate --config /etc/caddy/Caddyfile; then
   log "✓ Caddyfile is valid"
 else
   log_error "Caddyfile validation failed!"
@@ -117,7 +112,7 @@ else
 fi
 
 # Step 3: Fix log directory permissions
-log_step "[3/5] Fix Log Permissions"
+log_step "[3/4] Fix Log Permissions"
 log "Adding caddy user to cmdetect group..."
 usermod -aG cmdetect caddy
 log "✓ Caddy user added to cmdetect group"
@@ -134,26 +129,8 @@ log "Setting SGID bit for automatic group inheritance..."
 chmod g+s /opt/cmdetect/logs
 log "✓ SGID bit set"
 
-# Step 4: Configure domain environment variable
-log_step "[4/5] Configure Domain Variable"
-log "Creating systemd override for DOMAIN=${DOMAIN}..."
-
-mkdir -p /etc/systemd/system/caddy.service.d
-
-cat > /etc/systemd/system/caddy.service.d/override.conf <<EOF
-[Service]
-Environment="DOMAIN=${DOMAIN}"
-EOF
-
-log "✓ Systemd override created"
-
-log "Reloading systemd daemon..."
-systemctl daemon-reexec
-systemctl daemon-reload
-log "✓ Systemd reloaded"
-
-# Step 5: Restart Caddy
-log_step "[5/5] Restart Caddy"
+# Step 4: Restart Caddy
+log_step "[4/4] Restart Caddy"
 log "Restarting Caddy (will obtain SSL certificates)..."
 log "This may take a moment as Let's Encrypt certificates are requested..."
 systemctl restart caddy
@@ -178,12 +155,12 @@ systemctl status caddy --no-pager || true
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                                                   ║${NC}"
-echo -e "${GREEN}║           Caddy Setup Complete! 🎉                ║${NC}"
+echo -e "${GREEN}║           Caddy Setup Complete!                   ║${NC}"
 echo -e "${GREEN}║                                                   ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${YELLOW}Environment: ${ENV}${NC}"
-if [ "$ENV" = "dev" ]; then
+echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
+if [ "$ENVIRONMENT" = "development" ]; then
   echo -e "${YELLOW}Basic Auth: Enabled (user: dev, pass: dev)${NC}"
 else
   echo -e "${YELLOW}Basic Auth: Disabled (production)${NC}"
