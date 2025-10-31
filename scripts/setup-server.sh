@@ -6,10 +6,10 @@
 # This script performs idempotent setup of a Hetzner VM for CMDetect deployment
 #
 # Usage:
-#   sudo ./scripts/deployment/setup-server.sh
+#   sudo ./scripts/setup-server.sh
 #
 # What this script does:
-#   - Installs Node.js 22, PM2, Caddy, Docker, Docker Compose, UFW, Fail2ban, rclone
+#   - Installs Node.js 22, Caddy, Docker, Docker Compose, UFW, Fail2ban, rclone
 #   - Configures firewall with UFW
 #   - Configures Fail2ban for SSH protection
 #   - Creates /opt/cmdetect directory
@@ -134,26 +134,6 @@ install_nodejs() {
     npm install -g pnpm
     PNPM_VERSION=$(pnpm --version)
     log "pnpm installed: $PNPM_VERSION"
-}
-
-################################################################################
-# PM2 installation
-################################################################################
-
-install_pm2() {
-    log "Installing PM2..."
-
-    if command -v pm2 &> /dev/null; then
-        PM2_VERSION=$(pm2 --version)
-        log_warn "PM2 already installed: $PM2_VERSION"
-        return 0
-    fi
-
-    # Install PM2 globally
-    npm install -g pm2
-
-    PM2_VERSION=$(pm2 --version)
-    log "PM2 installed: $PM2_VERSION"
 }
 
 ################################################################################
@@ -346,26 +326,8 @@ logpath = %(sshd_log)s
 backend = %(sshd_backend)s
 maxretry = 5
 
-[nginx-http-auth]
-enabled = true
-port = http,https
-logpath = /var/log/nginx/error.log
-
-[nginx-noscript]
-enabled = true
-port = http,https
-logpath = /var/log/nginx/access.log
-
-[nginx-badbots]
-enabled = true
-port = http,https
-logpath = /var/log/nginx/access.log
-maxretry = 2
-
-[nginx-noproxy]
-enabled = true
-port = http,https
-logpath = /var/log/nginx/access.log
+# Note: Caddy protection can be added later with custom filters
+# Currently only SSH is protected by Fail2ban
 EOF
 
     # Enable and restart Fail2ban
@@ -487,7 +449,6 @@ print_summary() {
     log "Installed:"
     log "  - Node.js $(node --version 2>/dev/null || echo 'N/A')"
     log "  - pnpm $(pnpm --version 2>/dev/null || echo 'N/A')"
-    log "  - PM2 $(pm2 --version 2>/dev/null || echo 'N/A')"
     log "  - Caddy $(caddy version 2>/dev/null | cut -d' ' -f1 || echo 'N/A')"
     log "  - Docker $(docker --version 2>/dev/null | cut -d' ' -f3 | tr -d ',' || echo 'N/A')"
     log "  - Docker Compose $(docker compose version 2>/dev/null | cut -d' ' -f4 | tr -d 'v' || echo 'N/A')"
@@ -515,7 +476,6 @@ main() {
 
     update_system
     install_nodejs
-    install_pm2
     install_caddy
     install_docker
     install_docker_compose

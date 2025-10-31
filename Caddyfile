@@ -7,7 +7,14 @@
     }
 }
 
-# Development Basic Auth
+# Protected snippet (will be configured based on ENV)
+# For dev: includes basic auth
+# For prod: empty
+(protected) {
+    # ENV_PLACEHOLDER
+}
+
+# Development Basic Auth snippet
 (dev_auth) {
     basic_auth {
         dev $2a$14$/dZPeItIHcfpa14LFLHLeun86uccqZghpH5YLJa5wysMgI778usjS
@@ -27,7 +34,7 @@
 
 # Marketing Website (Protected in Dev)
 {$DOMAIN}, www.{$DOMAIN} {
-    import dev_auth
+    import protected
     import security_headers
     
     root * /opt/cmdetect/apps/marketing/dist
@@ -43,9 +50,9 @@
     }
 }
 
-# Practitioner Frontend (Basic Auth for MVP - add VPN later)
+# Practitioner Frontend (Protected in Dev)
 app.{$DOMAIN} {
-    import dev_auth
+    import protected
     import security_headers
 
     root * /opt/cmdetect/apps/frontend/dist
@@ -63,9 +70,9 @@ app.{$DOMAIN} {
     }
 }
 
-# Patient Frontend
+# Patient Frontend (Protected in Dev)
 patient.{$DOMAIN} {
-    import dev_auth
+    import protected
     import security_headers
 
     root * /opt/cmdetect/apps/patient-frontend/dist
