@@ -97,8 +97,8 @@ fi
 log_step "[1/12] Environment Configuration"
 if [ ! -f ".env" ]; then
   log "Generating new .env file for domain: ${DOMAIN}"
-  chmod +x scripts/generate-secrets-dev-domain.sh
-  ./scripts/generate-secrets-dev-domain.sh "$DOMAIN" > .env
+  chmod +x scripts/generate-secrets.sh
+  ./scripts/generate-secrets.sh "$DOMAIN" > .env
   chmod 600 .env
   log "✓ .env file created and secured (chmod 600)"
 else
