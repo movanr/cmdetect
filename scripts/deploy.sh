@@ -22,9 +22,18 @@
 
 set -euo pipefail
 
+# Check required arguments
+if [ $# -lt 2 ]; then
+  echo "ERROR: Missing required arguments"
+  echo "Usage: $0 [ENV] [DOMAIN]"
+  echo "Example: $0 dev cmdetect-dev.de"
+  echo "Example: $0 prod cmdetect.com"
+  exit 1
+fi
+
 # Get environment and domain from command line arguments
-ENV="${1:-dev}"
-DOMAIN="${2:-cmdetect-dev.de}"
+ENV="${1}"
+DOMAIN="${2}"
 
 # Validate ENV
 if [[ "$ENV" != "dev" && "$ENV" != "prod" ]]; then
@@ -134,7 +143,7 @@ else
 fi
 
 if [ -f "${CMDETECT_HOME}/scripts/deploy-app.sh" ]; then
-  sudo -u ${CMDETECT_USER} bash "${CMDETECT_HOME}/scripts/deploy-app.sh" "${DOMAIN}" ${SEED_FLAG}
+  sudo -u ${CMDETECT_USER} bash "${CMDETECT_HOME}/scripts/deploy-app.sh" "${ENV}" "${DOMAIN}" ${SEED_FLAG}
   log "✓ Application deployed"
 else
   log_error "deploy-app.sh not found at ${CMDETECT_HOME}/scripts/deploy-app.sh"

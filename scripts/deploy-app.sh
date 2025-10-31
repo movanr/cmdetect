@@ -6,10 +6,11 @@
 # This script deploys the CMDetect application (builds, migrations, seeds)
 #
 # Usage:
-#   ./scripts/deploy-app.sh [DOMAIN] [--with-seeds]
+#   ./scripts/deploy-app.sh [ENV] [DOMAIN] [--with-seeds]
 #
 # Example:
-#   ./scripts/deploy-app.sh cmdetect-dev.de --with-seeds
+#   ./scripts/deploy-app.sh dev cmdetect-dev.de --with-seeds
+#   ./scripts/deploy-app.sh prod cmdetect.com
 #
 # Prerequisites:
 #   - Run as 'cmdetect' user (not root)
@@ -22,12 +23,28 @@
 
 set -euo pipefail
 
-# Get domain from command line argument or use default
-DOMAIN="${1:-cmdetect-dev.de}"
+# Check required arguments
+if [ $# -lt 2 ]; then
+  echo "ERROR: Missing required arguments"
+  echo "Usage: $0 [ENV] [DOMAIN] [--with-seeds]"
+  echo "Example: $0 dev cmdetect-dev.de --with-seeds"
+  exit 1
+fi
+
+# Get environment and domain from command line arguments
+ENV="${1}"
+DOMAIN="${2}"
+
+# Validate ENV
+if [[ "$ENV" != "dev" && "$ENV" != "prod" ]]; then
+  echo "ERROR: ENV must be 'dev' or 'prod', got: $ENV"
+  exit 1
+fi
+
 APPLY_SEEDS=false
 
 # Parse additional arguments
-shift || true
+shift 2
 while [[ $# -gt 0 ]]; do
     case $1 in
         --with-seeds)

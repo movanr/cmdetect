@@ -78,7 +78,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 
 // Health check
 app.get("/health", (_, res) => {
-  res.json({ status: "OK", service: "hasura-auth-server" });
+  res.json({ status: "OK", service: "cmdetect-auth-server" });
 });
 
 // Global error handler for Express middleware errors (including JSON parsing)
