@@ -139,15 +139,15 @@ sleep 10
 log "✓ Bootstrap containers started"
 
 # Step 5: Apply Hasura migrations
+ADMIN_SECRET=$(grep HASURA_GRAPHQL_ADMIN_SECRET .env | cut -d '=' -f2)
 log_step "[5/12] Database Migrations"
 cd apps/hasura
 log "Applying Hasura migrations..."
-hasura migrate apply --database-name default
+hasura migrate apply --database-name default --admin-secret "$ADMIN_SECRET"
 log "✓ Migrations applied"
 
 # Step 6: Apply Hasura metadata
 log_step "[6/12] Hasura Metadata"
-ADMIN_SECRET=$(grep HASURA_GRAPHQL_ADMIN_SECRET ../../.env | cut -d '=' -f2)
 log "Applying Hasura metadata..."
 hasura metadata apply --admin-secret "$ADMIN_SECRET"
 log "✓ Metadata applied"
