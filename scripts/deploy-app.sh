@@ -200,6 +200,15 @@ log "Stopping bootstrap containers..."
 docker compose -f docker-compose.bootstrap.yml down
 log "✓ Bootstrap containers stopped"
 
+# Debug: Verify required env vars are set
+log "Verifying environment variables..."
+if [ -z "${DOMAIN:-}" ]; then
+  log_error "DOMAIN is not set! Cannot start production containers."
+  exit 1
+fi
+log "  DOMAIN: ${DOMAIN}"
+log "  ENVIRONMENT: ${ENVIRONMENT}"
+
 log "Building and starting production containers..."
 docker compose -f docker-compose.prod.yml up -d --build
 log "Waiting for services to be healthy (15s)..."
