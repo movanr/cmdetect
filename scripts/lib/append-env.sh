@@ -31,8 +31,8 @@ append_env() {
     # Create file if it doesn't exist
     if [ ! -f "$ENV_FILE" ]; then
         touch "$ENV_FILE"
-        chmod 600 "$ENV_FILE"
-        chown root:root "$ENV_FILE"
+        chmod 640 "$ENV_FILE"
+        chown root:cmdetect "$ENV_FILE"
     fi
 
     # Check if key already exists
@@ -47,9 +47,9 @@ append_env() {
         echo "${key}=${value}" >> "$ENV_FILE"
     fi
 
-    # Ensure secure permissions
-    chmod 600 "$ENV_FILE"
-    chown root:root "$ENV_FILE"
+    # Ensure secure permissions (root write, cmdetect group read)
+    chmod 640 "$ENV_FILE"
+    chown root:cmdetect "$ENV_FILE"
 }
 
 # Export function for use in scripts

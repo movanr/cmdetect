@@ -106,8 +106,8 @@ fi
 
 # Create directory
 mkdir -p /var/www/cmdetect
-chown root:root /var/www/cmdetect
-chmod 755 /var/www/cmdetect
+chown root:cmdetect /var/www/cmdetect
+chmod 750 /var/www/cmdetect
 
 # Check if file exists
 if [ -f "/var/www/cmdetect/.env" ]; then
@@ -139,8 +139,8 @@ cat > /var/www/cmdetect/.env <<EOF
 
 EOF
 
-chmod 600 /var/www/cmdetect/.env
-chown root:root /var/www/cmdetect/.env
+chmod 640 /var/www/cmdetect/.env
+chown root:cmdetect /var/www/cmdetect/.env
 
 log_step "Writing Server Configuration"
 

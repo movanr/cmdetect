@@ -149,7 +149,7 @@ fi
 log_step "Secrets Generated Successfully"
 log ""
 log "✓ All secrets saved to: /var/www/cmdetect/.env"
-log "✓ File permissions: 600 (root only)"
+log "✓ File permissions: 640 (root write, cmdetect group read)"
 log ""
 
 if [ "$REGENERATE" = true ]; then

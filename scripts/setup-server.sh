@@ -395,9 +395,9 @@ create_deployment_structure() {
 
     # Create /var/www/cmdetect directory for server-specific configuration
     mkdir -p /var/www/cmdetect
-    chown root:root /var/www/cmdetect
-    chmod 755 /var/www/cmdetect
-    log "Created /var/www/cmdetect for server configuration"
+    chown root:cmdetect /var/www/cmdetect
+    chmod 750 /var/www/cmdetect
+    log "Created /var/www/cmdetect for server configuration (root:cmdetect 750)"
 
     # Add cmdetect user to docker group (if docker is installed)
     if command -v docker &> /dev/null; then
