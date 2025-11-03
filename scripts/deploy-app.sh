@@ -169,6 +169,15 @@ cd ../../
 # Step 7: Generate GraphQL types
 log_step "[7/10] GraphQL Code Generation"
 log "Generating TypeScript types from GraphQL schema..."
+
+# Debug: Check if admin secret is set
+if [ -z "${HASURA_GRAPHQL_ADMIN_SECRET:-}" ]; then
+  log_error "HASURA_GRAPHQL_ADMIN_SECRET is not set in environment!"
+  exit 1
+else
+  log "Admin secret is set (length: ${#HASURA_GRAPHQL_ADMIN_SECRET})"
+fi
+
 pnpm codegen
 log "✓ GraphQL types generated"
 
