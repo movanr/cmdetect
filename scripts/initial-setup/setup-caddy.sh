@@ -126,7 +126,7 @@ fi
 log_step "[4/5] Setup Log Directory"
 log "Creating /var/log/caddy directory..."
 mkdir -p /var/log/caddy
-chown caddy:caddy /var/log/caddy
+chown -R caddy:caddy /var/log/caddy
 chmod 755 /var/log/caddy
 log "✓ Log directory created and owned by caddy:caddy"
 
