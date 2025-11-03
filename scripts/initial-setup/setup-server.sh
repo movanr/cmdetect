@@ -377,11 +377,17 @@ install_rclone() {
 create_deployment_structure() {
     log "Creating deployment user and directory structure..."
 
+    # Create cmdetect group first (if not exists)
+    if ! getent group "$CMDETECT_USER" &>/dev/null; then
+        groupadd -r "$CMDETECT_USER"
+        log "Created system group: $CMDETECT_USER"
+    fi
+
     # Create system user for deployment
     if id "$CMDETECT_USER" &>/dev/null; then
         log_warn "User $CMDETECT_USER already exists"
     else
-        useradd -r -m -s /bin/bash -d "/home/$CMDETECT_USER" "$CMDETECT_USER"
+        useradd -r -m -g "$CMDETECT_USER" -s /bin/bash -d "/home/$CMDETECT_USER" "$CMDETECT_USER"
         log "Created system user: $CMDETECT_USER"
     fi
 
@@ -411,12 +417,6 @@ create_deployment_structure() {
     if command -v docker &> /dev/null; then
         usermod -aG docker "$CMDETECT_USER" || true
         log "Added $CMDETECT_USER to docker group"
-    fi
-
-    # Add caddy user to cmdetect group (if caddy is installed)
-    if command -v caddy &> /dev/null && id caddy &>/dev/null; then
-        usermod -aG cmdetect caddy || true
-        log "Added caddy to cmdetect group (for reading server config)"
     fi
 }
 
