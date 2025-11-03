@@ -409,9 +409,23 @@ create_deployment_structure() {
 
     # Create /var/www/cmdetect directory for server-specific configuration
     mkdir -p /var/www/cmdetect
+
+    # Set ownership and permissions with setgid bit
+    # The setgid bit (2) ensures new files inherit the cmdetect group
     chown root:cmdetect /var/www/cmdetect
-    chmod 750 /var/www/cmdetect
-    log "Created /var/www/cmdetect for server configuration (root:cmdetect 750)"
+    chmod 2750 /var/www/cmdetect
+
+    # Verify permissions were set correctly
+    ACTUAL_PERMS=$(stat -c '%a' /var/www/cmdetect 2>/dev/null || stat -f '%Lp' /var/www/cmdetect 2>/dev/null)
+    ACTUAL_GROUP=$(stat -c '%G' /var/www/cmdetect 2>/dev/null || stat -f '%Sg' /var/www/cmdetect 2>/dev/null)
+
+    if [[ "$ACTUAL_GROUP" != "cmdetect" ]]; then
+        log_error "Failed to set group ownership to cmdetect (got: $ACTUAL_GROUP)"
+        log_error "Please manually run: sudo chown root:cmdetect /var/www/cmdetect"
+    fi
+
+    log "Created /var/www/cmdetect for server configuration (root:cmdetect 2750)"
+    log "Files created here will automatically inherit cmdetect group ownership"
 
     # Add cmdetect user to docker group (if docker is installed)
     if command -v docker &> /dev/null; then

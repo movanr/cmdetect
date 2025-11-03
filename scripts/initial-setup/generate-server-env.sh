@@ -93,10 +93,6 @@ if [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
   exit 1
 fi
 
-# Create directory
-mkdir -p /var/www/cmdetect
-chown root:caddy /var/www/cmdetect 2>/dev/null || chown root:root /var/www/cmdetect
-chmod 750 /var/www/cmdetect
 
 # Check if server.env exists
 SERVER_ENV="/var/www/cmdetect/server.env"
