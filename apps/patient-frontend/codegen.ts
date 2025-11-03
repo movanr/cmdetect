@@ -1,7 +1,11 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
+import { config as dotenvConfig } from "dotenv";
+import fs from "fs";
 
-// Debug: Check what Node.js sees
-console.log("[CODEGEN DEBUG] HASURA_GRAPHQL_ADMIN_SECRET:", process.env.HASURA_GRAPHQL_ADMIN_SECRET ? `set (length: ${process.env.HASURA_GRAPHQL_ADMIN_SECRET.length})` : "NOT SET");
+// Load secrets from server config if it exists (production deployment)
+if (fs.existsSync("/var/www/cmdetect/secrets.env")) {
+  dotenvConfig({ path: "/var/www/cmdetect/secrets.env" });
+}
 
 const config: CodegenConfig = {
   schema: {
