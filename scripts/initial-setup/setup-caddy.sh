@@ -6,39 +6,35 @@
 # This script configures Caddy reverse proxy with SSL certificates
 #
 # Usage (as root):
-#   sudo ./scripts/setup-caddy.sh
+#   sudo ./setup-caddy.sh
 #
 # Prerequisites:
 #   - Caddy installed as systemd service
-#   - Repository at /opt/cmdetect
-#   - Environment configured in /var/www/cmdetect/.env
-#   - Logs directory exists at /opt/cmdetect/logs
+#   - Environment configured in /var/www/cmdetect/server.env
 #
 ################################################################################
 
 set -euo pipefail
 
-# Load environment variables
-if [ ! -f "/var/www/cmdetect/.env" ]; then
-  echo "ERROR: /var/www/cmdetect/.env not found"
-  echo "Please create it from server.env.example and configure DOMAIN, ENVIRONMENT, etc."
+# Get script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Load server environment variables
+SERVER_ENV="/var/www/cmdetect/server.env"
+if [ ! -f "$SERVER_ENV" ]; then
+  echo "ERROR: $SERVER_ENV not found"
+  echo "Please run generate-server-env.sh first"
   exit 1
 fi
 
-# Source environment files (server-specific overrides portable config)
+# Source server environment
 set -a
-[ -f "/opt/cmdetect/.env" ] && source /opt/cmdetect/.env
-source /var/www/cmdetect/.env
+source "$SERVER_ENV"
 set +a
 
 # Validate required variables
 if [ -z "${DOMAIN:-}" ]; then
-  echo "ERROR: DOMAIN not set in /var/www/cmdetect/.env"
-  exit 1
-fi
-
-if [ -z "${ENVIRONMENT:-}" ]; then
-  echo "ERROR: ENVIRONMENT not set in /var/www/cmdetect/.env"
+  echo "ERROR: DOMAIN not set in $SERVER_ENV"
   exit 1
 fi
 
@@ -73,7 +69,6 @@ cat <<'EOF'
 ╚═══════════════════════════════════════════════════╝
 EOF
 echo -e "${NC}"
-echo "Environment: ${ENVIRONMENT}"
 echo "Domain: ${DOMAIN}"
 echo ""
 
@@ -84,8 +79,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Check Caddyfile.template exists
-if [ ! -f "/opt/cmdetect/Caddyfile.template" ]; then
-  log_error "Caddyfile.template not found at /opt/cmdetect/Caddyfile.template"
+if [ ! -f "$SCRIPT_DIR/Caddyfile.template" ]; then
+  log_error "Caddyfile.template not found at $SCRIPT_DIR/Caddyfile.template"
   exit 1
 fi
 
@@ -96,13 +91,29 @@ if ! command -v envsubst &> /dev/null; then
 fi
 
 # Step 1: Generate Caddyfile from template
-log_step "[1/4] Generate Caddyfile"
+log_step "[1/5] Generate Caddyfile"
 log "Processing Caddyfile.template with environment variables..."
-envsubst < /opt/cmdetect/Caddyfile.template > /etc/caddy/Caddyfile
-log "✓ Caddyfile generated for ${ENVIRONMENT} environment"
+envsubst < "$SCRIPT_DIR/Caddyfile.template" > /etc/caddy/Caddyfile
+log "✓ Caddyfile generated"
 
-# Step 2: Validate Caddyfile
-log_step "[2/4] Validate Caddyfile"
+# Step 2: Create empty Basic Auth snippet
+log_step "[2/5] Create Auth Snippet"
+mkdir -p /etc/caddy/snippets
+
+cat > /etc/caddy/snippets/dev-auth.caddy <<EOF
+# Basic Auth snippet
+# To enable Basic Auth (development only), add:
+#
+# basic_auth {
+#     username \$2a\$14\$hash_generated_by_caddy
+# }
+#
+# Generate hash with: caddy hash-password --plaintext "your_password"
+EOF
+log "✓ Empty auth snippet created at /etc/caddy/snippets/dev-auth.caddy"
+
+# Step 3: Validate Caddyfile
+log_step "[3/5] Validate Caddyfile"
 log "Running Caddy validation..."
 if caddy validate --config /etc/caddy/Caddyfile; then
   log "✓ Caddyfile is valid"
@@ -111,26 +122,16 @@ else
   exit 1
 fi
 
-# Step 3: Fix log directory permissions
-log_step "[3/4] Fix Log Permissions"
-log "Adding caddy user to cmdetect group..."
-usermod -aG cmdetect caddy
-log "✓ Caddy user added to cmdetect group"
+# Step 4: Setup log directory
+log_step "[4/5] Setup Log Directory"
+log "Creating /var/log/caddy directory..."
+mkdir -p /var/log/caddy
+chown caddy:caddy /var/log/caddy
+chmod 755 /var/log/caddy
+log "✓ Log directory created and owned by caddy:caddy"
 
-log "Setting group ownership of logs directory..."
-chgrp -R cmdetect /opt/cmdetect/logs
-log "✓ Group ownership set to cmdetect"
-
-log "Setting directory permissions (775)..."
-chmod -R 775 /opt/cmdetect/logs
-log "✓ Permissions set to 775"
-
-log "Setting SGID bit for automatic group inheritance..."
-chmod g+s /opt/cmdetect/logs
-log "✓ SGID bit set"
-
-# Step 4: Restart Caddy
-log_step "[4/4] Restart Caddy"
+# Step 5: Restart Caddy
+log_step "[5/5] Restart Caddy"
 log "Restarting Caddy (will obtain SSL certificates)..."
 log "This may take a moment as Let's Encrypt certificates are requested..."
 systemctl restart caddy
@@ -159,12 +160,7 @@ echo -e "${GREEN}║           Caddy Setup Complete!                   ║${NC}"
 echo -e "${GREEN}║                                                   ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${YELLOW}Environment: ${ENVIRONMENT}${NC}"
-if [ "$ENVIRONMENT" = "development" ]; then
-  echo -e "${YELLOW}Basic Auth: Enabled (user: dev, pass: dev)${NC}"
-else
-  echo -e "${YELLOW}Basic Auth: Disabled (production)${NC}"
-fi
+echo -e "${YELLOW}Domain: ${DOMAIN}${NC}"
 echo ""
 echo -e "${YELLOW}Services Available:${NC}"
 echo "  - Marketing:       https://${DOMAIN}"
@@ -178,8 +174,9 @@ echo -e "${YELLOW}Verify SSL Certificates:${NC}"
 echo "  curl -I https://app.${DOMAIN}"
 echo ""
 echo -e "${YELLOW}View Logs:${NC}"
-echo "  - Caddy:           journalctl -u caddy -f"
-echo "  - Caddy access:    tail -f /opt/cmdetect/logs/caddy-*.log"
+echo "  - Caddy service:   journalctl -u caddy -f"
+echo "  - Caddy access:    tail -f /var/log/caddy/access-*.log"
+echo "  - Caddy errors:    tail -f /var/log/caddy/error-*.log"
 echo ""
 echo -e "${YELLOW}Manage Caddy:${NC}"
 echo "  - Status:          systemctl status caddy"

@@ -355,7 +355,15 @@ install_rclone() {
     fi
 
     # Install rclone using official script
-    curl https://rclone.org/install.sh | bash
+    # Download first, then execute (piping to bash can cause script to exit)
+    log "Downloading rclone installer..."
+    curl -fsSL https://rclone.org/install.sh -o /tmp/rclone-install.sh
+
+    log "Running rclone installer..."
+    bash /tmp/rclone-install.sh
+
+    # Cleanup
+    rm -f /tmp/rclone-install.sh
 
     RCLONE_VERSION=$(rclone version | head -n1 | cut -d' ' -f2)
     log "rclone installed: $RCLONE_VERSION"

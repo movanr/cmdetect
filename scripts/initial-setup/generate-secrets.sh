@@ -48,13 +48,10 @@ fi
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Load helper functions
-source "${SCRIPT_DIR}/lib/append-env.sh"
-
-# Check if server env exists
-if [ ! -f "/var/www/cmdetect/.env" ]; then
-  log_error "/var/www/cmdetect/.env not found"
-  log_error "Run ./scripts/generate-server-env.sh first"
+# Check if /var/www/cmdetect directory exists
+if [ ! -d "/var/www/cmdetect" ]; then
+  log_error "/var/www/cmdetect directory not found"
+  log_error "Run ./generate-server-env.sh first"
   exit 1
 fi
 
@@ -67,16 +64,18 @@ generate_secret() {
 }
 
 # Check if secrets already exist
+SECRETS_ENV="/var/www/cmdetect/secrets.env"
 REGENERATE=false
-if grep -q "^POSTGRES_PASSWORD=" /var/www/cmdetect/.env 2>/dev/null; then
-  log_warn "Secrets already exist in /var/www/cmdetect/.env"
+
+if [ -f "$SECRETS_ENV" ]; then
+  log_warn "$SECRETS_ENV already exists"
   echo ""
   read -p "Regenerate all secrets? This will require updating all services! (y/N): " -n 1 -r
   echo ""
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     REGENERATE=true
     # Backup
-    cp /var/www/cmdetect/.env /var/www/cmdetect/.env.backup.$(date +%Y%m%d_%H%M%S)
+    cp "$SECRETS_ENV" "${SECRETS_ENV}.backup.$(date +%Y%m%d_%H%M%S)"
     log "✓ Backup created"
   else
     log "Keeping existing secrets. Exiting."
@@ -86,79 +85,91 @@ fi
 
 log_step "Generating Secrets"
 
-# Generate PostgreSQL password
+# Generate secrets
 POSTGRES_PASSWORD=$(generate_secret 32)
-append_env "POSTGRES_PASSWORD" "$POSTGRES_PASSWORD"
 log "✓ POSTGRES_PASSWORD generated (32 chars)"
 
-# Generate Hasura admin secret
 HASURA_ADMIN_SECRET=$(generate_secret 64)
-append_env "HASURA_GRAPHQL_ADMIN_SECRET" "$HASURA_ADMIN_SECRET"
 log "✓ HASURA_GRAPHQL_ADMIN_SECRET generated (64 chars)"
 
-# Generate Better Auth secret
 BETTER_AUTH_SECRET=$(generate_secret 64)
-append_env "BETTER_AUTH_SECRET" "$BETTER_AUTH_SECRET"
 log "✓ BETTER_AUTH_SECRET generated (64 chars)"
 
 # Optional: Prompt for SMTP configuration
 log_step "SMTP Configuration (Optional)"
 echo ""
 echo "Configure SMTP for email verification?"
-echo "Press Enter to skip, or 'y' to configure"
 read -p "Configure SMTP? (y/N): " -n 1 -r
 echo ""
+
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_USER=""
+SMTP_PASS=""
+SMTP_FROM=""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo ""
   read -p "SMTP Host (e.g., smtp.gmail.com): " SMTP_HOST
-  read -p "SMTP Port (e.g., 587): " SMTP_PORT
+  read -p "SMTP Port (default: 587): " SMTP_PORT_INPUT
+  SMTP_PORT="${SMTP_PORT_INPUT:-587}"
   read -p "SMTP User (e.g., your-email@gmail.com): " SMTP_USER
   read -s -p "SMTP Password: " SMTP_PASS
   echo ""
   read -p "SMTP From (e.g., noreply@yourdomain.com): " SMTP_FROM
 
   if [ -n "$SMTP_HOST" ]; then
-    append_env "SMTP_HOST" "$SMTP_HOST"
-    log "✓ SMTP_HOST set"
-  fi
-
-  if [ -n "$SMTP_PORT" ]; then
-    append_env "SMTP_PORT" "$SMTP_PORT"
-    log "✓ SMTP_PORT set"
-  fi
-
-  if [ -n "$SMTP_USER" ]; then
-    append_env "SMTP_USER" "$SMTP_USER"
-    log "✓ SMTP_USER set"
-  fi
-
-  if [ -n "$SMTP_PASS" ]; then
-    append_env "SMTP_PASS" "$SMTP_PASS"
-    log "✓ SMTP_PASS set"
-  fi
-
-  if [ -n "$SMTP_FROM" ]; then
-    append_env "SMTP_FROM" "$SMTP_FROM"
-    log "✓ SMTP_FROM set"
+    log "✓ SMTP configured"
   fi
 else
   log "Skipping SMTP configuration (emails disabled)"
 fi
 
+# Create secrets.env file
+cat > "$SECRETS_ENV" <<EOF
+################################################################################
+# Application Secrets
+#
+# Generated: $(date +'%Y-%m-%d %H:%M:%S')
+#
+# This file contains sensitive secrets for the application.
+# DO NOT commit to version control!
+################################################################################
+
+# Database
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+# Hasura
+HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
+
+# Better Auth
+BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+
+# SMTP (Optional - leave empty if not using)
+SMTP_HOST=${SMTP_HOST}
+SMTP_PORT=${SMTP_PORT}
+SMTP_USER=${SMTP_USER}
+SMTP_PASS=${SMTP_PASS}
+SMTP_FROM=${SMTP_FROM}
+EOF
+
+chmod 640 "$SECRETS_ENV"
+chown root:cmdetect "$SECRETS_ENV" 2>/dev/null || chown root:root "$SECRETS_ENV"
+
 log_step "Secrets Generated Successfully"
 log ""
-log "✓ All secrets saved to: /var/www/cmdetect/.env"
+log "✓ All secrets saved to: $SECRETS_ENV"
 log "✓ File permissions: 640 (root write, cmdetect group read)"
 log ""
 
 if [ "$REGENERATE" = true ]; then
   log_warn "Secrets have been regenerated!"
-  log_warn "You must restart all services for changes to take effect:"
-  log_warn "  sudo ./scripts/deploy.sh"
+  log_warn "You must restart all services for changes to take effect."
   log ""
 fi
 
 log "Next steps:"
-log "  1. Deploy application: sudo ./scripts/deploy.sh"
+log "  1. Setup Caddy: sudo ./setup-caddy.sh"
+log "  2. Clone repository to /opt/cmdetect"
+log "  3. Run deployment from repository"
 log ""

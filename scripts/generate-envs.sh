@@ -4,14 +4,14 @@
 # Generate Environment Files from Templates
 #
 # Uses templates and substitutes DOMAIN, ENVIRONMENT, EMAIL
-# from /var/www/cmdetect/.env
+# from /var/www/cmdetect/server.env
 #
 # Generates portable config files (NO SECRETS):
 #   - /opt/cmdetect/.env (backend/docker-compose)
 #   - /opt/cmdetect/apps/frontend/.env (practitioner frontend)
 #   - /opt/cmdetect/apps/patient-frontend/.env (patient frontend)
 #
-# Secrets remain in /var/www/cmdetect/.env and are loaded via script sourcing
+# Secrets remain in /var/www/cmdetect/secrets.env and are loaded via script sourcing
 #
 ################################################################################
 
@@ -43,9 +43,10 @@ log_step() {
 }
 
 # Check if server env exists
-if [ ! -f "/var/www/cmdetect/.env" ]; then
-  log_error "/var/www/cmdetect/.env not found"
-  log_error "Run: ./scripts/generate-server-env.sh"
+SERVER_ENV="/var/www/cmdetect/server.env"
+if [ ! -f "$SERVER_ENV" ]; then
+  log_error "$SERVER_ENV not found"
+  log_error "Run: sudo ./scripts/initial-setup/generate-server-env.sh"
   exit 1
 fi
 
@@ -54,13 +55,13 @@ REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
 log_step "CMDetect Environment File Generation"
 
-# Load ONLY non-secret variables for substitution
-DOMAIN=$(grep "^DOMAIN=" /var/www/cmdetect/.env | cut -d'=' -f2)
-ENVIRONMENT=$(grep "^ENVIRONMENT=" /var/www/cmdetect/.env | cut -d'=' -f2)
-EMAIL=$(grep "^EMAIL=" /var/www/cmdetect/.env | cut -d'=' -f2 || echo "")
+# Load server configuration (no secrets)
+set -a
+source "$SERVER_ENV"
+set +a
 
-if [ -z "$DOMAIN" ] || [ -z "$ENVIRONMENT" ]; then
-  log_error "DOMAIN or ENVIRONMENT not set in /var/www/cmdetect/.env"
+if [ -z "${DOMAIN:-}" ] || [ -z "${ENVIRONMENT:-}" ]; then
+  log_error "DOMAIN or ENVIRONMENT not set in $SERVER_ENV"
   exit 1
 fi
 
@@ -79,7 +80,6 @@ fi
 
 # Generate main .env using envsubst
 log "Processing .env.template..."
-export DOMAIN ENVIRONMENT
 envsubst < "${REPO_ROOT}/.env.template" > "${REPO_ROOT}/.env"
 chmod 644 "${REPO_ROOT}/.env"
 log "✓ ${REPO_ROOT}/.env (portable config only)"
@@ -118,6 +118,6 @@ log "✓ Backend: ${REPO_ROOT}/.env (portable, no secrets)"
 log "✓ Practitioner: ${REPO_ROOT}/apps/frontend/.env"
 log "✓ Patient: ${REPO_ROOT}/apps/patient-frontend/.env"
 log ""
-log "Note: Secrets remain in /var/www/cmdetect/.env"
-log "      Scripts source both files before running docker-compose"
+log "Note: Secrets remain in /var/www/cmdetect/secrets.env"
+log "      Scripts source server.env + secrets.env before running docker-compose"
 log ""

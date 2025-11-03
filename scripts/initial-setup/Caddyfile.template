@@ -7,15 +7,11 @@
     }
 }
 
-# Development Basic Auth snippet (injected via env var)
+# Development Basic Auth snippet (loaded from file)
 (dev_auth) {
-    ${CADDY_BASIC_AUTH_BLOCK}
+    import snippets/dev-auth.caddy
 }
 
-# Protected snippet - imports dev_auth (which is empty in production)
-(protected) {
-    import dev_auth
-}
 
 # Common Security Headers
 (security_headers) {
@@ -30,7 +26,7 @@
 
 # Marketing Website (Protected in Dev)
 ${DOMAIN}, www.${DOMAIN} {
-    import protected
+    import dev_auth
     import security_headers
 
     root * /opt/cmdetect/apps/marketing/dist
@@ -39,7 +35,7 @@ ${DOMAIN}, www.${DOMAIN} {
     encode gzip zstd
 
     log {
-        output file /opt/cmdetect/logs/caddy-marketing.log {
+        output file /var/log/caddy/marketing.log {
             roll_size 10mb
             roll_keep 5
         }
@@ -48,7 +44,7 @@ ${DOMAIN}, www.${DOMAIN} {
 
 # Practitioner Frontend (Protected in Dev)
 app.${DOMAIN} {
-    import protected
+    import dev_auth
     import security_headers
 
     root * /opt/cmdetect/apps/frontend/dist
@@ -59,7 +55,7 @@ app.${DOMAIN} {
     header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.${DOMAIN} https://auth.${DOMAIN} wss://api.${DOMAIN}; font-src 'self' data:;"
 
     log {
-        output file /opt/cmdetect/logs/caddy-app.log {
+        output file /var/log/caddy/app.log {
             roll_size 10mb
             roll_keep 5
         }
@@ -68,7 +64,7 @@ app.${DOMAIN} {
 
 # Patient Frontend (Protected in Dev)
 patient.${DOMAIN} {
-    import protected
+    import dev_auth
     import security_headers
 
     root * /opt/cmdetect/apps/patient-frontend/dist
@@ -84,7 +80,7 @@ patient.${DOMAIN} {
     }
 
     log {
-        output file /opt/cmdetect/logs/caddy-patient.log {
+        output file /var/log/caddy/patient.log {
             roll_size 10mb
             roll_keep 5
         }
@@ -110,7 +106,7 @@ auth.${DOMAIN} {
     }
 
     log {
-        output file /opt/cmdetect/logs/caddy-auth.log {
+        output file /var/log/caddy/auth.log {
             roll_size 10mb
             roll_keep 5
         }
@@ -158,7 +154,7 @@ api.${DOMAIN} {
     }
 
     log {
-        output file /opt/cmdetect/logs/caddy-api.log {
+        output file /var/log/caddy/api.log {
             roll_size 10mb
             roll_keep 5
         }
