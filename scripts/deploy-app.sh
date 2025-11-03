@@ -3,7 +3,7 @@
 ################################################################################
 # CMDetect Application Deployment Script
 #
-# This script deploys the CMDetect application (builds, migrations, seeds)
+# This script deploys the CMDetect application (builds and migrations)
 #
 # Usage:
 #   ./scripts/deploy-app.sh
@@ -50,20 +50,9 @@ if [ -z "${DOMAIN:-}" ]; then
   exit 1
 fi
 
-if [ -z "${ENVIRONMENT:-}" ]; then
-  echo "ERROR: ENVIRONMENT not set in $SERVER_ENV"
-  exit 1
-fi
-
 if [ -z "${HASURA_GRAPHQL_ADMIN_SECRET:-}" ]; then
   echo "ERROR: HASURA_GRAPHQL_ADMIN_SECRET not set in $SECRETS_ENV"
   exit 1
-fi
-
-# Auto-apply seeds in development environment
-APPLY_SEEDS=false
-if [ "$ENVIRONMENT" = "development" ]; then
-  APPLY_SEEDS=true
 fi
 
 # Colors
@@ -101,9 +90,7 @@ cat <<'EOF'
 ╚═══════════════════════════════════════════════════╝
 EOF
 echo -e "${NC}"
-echo "Environment: ${ENVIRONMENT}"
 echo "Domain: ${DOMAIN}"
-echo "Apply seeds: ${APPLY_SEEDS}"
 echo ""
 
 # Check we're not running as root
@@ -120,13 +107,13 @@ if [ ! -f "package.json" ]; then
 fi
 
 # Step 1: Generate environment files
-log_step "[1/10] Environment Configuration"
+log_step "[1/9] Environment Configuration"
 log "Generating environment files from templates..."
 bash scripts/generate-envs.sh
 log "✓ Environment files generated"
 
 # Step 2: Install dependencies
-log_step "[2/10] Install Dependencies"
+log_step "[2/9] Install Dependencies"
 log "Running: pnpm install --frozen-lockfile"
 # Include devDependencies even in production (needed for build tools like turbo)
 # --force: non-interactive, automatically proceed with reinstallation if needed
@@ -134,7 +121,7 @@ pnpm install --frozen-lockfile --prod=false
 log "✓ Dependencies installed"
 
 # Step 3: Start bootstrap containers
-log_step "[3/10] Bootstrap Containers"
+log_step "[3/9] Bootstrap Containers"
 log "Starting PostgreSQL and Hasura for migrations..."
 docker compose -f docker-compose.bootstrap.yml up -d
 log "Waiting for services to be healthy (10s)..."
@@ -142,32 +129,22 @@ sleep 10
 log "✓ Bootstrap containers started"
 
 # Step 4: Apply Hasura migrations
-log_step "[4/10] Database Migrations"
+log_step "[4/9] Database Migrations"
 cd apps/hasura
 log "Applying Hasura migrations..."
 hasura migrate apply --database-name default --admin-secret "$HASURA_GRAPHQL_ADMIN_SECRET"
 log "✓ Migrations applied"
 
 # Step 5: Apply Hasura metadata
-log_step "[5/10] Hasura Metadata"
+log_step "[5/9] Hasura Metadata"
 log "Applying Hasura metadata..."
 hasura metadata apply --admin-secret "$HASURA_GRAPHQL_ADMIN_SECRET"
 log "✓ Metadata applied"
 
-# Step 6: Apply seeds (optional)
-log_step "[6/10] Database Seeds"
-if [ "$APPLY_SEEDS" = true ]; then
-  log "Applying database seeds..."
-  hasura seed apply --database-name default --admin-secret "$HASURA_GRAPHQL_ADMIN_SECRET"
-  log "✓ Seeds applied"
-else
-  log "Skipping seeds (${ENVIRONMENT} environment)"
-fi
-
 cd ../../
 
-# Step 7: Generate GraphQL types
-log_step "[7/10] GraphQL Code Generation"
+# Step 6: Generate GraphQL types
+log_step "[6/9] GraphQL Code Generation"
 log "Generating TypeScript types from GraphQL schema..."
 
 # Debug: Check if admin secret is set
@@ -181,21 +158,21 @@ fi
 pnpm codegen
 log "✓ GraphQL types generated"
 
-# Step 8: Build frontends
-log_step "[8/10] Build Frontends"
+# Step 7: Build frontends
+log_step "[7/9] Build Frontends"
 log "Building all packages and frontends..."
 pnpm build
 log "✓ Frontends built"
 
-# Step 9: Create logs directory
-log_step "[9/10] Logs Directory"
+# Step 8: Create logs directory
+log_step "[8/9] Logs Directory"
 log "Creating /opt/cmdetect/logs..."
 mkdir -p /opt/cmdetect/logs
 log "✓ Logs directory created"
 log_warn "Note: Run setup-caddy.sh as root to configure permissions"
 
-# Step 10: Stop bootstrap and start production containers
-log_step "[10/10] Production Containers"
+# Step 9: Stop bootstrap and start production containers
+log_step "[9/9] Production Containers"
 log "Stopping bootstrap containers..."
 docker compose -f docker-compose.bootstrap.yml down
 log "✓ Bootstrap containers stopped"
@@ -207,7 +184,6 @@ if [ -z "${DOMAIN:-}" ]; then
   exit 1
 fi
 log "  DOMAIN: ${DOMAIN}"
-log "  ENVIRONMENT: ${ENVIRONMENT}"
 
 log "Building and starting production containers..."
 docker compose -f docker-compose.prod.yml up -d --build

@@ -6,16 +6,15 @@
 # Creates /var/www/cmdetect/server.env with server-specific variables
 #
 # Usage:
-#   sudo ./generate-server-env.sh ENVIRONMENT DOMAIN EMAIL
+#   sudo ./generate-server-env.sh DOMAIN EMAIL
 #
 # Arguments:
-#   ENVIRONMENT - Either 'development' or 'production'
 #   DOMAIN      - Domain name (e.g., cmdetect-dev.de)
 #   EMAIL       - Admin email for Let's Encrypt (e.g., admin@cmdetect.de)
 #
 # Example:
-#   sudo ./generate-server-env.sh development cmdetect-dev.de admin@cmdetect.de
-#   sudo ./generate-server-env.sh production cmdetect.de admin@cmdetect.de
+#   sudo ./generate-server-env.sh cmdetect-dev.de admin@cmdetect.de
+#   sudo ./generate-server-env.sh cmdetect.de admin@cmdetect.de
 #
 ################################################################################
 
@@ -56,28 +55,16 @@ fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Parse arguments
-ENVIRONMENT="${1:-}"
-DOMAIN="${2:-}"
-EMAIL="${3:-}"
-
-log_step "CMDetect Server Environment Configuration"
+DOMAIN="${1:-}"
+EMAIL="${2:-}"
 
 # Require all arguments
-if [ -z "$ENVIRONMENT" ] || [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
+if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
   log_error "Missing required arguments"
   echo ""
-  echo "Usage: $0 ENVIRONMENT DOMAIN EMAIL"
+  echo "Usage: $0 DOMAIN EMAIL"
+  echo "Example: sudo $0 cmdetect-dev.de admin@cmdetect.de"
   echo ""
-  echo "Example:"
-  echo "  sudo $0 development cmdetect-dev.de admin@cmdetect.de"
-  echo "  sudo $0 production cmdetect.de admin@cmdetect.de"
-  echo ""
-  exit 1
-fi
-
-# Validate environment
-if [[ "$ENVIRONMENT" != "development" && "$ENVIRONMENT" != "production" ]]; then
-  log_error "ENVIRONMENT must be 'development' or 'production', got: $ENVIRONMENT"
   exit 1
 fi
 
@@ -97,19 +84,16 @@ fi
 # Check if server.env exists
 SERVER_ENV="/var/www/cmdetect/server.env"
 if [ -f "$SERVER_ENV" ]; then
-  log_warn "$SERVER_ENV already exists"
+  log_warn "File already exists"
   read -p "Overwrite? (y/N): " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    log "Keeping existing file. Exiting."
     exit 0
   fi
-  # Backup existing file
   cp "$SERVER_ENV" "${SERVER_ENV}.backup.$(date +%Y%m%d_%H%M%S)"
-  log "✓ Backup created"
 fi
 
-log_step "Server Configuration"
+log "Generating server configuration..."
 
 # Create server.env
 cat > "$SERVER_ENV" <<EOF
@@ -120,32 +104,15 @@ cat > "$SERVER_ENV" <<EOF
 #
 # This file contains server-level configuration used by:
 # - Caddy (DOMAIN, EMAIL)
-# - Application deployment (DOMAIN, ENVIRONMENT)
+# - Application deployment (DOMAIN)
 ################################################################################
 
 DOMAIN=${DOMAIN}
 EMAIL=${EMAIL}
-ENVIRONMENT=${ENVIRONMENT}
 EOF
-
-log "✓ Server configuration created"
 
 chmod 640 "$SERVER_ENV"
 chown root:cmdetect "$SERVER_ENV" 2>/dev/null || chown root:root "$SERVER_ENV"
 
-log_step "Configuration Created"
-log ""
-log "✓ Server config saved to: $SERVER_ENV"
-log ""
-log "Summary:"
-log "  Environment: ${ENVIRONMENT}"
-log "  Domain: ${DOMAIN}"
-log "  Email: ${EMAIL}"
-if [ "$ENVIRONMENT" = "development" ]; then
-  log "  Basic Auth: Enabled (user: dev)"
-fi
-log ""
-log "Next steps:"
-log "  1. Generate secrets: sudo ./generate-secrets.sh"
-log "  2. Setup Caddy: sudo ./setup-caddy.sh"
-log ""
+log "✓ Configuration saved (${DOMAIN})"
+echo ""

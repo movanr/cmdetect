@@ -55,8 +55,6 @@ if [ ! -d "/var/www/cmdetect" ]; then
   exit 1
 fi
 
-log_step "CMDetect Secret Generation"
-
 # Function to generate secure random string
 generate_secret() {
     local length=$1
@@ -95,36 +93,6 @@ log "✓ HASURA_GRAPHQL_ADMIN_SECRET generated (64 chars)"
 BETTER_AUTH_SECRET=$(generate_secret 64)
 log "✓ BETTER_AUTH_SECRET generated (64 chars)"
 
-# Optional: Prompt for SMTP configuration
-log_step "SMTP Configuration (Optional)"
-echo ""
-echo "Configure SMTP for email verification?"
-read -p "Configure SMTP? (y/N): " -n 1 -r
-echo ""
-
-SMTP_HOST=""
-SMTP_PORT="587"
-SMTP_USER=""
-SMTP_PASS=""
-SMTP_FROM=""
-
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-  echo ""
-  read -p "SMTP Host (e.g., smtp.gmail.com): " SMTP_HOST
-  read -p "SMTP Port (default: 587): " SMTP_PORT_INPUT
-  SMTP_PORT="${SMTP_PORT_INPUT:-587}"
-  read -p "SMTP User (e.g., your-email@gmail.com): " SMTP_USER
-  read -s -p "SMTP Password: " SMTP_PASS
-  echo ""
-  read -p "SMTP From (e.g., noreply@yourdomain.com): " SMTP_FROM
-
-  if [ -n "$SMTP_HOST" ]; then
-    log "✓ SMTP configured"
-  fi
-else
-  log "Skipping SMTP configuration (emails disabled)"
-fi
-
 # Create secrets.env file
 cat > "$SECRETS_ENV" <<EOF
 ################################################################################
@@ -145,12 +113,12 @@ HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_ADMIN_SECRET}
 # Better Auth
 BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
 
-# SMTP (Optional - leave empty if not using)
-SMTP_HOST=${SMTP_HOST}
-SMTP_PORT=${SMTP_PORT}
-SMTP_USER=${SMTP_USER}
-SMTP_PASS=${SMTP_PASS}
-SMTP_FROM=${SMTP_FROM}
+# SMTP (Optional - configure if you want email verification)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
 EOF
 
 chmod 640 "$SECRETS_ENV"

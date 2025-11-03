@@ -3,7 +3,7 @@
 ################################################################################
 # Generate Environment Files from Templates
 #
-# Uses templates and substitutes DOMAIN, ENVIRONMENT, EMAIL
+# Uses templates and substitutes DOMAIN, EMAIL
 # from /var/www/cmdetect/server.env
 #
 # Generates portable config files (NO SECRETS):
@@ -60,14 +60,13 @@ set -a
 source "$SERVER_ENV"
 set +a
 
-if [ -z "${DOMAIN:-}" ] || [ -z "${ENVIRONMENT:-}" ]; then
-  log_error "DOMAIN or ENVIRONMENT not set in $SERVER_ENV"
+if [ -z "${DOMAIN:-}" ]; then
+  log_error "DOMAIN not set in $SERVER_ENV"
   exit 1
 fi
 
 log "Configuration:"
 log "  Domain: ${DOMAIN}"
-log "  Environment: ${ENVIRONMENT}"
 log "  Email: ${EMAIL:-not set}"
 
 log_step "[1/3] Backend Environment"
