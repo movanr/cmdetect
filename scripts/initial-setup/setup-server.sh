@@ -412,6 +412,12 @@ create_deployment_structure() {
         usermod -aG docker "$CMDETECT_USER" || true
         log "Added $CMDETECT_USER to docker group"
     fi
+
+    # Add caddy user to cmdetect group (if caddy is installed)
+    if command -v caddy &> /dev/null && id caddy &>/dev/null; then
+        usermod -aG cmdetect caddy || true
+        log "Added caddy to cmdetect group (for reading server config)"
+    fi
 }
 
 ################################################################################

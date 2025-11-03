@@ -135,7 +135,7 @@ EOF
 log "✓ Server configuration created"
 
 chmod 640 "$SERVER_ENV"
-chown root:caddy "$SERVER_ENV" 2>/dev/null || chown root:root "$SERVER_ENV"
+chown root:cmdetect "$SERVER_ENV" 2>/dev/null || chown root:root "$SERVER_ENV"
 
 log_step "Configuration Created"
 log ""
