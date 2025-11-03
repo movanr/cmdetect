@@ -130,7 +130,7 @@ log_step "[2/10] Install Dependencies"
 log "Running: pnpm install --frozen-lockfile"
 # Include devDependencies even in production (needed for build tools like turbo)
 # --force: non-interactive, automatically proceed with reinstallation if needed
-pnpm install --frozen-lockfile --prod=false --force
+pnpm install --frozen-lockfile --prod=false
 log "✓ Dependencies installed"
 
 # Step 3: Start bootstrap containers

@@ -2,8 +2,8 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 import { config as dotenvConfig } from "dotenv";
 import path from "path";
 
-// Load .env from repository root
-dotenvConfig({ path: path.resolve(__dirname, "../../.env") });
+// Load .env from repository root (don't override existing env vars)
+dotenvConfig({ path: path.resolve(__dirname, "../../.env"), override: false });
 
 const config: CodegenConfig = {
   schema: {
