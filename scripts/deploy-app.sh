@@ -10,7 +10,8 @@
 #
 # Prerequisites:
 #   - Run as 'cmdetect' user (not root)
-#   - Environment configured in /var/www/cmdetect/.env
+#   - Server config in /var/www/cmdetect/server.env
+#   - Secrets in /var/www/cmdetect/secrets.env
 #   - pnpm installed
 #   - Docker and docker-compose installed
 #   - hasura CLI installed
@@ -21,31 +22,41 @@
 set -euo pipefail
 
 # Load environment variables
-if [ ! -f "/var/www/cmdetect/.env" ]; then
-  echo "ERROR: /var/www/cmdetect/.env not found"
-  echo "Please create it from server.env.example"
+SERVER_ENV="/var/www/cmdetect/server.env"
+SECRETS_ENV="/var/www/cmdetect/secrets.env"
+
+if [ ! -f "$SERVER_ENV" ]; then
+  echo "ERROR: $SERVER_ENV not found"
+  echo "Please run: sudo ./scripts/initial-setup/generate-server-env.sh"
   exit 1
 fi
 
-# Source environment files (server-specific overrides portable config)
+if [ ! -f "$SECRETS_ENV" ]; then
+  echo "ERROR: $SECRETS_ENV not found"
+  echo "Please run: sudo ./scripts/initial-setup/generate-secrets.sh"
+  exit 1
+fi
+
+# Source environment files
 set -a
 [ -f "/opt/cmdetect/.env" ] && source /opt/cmdetect/.env
-source /var/www/cmdetect/.env
+source "$SERVER_ENV"
+source "$SECRETS_ENV"
 set +a
 
 # Validate required variables
 if [ -z "${DOMAIN:-}" ]; then
-  echo "ERROR: DOMAIN not set in /var/www/cmdetect/.env"
+  echo "ERROR: DOMAIN not set in $SERVER_ENV"
   exit 1
 fi
 
 if [ -z "${ENVIRONMENT:-}" ]; then
-  echo "ERROR: ENVIRONMENT not set in /var/www/cmdetect/.env"
+  echo "ERROR: ENVIRONMENT not set in $SERVER_ENV"
   exit 1
 fi
 
 if [ -z "${HASURA_GRAPHQL_ADMIN_SECRET:-}" ]; then
-  echo "ERROR: HASURA_GRAPHQL_ADMIN_SECRET not set in /var/www/cmdetect/.env"
+  echo "ERROR: HASURA_GRAPHQL_ADMIN_SECRET not set in $SECRETS_ENV"
   exit 1
 fi
 
