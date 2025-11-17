@@ -193,4 +193,6 @@ describe("Role-Based Access Control", () => {
       ).rejects.toThrow();
     });
   });
+  // TODO: Würde auf jeden Fall ein paar Tests haben für Public User, dass die Tables die er nicht accessen darf immer sofort failen (Schema Error von Hasura weil anders).
+  // TODO: Eigl ist es deklarativ genug mit Hasura, ggf kannst du auch die YAML File parsen für die Tables und checken
 });
