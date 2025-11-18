@@ -25,15 +25,20 @@ export const auth = betterAuth({
       jwt: {
         issuer: "cmdetect-auth-server",
         audience: "hasura",
+        // TODO: expirationTime so klein wie möglich und lieber öfter refreshen
+        // (kein Refresh Token notwendig weil Session available, also bei nem 401 wenn expired ist, nochmal den JWT neu holen im execute)
         expirationTime: "8h", // Longer session for healthcare workflow
         definePayload: ({ user }) => {
           // Validate roles array and apply hierarchy for authenticated users
           // Clinical roles (physician, receptionist) have priority over admin role
           const userRoles = (user.roles as string[]) || [];
+          // TODO: Lieber parsen statt Code der was checkt -> Deklarativ > Imperativ
           const validRoles = userRoles.filter((role) => roleHierarchy.includes(role as any));
 
           if (validRoles.length > 0 && user.organizationId) {
             // Use activeRole from user if set, otherwise use hierarchy default
+
+            // Würd immer ne ActiveRole requiren, gibts einen Grund warum das null sein könnte?
             const activeRole =
               user.activeRole && validRoles.includes(user.activeRole)
                 ? user.activeRole

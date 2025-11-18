@@ -7,24 +7,27 @@ export const authClient = createAuthClient({
   },
 });
 
-export const {
-  signIn,
-  signOut,
-  signUp,
-  useSession,
-} = authClient;
+export const { signIn, signOut, signUp, useSession } = authClient;
 
+let token: string | null = null;
 // Helper to get JWT token (automatically includes active role)
 export async function getJWTToken(): Promise<string | null> {
   try {
-    const response = await fetch(`${import.meta.env.VITE_AUTH_SERVER_URL || "http://localhost:3001"}/api/auth/token`, {
-      method: "GET",
-      credentials: "include",
-    });
-    
+    if (token) {
+      return token;
+    }
+    const response = await fetch(
+      `${import.meta.env.VITE_AUTH_SERVER_URL || "http://localhost:3001"}/api/auth/token`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
     if (response.ok) {
       const data = await response.json();
-      return data.token;
+      token = data.token;
+      return token;
     }
     return null;
   } catch (error) {
@@ -33,18 +36,31 @@ export async function getJWTToken(): Promise<string | null> {
   }
 }
 
+export const refreshJWTToken = async () => {
+  token = null;
+  const newToken = await getJWTToken();
+  if (newToken) {
+    token = newToken;
+    return token;
+  }
+  return null;
+};
+
 // Helper to switch user role
 export async function switchUserRole(role: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetch(`${import.meta.env.VITE_AUTH_SERVER_URL || "http://localhost:3001"}/api/auth/switch-role`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ role }),
-    });
-    
+    const response = await fetch(
+      `${import.meta.env.VITE_AUTH_SERVER_URL || "http://localhost:3001"}/api/auth/switch-role`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ role }),
+      }
+    );
+
     if (response.ok) {
       const data = await response.json();
       return { success: data.success };
@@ -57,4 +73,3 @@ export async function switchUserRole(role: string): Promise<{ success: boolean; 
     return { success: false, error: "Network error" };
   }
 }
-

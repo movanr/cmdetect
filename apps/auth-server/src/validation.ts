@@ -1,3 +1,5 @@
+// TODO: Das sollte alles Zod sein. Zu viel Potential Fehler zu haben.
+
 /**
  * Validation utilities for auth server endpoints
  */

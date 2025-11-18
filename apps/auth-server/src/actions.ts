@@ -13,6 +13,8 @@ import {
 } from './validation';
 import { sendActionError, sendActionSuccess } from './errors';
 
+// TODO: 1. Inputs immer parsen mit Zod und du kannst auch von Hasura aus einen Header mitschicken lassen, dass du weißt, dass die Action von Hasura gecalled wird
+// TODO (nice-to-have): 2. Scheint mir als könnten fast alle Actions direkt in Hasura gemacht werden mit native Queries die dir dann GraphQL exposen. Vorteil -> Permissions werden gechecked ob korrekt statt wie hier indirekt Superuser Access
 export class ActionHandlers {
   constructor(private db: DatabaseService) {}
 
