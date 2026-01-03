@@ -235,8 +235,8 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
       zod:
-        specifier: ^4.1.7
-        version: 4.1.7
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@0no-co/graphqlsp':
         specifier: ^1.15.0
@@ -359,8 +359,8 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
       zod:
-        specifier: ^4.1.7
-        version: 4.1.7
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@graphql-codegen/cli':
         specifier: ^6.0.0
@@ -402,8 +402,8 @@ importers:
   packages/config:
     dependencies:
       zod:
-        specifier: ^4.1.7
-        version: 4.1.7
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       typescript:
         specifier: ^5.9.2

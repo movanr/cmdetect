@@ -46,7 +46,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
-    "zod": "^4.1.7"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@0no-co/graphqlsp": "^1.15.0",
