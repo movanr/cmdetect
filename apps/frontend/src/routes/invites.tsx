@@ -1,10 +1,10 @@
+import { InvitesView } from "@/features/patient-records/components/InvitesView";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { AppLayout } from "../components/layouts/AppLayout";
-import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
-import { InvitesView } from "../features/invites/InvitesView";
 import { Button } from "../components/ui/button";
 import { getTranslations } from "../config/i18n";
-import { Plus } from "lucide-react";
+import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 import { cn } from "../lib/utils";
 
 export const Route = createFileRoute("/invites")({
@@ -21,12 +21,8 @@ function InvitesPage() {
           {/* Page header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">
-                {t.nav.patients}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t.pageDescriptions.invites}
-              </p>
+              <h1 className="text-3xl font-semibold tracking-tight">{t.nav.patients}</h1>
+              <p className="text-sm text-muted-foreground mt-1">{t.pageDescriptions.invites}</p>
             </div>
             <Button asChild>
               <Link to="/invites/new">

@@ -1,16 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { CaseLayout } from "../components/layouts/CaseLayout";
-import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTranslations } from "../config/i18n";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { execute } from "@/graphql/execute";
-import { graphql } from "@/graphql";
-import { useEffect, useState } from "react";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
+import { graphql } from "@/graphql";
+import { execute } from "@/graphql/execute";
 import { formatDate } from "@/lib/date-utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { CaseLayout } from "../components/layouts/CaseLayout";
+import { getTranslations } from "../config/i18n";
+import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 
 // GraphQL queries
 const GET_PATIENT_RECORD = graphql(`
@@ -37,28 +37,19 @@ const GET_PATIENT_RECORD = graphql(`
 
 const UPDATE_VIEWED = graphql(`
   mutation UpdateViewed($id: String!) {
-    update_patient_record_by_pk(
-      pk_columns: { id: $id }
-      _set: { viewed: true }
-    ) {
+    update_patient_record_by_pk(pk_columns: { id: $id }, _set: { viewed: true }) {
       id
       viewed
     }
   }
 `);
 
-console.log("cases_.$id.anamnesis.tsx file loaded");
-
 export const Route = createFileRoute("/cases_/$id/anamnesis")({
   component: AnamnesisPage,
 });
 
-console.log("Route created:", Route);
-
 function AnamnesisPage() {
-  console.log("AnamnesisPage rendering");
   const { id } = Route.useParams();
-  console.log("Patient ID:", id);
   const navigate = useNavigate();
   const t = getTranslations();
   const queryClient = useQueryClient();
@@ -104,10 +95,7 @@ function AnamnesisPage() {
           return;
         }
 
-        const patientData = await decryptPatientData(
-          record.first_name_encrypted,
-          privateKeyPem
-        );
+        const patientData = await decryptPatientData(record.first_name_encrypted, privateKeyPem);
         setDecryptedData(patientData);
       } catch (error) {
         console.error("Failed to decrypt patient data:", error);
@@ -135,13 +123,9 @@ function AnamnesisPage() {
         <CaseLayout caseId={id} currentStep="anamnesis">
           <Card>
             <CardContent className="p-6">
-              <p className="text-center text-muted-foreground">
-                Fall nicht gefunden
-              </p>
+              <p className="text-center text-muted-foreground">Fall nicht gefunden</p>
               <div className="flex justify-center mt-4">
-                <Button onClick={() => navigate({ to: "/cases" })}>
-                  Zurück zur Übersicht
-                </Button>
+                <Button onClick={() => navigate({ to: "/cases" })}>Zurück zur Übersicht</Button>
               </div>
             </CardContent>
           </Card>
@@ -175,9 +159,7 @@ function AnamnesisPage() {
             <CardTitle>{t.caseSteps.anamnesis}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">
-              Hier wird der Anamnese-Schritt angezeigt.
-            </p>
+            <p className="text-muted-foreground">Hier wird der Anamnese-Schritt angezeigt.</p>
             {/* TODO: Add anamnesis form/content */}
           </CardContent>
         </Card>

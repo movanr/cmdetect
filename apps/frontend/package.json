@@ -16,7 +16,7 @@
   "dependencies": {
     "@cmdetect/config": "workspace:*",
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@hookform/resolvers": "^5.2.1",
+    "@hookform/resolvers": "^5.2.2",
     "@noble/ciphers": "^2.0.0",
     "@noble/curves": "^2.0.0",
     "@noble/hashes": "^2.0.0",

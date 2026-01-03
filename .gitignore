@@ -59,6 +59,9 @@ apps/*/src/graphql/graphql.ts
 apps/*/src/graphql/fragment-masking.ts
 apps/*/schema.graphql
 
+# TanStack Router generated files
+apps/*/src/routeTree.gen.ts
+
 # Database
 *.db
 *.sqlite
