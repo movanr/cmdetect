@@ -1,3 +1,9 @@
+type Query {
+  getPatientProgress(
+    invite_token: String!
+  ): PatientProgressResponse!
+}
+
 type Mutation {
   submitPatientConsent(
     invite_token: String!
@@ -24,13 +30,6 @@ type Mutation {
     invite_token: String!
   ): ValidateInviteTokenResponse!
 }
-
-type Query {
-  getPatientProgress(
-    invite_token: String!
-  ): PatientProgressResponse!
-}
-
 
 input ConsentInput {
   consent_given: Boolean!

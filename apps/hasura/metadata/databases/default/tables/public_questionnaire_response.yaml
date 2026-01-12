@@ -76,6 +76,7 @@ update_permissions:
     permission:
       columns:
         - deleted_at
+        - response_data
       filter:
         _and:
           - organization_id:

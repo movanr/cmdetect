@@ -3,23 +3,28 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDistanceToNow } from "@/lib/date-utils";
 import { ClipboardList } from "lucide-react";
-import { useQuestionnaireResponses, type QuestionnaireResponse } from "../hooks/useQuestionnaireResponses";
-import { QuestionItem } from "./QuestionItem";
-import { PHQ4Summary } from "./PHQ4Summary";
 import {
-  SQ_QUESTION_LABELS,
-  PHQ4_QUESTION_LABELS,
-  PHQ4_ANSWER_LABELS,
-  SQ_YES_NO_LABELS,
-  SQ3_LABELS,
   QUESTIONNAIRE_TITLES,
+  SQ_OFFICE_USE_QUESTIONS,
+  SQ_QUESTION_LABELS,
   SQ_SECTIONS_ORDER,
 } from "../data/questionLabels";
-import { formatDistanceToNow } from "@/lib/date-utils";
+import { isQuestionEnabled } from "../data/sqEnableWhen";
+import {
+  useQuestionnaireResponses,
+  type QuestionnaireResponse,
+} from "../hooks/useQuestionnaireResponses";
+import { useUpdateQuestionnaireResponse } from "../hooks/useUpdateQuestionnaireResponse";
+import { type OfficeUseValue } from "./editors/SideCheckboxGroup";
+import { InlineQuestionItem, getAnswerType } from "./InlineQuestionItem";
+import { OfficeUseQuestionItem } from "./OfficeUseQuestionItem";
+import { PHQ4Summary } from "./PHQ4Summary";
+import { QuestionItem } from "./QuestionItem";
 
 interface QuestionnaireViewerProps {
   patientRecordId: string;
@@ -77,7 +82,7 @@ export function QuestionnaireViewer({ patientRecordId }: QuestionnaireViewerProp
 
           {data.map((response) => (
             <TabsContent key={response.id} value={response.questionnaireId}>
-              <QuestionnaireTabContent response={response} />
+              <QuestionnaireTabContent response={response} patientRecordId={patientRecordId} />
             </TabsContent>
           ))}
         </Tabs>
@@ -88,9 +93,10 @@ export function QuestionnaireViewer({ patientRecordId }: QuestionnaireViewerProp
 
 interface QuestionnaireTabContentProps {
   response: QuestionnaireResponse;
+  patientRecordId: string;
 }
 
-function QuestionnaireTabContent({ response }: QuestionnaireTabContentProps) {
+function QuestionnaireTabContent({ response, patientRecordId }: QuestionnaireTabContentProps) {
   const { questionnaireId, answers, submittedAt } = response;
 
   return (
@@ -101,11 +107,9 @@ function QuestionnaireTabContent({ response }: QuestionnaireTabContentProps) {
       </div>
 
       {/* Questionnaire-specific rendering */}
-      {questionnaireId === "phq-4" && (
-        <PHQ4Content answers={answers as Record<string, string>} />
-      )}
+      {questionnaireId === "phq-4" && <PHQ4Content answers={answers as Record<string, string>} />}
       {questionnaireId === "dc-tmd-sq" && (
-        <SQContent answers={answers as Record<string, unknown>} />
+        <SQContent response={response} patientRecordId={patientRecordId} />
       )}
       {questionnaireId !== "phq-4" && questionnaireId !== "dc-tmd-sq" && (
         <GenericContent answers={answers} />
@@ -122,15 +126,54 @@ function PHQ4Content({ answers }: { answers: Record<string, string> }) {
 }
 
 /**
- * DC/TMD-SQ content grouped by section
+ * DC/TMD-SQ content grouped by section with inline editing
+ * SQ8-SQ14 have Office use fields for clinical confirmation
  */
-function SQContent({ answers }: { answers: Record<string, unknown> }) {
-  // Group answers by section
+function SQContent({
+  response,
+  patientRecordId,
+}: {
+  response: QuestionnaireResponse;
+  patientRecordId: string;
+}) {
+  const { answers, id: responseId, questionnaireId, questionnaireVersion } = response;
+  const updateMutation = useUpdateQuestionnaireResponse(patientRecordId);
+
+  // Define question order for proper sorting
+  const QUESTION_ORDER = [
+    "SQ1",
+    "SQ2",
+    "SQ3",
+    "SQ4_A",
+    "SQ4_B",
+    "SQ4_C",
+    "SQ4_D",
+    "SQ5",
+    "SQ6",
+    "SQ7_A",
+    "SQ7_B",
+    "SQ7_C",
+    "SQ7_D",
+    "SQ8",
+    "SQ9",
+    "SQ10",
+    "SQ11",
+    "SQ12",
+    "SQ13",
+    "SQ14",
+  ];
+
+  // Group questions by section, showing only enabled questions
+  // This includes questions without answers if they become enabled
   const answersBySection: Record<string, Array<{ id: string; answer: unknown }>> = {};
 
-  Object.entries(answers).forEach(([questionId, answer]) => {
-    const label = SQ_QUESTION_LABELS[questionId];
-    if (!label) return;
+  // Get all question IDs from labels and filter by enableWhen
+  Object.entries(SQ_QUESTION_LABELS).forEach(([questionId, label]) => {
+    // Check if question is enabled based on current answers
+    if (!isQuestionEnabled(questionId, answers)) return;
+
+    // Get the answer (may be undefined for newly enabled questions)
+    const answer = answers[questionId];
 
     if (!answersBySection[label.section]) {
       answersBySection[label.section] = [];
@@ -138,26 +181,126 @@ function SQContent({ answers }: { answers: Record<string, unknown> }) {
     answersBySection[label.section].push({ id: questionId, answer });
   });
 
+  // Sort questions within each section by predefined order
+  Object.values(answersBySection).forEach((sectionAnswers) => {
+    sectionAnswers.sort((a, b) => {
+      const orderA = QUESTION_ORDER.indexOf(a.id);
+      const orderB = QUESTION_ORDER.indexOf(b.id);
+      return orderA - orderB;
+    });
+  });
+
+  const handleSave = async (questionId: string, newValue: unknown) => {
+    // Build the updated response_data with the new answer
+    const updatedAnswers: Record<string, unknown> = {
+      ...answers,
+      [questionId]: newValue,
+    };
+
+    // If changing an office-use question to "no", also clear the office use
+    if (SQ_OFFICE_USE_QUESTIONS.has(questionId) && newValue === "no") {
+      const officeUseKey = `${questionId}_office`;
+      updatedAnswers[officeUseKey] = {};
+    }
+
+    const updatedResponseData = {
+      questionnaire_id: questionnaireId,
+      questionnaire_version: questionnaireVersion,
+      answers: updatedAnswers,
+    };
+
+    await updateMutation.mutateAsync({
+      id: responseId,
+      responseData: updatedResponseData,
+    });
+  };
+
+  const handleOfficeUseChange = async (questionId: string, officeUse: OfficeUseValue) => {
+    // Store office use as a nested object under "{questionId}_office"
+    const officeUseKey = `${questionId}_office`;
+    const updatedAnswers = {
+      ...answers,
+      [officeUseKey]: officeUse,
+    };
+
+    const updatedResponseData = {
+      questionnaire_id: questionnaireId,
+      questionnaire_version: questionnaireVersion,
+      answers: updatedAnswers,
+    };
+
+    await updateMutation.mutateAsync({
+      id: responseId,
+      responseData: updatedResponseData,
+    });
+  };
+
+  // Get office use value for a question
+  const getOfficeUse = (questionId: string): OfficeUseValue => {
+    const officeUseKey = `${questionId}_office`;
+    return (answers[officeUseKey] as OfficeUseValue) || {};
+  };
+
+  // Count pending confirmations (questions with Yes answer but no side confirmed)
+  const pendingConfirmations = Array.from(SQ_OFFICE_USE_QUESTIONS).filter((qId) => {
+    if (!isQuestionEnabled(qId, answers)) return false;
+    if (answers[qId] !== "yes") return false;
+    const officeUse = getOfficeUse(qId);
+    return !officeUse.R && !officeUse.L && !officeUse.DNK;
+  }).length;
+
   return (
     <div className="space-y-6">
+      {/* Status banner for pending confirmations */}
+      {pendingConfirmations > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center gap-2">
+          <span className="text-amber-600 font-medium text-sm">
+            {pendingConfirmations} {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"} Seitenbestätigung
+          </span>
+        </div>
+      )}
+
       {SQ_SECTIONS_ORDER.map((section) => {
         const sectionAnswers = answersBySection[section];
         if (!sectionAnswers || sectionAnswers.length === 0) return null;
 
         return (
           <div key={section}>
-            <h4 className="font-semibold text-sm text-muted-foreground mb-2 uppercase tracking-wide">
-              {section}
-            </h4>
+            {/* Section header */}
+            <div className="mb-2">
+              <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                {section}
+              </h4>
+            </div>
             <div className="border rounded-lg px-4">
               {sectionAnswers.map(({ id, answer }) => {
                 const label = SQ_QUESTION_LABELS[id];
+                const isOfficeUseQuestion = SQ_OFFICE_USE_QUESTIONS.has(id);
+
+                if (isOfficeUseQuestion) {
+                  return (
+                    <OfficeUseQuestionItem
+                      key={id}
+                      questionId={id}
+                      questionText={label?.text || id}
+                      patientAnswer={answer as string}
+                      officeUse={getOfficeUse(id)}
+                      onPatientAnswerChange={handleSave}
+                      onOfficeUseChange={handleOfficeUseChange}
+                      isSaving={updateMutation.isPending}
+                    />
+                  );
+                }
+
                 return (
-                  <QuestionItem
+                  <InlineQuestionItem
                     key={id}
                     questionId={id}
                     questionText={label?.text || id}
-                    answer={formatSQAnswer(id, answer)}
+                    answer={answer}
+                    answerType={getAnswerType(id)}
+                    onSave={handleSave}
+                    isSaving={updateMutation.isPending}
                   />
                 );
               })}
@@ -167,39 +310,6 @@ function SQContent({ answers }: { answers: Record<string, unknown> }) {
       })}
     </div>
   );
-}
-
-/**
- * Format SQ answer based on question type
- */
-function formatSQAnswer(questionId: string, answer: unknown): string {
-  // Composite number answer (years/months)
-  if (typeof answer === "object" && answer !== null) {
-    const composite = answer as { years?: number; months?: number };
-    const parts: string[] = [];
-    if (composite.years !== undefined && composite.years > 0) {
-      parts.push(`${composite.years} Jahr${composite.years !== 1 ? "e" : ""}`);
-    }
-    if (composite.months !== undefined && composite.months > 0) {
-      parts.push(`${composite.months} Monat${composite.months !== 1 ? "e" : ""}`);
-    }
-    return parts.length > 0 ? parts.join(", ") : "0";
-  }
-
-  // String answer
-  if (typeof answer === "string") {
-    // SQ3 specific labels
-    if (questionId === "SQ3" && SQ3_LABELS[answer]) {
-      return SQ3_LABELS[answer];
-    }
-    // Yes/No labels
-    if (SQ_YES_NO_LABELS[answer]) {
-      return SQ_YES_NO_LABELS[answer];
-    }
-    return answer;
-  }
-
-  return String(answer);
 }
 
 /**

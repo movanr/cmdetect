@@ -1,4 +1,11 @@
 actions:
+  - name: getPatientProgress
+    definition:
+      kind: ""
+      handler: http://auth-server:3001/actions/get-patient-progress
+      forward_client_headers: true
+    permissions:
+      - role: public
   - name: submitPatientConsent
     definition:
       kind: synchronous
@@ -24,13 +31,6 @@ actions:
     definition:
       kind: synchronous
       handler: http://auth-server:3001/actions/validate-invite-token
-      forward_client_headers: true
-    permissions:
-      - role: public
-  - name: getPatientProgress
-    definition:
-      kind: synchronous
-      handler: http://auth-server:3001/actions/get-patient-progress
       forward_client_headers: true
     permissions:
       - role: public

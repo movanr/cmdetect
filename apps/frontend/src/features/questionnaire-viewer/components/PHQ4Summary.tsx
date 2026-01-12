@@ -31,7 +31,7 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden mb-4">
+    <div className="border rounded-lg overflow-hidden mb-4 w-fit max-w-full">
       {/* Header */}
       <div className="bg-muted/50 px-4 py-2 border-b">
         <p className="text-sm text-muted-foreground">
@@ -40,12 +40,12 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
       </div>
 
       {/* Table */}
-      <table className="w-full">
+      <table>
         <thead>
           <tr className="border-b bg-muted/30">
             <th className="text-left p-3 font-medium text-sm"></th>
             {SCORE_OPTIONS.map((opt) => (
-              <th key={opt.value} className="p-2 text-center font-medium text-xs align-bottom w-[70px]">
+              <th key={opt.value} className="p-2 text-center font-medium text-xs align-bottom">
                 <div className="text-muted-foreground text-[10px] leading-tight mb-1">{opt.label}</div>
                 <div className="text-sm font-semibold">{opt.value}</div>
               </th>

@@ -139,3 +139,15 @@ export const SQ_SECTIONS_ORDER = [
   "Kiefersperre (geschlossen)",
   "Kiefersperre (offen)",
 ];
+
+// Questions that have Office use fields (SQ8-SQ14)
+// All have R / L / DNK options for side confirmation
+export const SQ_OFFICE_USE_QUESTIONS = new Set([
+  "SQ8", // Joint noises
+  "SQ9", // Closed locking
+  "SQ10",
+  "SQ11",
+  "SQ12",
+  "SQ13", // Open locking
+  "SQ14",
+]);
