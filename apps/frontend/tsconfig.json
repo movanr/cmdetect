@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "src/features/examination/ui/grouping/groupByContext"],
   "compilerOptions": {
     "plugins": [
       {
