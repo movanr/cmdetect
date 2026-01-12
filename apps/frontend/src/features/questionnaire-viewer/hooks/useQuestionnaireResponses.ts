@@ -12,6 +12,10 @@ export interface QuestionnaireResponse {
   questionnaireVersion: string;
   answers: Record<string, unknown>;
   submittedAt: string;
+  /** ISO timestamp when the questionnaire was reviewed with patient */
+  reviewedAt?: string;
+  /** User ID of who reviewed the questionnaire */
+  reviewedBy?: string;
 }
 
 export function useQuestionnaireResponses(patientRecordId: string) {
@@ -28,6 +32,10 @@ export function useQuestionnaireResponses(patientRecordId: string) {
           questionnaire_id: string;
           questionnaire_version: string;
           answers: Record<string, unknown>;
+          _meta?: {
+            reviewed_at?: string;
+            reviewed_by?: string;
+          };
         };
 
         return {
@@ -36,6 +44,8 @@ export function useQuestionnaireResponses(patientRecordId: string) {
           questionnaireVersion: responseData?.questionnaire_version || "1.0",
           answers: responseData?.answers || {},
           submittedAt: response.submitted_at,
+          reviewedAt: responseData?._meta?.reviewed_at,
+          reviewedBy: responseData?._meta?.reviewed_by,
         } satisfies QuestionnaireResponse;
       });
     },

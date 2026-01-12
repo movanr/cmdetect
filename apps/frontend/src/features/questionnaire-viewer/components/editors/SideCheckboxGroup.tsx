@@ -4,6 +4,10 @@
  * DNK is mutually exclusive with R/L
  */
 
+import { useId } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
 export interface OfficeUseValue {
   R?: boolean;
   L?: boolean;
@@ -14,13 +18,16 @@ interface SideCheckboxGroupProps {
   value: OfficeUseValue;
   onChange: (value: OfficeUseValue) => void;
   disabled?: boolean;
+  error?: boolean;
 }
 
 export function SideCheckboxGroup({
   value,
   onChange,
   disabled = false,
+  error = false,
 }: SideCheckboxGroupProps) {
+  const id = useId();
   const handleRChange = (checked: boolean) => {
     if (checked) {
       // Selecting R clears DNK
@@ -48,39 +55,53 @@ export function SideCheckboxGroup({
     }
   };
 
+  const labelClass = error
+    ? "text-sm font-normal cursor-pointer text-destructive"
+    : "text-sm font-normal cursor-pointer";
+
+  const labelClassMuted = error
+    ? "text-sm font-normal cursor-pointer text-destructive"
+    : "text-sm font-normal cursor-pointer text-muted-foreground";
+
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs text-muted-foreground mr-1">Seite:</span>
-      <label className="flex items-center gap-1.5 cursor-pointer">
-        <input
-          type="checkbox"
+      <div className="flex items-center gap-1.5">
+        <Checkbox
+          id={`${id}-R`}
           checked={value.R ?? false}
-          onChange={(e) => handleRChange(e.target.checked)}
+          onCheckedChange={(checked) => handleRChange(checked === true)}
           disabled={disabled}
-          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+          aria-invalid={error}
         />
-        <span className="text-sm">Rechts</span>
-      </label>
-      <label className="flex items-center gap-1.5 cursor-pointer">
-        <input
-          type="checkbox"
+        <Label htmlFor={`${id}-R`} className={labelClass}>
+          Rechts
+        </Label>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <Checkbox
+          id={`${id}-L`}
           checked={value.L ?? false}
-          onChange={(e) => handleLChange(e.target.checked)}
+          onCheckedChange={(checked) => handleLChange(checked === true)}
           disabled={disabled}
-          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+          aria-invalid={error}
         />
-        <span className="text-sm">Links</span>
-      </label>
-      <label className="flex items-center gap-1.5 cursor-pointer">
-        <input
-          type="checkbox"
+        <Label htmlFor={`${id}-L`} className={labelClass}>
+          Links
+        </Label>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <Checkbox
+          id={`${id}-DNK`}
           checked={value.DNK ?? false}
-          onChange={(e) => handleDNKChange(e.target.checked)}
+          onCheckedChange={(checked) => handleDNKChange(checked === true)}
           disabled={disabled}
-          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+          aria-invalid={error}
         />
-        <span className="text-sm text-muted-foreground">Unklar</span>
-      </label>
+        <Label htmlFor={`${id}-DNK`} className={labelClassMuted}>
+          Unklar
+        </Label>
+      </div>
     </div>
   );
 }

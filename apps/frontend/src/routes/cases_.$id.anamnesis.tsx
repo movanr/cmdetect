@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { getTranslations } from "../config/i18n";
 import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
-import { QuestionnaireViewer } from "../features/questionnaire-viewer";
+import { AnamnesisReviewContainer } from "../features/questionnaire-viewer";
 
 // GraphQL queries
 const GET_PATIENT_RECORD = graphql(`
@@ -154,8 +154,8 @@ function AnamnesisPage() {
         patientDob={patientDob}
         isDecrypting={isDecrypting}
       >
-        {/* Questionnaire Responses */}
-        <QuestionnaireViewer patientRecordId={id} />
+        {/* Questionnaire Review Flow */}
+        <AnamnesisReviewContainer patientRecordId={id} />
       </CaseLayout>
     </KeySetupGuard>
   );

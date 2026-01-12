@@ -92,7 +92,7 @@ export function OfficeUseQuestionItem({
                   disabled={isSaving}
                 />
                 {needsConfirmation && (
-                  <span className="text-xs text-amber-600 font-medium">← Bitte bestätigen</span>
+                  <span className="text-xs text-amber-600 font-medium">← Bitte Seite angeben</span>
                 )}
               </>
             )}
