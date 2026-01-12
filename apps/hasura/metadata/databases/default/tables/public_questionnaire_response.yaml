@@ -19,7 +19,7 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
         submitted_at: now()
       columns:
-        - fhir_resource
+        - response_data
         - patient_consent_id
         - patient_record_id
     comment: ""
@@ -30,7 +30,7 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
         submitted_at: now()
       columns:
-        - fhir_resource
+        - response_data
         - patient_consent_id
         - patient_record_id
     comment: ""
@@ -39,7 +39,7 @@ select_permissions:
     permission:
       columns:
         - created_at
-        - fhir_resource
+        - response_data
         - id
         - organization_id
         - patient_consent_id
@@ -57,7 +57,7 @@ select_permissions:
     permission:
       columns:
         - created_at
-        - fhir_resource
+        - response_data
         - id
         - organization_id
         - patient_consent_id
@@ -87,7 +87,7 @@ update_permissions:
   - role: physician
     permission:
       columns:
-        - fhir_resource
+        - response_data
       filter:
         _and:
           - organization_id:

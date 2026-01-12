@@ -74,11 +74,10 @@ select_permissions:
         - invite_token
         - last_name_encrypted
         - last_viewed_at
-        - last_viewed_at
-        - last_viewed_by
         - last_viewed_by
         - organization_id
         - patient_data_completed_at
+        - submission_completed_at
         - updated_at
         - viewed
       filter:
@@ -101,11 +100,10 @@ select_permissions:
         - invite_token
         - last_name_encrypted
         - last_viewed_at
-        - last_viewed_at
-        - last_viewed_by
         - last_viewed_by
         - organization_id
         - patient_data_completed_at
+        - submission_completed_at
         - updated_at
         - viewed
       filter:
@@ -128,11 +126,10 @@ select_permissions:
         - invite_token
         - last_name_encrypted
         - last_viewed_at
-        - last_viewed_at
-        - last_viewed_by
         - last_viewed_by
         - organization_id
         - patient_data_completed_at
+        - submission_completed_at
         - updated_at
         - viewed
       filter:
@@ -150,7 +147,9 @@ update_permissions:
         - date_of_birth_encrypted
         - deleted_at
         - first_name_encrypted
+        - invite_expires_at
         - last_name_encrypted
+        - submission_completed_at
         - viewed
       filter:
         _and:
@@ -169,7 +168,9 @@ update_permissions:
       columns:
         - clinic_internal_id
         - deleted_at
+        - invite_expires_at
         - last_viewed_by
+        - submission_completed_at
         - viewed
       filter:
         _and:
@@ -188,6 +189,8 @@ update_permissions:
       columns:
         - clinic_internal_id
         - deleted_at
+        - invite_expires_at
+        - submission_completed_at
         - viewed
       filter:
         _and:
@@ -196,4 +199,6 @@ update_permissions:
           - deleted_at:
               _is_null: true
       check: {}
+      set:
+        updated_at: now()
     comment: ""

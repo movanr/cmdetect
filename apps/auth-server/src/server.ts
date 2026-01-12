@@ -67,6 +67,14 @@ app.post(
   )
 );
 
+app.post(
+  "/actions/get-patient-progress",
+  handleAsyncError(
+    (req, res) => actionHandlers.getPatientProgress(req, res),
+    "Failed to get patient progress"
+  )
+);
+
 // Authentication endpoints
 app.post(
   "/api/auth/switch-role",

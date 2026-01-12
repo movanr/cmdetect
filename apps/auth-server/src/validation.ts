@@ -31,32 +31,40 @@ export function validateInviteToken(invite_token: any): ValidationResult {
 }
 
 /**
- * Validates FHIR QuestionnaireResponse resource according to FHIR spec
+ * Known questionnaire IDs that the system accepts
  */
-export function validateFHIRQuestionnaireResponse(fhir_resource: any): ValidationResult {
-  if (!fhir_resource || typeof fhir_resource !== 'object') {
-    return { valid: false, error: "FHIR resource must be an object" };
+const KNOWN_QUESTIONNAIRE_IDS = ['dc-tmd-sq', 'phq-4'];
+
+/**
+ * Validates questionnaire response data structure
+ */
+export function validateQuestionnaireResponseData(response_data: any): ValidationResult {
+  if (!response_data || typeof response_data !== 'object') {
+    return { valid: false, error: "Response data must be an object" };
   }
 
-  // Validate resourceType
-  if (fhir_resource.resourceType !== 'QuestionnaireResponse') {
-    return { valid: false, error: "resourceType must be 'QuestionnaireResponse'" };
+  // Validate questionnaire_id
+  if (!response_data.questionnaire_id || typeof response_data.questionnaire_id !== 'string') {
+    return { valid: false, error: "questionnaire_id is required and must be a string" };
   }
 
-  // Validate questionnaire field (required)
-  if (!fhir_resource.questionnaire || typeof fhir_resource.questionnaire !== 'string') {
-    return { valid: false, error: "questionnaire field is required and must be a string" };
+  if (!KNOWN_QUESTIONNAIRE_IDS.includes(response_data.questionnaire_id)) {
+    return { valid: false, error: `Unknown questionnaire_id. Must be one of: ${KNOWN_QUESTIONNAIRE_IDS.join(', ')}` };
   }
 
-  // Validate status field (required)
-  if (!fhir_resource.status || typeof fhir_resource.status !== 'string') {
-    return { valid: false, error: "status field is required and must be a string" };
+  // Validate questionnaire_version
+  if (!response_data.questionnaire_version || typeof response_data.questionnaire_version !== 'string') {
+    return { valid: false, error: "questionnaire_version is required and must be a string" };
   }
 
-  // Validate status values according to FHIR spec
-  const validStatuses = ['in-progress', 'completed', 'amended', 'entered-in-error', 'stopped'];
-  if (!validStatuses.includes(fhir_resource.status)) {
-    return { valid: false, error: `status must be one of: ${validStatuses.join(', ')}` };
+  // Validate answers
+  if (!response_data.answers || typeof response_data.answers !== 'object') {
+    return { valid: false, error: "answers is required and must be an object" };
+  }
+
+  // Ensure answers is not empty
+  if (Object.keys(response_data.answers).length === 0) {
+    return { valid: false, error: "answers cannot be empty" };
   }
 
   return { valid: true };

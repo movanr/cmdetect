@@ -3,7 +3,7 @@
  * Coordinates form state, navigation, and persistence
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SQAnswers } from "../model/answer";
@@ -46,6 +46,7 @@ export function SQWizard({
   } = useSQWizardNavigation(answers, initialIndex, initialHistory);
 
   const [error, setError] = useState<string | undefined>();
+  const hasCalledComplete = useRef(false);
 
   // Persist progress on every change
   useEffect(() => {
@@ -86,12 +87,13 @@ export function SQWizard({
 
   // Handle completion - filter to only enabled answers before callback
   useEffect(() => {
-    if (isComplete && onComplete) {
+    if (isComplete && onComplete && !hasCalledComplete.current) {
+      hasCalledComplete.current = true;
       clearProgress();
       const enabledAnswers = filterEnabledAnswers(answers);
       onComplete(enabledAnswers);
     }
-  }, [isComplete, answers, onComplete]);
+  }, [isComplete, onComplete]);
 
   // Show completion screen only if no onComplete handler (standalone mode)
   if (isComplete && !onComplete) {

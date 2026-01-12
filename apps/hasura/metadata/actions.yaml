@@ -27,6 +27,13 @@ actions:
       forward_client_headers: true
     permissions:
       - role: public
+  - name: getPatientProgress
+    definition:
+      kind: synchronous
+      handler: http://auth-server:3001/actions/get-patient-progress
+      forward_client_headers: true
+    permissions:
+      - role: public
 custom_types:
   enums: []
   input_objects:
@@ -39,4 +46,5 @@ custom_types:
     - name: QuestionnaireResponseResponse
     - name: ValidateInviteTokenResponse
     - name: PatientPersonalDataResponse
+    - name: PatientProgressResponse
   scalars: []

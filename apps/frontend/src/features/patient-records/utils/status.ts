@@ -11,7 +11,8 @@ export function getCaseStatus(record: PatientRecord): CaseStatus {
   if (record.patient_consent?.consent_given === false) {
     return "consent_denied";
   }
-  if (record.patient_data_completed_at) {
+  // Only show as a case when full submission is complete (all questionnaires submitted)
+  if (record.submission_completed_at) {
     if (record.viewed) return "viewed";
     return "new";
   }

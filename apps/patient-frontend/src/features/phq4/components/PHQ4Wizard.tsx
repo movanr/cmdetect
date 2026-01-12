@@ -2,7 +2,7 @@
  * Main wizard orchestrator for PHQ-4 questionnaire
  */
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +38,8 @@ export function PHQ4Wizard({
     goBack,
   } = usePHQ4Navigation(initialIndex);
 
+  const hasCalledComplete = useRef(false);
+
   // Persist progress on every change
   useEffect(() => {
     if (!isComplete) {
@@ -56,11 +58,12 @@ export function PHQ4Wizard({
 
   // Handle completion
   useEffect(() => {
-    if (isComplete && onComplete) {
+    if (isComplete && onComplete && !hasCalledComplete.current) {
+      hasCalledComplete.current = true;
       clearProgress();
       onComplete(answers);
     }
-  }, [isComplete, answers, onComplete]);
+  }, [isComplete, onComplete]);
 
   // Show completion screen only if no onComplete handler (standalone mode)
   if (isComplete && !onComplete) {

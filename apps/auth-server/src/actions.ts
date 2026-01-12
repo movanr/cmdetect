@@ -4,12 +4,11 @@
 
 import { Request, Response } from 'express';
 import { DatabaseService } from './database';
-import { 
-  validateInviteToken, 
-  validateConsentData, 
-  validateResponseData, 
-  validateFHIRQuestionnaireResponse,
-  validatePatientPersonalData 
+import {
+  validateInviteToken,
+  validateConsentData,
+  validateQuestionnaireResponseData,
+  validatePatientPersonalData
 } from './validation';
 import { sendActionError, sendActionSuccess } from './errors';
 
@@ -54,6 +53,9 @@ export class ActionHandlers {
     sendActionSuccess(res, { patient_consent_id: consentId });
   }
 
+  // Required questionnaires that must be submitted before marking flow as complete
+  private static readonly REQUIRED_QUESTIONNAIRES = ['dc-tmd-sq', 'phq-4'];
+
   /**
    * Handles questionnaire response submission
    */
@@ -66,16 +68,10 @@ export class ActionHandlers {
       return sendActionError(res, tokenValidation.error!);
     }
 
-    // Validate response data
-    const responseValidation = validateResponseData(response_data);
+    // Validate response data structure
+    const responseValidation = validateQuestionnaireResponseData(response_data);
     if (!responseValidation.valid) {
       return sendActionError(res, responseValidation.error!);
-    }
-
-    // Validate FHIR resource
-    const fhirValidation = validateFHIRQuestionnaireResponse(response_data.fhir_resource);
-    if (!fhirValidation.valid) {
-      return sendActionError(res, fhirValidation.error!);
     }
 
     // Get patient record
@@ -90,13 +86,32 @@ export class ActionHandlers {
       return sendActionError(res, "No consent found for this patient record. Please submit consent first.");
     }
 
+    // Build the response payload to store
+    const responsePayload = {
+      questionnaire_id: response_data.questionnaire_id,
+      questionnaire_version: response_data.questionnaire_version,
+      answers: response_data.answers,
+      submitted_at: new Date().toISOString(),
+    };
+
     // Create questionnaire response
     const responseId = await this.db.createQuestionnaireResponse(
       patientRecord.id,
       consent.id,
       patientRecord.organization_id,
-      response_data.fhir_resource
+      responsePayload
     );
+
+    // Check if all required questionnaires are now submitted
+    const submittedQuestionnaires = await this.db.getSubmittedQuestionnaireIds(patientRecord.id);
+    const allComplete = ActionHandlers.REQUIRED_QUESTIONNAIRES.every(
+      id => submittedQuestionnaires.includes(id)
+    );
+
+    if (allComplete) {
+      await this.db.markSubmissionComplete(patientRecord.id);
+      console.log(`All questionnaires submitted for patient record ${patientRecord.id}, marking complete`);
+    }
 
     sendActionSuccess(res, { questionnaire_response_id: responseId });
   }
@@ -162,11 +177,70 @@ export class ActionHandlers {
 
     // Validate token and get organization details
     const result = await this.db.validateInviteTokenWithPublicKey(invite_token);
-    
+
     // Log validation attempt (without sensitive data)
     console.log(`Invite validation attempt: token=${invite_token ? 'present' : 'missing'}, valid=${result.valid}`);
 
     // Return the validation result directly
     res.json(result);
+  }
+
+  /**
+   * Gets patient progress for resume functionality
+   */
+  async getPatientProgress(req: Request, res: Response): Promise<void> {
+    const { invite_token } = req.body.input;
+
+    // Basic token format validation
+    const tokenValidation = validateInviteToken(invite_token);
+    if (!tokenValidation.valid) {
+      res.json({
+        valid: false,
+        has_consent: false,
+        consent_given: false,
+        has_personal_data: false,
+        submitted_questionnaires: [],
+        error_message: tokenValidation.error
+      });
+      return;
+    }
+
+    // Get patient progress from database
+    const result = await this.db.getPatientProgress(invite_token);
+    res.json(result);
+  }
+
+  /**
+   * Resets an invite token (extends expiration, clears completion)
+   */
+  async resetInviteToken(req: Request, res: Response): Promise<void> {
+    const { patient_record_id } = req.body.input;
+    const sessionVariables = req.body.session_variables;
+
+    // Get organization ID from session (JWT claim)
+    const organizationId = sessionVariables?.['x-hasura-organization-id'];
+    if (!organizationId) {
+      return sendActionError(res, "Organization ID not found in session");
+    }
+
+    // Validate patient_record_id
+    if (!patient_record_id || typeof patient_record_id !== 'string') {
+      return sendActionError(res, "Invalid patient record ID");
+    }
+
+    try {
+      const newExpiresAt = await this.db.resetInviteToken(patient_record_id, organizationId);
+
+      if (!newExpiresAt) {
+        return sendActionError(res, "Patient record not found or access denied");
+      }
+
+      sendActionSuccess(res, {
+        new_expires_at: newExpiresAt.toISOString()
+      });
+    } catch (error) {
+      console.error('Error resetting invite token:', error);
+      return sendActionError(res, "Failed to reset invite token");
+    }
   }
 }

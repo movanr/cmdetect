@@ -81,6 +81,37 @@ services:
       retries: 5
       start_period: 10s
 
+  auth-server:
+    build:
+      context: .
+      dockerfile: apps/auth-server/Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-cmdetect}_auth_server
+    restart: unless-stopped
+    ports:
+      - "${AUTH_SERVER_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      POSTGRES_DB: ${POSTGRES_DB:-cmdetect}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET required}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      PATIENT_FRONTEND_URL: ${PATIENT_FRONTEND_URL:-http://localhost:3002}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cmdetect_network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => process.exit(1))\""]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+
 volumes:
   postgres_data:
     driver: local

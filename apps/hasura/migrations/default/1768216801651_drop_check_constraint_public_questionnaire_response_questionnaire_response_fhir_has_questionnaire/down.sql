@@ -1,0 +1,1 @@
+alter table "public"."questionnaire_response" add constraint "questionnaire_response_fhir_has_questionnaire" check (CHECK (response_data ? 'questionnaire'::text AND (response_data ->> 'questionnaire'::text) <> ''::text));

@@ -18,6 +18,7 @@ export const GET_ALL_PATIENT_RECORDS = graphql(`
       last_viewed_by
       viewed
       patient_data_completed_at
+      submission_completed_at
       first_name_encrypted
       last_name_encrypted
       date_of_birth_encrypted
@@ -62,6 +63,34 @@ export const DELETE_PATIENT_RECORD = graphql(`
       _set: { deleted_at: "now()" }
     ) {
       id
+    }
+  }
+`);
+
+export const RESET_INVITE_TOKEN = graphql(`
+  mutation ResetInviteToken($id: String!, $new_expires_at: timestamptz!) {
+    update_patient_record_by_pk(
+      pk_columns: { id: $id }
+      _set: {
+        invite_expires_at: $new_expires_at
+        submission_completed_at: null
+      }
+    ) {
+      id
+      invite_expires_at
+    }
+  }
+`);
+
+export const GET_QUESTIONNAIRE_RESPONSES = graphql(`
+  query GetQuestionnaireResponses($patient_record_id: String!) {
+    questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      order_by: { submitted_at: asc }
+    ) {
+      id
+      response_data
+      submitted_at
     }
   }
 `);

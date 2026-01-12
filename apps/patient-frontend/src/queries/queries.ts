@@ -53,15 +53,35 @@ export const submitPatientPersonalData = graphql(`
 export const submitQuestionnaireResponse = graphql(`
   mutation SubmitQuestionnaireResponse(
     $invite_token: String!
-    $response_data: QuestionnaireResponseInput!
+    $questionnaire_id: String!
+    $questionnaire_version: String!
+    $answers: jsonb!
   ) {
     submitQuestionnaireResponse(
       invite_token: $invite_token
-      response_data: $response_data
+      response_data: {
+        questionnaire_id: $questionnaire_id
+        questionnaire_version: $questionnaire_version
+        answers: $answers
+      }
     ) {
       success
       questionnaire_response_id
       error
+    }
+  }
+`);
+
+// Get patient progress for resuming flow
+export const getPatientProgress = graphql(`
+  query GetPatientProgress($invite_token: String!) {
+    getPatientProgress(invite_token: $invite_token) {
+      valid
+      has_consent
+      consent_given
+      has_personal_data
+      submitted_questionnaires
+      error_message
     }
   }
 `);

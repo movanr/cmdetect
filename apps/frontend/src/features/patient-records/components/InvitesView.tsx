@@ -16,6 +16,7 @@ import {
   useInvites,
   getInviteStatus,
   useDeletePatientRecord,
+  useResetInviteToken,
   StatusBadge,
   type PatientRecord,
   type InviteStatus,
@@ -29,6 +30,7 @@ import {
   ExternalLink,
   CheckCircle2,
   XCircle,
+  RefreshCw,
 } from "lucide-react";
 import { getTranslations, interpolate } from "@/config/i18n";
 import { toast } from "sonner";
@@ -44,6 +46,7 @@ export function InvitesView() {
   const { data: patientRecords, isLoading } = useInvites();
   const t = getTranslations();
   const deleteMutation = useDeletePatientRecord();
+  const resetMutation = useResetInviteToken();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<InviteStatus | "all">("all");
 
@@ -54,6 +57,17 @@ export function InvitesView() {
       },
       onError: (error) => {
         toast.error("Failed to delete invite: " + error.message);
+      },
+    });
+  };
+
+  const handleReset = (id: string) => {
+    resetMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Invite token reset successfully. New expiration: 7 days from now.");
+      },
+      onError: (error) => {
+        toast.error("Failed to reset invite: " + error.message);
       },
     });
   };
@@ -176,6 +190,8 @@ export function InvitesView() {
   const renderActions = (record: PatientRecord) => {
     const status = getInviteStatus(record);
     const isSubmitted = status === "submitted";
+    const isExpired = status === "expired";
+    const canReset = isExpired || isSubmitted;
 
     return (
       <ActionButtons>
@@ -186,6 +202,15 @@ export function InvitesView() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {canReset && (
+              <DropdownMenuItem
+                onClick={() => handleReset(record.id)}
+                disabled={resetMutation.isPending}
+              >
+                <RefreshCw className="h-4 w-4" />
+                {resetMutation.isPending ? "Resetting..." : "Reset Invite"}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDelete(record.id)}

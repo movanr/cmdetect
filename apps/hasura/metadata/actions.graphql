@@ -25,6 +25,13 @@ type Mutation {
   ): ValidateInviteTokenResponse!
 }
 
+type Query {
+  getPatientProgress(
+    invite_token: String!
+  ): PatientProgressResponse!
+}
+
+
 input ConsentInput {
   consent_given: Boolean!
   consent_text: String!
@@ -34,7 +41,9 @@ input ConsentInput {
 }
 
 input QuestionnaireResponseInput {
-  fhir_resource: jsonb!
+  questionnaire_id: String!
+  questionnaire_version: String!
+  answers: jsonb!
 }
 
 input ValidateInviteTokenInput {
@@ -73,5 +82,14 @@ type PatientPersonalDataResponse {
   patient_record_id: uuid
   message: String
   error: String
+}
+
+type PatientProgressResponse {
+  valid: Boolean!
+  has_consent: Boolean!
+  consent_given: Boolean!
+  has_personal_data: Boolean!
+  submitted_questionnaires: [String!]!
+  error_message: String
 }
 

@@ -25,7 +25,7 @@ export interface QuestionnaireResponse {
   patient_record_id: string;
   patient_consent_id: string;
   organization_id: string;
-  fhir_resource: any;
+  response_data: any;
 }
 
 export interface InviteValidationResult {
@@ -117,13 +117,13 @@ export class DatabaseService {
     patientRecordId: string,
     patientConsentId: string,
     organizationId: string,
-    fhirResource: any
+    responseData: any
   ): Promise<string> {
     const query = `
       INSERT INTO questionnaire_response (
-        patient_record_id, patient_consent_id, organization_id, 
-        fhir_resource, submitted_at
-      ) VALUES ($1, $2, $3, $4, NOW()) 
+        patient_record_id, patient_consent_id, organization_id,
+        response_data, submitted_at
+      ) VALUES ($1, $2, $3, $4, NOW())
       RETURNING id
     `;
 
@@ -131,7 +131,7 @@ export class DatabaseService {
       patientRecordId,
       patientConsentId,
       organizationId,
-      fhirResource,
+      responseData,
     ]);
 
     return result.rows[0].id;
@@ -184,7 +184,7 @@ export class DatabaseService {
         SELECT
           pr.id as patient_record_id,
           pr.invite_expires_at,
-          pr.patient_data_completed_at,
+          pr.submission_completed_at,
           o.name as organization_name,
           o.public_key_pem
         FROM patient_record pr
@@ -205,11 +205,11 @@ export class DatabaseService {
 
       const row = result.rows[0];
 
-      // Check if patient data has already been completed
-      if (row.patient_data_completed_at) {
+      // Check if entire submission flow has been completed
+      if (row.submission_completed_at) {
         return {
           valid: false,
-          error_message: "This invite has already been used. Patient data has been submitted."
+          error_message: "This invite has already been used. All questionnaires have been submitted."
         };
       }
 
@@ -242,6 +242,140 @@ export class DatabaseService {
       return {
         valid: false,
         error_message: "Database error occurred during validation"
+      };
+    }
+  }
+
+  /**
+   * Gets list of questionnaire IDs that have been submitted for a patient
+   */
+  async getSubmittedQuestionnaireIds(patientRecordId: string): Promise<string[]> {
+    const query = `
+      SELECT DISTINCT response_data->>'questionnaire_id' as questionnaire_id
+      FROM questionnaire_response
+      WHERE patient_record_id = $1
+    `;
+    const result = await this.db.query(query, [patientRecordId]);
+    return result.rows.map((r: { questionnaire_id: string }) => r.questionnaire_id);
+  }
+
+  /**
+   * Marks the entire submission flow as complete
+   */
+  async markSubmissionComplete(patientRecordId: string): Promise<void> {
+    const query = `
+      UPDATE patient_record
+      SET submission_completed_at = NOW(), updated_at = NOW()
+      WHERE id = $1
+    `;
+    await this.db.query(query, [patientRecordId]);
+  }
+
+  /**
+   * Resets an invite token by extending expiration and clearing completion status
+   */
+  async resetInviteToken(patientRecordId: string, organizationId: string): Promise<Date | null> {
+    const newExpiry = new Date();
+    newExpiry.setDate(newExpiry.getDate() + 7);
+
+    const query = `
+      UPDATE patient_record
+      SET invite_expires_at = $2,
+          submission_completed_at = NULL,
+          updated_at = NOW()
+      WHERE id = $1 AND organization_id = $3 AND deleted_at IS NULL
+      RETURNING invite_expires_at
+    `;
+
+    const result = await this.db.query(query, [patientRecordId, newExpiry, organizationId]);
+    return result.rows[0]?.invite_expires_at || null;
+  }
+
+  /**
+   * Gets patient progress for resume functionality
+   */
+  async getPatientProgress(inviteToken: string): Promise<{
+    valid: boolean;
+    has_consent: boolean;
+    consent_given: boolean;
+    has_personal_data: boolean;
+    submitted_questionnaires: string[];
+    error_message?: string;
+  }> {
+    try {
+      const query = `
+        SELECT
+          pr.id as patient_record_id,
+          pr.invite_expires_at,
+          pr.submission_completed_at,
+          pr.patient_data_completed_at,
+          pc.id as consent_id,
+          pc.consent_given
+        FROM patient_record pr
+        LEFT JOIN patient_consent pc ON pr.id = pc.patient_record_id
+        WHERE pr.invite_token = $1
+          AND pr.deleted_at IS NULL
+      `;
+
+      const result = await this.db.query(query, [inviteToken]);
+
+      if (result.rows.length === 0) {
+        return {
+          valid: false,
+          has_consent: false,
+          consent_given: false,
+          has_personal_data: false,
+          submitted_questionnaires: [],
+          error_message: "Invalid invite link"
+        };
+      }
+
+      const row = result.rows[0];
+
+      // Check if token has expired
+      if (new Date(row.invite_expires_at) <= new Date()) {
+        return {
+          valid: false,
+          has_consent: false,
+          consent_given: false,
+          has_personal_data: false,
+          submitted_questionnaires: [],
+          error_message: "Invite link has expired"
+        };
+      }
+
+      // Check if already fully completed
+      if (row.submission_completed_at) {
+        return {
+          valid: false,
+          has_consent: true,
+          consent_given: true,
+          has_personal_data: true,
+          submitted_questionnaires: [],
+          error_message: "This invite has already been used. All questionnaires have been submitted."
+        };
+      }
+
+      // Get submitted questionnaires
+      const submittedQuestionnaires = await this.getSubmittedQuestionnaireIds(row.patient_record_id);
+
+      return {
+        valid: true,
+        has_consent: !!row.consent_id,
+        consent_given: row.consent_given ?? false,
+        has_personal_data: !!row.patient_data_completed_at,
+        submitted_questionnaires: submittedQuestionnaires
+      };
+
+    } catch (error) {
+      console.error('Database error during progress check:', error);
+      return {
+        valid: false,
+        has_consent: false,
+        consent_given: false,
+        has_personal_data: false,
+        submitted_questionnaires: [],
+        error_message: "Database error occurred"
       };
     }
   }

@@ -17,6 +17,8 @@ export {
   GET_ALL_PATIENT_RECORDS,
   CREATE_PATIENT_RECORD,
   DELETE_PATIENT_RECORD,
+  RESET_INVITE_TOKEN,
+  GET_QUESTIONNAIRE_RESPONSES,
 } from "./queries";
 
 // Hooks
@@ -26,6 +28,7 @@ export { useSubmissions } from "./hooks/useSubmissions";
 export {
   useCreatePatientRecord,
   useDeletePatientRecord,
+  useResetInviteToken,
 } from "./hooks/usePatientMutations";
 
 // Utilities

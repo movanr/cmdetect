@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
 import { graphql } from "@/graphql";
@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { getTranslations } from "../config/i18n";
 import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
+import { QuestionnaireViewer } from "../features/questionnaire-viewer";
 
 // GraphQL queries
 const GET_PATIENT_RECORD = graphql(`
@@ -153,16 +154,8 @@ function AnamnesisPage() {
         patientDob={patientDob}
         isDecrypting={isDecrypting}
       >
-        {/* Anamnesis Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.caseSteps.anamnesis}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Hier wird der Anamnese-Schritt angezeigt.</p>
-            {/* TODO: Add anamnesis form/content */}
-          </CardContent>
-        </Card>
+        {/* Questionnaire Responses */}
+        <QuestionnaireViewer patientRecordId={id} />
       </CaseLayout>
     </KeySetupGuard>
   );
