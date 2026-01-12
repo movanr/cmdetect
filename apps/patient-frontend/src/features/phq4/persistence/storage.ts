@@ -2,7 +2,7 @@
  * localStorage persistence for PHQ-4 questionnaire progress
  */
 
-import type { PHQ4Answers } from "../model/answer";
+import type { PHQ4Answers } from "@cmdetect/questionnaires";
 
 const STORAGE_KEY = "phq4_progress";
 const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours

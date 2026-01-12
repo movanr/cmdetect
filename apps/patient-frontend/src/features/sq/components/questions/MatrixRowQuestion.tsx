@@ -6,11 +6,14 @@
 
 import { Button } from "@/components/ui/button";
 import { useFormContext } from "react-hook-form";
-import type { SQAnswers } from "../../model/answer";
-import type { MatrixRowQuestion as MatrixRowQuestionType } from "../../model/question";
+import {
+  SQ_YES_NO_LABELS,
+  type SQAnswers,
+  type SQMatrixRowQuestion,
+} from "@cmdetect/questionnaires";
 
 type MatrixRowQuestionProps = {
-  question: MatrixRowQuestionType;
+  question: SQMatrixRowQuestion;
   onNavigateNext: (selectedValue: string) => void;
 };
 
@@ -37,7 +40,7 @@ export function MatrixRowQuestion({ question, onNavigateNext }: MatrixRowQuestio
           className="flex-1 h-14 text-lg font-medium active:bg-muted"
           onClick={() => handleSelect("no")}
         >
-          No
+          {SQ_YES_NO_LABELS.no}
         </Button>
         <Button
           type="button"
@@ -45,7 +48,7 @@ export function MatrixRowQuestion({ question, onNavigateNext }: MatrixRowQuestio
           className="flex-1 h-14 text-lg font-medium active:bg-muted"
           onClick={() => handleSelect("yes")}
         >
-          Yes
+          {SQ_YES_NO_LABELS.yes}
         </Button>
       </div>
     </div>

@@ -3,14 +3,16 @@
  * Public exports
  */
 
-import type { QuestionnaireMetadata } from "../questionnaire-core";
-
-// Questionnaire metadata for submission
-export const SQ_METADATA: QuestionnaireMetadata = {
-  id: "dc-tmd-sq",
-  version: "1.0",
-  title: "DC/TMD Symptom Questionnaire",
-};
+// Re-export from shared package
+export {
+  SQ_METADATA,
+  SQ_SCREENS,
+  SQ_SECTIONS,
+  SQ_TOTAL_SCREENS,
+  type SQQuestion,
+  type SQAnswers,
+  type SQAnswerValue,
+} from "@cmdetect/questionnaires";
 
 // Components
 export { SQWizard } from "./components/SQWizard";
@@ -22,10 +24,3 @@ export { filterEnabledAnswers } from "./hooks/evaluateEnableWhen";
 
 // Persistence
 export { saveProgress, loadProgress, clearProgress, hasProgress } from "./persistence/storage";
-
-// Data
-export { SQ_SCREENS, SQ_SECTIONS, SQ_TOTAL_SCREENS } from "./data/sqQuestions";
-
-// Types
-export type { SQQuestion } from "./model/question";
-export type { SQAnswers, SQAnswerValue } from "./model/answer";

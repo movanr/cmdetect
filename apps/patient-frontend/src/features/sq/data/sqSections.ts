@@ -1,51 +1,25 @@
 /**
- * Section definitions for the DC/TMD Symptom Questionnaire
- * Used for section-based progress tracking
+ * Section utilities for the DC/TMD Symptom Questionnaire
+ * Uses shared section definitions, adds patient-frontend specific utilities
  */
 
-import type { SQAnswers } from "../model/answer";
-import { SQ_SCREENS } from "./sqQuestions";
-import { isQuestionEnabled } from "../hooks/evaluateEnableWhen";
+import {
+  SQ_SCREENS,
+  SQ_SECTIONS,
+  isQuestionEnabled,
+  type SQAnswers,
+  type SQSection,
+  type SQQuestionId,
+} from "@cmdetect/questionnaires";
 
-export type SQSection = {
-  id: string;
-  name: string;
-  questionIds: string[];
-};
-
-export const SQ_SECTIONS: SQSection[] = [
-  {
-    id: "pain",
-    name: "Pain",
-    questionIds: ["SQ1", "SQ2", "SQ3", "SQ4_A", "SQ4_B", "SQ4_C", "SQ4_D"],
-  },
-  {
-    id: "headache",
-    name: "Headache",
-    questionIds: ["SQ5", "SQ6", "SQ7_A", "SQ7_B", "SQ7_C", "SQ7_D"],
-  },
-  {
-    id: "joint_noises",
-    name: "Jaw Joint Noises",
-    questionIds: ["SQ8"],
-  },
-  {
-    id: "closed_locking",
-    name: "Closed Locking",
-    questionIds: ["SQ9", "SQ10", "SQ11", "SQ12"],
-  },
-  {
-    id: "open_locking",
-    name: "Open Locking",
-    questionIds: ["SQ13", "SQ14"],
-  },
-];
+// Re-export from shared package
+export { SQ_SECTIONS, type SQSection };
 
 /**
  * Find which section a question belongs to
  */
 export function getSectionForQuestion(
-  questionId: string
+  questionId: SQQuestionId
 ): { section: SQSection; sectionIndex: number } | undefined {
   for (let i = 0; i < SQ_SECTIONS.length; i++) {
     if (SQ_SECTIONS[i].questionIds.includes(questionId)) {
@@ -57,9 +31,10 @@ export function getSectionForQuestion(
 
 /**
  * Get the position of a question within its section (among enabled questions only)
+ * Used for showing progress like "Question 2 of 4 in Pain section"
  */
 export function getQuestionPositionInSection(
-  questionId: string,
+  questionId: SQQuestionId,
   answers: SQAnswers
 ): { current: number; total: number } {
   const sectionInfo = getSectionForQuestion(questionId);
@@ -76,7 +51,7 @@ export function getQuestionPositionInSection(
 
   // Filter to only enabled questions
   const enabledQuestions = sectionQuestions.filter((q) =>
-    isQuestionEnabled(q, answers)
+    isQuestionEnabled(q.enableWhen, answers)
   );
 
   // Find current question's position among enabled questions

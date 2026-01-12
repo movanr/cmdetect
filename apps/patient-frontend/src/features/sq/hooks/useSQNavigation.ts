@@ -4,16 +4,18 @@
  */
 
 import { useState, useMemo, useCallback, useRef } from "react";
-import type { SQQuestion } from "../model/question";
-import type { SQAnswers } from "../model/answer";
-import { SQ_SCREENS } from "../data/sqQuestions";
+import {
+  SQ_SCREENS,
+  isQuestionEnabled,
+  type SQQuestion,
+  type SQAnswers,
+} from "@cmdetect/questionnaires";
 import {
   getSectionForQuestion,
   getQuestionPositionInSection,
   TOTAL_SECTIONS,
   type SQSection,
 } from "../data/sqSections";
-import { isQuestionEnabled } from "./evaluateEnableWhen";
 
 type UseSQNavigationReturn = {
   currentQuestion: SQQuestion | undefined;
@@ -38,7 +40,7 @@ function calculateVisibleScreens(
   screens: SQQuestion[],
   answers: SQAnswers
 ): number {
-  return screens.filter((q) => isQuestionEnabled(q, answers)).length;
+  return screens.filter((q) => isQuestionEnabled(q.enableWhen, answers)).length;
 }
 
 /**
@@ -51,7 +53,7 @@ function findNextEnabledIndex(
   answers: SQAnswers
 ): number {
   for (let i = currentIndex + 1; i < screens.length; i++) {
-    if (isQuestionEnabled(screens[i], answers)) {
+    if (isQuestionEnabled(screens[i].enableWhen, answers)) {
       return i;
     }
   }

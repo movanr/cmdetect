@@ -12,9 +12,12 @@ import {
   QUESTIONNAIRE_TITLES,
   SQ_OFFICE_USE_QUESTIONS,
   SQ_QUESTION_LABELS,
-  SQ_SECTIONS_ORDER,
-} from "../data/questionLabels";
-import { isQuestionEnabled } from "../data/sqEnableWhen";
+  SQ_SECTION_NAMES_ORDER,
+  SQ_ENABLE_WHEN,
+  SQ_QUESTION_ORDER,
+  isQuestionIdEnabled,
+  type SQQuestionId,
+} from "@cmdetect/questionnaires";
 import {
   useQuestionnaireResponses,
   type QuestionnaireResponse,
@@ -139,38 +142,18 @@ function SQContent({
   const { answers, id: responseId, questionnaireId, questionnaireVersion } = response;
   const updateMutation = useUpdateQuestionnaireResponse(patientRecordId);
 
-  // Define question order for proper sorting
-  const QUESTION_ORDER = [
-    "SQ1",
-    "SQ2",
-    "SQ3",
-    "SQ4_A",
-    "SQ4_B",
-    "SQ4_C",
-    "SQ4_D",
-    "SQ5",
-    "SQ6",
-    "SQ7_A",
-    "SQ7_B",
-    "SQ7_C",
-    "SQ7_D",
-    "SQ8",
-    "SQ9",
-    "SQ10",
-    "SQ11",
-    "SQ12",
-    "SQ13",
-    "SQ14",
-  ];
-
   // Group questions by section, showing only enabled questions
   // This includes questions without answers if they become enabled
-  const answersBySection: Record<string, Array<{ id: string; answer: unknown }>> = {};
+  const answersBySection: Record<string, Array<{ id: SQQuestionId; answer: unknown }>> = {};
 
   // Get all question IDs from labels and filter by enableWhen
-  Object.entries(SQ_QUESTION_LABELS).forEach(([questionId, label]) => {
+  // Use SQ_QUESTION_ORDER to iterate in the correct order (Object.entries doesn't guarantee order)
+  SQ_QUESTION_ORDER.forEach((questionId) => {
+    const label = SQ_QUESTION_LABELS[questionId];
+    if (!label) return; // Safety check
+
     // Check if question is enabled based on current answers
-    if (!isQuestionEnabled(questionId, answers)) return;
+    if (!isQuestionIdEnabled(questionId, SQ_ENABLE_WHEN, answers)) return;
 
     // Get the answer (may be undefined for newly enabled questions)
     const answer = answers[questionId];
@@ -180,15 +163,7 @@ function SQContent({
     }
     answersBySection[label.section].push({ id: questionId, answer });
   });
-
-  // Sort questions within each section by predefined order
-  Object.values(answersBySection).forEach((sectionAnswers) => {
-    sectionAnswers.sort((a, b) => {
-      const orderA = QUESTION_ORDER.indexOf(a.id);
-      const orderB = QUESTION_ORDER.indexOf(b.id);
-      return orderA - orderB;
-    });
-  });
+  // Note: Questions are already in order since we iterate SQ_QUESTION_ORDER
 
   const handleSave = async (questionId: string, newValue: unknown) => {
     // Build the updated response_data with the new answer
@@ -198,7 +173,7 @@ function SQContent({
     };
 
     // If changing an office-use question to "no", also clear the office use
-    if (SQ_OFFICE_USE_QUESTIONS.has(questionId) && newValue === "no") {
+    if (SQ_OFFICE_USE_QUESTIONS.has(questionId as SQQuestionId) && newValue === "no") {
       const officeUseKey = `${questionId}_office`;
       updatedAnswers[officeUseKey] = {};
     }
@@ -243,7 +218,7 @@ function SQContent({
 
   // Count pending confirmations (questions with Yes answer but no side confirmed)
   const pendingConfirmations = Array.from(SQ_OFFICE_USE_QUESTIONS).filter((qId) => {
-    if (!isQuestionEnabled(qId, answers)) return false;
+    if (!isQuestionIdEnabled(qId, SQ_ENABLE_WHEN, answers)) return false;
     if (answers[qId] !== "yes") return false;
     const officeUse = getOfficeUse(qId);
     return !officeUse.R && !officeUse.L && !officeUse.DNK;
@@ -260,7 +235,7 @@ function SQContent({
         </div>
       )}
 
-      {SQ_SECTIONS_ORDER.map((section) => {
+      {SQ_SECTION_NAMES_ORDER.map((section) => {
         const sectionAnswers = answersBySection[section];
         if (!sectionAnswers || sectionAnswers.length === 0) return null;
 

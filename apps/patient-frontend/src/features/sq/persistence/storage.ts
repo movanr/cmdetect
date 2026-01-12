@@ -3,7 +3,7 @@
  * Allows patients to resume if they close/refresh the browser
  */
 
-import type { SQAnswers } from "../model/answer";
+import type { SQAnswers } from "@cmdetect/questionnaires";
 
 const STORAGE_KEY = "sq_progress";
 const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours

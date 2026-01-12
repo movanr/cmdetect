@@ -3,7 +3,7 @@
  */
 
 import { useForm, type UseFormReturn } from "react-hook-form";
-import type { SQAnswers } from "../model/answer";
+import type { SQAnswers } from "@cmdetect/questionnaires";
 
 type UseSQFormOptions = {
   initialAnswers?: SQAnswers;

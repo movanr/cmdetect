@@ -1,16 +1,16 @@
 /**
- * EnableWhen conditions for SQ questions
- * Defines which questions depend on other answers
+ * SQ EnableWhen Conditions Map
+ * Extracted for use when you don't need full question objects
  */
+import type { EnableWhenCondition, SQQuestionId } from "../types";
 
-export type EnableWhenCondition = {
-  questionId: string;
-  operator: "=" | "!=";
-  value: string;
-};
-
-// Questions with their enableWhen conditions
-export const SQ_ENABLE_WHEN: Record<string, EnableWhenCondition[]> = {
+/**
+ * EnableWhen conditions for SQ questions
+ * Questions without entries are always shown
+ */
+export const SQ_ENABLE_WHEN: Partial<
+  Record<SQQuestionId, EnableWhenCondition[]>
+> = {
   // SQ2, SQ3 require SQ1 = yes
   SQ2: [{ questionId: "SQ1", operator: "=", value: "yes" }],
   SQ3: [{ questionId: "SQ1", operator: "=", value: "yes" }],
@@ -53,32 +53,3 @@ export const SQ_ENABLE_WHEN: Record<string, EnableWhenCondition[]> = {
   // SQ14 requires SQ13 = yes
   SQ14: [{ questionId: "SQ13", operator: "=", value: "yes" }],
 };
-
-/**
- * Check if a question is enabled based on current answers
- */
-export function isQuestionEnabled(
-  questionId: string,
-  answers: Record<string, unknown>
-): boolean {
-  const conditions = SQ_ENABLE_WHEN[questionId];
-
-  // No conditions = always enabled
-  if (!conditions || conditions.length === 0) {
-    return true;
-  }
-
-  // All conditions must be true (AND logic)
-  return conditions.every((condition) => {
-    const answer = answers[condition.questionId];
-
-    switch (condition.operator) {
-      case "=":
-        return answer === condition.value;
-      case "!=":
-        return answer !== condition.value;
-      default:
-        return false;
-    }
-  });
-}

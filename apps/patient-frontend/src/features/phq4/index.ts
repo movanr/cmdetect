@@ -2,17 +2,18 @@
  * PHQ-4 Questionnaire Feature
  */
 
-import type { QuestionnaireMetadata } from "../questionnaire-core";
+// Re-export from shared package
+export {
+  PHQ4_METADATA,
+  PHQ4_QUESTIONNAIRE,
+  type PHQ4Answers,
+} from "@cmdetect/questionnaires";
 
-// Questionnaire metadata for submission
-export const PHQ4_METADATA: QuestionnaireMetadata = {
-  id: "phq-4",
-  version: "1.0",
-  title: "Gesundheitsfragebogen für Patienten (PHQ-4)",
-};
-
+// Components
 export { PHQ4Wizard } from "./components/PHQ4Wizard";
+
+// Hooks
 export { usePHQ4Form } from "./hooks/usePHQ4Form";
+
+// Persistence
 export { loadProgress, clearProgress } from "./persistence/storage";
-export { PHQ4_QUESTIONNAIRE } from "./data/phq4Questions";
-export type { PHQ4Answers } from "./model/answer";

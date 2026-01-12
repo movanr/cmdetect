@@ -3,7 +3,7 @@
  */
 
 import { useForm } from "react-hook-form";
-import type { PHQ4Answers } from "../model/answer";
+import type { PHQ4Answers } from "@cmdetect/questionnaires";
 
 export function usePHQ4Form(initialAnswers?: PHQ4Answers) {
   return useForm<PHQ4Answers>({

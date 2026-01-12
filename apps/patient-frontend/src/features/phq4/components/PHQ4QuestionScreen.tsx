@@ -5,9 +5,12 @@
 
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import type { PHQ4Question, PHQ4Option } from "../model/question";
-import type { PHQ4Answers } from "../model/answer";
-import { PHQ4_QUESTIONNAIRE } from "../data/phq4Questions";
+import {
+  PHQ4_QUESTIONNAIRE,
+  type PHQ4Question,
+  type PHQ4Answers,
+  type ScoredOption,
+} from "@cmdetect/questionnaires";
 
 type PHQ4QuestionScreenProps = {
   question: PHQ4Question;
@@ -38,7 +41,7 @@ export function PHQ4QuestionScreen({
 
       {/* Options - vertically stacked */}
       <div className="flex flex-col gap-3">
-        {options.map((option: PHQ4Option) => (
+        {options.map((option: ScoredOption) => (
           <Button
             key={option.value}
             type="button"

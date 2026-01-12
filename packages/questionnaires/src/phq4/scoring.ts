@@ -8,21 +8,18 @@
  * Total score range: 0-12
  * Each subscale: 0-6
  */
-
-export interface PHQ4Score {
-  total: number;
-  maxTotal: number;
-  anxiety: number; // GAD-2 subscale
-  maxAnxiety: number;
-  depression: number; // PHQ-2 subscale
-  maxDepression: number;
-}
+import type {
+  PHQ4Answers,
+  PHQ4Score,
+  PHQ4Interpretation,
+  PHQ4SubscaleResult,
+} from "../types";
 
 /**
  * Calculate PHQ-4 scores from answers
  */
-export function calculatePHQ4Score(answers: Record<string, string>): PHQ4Score {
-  const getScore = (id: string): number => {
+export function calculatePHQ4Score(answers: PHQ4Answers): PHQ4Score {
+  const getScore = (id: keyof PHQ4Answers): number => {
     const value = answers[id];
     if (value === undefined || value === null) return 0;
     const parsed = parseInt(value, 10);
@@ -49,12 +46,9 @@ export function calculatePHQ4Score(answers: Record<string, string>): PHQ4Score {
 }
 
 /**
- * Get interpretation text for PHQ-4 score
+ * Get interpretation text for PHQ-4 total score
  */
-export function getPHQ4Interpretation(score: PHQ4Score): {
-  severity: "none" | "mild" | "moderate" | "severe";
-  text: string;
-} {
+export function getPHQ4Interpretation(score: PHQ4Score): PHQ4Interpretation {
   if (score.total <= 2) {
     return { severity: "none", text: "Keine bis minimale psychische Belastung" };
   } else if (score.total <= 5) {
@@ -70,10 +64,7 @@ export function getPHQ4Interpretation(score: PHQ4Score): {
  * Get subscale interpretation
  * Score >= 3 is considered positive screening
  */
-export function getSubscaleInterpretation(score: number): {
-  positive: boolean;
-  text: string;
-} {
+export function getSubscaleInterpretation(score: number): PHQ4SubscaleResult {
   if (score >= 3) {
     return { positive: true, text: "Auffällig (≥3)" };
   }

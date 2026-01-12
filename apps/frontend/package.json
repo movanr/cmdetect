@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@cmdetect/config": "workspace:*",
+    "@cmdetect/questionnaires": "workspace:*",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@noble/ciphers": "^2.0.0",

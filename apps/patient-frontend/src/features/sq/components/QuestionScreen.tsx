@@ -3,7 +3,7 @@
  * Renders the appropriate question component based on type
  */
 
-import type { SQQuestion } from "../model/question";
+import type { SQQuestion } from "@cmdetect/questionnaires";
 import { SingleChoiceQuestion } from "./questions/SingleChoiceQuestion";
 import { CompositeNumberQuestion } from "./questions/CompositeNumberQuestion";
 import { MatrixRowQuestion } from "./questions/MatrixRowQuestion";

@@ -12,4 +12,4 @@ export { PHQ4Summary } from "./components/PHQ4Summary";
 export { useQuestionnaireResponses } from "./hooks/useQuestionnaireResponses";
 export { useUpdateQuestionnaireResponse } from "./hooks/useUpdateQuestionnaireResponse";
 export type { QuestionnaireResponse } from "./hooks/useQuestionnaireResponses";
-export { calculatePHQ4Score, getPHQ4Interpretation } from "./utils/scoring";
+export { calculatePHQ4Score, getPHQ4Interpretation } from "@cmdetect/questionnaires";

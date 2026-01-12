@@ -3,21 +3,17 @@
  */
 
 import { Badge } from "@/components/ui/badge";
-import { calculatePHQ4Score, getPHQ4Interpretation } from "../utils/scoring";
-import { PHQ4_QUESTION_LABELS } from "../data/questionLabels";
+import {
+  calculatePHQ4Score,
+  getPHQ4Interpretation,
+  PHQ4_QUESTIONS,
+  PHQ4_QUESTION_ORDER,
+  PHQ4_OPTIONS,
+} from "@cmdetect/questionnaires";
 
 interface PHQ4SummaryProps {
   answers: Record<string, string>;
 }
-
-const SCORE_OPTIONS = [
-  { value: "0", label: "Überhaupt nicht" },
-  { value: "1", label: "An einzelnen Tagen" },
-  { value: "2", label: "An mehr als der Hälfte der Tage" },
-  { value: "3", label: "Beinahe jeden Tag" },
-];
-
-const QUESTIONS_ORDER = ["PHQ4_A", "PHQ4_B", "PHQ4_C", "PHQ4_D"];
 
 export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
   const score = calculatePHQ4Score(answers);
@@ -44,7 +40,7 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
         <thead>
           <tr className="border-b bg-muted/30">
             <th className="text-left p-3 font-medium text-sm"></th>
-            {SCORE_OPTIONS.map((opt) => (
+            {PHQ4_OPTIONS.map((opt) => (
               <th key={opt.value} className="p-2 text-center font-medium text-xs align-bottom">
                 <div className="text-muted-foreground text-[10px] leading-tight mb-1">{opt.label}</div>
                 <div className="text-sm font-semibold">{opt.value}</div>
@@ -53,8 +49,8 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
           </tr>
         </thead>
         <tbody>
-          {QUESTIONS_ORDER.map((questionId, index) => {
-            const label = PHQ4_QUESTION_LABELS[questionId];
+          {PHQ4_QUESTION_ORDER.map((questionId, index) => {
+            const label = PHQ4_QUESTIONS[questionId];
             const selectedValue = answers[questionId];
 
             return (
@@ -63,7 +59,7 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
                   <span className="text-muted-foreground mr-2">{String.fromCharCode(97 + index)}.</span>
                   {label?.text}
                 </td>
-                {SCORE_OPTIONS.map((opt) => (
+                {PHQ4_OPTIONS.map((opt) => (
                   <td key={opt.value} className="p-2 text-center">
                     <div
                       className={`w-6 h-6 rounded-full border-2 mx-auto flex items-center justify-center ${

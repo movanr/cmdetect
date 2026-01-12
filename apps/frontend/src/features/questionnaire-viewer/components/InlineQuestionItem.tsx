@@ -3,7 +3,7 @@
  * Used for SQ1-SQ7 questions
  */
 
-import { SQ_YES_NO_LABELS } from "../data/questionLabels";
+import { SQ_YES_NO_LABELS } from "@cmdetect/questionnaires";
 import { DurationEditor } from "./editors/DurationEditor";
 import { SQ3Editor } from "./editors/SQ3Editor";
 

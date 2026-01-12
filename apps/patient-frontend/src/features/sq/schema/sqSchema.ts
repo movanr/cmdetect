@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import type { SQQuestion } from "../model/question";
+import type { SQQuestion } from "@cmdetect/questionnaires";
 
 /**
  * Schema for composite number fields (years + months)

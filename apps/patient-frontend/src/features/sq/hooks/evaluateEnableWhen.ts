@@ -1,49 +1,26 @@
 /**
- * Evaluates enableWhen conditions for questions
- * Used for navigation (skip disabled questions) and submit (filter disabled answers)
+ * EnableWhen utilities for the patient frontend
+ * Uses shared evaluation logic, adds submission-specific filtering
  */
 
-import type { SQQuestion, EnableWhenCondition } from "../model/question";
-import type { SQAnswers } from "../model/answer";
-import { SQ_SCREENS } from "../data/sqQuestions";
+import {
+  SQ_SCREENS,
+  isQuestionEnabled,
+  type SQQuestion,
+  type SQAnswers,
+  type SQQuestionId,
+} from "@cmdetect/questionnaires";
 
 /**
- * Evaluates a single enableWhen condition against current answers
+ * Re-export the shared isQuestionEnabled function with the question wrapper
+ * The shared function takes enableWhen conditions directly, but components
+ * often have the full question object
  */
-function evaluateCondition(
-  condition: EnableWhenCondition,
-  answers: SQAnswers
-): boolean {
-  const answer = answers[condition.questionId];
-
-  switch (condition.operator) {
-    case "=":
-      return answer === condition.value;
-    case "!=":
-      return answer !== condition.value;
-    case "exists":
-      return answer !== undefined;
-    default:
-      return false;
-  }
-}
-
-/**
- * Checks if a question is enabled based on current answers
- * Questions without enableWhen are always enabled
- * Multiple conditions use AND logic (all must be true)
- */
-export function isQuestionEnabled(
+export function isQuestionEnabledFromQuestion(
   question: SQQuestion,
   answers: SQAnswers
 ): boolean {
-  if (!question.enableWhen || question.enableWhen.length === 0) {
-    return true;
-  }
-
-  return question.enableWhen.every((condition) =>
-    evaluateCondition(condition, answers)
-  );
+  return isQuestionEnabled(question.enableWhen, answers);
 }
 
 /**
@@ -55,10 +32,12 @@ export function filterEnabledAnswers(
   screens: SQQuestion[] = SQ_SCREENS
 ): SQAnswers {
   const enabledIds = new Set(
-    screens.filter((q) => isQuestionEnabled(q, answers)).map((q) => q.id)
+    screens
+      .filter((q) => isQuestionEnabled(q.enableWhen, answers))
+      .map((q) => q.id)
   );
 
   return Object.fromEntries(
-    Object.entries(answers).filter(([id]) => enabledIds.has(id))
-  );
+    Object.entries(answers).filter(([id]) => enabledIds.has(id as SQQuestionId))
+  ) as SQAnswers;
 }

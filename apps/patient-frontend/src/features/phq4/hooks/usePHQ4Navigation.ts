@@ -4,8 +4,11 @@
  */
 
 import { useState, useCallback, useRef } from "react";
-import { PHQ4_QUESTIONNAIRE, PHQ4_TOTAL_QUESTIONS } from "../data/phq4Questions";
-import type { PHQ4Question } from "../model/question";
+import {
+  PHQ4_QUESTIONNAIRE,
+  PHQ4_TOTAL_QUESTIONS,
+  type PHQ4Question,
+} from "@cmdetect/questionnaires";
 
 type UsePHQ4NavigationReturn = {
   currentQuestion: PHQ4Question;

@@ -5,11 +5,14 @@
 
 import { Button } from "@/components/ui/button";
 import { useFormContext } from "react-hook-form";
-import type { SQAnswers } from "../../model/answer";
-import type { SingleChoiceQuestion as SingleChoiceQuestionType } from "../../model/question";
+import type {
+  SQAnswers,
+  SQSingleChoiceQuestion,
+  AnswerOption,
+} from "@cmdetect/questionnaires";
 
 type SingleChoiceQuestionProps = {
-  question: SingleChoiceQuestionType;
+  question: SQSingleChoiceQuestion;
   onNavigateNext: (selectedValue: string) => void;
 };
 
@@ -29,7 +32,7 @@ export function SingleChoiceQuestion({ question, onNavigateNext }: SingleChoiceQ
       </div>
 
       <div className={question.options.length <= 2 ? "flex flex-row gap-4" : "flex flex-col gap-3"}>
-        {question.options.map((option) => (
+        {question.options.map((option: AnswerOption) => (
           <Button
             key={option.value}
             type="button"

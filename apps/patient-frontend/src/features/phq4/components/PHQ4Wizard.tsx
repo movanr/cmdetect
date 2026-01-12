@@ -7,8 +7,7 @@ import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import type { PHQ4Answers } from "../model/answer";
-import { PHQ4_QUESTIONNAIRE } from "../data/phq4Questions";
+import { PHQ4_QUESTIONNAIRE, type PHQ4Answers } from "@cmdetect/questionnaires";
 import { usePHQ4Navigation } from "../hooks/usePHQ4Navigation";
 import { saveProgress, clearProgress } from "../persistence/storage";
 import { ProgressHeader } from "./ProgressHeader";
@@ -108,8 +107,8 @@ export function PHQ4Wizard({
  * Completion screen
  */
 function PHQ4Complete({ answers }: { answers: PHQ4Answers }) {
-  const answeredCount = Object.keys(answers).filter(
-    (key) => answers[key] !== undefined
+  const answeredCount = Object.values(answers).filter(
+    (value) => value !== undefined
   ).length;
 
   return (

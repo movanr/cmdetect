@@ -6,7 +6,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
-import type { SQAnswers } from "../model/answer";
+import type { SQAnswers } from "@cmdetect/questionnaires";
 import { useSQWizardNavigation } from "../hooks/useSQNavigation";
 import { validateScreen } from "../schema/sqSchema";
 import { filterEnabledAnswers } from "../hooks/evaluateEnableWhen";
@@ -155,8 +155,8 @@ export function SQWizard({
  */
 function SQComplete({ answers }: { answers: SQAnswers }) {
   // Count answered questions
-  const answeredCount = Object.keys(answers).filter(
-    (key) => answers[key] !== undefined
+  const answeredCount = Object.values(answers).filter(
+    (value) => value !== undefined
   ).length;
 
   return (

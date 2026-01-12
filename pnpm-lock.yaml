@@ -141,6 +141,9 @@ importers:
       '@cmdetect/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@cmdetect/questionnaires':
+        specifier: workspace:*
+        version: link:../../packages/questionnaires
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.11.0)
@@ -301,6 +304,9 @@ importers:
 
   apps/patient-frontend:
     dependencies:
+      '@cmdetect/questionnaires':
+        specifier: workspace:*
+        version: link:../../packages/questionnaires
       '@graphql-typed-document-node/core':
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.11.0)
@@ -413,6 +419,12 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
+  packages/questionnaires:
     devDependencies:
       typescript:
         specifier: ^5.9.2

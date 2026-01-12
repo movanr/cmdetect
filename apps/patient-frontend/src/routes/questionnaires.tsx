@@ -9,8 +9,12 @@ import { FormProvider } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
 
 // SQ imports
-import { SQWizard, useSQForm, loadProgress as loadSQProgress } from "../features/sq";
-import type { SQAnswers } from "../features/sq/model/answer";
+import {
+  SQWizard,
+  useSQForm,
+  loadProgress as loadSQProgress,
+  type SQAnswers,
+} from "../features/sq";
 
 // PHQ-4 imports
 import {
@@ -18,8 +22,8 @@ import {
   usePHQ4Form,
   loadProgress as loadPHQ4Progress,
   PHQ4_QUESTIONNAIRE,
+  type PHQ4Answers,
 } from "../features/phq4";
-import type { PHQ4Answers } from "../features/phq4/model/answer";
 
 // Define the questionnaire sequence
 const QUESTIONNAIRES = [

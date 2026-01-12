@@ -3,7 +3,7 @@
  * Shows patient response (Yes/No) and office use (R/L/DNK) side by side
  */
 
-import { SQ_YES_NO_LABELS } from "../data/questionLabels";
+import { SQ_YES_NO_LABELS } from "@cmdetect/questionnaires";
 import { SideCheckboxGroup, type OfficeUseValue } from "./editors/SideCheckboxGroup";
 
 interface OfficeUseQuestionItemProps {

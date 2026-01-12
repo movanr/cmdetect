@@ -6,11 +6,14 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { CompositeNumberQuestion as CompositeNumberQuestionType } from "../../model/question";
-import type { SQAnswers, CompositeNumberAnswer } from "../../model/answer";
+import type {
+  SQCompositeNumberQuestion,
+  SQAnswers,
+  CompositeNumberAnswer,
+} from "@cmdetect/questionnaires";
 
 type CompositeNumberQuestionProps = {
-  question: CompositeNumberQuestionType;
+  question: SQCompositeNumberQuestion;
   error?: string;
 };
 
@@ -79,7 +82,7 @@ export function CompositeNumberQuestion({
       />
 
       <p className="text-sm text-muted-foreground">
-        Enter years, months, or both
+        Geben Sie Jahre, Monate oder beides ein
       </p>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
