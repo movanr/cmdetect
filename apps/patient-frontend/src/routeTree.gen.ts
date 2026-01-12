@@ -9,8 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SqRouteImport } from './routes/sq'
+import { Route as QuestionnairesRouteImport } from './routes/questionnaires'
+import { Route as Phq4RouteImport } from './routes/phq4'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SqRoute = SqRouteImport.update({
+  id: '/sq',
+  path: '/sq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionnairesRoute = QuestionnairesRouteImport.update({
+  id: '/questionnaires',
+  path: '/questionnaires',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Phq4Route = Phq4RouteImport.update({
+  id: '/phq4',
+  path: '/phq4',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +37,61 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/phq4': typeof Phq4Route
+  '/questionnaires': typeof QuestionnairesRoute
+  '/sq': typeof SqRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/phq4': typeof Phq4Route
+  '/questionnaires': typeof QuestionnairesRoute
+  '/sq': typeof SqRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/phq4': typeof Phq4Route
+  '/questionnaires': typeof QuestionnairesRoute
+  '/sq': typeof SqRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/phq4' | '/questionnaires' | '/sq'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/phq4' | '/questionnaires' | '/sq'
+  id: '__root__' | '/' | '/phq4' | '/questionnaires' | '/sq'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  Phq4Route: typeof Phq4Route
+  QuestionnairesRoute: typeof QuestionnairesRoute
+  SqRoute: typeof SqRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sq': {
+      id: '/sq'
+      path: '/sq'
+      fullPath: '/sq'
+      preLoaderRoute: typeof SqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/questionnaires': {
+      id: '/questionnaires'
+      path: '/questionnaires'
+      fullPath: '/questionnaires'
+      preLoaderRoute: typeof QuestionnairesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phq4': {
+      id: '/phq4'
+      path: '/phq4'
+      fullPath: '/phq4'
+      preLoaderRoute: typeof Phq4RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +104,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  Phq4Route: Phq4Route,
+  QuestionnairesRoute: QuestionnairesRoute,
+  SqRoute: SqRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
