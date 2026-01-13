@@ -25,10 +25,30 @@ import {
   type PHQ4Answers,
 } from "../features/phq4";
 
+// GCPS-1M imports
+import {
+  GCPS1MWizard,
+  useGCPS1MForm,
+  loadProgress as loadGCPS1MProgress,
+  GCPS_1M_QUESTIONNAIRE,
+  type GCPS1MAnswers,
+} from "../features/gcps-1m";
+
+// JFLS-8 imports
+import {
+  JFLS8Wizard,
+  useJFLS8Form,
+  loadProgress as loadJFLS8Progress,
+  JFLS8_QUESTIONNAIRE,
+  type JFLS8Answers,
+} from "../features/jfls8";
+
 // Define the questionnaire sequence
 const QUESTIONNAIRES = [
   { id: "sq", name: "Symptom Questionnaire", shortName: "SQ" },
   { id: "phq4", name: PHQ4_QUESTIONNAIRE.title, shortName: "PHQ-4" },
+  { id: "gcps-1m", name: GCPS_1M_QUESTIONNAIRE.title, shortName: "GCPS" },
+  { id: "jfls-8", name: JFLS8_QUESTIONNAIRE.title, shortName: "JFLS-8" },
 ] as const;
 
 type QuestionnaireId = (typeof QUESTIONNAIRES)[number]["id"];
@@ -86,6 +106,8 @@ function QuestionnairesPage() {
   const [allAnswers, setAllAnswers] = useState<{
     sq?: SQAnswers;
     phq4?: PHQ4Answers;
+    "gcps-1m"?: GCPS1MAnswers;
+    "jfls-8"?: JFLS8Answers;
   }>({});
 
   // Track if all questionnaires are complete
@@ -155,6 +177,18 @@ function QuestionnairesPage() {
             onComplete={(answers) => handleQuestionnaireComplete("phq4", answers)}
           />
         )}
+        {currentQuestionnaireId === "gcps-1m" && (
+          <GCPS1MQuestionnaireWrapper
+            token={effectiveToken}
+            onComplete={(answers) => handleQuestionnaireComplete("gcps-1m", answers)}
+          />
+        )}
+        {currentQuestionnaireId === "jfls-8" && (
+          <JFLS8QuestionnaireWrapper
+            token={effectiveToken}
+            onComplete={(answers) => handleQuestionnaireComplete("jfls-8", answers)}
+          />
+        )}
       </main>
     </div>
   );
@@ -212,12 +246,60 @@ function PHQ4QuestionnaireWrapper({
 }
 
 /**
+ * Wrapper for GCPS-1M questionnaire
+ */
+function GCPS1MQuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: GCPS1MAnswers) => void;
+}) {
+  const savedProgress = loadGCPS1MProgress(token);
+  const methods = useGCPS1MForm(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <GCPS1MWizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for JFLS-8 questionnaire
+ */
+function JFLS8QuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: JFLS8Answers) => void;
+}) {
+  const savedProgress = loadJFLS8Progress(token);
+  const methods = useJFLS8Form(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <JFLS8Wizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
  * Final completion screen when all questionnaires are done
  */
 function AllQuestionnairesComplete({
   answers,
 }: {
-  answers: { sq?: SQAnswers; phq4?: PHQ4Answers };
+  answers: { sq?: SQAnswers; phq4?: PHQ4Answers; "gcps-1m"?: GCPS1MAnswers; "jfls-8"?: JFLS8Answers };
 }) {
   const handleSubmit = () => {
     console.log("All questionnaires completed. Submitting:", answers);

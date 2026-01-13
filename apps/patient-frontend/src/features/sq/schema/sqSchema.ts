@@ -7,20 +7,6 @@ import { z } from "zod";
 import type { SQQuestion } from "@cmdetect/questionnaires";
 
 /**
- * Schema for composite number fields (years + months)
- * At least one of years or months must be provided
- * Note: values are already numbers from parseInt in the component, no coercion needed
- */
-const compositeNumberSchema = z
-  .object({
-    years: z.number().int().min(0).max(99).optional(),
-    months: z.number().int().min(0).max(11).optional(),
-  })
-  .refine((data) => data.years != null || data.months != null, {
-    message: "Please enter years or months",
-  });
-
-/**
  * Creates a validation schema for a single screen/question
  * Used when user clicks "Next" to validate current answer
  */
@@ -28,18 +14,29 @@ export function createScreenSchema(question: SQQuestion): z.ZodTypeAny {
   switch (question.type) {
     case "single_choice":
       return z.object({
-        [question.id]: z.string({ required_error: "Please select an option" }),
+        [question.id]: z.string({ required_error: "Bitte wählen Sie eine Option" }),
       });
 
     case "matrix_row":
       return z.object({
-        [question.id]: z.string({ required_error: "Please select Yes or No" }),
+        [question.id]: z.string({ required_error: "Bitte wählen Sie Ja oder Nein" }),
       });
 
-    case "composite_number":
+    case "composite_number": {
+      const errorMessage = "Bitte geben Sie Jahre oder Monate ein";
       return z.object({
-        [question.id]: compositeNumberSchema,
+        [question.id]: z
+          .object({
+            years: z.number().int().min(0).max(99).optional(),
+            months: z.number().int().min(0).max(11).optional(),
+          })
+          .optional()
+          .refine(
+            (data) => data?.years != null || data?.months != null,
+            { message: errorMessage }
+          ),
       });
+    }
 
     default:
       // TypeScript exhaustive check
@@ -67,6 +64,6 @@ export function validateScreen(
   const firstError = result.error.errors[0];
   return {
     success: false,
-    error: firstError?.message ?? "Invalid answer",
+    error: firstError?.message ?? "Ungültige Antwort",
   };
 }

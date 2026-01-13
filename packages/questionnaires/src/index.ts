@@ -37,6 +37,22 @@ export type {
   SQAnswerValue,
   SQAnswers,
   SQOfficeUseValue,
+  // GCPS 1-month types
+  GCPS1MQuestionId,
+  GCPS1MScaleQuestion,
+  GCPS1MNumericQuestion,
+  GCPS1MQuestion,
+  GCPS1MQuestionnaire,
+  GCPS1MAnswers,
+  GCPS1MScore,
+  GCPSGrade,
+  GCPSGradeInterpretation,
+  GCPSCPILevel,
+  // JFLS-8 types
+  JFLS8QuestionId,
+  JFLS8Question,
+  JFLS8Questionnaire,
+  JFLS8Answers,
 } from "./types";
 
 // ============================================================================
@@ -91,6 +107,57 @@ export {
 export { SQ_ENABLE_WHEN } from "./sq/enableWhen";
 
 // ============================================================================
+// GCPS 1-Month (Graded Chronic Pain Scale - 1 Month Version)
+// ============================================================================
+export {
+  GCPS_1M_QUESTIONS,
+  GCPS_1M_QUESTION_ORDER,
+  GCPS_1M_METADATA,
+  GCPS_1M_TOTAL_QUESTIONS,
+  GCPS_1M_QUESTIONNAIRE,
+  GCPS_1M_QUESTION_LABELS,
+} from "./gcps-1m/questions";
+
+export {
+  GCPS_1M_PAIN_SCALE_OPTIONS,
+  GCPS_1M_INTERFERENCE_SCALE_OPTIONS,
+  GCPS_1M_PAIN_LABELS,
+  GCPS_1M_INTERFERENCE_LABELS,
+  GCPS_1M_DAYS_CONFIG,
+  GCPS_1M_6_MONTH_DAYS_CONFIG,
+  GCPS_1M_OPTION_LABELS,
+} from "./gcps-1m/options";
+
+export {
+  calculateGCPS1MScore,
+  calculateCPI,
+  calculateInterferenceScore,
+  getInterferencePoints,
+  getDisabilityDaysPoints,
+  getCPILevel,
+  determineGrade,
+} from "./gcps-1m/scoring";
+
+// ============================================================================
+// JFLS-8 (Jaw Functional Limitation Scale - 8 items)
+// ============================================================================
+export {
+  JFLS8_QUESTIONS,
+  JFLS8_QUESTION_ORDER,
+  JFLS8_METADATA,
+  JFLS8_INSTRUCTIONS,
+  JFLS8_TOTAL_QUESTIONS,
+  JFLS8_QUESTIONNAIRE,
+  JFLS8_QUESTION_LABELS,
+} from "./jfls8/questions";
+
+export {
+  JFLS8_SCALE_OPTIONS,
+  JFLS8_SCALE_LABELS,
+  JFLS8_OPTION_LABELS,
+} from "./jfls8/options";
+
+// ============================================================================
 // Utilities
 // ============================================================================
 export {
@@ -109,10 +176,12 @@ export {
 export const QUESTIONNAIRE_TITLES: Record<string, string> = {
   "dc-tmd-sq": "DC/TMD Symptom-Fragebogen",
   "phq-4": "PHQ-4 Gesundheitsfragebogen",
+  "gcps-1m": "GCPS - Stufenskala für chronische Schmerzen",
+  "jfls-8": "JFLS-8 - Kieferfunktions-Einschränkungsskala",
 };
 
 /**
  * All supported questionnaire IDs
  */
-export const QUESTIONNAIRE_IDS = ["dc-tmd-sq", "phq-4"] as const;
+export const QUESTIONNAIRE_IDS = ["dc-tmd-sq", "phq-4", "gcps-1m", "jfls-8"] as const;
 export type QuestionnaireId = (typeof QUESTIONNAIRE_IDS)[number];

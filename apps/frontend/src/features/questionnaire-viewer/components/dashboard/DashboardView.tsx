@@ -19,6 +19,8 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
   // Find specific questionnaire responses
   const sqResponse = responses.find((r) => r.questionnaireId === "dc-tmd-sq");
   const phq4Response = responses.find((r) => r.questionnaireId === "phq-4");
+  const gcps1mResponse = responses.find((r) => r.questionnaireId === "gcps-1m");
+  const jfls8Response = responses.find((r) => r.questionnaireId === "jfls-8");
 
   // Check if there are any responses at all
   if (responses.length === 0) {
@@ -62,6 +64,14 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
               answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
             />
 
+            {/* GCPS-1M Card */}
+            <Axis2ScoreCard
+              questionnaireId="gcps-1m"
+              title="GCPS (1M)"
+              subtitle="Chronische Schmerzen"
+              answers={gcps1mResponse ? (gcps1mResponse.answers as Record<string, string | number>) : null}
+            />
+
             {/* OBC Placeholder */}
             <Axis2ScoreCard
               questionnaireId="obc"
@@ -71,13 +81,12 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
               isPlaceholder
             />
 
-            {/* JFLS Placeholder */}
+            {/* JFLS-8 Card */}
             <Axis2ScoreCard
-              questionnaireId="jfls"
-              title="JFLS"
+              questionnaireId="jfls-8"
+              title="JFLS-8"
               subtitle="Kieferfunktion"
-              answers={null}
-              isPlaceholder
+              answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
             />
           </div>
         </section>

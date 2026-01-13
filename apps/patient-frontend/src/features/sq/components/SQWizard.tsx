@@ -111,7 +111,7 @@ export function SQWizard({
     return (
       <div className="max-w-lg mx-auto p-4 text-center">
         <p className="text-destructive">
-          An error occurred. Please refresh the page.
+          Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.
         </p>
       </div>
     );
@@ -179,15 +179,15 @@ function SQComplete({ answers }: { answers: SQAnswers }) {
             </svg>
           </div>
 
-          <h2 className="text-2xl font-semibold">Questionnaire Complete</h2>
+          <h2 className="text-2xl font-semibold">Fragebogen abgeschlossen</h2>
 
           <p className="text-muted-foreground">
-            Thank you for completing the Symptom Questionnaire. Your responses
-            have been recorded.
+            Vielen Dank für das Ausfüllen des Symptom-Fragebogens. Ihre
+            Antworten wurden erfasst.
           </p>
 
           <p className="text-sm text-muted-foreground">
-            {answeredCount} questions answered
+            {answeredCount} Fragen beantwortet
           </p>
         </CardContent>
       </Card>

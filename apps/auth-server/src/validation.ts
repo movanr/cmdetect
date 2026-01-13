@@ -33,7 +33,7 @@ export function validateInviteToken(invite_token: any): ValidationResult {
 /**
  * Known questionnaire IDs that the system accepts
  */
-const KNOWN_QUESTIONNAIRE_IDS = ['dc-tmd-sq', 'phq-4'];
+const KNOWN_QUESTIONNAIRE_IDS = ['dc-tmd-sq', 'phq-4', 'gcps-1m', 'jfls-8'];
 
 /**
  * Validates questionnaire response data structure

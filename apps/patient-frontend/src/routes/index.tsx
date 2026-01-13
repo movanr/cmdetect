@@ -32,6 +32,20 @@ import {
   PHQ4_METADATA,
 } from "../features/phq4";
 import type { PHQ4Answers } from "../features/phq4";
+import {
+  GCPS1MWizard,
+  useGCPS1MForm,
+  loadProgress as loadGCPS1MProgress,
+  GCPS_1M_METADATA,
+} from "../features/gcps-1m";
+import type { GCPS1MAnswers } from "../features/gcps-1m";
+import {
+  JFLS8Wizard,
+  useJFLS8Form,
+  loadProgress as loadJFLS8Progress,
+  JFLS8_METADATA,
+} from "../features/jfls8";
+import type { JFLS8Answers } from "../features/jfls8";
 
 // Form components
 import { PersonalDataForm } from "./-components/PersonalDataForm";
@@ -62,6 +76,8 @@ type FlowStep =
   | "personal-data"
   | "questionnaire-sq"
   | "questionnaire-phq4"
+  | "questionnaire-gcps1m"
+  | "questionnaire-jfls8"
   | "complete"
   | "declined";
 
@@ -118,6 +134,10 @@ function PatientFlowPage() {
             setStep("questionnaire-sq");
           } else if (!progress.submitted_questionnaires.includes("phq-4")) {
             setStep("questionnaire-phq4");
+          } else if (!progress.submitted_questionnaires.includes("gcps-1m")) {
+            setStep("questionnaire-gcps1m");
+          } else if (!progress.submitted_questionnaires.includes("jfls-8")) {
+            setStep("questionnaire-jfls8");
           } else {
             // All complete
             setStep("complete");
@@ -318,6 +338,30 @@ function PatientFlowPage() {
         questionnaire_version: PHQ4_METADATA.version,
         answers: answers as Record<string, unknown>,
       },
+      "questionnaire-gcps1m"
+    );
+  };
+
+  // Handle GCPS-1M completion
+  const handleGCPS1MComplete = (answers: GCPS1MAnswers) => {
+    submitQuestionnaire(
+      {
+        questionnaire_id: GCPS_1M_METADATA.id,
+        questionnaire_version: GCPS_1M_METADATA.version,
+        answers: answers as Record<string, unknown>,
+      },
+      "questionnaire-jfls8"
+    );
+  };
+
+  // Handle JFLS-8 completion
+  const handleJFLS8Complete = (answers: JFLS8Answers) => {
+    submitQuestionnaire(
+      {
+        questionnaire_id: JFLS8_METADATA.id,
+        questionnaire_version: JFLS8_METADATA.version,
+        answers: answers as Record<string, unknown>,
+      },
       "complete"
     );
   };
@@ -342,20 +386,30 @@ function PatientFlowPage() {
   }
 
   // Questionnaire steps
-  if (step === "questionnaire-sq" || step === "questionnaire-phq4") {
+  if (step === "questionnaire-sq" || step === "questionnaire-phq4" || step === "questionnaire-gcps1m" || step === "questionnaire-jfls8") {
+    const questionnaireNumber = step === "questionnaire-sq" ? 1
+      : step === "questionnaire-phq4" ? 2
+      : step === "questionnaire-gcps1m" ? 3
+      : 4;
+    const questionnaireTitle = step === "questionnaire-sq"
+      ? SQ_METADATA.title
+      : step === "questionnaire-phq4"
+        ? PHQ4_METADATA.title
+        : step === "questionnaire-gcps1m"
+          ? GCPS_1M_METADATA.title
+          : JFLS8_METADATA.title;
+
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-muted/30">
           <div className="max-w-lg mx-auto px-4 pt-8 pb-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                Fragebogen {step === "questionnaire-sq" ? "1" : "2"}/2
+                Fragebogen {questionnaireNumber}/4
               </span>
               <span className="text-muted-foreground">·</span>
               <span className="text-sm font-medium">
-                {step === "questionnaire-sq"
-                  ? SQ_METADATA.title
-                  : PHQ4_METADATA.title}
+                {questionnaireTitle}
               </span>
             </div>
           </div>
@@ -393,6 +447,18 @@ function PatientFlowPage() {
             <PHQ4QuestionnaireWrapper
               token={token}
               onComplete={handlePHQ4Complete}
+            />
+          )}
+          {step === "questionnaire-gcps1m" && (
+            <GCPS1MQuestionnaireWrapper
+              token={token}
+              onComplete={handleGCPS1MComplete}
+            />
+          )}
+          {step === "questionnaire-jfls8" && (
+            <JFLS8QuestionnaireWrapper
+              token={token}
+              onComplete={handleJFLS8Complete}
             />
           )}
         </main>
@@ -573,6 +639,54 @@ function PHQ4QuestionnaireWrapper({
   return (
     <FormProvider {...methods}>
       <PHQ4Wizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for GCPS-1M questionnaire
+ */
+function GCPS1MQuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: GCPS1MAnswers) => void;
+}) {
+  const savedProgress = loadGCPS1MProgress(token);
+  const methods = useGCPS1MForm(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <GCPS1MWizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for JFLS-8 questionnaire
+ */
+function JFLS8QuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: JFLS8Answers) => void;
+}) {
+  const savedProgress = loadJFLS8Progress(token);
+  const methods = useJFLS8Form(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <JFLS8Wizard
         token={token}
         initialIndex={savedProgress?.currentIndex}
         onComplete={onComplete}

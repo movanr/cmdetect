@@ -35,11 +35,11 @@ export function ProgressHeader({
       <Progress value={percentage} className="h-2" />
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-          Section {sectionIndex + 1} of {totalSections} · {sectionName}
+          Abschnitt {sectionIndex + 1} von {totalSections} · {sectionName}
         </p>
         {showSubCounter && (
           <p className="text-xs text-muted-foreground">
-            Question {questionInSection} of {totalInSection}
+            Frage {questionInSection} von {totalInSection}
           </p>
         )}
       </div>

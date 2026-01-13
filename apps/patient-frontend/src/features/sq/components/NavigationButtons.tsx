@@ -30,12 +30,12 @@ export function NavigationButtons({
         disabled={!canGoBack || isLoading}
       >
         <ChevronLeft className="mr-1 h-4 w-4" />
-        Back
+        Zurück
       </Button>
 
       {showNext && (
         <Button type="button" onClick={() => onNext()} disabled={isLoading}>
-          Next
+          Weiter
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       )}

@@ -35,20 +35,20 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
           <span className="underline">letzten 2 Wochen</span> durch die folgenden Beschwerden
           beeinträchtigt?
         </CardDescription>
+        <div className="text-[10px] text-muted-foreground/70 mt-1">
+          0 = Überhaupt nicht, 1 = An einzelnen Tagen, 2 = An mehr als der Hälfte der Tage, 3 = Beinahe jeden Tag
+        </div>
       </CardHeader>
 
       {/* Table */}
       <CardContent className="p-0">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
               <TableHead className="w-auto" />
               {PHQ4_OPTIONS.map((opt) => (
-                <TableHead key={opt.value} className="text-center p-2">
-                  <div className="text-muted-foreground text-[10px] leading-tight mb-1">
-                    {opt.label}
-                  </div>
-                  <div className="text-sm font-semibold">{opt.value}</div>
+                <TableHead key={opt.value} className="text-center px-1 py-1 w-[32px]">
+                  <div className="text-xs font-semibold">{opt.value}</div>
                 </TableHead>
               ))}
             </TableRow>
@@ -60,23 +60,23 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
 
               return (
                 <TableRow key={questionId}>
-                  <TableCell className="p-3 text-sm whitespace-normal">
-                    <span className="text-muted-foreground mr-2">
+                  <TableCell className="p-2 text-sm">
+                    <span className="text-muted-foreground mr-1">
                       {String.fromCharCode(97 + index)}.
                     </span>
                     {label?.text}
                   </TableCell>
                   {PHQ4_OPTIONS.map((opt) => (
-                    <TableCell key={opt.value} className="p-2 text-center">
+                    <TableCell key={opt.value} className="px-1 py-1 text-center">
                       <div
-                        className={`w-6 h-6 rounded-full border-2 mx-auto flex items-center justify-center ${
+                        className={`w-5 h-5 rounded-full border-[1.5px] mx-auto flex items-center justify-center ${
                           selectedValue === opt.value
                             ? "border-primary bg-primary text-primary-foreground"
                             : "border-muted-foreground/30"
                         }`}
                       >
                         {selectedValue === opt.value && (
-                          <span className="text-xs font-bold">{opt.value}</span>
+                          <span className="text-[10px] font-bold">{opt.value}</span>
                         )}
                       </div>
                     </TableCell>

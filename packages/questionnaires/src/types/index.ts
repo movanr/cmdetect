@@ -35,3 +35,23 @@ export type {
   SQAnswers,
   SQOfficeUseValue,
 } from "./sq";
+
+export type {
+  GCPS1MQuestionId,
+  GCPS1MScaleQuestion,
+  GCPS1MNumericQuestion,
+  GCPS1MQuestion,
+  GCPS1MQuestionnaire,
+  GCPS1MAnswers,
+  GCPS1MScore,
+  GCPSGrade,
+  GCPSGradeInterpretation,
+  GCPSCPILevel,
+} from "./gcps";
+
+export type {
+  JFLS8QuestionId,
+  JFLS8Question,
+  JFLS8Questionnaire,
+  JFLS8Answers,
+} from "./jfls8";
