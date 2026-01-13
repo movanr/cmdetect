@@ -57,7 +57,7 @@ interface SectionProps {
   title: string;
   questions: OBCQuestionId[];
   answers: OBCAnswers;
-  options: typeof OBC_SLEEP_OPTIONS;
+  options: typeof OBC_SLEEP_OPTIONS | typeof OBC_WAKING_OPTIONS;
 }
 
 function OBCSection({ title, questions, answers, options }: SectionProps) {

@@ -391,8 +391,12 @@ export function Axis2ScoreCard({
         </CardHeader>
 
         {/* Expandable details with scoring scales */}
-        {isExpanded && (
-          <CardContent className="border-t bg-muted/20 p-4 space-y-4">
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out"
+          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <CardContent className="border-t bg-muted/20 p-4 space-y-4">
             {/* Charakteristische Schmerzintensität */}
             <div>
               <p className="text-sm font-medium mb-2">
@@ -490,8 +494,9 @@ export function Axis2ScoreCard({
             <div className="pt-2 border-t">
               <GCPS1MSummary answers={answers as GCPS1MAnswers} />
             </div>
-          </CardContent>
-        )}
+            </CardContent>
+          </div>
+        </div>
       </Card>
     );
   }
@@ -599,11 +604,16 @@ export function Axis2ScoreCard({
         </CardHeader>
 
         {/* Expandable details */}
-        {isExpanded && (
-          <CardContent className="border-t bg-muted/20 p-4">
-            <JFLS8Summary answers={answers as JFLS8Answers} />
-          </CardContent>
-        )}
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out"
+          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <CardContent className="border-t bg-muted/20 p-4">
+              <JFLS8Summary answers={answers as JFLS8Answers} />
+            </CardContent>
+          </div>
+        </div>
       </Card>
     );
   }
@@ -730,11 +740,16 @@ export function Axis2ScoreCard({
         </CardHeader>
 
         {/* Expandable details */}
-        {isExpanded && (
-          <CardContent className="border-t bg-muted/20 p-4">
-            <JFLS20Summary answers={answers as JFLS20Answers} />
-          </CardContent>
-        )}
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out"
+          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <CardContent className="border-t bg-muted/20 p-4">
+              <JFLS20Summary answers={answers as JFLS20Answers} />
+            </CardContent>
+          </div>
+        </div>
       </Card>
     );
   }
@@ -830,11 +845,16 @@ export function Axis2ScoreCard({
         </CardHeader>
 
         {/* Expandable details */}
-        {isExpanded && (
-          <CardContent className="border-t bg-muted/20 p-4">
-            <OBCSummary answers={answers as OBCAnswers} />
-          </CardContent>
-        )}
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out"
+          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <CardContent className="border-t bg-muted/20 p-4">
+              <OBCSummary answers={answers as OBCAnswers} />
+            </CardContent>
+          </div>
+        </div>
       </Card>
     );
   }
@@ -965,11 +985,16 @@ export function Axis2ScoreCard({
       </CardHeader>
 
       {/* Expandable details */}
-      {isExpanded && (
-        <CardContent className="border-t bg-muted/20 p-4">
-          <PHQ4Summary answers={answers as Record<string, string>} />
-        </CardContent>
-      )}
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <CardContent className="border-t bg-muted/20 p-4">
+            <PHQ4Summary answers={answers as Record<string, string>} />
+          </CardContent>
+        </div>
+      </div>
     </Card>
   );
 }

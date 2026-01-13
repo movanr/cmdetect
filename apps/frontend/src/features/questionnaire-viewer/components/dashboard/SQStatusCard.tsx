@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   ChevronDown,
   ChevronUp,
@@ -53,17 +54,19 @@ export function SQStatusCard({
   // No SQ data
   if (!response) {
     return (
-      <div className="border rounded-lg p-4 bg-muted/30">
-        <div className="flex items-center gap-2">
-          <AlertCircle className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
-            <p className="text-sm text-muted-foreground mt-1">
-              Noch nicht eingereicht
-            </p>
+      <Card className="bg-muted/30 py-0">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                Noch nicht eingereicht
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -72,7 +75,7 @@ export function SQStatusCard({
   const isReviewed = !!reviewedAt;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <Card className="overflow-hidden py-0 gap-0">
       {/* Header */}
       <div className="p-4">
         <div className="flex items-start justify-between">
@@ -148,11 +151,16 @@ export function SQStatusCard({
       </div>
 
       {/* Expandable details */}
-      {isExpanded && (
-        <div className="border-t bg-muted/20 p-4">
-          <SQReadOnlyView answers={answers} />
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <CardContent className="border-t bg-muted/20 p-4">
+            <SQReadOnlyView answers={answers} />
+          </CardContent>
         </div>
-      )}
-    </div>
+      </div>
+    </Card>
   );
 }

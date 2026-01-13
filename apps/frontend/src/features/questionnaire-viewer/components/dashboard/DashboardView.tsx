@@ -57,15 +57,7 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Achse 2 - Psychosoziale Bewertung
           </h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* PHQ-4 Card */}
-            <Axis2ScoreCard
-              questionnaireId="phq-4"
-              title="PHQ-4 - Gesundheitsfragebogen für Patienten"
-              subtitle="Depression & Angst"
-              answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
-            />
-
+          <div className="grid gap-4 md:grid-cols-2 items-start">
             {/* GCPS-1M Card */}
             <Axis2ScoreCard
               questionnaireId="gcps-1m"
@@ -76,19 +68,26 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
               }
             />
 
+            {/* JFLS-8 Card */}
+            <Axis2ScoreCard
+              questionnaireId="jfls-8"
+              title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
+              answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
+            />
+            {/* PHQ-4 Card */}
+            <Axis2ScoreCard
+              questionnaireId="phq-4"
+              title="PHQ-4 - Gesundheitsfragebogen für Patienten"
+              subtitle="Depression & Angst"
+              answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
+            />
+
             {/* OBC Card */}
             <Axis2ScoreCard
               questionnaireId="obc"
               title="OBC - Oral Behaviors Checklist"
               subtitle="Orale Parafunktionen"
               answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
-            />
-
-            {/* JFLS-8 Card */}
-            <Axis2ScoreCard
-              questionnaireId="jfls-8"
-              title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
-              answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
             />
 
             {/* JFLS-20 Card */}
