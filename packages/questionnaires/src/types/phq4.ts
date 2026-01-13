@@ -21,6 +21,7 @@ export type PHQ4QuestionId = "PHQ4_A" | "PHQ4_B" | "PHQ4_C" | "PHQ4_D";
  */
 export type PHQ4Question = {
   id: PHQ4QuestionId;
+  type: "choice";
   text: string; // German
 };
 

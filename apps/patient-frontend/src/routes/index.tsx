@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { FormProvider } from "react-hook-form";
 import { AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -16,56 +16,25 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 
-// Questionnaire imports
+// Questionnaire engine
 import {
-  SQWizard,
-  useSQForm,
-  loadProgress as loadSQProgress,
-  filterEnabledAnswers,
-  SQ_METADATA,
-} from "../features/sq";
+  QUESTIONNAIRE_FLOW,
+  getFlowItemById,
+  getNextFlowItem,
+  useQuestionnaireForm,
+  GenericWizard,
+  type GenericQuestionnaire,
+} from "../features/questionnaire-engine";
+
+// SQ - kept separate due to enableWhen logic
+import { SQWizard, useSQForm } from "../features/sq";
 import type { SQAnswers } from "../features/sq";
-import {
-  PHQ4Wizard,
-  usePHQ4Form,
-  loadProgress as loadPHQ4Progress,
-  PHQ4_METADATA,
-} from "../features/phq4";
-import type { PHQ4Answers } from "../features/phq4";
-import {
-  GCPS1MWizard,
-  useGCPS1MForm,
-  loadProgress as loadGCPS1MProgress,
-  GCPS_1M_METADATA,
-} from "../features/gcps-1m";
-import type { GCPS1MAnswers } from "../features/gcps-1m";
-import {
-  JFLS8Wizard,
-  useJFLS8Form,
-  loadProgress as loadJFLS8Progress,
-  JFLS8_METADATA,
-} from "../features/jfls8";
-import type { JFLS8Answers } from "../features/jfls8";
-import {
-  JFLS20Wizard,
-  useJFLS20Form,
-  loadProgress as loadJFLS20Progress,
-  JFLS20_METADATA,
-} from "../features/jfls20";
-import type { JFLS20Answers } from "../features/jfls20";
-import {
-  OBCWizard,
-  useOBCForm,
-  loadProgress as loadOBCProgress,
-} from "../features/obc";
-import { OBC_METADATA } from "@cmdetect/questionnaires";
-import type { OBCAnswers } from "@cmdetect/questionnaires";
 
 // Form components
 import { PersonalDataForm } from "./-components/PersonalDataForm";
 import type { PersonalDataFormValues } from "./-components/personalDataSchema";
 
-// Consent constants - single source of truth
+// Consent constants
 const CONSENT_TEXT =
   "Ich willige in die Erhebung und Verarbeitung meiner persönlichen Gesundheitsdaten zum Zweck der medizinischen Versorgung ein. Ich verstehe, dass meine Daten verschlüsselt und sicher gespeichert werden.";
 const CONSENT_VERSION = "1.0";
@@ -83,17 +52,12 @@ export const Route = createFileRoute("/")({
   component: PatientFlowPage,
 });
 
-// Flow steps
+// Flow steps - generated from config
 type FlowStep =
   | "validate"
   | "consent"
   | "personal-data"
-  | "questionnaire-sq"
-  | "questionnaire-phq4"
-  | "questionnaire-gcps1m"
-  | "questionnaire-jfls8"
-  | "questionnaire-jfls20"
-  | "questionnaire-obc"
+  | "questionnaire"
   | "complete"
   | "declined";
 
@@ -101,6 +65,7 @@ function PatientFlowPage() {
   const { token } = Route.useSearch();
 
   const [step, setStep] = useState<FlowStep>("validate");
+  const [currentQuestionnaireId, setCurrentQuestionnaireId] = useState<string | null>(null);
   const [publicKey, setPublicKey] = useState<string>("");
   const [organizationName, setOrganizationName] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -109,20 +74,20 @@ function PatientFlowPage() {
     questionnaire_id: string;
     questionnaire_version: string;
     answers: Record<string, unknown>;
-    nextStep: FlowStep;
   } | null>(null);
 
-  // Validate token and check progress mutation
+  // Ref to prevent double validation (React Strict Mode)
+  const hasValidatedToken = useRef(false);
+
+  // Validate token and check progress
   const validateTokenMutation = useMutation({
     mutationFn: async (inviteToken: string) => {
-      // First validate the token
       const tokenResult = await execute(validateInviteToken, { invite_token: inviteToken });
 
       if (!tokenResult.validateInviteToken.valid || !tokenResult.validateInviteToken.public_key_pem) {
         return { tokenResult, progressResult: null };
       }
 
-      // Then get patient progress to determine starting step
       const progressResult = await execute(getPatientProgress, { invite_token: inviteToken });
       return { tokenResult, progressResult };
     },
@@ -142,28 +107,23 @@ function PatientFlowPage() {
           if (!progress.has_consent) {
             setStep("consent");
           } else if (!progress.consent_given) {
-            // Consent was declined
             setStep("declined");
           } else if (!progress.has_personal_data) {
             setStep("personal-data");
-          } else if (!progress.submitted_questionnaires.includes("dc-tmd-sq")) {
-            setStep("questionnaire-sq");
-          } else if (!progress.submitted_questionnaires.includes("phq-4")) {
-            setStep("questionnaire-phq4");
-          } else if (!progress.submitted_questionnaires.includes("gcps-1m")) {
-            setStep("questionnaire-gcps1m");
-          } else if (!progress.submitted_questionnaires.includes("jfls-8")) {
-            setStep("questionnaire-jfls8");
-          } else if (!progress.submitted_questionnaires.includes("jfls-20")) {
-            setStep("questionnaire-jfls20");
-          } else if (!progress.submitted_questionnaires.includes("obc")) {
-            setStep("questionnaire-obc");
           } else {
-            // All complete
-            setStep("complete");
+            // Find first incomplete questionnaire using flow config
+            const nextQuestionnaire = QUESTIONNAIRE_FLOW.find(
+              (item) => !progress.submitted_questionnaires.includes(item.questionnaire.id)
+            );
+
+            if (nextQuestionnaire) {
+              setCurrentQuestionnaireId(nextQuestionnaire.questionnaire.id);
+              setStep("questionnaire");
+            } else {
+              setStep("complete");
+            }
           }
         } else {
-          // No progress data, start from beginning
           setStep("consent");
         }
       } else {
@@ -234,7 +194,10 @@ function PatientFlowPage() {
     },
     onSuccess: (data) => {
       if (data.submitPatientPersonalData.success) {
-        setStep("questionnaire-sq");
+        // Start first questionnaire
+        const firstQuestionnaire = QUESTIONNAIRE_FLOW[0];
+        setCurrentQuestionnaireId(firstQuestionnaire.questionnaire.id);
+        setStep("questionnaire");
         setError("");
       } else {
         setError(
@@ -267,12 +230,14 @@ function PatientFlowPage() {
       }),
   });
 
-  // Validate token on mount
+  // Validate token on mount (with ref guard to prevent double execution in Strict Mode)
   useEffect(() => {
-    if (token && step === "validate") {
+    if (token && step === "validate" && !hasValidatedToken.current) {
+      hasValidatedToken.current = true;
       validateTokenMutation.mutate(token);
     }
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]); // Only depend on token - validateTokenMutation.mutate is stable
 
   // Handle consent submission
   const handleConsent = async (consentGiven: boolean) => {
@@ -297,117 +262,62 @@ function PatientFlowPage() {
     await personalDataMutation.mutateAsync(data);
   };
 
-  // Submit questionnaire and handle success/failure
-  const submitQuestionnaire = async (
-    submission: {
-      questionnaire_id: string;
-      questionnaire_version: string;
-      answers: Record<string, unknown>;
-    },
-    nextStep: FlowStep
-  ) => {
-    setSubmissionError("");
-    setPendingSubmission({ ...submission, nextStep });
+  // Generic questionnaire completion handler - memoized to avoid unnecessary re-renders
+  const handleQuestionnaireComplete = useCallback(
+    async (answers: Record<string, unknown>) => {
+      if (!currentQuestionnaireId) return;
 
-    try {
-      const result = await questionnaireSubmitMutation.mutateAsync(submission);
+      const flowItem = getFlowItemById(currentQuestionnaireId);
+      if (!flowItem) return;
 
-      if (result.submitQuestionnaireResponse.success) {
-        setPendingSubmission(null);
-        setStep(nextStep);
-      } else {
+      const { id, version } = flowItem.questionnaire;
+
+      setSubmissionError("");
+      setPendingSubmission({
+        questionnaire_id: id,
+        questionnaire_version: version ?? "1.0",
+        answers,
+      });
+
+      try {
+        const result = await questionnaireSubmitMutation.mutateAsync({
+          questionnaire_id: id,
+          questionnaire_version: version ?? "1.0",
+          answers,
+        });
+
+        if (result.submitQuestionnaireResponse.success) {
+          setPendingSubmission(null);
+
+          // Move to next questionnaire or complete
+          const nextItem = getNextFlowItem(currentQuestionnaireId);
+          if (nextItem) {
+            setCurrentQuestionnaireId(nextItem.questionnaire.id);
+          } else {
+            setStep("complete");
+          }
+        } else {
+          setSubmissionError(
+            result.submitQuestionnaireResponse.error ||
+              "Fragebogen konnte nicht übermittelt werden"
+          );
+        }
+      } catch (err) {
         setSubmissionError(
-          result.submitQuestionnaireResponse.error ||
-            "Fragebogen konnte nicht übermittelt werden"
+          err instanceof Error
+            ? err.message
+            : "Fragebogen konnte nicht übermittelt werden"
         );
       }
-    } catch (err) {
-      setSubmissionError(
-        err instanceof Error
-          ? err.message
-          : "Fragebogen konnte nicht übermittelt werden"
-      );
-    }
-  };
+    },
+    [currentQuestionnaireId, questionnaireSubmitMutation]
+  );
 
   // Retry pending submission
   const retrySubmission = () => {
     if (pendingSubmission) {
-      const { nextStep, ...submission } = pendingSubmission;
-      submitQuestionnaire(submission, nextStep);
+      handleQuestionnaireComplete(pendingSubmission.answers);
     }
-  };
-
-  // Handle SQ completion
-  const handleSQComplete = (answers: SQAnswers) => {
-    submitQuestionnaire(
-      {
-        questionnaire_id: SQ_METADATA.id,
-        questionnaire_version: SQ_METADATA.version,
-        answers: answers as Record<string, unknown>,
-      },
-      "questionnaire-phq4"
-    );
-  };
-
-  // Handle PHQ-4 completion
-  const handlePHQ4Complete = (answers: PHQ4Answers) => {
-    submitQuestionnaire(
-      {
-        questionnaire_id: PHQ4_METADATA.id,
-        questionnaire_version: PHQ4_METADATA.version,
-        answers: answers as Record<string, unknown>,
-      },
-      "questionnaire-gcps1m"
-    );
-  };
-
-  // Handle GCPS-1M completion
-  const handleGCPS1MComplete = (answers: GCPS1MAnswers) => {
-    submitQuestionnaire(
-      {
-        questionnaire_id: GCPS_1M_METADATA.id,
-        questionnaire_version: GCPS_1M_METADATA.version,
-        answers: answers as Record<string, unknown>,
-      },
-      "questionnaire-jfls8"
-    );
-  };
-
-  // Handle JFLS-8 completion
-  const handleJFLS8Complete = (answers: JFLS8Answers) => {
-    submitQuestionnaire(
-      {
-        questionnaire_id: JFLS8_METADATA.id,
-        questionnaire_version: JFLS8_METADATA.version,
-        answers: answers as Record<string, unknown>,
-      },
-      "questionnaire-jfls20"
-    );
-  };
-
-  // Handle JFLS-20 completion
-  const handleJFLS20Complete = (answers: JFLS20Answers) => {
-    submitQuestionnaire(
-      {
-        questionnaire_id: JFLS20_METADATA.id,
-        questionnaire_version: JFLS20_METADATA.version,
-        answers: answers as Record<string, unknown>,
-      },
-      "questionnaire-obc"
-    );
-  };
-
-  // Handle OBC completion
-  const handleOBCComplete = (answers: OBCAnswers) => {
-    submitQuestionnaire(
-      {
-        questionnaire_id: OBC_METADATA.id,
-        questionnaire_version: OBC_METADATA.version,
-        answers: answers as Record<string, unknown>,
-      },
-      "complete"
-    );
   };
 
   // No token provided
@@ -429,25 +339,17 @@ function PatientFlowPage() {
     );
   }
 
-  // Questionnaire steps
-  if (step === "questionnaire-sq" || step === "questionnaire-phq4" || step === "questionnaire-gcps1m" || step === "questionnaire-jfls8" || step === "questionnaire-jfls20" || step === "questionnaire-obc") {
-    const questionnaireNumber = step === "questionnaire-sq" ? 1
-      : step === "questionnaire-phq4" ? 2
-      : step === "questionnaire-gcps1m" ? 3
-      : step === "questionnaire-jfls8" ? 4
-      : step === "questionnaire-jfls20" ? 5
-      : 6;
-    const questionnaireTitle = step === "questionnaire-sq"
-      ? SQ_METADATA.title
-      : step === "questionnaire-phq4"
-        ? PHQ4_METADATA.title
-        : step === "questionnaire-gcps1m"
-          ? GCPS_1M_METADATA.title
-          : step === "questionnaire-jfls8"
-            ? JFLS8_METADATA.title
-            : step === "questionnaire-jfls20"
-              ? JFLS20_METADATA.title
-              : OBC_METADATA.title;
+  // Questionnaire step
+  if (step === "questionnaire" && currentQuestionnaireId) {
+    const flowItem = getFlowItemById(currentQuestionnaireId);
+    if (!flowItem) return null;
+
+    const questionnaireIndex = QUESTIONNAIRE_FLOW.findIndex(
+      (item) => item.questionnaire.id === currentQuestionnaireId
+    );
+    const questionnaireNumber = questionnaireIndex + 1;
+    const totalQuestionnaires = QUESTIONNAIRE_FLOW.length;
+    const { title } = flowItem.questionnaire;
 
     return (
       <div className="min-h-screen bg-background">
@@ -455,12 +357,10 @@ function PatientFlowPage() {
           <div className="max-w-lg mx-auto px-4 pt-8 pb-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                Fragebogen {questionnaireNumber}/6
+                Fragebogen {questionnaireNumber}/{totalQuestionnaires}
               </span>
               <span className="text-muted-foreground">·</span>
-              <span className="text-sm font-medium">
-                {questionnaireTitle}
-              </span>
+              <span className="text-sm font-medium">{title}</span>
             </div>
           </div>
         </header>
@@ -487,40 +387,21 @@ function PatientFlowPage() {
         )}
 
         <main>
-          {step === "questionnaire-sq" && (
+          {flowItem.isCustom ? (
+            // SQ uses its own wizard due to enableWhen logic
             <SQQuestionnaireWrapper
               token={token}
-              onComplete={handleSQComplete}
+              onComplete={(answers) =>
+                handleQuestionnaireComplete(answers as Record<string, unknown>)
+              }
             />
-          )}
-          {step === "questionnaire-phq4" && (
-            <PHQ4QuestionnaireWrapper
+          ) : (
+            // All other questionnaires use the generic wizard
+            <GenericQuestionnaireWrapper
+              key={currentQuestionnaireId}
+              questionnaire={flowItem.questionnaire}
               token={token}
-              onComplete={handlePHQ4Complete}
-            />
-          )}
-          {step === "questionnaire-gcps1m" && (
-            <GCPS1MQuestionnaireWrapper
-              token={token}
-              onComplete={handleGCPS1MComplete}
-            />
-          )}
-          {step === "questionnaire-jfls8" && (
-            <JFLS8QuestionnaireWrapper
-              token={token}
-              onComplete={handleJFLS8Complete}
-            />
-          )}
-          {step === "questionnaire-jfls20" && (
-            <JFLS20QuestionnaireWrapper
-              token={token}
-              onComplete={handleJFLS20Complete}
-            />
-          )}
-          {step === "questionnaire-obc" && (
-            <OBCQuestionnaireWrapper
-              token={token}
-              onComplete={handleOBCComplete}
+              onComplete={handleQuestionnaireComplete}
             />
           )}
         </main>
@@ -654,7 +535,7 @@ function PatientFlowPage() {
 }
 
 /**
- * Wrapper for SQ questionnaire
+ * Wrapper for SQ questionnaire (kept separate due to enableWhen logic)
  */
 function SQQuestionnaireWrapper({
   token,
@@ -663,142 +544,34 @@ function SQQuestionnaireWrapper({
   token: string;
   onComplete: (answers: SQAnswers) => void;
 }) {
-  const savedProgress = loadSQProgress(token);
-  const methods = useSQForm({
-    initialAnswers: savedProgress?.answers,
-  });
-
-  const handleComplete = (answers: SQAnswers) => {
-    const filteredAnswers = filterEnabledAnswers(answers);
-    onComplete(filteredAnswers);
-  };
+  const methods = useSQForm();
 
   return (
     <FormProvider {...methods}>
-      <SQWizard
-        token={token}
-        initialIndex={savedProgress?.currentIndex}
-        initialHistory={savedProgress?.history}
-        onComplete={handleComplete}
-      />
+      <SQWizard token={token} onComplete={onComplete} />
     </FormProvider>
   );
 }
 
 /**
- * Wrapper for PHQ-4 questionnaire
+ * Generic wrapper for all other questionnaires
  */
-function PHQ4QuestionnaireWrapper({
+function GenericQuestionnaireWrapper({
+  questionnaire,
   token,
   onComplete,
 }: {
+  questionnaire: GenericQuestionnaire;
   token: string;
-  onComplete: (answers: PHQ4Answers) => void;
+  onComplete: (answers: Record<string, unknown>) => void;
 }) {
-  const savedProgress = loadPHQ4Progress(token);
-  const methods = usePHQ4Form(savedProgress?.answers);
+  const methods = useQuestionnaireForm();
 
   return (
     <FormProvider {...methods}>
-      <PHQ4Wizard
+      <GenericWizard
+        questionnaire={questionnaire}
         token={token}
-        initialIndex={savedProgress?.currentIndex}
-        onComplete={onComplete}
-      />
-    </FormProvider>
-  );
-}
-
-/**
- * Wrapper for GCPS-1M questionnaire
- */
-function GCPS1MQuestionnaireWrapper({
-  token,
-  onComplete,
-}: {
-  token: string;
-  onComplete: (answers: GCPS1MAnswers) => void;
-}) {
-  const savedProgress = loadGCPS1MProgress(token);
-  const methods = useGCPS1MForm(savedProgress?.answers);
-
-  return (
-    <FormProvider {...methods}>
-      <GCPS1MWizard
-        token={token}
-        initialIndex={savedProgress?.currentIndex}
-        onComplete={onComplete}
-      />
-    </FormProvider>
-  );
-}
-
-/**
- * Wrapper for JFLS-8 questionnaire
- */
-function JFLS8QuestionnaireWrapper({
-  token,
-  onComplete,
-}: {
-  token: string;
-  onComplete: (answers: JFLS8Answers) => void;
-}) {
-  const savedProgress = loadJFLS8Progress(token);
-  const methods = useJFLS8Form(savedProgress?.answers);
-
-  return (
-    <FormProvider {...methods}>
-      <JFLS8Wizard
-        token={token}
-        initialIndex={savedProgress?.currentIndex}
-        onComplete={onComplete}
-      />
-    </FormProvider>
-  );
-}
-
-/**
- * Wrapper for JFLS-20 questionnaire
- */
-function JFLS20QuestionnaireWrapper({
-  token,
-  onComplete,
-}: {
-  token: string;
-  onComplete: (answers: JFLS20Answers) => void;
-}) {
-  const savedProgress = loadJFLS20Progress(token);
-  const methods = useJFLS20Form(savedProgress?.answers);
-
-  return (
-    <FormProvider {...methods}>
-      <JFLS20Wizard
-        token={token}
-        initialIndex={savedProgress?.currentIndex}
-        onComplete={onComplete}
-      />
-    </FormProvider>
-  );
-}
-
-/**
- * Wrapper for OBC questionnaire
- */
-function OBCQuestionnaireWrapper({
-  token,
-  onComplete,
-}: {
-  token: string;
-  onComplete: (answers: OBCAnswers) => void;
-}) {
-  const savedProgress = loadOBCProgress(token);
-  const methods = useOBCForm(savedProgress?.answers);
-
-  return (
-    <FormProvider {...methods}>
-      <OBCWizard
-        token={token}
-        initialIndex={savedProgress?.currentIndex}
         onComplete={onComplete}
       />
     </FormProvider>

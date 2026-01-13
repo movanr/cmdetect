@@ -45,3 +45,47 @@ export type QuestionnaireSubmission = {
   questionnaire_version: string;
   answers: Record<string, unknown>;
 };
+
+/**
+ * Question types supported by the questionnaire engine
+ */
+export type QuestionType = "scale_0_10" | "choice" | "numeric";
+
+/**
+ * Generic section for questionnaires with section-specific options
+ */
+export type GenericSection = {
+  id: string;
+  title?: string;
+  options: readonly ScoredOption[];
+};
+
+/**
+ * Generic question interface for rendering
+ * All questionnaire-specific question types should be compatible with this
+ */
+export type GenericQuestion = {
+  id: string;
+  type: QuestionType;
+  text: string;
+  note?: string;
+  section?: string; // Reference to section for section-specific options
+  scaleLabels?: { min: string; max: string };
+  range?: { min: number; max: number };
+  unit?: string;
+};
+
+/**
+ * Generic questionnaire structure
+ * All questionnaire-specific types should be compatible with this
+ */
+export type GenericQuestionnaire = {
+  id: string;
+  title: string;
+  version?: string;
+  instruction?: string;
+  instructions?: readonly string[];
+  questions: readonly GenericQuestion[];
+  options?: readonly ScoredOption[];
+  sections?: readonly GenericSection[]; // For questionnaires with section-specific options
+};

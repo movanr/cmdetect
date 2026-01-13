@@ -11,18 +11,22 @@ import { PHQ4_OPTIONS } from "./options";
 export const PHQ4_QUESTIONS: Record<PHQ4QuestionId, PHQ4Question> = {
   PHQ4_A: {
     id: "PHQ4_A",
+    type: "choice",
     text: "Wenig Interesse oder Freude an Ihren Tätigkeiten",
   },
   PHQ4_B: {
     id: "PHQ4_B",
+    type: "choice",
     text: "Niedergeschlagenheit, Schwermut oder Hoffnungslosigkeit",
   },
   PHQ4_C: {
     id: "PHQ4_C",
+    type: "choice",
     text: "Nervosität, Ängstlichkeit oder Anspannung",
   },
   PHQ4_D: {
     id: "PHQ4_D",
+    type: "choice",
     text: "Nicht in der Lage sein, Sorgen zu stoppen oder zu kontrollieren",
   },
 };

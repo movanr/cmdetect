@@ -8,6 +8,10 @@ export type {
   ScoredOption,
   QuestionnaireMetadata,
   QuestionnaireSubmission,
+  QuestionType,
+  GenericSection,
+  GenericQuestion,
+  GenericQuestionnaire,
 } from "./common";
 
 export type {

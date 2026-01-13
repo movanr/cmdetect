@@ -15,107 +15,128 @@ export const OBC_QUESTIONS: Record<OBCQuestionId, OBCQuestion> = {
   // Sleep activities (items 1-2)
   OBC_1: {
     id: "OBC_1",
+    type: "choice",
     section: "sleep",
     text: "Pressen oder Knirschen mit den Zähnen während des Schlafs, basierend auf jeglichen verfügbaren Informationen",
   },
   OBC_2: {
     id: "OBC_2",
+    type: "choice",
     section: "sleep",
     text: "Schlafen in einer Position, die Druck auf den Kiefer ausübt (z.B. auf dem Bauch oder auf der Seite)",
   },
   // Waking activities (items 3-21)
   OBC_3: {
     id: "OBC_3",
+    type: "choice",
     section: "waking",
     text: "Im Wachzustand mit den Zähnen knirschen",
   },
   OBC_4: {
     id: "OBC_4",
+    type: "choice",
     section: "waking",
     text: "Im Wachzustand die Zähne zusammenpressen",
   },
   OBC_5: {
     id: "OBC_5",
+    type: "choice",
     section: "waking",
     text: "Pressen, Berühren oder Zusammenhalten der Zähne außer beim Essen (gemeint ist der Kontakt zwischen Zähnen des Ober- und Unterkiefers)",
   },
   OBC_6: {
     id: "OBC_6",
+    type: "choice",
     section: "waking",
     text: "Halten, Verspannen oder Anspannen der Muskulatur ohne Pressen oder Aufeinanderhalten der Zähne",
   },
   OBC_7: {
     id: "OBC_7",
+    type: "choice",
     section: "waking",
     text: "Den Kiefer nach vorn oder zur Seite halten oder schieben",
   },
   OBC_8: {
     id: "OBC_8",
+    type: "choice",
     section: "waking",
     text: "Die Zunge kraftvoll gegen die Zähne pressen",
   },
   OBC_9: {
     id: "OBC_9",
+    type: "choice",
     section: "waking",
     text: "Die Zunge zwischen die Zahnreihen legen",
   },
   OBC_10: {
     id: "OBC_10",
+    type: "choice",
     section: "waking",
     text: "Auf Ihre Zunge, Wange oder Lippen beißen, kauen oder mit ihnen spielen",
   },
   OBC_11: {
     id: "OBC_11",
+    type: "choice",
     section: "waking",
     text: "Den Kiefer in einer starren oder angespannten Position halten, wie um den Kiefer zu stützen oder zu schützen",
   },
   OBC_12: {
     id: "OBC_12",
+    type: "choice",
     section: "waking",
     text: "Objekte wie Haare, Pfeife, Bleistift, Stifte, Finger, Fingernägel usw. zwischen den Zähnen halten oder darauf beißen",
   },
   OBC_13: {
     id: "OBC_13",
+    type: "choice",
     section: "waking",
     text: "Kaugummikauen",
   },
   OBC_14: {
     id: "OBC_14",
+    type: "choice",
     section: "waking",
     text: "Spielen eines Musikinstruments, bei dem der Mund oder Kiefer beansprucht wird (z.B. Holz-, Blechblas-, Streichinstrumente)",
   },
   OBC_15: {
     id: "OBC_15",
+    type: "choice",
     section: "waking",
     text: "Sich mit Ihrer Hand auf den Kiefer lehnen, wie beim Stützen oder Ausruhen des Kinns in der Hand",
   },
   OBC_16: {
     id: "OBC_16",
+    type: "choice",
     section: "waking",
     text: "Kauen von Nahrung nur auf einer Seite",
   },
   OBC_17: {
     id: "OBC_17",
+    type: "choice",
     section: "waking",
     text: "Essen zwischen den Mahlzeiten (gemeint ist Nahrung, die gekaut werden muss)",
   },
   OBC_18: {
     id: "OBC_18",
+    type: "choice",
     section: "waking",
     text: "Anhaltendes Sprechen (z.B. Lehrtätigkeit, Verkauf, Kundenservice)",
   },
   OBC_19: {
     id: "OBC_19",
+    type: "choice",
     section: "waking",
     text: "Singen",
   },
   OBC_20: {
     id: "OBC_20",
+    type: "choice",
     section: "waking",
     text: "Gähnen",
   },
   OBC_21: {
     id: "OBC_21",
+    type: "choice",
     section: "waking",
     text: "Halten des Telefons zwischen Ihrem Kopf und Ihren Schultern",
   },
@@ -165,7 +186,6 @@ export const OBC_METADATA = {
 export const OBC_INSTRUCTIONS = [
   "Wie oft haben Sie, im letzten Monat, jede der folgenden Aktivitäten ausgeführt?",
   "Falls die Häufigkeit der Aktivität variiert, wählen Sie bitte die höhere Option aus.",
-  "Bitte markieren Sie die Antwort zu jedem Punkt und überspringen Sie keine Punkte.",
 ] as const;
 
 /**

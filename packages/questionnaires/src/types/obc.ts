@@ -45,6 +45,7 @@ export type OBCSectionId = "sleep" | "waking";
  */
 export type OBCQuestion = {
   id: OBCQuestionId;
+  type: "choice";
   section: OBCSectionId;
   text: string;
 };

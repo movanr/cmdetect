@@ -15,6 +15,10 @@ export type {
   ScoredOption,
   QuestionnaireMetadata,
   QuestionnaireSubmission,
+  QuestionType,
+  GenericSection,
+  GenericQuestion,
+  GenericQuestionnaire,
   // PHQ-4 types
   PHQ4Option,
   PHQ4QuestionId,

@@ -10,20 +10,20 @@ import type { SQAnswers } from "@cmdetect/questionnaires";
 import { useSQWizardNavigation } from "../hooks/useSQNavigation";
 import { validateScreen } from "../schema/sqSchema";
 import { filterEnabledAnswers } from "../hooks/evaluateEnableWhen";
-import { saveProgress, clearProgress } from "../persistence/storage";
+import { clearProgress } from "../persistence/storage";
 import { ProgressHeader } from "./ProgressHeader";
 import { QuestionScreen } from "./QuestionScreen";
 import { NavigationButtons } from "./NavigationButtons";
 
 type SQWizardProps = {
-  token: string;
+  token?: string; // Kept for API compatibility, not used after removing persistence
   initialIndex?: number;
   initialHistory?: number[];
   onComplete?: (answers: SQAnswers) => void;
 };
 
 export function SQWizard({
-  token,
+  token: _token,
   initialIndex = 0,
   initialHistory = [],
   onComplete,
@@ -33,7 +33,7 @@ export function SQWizard({
 
   const {
     currentQuestion,
-    currentIndex,
+    currentIndex: _currentIndex,
     canGoBack,
     isComplete,
     goNext,
@@ -47,13 +47,6 @@ export function SQWizard({
 
   const [error, setError] = useState<string | undefined>();
   const hasCalledComplete = useRef(false);
-
-  // Persist progress on every change
-  useEffect(() => {
-    if (!isComplete) {
-      saveProgress(token, answers, currentIndex, []);
-    }
-  }, [token, answers, currentIndex, isComplete]);
 
   // Handle next/auto-navigate with validation
   // selectedValue is passed from auto-navigating question types to avoid stale state
@@ -90,10 +83,10 @@ export function SQWizard({
     if (isComplete && onComplete && !hasCalledComplete.current) {
       hasCalledComplete.current = true;
       clearProgress();
-      const enabledAnswers = filterEnabledAnswers(answers);
+      const enabledAnswers = filterEnabledAnswers(methods.getValues() as SQAnswers);
       onComplete(enabledAnswers);
     }
-  }, [isComplete, onComplete]);
+  }, [isComplete, onComplete, methods]);
 
   // Show completion screen only if no onComplete handler (standalone mode)
   if (isComplete && !onComplete) {
