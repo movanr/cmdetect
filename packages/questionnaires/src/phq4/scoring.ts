@@ -46,17 +46,22 @@ export function calculatePHQ4Score(answers: PHQ4Answers): PHQ4Score {
 }
 
 /**
- * Get interpretation text for PHQ-4 total score
+ * Get interpretation for PHQ-4 total score
+ * Severity levels per Löwe et al. (2010):
+ * - 0-2: Normal
+ * - 3-5: Mild
+ * - 6-8: Moderat (clinical cutoff ≥6)
+ * - 9-12: Schwer
  */
 export function getPHQ4Interpretation(score: PHQ4Score): PHQ4Interpretation {
   if (score.total <= 2) {
-    return { severity: "none", text: "Keine bis minimale psychische Belastung" };
+    return { severity: "none", text: "Normal" };
   } else if (score.total <= 5) {
-    return { severity: "mild", text: "Leichte psychische Belastung" };
+    return { severity: "mild", text: "Mild" };
   } else if (score.total <= 8) {
-    return { severity: "moderate", text: "Mäßige psychische Belastung" };
+    return { severity: "moderate", text: "Moderat" };
   } else {
-    return { severity: "severe", text: "Schwere psychische Belastung" };
+    return { severity: "severe", text: "Schwer" };
   }
 }
 

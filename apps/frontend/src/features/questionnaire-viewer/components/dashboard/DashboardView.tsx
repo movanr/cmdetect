@@ -53,19 +53,32 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Achse 2 - Psychosoziale Bewertung
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             {/* PHQ-4 Card */}
             <Axis2ScoreCard
               questionnaireId="phq-4"
               title="PHQ-4"
+              subtitle="Depression & Angst"
               answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
             />
 
             {/* OBC Placeholder */}
-            <Axis2ScoreCard questionnaireId="obc" title="OBC" answers={null} isPlaceholder />
+            <Axis2ScoreCard
+              questionnaireId="obc"
+              title="OBC"
+              subtitle="Orale Parafunktionen"
+              answers={null}
+              isPlaceholder
+            />
 
             {/* JFLS Placeholder */}
-            <Axis2ScoreCard questionnaireId="jfls" title="JFLS" answers={null} isPlaceholder />
+            <Axis2ScoreCard
+              questionnaireId="jfls"
+              title="JFLS"
+              subtitle="Kieferfunktion"
+              answers={null}
+              isPlaceholder
+            />
           </div>
         </section>
       </CardContent>
