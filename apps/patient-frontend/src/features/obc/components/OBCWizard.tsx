@@ -1,5 +1,6 @@
 /**
- * Main wizard orchestrator for JFLS-8 questionnaire
+ * Main wizard orchestrator for OBC questionnaire
+ * Handles section transitions and PHQ-4 style navigation
  */
 
 import { useEffect, useCallback, useRef } from "react";
@@ -7,35 +8,38 @@ import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import { JFLS8_QUESTIONNAIRE, JFLS8_INSTRUCTIONS, type JFLS8Answers } from "@cmdetect/questionnaires";
-import { useJFLS8Navigation } from "../hooks/useJFLS8Navigation";
+import { OBC_QUESTIONNAIRE, type OBCAnswers } from "@cmdetect/questionnaires";
+import { useOBCNavigation } from "../hooks/useOBCNavigation";
 import { saveProgress, clearProgress } from "../persistence/storage";
 import { ProgressHeader } from "../../gcps-1m/components/ProgressHeader";
-import { JFLS8QuestionScreen } from "./JFLS8QuestionScreen";
+import { OBCQuestionScreen } from "./OBCQuestionScreen";
+import { OBCSectionIntro } from "./OBCSectionIntro";
 
-type JFLS8WizardProps = {
+type OBCWizardProps = {
   token: string;
   initialIndex?: number;
-  onComplete?: (answers: JFLS8Answers) => void;
+  onComplete?: (answers: OBCAnswers) => void;
 };
 
-export function JFLS8Wizard({
+export function OBCWizard({
   token,
   initialIndex = 0,
   onComplete,
-}: JFLS8WizardProps) {
-  const methods = useFormContext<JFLS8Answers>();
+}: OBCWizardProps) {
+  const methods = useFormContext<OBCAnswers>();
   const answers = methods.watch();
 
   const {
     currentQuestion,
     currentIndex,
+    currentSection,
     totalQuestions,
     canGoBack,
     isComplete,
+    showingSectionIntro,
     goNext,
     goBack,
-  } = useJFLS8Navigation(initialIndex);
+  } = useOBCNavigation(initialIndex);
 
   const hasCalledComplete = useRef(false);
 
@@ -49,10 +53,6 @@ export function JFLS8Wizard({
   // Handle navigation
   const handleNext = useCallback(() => {
     goNext();
-  }, [goNext]);
-
-  const handleSkip = useCallback(() => {
-    goNext();  // Advance without setting answer
   }, [goNext]);
 
   const handleBack = useCallback(() => {
@@ -70,7 +70,7 @@ export function JFLS8Wizard({
 
   // Show completion screen only if no onComplete handler (standalone mode)
   if (isComplete && !onComplete) {
-    return <JFLS8Complete answers={answers} />;
+    return <OBCComplete answers={answers} />;
   }
 
   // When complete with onComplete handler, render nothing while parent transitions
@@ -82,25 +82,25 @@ export function JFLS8Wizard({
     <div className="max-w-lg mx-auto p-4 space-y-6">
       <ProgressHeader current={currentIndex + 1} total={totalQuestions} />
 
-      {/* Main instruction - shown on all questions */}
-      <div className="text-sm text-muted-foreground space-y-2 px-1">
-        <p className="font-medium text-foreground">{JFLS8_INSTRUCTIONS[0]}</p>
-        <p>{JFLS8_INSTRUCTIONS[1]}</p>
-        <p>{JFLS8_INSTRUCTIONS[2]}</p>
-      </div>
-
       <Card>
         <CardContent className="pt-6">
-          <JFLS8QuestionScreen
-            question={currentQuestion}
-            onNavigateNext={handleNext}
-            onSkip={handleSkip}
-          />
+          {showingSectionIntro ? (
+            <OBCSectionIntro
+              sectionId={currentSection}
+              onContinue={handleNext}
+            />
+          ) : (
+            <OBCQuestionScreen
+              question={currentQuestion}
+              sectionId={currentSection}
+              onNavigateNext={handleNext}
+            />
+          )}
         </CardContent>
       </Card>
 
       {/* Back button */}
-      {canGoBack && (
+      {canGoBack && !showingSectionIntro && (
         <div className="flex justify-start">
           <Button type="button" variant="outline" onClick={handleBack}>
             <ChevronLeft className="mr-1 h-4 w-4" />
@@ -115,7 +115,7 @@ export function JFLS8Wizard({
 /**
  * Completion screen
  */
-function JFLS8Complete({ answers }: { answers: JFLS8Answers }) {
+function OBCComplete({ answers }: { answers: OBCAnswers }) {
   const answeredCount = Object.values(answers).filter(
     (value) => value !== undefined
   ).length;
@@ -143,7 +143,7 @@ function JFLS8Complete({ answers }: { answers: JFLS8Answers }) {
           <h2 className="text-2xl font-semibold">Fragebogen abgeschlossen</h2>
 
           <p className="text-muted-foreground">
-            Vielen Dank für das Ausfüllen des {JFLS8_QUESTIONNAIRE.title}.
+            Vielen Dank für das Ausfüllen des {OBC_QUESTIONNAIRE.title}.
           </p>
 
           <p className="text-sm text-muted-foreground">

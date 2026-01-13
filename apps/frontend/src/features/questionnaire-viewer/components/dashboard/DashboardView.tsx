@@ -21,6 +21,8 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
   const phq4Response = responses.find((r) => r.questionnaireId === "phq-4");
   const gcps1mResponse = responses.find((r) => r.questionnaireId === "gcps-1m");
   const jfls8Response = responses.find((r) => r.questionnaireId === "jfls-8");
+  const jfls20Response = responses.find((r) => r.questionnaireId === "jfls-20");
+  const obcResponse = responses.find((r) => r.questionnaireId === "obc");
 
   // Check if there are any responses at all
   if (responses.length === 0) {
@@ -59,7 +61,7 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
             {/* PHQ-4 Card */}
             <Axis2ScoreCard
               questionnaireId="phq-4"
-              title="PHQ-4"
+              title="PHQ-4 - Gesundheitsfragebogen für Patienten"
               subtitle="Depression & Angst"
               answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
             />
@@ -67,26 +69,33 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
             {/* GCPS-1M Card */}
             <Axis2ScoreCard
               questionnaireId="gcps-1m"
-              title="GCPS (1M)"
-              subtitle="Chronische Schmerzen"
-              answers={gcps1mResponse ? (gcps1mResponse.answers as Record<string, string | number>) : null}
+              title="GCPS - Graduierung chronischer Schmerzen"
+              subtitle="1-Monats-Version"
+              answers={
+                gcps1mResponse ? (gcps1mResponse.answers as Record<string, string | number>) : null
+              }
             />
 
-            {/* OBC Placeholder */}
+            {/* OBC Card */}
             <Axis2ScoreCard
               questionnaireId="obc"
-              title="OBC"
+              title="OBC - Oral Behaviors Checklist"
               subtitle="Orale Parafunktionen"
-              answers={null}
-              isPlaceholder
+              answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
             />
 
             {/* JFLS-8 Card */}
             <Axis2ScoreCard
               questionnaireId="jfls-8"
-              title="JFLS-8"
-              subtitle="Kieferfunktion"
+              title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
               answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
+            />
+
+            {/* JFLS-20 Card */}
+            <Axis2ScoreCard
+              questionnaireId="jfls-20"
+              title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
+              answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
             />
           </div>
         </section>

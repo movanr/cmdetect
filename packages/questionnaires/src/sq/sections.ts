@@ -19,17 +19,17 @@ export const SQ_SECTIONS: SQSection[] = [
   },
   {
     id: "joint_noises",
-    name: "Kiefergelenkgeräusche",
+    name: "Gelenkgeräusche",
     questionIds: ["SQ8"],
   },
   {
     id: "closed_locking",
-    name: "Kiefersperre (geschlossen)",
+    name: "Kieferklemme",
     questionIds: ["SQ9", "SQ10", "SQ11", "SQ12"],
   },
   {
     id: "open_locking",
-    name: "Kiefersperre (offen)",
+    name: "Kiefersperre",
     questionIds: ["SQ13", "SQ14"],
   },
 ];

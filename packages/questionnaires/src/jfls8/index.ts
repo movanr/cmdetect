@@ -17,3 +17,9 @@ export {
   JFLS8_SCALE_LABELS,
   JFLS8_OPTION_LABELS,
 } from "./options";
+
+export {
+  calculateJFLS8Score,
+  getJFLS8LimitationLevel,
+  JFLS8_REFERENCE_VALUES,
+} from "./scoring";

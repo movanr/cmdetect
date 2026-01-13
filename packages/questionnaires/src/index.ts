@@ -53,6 +53,29 @@ export type {
   JFLS8Question,
   JFLS8Questionnaire,
   JFLS8Answers,
+  JFLS8LimitationLevel,
+  JFLS8LimitationInterpretation,
+  JFLS8Score,
+  // OBC types
+  OBCQuestionId,
+  OBCSectionId,
+  OBCQuestion,
+  OBCSection,
+  OBCAnswers,
+  OBCQuestionnaire,
+  OBCRiskLevel,
+  OBCRiskInterpretation,
+  OBCScore,
+  // JFLS-20 types
+  JFLS20QuestionId,
+  JFLS20Question,
+  JFLS20Questionnaire,
+  JFLS20Answers,
+  JFLS20LimitationLevel,
+  JFLS20LimitationInterpretation,
+  JFLS20SubscaleId,
+  JFLS20SubscaleScore,
+  JFLS20Score,
 } from "./types";
 
 // ============================================================================
@@ -157,6 +180,67 @@ export {
   JFLS8_OPTION_LABELS,
 } from "./jfls8/options";
 
+export {
+  calculateJFLS8Score,
+  getJFLS8LimitationLevel,
+  JFLS8_REFERENCE_VALUES,
+} from "./jfls8/scoring";
+
+// ============================================================================
+// OBC (Oral Behaviors Checklist)
+// ============================================================================
+export {
+  OBC_QUESTIONS,
+  OBC_QUESTION_ORDER,
+  OBC_METADATA,
+  OBC_INSTRUCTIONS,
+  OBC_TOTAL_QUESTIONS,
+  OBC_QUESTIONNAIRE,
+  OBC_QUESTION_LABELS,
+} from "./obc/questions";
+
+export {
+  OBC_SLEEP_OPTIONS,
+  OBC_WAKING_OPTIONS,
+  OBC_SLEEP_OPTION_LABELS,
+  OBC_WAKING_OPTION_LABELS,
+} from "./obc/options";
+
+export {
+  OBC_SECTIONS,
+  OBC_SECTION_ORDER,
+  getSectionForQuestionIndex,
+} from "./obc/sections";
+
+export { calculateOBCScore, getOBCRiskLevel } from "./obc/scoring";
+
+// ============================================================================
+// JFLS-20 (Jaw Functional Limitation Scale - 20 items)
+// ============================================================================
+export {
+  JFLS20_QUESTIONS,
+  JFLS20_QUESTION_ORDER,
+  JFLS20_METADATA,
+  JFLS20_INSTRUCTIONS,
+  JFLS20_TOTAL_QUESTIONS,
+  JFLS20_QUESTIONNAIRE,
+  JFLS20_QUESTION_LABELS,
+} from "./jfls20/questions";
+
+export {
+  JFLS20_SCALE_OPTIONS,
+  JFLS20_SCALE_LABELS,
+  JFLS20_OPTION_LABELS,
+} from "./jfls20/options";
+
+export {
+  calculateJFLS20Score,
+  getJFLS20LimitationLevel,
+  getJFLS20SubscaleItems,
+  JFLS20_REFERENCE_VALUES,
+  JFLS20_SUBSCALE_LABELS,
+} from "./jfls20/scoring";
+
 // ============================================================================
 // Utilities
 // ============================================================================
@@ -178,10 +262,12 @@ export const QUESTIONNAIRE_TITLES: Record<string, string> = {
   "phq-4": "PHQ-4 Gesundheitsfragebogen",
   "gcps-1m": "GCPS - Stufenskala für chronische Schmerzen",
   "jfls-8": "JFLS-8 - Kieferfunktions-Einschränkungsskala",
+  "jfls-20": "JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)",
+  "obc": "OBC - Oral Behaviors Checklist",
 };
 
 /**
  * All supported questionnaire IDs
  */
-export const QUESTIONNAIRE_IDS = ["dc-tmd-sq", "phq-4", "gcps-1m", "jfls-8"] as const;
+export const QUESTIONNAIRE_IDS = ["dc-tmd-sq", "phq-4", "gcps-1m", "jfls-8", "jfls-20", "obc"] as const;
 export type QuestionnaireId = (typeof QUESTIONNAIRE_IDS)[number];

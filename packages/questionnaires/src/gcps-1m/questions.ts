@@ -29,45 +29,45 @@ export const GCPS_1M_QUESTIONS: Record<GCPS1MQuestionId, GCPS1MQuestion> = {
   GCPS1M_2: {
     id: "GCPS1M_2",
     type: "scale_0_10",
-    text: "Wie würden Sie Ihre Gesichtsschmerzen JETZT bewerten?",
+    text: "Wie würden Sie Ihre Gesichtsschmerzen zum JETZIGEN Zeitpunkt einschätzen?",
     scaleLabels: GCPS_1M_PAIN_LABELS,
   },
   GCPS1M_3: {
     id: "GCPS1M_3",
     type: "scale_0_10",
-    text: "Wie würden Sie Ihre STÄRKSTEN Gesichtsschmerzen in den LETZTEN 30 TAGEN bewerten?",
+    text: "Wie würden Sie Ihren STÄRKSTEN Gesichtsschmerz in den LETZTEN 30 TAGEN einschätzen?",
     scaleLabels: GCPS_1M_PAIN_LABELS,
   },
   GCPS1M_4: {
     id: "GCPS1M_4",
     type: "scale_0_10",
-    text: "Wie würden Sie Ihre Gesichtsschmerzen in den LETZTEN 30 TAGEN IM DURCHSCHNITT bewerten? [Das heißt, Ihre üblichen Schmerzen zu Zeiten, in denen Sie Schmerzen hatten.]",
+    text: "Wie würden Sie Ihre DURCHSCHNITTLICHEN Gesichtsschmerzen in den LETZTEN 30 TAGEN einschätzen?",
+    note: "Gemeint ist Ihr gewöhnlicher Schmerz, wenn Sie Schmerzen hatten.",
     scaleLabels: GCPS_1M_PAIN_LABELS,
   },
   GCPS1M_5: {
     id: "GCPS1M_5",
     type: "numeric",
-    text: "An wie vielen Tagen in den LETZTEN 30 TAGEN haben Ihre Gesichtsschmerzen Sie davon abgehalten, Ihren ÜBLICHEN AKTIVITÄTEN wie Arbeit, Schule oder Hausarbeit nachzugehen?",
-    note: "jeden Tag = 30 Tage",
+    text: "Wie viele Tage haben Ihre Gesichtsschmerzen Sie in den LETZTEN 30 TAGEN von Ihren ÜBLICHEN AKTIVITÄTEN wie Arbeit, Schule oder Hausarbeit abgehalten?",
     range: { min: GCPS_1M_DAYS_CONFIG.min, max: GCPS_1M_DAYS_CONFIG.max },
     unit: GCPS_1M_DAYS_CONFIG.unit,
   },
   GCPS1M_6: {
     id: "GCPS1M_6",
     type: "scale_0_10",
-    text: "Wie sehr haben Gesichtsschmerzen in den LETZTEN 30 TAGEN Ihre TÄGLICHEN AKTIVITÄTEN beeinträchtigt?",
+    text: "Wie stark haben Ihre Gesichtsschmerzen Sie in den LETZTEN 30 TAGEN bei Ihren TÄGLICHEN AKTIVITÄTEN beeinträchtigt?",
     scaleLabels: GCPS_1M_INTERFERENCE_LABELS,
   },
   GCPS1M_7: {
     id: "GCPS1M_7",
     type: "scale_0_10",
-    text: "Wie sehr haben Gesichtsschmerzen in den LETZTEN 30 TAGEN Ihre FREIZEIT-, SOZIAL- UND FAMILIENAKTIVITÄTEN beeinträchtigt?",
+    text: "Wie stark haben Ihre Gesichtsschmerzen Sie in den LETZTEN 30 TAGEN bei Ihren FREIZEIT-, GESELLSCHAFTS- UND FAMILIENAKTIVITÄTEN beeinträchtigt?",
     scaleLabels: GCPS_1M_INTERFERENCE_LABELS,
   },
   GCPS1M_8: {
     id: "GCPS1M_8",
     type: "scale_0_10",
-    text: "Wie sehr haben Gesichtsschmerzen in den LETZTEN 30 TAGEN Ihre ARBEITSFÄHIGKEIT, einschließlich Hausarbeit, beeinträchtigt?",
+    text: "Wie stark haben Ihre Gesichtsschmerzen in den LETZTEN 30 TAGEN Ihre ARBEITSFÄHIGKEIT, einschließlich Hausarbeit, beeinträchtigt?",
     scaleLabels: GCPS_1M_INTERFERENCE_LABELS,
   },
 };
@@ -91,9 +91,9 @@ export const GCPS_1M_QUESTION_ORDER: GCPS1MQuestionId[] = [
  */
 export const GCPS_1M_METADATA = {
   id: "gcps-1m",
-  title: "GCPS - Stufenskala für chronische Schmerzen",
-  version: "2.0 (2013-05-12)",
-  source: "inform-iadr.com / DC/TMD",
+  title: "Graduierung chronischer Schmerzen",
+  version: "12/2018",
+  source: "Von Korff M. Deutsche Übersetzung: Asendorf A, Eberhard L, Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig.",
   timeframe: "1-month",
 } as const;
 

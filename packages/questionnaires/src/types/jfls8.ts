@@ -49,3 +49,33 @@ export type JFLS8Questionnaire = {
  * Values are strings for 0-10 scale
  */
 export type JFLS8Answers = Partial<Record<JFLS8QuestionId, string>>;
+
+/**
+ * JFLS-8 limitation level based on reference values
+ * - normal: <0.5 (within healthy range, ref: 0.16)
+ * - mild: 0.5-1.5 (between healthy and chronic TMD)
+ * - significant: ≥1.5 (chronic TMD range, ref: 1.74)
+ */
+export type JFLS8LimitationLevel = "normal" | "mild" | "significant";
+
+/**
+ * JFLS-8 limitation interpretation
+ */
+export type JFLS8LimitationInterpretation = {
+  label: string;
+  labelDe: string;
+};
+
+/**
+ * Complete JFLS-8 score result
+ */
+export type JFLS8Score = {
+  globalScore: number | null;
+  maxScore: number;
+  answeredCount: number;
+  totalQuestions: number;
+  missingCount: number;
+  isValid: boolean;
+  limitationLevel: JFLS8LimitationLevel | null;
+  limitationInterpretation: JFLS8LimitationInterpretation | null;
+};

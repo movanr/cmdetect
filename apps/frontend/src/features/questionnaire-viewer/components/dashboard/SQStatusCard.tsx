@@ -57,7 +57,7 @@ export function SQStatusCard({
         <div className="flex items-center gap-2">
           <AlertCircle className="h-5 w-5 text-muted-foreground" />
           <div>
-            <h4 className="font-medium">DC/TMD Symptomfragebogen</h4>
+            <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
             <p className="text-sm text-muted-foreground mt-1">
               Noch nicht eingereicht
             </p>
@@ -78,7 +78,7 @@ export function SQStatusCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h4 className="font-medium">DC/TMD Symptomfragebogen</h4>
+              <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
               {isReviewed ? (
                 <Badge className="bg-green-100 text-green-800 border-green-200">
                   <CheckCircle2 className="h-3 w-3 mr-1" />

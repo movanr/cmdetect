@@ -33,7 +33,7 @@ export function validateInviteToken(invite_token: any): ValidationResult {
 /**
  * Known questionnaire IDs that the system accepts
  */
-const KNOWN_QUESTIONNAIRE_IDS = ['dc-tmd-sq', 'phq-4', 'gcps-1m', 'jfls-8'];
+const KNOWN_QUESTIONNAIRE_IDS = ['dc-tmd-sq', 'phq-4', 'gcps-1m', 'jfls-8', 'jfls-20', 'obc'];
 
 /**
  * Validates questionnaire response data structure
@@ -62,8 +62,12 @@ export function validateQuestionnaireResponseData(response_data: any): Validatio
     return { valid: false, error: "answers is required and must be an object" };
   }
 
-  // Ensure answers is not empty
-  if (Object.keys(response_data.answers).length === 0) {
+  // Questionnaires that allow skipping all questions (JFLS scales)
+  const ALLOWS_EMPTY_ANSWERS = ['jfls-8', 'jfls-20'];
+
+  // Ensure answers is not empty (unless questionnaire allows it)
+  if (Object.keys(response_data.answers).length === 0 &&
+      !ALLOWS_EMPTY_ANSWERS.includes(response_data.questionnaire_id)) {
     return { valid: false, error: "answers cannot be empty" };
   }
 

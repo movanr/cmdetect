@@ -5,17 +5,34 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { GCPS1MAnswers, GCPSGrade, JFLS8Answers } from "@cmdetect/questionnaires";
+import type {
+  GCPS1MAnswers,
+  GCPSGrade,
+  JFLS8Answers,
+  JFLS8LimitationLevel,
+  JFLS20Answers,
+  JFLS20LimitationLevel,
+  JFLS20SubscaleScore,
+  OBCAnswers,
+  OBCRiskLevel,
+} from "@cmdetect/questionnaires";
 import {
   calculateGCPS1MScore,
+  calculateJFLS8Score,
+  calculateJFLS20Score,
+  calculateOBCScore,
   calculatePHQ4Score,
   getPHQ4Interpretation,
   getSubscaleInterpretation,
+  JFLS20_SUBSCALE_LABELS,
+  JFLS20_REFERENCE_VALUES,
 } from "@cmdetect/questionnaires";
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { GCPS1MSummary } from "../GCPS1MSummary";
 import { JFLS8Summary } from "../JFLS8Summary";
+import { JFLS20Summary } from "../JFLS20Summary";
+import { OBCSummary } from "../OBCSummary";
 import { PHQ4Summary } from "../PHQ4Summary";
 
 // Clinical cutoff threshold per Löwe et al. (2010)
@@ -58,6 +75,124 @@ const INTERFERENCE_SEGMENTS = [
   { bp: 3, range: "70+", min: 70, max: 100, color: "bg-red-500" },
 ] as const;
 
+// OBC Risk level segments based on TMD prevalence comparison
+const OBC_RISK_SEGMENTS: Array<{
+  level: OBCRiskLevel;
+  label: string;
+  sublabel: string;
+  range: string;
+  min: number;
+  max: number;
+  color: string;
+}> = [
+  {
+    level: "normal",
+    label: "Normal",
+    sublabel: "Normale Verhaltensweisen",
+    range: "0-16",
+    min: 0,
+    max: 16,
+    color: "bg-green-500",
+  },
+  {
+    level: "elevated",
+    label: "Erhöht",
+    sublabel: "2× häufiger bei CMD",
+    range: "17-24",
+    min: 17,
+    max: 24,
+    color: "bg-yellow-500",
+  },
+  {
+    level: "high",
+    label: "Hoch",
+    sublabel: "17× häufiger bei CMD",
+    range: "25+",
+    min: 25,
+    max: 84,
+    color: "bg-red-500",
+  },
+];
+
+// JFLS-8 Limitation level segments based on reference values
+// Healthy: 0.16, Chronic TMD: 1.74
+const JFLS8_LIMITATION_SEGMENTS: Array<{
+  level: JFLS8LimitationLevel;
+  label: string;
+  sublabel: string;
+  range: string;
+  min: number;
+  max: number;
+  color: string;
+}> = [
+  {
+    level: "normal",
+    label: "Normal",
+    sublabel: "Ref: 0.16",
+    range: "<0.5",
+    min: 0,
+    max: 0.5,
+    color: "bg-green-500",
+  },
+  {
+    level: "mild",
+    label: "Leicht",
+    sublabel: "Leichte Einschränkung",
+    range: "0.5-1.5",
+    min: 0.5,
+    max: 1.5,
+    color: "bg-yellow-500",
+  },
+  {
+    level: "significant",
+    label: "Deutlich",
+    sublabel: "Ref TMD: 1.74",
+    range: "≥1.5",
+    min: 1.5,
+    max: 10,
+    color: "bg-red-500",
+  },
+];
+
+// JFLS-20 Limitation level segments (same reference values as JFLS-8)
+const JFLS20_LIMITATION_SEGMENTS: Array<{
+  level: JFLS20LimitationLevel;
+  label: string;
+  sublabel: string;
+  range: string;
+  min: number;
+  max: number;
+  color: string;
+}> = [
+  {
+    level: "normal",
+    label: "Normal",
+    sublabel: "Ref: 0.16",
+    range: "<0.5",
+    min: 0,
+    max: 0.5,
+    color: "bg-green-500",
+  },
+  {
+    level: "mild",
+    label: "Leicht",
+    sublabel: "Leichte Einschränkung",
+    range: "0.5-1.5",
+    min: 0.5,
+    max: 1.5,
+    color: "bg-yellow-500",
+  },
+  {
+    level: "significant",
+    label: "Deutlich",
+    sublabel: "Ref TMD: 1.74",
+    range: "≥1.5",
+    min: 1.5,
+    max: 10,
+    color: "bg-red-500",
+  },
+];
+
 interface Axis2ScoreCardProps {
   questionnaireId: string;
   title: string;
@@ -75,6 +210,49 @@ function getActiveSegment(score: number): number {
   if (score <= 5) return 1;
   if (score <= 8) return 2;
   return 3;
+}
+
+/**
+ * Helper component to display a JFLS-20 subscale score
+ */
+function JFLS20SubscaleDisplay({
+  label,
+  subscale,
+  refValues,
+}: {
+  label: string;
+  subscale: JFLS20SubscaleScore;
+  refValues: { healthy: { mean: number }; chronicTMD: { mean: number } };
+}) {
+  const isElevated =
+    subscale.isValid &&
+    subscale.score !== null &&
+    subscale.score >= refValues.chronicTMD.mean;
+
+  if (!subscale.isValid) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="text-muted-foreground">{label}:</span>
+        <span className="text-muted-foreground text-xs">
+          ({subscale.missingCount} fehlend)
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-muted-foreground">{label}:</span>
+      <span className={isElevated ? "text-red-600 font-medium" : ""}>
+        {subscale.score?.toFixed(1)}
+      </span>
+      {isElevated && (
+        <span className="text-[10px] text-red-600">
+          (≥{refValues.chronicTMD.mean.toFixed(1)})
+        </span>
+      )}
+    </div>
+  );
 }
 
 export function Axis2ScoreCard({
@@ -177,7 +355,9 @@ export function Axis2ScoreCard({
               <div
                 key={segment.grade}
                 className={`flex-1 text-center ${
-                  index === activeGradeIndex ? "font-medium text-foreground" : "text-muted-foreground"
+                  index === activeGradeIndex
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground"
                 }`}
               >
                 {segment.sublabel}
@@ -194,6 +374,20 @@ export function Axis2ScoreCard({
               - {gcpsScore.gradeInterpretation.labelDe}
             </span>
           </div>
+
+          {/* Clinical interpretation warning */}
+          {gcpsScore.grade >= 3 && (
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
+              <AlertTriangle className="size-4" />
+              <span className="text-sm font-medium">Dysfunktionaler chronischer Schmerz</span>
+            </div>
+          )}
+          {gcpsScore.grade >= 1 && gcpsScore.grade <= 2 && (
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-yellow-600">
+              <AlertTriangle className="size-4" />
+              <span className="text-sm font-medium">Funktional persistierender Schmerz</span>
+            </div>
+          )}
         </CardHeader>
 
         {/* Expandable details with scoring scales */}
@@ -221,9 +415,21 @@ export function Axis2ScoreCard({
                 ))}
               </div>
               <div className="flex mt-1 text-[9px]">
-                <div className={`flex-[0.5] text-center ${activeCPISegment === 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>Keine</div>
-                <div className={`flex-1 text-center ${activeCPISegment === 1 ? "font-medium text-foreground" : "text-muted-foreground"}`}>Gering</div>
-                <div className={`flex-1 text-center ${activeCPISegment === 2 ? "font-medium text-foreground" : "text-muted-foreground"}`}>Hoch</div>
+                <div
+                  className={`flex-[0.5] text-center ${activeCPISegment === 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                >
+                  Keine
+                </div>
+                <div
+                  className={`flex-1 text-center ${activeCPISegment === 1 ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                >
+                  Gering
+                </div>
+                <div
+                  className={`flex-1 text-center ${activeCPISegment === 2 ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                >
+                  Hoch
+                </div>
               </div>
             </div>
 
@@ -254,7 +460,9 @@ export function Axis2ScoreCard({
                   <div
                     key={segment.bp}
                     className={`flex-1 text-center ${
-                      index === activeInterferenceSegment ? "font-medium text-foreground" : "text-muted-foreground"
+                      index === activeInterferenceSegment
+                        ? "font-medium text-foreground"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {segment.bp} BP
@@ -288,8 +496,16 @@ export function Axis2ScoreCard({
     );
   }
 
-  // JFLS-8 - Answers only (no scoring yet)
+  // JFLS-8 Scoring
   if (questionnaireId === "jfls-8") {
+    const jflsScore = calculateJFLS8Score(answers as JFLS8Answers);
+    const activeLimitationIndex = jflsScore.limitationLevel
+      ? JFLS8_LIMITATION_SEGMENTS.findIndex(
+          (segment) => segment.level === jflsScore.limitationLevel
+        )
+      : -1;
+    const isSignificant = jflsScore.limitationLevel === "significant";
+
     return (
       <Card className="overflow-hidden py-0 gap-0">
         <CardHeader className="p-4">
@@ -317,15 +533,306 @@ export function Axis2ScoreCard({
             </Button>
           </div>
 
-          <p className="text-sm text-muted-foreground">
-            Kieferfunktions-Einschränkungsskala
-          </p>
+          {/* Limitation level label */}
+          <p className="text-sm text-muted-foreground mb-2">Kieferfunktions-Einschränkung</p>
+
+          {/* Limitation scale */}
+          <div className="relative">
+            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
+              {JFLS8_LIMITATION_SEGMENTS.map((segment, index) => (
+                <div
+                  key={segment.level}
+                  className={`flex-1 ${segment.color} ${
+                    index === activeLimitationIndex
+                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
+                      : "opacity-40"
+                  } flex flex-col items-center justify-center transition-all`}
+                >
+                  <span className="text-[10px] font-medium text-white drop-shadow-sm">
+                    {segment.range}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Labels under scale */}
+          <div className="flex mt-1 text-[10px]">
+            {JFLS8_LIMITATION_SEGMENTS.map((segment, index) => (
+              <div
+                key={segment.level}
+                className={`flex-1 text-center ${
+                  index === activeLimitationIndex
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {segment.label}
+              </div>
+            ))}
+          </div>
+
+          {/* Score display */}
+          <div className="flex items-center justify-center mt-3">
+            {jflsScore.isValid && jflsScore.globalScore !== null ? (
+              <>
+                <span className="text-2xl font-bold">{jflsScore.globalScore.toFixed(2)}</span>
+                <span className="text-lg text-muted-foreground ml-1">/ {jflsScore.maxScore}</span>
+                <span className="ml-3 text-sm font-medium">
+                  {jflsScore.limitationInterpretation?.labelDe}
+                </span>
+              </>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                Zu viele fehlende Antworten ({jflsScore.missingCount}/8)
+              </span>
+            )}
+          </div>
+
+          {/* Significant limitation warning */}
+          {isSignificant && (
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
+              <AlertTriangle className="size-4" />
+              <span className="text-sm font-medium">Deutliche Funktionseinschränkung</span>
+            </div>
+          )}
         </CardHeader>
 
         {/* Expandable details */}
         {isExpanded && (
           <CardContent className="border-t bg-muted/20 p-4">
             <JFLS8Summary answers={answers as JFLS8Answers} />
+          </CardContent>
+        )}
+      </Card>
+    );
+  }
+
+  // JFLS-20 Scoring (same methodology as JFLS-8)
+  if (questionnaireId === "jfls-20") {
+    const jflsScore = calculateJFLS20Score(answers as JFLS20Answers);
+    const activeLimitationIndex = jflsScore.limitationLevel
+      ? JFLS20_LIMITATION_SEGMENTS.findIndex(
+          (segment) => segment.level === jflsScore.limitationLevel
+        )
+      : -1;
+    const isSignificant = jflsScore.limitationLevel === "significant";
+
+    return (
+      <Card className="overflow-hidden py-0 gap-0">
+        <CardHeader className="p-4">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h4 className="font-medium">{title}</h4>
+              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-muted-foreground"
+            >
+              {isExpanded ? (
+                <>
+                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Details <ChevronDown className="ml-1 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Limitation level label */}
+          <p className="text-sm text-muted-foreground mb-2">Kieferfunktions-Einschränkung (erweitert)</p>
+
+          {/* Limitation scale */}
+          <div className="relative">
+            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
+              {JFLS20_LIMITATION_SEGMENTS.map((segment, index) => (
+                <div
+                  key={segment.level}
+                  className={`flex-1 ${segment.color} ${
+                    index === activeLimitationIndex
+                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
+                      : "opacity-40"
+                  } flex flex-col items-center justify-center transition-all`}
+                >
+                  <span className="text-[10px] font-medium text-white drop-shadow-sm">
+                    {segment.range}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Labels under scale */}
+          <div className="flex mt-1 text-[10px]">
+            {JFLS20_LIMITATION_SEGMENTS.map((segment, index) => (
+              <div
+                key={segment.level}
+                className={`flex-1 text-center ${
+                  index === activeLimitationIndex
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {segment.label}
+              </div>
+            ))}
+          </div>
+
+          {/* Score display */}
+          <div className="flex items-center justify-center mt-3">
+            {jflsScore.isValid && jflsScore.globalScore !== null ? (
+              <>
+                <span className="text-2xl font-bold">{jflsScore.globalScore.toFixed(2)}</span>
+                <span className="text-lg text-muted-foreground ml-1">/ {jflsScore.maxScore}</span>
+                <span className="ml-3 text-sm font-medium">
+                  {jflsScore.limitationInterpretation?.labelDe}
+                </span>
+              </>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                Zu viele fehlende Antworten ({jflsScore.missingCount}/20)
+              </span>
+            )}
+          </div>
+
+          {/* Significant limitation warning */}
+          {isSignificant && (
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
+              <AlertTriangle className="size-4" />
+              <span className="text-sm font-medium">Deutliche Funktionseinschränkung</span>
+            </div>
+          )}
+
+          {/* Subscales */}
+          <div className="flex flex-wrap justify-center gap-4 mt-4 pt-3 border-t text-sm">
+            <JFLS20SubscaleDisplay
+              label={JFLS20_SUBSCALE_LABELS.mastication.labelDe}
+              subscale={jflsScore.subscales.mastication}
+              refValues={JFLS20_REFERENCE_VALUES.mastication}
+            />
+            <JFLS20SubscaleDisplay
+              label={JFLS20_SUBSCALE_LABELS.mobility.labelDe}
+              subscale={jflsScore.subscales.mobility}
+              refValues={JFLS20_REFERENCE_VALUES.mobility}
+            />
+            <JFLS20SubscaleDisplay
+              label={JFLS20_SUBSCALE_LABELS.communication.labelDe}
+              subscale={jflsScore.subscales.communication}
+              refValues={JFLS20_REFERENCE_VALUES.communication}
+            />
+          </div>
+        </CardHeader>
+
+        {/* Expandable details */}
+        {isExpanded && (
+          <CardContent className="border-t bg-muted/20 p-4">
+            <JFLS20Summary answers={answers as JFLS20Answers} />
+          </CardContent>
+        )}
+      </Card>
+    );
+  }
+
+  // OBC Scoring
+  if (questionnaireId === "obc") {
+    const obcScore = calculateOBCScore(answers as OBCAnswers);
+    const activeRiskIndex = OBC_RISK_SEGMENTS.findIndex(
+      (segment) => segment.level === obcScore.riskLevel
+    );
+    const isHighRisk = obcScore.riskLevel === "high";
+
+    return (
+      <Card className="overflow-hidden py-0 gap-0">
+        <CardHeader className="p-4">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h4 className="font-medium">{title}</h4>
+              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-muted-foreground"
+            >
+              {isExpanded ? (
+                <>
+                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Details <ChevronDown className="ml-1 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Risk level label */}
+          <p className="text-sm text-muted-foreground mb-2">Orale Verhaltensweisen - TMD-Risiko</p>
+
+          {/* Risk scale */}
+          <div className="relative">
+            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
+              {OBC_RISK_SEGMENTS.map((segment, index) => (
+                <div
+                  key={segment.level}
+                  className={`flex-1 ${segment.color} ${
+                    index === activeRiskIndex
+                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
+                      : "opacity-40"
+                  } flex flex-col items-center justify-center transition-all`}
+                >
+                  <span className="text-[10px] font-medium text-white drop-shadow-sm">
+                    {segment.range}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Labels under scale */}
+          <div className="flex mt-1 text-[10px]">
+            {OBC_RISK_SEGMENTS.map((segment, index) => (
+              <div
+                key={segment.level}
+                className={`flex-1 text-center ${
+                  index === activeRiskIndex
+                    ? "font-medium text-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {segment.label}
+              </div>
+            ))}
+          </div>
+
+          {/* Score display */}
+          <div className="flex items-center justify-center mt-3">
+            <span className="text-2xl font-bold">{obcScore.totalScore}</span>
+            <span className="text-lg text-muted-foreground ml-1">/ {obcScore.maxScore}</span>
+            <span className="ml-3 text-sm font-medium">{obcScore.riskInterpretation.labelDe}</span>
+          </div>
+
+          {/* High risk warning */}
+          {isHighRisk && (
+            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
+              <AlertTriangle className="size-4" />
+              <span className="text-sm font-medium">Trägt zur Entstehung von CMD bei</span>
+            </div>
+          )}
+        </CardHeader>
+
+        {/* Expandable details */}
+        {isExpanded && (
+          <CardContent className="border-t bg-muted/20 p-4">
+            <OBCSummary answers={answers as OBCAnswers} />
           </CardContent>
         )}
       </Card>

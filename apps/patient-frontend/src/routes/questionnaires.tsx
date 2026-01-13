@@ -43,12 +43,31 @@ import {
   type JFLS8Answers,
 } from "../features/jfls8";
 
+// JFLS-20 imports
+import {
+  JFLS20Wizard,
+  useJFLS20Form,
+  loadProgress as loadJFLS20Progress,
+  JFLS20_QUESTIONNAIRE,
+  type JFLS20Answers,
+} from "../features/jfls20";
+
+// OBC imports
+import {
+  OBCWizard,
+  useOBCForm,
+  loadProgress as loadOBCProgress,
+} from "../features/obc";
+import { OBC_QUESTIONNAIRE, type OBCAnswers } from "@cmdetect/questionnaires";
+
 // Define the questionnaire sequence
 const QUESTIONNAIRES = [
   { id: "sq", name: "Symptom Questionnaire", shortName: "SQ" },
   { id: "phq4", name: PHQ4_QUESTIONNAIRE.title, shortName: "PHQ-4" },
   { id: "gcps-1m", name: GCPS_1M_QUESTIONNAIRE.title, shortName: "GCPS" },
   { id: "jfls-8", name: JFLS8_QUESTIONNAIRE.title, shortName: "JFLS-8" },
+  { id: "jfls-20", name: JFLS20_QUESTIONNAIRE.title, shortName: "JFLS-20" },
+  { id: "obc", name: OBC_QUESTIONNAIRE.title, shortName: "OBC" },
 ] as const;
 
 type QuestionnaireId = (typeof QUESTIONNAIRES)[number]["id"];
@@ -108,6 +127,8 @@ function QuestionnairesPage() {
     phq4?: PHQ4Answers;
     "gcps-1m"?: GCPS1MAnswers;
     "jfls-8"?: JFLS8Answers;
+    "jfls-20"?: JFLS20Answers;
+    obc?: OBCAnswers;
   }>({});
 
   // Track if all questionnaires are complete
@@ -187,6 +208,18 @@ function QuestionnairesPage() {
           <JFLS8QuestionnaireWrapper
             token={effectiveToken}
             onComplete={(answers) => handleQuestionnaireComplete("jfls-8", answers)}
+          />
+        )}
+        {currentQuestionnaireId === "jfls-20" && (
+          <JFLS20QuestionnaireWrapper
+            token={effectiveToken}
+            onComplete={(answers) => handleQuestionnaireComplete("jfls-20", answers)}
+          />
+        )}
+        {currentQuestionnaireId === "obc" && (
+          <OBCQuestionnaireWrapper
+            token={effectiveToken}
+            onComplete={(answers) => handleQuestionnaireComplete("obc", answers)}
           />
         )}
       </main>
@@ -294,12 +327,60 @@ function JFLS8QuestionnaireWrapper({
 }
 
 /**
+ * Wrapper for JFLS-20 questionnaire
+ */
+function JFLS20QuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: JFLS20Answers) => void;
+}) {
+  const savedProgress = loadJFLS20Progress(token);
+  const methods = useJFLS20Form(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <JFLS20Wizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for OBC questionnaire
+ */
+function OBCQuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: OBCAnswers) => void;
+}) {
+  const savedProgress = loadOBCProgress(token);
+  const methods = useOBCForm(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <OBCWizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
  * Final completion screen when all questionnaires are done
  */
 function AllQuestionnairesComplete({
   answers,
 }: {
-  answers: { sq?: SQAnswers; phq4?: PHQ4Answers; "gcps-1m"?: GCPS1MAnswers; "jfls-8"?: JFLS8Answers };
+  answers: { sq?: SQAnswers; phq4?: PHQ4Answers; "gcps-1m"?: GCPS1MAnswers; "jfls-8"?: JFLS8Answers; "jfls-20"?: JFLS20Answers; obc?: OBCAnswers };
 }) {
   const handleSubmit = () => {
     console.log("All questionnaires completed. Submitting:", answers);

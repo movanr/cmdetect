@@ -1,5 +1,5 @@
 /**
- * Main wizard orchestrator for JFLS-8 questionnaire
+ * Main wizard orchestrator for JFLS-20 questionnaire
  */
 
 import { useEffect, useCallback, useRef } from "react";
@@ -7,24 +7,28 @@ import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
-import { JFLS8_QUESTIONNAIRE, JFLS8_INSTRUCTIONS, type JFLS8Answers } from "@cmdetect/questionnaires";
-import { useJFLS8Navigation } from "../hooks/useJFLS8Navigation";
+import {
+  JFLS20_QUESTIONNAIRE,
+  JFLS20_INSTRUCTIONS,
+  type JFLS20Answers,
+} from "@cmdetect/questionnaires";
+import { useJFLS20Navigation } from "../hooks/useJFLS20Navigation";
 import { saveProgress, clearProgress } from "../persistence/storage";
 import { ProgressHeader } from "../../gcps-1m/components/ProgressHeader";
-import { JFLS8QuestionScreen } from "./JFLS8QuestionScreen";
+import { JFLS20QuestionScreen } from "./JFLS20QuestionScreen";
 
-type JFLS8WizardProps = {
+type JFLS20WizardProps = {
   token: string;
   initialIndex?: number;
-  onComplete?: (answers: JFLS8Answers) => void;
+  onComplete?: (answers: JFLS20Answers) => void;
 };
 
-export function JFLS8Wizard({
+export function JFLS20Wizard({
   token,
   initialIndex = 0,
   onComplete,
-}: JFLS8WizardProps) {
-  const methods = useFormContext<JFLS8Answers>();
+}: JFLS20WizardProps) {
+  const methods = useFormContext<JFLS20Answers>();
   const answers = methods.watch();
 
   const {
@@ -35,7 +39,7 @@ export function JFLS8Wizard({
     isComplete,
     goNext,
     goBack,
-  } = useJFLS8Navigation(initialIndex);
+  } = useJFLS20Navigation(initialIndex);
 
   const hasCalledComplete = useRef(false);
 
@@ -52,7 +56,7 @@ export function JFLS8Wizard({
   }, [goNext]);
 
   const handleSkip = useCallback(() => {
-    goNext();  // Advance without setting answer
+    goNext(); // Advance without setting answer
   }, [goNext]);
 
   const handleBack = useCallback(() => {
@@ -70,7 +74,7 @@ export function JFLS8Wizard({
 
   // Show completion screen only if no onComplete handler (standalone mode)
   if (isComplete && !onComplete) {
-    return <JFLS8Complete answers={answers} />;
+    return <JFLS20Complete answers={answers} />;
   }
 
   // When complete with onComplete handler, render nothing while parent transitions
@@ -84,14 +88,14 @@ export function JFLS8Wizard({
 
       {/* Main instruction - shown on all questions */}
       <div className="text-sm text-muted-foreground space-y-2 px-1">
-        <p className="font-medium text-foreground">{JFLS8_INSTRUCTIONS[0]}</p>
-        <p>{JFLS8_INSTRUCTIONS[1]}</p>
-        <p>{JFLS8_INSTRUCTIONS[2]}</p>
+        <p className="font-medium text-foreground">{JFLS20_INSTRUCTIONS[0]}</p>
+        <p>{JFLS20_INSTRUCTIONS[1]}</p>
+        <p>{JFLS20_INSTRUCTIONS[2]}</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
-          <JFLS8QuestionScreen
+          <JFLS20QuestionScreen
             question={currentQuestion}
             onNavigateNext={handleNext}
             onSkip={handleSkip}
@@ -115,7 +119,7 @@ export function JFLS8Wizard({
 /**
  * Completion screen
  */
-function JFLS8Complete({ answers }: { answers: JFLS8Answers }) {
+function JFLS20Complete({ answers }: { answers: JFLS20Answers }) {
   const answeredCount = Object.values(answers).filter(
     (value) => value !== undefined
   ).length;
@@ -143,7 +147,7 @@ function JFLS8Complete({ answers }: { answers: JFLS8Answers }) {
           <h2 className="text-2xl font-semibold">Fragebogen abgeschlossen</h2>
 
           <p className="text-muted-foreground">
-            Vielen Dank für das Ausfüllen des {JFLS8_QUESTIONNAIRE.title}.
+            Vielen Dank für das Ausfüllen des {JFLS20_QUESTIONNAIRE.title}.
           </p>
 
           <p className="text-sm text-muted-foreground">

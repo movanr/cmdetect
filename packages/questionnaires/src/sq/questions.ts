@@ -23,7 +23,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ1",
     type: "single_choice",
-    text: "Hatten Sie jemals Schmerzen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr auf einer Seite?",
+    text: "Hatten Sie jemals auf einer oder beiden Seiten Schmerzen im Kiefer, im Schläfenbereich, im Ohr oder vor dem Ohr?",
     options: SQ_YES_NO_OPTIONS,
   },
 
@@ -31,7 +31,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ2",
     type: "composite_number",
-    text: "Vor wie vielen Jahren oder Monaten begannen Ihre Schmerzen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr zum ersten Mal?",
+    text: "Vor wie vielen Jahren oder Monaten hat Ihr Schmerz im Kiefer, den Schläfen, im oder vor dem Ohr erstmals begonnen?",
     fields: {
       years: { id: "SQ2_years", label: "Jahre" },
       months: { id: "SQ2_months", label: "Monate" },
@@ -43,8 +43,8 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ3",
     type: "single_choice",
-    text: "Welche der folgenden Aussagen beschreibt am besten Schmerzen in den letzten 30 Tagen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr?",
-    note: "Bitte wählen Sie EINE Antwort.",
+    text: "Welche der folgenden Antworten beschreibt die Schmerzen im Kiefer, Schläfenbereich, im Ohr oder vor dem Ohr auf beiden Seiten in den letzten 30 Tagen am besten?",
+    note: "Wählen Sie EINE Antwort.",
     options: SQ_PAIN_FREQUENCY_OPTIONS,
     enableWhen: [{ questionId: "SQ1", operator: "=", value: "yes" }],
   },
@@ -55,8 +55,8 @@ export const SQ_SCREENS: SQQuestion[] = [
     id: "SQ4_A",
     type: "matrix_row",
     parentId: "SQ4",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Schmerzen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr verändert (verbessert oder verschlechtert)?",
-    rowText: "Kauen harter oder zäher Nahrung",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schmerz im Kiefer oder im Schläfenbereich, im Ohr oder vor dem Ohr, auf einer oder beiden Seiten verändert (d. h. verbessert bzw. verschlechtert)?",
+    rowText: "Kauen von harter oder zäher Nahrung",
     enableWhen: [
       { questionId: "SQ1", operator: "=", value: "yes" },
       { questionId: "SQ3", operator: "!=", value: "no_pain" },
@@ -66,8 +66,8 @@ export const SQ_SCREENS: SQQuestion[] = [
     id: "SQ4_B",
     type: "matrix_row",
     parentId: "SQ4",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Schmerzen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr verändert (verbessert oder verschlechtert)?",
-    rowText: "Mundöffnung oder Kieferbewegung nach vorne oder zur Seite",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schmerz im Kiefer oder im Schläfenbereich, im Ohr oder vor dem Ohr, auf einer oder beiden Seiten verändert (d. h. verbessert bzw. verschlechtert)?",
+    rowText: "Öffnung des Mundes oder Bewegung des Kiefers nach vorn oder zur Seite",
     enableWhen: [
       { questionId: "SQ1", operator: "=", value: "yes" },
       { questionId: "SQ3", operator: "!=", value: "no_pain" },
@@ -77,8 +77,8 @@ export const SQ_SCREENS: SQQuestion[] = [
     id: "SQ4_C",
     type: "matrix_row",
     parentId: "SQ4",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Schmerzen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr verändert (verbessert oder verschlechtert)?",
-    rowText: "Kiefergewohnheiten wie Zähne zusammenhalten, Zähne pressen/knirschen oder Kaugummi kauen",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schmerz im Kiefer oder im Schläfenbereich, im Ohr oder vor dem Ohr, auf einer oder beiden Seiten verändert (d. h. verbessert bzw. verschlechtert)?",
+    rowText: "Angewohnheiten wie Zähne aufeinander halten, Pressen/Knirschen mit den Zähnen oder Kaugummikauen",
     enableWhen: [
       { questionId: "SQ1", operator: "=", value: "yes" },
       { questionId: "SQ3", operator: "!=", value: "no_pain" },
@@ -88,8 +88,8 @@ export const SQ_SCREENS: SQQuestion[] = [
     id: "SQ4_D",
     type: "matrix_row",
     parentId: "SQ4",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Schmerzen im Kiefer, an der Schläfe, im Ohr oder vor dem Ohr verändert (verbessert oder verschlechtert)?",
-    rowText: "Andere Kieferaktivitäten wie Sprechen, Küssen oder Gähnen",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schmerz im Kiefer oder im Schläfenbereich, im Ohr oder vor dem Ohr, auf einer oder beiden Seiten verändert (d. h. verbessert bzw. verschlechtert)?",
+    rowText: "Andere Aktivitäten wie Reden, Küssen oder Gähnen",
     enableWhen: [
       { questionId: "SQ1", operator: "=", value: "yes" },
       { questionId: "SQ3", operator: "!=", value: "no_pain" },
@@ -104,7 +104,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ5",
     type: "single_choice",
-    text: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen, die die Schläfenbereiche einschlossen?",
+    text: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen im Schläfenbereich?",
     options: SQ_YES_NO_OPTIONS,
   },
 
@@ -112,7 +112,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ6",
     type: "composite_number",
-    text: "Vor wie vielen Jahren oder Monaten begannen Ihre Schläfenkopfschmerzen zum ersten Mal?",
+    text: "Vor wie vielen Jahren oder Monaten trat Ihr Schläfenkopfschmerz erstmals auf?",
     fields: {
       years: { id: "SQ6_years", label: "Jahre" },
       months: { id: "SQ6_months", label: "Monate" },
@@ -126,32 +126,32 @@ export const SQ_SCREENS: SQQuestion[] = [
     id: "SQ7_A",
     type: "matrix_row",
     parentId: "SQ7",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Kopfschmerzen in den Schläfenbereichen verändert (verbessert oder verschlechtert)?",
-    rowText: "Kauen harter oder zäher Nahrung",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schläfenkopfschmerz auf einer oder beiden Seiten verändert (d.h. verbessert bzw. verschlechtert)?",
+    rowText: "Kauen von harter oder zäher Nahrung",
     enableWhen: [{ questionId: "SQ5", operator: "=", value: "yes" }],
   },
   {
     id: "SQ7_B",
     type: "matrix_row",
     parentId: "SQ7",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Kopfschmerzen in den Schläfenbereichen verändert (verbessert oder verschlechtert)?",
-    rowText: "Mundöffnung oder Kieferbewegung nach vorne oder zur Seite",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schläfenkopfschmerz auf einer oder beiden Seiten verändert (d.h. verbessert bzw. verschlechtert)?",
+    rowText: "Öffnung des Mundes oder Bewegung des Kiefers nach vorn oder zur Seite",
     enableWhen: [{ questionId: "SQ5", operator: "=", value: "yes" }],
   },
   {
     id: "SQ7_C",
     type: "matrix_row",
     parentId: "SQ7",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Kopfschmerzen in den Schläfenbereichen verändert (verbessert oder verschlechtert)?",
-    rowText: "Kiefergewohnheiten wie Zähne zusammenhalten, Zähne pressen/knirschen oder Kaugummi kauen",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schläfenkopfschmerz auf einer oder beiden Seiten verändert (d.h. verbessert bzw. verschlechtert)?",
+    rowText: "Angewohnheiten wie Zähne aufeinander halten, Pressen/Knirschen mit den Zähnen oder Kaugummikauen",
     enableWhen: [{ questionId: "SQ5", operator: "=", value: "yes" }],
   },
   {
     id: "SQ7_D",
     type: "matrix_row",
     parentId: "SQ7",
-    text: "Haben in den letzten 30 Tagen die folgenden Aktivitäten Ihre Kopfschmerzen in den Schläfenbereichen verändert (verbessert oder verschlechtert)?",
-    rowText: "Andere Kieferaktivitäten wie Sprechen, Küssen oder Gähnen",
+    text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schläfenkopfschmerz auf einer oder beiden Seiten verändert (d.h. verbessert bzw. verschlechtert)?",
+    rowText: "Andere Aktivitäten wie Reden, Küssen oder Gähnen",
     enableWhen: [{ questionId: "SQ5", operator: "=", value: "yes" }],
   },
 
@@ -163,7 +163,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ8",
     type: "single_choice",
-    text: "Hatten Sie in den letzten 30 Tagen Kiefergelenkgeräusche bei Bewegung oder Benutzung des Kiefers?",
+    text: "Hatten Sie in den letzten 30 Tagen Gelenkgeräusche, wenn Sie Ihren Kiefer bewegt oder benutzt haben?",
     options: SQ_YES_NO_OPTIONS,
   },
 
@@ -175,7 +175,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ9",
     type: "single_choice",
-    text: "Ist Ihr Kiefer jemals blockiert oder eingerastet, sodass er sich nicht VOLLSTÄNDIG öffnen ließ?",
+    text: "War Ihre Mundöffnung jemals, auch nur für einen Moment blockiert, sodass sich der Unterkiefer nicht VOLLSTÄNDIG öffnen ließ?",
     options: SQ_YES_NO_OPTIONS,
   },
 
@@ -183,7 +183,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ10",
     type: "single_choice",
-    text: "War die Kiefersperre so stark, dass sie die Mundöffnung einschränkte und das Essen beeinträchtigte?",
+    text: "War die Blockade Ihres Kiefers so stark, dass es Ihre Mundöffnung eingeschränkt und Ihre Fähigkeit zu Essen beeinträchtigt hat?",
     options: SQ_YES_NO_OPTIONS,
     enableWhen: [{ questionId: "SQ9", operator: "=", value: "yes" }],
   },
@@ -192,7 +192,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ11",
     type: "single_choice",
-    text: "Hat sich Ihr Kiefer in den letzten 30 Tagen so blockiert, dass er sich nicht VOLLSTÄNDIG öffnen ließ, selbst für einen Moment, und dann wieder gelöst, sodass er sich VOLLSTÄNDIG öffnen ließ?",
+    text: "Hatten Sie in den letzten 30 Tagen eine Kieferklemme, sodass Sie den Mund, wenn auch nur kurzzeitig, nicht VOLLSTÄNDIG öffnen konnten, und löste sich diese anschließend, sodass Sie den Mund VOLLSTÄNDIG öffnen konnten?",
     options: SQ_YES_NO_OPTIONS,
     enableWhen: [{ questionId: "SQ9", operator: "=", value: "yes" }],
   },
@@ -201,7 +201,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ12",
     type: "single_choice",
-    text: "Ist Ihr Kiefer derzeit blockiert oder eingeschränkt, sodass er sich nicht VOLLSTÄNDIG öffnen lässt?",
+    text: "Ist Ihr Kiefer gegenwärtig blockiert oder eingeschränkt, so dass sich Ihr Kiefer nicht VOLLSTÄNDIG öffnen lässt?",
     options: SQ_YES_NO_OPTIONS,
     enableWhen: [
       { questionId: "SQ9", operator: "=", value: "yes" },
@@ -217,7 +217,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ13",
     type: "single_choice",
-    text: "Ist Ihr Kiefer in den letzten 30 Tagen bei weiter Mundöffnung blockiert oder eingerastet, selbst für einen Moment, sodass Sie ihn aus dieser weit geöffneten Position nicht schließen konnten?",
+    text: "Ist Ihr Kiefer in den letzten 30 Tagen, bei weiter Mundöffnung, auch nur für einen kurzen Moment, blockiert bzw. hängen geblieben, sodass Sie den Mund von dieser weit geöffneten Position aus nicht mehr schließen konnten?",
     options: SQ_YES_NO_OPTIONS,
   },
 
@@ -225,7 +225,7 @@ export const SQ_SCREENS: SQQuestion[] = [
   {
     id: "SQ14",
     type: "single_choice",
-    text: "Mussten Sie in den letzten 30 Tagen, als Ihr Kiefer weit offen blockiert war, etwas tun, um ihn zu schließen, einschließlich Ausruhen, Bewegen, Drücken oder Manövrieren?",
+    text: "Mussten Sie in den letzten 30 Tagen, als ihr Kiefer weit geöffnet blockiert oder hängen geblieben war, etwas unternehmen, um ihn schließen zu können, z.B. entspannen, bewegen, drücken oder umlenken?",
     options: SQ_YES_NO_OPTIONS,
     enableWhen: [{ questionId: "SQ13", operator: "=", value: "yes" }],
   },

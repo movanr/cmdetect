@@ -29,12 +29,15 @@ export const PHQ4_QUESTIONS: Record<PHQ4QuestionId, PHQ4Question> = {
 
 /**
  * PHQ-4 question order (for rendering)
+ * Official order: GAD-2 (anxiety) first, then PHQ-2 (depression)
+ * 1-2: Anxiety (C, D)
+ * 3-4: Depression (A, B)
  */
 export const PHQ4_QUESTION_ORDER: PHQ4QuestionId[] = [
-  "PHQ4_A",
-  "PHQ4_B",
-  "PHQ4_C",
-  "PHQ4_D",
+  "PHQ4_C", // 1. Nervosität, Ängstlichkeit oder Anspannung
+  "PHQ4_D", // 2. Nicht in der Lage sein, Sorgen zu stoppen
+  "PHQ4_A", // 3. Wenig Interesse oder Freude
+  "PHQ4_B", // 4. Niedergeschlagenheit, Schwermut
 ];
 
 /**

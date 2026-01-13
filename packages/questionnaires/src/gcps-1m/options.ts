@@ -39,11 +39,11 @@ export const GCPS_1M_PAIN_LABELS = {
 
 /**
  * Interference scale endpoint labels (German)
- * Used for questions 5, 6, 7
+ * Used for questions 6, 7, 8
  */
 export const GCPS_1M_INTERFERENCE_LABELS = {
   min: "Keine Beeinträchtigung",
-  max: "Konnte keine Aktivitäten ausführen",
+  max: "Unfähig, irgendeine Tätigkeit auszuüben",
 } as const;
 
 /**

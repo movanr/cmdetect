@@ -18,6 +18,7 @@ type GenericScaleQuestion = {
   id: string;
   type: "scale_0_10";
   text: string;
+  note?: string;
   scaleLabels: {
     min: string;
     max: string;
@@ -50,6 +51,11 @@ export function ScaleQuestion({ question, onNavigateNext }: ScaleQuestionProps) 
     <div className="space-y-6">
       {/* Question text */}
       <p className="text-lg font-medium leading-relaxed">{question.text}</p>
+
+      {/* Note if present */}
+      {question.note && (
+        <p className="text-sm text-muted-foreground italic">{question.note}</p>
+      )}
 
       {/* 0-10 horizontal button row */}
       <div className="flex gap-1 sm:gap-2 justify-between">

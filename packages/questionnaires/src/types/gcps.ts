@@ -32,6 +32,7 @@ export type GCPS1MScaleQuestion = {
   id: GCPS1MQuestionId;
   type: "scale_0_10";
   text: string;
+  note?: string;
   scaleLabels: {
     min: string; // Label for 0
     max: string; // Label for 10

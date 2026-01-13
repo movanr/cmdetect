@@ -46,6 +46,20 @@ import {
   JFLS8_METADATA,
 } from "../features/jfls8";
 import type { JFLS8Answers } from "../features/jfls8";
+import {
+  JFLS20Wizard,
+  useJFLS20Form,
+  loadProgress as loadJFLS20Progress,
+  JFLS20_METADATA,
+} from "../features/jfls20";
+import type { JFLS20Answers } from "../features/jfls20";
+import {
+  OBCWizard,
+  useOBCForm,
+  loadProgress as loadOBCProgress,
+} from "../features/obc";
+import { OBC_METADATA } from "@cmdetect/questionnaires";
+import type { OBCAnswers } from "@cmdetect/questionnaires";
 
 // Form components
 import { PersonalDataForm } from "./-components/PersonalDataForm";
@@ -78,6 +92,8 @@ type FlowStep =
   | "questionnaire-phq4"
   | "questionnaire-gcps1m"
   | "questionnaire-jfls8"
+  | "questionnaire-jfls20"
+  | "questionnaire-obc"
   | "complete"
   | "declined";
 
@@ -138,6 +154,10 @@ function PatientFlowPage() {
             setStep("questionnaire-gcps1m");
           } else if (!progress.submitted_questionnaires.includes("jfls-8")) {
             setStep("questionnaire-jfls8");
+          } else if (!progress.submitted_questionnaires.includes("jfls-20")) {
+            setStep("questionnaire-jfls20");
+          } else if (!progress.submitted_questionnaires.includes("obc")) {
+            setStep("questionnaire-obc");
           } else {
             // All complete
             setStep("complete");
@@ -362,6 +382,30 @@ function PatientFlowPage() {
         questionnaire_version: JFLS8_METADATA.version,
         answers: answers as Record<string, unknown>,
       },
+      "questionnaire-jfls20"
+    );
+  };
+
+  // Handle JFLS-20 completion
+  const handleJFLS20Complete = (answers: JFLS20Answers) => {
+    submitQuestionnaire(
+      {
+        questionnaire_id: JFLS20_METADATA.id,
+        questionnaire_version: JFLS20_METADATA.version,
+        answers: answers as Record<string, unknown>,
+      },
+      "questionnaire-obc"
+    );
+  };
+
+  // Handle OBC completion
+  const handleOBCComplete = (answers: OBCAnswers) => {
+    submitQuestionnaire(
+      {
+        questionnaire_id: OBC_METADATA.id,
+        questionnaire_version: OBC_METADATA.version,
+        answers: answers as Record<string, unknown>,
+      },
       "complete"
     );
   };
@@ -386,18 +430,24 @@ function PatientFlowPage() {
   }
 
   // Questionnaire steps
-  if (step === "questionnaire-sq" || step === "questionnaire-phq4" || step === "questionnaire-gcps1m" || step === "questionnaire-jfls8") {
+  if (step === "questionnaire-sq" || step === "questionnaire-phq4" || step === "questionnaire-gcps1m" || step === "questionnaire-jfls8" || step === "questionnaire-jfls20" || step === "questionnaire-obc") {
     const questionnaireNumber = step === "questionnaire-sq" ? 1
       : step === "questionnaire-phq4" ? 2
       : step === "questionnaire-gcps1m" ? 3
-      : 4;
+      : step === "questionnaire-jfls8" ? 4
+      : step === "questionnaire-jfls20" ? 5
+      : 6;
     const questionnaireTitle = step === "questionnaire-sq"
       ? SQ_METADATA.title
       : step === "questionnaire-phq4"
         ? PHQ4_METADATA.title
         : step === "questionnaire-gcps1m"
           ? GCPS_1M_METADATA.title
-          : JFLS8_METADATA.title;
+          : step === "questionnaire-jfls8"
+            ? JFLS8_METADATA.title
+            : step === "questionnaire-jfls20"
+              ? JFLS20_METADATA.title
+              : OBC_METADATA.title;
 
     return (
       <div className="min-h-screen bg-background">
@@ -405,7 +455,7 @@ function PatientFlowPage() {
           <div className="max-w-lg mx-auto px-4 pt-8 pb-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                Fragebogen {questionnaireNumber}/4
+                Fragebogen {questionnaireNumber}/6
               </span>
               <span className="text-muted-foreground">·</span>
               <span className="text-sm font-medium">
@@ -459,6 +509,18 @@ function PatientFlowPage() {
             <JFLS8QuestionnaireWrapper
               token={token}
               onComplete={handleJFLS8Complete}
+            />
+          )}
+          {step === "questionnaire-jfls20" && (
+            <JFLS20QuestionnaireWrapper
+              token={token}
+              onComplete={handleJFLS20Complete}
+            />
+          )}
+          {step === "questionnaire-obc" && (
+            <OBCQuestionnaireWrapper
+              token={token}
+              onComplete={handleOBCComplete}
             />
           )}
         </main>
@@ -687,6 +749,54 @@ function JFLS8QuestionnaireWrapper({
   return (
     <FormProvider {...methods}>
       <JFLS8Wizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for JFLS-20 questionnaire
+ */
+function JFLS20QuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: JFLS20Answers) => void;
+}) {
+  const savedProgress = loadJFLS20Progress(token);
+  const methods = useJFLS20Form(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <JFLS20Wizard
+        token={token}
+        initialIndex={savedProgress?.currentIndex}
+        onComplete={onComplete}
+      />
+    </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for OBC questionnaire
+ */
+function OBCQuestionnaireWrapper({
+  token,
+  onComplete,
+}: {
+  token: string;
+  onComplete: (answers: OBCAnswers) => void;
+}) {
+  const savedProgress = loadOBCProgress(token);
+  const methods = useOBCForm(savedProgress?.answers);
+
+  return (
+    <FormProvider {...methods}>
+      <OBCWizard
         token={token}
         initialIndex={savedProgress?.currentIndex}
         onComplete={onComplete}

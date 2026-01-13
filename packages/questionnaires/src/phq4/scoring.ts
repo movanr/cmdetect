@@ -2,8 +2,9 @@
  * PHQ-4 Scoring Utilities
  *
  * PHQ-4 = GAD-2 (anxiety) + PHQ-2 (depression)
- * - GAD-2: PHQ4_C + PHQ4_D (items 3 & 4)
- * - PHQ-2: PHQ4_A + PHQ4_B (items 1 & 2)
+ * Display order (per official German version):
+ * - Items 1-2 = GAD-2 (anxiety): PHQ4_C + PHQ4_D
+ * - Items 3-4 = PHQ-2 (depression): PHQ4_A + PHQ4_B
  *
  * Total score range: 0-12
  * Each subscale: 0-6

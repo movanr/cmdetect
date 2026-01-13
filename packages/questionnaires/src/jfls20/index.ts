@@ -1,0 +1,27 @@
+/**
+ * JFLS-20 module exports
+ */
+
+export {
+  JFLS20_QUESTIONS,
+  JFLS20_QUESTION_ORDER,
+  JFLS20_METADATA,
+  JFLS20_INSTRUCTIONS,
+  JFLS20_TOTAL_QUESTIONS,
+  JFLS20_QUESTIONNAIRE,
+  JFLS20_QUESTION_LABELS,
+} from "./questions";
+
+export {
+  JFLS20_SCALE_OPTIONS,
+  JFLS20_SCALE_LABELS,
+  JFLS20_OPTION_LABELS,
+} from "./options";
+
+export {
+  calculateJFLS20Score,
+  getJFLS20LimitationLevel,
+  getJFLS20SubscaleItems,
+  JFLS20_REFERENCE_VALUES,
+  JFLS20_SUBSCALE_LABELS,
+} from "./scoring";

@@ -54,4 +54,31 @@ export type {
   JFLS8Question,
   JFLS8Questionnaire,
   JFLS8Answers,
+  JFLS8LimitationLevel,
+  JFLS8LimitationInterpretation,
+  JFLS8Score,
 } from "./jfls8";
+
+export type {
+  OBCQuestionId,
+  OBCSectionId,
+  OBCQuestion,
+  OBCSection,
+  OBCAnswers,
+  OBCQuestionnaire,
+  OBCRiskLevel,
+  OBCRiskInterpretation,
+  OBCScore,
+} from "./obc";
+
+export type {
+  JFLS20QuestionId,
+  JFLS20Question,
+  JFLS20Questionnaire,
+  JFLS20Answers,
+  JFLS20LimitationLevel,
+  JFLS20LimitationInterpretation,
+  JFLS20SubscaleId,
+  JFLS20SubscaleScore,
+  JFLS20Score,
+} from "./jfls20";

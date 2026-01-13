@@ -25,7 +25,7 @@ export const SQ_MATRIX_OPTIONS: AnswerOption[] = [
 export const SQ_PAIN_FREQUENCY_OPTIONS: AnswerOption[] = [
   { value: "no_pain", label: "Keine Schmerzen" },
   { value: "intermittent", label: "Schmerzen kommen und gehen" },
-  { value: "continuous", label: "Schmerzen sind ständig vorhanden" },
+  { value: "continuous", label: "Schmerzen sind immer vorhanden" },
 ];
 
 /**
@@ -42,7 +42,7 @@ export const SQ_YES_NO_LABELS: Record<string, string> = {
 export const SQ_PAIN_FREQUENCY_LABELS: Record<string, string> = {
   no_pain: "Keine Schmerzen",
   intermittent: "Schmerzen kommen und gehen",
-  continuous: "Schmerzen sind ständig vorhanden",
+  continuous: "Schmerzen sind immer vorhanden",
 };
 
 /**
