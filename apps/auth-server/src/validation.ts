@@ -1,10 +1,21 @@
 // TODO: Das sollte alles Zod sein. Zu viel Potential Fehler zu haben.
 
-import { QUESTIONNAIRE_IDS } from "@cmdetect/questionnaires";
-
 /**
  * Validation utilities for auth server endpoints
  */
+
+/**
+ * Known questionnaire IDs that the system accepts
+ * Note: Keep in sync with @cmdetect/questionnaires package
+ */
+const QUESTIONNAIRE_IDS = [
+  "dc-tmd-sq",
+  "phq-4",
+  "gcps-1m",
+  "jfls-8",
+  "jfls-20",
+  "obc",
+];
 
 export interface ValidationResult {
   valid: boolean;
@@ -33,7 +44,7 @@ export function validateInviteToken(invite_token: any): ValidationResult {
 }
 
 /**
- * Known questionnaire IDs that the system accepts (derived from questionnaires package)
+ * Known questionnaire IDs reference for validation
  */
 const KNOWN_QUESTIONNAIRE_IDS = QUESTIONNAIRE_IDS;
 

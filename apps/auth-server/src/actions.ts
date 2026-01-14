@@ -2,7 +2,6 @@
  * Hasura action handlers
  */
 
-import { QUESTIONNAIRE_IDS } from "@cmdetect/questionnaires";
 import { Request, Response } from "express";
 import { DatabaseService } from "./database";
 import { sendActionError, sendActionSuccess } from "./errors";
@@ -54,8 +53,18 @@ export class ActionHandlers {
     sendActionSuccess(res, { patient_consent_id: consentId });
   }
 
-  // Required questionnaires that must be submitted before marking flow as complete
-  private static readonly REQUIRED_QUESTIONNAIRES = QUESTIONNAIRE_IDS;
+  /**
+   * Required questionnaires that must be submitted before marking flow as complete
+   * Note: Keep in sync with @cmdetect/questionnaires ENABLED_QUESTIONNAIRES
+   */
+  private static readonly REQUIRED_QUESTIONNAIRES = [
+    "dc-tmd-sq",
+    "phq-4",
+    "gcps-1m",
+    "jfls-8",
+    // "jfls-20",  // Disabled
+    "obc",
+  ];
 
   /**
    * Handles questionnaire response submission
