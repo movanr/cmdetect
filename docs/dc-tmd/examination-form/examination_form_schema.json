@@ -1,0 +1,476 @@
+{
+  "meta": {
+    "name": "DC/TMD Examination Form Schema",
+    "description": "Complete schema mapping examination data to DC/TMD Examination Form fields",
+    "version": "1.0.0",
+    "based_on": "DC/TMD Clinical Examination Protocol Version 02June2013",
+    "form_reference": "Section 9: Examination Form (North American Format)"
+  },
+
+  "form_header": {
+    "patient_name": { "type": "text", "required": true, "label": "Patient" },
+    "examiner_name": { "type": "text", "required": true, "label": "Examiner" },
+    "date_filled": { "type": "date", "format": "mm-dd-yyyy", "required": true, "label": "Date filled out" }
+  },
+
+  "response_format": {
+    "boolean": { "true": "Y", "false": "N" },
+    "measurement": { "unit": "mm", "format": "integer" }
+  },
+
+  "form_fields": {
+    "E1a_pain_location": {
+      "label": "Location of Pain: Last 30 days",
+      "right": {
+        "none": { "type": "boolean", "label": "None" },
+        "temporalis": { "type": "boolean", "label": "Temporalis" },
+        "masseter": { "type": "boolean", "label": "Masseter" },
+        "tmj": { "type": "boolean", "label": "TMJ" },
+        "other_m_muscles": { "type": "boolean", "label": "Other m muscles" },
+        "non_mast_structures": { "type": "boolean", "label": "Non-mast structures" }
+      },
+      "left": {
+        "none": { "type": "boolean", "label": "None" },
+        "temporalis": { "type": "boolean", "label": "Temporalis" },
+        "masseter": { "type": "boolean", "label": "Masseter" },
+        "tmj": { "type": "boolean", "label": "TMJ" },
+        "other_m_muscles": { "type": "boolean", "label": "Other m muscles" },
+        "non_mast_structures": { "type": "boolean", "label": "Non-mast structures" }
+      }
+    },
+
+    "E1b_headache_location": {
+      "label": "Location of Headache: Last 30 days",
+      "right": {
+        "none": { "type": "boolean", "label": "None" },
+        "temporal": { "type": "boolean", "label": "Temporal" },
+        "other": { "type": "boolean", "label": "Other" }
+      },
+      "left": {
+        "none": { "type": "boolean", "label": "None" },
+        "temporal": { "type": "boolean", "label": "Temporal" },
+        "other": { "type": "boolean", "label": "Other" }
+      }
+    },
+
+    "E2_incisal_relationships": {
+      "label": "Incisal Relationships",
+      "reference_tooth": {
+        "type": "enum",
+        "options": [
+          { "id": "tooth_8", "label": "#8", "fdi": "11" },
+          { "id": "tooth_9", "label": "#9", "fdi": "21" },
+          { "id": "other", "label": "Other" }
+        ]
+      },
+      "horizontal_overjet": {
+        "type": "measurement",
+        "unit": "mm",
+        "negative_allowed": true,
+        "negative_label": "If negative (anterior cross-bite)"
+      },
+      "vertical_overlap": {
+        "type": "measurement",
+        "unit": "mm",
+        "negative_allowed": true,
+        "negative_label": "If negative (anterior open-bite)"
+      },
+      "midline_deviation": {
+        "direction": {
+          "type": "enum",
+          "options": ["right", "left", "n/a"]
+        },
+        "mm": {
+          "type": "measurement",
+          "unit": "mm",
+          "condition": "direction != 'n/a'"
+        }
+      }
+    },
+
+    "E3_opening_pattern": {
+      "label": "Opening Pattern (Supplemental)",
+      "supplemental": true,
+      "pattern": {
+        "type": "enum",
+        "options": ["straight", "corrected_deviation"],
+        "uncorrected_deviation": {
+          "type": "enum",
+          "options": ["right", "left"]
+        }
+      }
+    },
+
+    "E4_opening_movements": {
+      "label": "Opening Movements",
+      "pain_free_opening": {
+        "measurement_mm": { "type": "measurement", "unit": "mm" }
+      },
+      "max_unassisted_opening": {
+        "measurement_mm": { "type": "measurement", "unit": "mm" },
+        "pain_assessment": {
+          "right": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          },
+          "left": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          }
+        }
+      },
+      "max_assisted_opening": {
+        "measurement_mm": { "type": "measurement", "unit": "mm" },
+        "pain_assessment": {
+          "right": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          },
+          "left": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          }
+        }
+      },
+      "terminated": { "type": "boolean", "label": "Terminated?" }
+    },
+
+    "E5_lateral_protrusive_movements": {
+      "label": "Lateral and Protrusive Movements",
+      "right_lateral": {
+        "measurement_mm": { "type": "measurement", "unit": "mm" },
+        "pain_assessment": {
+          "right": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          },
+          "left": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          }
+        }
+      },
+      "left_lateral": {
+        "measurement_mm": { "type": "measurement", "unit": "mm" },
+        "pain_assessment": {
+          "right": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          },
+          "left": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          }
+        }
+      },
+      "protrusion": {
+        "measurement_mm": { "type": "measurement", "unit": "mm", "negative_allowed": true },
+        "pain_assessment": {
+          "right": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          },
+          "left": {
+            "temporalis": { "pain": "boolean", "familiar_pain": "boolean", "familiar_headache": "boolean" },
+            "masseter": { "pain": "boolean", "familiar_pain": "boolean" },
+            "tmj": { "pain": "boolean", "familiar_pain": "boolean" },
+            "other_m_musc": { "pain": "boolean", "familiar_pain": "boolean" },
+            "non_mast": { "pain": "boolean", "familiar_pain": "boolean" }
+          }
+        }
+      }
+    },
+
+    "E6_tmj_noises_open_close": {
+      "label": "TMJ Noises During Open & Close Movements",
+      "right": {
+        "click": {
+          "examiner_open": { "type": "boolean", "label": "Open" },
+          "examiner_close": { "type": "boolean", "label": "Close" }
+        },
+        "crepitus": {
+          "examiner_open": { "type": "boolean", "label": "Open" },
+          "examiner_close": { "type": "boolean", "label": "Close" }
+        },
+        "patient_reported": { "type": "boolean", "label": "Patient" },
+        "pain_with_click": { "type": "boolean", "label": "Pain w/ Click" },
+        "familiar_pain": { "type": "boolean", "label": "Familiar Pain" }
+      },
+      "left": {
+        "click": {
+          "examiner_open": { "type": "boolean", "label": "Open" },
+          "examiner_close": { "type": "boolean", "label": "Close" }
+        },
+        "crepitus": {
+          "examiner_open": { "type": "boolean", "label": "Open" },
+          "examiner_close": { "type": "boolean", "label": "Close" }
+        },
+        "patient_reported": { "type": "boolean", "label": "Patient" },
+        "pain_with_click": { "type": "boolean", "label": "Pain w/ Click" },
+        "familiar_pain": { "type": "boolean", "label": "Familiar Pain" }
+      }
+    },
+
+    "E7_tmj_noises_lateral_protrusive": {
+      "label": "TMJ Noises During Lateral & Protrusive Movements",
+      "right": {
+        "click": {
+          "examiner": { "type": "boolean", "label": "Examiner" },
+          "patient": { "type": "boolean", "label": "Patient" }
+        },
+        "crepitus": {
+          "examiner": { "type": "boolean", "label": "Examiner" },
+          "patient": { "type": "boolean", "label": "Patient" }
+        },
+        "pain_with_click": { "type": "boolean", "label": "Pain w/ Click" },
+        "familiar_pain": { "type": "boolean", "label": "Familiar Pain" }
+      },
+      "left": {
+        "click": {
+          "examiner": { "type": "boolean", "label": "Examiner" },
+          "patient": { "type": "boolean", "label": "Patient" }
+        },
+        "crepitus": {
+          "examiner": { "type": "boolean", "label": "Examiner" },
+          "patient": { "type": "boolean", "label": "Patient" }
+        },
+        "pain_with_click": { "type": "boolean", "label": "Pain w/ Click" },
+        "familiar_pain": { "type": "boolean", "label": "Familiar Pain" }
+      }
+    },
+
+    "E8_joint_locking": {
+      "label": "Joint Locking",
+      "right": {
+        "while_opening": {
+          "locking": { "type": "boolean", "label": "Locking" },
+          "reduction_patient": { "type": "boolean", "label": "Patient" },
+          "reduction_examiner": { "type": "boolean", "label": "Examiner" }
+        },
+        "wide_open_position": {
+          "locking": { "type": "boolean", "label": "Locking" },
+          "reduction_patient": { "type": "boolean", "label": "Patient" },
+          "reduction_examiner": { "type": "boolean", "label": "Examiner" }
+        }
+      },
+      "left": {
+        "while_opening": {
+          "locking": { "type": "boolean", "label": "Locking" },
+          "reduction_patient": { "type": "boolean", "label": "Patient" },
+          "reduction_examiner": { "type": "boolean", "label": "Examiner" }
+        },
+        "wide_open_position": {
+          "locking": { "type": "boolean", "label": "Locking" },
+          "reduction_patient": { "type": "boolean", "label": "Patient" },
+          "reduction_examiner": { "type": "boolean", "label": "Examiner" }
+        }
+      }
+    },
+
+    "E9_muscle_tmj_palpation": {
+      "label": "Muscle & TMJ Pain with Palpation",
+      "spreading_pain_note": "Pain that extends beyond palpation site but stays within the same muscle boundary (DC/TMD placeholder for myofascial pain with spreading diagnosis)",
+      "right": {
+        "temporalis_posterior": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "familiar_headache": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "temporalis_middle": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "familiar_headache": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "temporalis_anterior": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "familiar_headache": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "masseter_origin": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "masseter_body": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "masseter_insertion": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "tmj_lateral_pole": {
+          "pressure_kg": 0.5,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "tmj_around_lateral_pole": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        }
+      },
+      "left": {
+        "temporalis_posterior": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "familiar_headache": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "temporalis_middle": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "familiar_headache": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "temporalis_anterior": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "familiar_headache": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "masseter_origin": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "masseter_body": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "masseter_insertion": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" },
+          "spreading_pain": { "type": "boolean" }
+        },
+        "tmj_lateral_pole": {
+          "pressure_kg": 0.5,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "tmj_around_lateral_pole": {
+          "pressure_kg": 1.0,
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        }
+      }
+    },
+
+    "E10_supplemental_palpation": {
+      "label": "Supplemental Muscle Pain with Palpation",
+      "supplemental": true,
+      "pressure_kg": 0.5,
+      "right": {
+        "posterior_mandibular": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "submandibular": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "lateral_pterygoid": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "temporalis_tendon": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        }
+      },
+      "left": {
+        "posterior_mandibular": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "submandibular": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "lateral_pterygoid": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        },
+        "temporalis_tendon": {
+          "pain": { "type": "boolean" },
+          "familiar_pain": { "type": "boolean" },
+          "referred_pain": { "type": "boolean" }
+        }
+      }
+    },
+
+    "E11_comments": {
+      "label": "Comments",
+      "type": "text",
+      "multiline": true
+    }
+  }
+}

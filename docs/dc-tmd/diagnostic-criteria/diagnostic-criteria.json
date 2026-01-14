@@ -1,0 +1,535 @@
+{
+  "meta": {
+    "title": "Diagnostic Criteria for the Most Common Temporomandibular Disorders",
+    "subtitle": "Symptom Questionnaire and Clinical Examination Items",
+    "version": "2/6/2020",
+    "source": {
+      "authors": "Schiffman E, Ohrbach R, Truelove E, Look J, Anderson G, Goulet J-P, List T, Svensson P, Gonzalez Y, Lobbezoo F, Michelotti A, Brooks S, Ceusters W, Drangsholt M, Ettlin D, Gaul C, Goldberg LJ, Haythornthwaite J, Hollender L, Jensen R, John MT, deLaat A, deLeeuw R, Maixner W, van der Meulen M, Murray GM, Nixdorf DR, Palla S, Petersson A, Pionchon P, Smith B, Visscher C, Zakrzewska J, and Dworkin SF",
+      "year": 2014,
+      "title": "Diagnostic Criteria for Temporomandibular Disorders (DC/TMD) for Clinical and Research Applications: Recommendations of the International RDC/TMD Consortium Network and Orofacial Pain Special Interest Group",
+      "journal": "Journal of Oral & Facial Pain and Headache",
+      "volume": 28,
+      "pages": "6-27"
+    },
+    "notes": [
+      "All listed criteria in History (DC/TMD Symptom Questionnaire) and Examination (DC/TMD Examination Form) are required for the specific Diagnosis unless otherwise stated",
+      "Each criterion is positive unless otherwise specified",
+      "Exact time period for time-relevant History or Examination items is not specified since that is a function of how the items are constructed to suit a given purpose; the logic does not change according to time period",
+      "The time period as assessed by history items for disc displacement without reduction vs with reduction is relative"
+    ]
+  },
+
+  "questionnaire_items": {
+    "SQ3": "Pain in a masticatory structure",
+    "SQ4": "Pain modified by jaw movement, function, or parafunction",
+    "SQ5": "Headache of any type in temporal region",
+    "SQ7": "Headache affected by jaw movement, function, or parafunction",
+    "SQ8": "Current TMJ noises by history",
+    "SQ9": "TMJ lock with limited opening (current or prior)",
+    "SQ10": "Limitation severe enough to interfere with ability to eat",
+    "SQ11": "Current intermittent locking",
+    "SQ12": "Current limited opening",
+    "SQ13": "TMJ locking or catching in wide open jaw position",
+    "SQ14": "Unable to close mouth without specific maneuver"
+  },
+
+  "examination_items": {
+    "E1a": "Location of pain in last 30 days",
+    "E1b": "Location of headache in last 30 days",
+    "E4b": "Maximum unassisted opening with pain assessment",
+    "E4c": "Maximum assisted opening with pain assessment",
+    "E5a": "Right lateral excursion with pain assessment",
+    "E5b": "Left lateral excursion with pain assessment",
+    "E5c": "Protrusion with pain assessment",
+    "E6": "TMJ noises during open and close movements",
+    "E7": "TMJ noises during lateral and protrusive movements",
+    "E8": "Joint locking assessment",
+    "E9": "Muscle and TMJ pain with palpation",
+    "E10": "Supplemental muscle pain with palpation"
+  },
+
+  "disorders": {
+    "pain_disorders": [
+      {
+        "id": "myalgia",
+        "name": "Myalgia",
+        "icd9": "729.1",
+        "sensitivity": 0.90,
+        "specificity": 0.95,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "Pain in a masticatory structure",
+              "questionnaire_items": ["SQ3"],
+              "required": true
+            },
+            {
+              "description": "Pain modified by jaw movement, function, or parafunction",
+              "questionnaire_items": ["SQ4"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Confirmation of pain in masticatory muscle(s)",
+              "form_items": ["E1a"],
+              "required": true
+            },
+            {
+              "description": "Familiar pain in masticatory muscle(s) with either muscle palpation or maximum opening",
+              "form_items": ["E4b", "E4c", "E9", "E10"],
+              "form_logic": "(E4b OR E4c OR E9: familiar pain in temporalis or masseter) OR (E10: familiar pain in supplemental muscles, if E10 included)",
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "local_myalgia",
+        "name": "Local Myalgia",
+        "icd9": "729.1",
+        "sensitivity": null,
+        "specificity": null,
+        "sensitivity_specificity_note": "Not established",
+        "parent": "myalgia",
+        "criteria": {
+          "history": [
+            {
+              "description": "Same as for Myalgia",
+              "questionnaire_items": ["SQ3", "SQ4"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Confirmation of pain in masticatory muscle(s)",
+              "form_items": ["E1a"],
+              "required": true
+            },
+            {
+              "description": "Familiar pain with muscle palpation",
+              "form_items": ["E9", "E10"],
+              "form_logic": "(E9: familiar pain in masseter or temporalis) OR (E10: familiar pain in supplemental muscles, if E10 included)",
+              "required": true
+            },
+            {
+              "description": "Pain remains local to the area of stimulation",
+              "form_items": ["E9", "E10"],
+              "form_logic": "(E9: negative referred pain AND negative spreading pain) AND (E10: negative referred pain AND negative spreading pain, if E10 included)",
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "myofascial_pain_with_spreading",
+        "name": "Myofascial Pain with Spreading",
+        "icd9": "729.1",
+        "sensitivity": null,
+        "specificity": null,
+        "sensitivity_specificity_note": "Not established",
+        "parent": "myalgia",
+        "criteria": {
+          "history": [
+            {
+              "description": "Same as for Myalgia",
+              "questionnaire_items": ["SQ3", "SQ4"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Confirmation of pain in masticatory muscle(s)",
+              "form_items": ["E1a"],
+              "required": true
+            },
+            {
+              "description": "Familiar pain with muscle palpation",
+              "form_items": ["E9", "E10"],
+              "form_logic": "(E9: familiar pain in masseter or temporalis) OR (E10: familiar pain in supplemental muscles, if E10 included)",
+              "required": true
+            },
+            {
+              "description": "Spreading (but not referred) pain with muscle palpation",
+              "form_items": ["E9", "E10"],
+              "form_logic": "((E9: spreading pain) OR (E10: spreading pain, if E10 included)) AND ((E9: negative referred pain) AND (E10: negative referred pain, if E10 included))",
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "myofascial_pain_with_referral",
+        "name": "Myofascial Pain with Referral",
+        "icd9": "729.1",
+        "sensitivity": 0.86,
+        "specificity": 0.98,
+        "parent": "myalgia",
+        "criteria": {
+          "history": [
+            {
+              "description": "Same as for Myalgia",
+              "questionnaire_items": ["SQ3", "SQ4"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Confirmation of pain in masticatory muscle(s)",
+              "form_items": ["E1a"],
+              "required": true
+            },
+            {
+              "description": "Familiar pain with muscle palpation",
+              "form_items": ["E9", "E10"],
+              "form_logic": "(E9: familiar pain in masseter or temporalis) OR (E10: familiar pain in supplemental muscles, if E10 included)",
+              "required": true
+            },
+            {
+              "description": "Referred pain with muscle palpation",
+              "form_items": ["E9", "E10"],
+              "form_logic": "(E9: positive referred pain) OR (E10: positive referred pain, if E10 included)",
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "arthralgia",
+        "name": "Arthralgia",
+        "icd9": "524.62",
+        "sensitivity": 0.89,
+        "specificity": 0.98,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "Pain in a masticatory structure",
+              "questionnaire_items": ["SQ3"],
+              "required": true
+            },
+            {
+              "description": "Pain modified by jaw movement, function, or parafunction",
+              "questionnaire_items": ["SQ4"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Confirmation of pain in TMJ(s)",
+              "form_items": ["E1a"],
+              "required": true
+            },
+            {
+              "description": "Familiar pain with TMJ palpation or range of motion",
+              "form_items": ["E4b", "E4c", "E5a", "E5b", "E5c", "E9"],
+              "form_logic": "E4b, E4c, E5a-c, or E9: familiar pain in TMJ",
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "headache_attributed_to_tmd",
+        "name": "Headache Attributed to TMD",
+        "icd9": ["339.89", "784.0"],
+        "icd9_descriptions": ["other specified headache syndrome", "headache"],
+        "sensitivity": 0.89,
+        "specificity": 0.87,
+        "parent": null,
+        "notes": [
+          "For a secondary headache diagnosis, a primary diagnosis of either myalgia or arthralgia is required"
+        ],
+        "requires_primary_diagnosis": ["myalgia", "arthralgia"],
+        "criteria": {
+          "history": [
+            {
+              "description": "Headache of any type in temporal region",
+              "questionnaire_items": ["SQ5"],
+              "required": true
+            },
+            {
+              "description": "Headache affected by jaw movement, function, or parafunction",
+              "questionnaire_items": ["SQ7"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Confirmation of headache in temporalis muscle",
+              "form_items": ["E1b"],
+              "required": true
+            },
+            {
+              "description": "Report of familiar headache in temporalis area from either palpation of the temporalis muscle or range of motion of jaw",
+              "form_items": ["E4b", "E4c", "E5a", "E5b", "E5c", "E9"],
+              "form_logic": "E4b, E4c, E5a-c, or E9: familiar headache pain in the temporalis muscle",
+              "required": true
+            }
+          ]
+        }
+      }
+    ],
+
+    "joint_disorders": [
+      {
+        "id": "disc_displacement_with_reduction",
+        "name": "Disc Displacement with Reduction",
+        "icd9": "524.63",
+        "sensitivity": 0.34,
+        "specificity": 0.92,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "Current TMJ noises by history OR patient reports noise during the examination",
+              "questionnaire_items": ["SQ8"],
+              "form_items_alternative": ["E6", "E7"],
+              "logic": "SQ8 OR (E6 or E7: noise reported by patient)",
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Click(s) with opening and closing",
+              "form_items": ["E6"],
+              "form_logic": "E6: (open & close) click",
+              "required": false,
+              "alternative_to": "click_open_close_and_excursive"
+            },
+            {
+              "description": "Both click with opening or closing AND click with lateral or protrusive movements",
+              "form_items": ["E6", "E7"],
+              "form_logic": "(E6: open or close click) AND (E7: protrusive or lateral click)",
+              "required": false,
+              "alternative_to": "click_open_and_close"
+            }
+          ],
+          "examination_logic": "(E6: open & close click) OR ((E6: open or close click) AND (E7: protrusive or lateral click))"
+        }
+      },
+      {
+        "id": "disc_displacement_with_reduction_intermittent_locking",
+        "name": "Disc Displacement with Reduction, with Intermittent Locking",
+        "icd9": "524.63",
+        "sensitivity": 0.38,
+        "specificity": 0.98,
+        "parent": "disc_displacement_with_reduction",
+        "criteria": {
+          "history": [
+            {
+              "description": "Same as disc displacement with reduction",
+              "inherits_from": "disc_displacement_with_reduction",
+              "required": true
+            },
+            {
+              "description": "Current intermittent locking with limited opening",
+              "questionnaire_items": ["SQ11", "SQ12"],
+              "questionnaire_logic": "SQ11=yes AND SQ12=no",
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Same as disc displacement with reduction",
+              "inherits_from": "disc_displacement_with_reduction",
+              "required": true
+            },
+            {
+              "description": "When disorder present in clinic: maneuver required to open mouth",
+              "form_items": ["E8"],
+              "required": false,
+              "optional": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "disc_displacement_without_reduction_with_limited_opening",
+        "name": "Disc Displacement without Reduction, with Limited Opening",
+        "icd9": "524.63",
+        "sensitivity": 0.80,
+        "specificity": 0.97,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "Current TMJ lock with limited opening",
+              "questionnaire_items": ["SQ9"],
+              "note": "Current = based on SQ9 interpretation",
+              "required": true
+            },
+            {
+              "description": "Limitation severe enough to interfere with ability to eat",
+              "questionnaire_items": ["SQ10"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Passive stretch (maximum assisted opening) < 40mm",
+              "form_items": ["E4c"],
+              "form_logic": "E4c < 40mm including vertical incisal overlap",
+              "threshold_mm": 40,
+              "threshold_operator": "<",
+              "includes_vertical_overlap": true,
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "disc_displacement_without_reduction_without_limited_opening",
+        "name": "Disc Displacement without Reduction, without Limited Opening",
+        "icd9": "524.63",
+        "sensitivity": 0.54,
+        "specificity": 0.79,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "Prior TMJ lock with limited opening",
+              "questionnaire_items": ["SQ9"],
+              "note": "Prior = based on SQ9 interpretation (change over time)",
+              "required": true
+            },
+            {
+              "description": "Limitation severe enough to interfere with ability to eat",
+              "questionnaire_items": ["SQ10"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Passive stretch (maximum assisted opening) >= 40mm",
+              "form_items": ["E4c"],
+              "form_logic": "E4c >= 40mm including vertical incisal overlap",
+              "threshold_mm": 40,
+              "threshold_operator": ">=",
+              "includes_vertical_overlap": true,
+              "required": true
+            }
+          ]
+        },
+        "notes": [
+          "'Current' and 'Prior' (as based on SQ9) for distinguishing the 'with limitation' vs 'without limitation' variants are interpreted based on change over time as determined by history and as confirmed by the clinical examination for jaw range of motion"
+        ]
+      },
+      {
+        "id": "degenerative_joint_disease",
+        "name": "Degenerative Joint Disease",
+        "icd9": "715.18",
+        "sensitivity": 0.55,
+        "specificity": 0.61,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "Current TMJ noises by history OR patient reports noise during the examination",
+              "questionnaire_items": ["SQ8"],
+              "form_items_alternative": ["E6", "E7"],
+              "logic": "SQ8 OR (E6 or E7: noise reported by patient)",
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "Crepitus during jaw movement",
+              "form_items": ["E6", "E7"],
+              "form_logic": "E6 or E7: crepitus detected by examiner",
+              "required": true
+            }
+          ]
+        }
+      },
+      {
+        "id": "subluxation",
+        "name": "Subluxation",
+        "icd9": "830.0",
+        "sensitivity": 0.98,
+        "specificity": 1.00,
+        "parent": null,
+        "criteria": {
+          "history": [
+            {
+              "description": "TMJ locking or catching in wide open jaw position",
+              "questionnaire_items": ["SQ13"],
+              "required": true
+            },
+            {
+              "description": "Unable to close mouth without specific maneuver",
+              "questionnaire_items": ["SQ14"],
+              "required": true
+            }
+          ],
+          "examination": [
+            {
+              "description": "When disorder present in clinic: maneuver required to close mouth",
+              "form_items": ["E8"],
+              "required": false,
+              "optional": true
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "diagnostic_hierarchy": {
+    "myalgia_subtypes": {
+      "description": "Myalgia subtypes are mutually exclusive based on pain pattern",
+      "parent": "myalgia",
+      "subtypes": ["local_myalgia", "myofascial_pain_with_spreading", "myofascial_pain_with_referral"],
+      "differentiation": {
+        "local_myalgia": "Pain remains local, no spreading, no referral",
+        "myofascial_pain_with_spreading": "Pain spreads within muscle boundary, no referral",
+        "myofascial_pain_with_referral": "Pain refers beyond muscle boundary"
+      }
+    },
+    "disc_displacement_variants": {
+      "description": "Disc displacement variants based on reduction and opening limitation",
+      "variants": [
+        "disc_displacement_with_reduction",
+        "disc_displacement_with_reduction_intermittent_locking",
+        "disc_displacement_without_reduction_with_limited_opening",
+        "disc_displacement_without_reduction_without_limited_opening"
+      ]
+    }
+  },
+
+  "change_history": [
+    {
+      "date": "2020-02-06",
+      "changes": [
+        "\"Myofascial Pain\" revised to \"Myofascial Pain with Spreading\", to reconcile the table with the decision tree previously updated"
+      ]
+    },
+    {
+      "date": "2018-07-04",
+      "changes": [
+        "For Disk Displacement with Reduction, Examination E7 was clarified by adding \"(protrusive or lateral)\" for the type of click expected to fulfill criterion"
+      ]
+    },
+    {
+      "date": "2015-10-23",
+      "changes": [
+        "Incorrect sensitivity and specificity values were present for some disorders; this error was identified by an observant translation team leader, and the error is assumed to have emerged during preparation of the table prior to computation of final sensitivity and specificity estimates for the published DC/TMD"
+      ]
+    },
+    {
+      "date": "2014-05-25",
+      "changes": [
+        "Added \"OR\" to \"Current TMJ noises by history\" for each of Disc Displacement with Reduction and Degenerative Joint Disease, as per published DC/TMD",
+        "Added diagnostic criterion note to Headache Secondary to TMD, with regard to necessity of either a myalgia or arthralgia diagnosis in order to have a secondary headache",
+        "Corrected minor punctuation discrepancies"
+      ]
+    },
+    {
+      "date": "2014-04-29",
+      "changes": [
+        "Corrected name of disorder \"myofascial pain\"; was incorrectly stated as \"myofascial pain with spreading\""
+      ]
+    }
+  ]
+}
