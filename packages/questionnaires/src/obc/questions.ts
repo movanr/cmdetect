@@ -5,6 +5,7 @@
  * Source: Copyright Ohrbach R. Deutsche Übersetzung: Asendorf A, Eberhard L,
  *         Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig.
  */
+import { QUESTIONNAIRE_ID } from "..";
 import type { OBCQuestion, OBCQuestionId, OBCQuestionnaire } from "../types";
 import { OBC_SECTIONS, OBC_SECTION_ORDER } from "./sections";
 
@@ -173,7 +174,7 @@ export const OBC_QUESTION_ORDER: OBCQuestionId[] = [
  * OBC questionnaire metadata
  */
 export const OBC_METADATA = {
-  id: "obc",
+  id: QUESTIONNAIRE_ID.OBC,
   title: "OBC - Oral Behaviors Checklist",
   version: "12/2018",
   source: "Copyright Ohrbach R. Verfügbar unter http://www.rdc-tmdinternational.org",

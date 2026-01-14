@@ -1,12 +1,11 @@
 /**
  * Scale Question Component (0-10 horizontal buttons)
  * Shows 11 buttons in a row with endpoint labels below
- * Requires explicit Next button click to proceed
+ * Auto-advances after selection with brief animation feedback
  */
 
 import { useFormContext } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { GenericQuestion } from "../../types";
 
 type ScaleQuestionProps = {
@@ -20,12 +19,10 @@ export function ScaleQuestion({ question, onNavigateNext }: ScaleQuestionProps) 
 
   const handleSelect = (value: string) => {
     setValue(question.id, value);
-  };
-
-  const handleNext = () => {
-    if (currentValue !== undefined) {
+    // Brief delay to show selection feedback before navigating
+    setTimeout(() => {
       onNavigateNext();
-    }
+    }, 200);
   };
 
   // Generate 0-10 options
@@ -43,17 +40,24 @@ export function ScaleQuestion({ question, onNavigateNext }: ScaleQuestionProps) 
 
       {/* 0-10 horizontal button row */}
       <div className="flex gap-1 sm:gap-2 justify-between">
-        {options.map((value) => (
-          <Button
-            key={value}
-            type="button"
-            variant={currentValue === value ? "default" : "outline"}
-            className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-medium p-0 min-w-0"
-            onClick={() => handleSelect(value)}
-          >
-            {value}
-          </Button>
-        ))}
+        {options.map((value) => {
+          const isSelected = currentValue === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              className={cn(
+                "flex-1 h-12 sm:h-14 text-base sm:text-lg font-medium min-w-0 rounded-md border transition-all duration-150",
+                isSelected
+                  ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary ring-offset-2"
+                  : "bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+              )}
+              onClick={() => handleSelect(value)}
+            >
+              {value}
+            </button>
+          );
+        })}
       </div>
 
       {/* Scale endpoint labels below buttons with connecting lines */}
@@ -76,16 +80,18 @@ export function ScaleQuestion({ question, onNavigateNext }: ScaleQuestionProps) 
         </div>
       )}
 
-      {/* Next button */}
-      <Button
-        type="button"
-        onClick={handleNext}
-        disabled={currentValue === undefined}
-        className="w-full h-12"
-      >
-        Weiter
-        <ChevronRight className="ml-2 h-5 w-5" />
-      </Button>
+      {/* Skip button for skippable questions (e.g., JFLS scales) */}
+      {question.skippable && (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={onNavigateNext}
+            className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+          >
+            Frage auslassen
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,16 +3,13 @@
  * Graded Chronic Pain Scale Version 2.0
  * Source: inform-iadr.com / DC/TMD
  */
-import type {
-  GCPS1MQuestion,
-  GCPS1MQuestionId,
-  GCPS1MQuestionnaire,
-} from "../types";
+import { QUESTIONNAIRE_ID } from "..";
+import type { GCPS1MQuestion, GCPS1MQuestionId, GCPS1MQuestionnaire } from "../types";
 import {
-  GCPS_1M_PAIN_LABELS,
-  GCPS_1M_INTERFERENCE_LABELS,
-  GCPS_1M_DAYS_CONFIG,
   GCPS_1M_6_MONTH_DAYS_CONFIG,
+  GCPS_1M_DAYS_CONFIG,
+  GCPS_1M_INTERFERENCE_LABELS,
+  GCPS_1M_PAIN_LABELS,
 } from "./options";
 
 /**
@@ -90,10 +87,11 @@ export const GCPS_1M_QUESTION_ORDER: GCPS1MQuestionId[] = [
  * GCPS 1-month questionnaire metadata
  */
 export const GCPS_1M_METADATA = {
-  id: "gcps-1m",
+  id: QUESTIONNAIRE_ID.GCPS_1M,
   title: "Graduierung chronischer Schmerzen",
   version: "12/2018",
-  source: "Von Korff M. Deutsche Übersetzung: Asendorf A, Eberhard L, Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig.",
+  source:
+    "Von Korff M. Deutsche Übersetzung: Asendorf A, Eberhard L, Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig.",
   timeframe: "1-month",
 } as const;
 

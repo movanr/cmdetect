@@ -1,5 +1,7 @@
 // TODO: Das sollte alles Zod sein. Zu viel Potential Fehler zu haben.
 
+import { QUESTIONNAIRE_IDS } from "@cmdetect/questionnaires";
+
 /**
  * Validation utilities for auth server endpoints
  */
@@ -31,9 +33,9 @@ export function validateInviteToken(invite_token: any): ValidationResult {
 }
 
 /**
- * Known questionnaire IDs that the system accepts
+ * Known questionnaire IDs that the system accepts (derived from questionnaires package)
  */
-const KNOWN_QUESTIONNAIRE_IDS = ['dc-tmd-sq', 'phq-4', 'gcps-1m', 'jfls-8', 'jfls-20', 'obc'];
+const KNOWN_QUESTIONNAIRE_IDS = QUESTIONNAIRE_IDS;
 
 /**
  * Validates questionnaire response data structure
@@ -57,18 +59,9 @@ export function validateQuestionnaireResponseData(response_data: any): Validatio
     return { valid: false, error: "questionnaire_version is required and must be a string" };
   }
 
-  // Validate answers
+  // Validate answers (empty answers are allowed - some questionnaires support skipping)
   if (!response_data.answers || typeof response_data.answers !== 'object') {
     return { valid: false, error: "answers is required and must be an object" };
-  }
-
-  // Questionnaires that allow skipping all questions (JFLS scales)
-  const ALLOWS_EMPTY_ANSWERS = ['jfls-8', 'jfls-20'];
-
-  // Ensure answers is not empty (unless questionnaire allows it)
-  if (Object.keys(response_data.answers).length === 0 &&
-      !ALLOWS_EMPTY_ANSWERS.includes(response_data.questionnaire_id)) {
-    return { valid: false, error: "answers cannot be empty" };
   }
 
   return { valid: true };

@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { useQuestionnaireResponses } from "../hooks/useQuestionnaireResponses";
 import { DashboardView } from "./dashboard";
 import { SQWizardView } from "./wizard";
@@ -44,7 +45,7 @@ export function AnamnesisReviewContainer({
   const responses = data ?? [];
 
   // Find SQ response for wizard
-  const sqResponse = responses.find((r) => r.questionnaireId === "dc-tmd-sq");
+  const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
 
   // Wizard view
   if (viewMode === "wizard" && sqResponse) {

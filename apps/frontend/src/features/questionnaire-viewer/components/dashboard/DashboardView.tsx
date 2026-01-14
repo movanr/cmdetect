@@ -5,6 +5,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { QUESTIONNAIRE_ID, isQuestionnaireEnabled } from "@cmdetect/questionnaires";
 import { ClipboardList } from "lucide-react";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
@@ -17,12 +18,12 @@ interface DashboardViewProps {
 
 export function DashboardView({ responses, onStartReview }: DashboardViewProps) {
   // Find specific questionnaire responses
-  const sqResponse = responses.find((r) => r.questionnaireId === "dc-tmd-sq");
-  const phq4Response = responses.find((r) => r.questionnaireId === "phq-4");
-  const gcps1mResponse = responses.find((r) => r.questionnaireId === "gcps-1m");
-  const jfls8Response = responses.find((r) => r.questionnaireId === "jfls-8");
-  const jfls20Response = responses.find((r) => r.questionnaireId === "jfls-20");
-  const obcResponse = responses.find((r) => r.questionnaireId === "obc");
+  const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
+  const phq4Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
+  const gcps1mResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
+  const jfls8Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
+  const jfls20Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20);
+  const obcResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.OBC);
 
   // Check if there are any responses at all
   if (responses.length === 0) {
@@ -46,12 +47,14 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
       </CardHeader>
       <CardContent className="space-y-6">
         {/* SQ Section - Symptom Questionnaire */}
-        <section>
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
-            Achse 1 - Symptomfragebogen
-          </h3>
-          <SQStatusCard response={sqResponse} onStartReview={onStartReview} />
-        </section>
+        {isQuestionnaireEnabled(QUESTIONNAIRE_ID.SQ) && (
+          <section>
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+              Achse 1 - Symptomfragebogen
+            </h3>
+            <SQStatusCard response={sqResponse} onStartReview={onStartReview} />
+          </section>
+        )}
         {/* Axis 2 Section - Psychosocial Assessment */}
         <section>
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
@@ -59,43 +62,54 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
           </h3>
           <div className="grid gap-4 md:grid-cols-2 items-start">
             {/* GCPS-1M Card */}
-            <Axis2ScoreCard
-              questionnaireId="gcps-1m"
-              title="GCPS - Graduierung chronischer Schmerzen"
-              subtitle="1-Monats-Version"
-              answers={
-                gcps1mResponse ? (gcps1mResponse.answers as Record<string, string | number>) : null
-              }
-            />
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && (
+              <Axis2ScoreCard
+                questionnaireId={QUESTIONNAIRE_ID.GCPS_1M}
+                title="GCPS - Graduierung chronischer Schmerzen"
+                subtitle="1-Monats-Version"
+                answers={
+                  gcps1mResponse ? (gcps1mResponse.answers as Record<string, string | number>) : null
+                }
+              />
+            )}
 
             {/* JFLS-8 Card */}
-            <Axis2ScoreCard
-              questionnaireId="jfls-8"
-              title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
-              answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
-            />
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && (
+              <Axis2ScoreCard
+                questionnaireId={QUESTIONNAIRE_ID.JFLS8}
+                title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
+                answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
+              />
+            )}
+
             {/* PHQ-4 Card */}
-            <Axis2ScoreCard
-              questionnaireId="phq-4"
-              title="PHQ-4 - Gesundheitsfragebogen für Patienten"
-              subtitle="Depression & Angst"
-              answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
-            />
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && (
+              <Axis2ScoreCard
+                questionnaireId={QUESTIONNAIRE_ID.PHQ4}
+                title="PHQ-4 - Gesundheitsfragebogen für Patienten"
+                subtitle="Depression & Angst"
+                answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
+              />
+            )}
 
             {/* OBC Card */}
-            <Axis2ScoreCard
-              questionnaireId="obc"
-              title="OBC - Oral Behaviors Checklist"
-              subtitle="Orale Parafunktionen"
-              answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
-            />
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && (
+              <Axis2ScoreCard
+                questionnaireId={QUESTIONNAIRE_ID.OBC}
+                title="OBC - Oral Behaviors Checklist"
+                subtitle="Orale Parafunktionen"
+                answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
+              />
+            )}
 
             {/* JFLS-20 Card */}
-            <Axis2ScoreCard
-              questionnaireId="jfls-20"
-              title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
-              answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
-            />
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && (
+              <Axis2ScoreCard
+                questionnaireId={QUESTIONNAIRE_ID.JFLS20}
+                title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
+                answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
+              />
+            )}
           </div>
         </section>
       </CardContent>

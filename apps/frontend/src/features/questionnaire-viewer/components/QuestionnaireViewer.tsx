@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import { ClipboardList } from "lucide-react";
 import {
+  QUESTIONNAIRE_ID,
   QUESTIONNAIRE_TITLES,
   SQ_OFFICE_USE_QUESTIONS,
   SQ_QUESTION_LABELS,
@@ -110,11 +111,11 @@ function QuestionnaireTabContent({ response, patientRecordId }: QuestionnaireTab
       </div>
 
       {/* Questionnaire-specific rendering */}
-      {questionnaireId === "phq-4" && <PHQ4Content answers={answers as Record<string, string>} />}
-      {questionnaireId === "dc-tmd-sq" && (
+      {questionnaireId === QUESTIONNAIRE_ID.PHQ4 && <PHQ4Content answers={answers as Record<string, string>} />}
+      {questionnaireId === QUESTIONNAIRE_ID.SQ && (
         <SQContent response={response} patientRecordId={patientRecordId} />
       )}
-      {questionnaireId !== "phq-4" && questionnaireId !== "dc-tmd-sq" && (
+      {questionnaireId !== QUESTIONNAIRE_ID.PHQ4 && questionnaireId !== QUESTIONNAIRE_ID.SQ && (
         <GenericContent answers={answers} />
       )}
     </div>

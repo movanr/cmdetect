@@ -1,11 +1,13 @@
 /**
  * Choice Question Component
  * Shows vertically stacked option buttons
- * Auto-navigates on selection (like PHQ-4)
+ * Auto-navigates on selection with brief animation feedback
  */
 
+import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import type { ScoredOption } from "@cmdetect/questionnaires";
 import type { GenericQuestion } from "../../types";
 
@@ -23,10 +25,20 @@ export function ChoiceQuestion({
   onNavigateNext,
 }: ChoiceQuestionProps) {
   const { setValue } = useFormContext<Record<string, string>>();
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+
+  // Reset selection state when question changes
+  useEffect(() => {
+    setSelectedValue(null);
+  }, [question.id]);
 
   const handleSelect = (value: string) => {
     setValue(question.id, value);
-    onNavigateNext();
+    setSelectedValue(value);
+    // Brief delay to show selection feedback before navigating
+    setTimeout(() => {
+      onNavigateNext();
+    }, 350);
   };
 
   return (
@@ -43,17 +55,26 @@ export function ChoiceQuestion({
 
       {/* Options - vertically stacked */}
       <div className="flex flex-col gap-3">
-        {options.map((option) => (
-          <Button
-            key={option.value}
-            type="button"
-            variant="outline"
-            className="w-full h-12 text-base font-medium justify-start px-4 active:bg-muted"
-            onClick={() => handleSelect(option.value)}
-          >
-            {option.label}
-          </Button>
-        ))}
+        {options.map((option) => {
+          const isSelected = selectedValue === option.value;
+          return (
+            <motion.button
+              key={option.value}
+              type="button"
+              animate={isSelected ? { scale: [1, 1.02, 1] } : {}}
+              transition={{ duration: 0.25 }}
+              className={cn(
+                "w-full h-12 text-base font-medium text-left px-4 rounded-md border transition-colors",
+                isSelected
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
+              )}
+              onClick={() => handleSelect(option.value)}
+            >
+              {option.label}
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );

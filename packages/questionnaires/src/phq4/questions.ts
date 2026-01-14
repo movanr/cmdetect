@@ -2,6 +2,7 @@
  * PHQ-4 Question Definitions (German)
  * Source: Prof. Dr. Bernd Lowe, 2015, Universitatsklinikum Hamburg-Eppendorf
  */
+import { QUESTIONNAIRE_ID } from "..";
 import type { PHQ4Question, PHQ4QuestionId, PHQ4Questionnaire } from "../types";
 import { PHQ4_OPTIONS } from "./options";
 
@@ -48,7 +49,7 @@ export const PHQ4_QUESTION_ORDER: PHQ4QuestionId[] = [
  * PHQ-4 questionnaire metadata
  */
 export const PHQ4_METADATA = {
-  id: "phq-4",
+  id: QUESTIONNAIRE_ID.PHQ4,
   title: "PHQ-4 Gesundheitsfragebogen",
   version: "1.0",
   instruction:

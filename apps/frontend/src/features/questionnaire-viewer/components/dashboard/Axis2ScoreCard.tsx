@@ -8,30 +8,31 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type {
   GCPS1MAnswers,
   GCPSGrade,
-  JFLS8Answers,
-  JFLS8LimitationLevel,
   JFLS20Answers,
   JFLS20LimitationLevel,
   JFLS20SubscaleScore,
+  JFLS8Answers,
+  JFLS8LimitationLevel,
   OBCAnswers,
   OBCRiskLevel,
 } from "@cmdetect/questionnaires";
 import {
   calculateGCPS1MScore,
-  calculateJFLS8Score,
   calculateJFLS20Score,
+  calculateJFLS8Score,
   calculateOBCScore,
   calculatePHQ4Score,
   getPHQ4Interpretation,
   getSubscaleInterpretation,
-  JFLS20_SUBSCALE_LABELS,
   JFLS20_REFERENCE_VALUES,
+  JFLS20_SUBSCALE_LABELS,
+  QUESTIONNAIRE_ID,
 } from "@cmdetect/questionnaires";
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { GCPS1MSummary } from "../GCPS1MSummary";
-import { JFLS8Summary } from "../JFLS8Summary";
 import { JFLS20Summary } from "../JFLS20Summary";
+import { JFLS8Summary } from "../JFLS8Summary";
 import { OBCSummary } from "../OBCSummary";
 import { PHQ4Summary } from "../PHQ4Summary";
 
@@ -225,17 +226,13 @@ function JFLS20SubscaleDisplay({
   refValues: { healthy: { mean: number }; chronicTMD: { mean: number } };
 }) {
   const isElevated =
-    subscale.isValid &&
-    subscale.score !== null &&
-    subscale.score >= refValues.chronicTMD.mean;
+    subscale.isValid && subscale.score !== null && subscale.score >= refValues.chronicTMD.mean;
 
   if (!subscale.isValid) {
     return (
       <div className="flex items-center gap-1.5">
         <span className="text-muted-foreground">{label}:</span>
-        <span className="text-muted-foreground text-xs">
-          ({subscale.missingCount} fehlend)
-        </span>
+        <span className="text-muted-foreground text-xs">({subscale.missingCount} fehlend)</span>
       </div>
     );
   }
@@ -247,9 +244,7 @@ function JFLS20SubscaleDisplay({
         {subscale.score?.toFixed(1)}
       </span>
       {isElevated && (
-        <span className="text-[10px] text-red-600">
-          (≥{refValues.chronicTMD.mean.toFixed(1)})
-        </span>
+        <span className="text-[10px] text-red-600">(≥{refValues.chronicTMD.mean.toFixed(1)})</span>
       )}
     </div>
   );
@@ -282,7 +277,7 @@ export function Axis2ScoreCard({
   }
 
   // GCPS-1M Scoring
-  if (questionnaireId === "gcps-1m") {
+  if (questionnaireId === QUESTIONNAIRE_ID.GCPS_1M) {
     const gcpsScore = calculateGCPS1MScore(answers as GCPS1MAnswers);
     const activeGradeIndex = gcpsScore.grade;
 
@@ -397,103 +392,105 @@ export function Axis2ScoreCard({
         >
           <div className="overflow-hidden">
             <CardContent className="border-t bg-muted/20 p-4 space-y-4">
-            {/* Charakteristische Schmerzintensität */}
-            <div>
-              <p className="text-sm font-medium mb-2">
-                Charakteristische Schmerzintensität: {gcpsScore.cpi}
-              </p>
-              <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                {CPI_SEGMENTS.map((segment, index) => (
-                  <div
-                    key={segment.label}
-                    className={`${index === 0 ? "flex-[0.5]" : "flex-1"} ${segment.color} ${
-                      index === activeCPISegment
-                        ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                        : "opacity-40"
-                    } flex items-center justify-center transition-all`}
-                  >
-                    <span className="text-[9px] font-medium text-white drop-shadow-sm">
-                      {segment.range}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex mt-1 text-[9px]">
-                <div
-                  className={`flex-[0.5] text-center ${activeCPISegment === 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                >
-                  Keine
-                </div>
-                <div
-                  className={`flex-1 text-center ${activeCPISegment === 1 ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                >
-                  Gering
-                </div>
-                <div
-                  className={`flex-1 text-center ${activeCPISegment === 2 ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                >
-                  Hoch
-                </div>
-              </div>
-            </div>
-
-            {/* Beeinträchtigungswert */}
-            <div>
-              <p className="text-sm font-medium mb-2">
-                Beeinträchtigungswert: {gcpsScore.interferenceScore} →{" "}
-                {gcpsScore.interferencePoints} BP
-              </p>
-              <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                {INTERFERENCE_SEGMENTS.map((segment, index) => (
-                  <div
-                    key={segment.bp}
-                    className={`flex-1 ${segment.color} ${
-                      index === activeInterferenceSegment
-                        ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                        : "opacity-40"
-                    } flex items-center justify-center transition-all`}
-                  >
-                    <span className="text-[9px] font-medium text-white drop-shadow-sm">
-                      {segment.range}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex mt-1 text-[9px]">
-                {INTERFERENCE_SEGMENTS.map((segment, index) => (
-                  <div
-                    key={segment.bp}
-                    className={`flex-1 text-center ${
-                      index === activeInterferenceSegment
-                        ? "font-medium text-foreground"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {segment.bp} BP
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Beeinträchtigungstage und Gesamt-BP */}
-            <div className="flex gap-4 text-sm pt-2 border-t">
+              {/* Charakteristische Schmerzintensität */}
               <div>
-                <span className="text-muted-foreground">Beeinträchtigungstage:</span>{" "}
-                <span className="font-medium">
-                  {gcpsScore.disabilityDays} {gcpsScore.disabilityDays === 1 ? "Tag" : "Tage"}
-                </span>{" "}
-                <span className="text-muted-foreground">→ {gcpsScore.disabilityDaysPoints} BP</span>
+                <p className="text-sm font-medium mb-2">
+                  Charakteristische Schmerzintensität: {gcpsScore.cpi}
+                </p>
+                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
+                  {CPI_SEGMENTS.map((segment, index) => (
+                    <div
+                      key={segment.label}
+                      className={`${index === 0 ? "flex-[0.5]" : "flex-1"} ${segment.color} ${
+                        index === activeCPISegment
+                          ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
+                          : "opacity-40"
+                      } flex items-center justify-center transition-all`}
+                    >
+                      <span className="text-[9px] font-medium text-white drop-shadow-sm">
+                        {segment.range}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex mt-1 text-[9px]">
+                  <div
+                    className={`flex-[0.5] text-center ${activeCPISegment === 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                  >
+                    Keine
+                  </div>
+                  <div
+                    className={`flex-1 text-center ${activeCPISegment === 1 ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                  >
+                    Gering
+                  </div>
+                  <div
+                    className={`flex-1 text-center ${activeCPISegment === 2 ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                  >
+                    Hoch
+                  </div>
+                </div>
               </div>
-              <div>
-                <span className="text-muted-foreground">Gesamt-BP:</span>{" "}
-                <span className="font-medium">{gcpsScore.totalDisabilityPoints}</span>
-              </div>
-            </div>
 
-            {/* Original answers */}
-            <div className="pt-2 border-t">
-              <GCPS1MSummary answers={answers as GCPS1MAnswers} />
-            </div>
+              {/* Beeinträchtigungswert */}
+              <div>
+                <p className="text-sm font-medium mb-2">
+                  Beeinträchtigungswert: {gcpsScore.interferenceScore} →{" "}
+                  {gcpsScore.interferencePoints} BP
+                </p>
+                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
+                  {INTERFERENCE_SEGMENTS.map((segment, index) => (
+                    <div
+                      key={segment.bp}
+                      className={`flex-1 ${segment.color} ${
+                        index === activeInterferenceSegment
+                          ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
+                          : "opacity-40"
+                      } flex items-center justify-center transition-all`}
+                    >
+                      <span className="text-[9px] font-medium text-white drop-shadow-sm">
+                        {segment.range}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex mt-1 text-[9px]">
+                  {INTERFERENCE_SEGMENTS.map((segment, index) => (
+                    <div
+                      key={segment.bp}
+                      className={`flex-1 text-center ${
+                        index === activeInterferenceSegment
+                          ? "font-medium text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {segment.bp} BP
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Beeinträchtigungstage und Gesamt-BP */}
+              <div className="flex gap-4 text-sm pt-2 border-t">
+                <div>
+                  <span className="text-muted-foreground">Beeinträchtigungstage:</span>{" "}
+                  <span className="font-medium">
+                    {gcpsScore.disabilityDays} {gcpsScore.disabilityDays === 1 ? "Tag" : "Tage"}
+                  </span>{" "}
+                  <span className="text-muted-foreground">
+                    → {gcpsScore.disabilityDaysPoints} BP
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Gesamt-BP:</span>{" "}
+                  <span className="font-medium">{gcpsScore.totalDisabilityPoints}</span>
+                </div>
+              </div>
+
+              {/* Original answers */}
+              <div className="pt-2 border-t">
+                <GCPS1MSummary answers={answers as GCPS1MAnswers} />
+              </div>
             </CardContent>
           </div>
         </div>
@@ -502,7 +499,7 @@ export function Axis2ScoreCard({
   }
 
   // JFLS-8 Scoring
-  if (questionnaireId === "jfls-8") {
+  if (questionnaireId === QUESTIONNAIRE_ID.JFLS8) {
     const jflsScore = calculateJFLS8Score(answers as JFLS8Answers);
     const activeLimitationIndex = jflsScore.limitationLevel
       ? JFLS8_LIMITATION_SEGMENTS.findIndex(
@@ -619,7 +616,7 @@ export function Axis2ScoreCard({
   }
 
   // JFLS-20 Scoring (same methodology as JFLS-8)
-  if (questionnaireId === "jfls-20") {
+  if (questionnaireId === QUESTIONNAIRE_ID.JFLS20) {
     const jflsScore = calculateJFLS20Score(answers as JFLS20Answers);
     const activeLimitationIndex = jflsScore.limitationLevel
       ? JFLS20_LIMITATION_SEGMENTS.findIndex(
@@ -656,7 +653,9 @@ export function Axis2ScoreCard({
           </div>
 
           {/* Limitation level label */}
-          <p className="text-sm text-muted-foreground mb-2">Kieferfunktions-Einschränkung (erweitert)</p>
+          <p className="text-sm text-muted-foreground mb-2">
+            Kieferfunktions-Einschränkung (erweitert)
+          </p>
 
           {/* Limitation scale */}
           <div className="relative">
@@ -755,7 +754,7 @@ export function Axis2ScoreCard({
   }
 
   // OBC Scoring
-  if (questionnaireId === "obc") {
+  if (questionnaireId === QUESTIONNAIRE_ID.OBC) {
     const obcScore = calculateOBCScore(answers as OBCAnswers);
     const activeRiskIndex = OBC_RISK_SEGMENTS.findIndex(
       (segment) => segment.level === obcScore.riskLevel
@@ -860,7 +859,7 @@ export function Axis2ScoreCard({
   }
 
   // Only PHQ-4 scoring is implemented
-  if (questionnaireId !== "phq-4") {
+  if (questionnaireId !== QUESTIONNAIRE_ID.PHQ4) {
     return (
       <Card>
         <CardHeader className="p-4">

@@ -13,7 +13,7 @@ export function useUsers() {
   return useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const result = await execute(GET_USERS);
+      const result = await execute(GET_USERS, {});
       return result.user || [];
     },
   });

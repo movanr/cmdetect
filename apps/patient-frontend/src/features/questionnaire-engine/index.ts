@@ -5,35 +5,32 @@
 
 // Types
 export type {
-  QuestionType,
   GenericQuestion,
   GenericQuestionnaire,
-  QuestionnaireFlowItem,
   NavigationState,
+  QuestionnaireFlowItem,
   QuestionnaireProgress,
+  QuestionType,
 } from "./types";
 
 // Config
 export {
-  QUESTIONNAIRE_FLOW,
+  getFlowIds,
   getFlowItemById,
   getNextFlowItem,
-  getFlowIds,
+  QUESTIONNAIRE_FLOW,
   TOTAL_QUESTIONNAIRES,
 } from "./config/flowConfig";
 
 // Hooks
-export { useQuestionnaireForm } from "./hooks/useQuestionnaireForm";
 export { useLinearNavigation } from "./hooks/useLinearNavigation";
-
-// Persistence
-export { saveProgress, loadProgress, clearProgress } from "./persistence/storage";
+export { useQuestionnaireForm } from "./hooks/useQuestionnaireForm";
 
 // Components
 export { GenericWizard } from "./components/GenericWizard";
+export { ProgressHeader, type TransitionPhase } from "./components/ProgressHeader";
 export { QuestionnaireComplete } from "./components/QuestionnaireComplete";
-export { ProgressHeader } from "./components/ProgressHeader";
-export { QuestionRenderer } from "./components/questions/QuestionRenderer";
-export { ScaleQuestion } from "./components/questions/ScaleQuestion";
 export { ChoiceQuestion } from "./components/questions/ChoiceQuestion";
 export { NumericQuestion } from "./components/questions/NumericQuestion";
+export { QuestionRenderer } from "./components/questions/QuestionRenderer";
+export { ScaleQuestion } from "./components/questions/ScaleQuestion";

@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { FormProvider } from "react-hook-form";
-import { AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertCircle, CheckCircle2, AlertTriangle, Lock, ClipboardList, Check } from "lucide-react";
+import { CMDetectLogo } from "../components/CMDetectLogo";
 import { execute } from "../graphql/execute";
 import {
   validateInviteToken,
@@ -24,6 +26,7 @@ import {
   useQuestionnaireForm,
   GenericWizard,
   type GenericQuestionnaire,
+  type TransitionPhase,
 } from "../features/questionnaire-engine";
 
 // SQ - kept separate due to enableWhen logic
@@ -75,6 +78,10 @@ function PatientFlowPage() {
     questionnaire_version: string;
     answers: Record<string, unknown>;
   } | null>(null);
+
+  // Transition animation state
+  const [transitionPhase, setTransitionPhase] = useState<TransitionPhase>("active");
+  const [nextQuestionnaireId, setNextQuestionnaireId] = useState<string | null>(null);
 
   // Ref to prevent double validation (React Strict Mode)
   const hasValidatedToken = useRef(false);
@@ -289,13 +296,16 @@ function PatientFlowPage() {
         if (result.submitQuestionnaireResponse.success) {
           setPendingSubmission(null);
 
-          // Move to next questionnaire or complete
+          // Determine next questionnaire (or completion)
           const nextItem = getNextFlowItem(currentQuestionnaireId);
           if (nextItem) {
-            setCurrentQuestionnaireId(nextItem.questionnaire.id);
+            setNextQuestionnaireId(nextItem.questionnaire.id);
           } else {
-            setStep("complete");
+            setNextQuestionnaireId(null); // Will trigger completion
           }
+
+          // Start the transition animation sequence
+          setTransitionPhase("completing");
         } else {
           setSubmissionError(
             result.submitQuestionnaireResponse.error ||
@@ -319,6 +329,29 @@ function PatientFlowPage() {
       handleQuestionnaireComplete(pendingSubmission.answers);
     }
   };
+
+  // Handle transition phase completion
+  const handleTransitionPhaseComplete = useCallback(
+    (completedPhase: TransitionPhase) => {
+      if (completedPhase === "completing") {
+        setTransitionPhase("success");
+      } else if (completedPhase === "success") {
+        setTransitionPhase("exiting");
+        // Small delay before switching questionnaire for exit animation
+        setTimeout(() => {
+          if (nextQuestionnaireId) {
+            setCurrentQuestionnaireId(nextQuestionnaireId);
+            setNextQuestionnaireId(null);
+          } else {
+            setStep("complete");
+          }
+          // Reset to active phase after transition
+          setTimeout(() => setTransitionPhase("active"), 35);
+        }, 210);
+      }
+    },
+    [nextQuestionnaireId]
+  );
 
   // No token provided
   if (!token) {
@@ -351,17 +384,22 @@ function PatientFlowPage() {
     const totalQuestionnaires = QUESTIONNAIRE_FLOW.length;
     const { title } = flowItem.questionnaire;
 
+    // Animation variants for content transitions
+    const contentVariants = {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      exit: { opacity: 0, y: -20 },
+    };
+
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b bg-muted/30">
-          <div className="max-w-lg mx-auto px-4 pt-8 pb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                Fragebogen {questionnaireNumber}/{totalQuestionnaires}
-              </span>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-sm font-medium">{title}</span>
-            </div>
+        {/* Header bar - consistent with patient flow */}
+        <header className="bg-background border-b">
+          <div className="max-w-lg mx-auto px-4 py-4">
+            <h1 className="text-lg font-semibold">{title}</h1>
+            <p className="text-sm text-muted-foreground">
+              Fragebogen {questionnaireNumber} von {totalQuestionnaires}
+            </p>
           </div>
         </header>
 
@@ -386,25 +424,44 @@ function PatientFlowPage() {
           </div>
         )}
 
-        <main>
-          {flowItem.isCustom ? (
-            // SQ uses its own wizard due to enableWhen logic
-            <SQQuestionnaireWrapper
-              token={token}
-              onComplete={(answers) =>
-                handleQuestionnaireComplete(answers as Record<string, unknown>)
-              }
-            />
-          ) : (
-            // All other questionnaires use the generic wizard
-            <GenericQuestionnaireWrapper
-              key={currentQuestionnaireId}
-              questionnaire={flowItem.questionnaire}
-              token={token}
-              onComplete={handleQuestionnaireComplete}
-            />
-          )}
-        </main>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestionnaireId}
+            variants={contentVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            {flowItem.isCustom ? (
+              // SQ uses its own wizard due to enableWhen logic
+              <SQQuestionnaireWrapper
+                token={token}
+                transitionPhase={transitionPhase}
+                onTransitionPhaseComplete={handleTransitionPhaseComplete}
+                onComplete={(answers) =>
+                  handleQuestionnaireComplete(answers as Record<string, unknown>)
+                }
+              />
+            ) : (
+              // All other questionnaires use the generic wizard
+              <GenericQuestionnaireWrapper
+                key={currentQuestionnaireId}
+                questionnaire={flowItem.questionnaire}
+                token={token}
+                transitionPhase={transitionPhase}
+                onTransitionPhaseComplete={handleTransitionPhaseComplete}
+                onComplete={handleQuestionnaireComplete}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* CMDetect Branding Footer */}
+        <div className="max-w-lg mx-auto px-4 py-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <CMDetectLogo size={16} />
+          <span>Powered by CMDetect</span>
+        </div>
       </div>
     );
   }
@@ -414,11 +471,26 @@ function PatientFlowPage() {
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardContent className="pt-6">
-            <h1 className="text-3xl font-bold mb-2">Patienteninformation</h1>
-            {organizationName && (
-              <p className="text-muted-foreground mb-6">
-                Organisation: {organizationName}
-              </p>
+            {/* Dynamic Header based on step */}
+            {step === "consent" && (
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold mb-1">Willkommen</h1>
+                {organizationName && (
+                  <p className="text-muted-foreground mb-1">{organizationName}</p>
+                )}
+                <p className="text-sm text-muted-foreground">Schritt 1 von 3</p>
+              </div>
+            )}
+            {step === "personal-data" && (
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold mb-1">Persönliche Daten</h1>
+                <p className="text-sm text-muted-foreground">Schritt 2 von 3</p>
+              </div>
+            )}
+            {step === "validate" && (
+              <div className="mb-6">
+                <p className="text-muted-foreground">Wird geladen...</p>
+              </div>
             )}
 
             {error && (
@@ -439,92 +511,243 @@ function PatientFlowPage() {
 
             {/* Consent Step */}
             {step === "consent" && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4">
-                  Schritt 1: Einwilligung
-                </h2>
-                <div className="bg-muted/50 p-4 rounded-md mb-6">
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Bevor Sie fortfahren, lesen Sie bitte die folgende
-                    Einwilligung und stimmen Sie zu:
-                  </p>
-                  <p className="text-sm font-medium">"{CONSENT_TEXT}"</p>
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold">Bevor wir beginnen</h2>
+
+                {/* Card 1: Encrypted Identity Data */}
+                <div className="bg-muted/30 border rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-medium">Ihre Identität (verschlüsselt)</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Ihr Name und Geburtsdatum werden mit Ende-zu-Ende-Verschlüsselung geschützt.
+                        Die Daten werden bereits auf Ihrem Gerät verschlüsselt – nur Ihre Praxis kann sie entschlüsseln.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-4">
+
+                {/* Card 2: Questionnaire Data */}
+                <div className="bg-muted/30 border rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <ClipboardList className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-medium">Ihre Fragebogen-Antworten</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Die medizinischen Angaben aus den Fragebögen werden sicher an Ihre Praxis übermittelt,
+                        um Ihr Arztgespräch vorzubereiten.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground text-center">
+                  Mit dem Fortfahren erklären Sie sich mit der Datenübermittlung einverstanden.
+                </p>
+
+                <div className="space-y-3">
                   <Button
                     onClick={() => handleConsent(true)}
                     disabled={consentMutation.isPending}
-                    className="flex-1"
+                    className="w-full"
                   >
                     {consentMutation.isPending
                       ? "Wird übermittelt..."
-                      : "Ich stimme zu"}
+                      : "Ich stimme zu und fortfahren"}
                   </Button>
                   <Button
                     onClick={() => handleConsent(false)}
                     disabled={consentMutation.isPending}
-                    variant="outline"
-                    className="flex-1"
+                    variant="ghost"
+                    className="w-full text-muted-foreground"
                   >
-                    Ablehnen
+                    Ich möchte nicht teilnehmen
                   </Button>
+                </div>
+
+                {/* CMDetect Branding Footer */}
+                <div className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <CMDetectLogo size={16} />
+                  <span>Powered by CMDetect</span>
                 </div>
               </div>
             )}
 
             {/* Personal Data Step */}
             {step === "personal-data" && (
-              <div>
-                <h2 className="text-xl font-semibold mb-4">
-                  Schritt 2: Persönliche Daten
-                </h2>
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="w-4 h-4" />
+                  <span>Diese Daten werden verschlüsselt übermittelt.</span>
+                </div>
+
                 <PersonalDataForm
                   onSubmit={handlePersonalData}
                   isPending={personalDataMutation.isPending}
                 />
+
+                {/* CMDetect Branding Footer */}
+                <div className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <CMDetectLogo size={16} />
+                  <span>Powered by CMDetect</span>
+                </div>
               </div>
             )}
 
             {/* Declined Step */}
             {step === "declined" && (
-              <div className="text-center py-8">
-                <div className="mb-6">
-                  <AlertTriangle className="w-16 h-16 text-amber-500 mx-auto" />
-                </div>
-                <h2 className="text-2xl font-bold text-amber-700 mb-4">
-                  Einwilligung abgelehnt
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  Sie haben die Einwilligung zur Erhebung und Verarbeitung Ihrer
-                  persönlichen Gesundheitsdaten abgelehnt.
-                </p>
-                <p className="text-muted-foreground mb-6">
-                  Ohne Einwilligung können wir den Patientenfragebogen nicht
-                  fortsetzen.
-                </p>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Wenn Sie Ihre Meinung ändern, können Sie über denselben Link
-                  zurückkehren und Ihre Einwilligung erteilen.
-                </p>
-                <Button onClick={() => setStep("consent")} variant="outline">
-                  Zurück zur Einwilligung
-                </Button>
+              <div className="text-center py-6 space-y-6">
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                    delay: 0.1,
+                  }}
+                >
+                  <div className="w-20 h-20 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-10 h-10 text-amber-600" />
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="space-y-2"
+                >
+                  <h2 className="text-2xl font-bold text-amber-700">
+                    Einwilligung abgelehnt
+                  </h2>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-4"
+                >
+                  <p className="text-muted-foreground">
+                    Sie haben die Einwilligung zur Datenübermittlung abgelehnt.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Ohne Einwilligung können wir den Patientenfragebogen nicht fortsetzen.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Wenn Sie Ihre Meinung ändern, können Sie über denselben Link
+                    zurückkehren und Ihre Einwilligung erteilen.
+                  </p>
+                  <Button onClick={() => setStep("consent")} variant="outline">
+                    Zurück zur Einwilligung
+                  </Button>
+                </motion.div>
+
+                {/* CMDetect Branding Footer */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground"
+                >
+                  <CMDetectLogo size={16} />
+                  <span>Powered by CMDetect</span>
+                </motion.div>
               </div>
             )}
 
             {/* Complete Step */}
             {step === "complete" && (
-              <div className="text-center py-8">
-                <div className="mb-6">
-                  <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
+              <div className="text-center py-6 space-y-6">
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                    delay: 0.1,
+                  }}
+                >
+                  <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-12 h-12 text-green-600" />
+                  </div>
+                </motion.div>
+
+                <div className="space-y-2">
+                  <motion.h2
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-2xl font-bold text-green-700"
+                  >
+                    Vielen Dank!
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-muted-foreground"
+                  >
+                    Ihre Angaben wurden erfolgreich an{" "}
+                    {organizationName || "Ihre Praxis"} übermittelt.
+                  </motion.p>
                 </div>
-                <h2 className="text-2xl font-bold text-green-700 mb-2">
-                  Fertig!
-                </h2>
-                <p className="text-muted-foreground">
-                  Vielen Dank für das Ausfüllen der Fragebögen. Ihre
-                  Gesundheitsdienstleister werden Ihre Informationen überprüfen.
-                </p>
+
+                {/* Summary Checklist */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="border-t border-b py-4 space-y-2"
+                >
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>Persönliche Daten (verschlüsselt)</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>{QUESTIONNAIRE_FLOW.length} Fragebögen abgeschlossen</span>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="space-y-4"
+                >
+                  <p className="text-sm text-muted-foreground">
+                    Ihr Gesundheitsdienstleister wird Ihre Informationen vor Ihrem Termin prüfen.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Sie können dieses Fenster jetzt schließen.
+                  </p>
+                </motion.div>
+
+                {/* CMDetect Branding Footer */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                  className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground"
+                >
+                  <CMDetectLogo size={16} />
+                  <span>Powered by CMDetect</span>
+                </motion.div>
               </div>
             )}
           </CardContent>
@@ -539,16 +762,25 @@ function PatientFlowPage() {
  */
 function SQQuestionnaireWrapper({
   token,
+  transitionPhase,
+  onTransitionPhaseComplete,
   onComplete,
 }: {
   token: string;
+  transitionPhase: TransitionPhase;
+  onTransitionPhaseComplete: (phase: TransitionPhase) => void;
   onComplete: (answers: SQAnswers) => void;
 }) {
   const methods = useSQForm();
 
   return (
     <FormProvider {...methods}>
-      <SQWizard token={token} onComplete={onComplete} />
+      <SQWizard
+        token={token}
+        transitionPhase={transitionPhase}
+        onTransitionPhaseComplete={onTransitionPhaseComplete}
+        onComplete={onComplete}
+      />
     </FormProvider>
   );
 }
@@ -559,10 +791,14 @@ function SQQuestionnaireWrapper({
 function GenericQuestionnaireWrapper({
   questionnaire,
   token,
+  transitionPhase,
+  onTransitionPhaseComplete,
   onComplete,
 }: {
   questionnaire: GenericQuestionnaire;
   token: string;
+  transitionPhase: TransitionPhase;
+  onTransitionPhaseComplete: (phase: TransitionPhase) => void;
   onComplete: (answers: Record<string, unknown>) => void;
 }) {
   const methods = useQuestionnaireForm();
@@ -572,6 +808,8 @@ function GenericQuestionnaireWrapper({
       <GenericWizard
         questionnaire={questionnaire}
         token={token}
+        transitionPhase={transitionPhase}
+        onTransitionPhaseComplete={onTransitionPhaseComplete}
         onComplete={onComplete}
       />
     </FormProvider>

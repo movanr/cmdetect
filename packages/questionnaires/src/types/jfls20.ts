@@ -41,6 +41,7 @@ export type JFLS20Question = {
     min: string;
     max: string;
   };
+  skippable?: boolean;
 };
 
 /**

@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,7 +78,14 @@ export function PersonalDataForm({ onSubmit, isPending }: PersonalDataFormProps)
       </div>
 
       <Button type="submit" disabled={isPending} className="w-full">
-        {isPending ? "Wird verschlüsselt und übermittelt..." : "Weiter"}
+        {isPending ? (
+          "Wird verschlüsselt..."
+        ) : (
+          <>
+            <Lock className="w-4 h-4 mr-2" />
+            Verschlüsselt übermitteln
+          </>
+        )}
       </Button>
     </form>
   );

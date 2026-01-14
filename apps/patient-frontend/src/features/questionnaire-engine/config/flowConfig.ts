@@ -3,14 +3,15 @@
  */
 
 import {
-  PHQ4_QUESTIONNAIRE,
   GCPS_1M_QUESTIONNAIRE,
   JFLS8_QUESTIONNAIRE,
   JFLS20_QUESTIONNAIRE,
   OBC_QUESTIONNAIRE,
+  PHQ4_QUESTIONNAIRE,
   SQ_METADATA,
+  isQuestionnaireEnabled,
 } from "@cmdetect/questionnaires";
-import type { QuestionnaireFlowItem, GenericQuestionnaire } from "../types";
+import type { GenericQuestionnaire, QuestionnaireFlowItem } from "../types";
 
 // SQ is custom (uses its own wizard due to enableWhen logic)
 // We create a minimal placeholder for flow tracking
@@ -22,17 +23,25 @@ const SQ_FLOW_PLACEHOLDER: GenericQuestionnaire = {
 };
 
 /**
- * Questionnaire flow order - determines sequence
- * Each item references the questionnaire from @cmdetect/questionnaires
+ * All possible questionnaire flow items in order
+ * Filtering is done by isQuestionnaireEnabled() from the shared config
  */
-export const QUESTIONNAIRE_FLOW: QuestionnaireFlowItem[] = [
+const ALL_FLOW_ITEMS: QuestionnaireFlowItem[] = [
   { questionnaire: SQ_FLOW_PLACEHOLDER, isCustom: true },
-  { questionnaire: PHQ4_QUESTIONNAIRE },
   { questionnaire: GCPS_1M_QUESTIONNAIRE },
   { questionnaire: JFLS8_QUESTIONNAIRE },
+  { questionnaire: PHQ4_QUESTIONNAIRE },
   { questionnaire: JFLS20_QUESTIONNAIRE },
   { questionnaire: OBC_QUESTIONNAIRE },
 ];
+
+/**
+ * Questionnaire flow filtered to only enabled questionnaires
+ * Enable/disable questionnaires in @cmdetect/questionnaires ENABLED_QUESTIONNAIRES
+ */
+export const QUESTIONNAIRE_FLOW = ALL_FLOW_ITEMS.filter((item) =>
+  isQuestionnaireEnabled(item.questionnaire.id)
+);
 
 /**
  * Get flow item by questionnaire ID
@@ -44,12 +53,8 @@ export function getFlowItemById(id: string): QuestionnaireFlowItem | undefined {
 /**
  * Get next flow item after the given questionnaire ID
  */
-export function getNextFlowItem(
-  currentId: string
-): QuestionnaireFlowItem | undefined {
-  const currentIndex = QUESTIONNAIRE_FLOW.findIndex(
-    (item) => item.questionnaire.id === currentId
-  );
+export function getNextFlowItem(currentId: string): QuestionnaireFlowItem | undefined {
+  const currentIndex = QUESTIONNAIRE_FLOW.findIndex((item) => item.questionnaire.id === currentId);
   if (currentIndex >= 0 && currentIndex < QUESTIONNAIRE_FLOW.length - 1) {
     return QUESTIONNAIRE_FLOW[currentIndex + 1];
   }

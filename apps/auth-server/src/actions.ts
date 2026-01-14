@@ -2,15 +2,16 @@
  * Hasura action handlers
  */
 
-import { Request, Response } from 'express';
-import { DatabaseService } from './database';
+import { QUESTIONNAIRE_IDS } from "@cmdetect/questionnaires";
+import { Request, Response } from "express";
+import { DatabaseService } from "./database";
+import { sendActionError, sendActionSuccess } from "./errors";
 import {
-  validateInviteToken,
   validateConsentData,
+  validateInviteToken,
+  validatePatientPersonalData,
   validateQuestionnaireResponseData,
-  validatePatientPersonalData
-} from './validation';
-import { sendActionError, sendActionSuccess } from './errors';
+} from "./validation";
 
 // TODO: 1. Inputs immer parsen mit Zod und du kannst auch von Hasura aus einen Header mitschicken lassen, dass du weißt, dass die Action von Hasura gecalled wird
 // TODO (nice-to-have): 2. Scheint mir als könnten fast alle Actions direkt in Hasura gemacht werden mit native Queries die dir dann GraphQL exposen. Vorteil -> Permissions werden gechecked ob korrekt statt wie hier indirekt Superuser Access
@@ -54,7 +55,7 @@ export class ActionHandlers {
   }
 
   // Required questionnaires that must be submitted before marking flow as complete
-  private static readonly REQUIRED_QUESTIONNAIRES = ['dc-tmd-sq', 'phq-4'];
+  private static readonly REQUIRED_QUESTIONNAIRES = QUESTIONNAIRE_IDS;
 
   /**
    * Handles questionnaire response submission
@@ -83,7 +84,10 @@ export class ActionHandlers {
     // Check if consent exists
     const consent = await this.db.getPatientConsentByRecordId(patientRecord.id);
     if (!consent) {
-      return sendActionError(res, "No consent found for this patient record. Please submit consent first.");
+      return sendActionError(
+        res,
+        "No consent found for this patient record. Please submit consent first."
+      );
     }
 
     // Build the response payload to store
@@ -104,13 +108,15 @@ export class ActionHandlers {
 
     // Check if all required questionnaires are now submitted
     const submittedQuestionnaires = await this.db.getSubmittedQuestionnaireIds(patientRecord.id);
-    const allComplete = ActionHandlers.REQUIRED_QUESTIONNAIRES.every(
-      id => submittedQuestionnaires.includes(id)
+    const allComplete = ActionHandlers.REQUIRED_QUESTIONNAIRES.every((id) =>
+      submittedQuestionnaires.includes(id)
     );
 
     if (allComplete) {
       await this.db.markSubmissionComplete(patientRecord.id);
-      console.log(`All questionnaires submitted for patient record ${patientRecord.id}, marking complete`);
+      console.log(
+        `All questionnaires submitted for patient record ${patientRecord.id}, marking complete`
+      );
     }
 
     sendActionSuccess(res, { questionnaire_response_id: responseId });
@@ -153,9 +159,9 @@ export class ActionHandlers {
       patient_data.date_of_birth_encrypted
     );
 
-    sendActionSuccess(res, { 
+    sendActionSuccess(res, {
       patient_record_id: patientRecord.id,
-      message: "Patient personal data submitted successfully" 
+      message: "Patient personal data submitted successfully",
     });
   }
 
@@ -170,7 +176,7 @@ export class ActionHandlers {
     if (!tokenValidation.valid) {
       res.json({
         valid: false,
-        error_message: tokenValidation.error
+        error_message: tokenValidation.error,
       });
       return;
     }
@@ -179,7 +185,9 @@ export class ActionHandlers {
     const result = await this.db.validateInviteTokenWithPublicKey(invite_token);
 
     // Log validation attempt (without sensitive data)
-    console.log(`Invite validation attempt: token=${invite_token ? 'present' : 'missing'}, valid=${result.valid}`);
+    console.log(
+      `Invite validation attempt: token=${invite_token ? "present" : "missing"}, valid=${result.valid}`
+    );
 
     // Return the validation result directly
     res.json(result);
@@ -200,7 +208,7 @@ export class ActionHandlers {
         consent_given: false,
         has_personal_data: false,
         submitted_questionnaires: [],
-        error_message: tokenValidation.error
+        error_message: tokenValidation.error,
       });
       return;
     }
@@ -218,13 +226,13 @@ export class ActionHandlers {
     const sessionVariables = req.body.session_variables;
 
     // Get organization ID from session (JWT claim)
-    const organizationId = sessionVariables?.['x-hasura-organization-id'];
+    const organizationId = sessionVariables?.["x-hasura-organization-id"];
     if (!organizationId) {
       return sendActionError(res, "Organization ID not found in session");
     }
 
     // Validate patient_record_id
-    if (!patient_record_id || typeof patient_record_id !== 'string') {
+    if (!patient_record_id || typeof patient_record_id !== "string") {
       return sendActionError(res, "Invalid patient record ID");
     }
 
@@ -236,10 +244,10 @@ export class ActionHandlers {
       }
 
       sendActionSuccess(res, {
-        new_expires_at: newExpiresAt.toISOString()
+        new_expires_at: newExpiresAt.toISOString(),
       });
     } catch (error) {
-      console.error('Error resetting invite token:', error);
+      console.error("Error resetting invite token:", error);
       return sendActionError(res, "Failed to reset invite token");
     }
   }

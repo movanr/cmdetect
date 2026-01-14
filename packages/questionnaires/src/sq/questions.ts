@@ -6,8 +6,9 @@
  * - Matrix questions (SQ4, SQ7) are expanded into individual rows
  * - Total screens: 22 (14 base questions, but SQ4 and SQ7 have 4 rows each)
  */
+import { QUESTIONNAIRE_ID } from "..";
 import type { SQQuestion, SQQuestionId } from "../types";
-import { SQ_YES_NO_OPTIONS, SQ_PAIN_FREQUENCY_OPTIONS } from "./options";
+import { SQ_PAIN_FREQUENCY_OPTIONS, SQ_YES_NO_OPTIONS } from "./options";
 import { SQ_SECTIONS } from "./sections";
 
 /**
@@ -78,7 +79,8 @@ export const SQ_SCREENS: SQQuestion[] = [
     type: "matrix_row",
     parentId: "SQ4",
     text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schmerz im Kiefer oder im Schläfenbereich, im Ohr oder vor dem Ohr, auf einer oder beiden Seiten verändert (d. h. verbessert bzw. verschlechtert)?",
-    rowText: "Angewohnheiten wie Zähne aufeinander halten, Pressen/Knirschen mit den Zähnen oder Kaugummikauen",
+    rowText:
+      "Angewohnheiten wie Zähne aufeinander halten, Pressen/Knirschen mit den Zähnen oder Kaugummikauen",
     enableWhen: [
       { questionId: "SQ1", operator: "=", value: "yes" },
       { questionId: "SQ3", operator: "!=", value: "no_pain" },
@@ -143,7 +145,8 @@ export const SQ_SCREENS: SQQuestion[] = [
     type: "matrix_row",
     parentId: "SQ7",
     text: "Haben die folgenden Aktivitäten in den letzten 30 Tagen einen Schläfenkopfschmerz auf einer oder beiden Seiten verändert (d.h. verbessert bzw. verschlechtert)?",
-    rowText: "Angewohnheiten wie Zähne aufeinander halten, Pressen/Knirschen mit den Zähnen oder Kaugummikauen",
+    rowText:
+      "Angewohnheiten wie Zähne aufeinander halten, Pressen/Knirschen mit den Zähnen oder Kaugummikauen",
     enableWhen: [{ questionId: "SQ5", operator: "=", value: "yes" }],
   },
   {
@@ -252,7 +255,7 @@ export const SQ_TOTAL_SCREENS = SQ_SCREENS.length;
  * SQ questionnaire metadata
  */
 export const SQ_METADATA = {
-  id: "dc-tmd-sq",
+  id: QUESTIONNAIRE_ID.SQ,
   title: "DC/TMD Symptom-Fragebogen",
   version: "1.0",
 } as const;
@@ -278,7 +281,10 @@ function getSectionName(questionId: SQQuestionId): string {
 function getDisplayText(q: SQQuestion): string {
   if (q.type === "matrix_row") {
     // For matrix rows, combine parent context with row text
-    const prefix = q.parentId === "SQ4" ? "Aktivität beeinflusst Schmerzen" : "Aktivität beeinflusst Kopfschmerzen";
+    const prefix =
+      q.parentId === "SQ4"
+        ? "Aktivität beeinflusst Schmerzen"
+        : "Aktivität beeinflusst Kopfschmerzen";
     return `${prefix}: ${q.rowText}`;
   }
   return q.text;
@@ -290,8 +296,5 @@ function getDisplayText(q: SQQuestion): string {
  */
 export const SQ_QUESTION_LABELS: Record<SQQuestionId, { text: string; section: string }> =
   Object.fromEntries(
-    SQ_SCREENS.map((q) => [
-      q.id,
-      { text: getDisplayText(q), section: getSectionName(q.id) },
-    ])
+    SQ_SCREENS.map((q) => [q.id, { text: getDisplayText(q), section: getSectionName(q.id) }])
   ) as Record<SQQuestionId, { text: string; section: string }>;

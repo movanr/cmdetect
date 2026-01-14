@@ -6,6 +6,17 @@
  */
 
 // ============================================================================
+// IDs and Config (imported first to avoid circular dependencies)
+// ============================================================================
+export {
+  QUESTIONNAIRE_ID,
+  QUESTIONNAIRE_IDS,
+  ENABLED_QUESTIONNAIRES,
+  isQuestionnaireEnabled,
+  type QuestionnaireId,
+} from "./ids";
+
+// ============================================================================
 // Types
 // ============================================================================
 export type {
@@ -257,21 +268,16 @@ export {
 // ============================================================================
 // Combined / Cross-questionnaire
 // ============================================================================
+import { QUESTIONNAIRE_ID } from "./ids";
 
 /**
  * Questionnaire titles (German)
  */
 export const QUESTIONNAIRE_TITLES: Record<string, string> = {
-  "dc-tmd-sq": "DC/TMD Symptom-Fragebogen",
-  "phq-4": "PHQ-4 Gesundheitsfragebogen",
-  "gcps-1m": "GCPS - Stufenskala für chronische Schmerzen",
-  "jfls-8": "JFLS-8 - Kieferfunktions-Einschränkungsskala",
-  "jfls-20": "JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)",
-  "obc": "OBC - Oral Behaviors Checklist",
+  [QUESTIONNAIRE_ID.SQ]: "DC/TMD Symptom-Fragebogen",
+  [QUESTIONNAIRE_ID.PHQ4]: "PHQ-4 Gesundheitsfragebogen",
+  [QUESTIONNAIRE_ID.GCPS_1M]: "GCPS - Stufenskala für chronische Schmerzen",
+  [QUESTIONNAIRE_ID.JFLS8]: "JFLS-8 - Kieferfunktions-Einschränkungsskala",
+  [QUESTIONNAIRE_ID.JFLS20]: "JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)",
+  [QUESTIONNAIRE_ID.OBC]: "OBC - Oral Behaviors Checklist",
 };
-
-/**
- * All supported questionnaire IDs
- */
-export const QUESTIONNAIRE_IDS = ["dc-tmd-sq", "phq-4", "gcps-1m", "jfls-8", "jfls-20", "obc"] as const;
-export type QuestionnaireId = (typeof QUESTIONNAIRE_IDS)[number];

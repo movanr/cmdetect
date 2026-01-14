@@ -3,22 +3,23 @@
  * Coordinates form state, navigation, and persistence
  */
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useFormContext } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SQAnswers } from "@cmdetect/questionnaires";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { filterEnabledAnswers } from "../hooks/evaluateEnableWhen";
 import { useSQWizardNavigation } from "../hooks/useSQNavigation";
 import { validateScreen } from "../schema/sqSchema";
-import { filterEnabledAnswers } from "../hooks/evaluateEnableWhen";
-import { clearProgress } from "../persistence/storage";
-import { ProgressHeader } from "./ProgressHeader";
-import { QuestionScreen } from "./QuestionScreen";
 import { NavigationButtons } from "./NavigationButtons";
+import { ProgressHeader, type TransitionPhase } from "./ProgressHeader";
+import { QuestionScreen } from "./QuestionScreen";
 
 type SQWizardProps = {
   token?: string; // Kept for API compatibility, not used after removing persistence
   initialIndex?: number;
   initialHistory?: number[];
+  transitionPhase?: TransitionPhase;
+  onTransitionPhaseComplete?: (phase: TransitionPhase) => void;
   onComplete?: (answers: SQAnswers) => void;
 };
 
@@ -26,6 +27,8 @@ export function SQWizard({
   token: _token,
   initialIndex = 0,
   initialHistory = [],
+  transitionPhase = "active",
+  onTransitionPhaseComplete,
   onComplete,
 }: SQWizardProps) {
   const methods = useFormContext<SQAnswers>();
@@ -56,8 +59,7 @@ export function SQWizard({
 
       // Use passed value (for auto-navigate) or get fresh value from form (for Next button)
       // getValues() ensures we get the current form value, avoiding stale closure issues
-      const currentValue =
-        selectedValue ?? methods.getValues(currentQuestion.id);
+      const currentValue = selectedValue ?? methods.getValues(currentQuestion.id);
 
       const result = validateScreen(currentQuestion, currentValue);
 
@@ -82,7 +84,6 @@ export function SQWizard({
   useEffect(() => {
     if (isComplete && onComplete && !hasCalledComplete.current) {
       hasCalledComplete.current = true;
-      clearProgress();
       const enabledAnswers = filterEnabledAnswers(methods.getValues() as SQAnswers);
       onComplete(enabledAnswers);
     }
@@ -94,51 +95,55 @@ export function SQWizard({
     return <SQComplete answers={enabledAnswers} />;
   }
 
-  // When complete with onComplete handler, render nothing while parent transitions
-  if (isComplete && onComplete) {
-    return null;
-  }
+  // Check if we're in transition mode (completing/success/exiting)
+  const isTransitioning = transitionPhase !== "active";
 
-  // Safety check
-  if (!currentQuestion) {
-    return (
-      <div className="max-w-lg mx-auto p-4 text-center">
-        <p className="text-destructive">
-          Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.
-        </p>
-      </div>
-    );
-  }
+  // When complete with onComplete handler, currentQuestion is undefined
+  // Show only the progress bar during transition animation
+  const showQuestionContent = currentQuestion !== undefined;
 
   // Only show Next button for composite_number questions (need explicit submission)
-  const showNextButton = currentQuestion.type === "composite_number";
+  const showNextButton = currentQuestion?.type === "composite_number";
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-6">
       <ProgressHeader
-        sectionIndex={currentSectionIndex}
+        sectionIndex={showQuestionContent ? currentSectionIndex : totalSections - 1}
         totalSections={totalSections}
         sectionName={currentSection?.name ?? ""}
-        questionInSection={questionInSection.current}
+        questionInSection={
+          showQuestionContent ? questionInSection.current : questionInSection.total
+        }
         totalInSection={questionInSection.total}
+        transitionPhase={transitionPhase}
+        onTransitionPhaseComplete={onTransitionPhaseComplete}
       />
 
-      <Card>
-        <CardContent className="pt-6">
-          <QuestionScreen
-            question={currentQuestion}
-            error={error}
-            onNavigateNext={handleNext}
+      {/* Content fades during transition, hidden when complete */}
+      {showQuestionContent && (
+        <div
+          className={`transition-opacity duration-300 ${
+            isTransitioning ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          <Card>
+            <CardContent className="pt-6">
+              <QuestionScreen
+                question={currentQuestion}
+                error={error}
+                onNavigateNext={handleNext}
+              />
+            </CardContent>
+          </Card>
+
+          <NavigationButtons
+            onBack={handleBack}
+            onNext={handleNext}
+            canGoBack={canGoBack && !isTransitioning}
+            showNext={showNextButton}
           />
-        </CardContent>
-      </Card>
-
-      <NavigationButtons
-        onBack={handleBack}
-        onNext={handleNext}
-        canGoBack={canGoBack}
-        showNext={showNextButton}
-      />
+        </div>
+      )}
     </div>
   );
 }
@@ -148,9 +153,7 @@ export function SQWizard({
  */
 function SQComplete({ answers }: { answers: SQAnswers }) {
   // Count answered questions
-  const answeredCount = Object.values(answers).filter(
-    (value) => value !== undefined
-  ).length;
+  const answeredCount = Object.values(answers).filter((value) => value !== undefined).length;
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-6">
@@ -175,13 +178,10 @@ function SQComplete({ answers }: { answers: SQAnswers }) {
           <h2 className="text-2xl font-semibold">Fragebogen abgeschlossen</h2>
 
           <p className="text-muted-foreground">
-            Vielen Dank für das Ausfüllen des Symptom-Fragebogens. Ihre
-            Antworten wurden erfasst.
+            Vielen Dank für das Ausfüllen des Symptom-Fragebogens. Ihre Antworten wurden erfasst.
           </p>
 
-          <p className="text-sm text-muted-foreground">
-            {answeredCount} Fragen beantwortet
-          </p>
+          <p className="text-sm text-muted-foreground">{answeredCount} Fragen beantwortet</p>
         </CardContent>
       </Card>
     </div>

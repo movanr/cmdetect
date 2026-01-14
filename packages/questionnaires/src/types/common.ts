@@ -73,6 +73,7 @@ export type GenericQuestion = {
   scaleLabels?: { min: string; max: string };
   range?: { min: number; max: number };
   unit?: string;
+  skippable?: boolean; // Allow question to be skipped (e.g., JFLS scales)
 };
 
 /**
