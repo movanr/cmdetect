@@ -15,23 +15,23 @@ import { Check, Circle, Zap } from "lucide-react";
 import { getLabel } from "../../content/labels";
 import { PAIN_TYPES } from "../../model/pain";
 import {
-  type InteractiveRegion,
+  type Region,
   type RegionStatus,
-  ALL_INTERACTIVE_REGIONS,
   EMPTY_REGION_STATUS,
   REGION_STATE_COLORS,
   REGION_VISUAL_STATES,
   getRegionVisualState,
-  mapInteractiveToRegion,
 } from "./types";
 
 interface RegionStatusListProps {
+  /** Regions to display */
+  regions: readonly Region[];
   /** Status for each region */
-  regionStatuses: Record<InteractiveRegion, RegionStatus>;
+  regionStatuses: Record<Region, RegionStatus>;
   /** Currently selected region (if any) */
-  selectedRegion?: InteractiveRegion | null;
+  selectedRegion?: Region | null;
   /** Callback when a region is clicked */
-  onRegionClick: (region: InteractiveRegion) => void;
+  onRegionClick: (region: Region) => void;
   /** Optional className */
   className?: string;
   /** Whether interactions are disabled */
@@ -74,6 +74,7 @@ function HeadacheIcon({ status }: { status: RegionStatus }) {
 }
 
 export function RegionStatusList({
+  regions,
   regionStatuses,
   selectedRegion,
   onRegionClick,
@@ -82,15 +83,14 @@ export function RegionStatusList({
 }: RegionStatusListProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {ALL_INTERACTIVE_REGIONS.map((region) => {
+      {regions.map((region) => {
         const status = regionStatuses[region] ?? EMPTY_REGION_STATUS;
         const isSelected = selectedRegion === region;
         const visualState = getRegionVisualState(status);
         const colors = REGION_STATE_COLORS[visualState];
 
         // Get label from centralized content
-        const regionConstant = mapInteractiveToRegion(region);
-        const label = getLabel(regionConstant);
+        const label = getLabel(region);
 
         return (
           <Button

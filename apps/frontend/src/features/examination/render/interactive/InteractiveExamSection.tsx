@@ -21,13 +21,12 @@ import { SIDES, type Side } from "../../model/side";
 import type { Question } from "../../model/question";
 import { painInterviewAfterMovement } from "../../definition/questions/pain";
 import {
-  type InteractiveRegion,
+  type Region,
   type RegionStatus,
-  ALL_INTERACTIVE_REGIONS,
+  E4_PAIN_REGIONS,
   EMPTY_REGION_STATUS,
   parseRegionId,
   buildRegionId,
-  mapInteractiveToRegion,
 } from "./types";
 import { useInteractiveExam } from "./useInteractiveExam";
 import { HeadDiagram } from "./HeadDiagram";
@@ -38,6 +37,8 @@ import { ProgressFooter } from "./ProgressFooter";
 interface InteractiveExamSectionProps {
   /** Movement context (maxUnassistedOpening or maxAssistedOpening) */
   movement: Movement;
+  /** Regions to assess - defaults to E4_PAIN_REGIONS */
+  regions?: readonly Region[];
   /** Whether the section is disabled (e.g., if terminated) */
   disabled?: boolean;
   /** Optional className */
@@ -46,6 +47,7 @@ interface InteractiveExamSectionProps {
 
 export function InteractiveExamSection({
   movement,
+  regions = E4_PAIN_REGIONS,
   disabled = false,
   className,
 }: InteractiveExamSectionProps) {
@@ -59,13 +61,12 @@ export function InteractiveExamSection({
   const questions = useMemo((): Question[] => {
     const all: Question[] = [];
     for (const side of Object.values(SIDES) as Side[]) {
-      for (const interactiveRegion of ALL_INTERACTIVE_REGIONS) {
-        const region = mapInteractiveToRegion(interactiveRegion);
+      for (const region of regions) {
         all.push(...painInterviewAfterMovement({ movement, side, region }));
       }
     }
     return all;
-  }, [movement]);
+  }, [movement, regions]);
 
   const {
     selectedRegion,
@@ -75,31 +76,31 @@ export function InteractiveExamSection({
     isQuestionEnabled,
     toggleAnswer,
     completeAllRegions,
-  } = useInteractiveExam({ movement, questions, formValues });
+  } = useInteractiveExam({ movement, regions, questions, formValues });
 
   // Get statuses for a specific side
   const getStatusesForSide = useCallback(
     (
       side: typeof SIDES.LEFT | typeof SIDES.RIGHT
-    ): Record<InteractiveRegion, RegionStatus> => {
-      const result: Record<InteractiveRegion, RegionStatus> = {} as Record<
-        InteractiveRegion,
+    ): Record<Region, RegionStatus> => {
+      const result: Record<Region, RegionStatus> = {} as Record<
+        Region,
         RegionStatus
       >;
-      for (const region of ALL_INTERACTIVE_REGIONS) {
+      for (const region of regions) {
         const regionId = buildRegionId(side, region);
         result[region] = regionStatuses[regionId] ?? EMPTY_REGION_STATUS;
       }
       return result;
     },
-    [regionStatuses]
+    [regionStatuses, regions]
   );
 
   // Get selected region for a specific side
   const getSelectedForSide = useCallback(
     (
       side: typeof SIDES.LEFT | typeof SIDES.RIGHT
-    ): InteractiveRegion | null => {
+    ): Region | null => {
       if (!selectedRegion) return null;
       const { side: selectedSide, region } = parseRegionId(selectedRegion);
       return selectedSide === side ? region : null;
@@ -128,6 +129,7 @@ export function InteractiveExamSection({
               </span>
               <div className="flex items-start gap-2">
                 <RegionStatusList
+                  regions={regions}
                   regionStatuses={getStatusesForSide(SIDES.RIGHT)}
                   selectedRegion={getSelectedForSide(SIDES.RIGHT)}
                   onRegionClick={(region) =>
@@ -137,6 +139,7 @@ export function InteractiveExamSection({
                 />
                 <HeadDiagram
                   side={SIDES.RIGHT}
+                  regions={regions}
                   regionStatuses={getStatusesForSide(SIDES.RIGHT)}
                   selectedRegion={getSelectedForSide(SIDES.RIGHT)}
                   onRegionClick={(region) =>
@@ -157,6 +160,7 @@ export function InteractiveExamSection({
               <div className="flex items-start gap-2">
                 <HeadDiagram
                   side={SIDES.LEFT}
+                  regions={regions}
                   regionStatuses={getStatusesForSide(SIDES.LEFT)}
                   selectedRegion={getSelectedForSide(SIDES.LEFT)}
                   onRegionClick={(region) =>
@@ -165,6 +169,7 @@ export function InteractiveExamSection({
                   disabled={disabled}
                 />
                 <RegionStatusList
+                  regions={regions}
                   regionStatuses={getStatusesForSide(SIDES.LEFT)}
                   selectedRegion={getSelectedForSide(SIDES.LEFT)}
                   onRegionClick={(region) =>

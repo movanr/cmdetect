@@ -9,9 +9,10 @@
  */
 
 import { ANSWER_VALUES, YES_NO_OPTIONS } from "../../model/answer";
+import { QUESTIONNAIRE_ID } from "../../model/constants";
 import { MEASUREMENT_IDS } from "../../model/measurement";
 import { MOVEMENTS } from "../../model/movement";
-import { PAIN_TYPES } from "../../model/pain";
+import { PAIN_TYPES, type PainType } from "../../model/pain";
 import type {
   BooleanQuestion,
   ChoiceQuestion,
@@ -21,23 +22,33 @@ import type {
   QuestionContext,
 } from "../../model/question";
 import { buildInstanceId } from "../../model/questionInstance";
-import { REGIONS } from "../../model/region";
+import { REGIONS, type Region } from "../../model/region";
 import { type SemanticId } from "../../model/semanticId";
 import { SIDES } from "../../model/side";
-
-const QUESTIONNAIRE_ID = "examination";
 
 /**
  * Regions assessed for pain during opening movements (E4).
  * These are the general regions (not palpation zones).
  */
-const E4_PAIN_REGIONS = [
+export const E4_PAIN_REGIONS = [
   REGIONS.TEMPORALIS,
   REGIONS.MASSETER,
   REGIONS.TMJ,
   REGIONS.OTHER_MAST,
   REGIONS.NON_MAST,
-] as const;
+] as const satisfies Region[];
+
+/**
+ * Returns the pain types applicable for a given E4 region.
+ * - Temporalis: pain, familiar pain, familiar headache
+ * - Others: pain, familiar pain
+ */
+export function getE4PainTypes(region: Region): readonly PainType[] {
+  if (region === REGIONS.TEMPORALIS) {
+    return [PAIN_TYPES.PAIN, PAIN_TYPES.FAMILIAR, PAIN_TYPES.FAMILIAR_HEADACHE];
+  }
+  return [PAIN_TYPES.PAIN, PAIN_TYPES.FAMILIAR];
+}
 
 /**
  * Creates a measurement question for opening distance.
@@ -103,10 +114,8 @@ function createPainQuestion(
 /**
  * Creates the pain interview questions for a single movement assessment.
  *
- * For each side × region combination, generates:
- * - Pain (always asked)
- * - Familiar pain (asked if pain = yes)
- * - Familiar headache (asked if pain = yes AND region = temporalis)
+ * For each side × region combination, generates questions for the
+ * applicable pain types (determined by getE4PainTypes).
  */
 function createPainInterviewForMovement(
   movement: (typeof MOVEMENTS)[keyof typeof MOVEMENTS]
@@ -116,24 +125,23 @@ function createPainInterviewForMovement(
   for (const side of Object.values(SIDES)) {
     for (const region of E4_PAIN_REGIONS) {
       const ctx: QuestionContext = { movement, side, region };
+      const painTypes = getE4PainTypes(region);
 
-      // Pain question - always enabled
-      const painQ = createPainQuestion(ctx, PAIN_TYPES.PAIN);
-      questions.push(painQ);
+      for (const painType of painTypes) {
+        // Pain question is always enabled
+        if (painType === PAIN_TYPES.PAIN) {
+          questions.push(createPainQuestion(ctx, painType));
+          continue;
+        }
 
-      // EnableWhen: pain = yes
-      const enableWhenPain: EnableWhen = {
-        dependsOn: { semanticId: PAIN_TYPES.PAIN, scope: "local" },
-        operator: "equals",
-        value: ANSWER_VALUES.YES,
-      };
+        // Other pain types depend on pain = yes
+        const enableWhen: EnableWhen = {
+          dependsOn: { semanticId: PAIN_TYPES.PAIN, scope: "local" },
+          operator: "equals",
+          value: ANSWER_VALUES.YES,
+        };
 
-      // Familiar pain - enabled when pain = yes
-      questions.push(createPainQuestion(ctx, PAIN_TYPES.FAMILIAR, enableWhenPain));
-
-      // Familiar headache - only for temporalis, enabled when pain = yes
-      if (region === REGIONS.TEMPORALIS) {
-        questions.push(createPainQuestion(ctx, PAIN_TYPES.FAMILIAR_HEADACHE, enableWhenPain));
+        questions.push(createPainQuestion(ctx, painType, enableWhen));
       }
     }
   }

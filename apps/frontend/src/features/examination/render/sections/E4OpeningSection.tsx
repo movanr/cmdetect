@@ -11,29 +11,22 @@
  * - Interactive: SVG head diagram with guided questioning
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { E4_PAIN_REGIONS, getE4PainTypes } from "../../definition/sections/e4-opening";
 import { MOVEMENTS } from "../../model/movement";
 import { REGIONS } from "../../model/region";
 import { getLabel, SECTION_LABELS } from "../../content/labels";
 import { MEASUREMENT_IDS } from "../../model/measurement";
 import { MeasurementField } from "../form-fields/MeasurementField";
 import { TerminatedCheckbox } from "../form-fields/TerminatedCheckbox";
-import { PainInterviewGrid, getE4PainTypes } from "./PainInterviewGrid";
+import { PainInterviewGrid } from "./PainInterviewGrid";
 import { InteractiveExamSection } from "../interactive";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-/**
- * Regions assessed in E4 (general regions, not palpation zones).
- */
-const E4_REGIONS = [
-  REGIONS.TEMPORALIS,
-  REGIONS.MASSETER,
-  REGIONS.TMJ,
-  REGIONS.OTHER_MAST,
-  REGIONS.NON_MAST,
-] as const;
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import type { Region } from "../interactive/types";
 
 /** View mode for pain interview */
 type ViewMode = "table" | "interactive";
@@ -45,6 +38,7 @@ interface MovementSectionProps {
   terminatedId: string;
   movement: (typeof MOVEMENTS)[keyof typeof MOVEMENTS];
   viewMode: ViewMode;
+  regions: readonly Region[];
 }
 
 /**
@@ -57,6 +51,7 @@ function MovementSection({
   terminatedId,
   movement,
   viewMode,
+  regions,
 }: MovementSectionProps) {
   const { watch } = useFormContext();
   const isTerminated = watch(terminatedId) === true;
@@ -86,7 +81,7 @@ function MovementSection({
           <PainInterviewGrid
             key={`grid-${movement}`}
             movement={movement}
-            regions={E4_REGIONS}
+            regions={regions}
             painTypesForRegion={getE4PainTypes}
             disabled={isTerminated}
           />
@@ -94,6 +89,7 @@ function MovementSection({
           <InteractiveExamSection
             key={`interactive-${movement}`}
             movement={movement}
+            regions={regions}
             disabled={isTerminated}
           />
         )}
@@ -109,25 +105,49 @@ interface E4OpeningSectionProps {
 
 export function E4OpeningSection({ className }: E4OpeningSectionProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [includeExtraRegions, setIncludeExtraRegions] = useState(true);
+
+  // Filter regions based on toggle - excludes NON_MAST and OTHER_MAST when off
+  const regions = useMemo((): readonly Region[] => {
+    if (includeExtraRegions) {
+      return E4_PAIN_REGIONS;
+    }
+    return E4_PAIN_REGIONS.filter(
+      (r) => r !== REGIONS.NON_MAST && r !== REGIONS.OTHER_MAST
+    );
+  }, [includeExtraRegions]);
 
   return (
     <Card className={className}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>{SECTION_LABELS.E4}</CardTitle>
-          <Tabs
-            value={viewMode}
-            onValueChange={(v) => setViewMode(v as ViewMode)}
-          >
-            <TabsList className="h-8">
-              <TabsTrigger value="table" className="text-xs px-3">
-                Tabelle
-              </TabsTrigger>
-              <TabsTrigger value="interactive" className="text-xs px-3">
-                Interaktiv
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-4">
+            {/* Test toggle for extra regions */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="extra-regions"
+                checked={includeExtraRegions}
+                onCheckedChange={(checked) => setIncludeExtraRegions(checked === true)}
+              />
+              <Label htmlFor="extra-regions" className="text-xs text-muted-foreground cursor-pointer">
+                Alle Regionen
+              </Label>
+            </div>
+            <Tabs
+              value={viewMode}
+              onValueChange={(v) => setViewMode(v as ViewMode)}
+            >
+              <TabsList className="h-8">
+                <TabsTrigger value="table" className="text-xs px-3">
+                  Tabelle
+                </TabsTrigger>
+                <TabsTrigger value="interactive" className="text-xs px-3">
+                  Interaktiv
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -150,6 +170,7 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
           terminatedId="examination.terminated:movement=maxUnassistedOpening"
           movement={MOVEMENTS.MAX_UNASSISTED_OPENING}
           viewMode={viewMode}
+          regions={regions}
         />
 
         {/* Maximum assisted opening */}
@@ -160,6 +181,7 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
           terminatedId="examination.terminated:movement=maxAssistedOpening"
           movement={MOVEMENTS.MAX_ASSISTED_OPENING}
           viewMode={viewMode}
+          regions={regions}
         />
       </CardContent>
     </Card>

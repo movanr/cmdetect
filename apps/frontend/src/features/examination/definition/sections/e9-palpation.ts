@@ -8,18 +8,12 @@
  */
 
 import { ANSWER_VALUES, YES_NO_OPTIONS } from "../../model/answer";
+import { QUESTIONNAIRE_ID } from "../../model/constants";
 import { PAIN_TYPES, type PainType } from "../../model/pain";
-import type {
-  ChoiceQuestion,
-  EnableWhen,
-  Question,
-  QuestionContext,
-} from "../../model/question";
+import type { ChoiceQuestion, EnableWhen, Question, QuestionContext } from "../../model/question";
 import { buildInstanceId } from "../../model/questionInstance";
 import { REGIONS, type Region } from "../../model/region";
 import { SIDES } from "../../model/side";
-
-const QUESTIONNAIRE_ID = "examination";
 
 /**
  * Temporalis zones for E9 palpation (1.0 kg pressure).
@@ -44,19 +38,12 @@ export const MASSETER_ZONES = [
  * - Lateral pole: 0.5 kg
  * - Around lateral pole: 1.0 kg
  */
-export const TMJ_ZONES = [
-  REGIONS.TMJ_LATERAL_POLE,
-  REGIONS.TMJ_AROUND_LATERAL_POLE,
-] as const;
+export const TMJ_ZONES = [REGIONS.TMJ_LATERAL_POLE, REGIONS.TMJ_AROUND_LATERAL_POLE] as const;
 
 /**
  * All E9 palpation zones.
  */
-export const E9_ZONES = [
-  ...TEMPORALIS_ZONES,
-  ...MASSETER_ZONES,
-  ...TMJ_ZONES,
-] as const;
+export const E9_ZONES = [...TEMPORALIS_ZONES, ...MASSETER_ZONES, ...TMJ_ZONES] as const;
 
 /**
  * Pressure specifications for each zone (in kg).
@@ -85,8 +72,8 @@ export const TEMPORALIS_PAIN_TYPES = [
   PAIN_TYPES.PAIN,
   PAIN_TYPES.FAMILIAR,
   PAIN_TYPES.FAMILIAR_HEADACHE,
-  PAIN_TYPES.REFERRED,
   PAIN_TYPES.SPREADING,
+  PAIN_TYPES.REFERRED,
 ] as const;
 
 /**
@@ -95,30 +82,26 @@ export const TEMPORALIS_PAIN_TYPES = [
 export const MASSETER_PAIN_TYPES = [
   PAIN_TYPES.PAIN,
   PAIN_TYPES.FAMILIAR,
-  PAIN_TYPES.REFERRED,
   PAIN_TYPES.SPREADING,
+  PAIN_TYPES.REFERRED,
 ] as const;
 
 /**
  * Pain types for TMJ zones (no familiar headache, no spreading).
  */
-export const TMJ_PAIN_TYPES = [
-  PAIN_TYPES.PAIN,
-  PAIN_TYPES.FAMILIAR,
-  PAIN_TYPES.REFERRED,
-] as const;
+export const TMJ_PAIN_TYPES = [PAIN_TYPES.PAIN, PAIN_TYPES.FAMILIAR, PAIN_TYPES.REFERRED] as const;
 
 /**
  * Returns the pain types applicable for a given E9 zone.
  */
 export function getE9PainTypes(zone: Region): readonly PainType[] {
-  if (TEMPORALIS_ZONES.includes(zone as typeof TEMPORALIS_ZONES[number])) {
+  if (TEMPORALIS_ZONES.includes(zone as (typeof TEMPORALIS_ZONES)[number])) {
     return TEMPORALIS_PAIN_TYPES;
   }
-  if (MASSETER_ZONES.includes(zone as typeof MASSETER_ZONES[number])) {
+  if (MASSETER_ZONES.includes(zone as (typeof MASSETER_ZONES)[number])) {
     return MASSETER_PAIN_TYPES;
   }
-  if (TMJ_ZONES.includes(zone as typeof TMJ_ZONES[number])) {
+  if (TMJ_ZONES.includes(zone as (typeof TMJ_ZONES)[number])) {
     return TMJ_PAIN_TYPES;
   }
   // Fallback

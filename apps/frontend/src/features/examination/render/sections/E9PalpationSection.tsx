@@ -14,7 +14,8 @@
 import { useFormContext } from "react-hook-form";
 import type { Region } from "../../model/region";
 import { ANSWER_VALUES } from "../../model/answer";
-import { PAIN_TYPES, type PainType } from "../../model/pain";
+import { QUESTIONNAIRE_ID } from "../../model/constants";
+import { PAIN_TYPES, PAIN_TYPE_DISPLAY_ORDER, type PainType } from "../../model/pain";
 import { buildInstanceId } from "../../model/questionInstance";
 import { SIDES, type Side } from "../../model/side";
 import { getLabel, SECTION_LABELS } from "../../content/labels";
@@ -28,19 +29,6 @@ import {
   getE9PainTypes,
   ZONE_PRESSURE,
 } from "../../definition/sections/e9-palpation";
-
-const QUESTIONNAIRE_ID = "examination";
-
-/**
- * Ordered list of pain types as they appear in grid columns.
- */
-const PAIN_TYPE_COLUMN_ORDER: readonly PainType[] = [
-  PAIN_TYPES.PAIN,
-  PAIN_TYPES.FAMILIAR,
-  PAIN_TYPES.FAMILIAR_HEADACHE,
-  PAIN_TYPES.REFERRED,
-  PAIN_TYPES.SPREADING,
-];
 
 interface PalpationGroupProps {
   title: string;
@@ -114,7 +102,7 @@ function PalpationGroup({
               <th />
               {Object.values(SIDES).flatMap((side) =>
                 Array.from({ length: maxPainTypes }).map((_, i) => {
-                  const painType = PAIN_TYPE_COLUMN_ORDER[i];
+                  const painType = PAIN_TYPE_DISPLAY_ORDER[i];
                   return (
                     <th
                       key={`${side}-header-${i}`}

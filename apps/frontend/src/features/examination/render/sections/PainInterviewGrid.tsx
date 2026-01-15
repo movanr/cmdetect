@@ -13,27 +13,14 @@
 import { Fragment } from "react";
 import { useFormContext } from "react-hook-form";
 import { ANSWER_VALUES } from "../../model/answer";
+import { QUESTIONNAIRE_ID } from "../../model/constants";
 import type { Movement } from "../../model/movement";
-import { PAIN_TYPES, type PainType } from "../../model/pain";
+import { PAIN_TYPES, PAIN_TYPE_DISPLAY_ORDER, type PainType } from "../../model/pain";
 import type { Region } from "../../model/region";
-import { REGIONS } from "../../model/region";
 import { SIDES, type Side } from "../../model/side";
 import { buildInstanceId } from "../../model/questionInstance";
 import { getLabel } from "../../content/labels";
 import { YesNoField } from "../form-fields/YesNoField";
-
-const QUESTIONNAIRE_ID = "examination";
-
-/**
- * Ordered list of pain types as they appear in grid columns.
- */
-const PAIN_TYPE_COLUMN_ORDER: readonly PainType[] = [
-  PAIN_TYPES.PAIN,
-  PAIN_TYPES.FAMILIAR,
-  PAIN_TYPES.FAMILIAR_HEADACHE,
-  PAIN_TYPES.REFERRED,
-  PAIN_TYPES.SPREADING,
-];
 
 interface PainInterviewGridProps {
   /** Movement context for E4 (opening movements) */
@@ -46,18 +33,6 @@ interface PainInterviewGridProps {
   disabled?: boolean;
   /** Optional className for the container */
   className?: string;
-}
-
-/**
- * Determines which pain types to show for a given region in E4.
- * - Temporalis: pain, familiar, familiarHeadache
- * - Others: pain, familiar
- */
-export function getE4PainTypes(region: Region): readonly PainType[] {
-  if (region === REGIONS.TEMPORALIS) {
-    return [PAIN_TYPES.PAIN, PAIN_TYPES.FAMILIAR, PAIN_TYPES.FAMILIAR_HEADACHE];
-  }
-  return [PAIN_TYPES.PAIN, PAIN_TYPES.FAMILIAR];
 }
 
 export function PainInterviewGrid({
@@ -116,7 +91,7 @@ export function PainInterviewGrid({
                 // Sub-header for pain types - show full labels
                 <Fragment key={side}>
                   {Array.from({ length: maxPainTypes }).map((_, i) => {
-                    const painType = PAIN_TYPE_COLUMN_ORDER[i];
+                    const painType = PAIN_TYPE_DISPLAY_ORDER[i];
                     return (
                       <th
                         key={`${side}-${i}`}

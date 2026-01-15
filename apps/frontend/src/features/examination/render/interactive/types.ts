@@ -1,48 +1,18 @@
 /**
  * Types for the interactive E4 examination mode.
+ *
+ * Uses E4_PAIN_REGIONS from definition as the source of truth for regions.
  */
 
 import type { Side } from "../../model/side";
 import { REGIONS, type Region } from "../../model/region";
-
-/**
- * Interactive regions for pain assessment.
- * Note: OTHER_MAST is not shown on SVG but appears in the region list.
- */
-export const INTERACTIVE_REGIONS = {
-  TEMPORALIS: "temporalis",
-  MASSETER: "masseter",
-  TMJ: "tmj",
-  NON_MAST: "nonMast",
-  OTHER_MAST: "otherMast",
-} as const;
-
-export type InteractiveRegion =
-  (typeof INTERACTIVE_REGIONS)[keyof typeof INTERACTIVE_REGIONS];
+import { E4_PAIN_REGIONS } from "../../definition/sections/e4-opening";
 
 /**
  * Unique identifier for a region including side.
  * Format: "{side}-{region}" e.g., "left-temporalis"
  */
-export type RegionId = `${Side}-${InteractiveRegion}`;
-
-/**
- * Map interactive region to the corresponding REGIONS constant.
- */
-export function mapInteractiveToRegion(region: InteractiveRegion): Region {
-  switch (region) {
-    case INTERACTIVE_REGIONS.TEMPORALIS:
-      return REGIONS.TEMPORALIS;
-    case INTERACTIVE_REGIONS.MASSETER:
-      return REGIONS.MASSETER;
-    case INTERACTIVE_REGIONS.TMJ:
-      return REGIONS.TMJ;
-    case INTERACTIVE_REGIONS.NON_MAST:
-      return REGIONS.NON_MAST;
-    case INTERACTIVE_REGIONS.OTHER_MAST:
-      return REGIONS.OTHER_MAST;
-  }
-}
+export type RegionId = `${Side}-${Region}`;
 
 /**
  * Status of a single region for display purposes.
@@ -164,40 +134,34 @@ export const REGION_STATE_COLORS = {
  */
 export function parseRegionId(regionId: RegionId): {
   side: Side;
-  region: InteractiveRegion;
+  region: Region;
 } {
-  const [side, region] = regionId.split("-") as [Side, InteractiveRegion];
+  const [side, region] = regionId.split("-") as [Side, Region];
   return { side, region };
 }
 
 /**
  * Build a RegionId from side and region.
  */
-export function buildRegionId(
-  side: Side,
-  region: InteractiveRegion
-): RegionId {
+export function buildRegionId(side: Side, region: Region): RegionId {
   return `${side}-${region}`;
 }
 
 /**
  * Regions shown on the SVG head diagram (excludes OTHER_MAST).
  */
-export const SVG_REGIONS: InteractiveRegion[] = [
-  INTERACTIVE_REGIONS.TEMPORALIS,
-  INTERACTIVE_REGIONS.MASSETER,
-  INTERACTIVE_REGIONS.TMJ,
-  INTERACTIVE_REGIONS.NON_MAST,
+export const SVG_REGIONS: readonly Region[] = [
+  REGIONS.TEMPORALIS,
+  REGIONS.MASSETER,
+  REGIONS.TMJ,
+  REGIONS.NON_MAST,
 ];
 
 /**
- * All interactive regions as an array (includes OTHER_MAST for the list).
+ * Total number of E4 regions (5 per side = 10 total).
  */
-export const ALL_INTERACTIVE_REGIONS: InteractiveRegion[] = Object.values(
-  INTERACTIVE_REGIONS
-);
+export const TOTAL_REGIONS = E4_PAIN_REGIONS.length * 2;
 
-/**
- * Total number of interactive regions (5 per side = 10 total).
- */
-export const TOTAL_REGIONS = ALL_INTERACTIVE_REGIONS.length * 2;
+// Re-export for convenience
+export { E4_PAIN_REGIONS };
+export type { Region };

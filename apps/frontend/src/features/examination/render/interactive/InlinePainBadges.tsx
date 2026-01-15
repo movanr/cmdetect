@@ -13,7 +13,7 @@ import { ANSWER_VALUES, type AnswerValue } from "../../model/answer";
 import { PAIN_TYPES } from "../../model/pain";
 import { getLabel } from "../../content/labels";
 import type { RegionId } from "./types";
-import { parseRegionId, mapInteractiveToRegion } from "./types";
+import { parseRegionId } from "./types";
 
 interface InlinePainBadgesProps {
   selectedRegion: RegionId;
@@ -35,10 +35,9 @@ export function InlinePainBadges({
 }: InlinePainBadgesProps) {
   const { getValues } = useFormContext();
   const { side, region } = parseRegionId(selectedRegion);
-  const regionConstant = mapInteractiveToRegion(region);
 
   // Get region and side labels from centralized content
-  const regionLabel = getLabel(regionConstant);
+  const regionLabel = getLabel(region);
   const sideLabel = getLabel(side);
 
   return (

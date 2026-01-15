@@ -1,13 +1,13 @@
 import { ANSWER_VALUES, YES_NO_OPTIONS } from "../../model/answer";
+import { QUESTIONNAIRE_ID } from "../../model/constants";
 import { PAIN_TYPES, type PainType } from "../../model/pain";
 import type { EnableWhen, Question, QuestionContext } from "../../model/question";
 import { buildInstanceId } from "../../model/questionInstance";
-import { REGIONS } from "../../model/region";
-
-// note: define QuestionDefinition type for static question definitions and then instantiate them with context
+import { getE4PainTypes } from "../sections/e4-opening";
+import { getE9PainTypes } from "../sections/e9-palpation";
 
 export function painPresent(ctx: QuestionContext, painType: PainType): Question {
-  const questionnaireId = "examination";
+  const questionnaireId = QUESTIONNAIRE_ID;
   const semanticId = painType;
   const instanceId = buildInstanceId(questionnaireId, semanticId, ctx);
   const enableWhen: EnableWhen = {
@@ -29,32 +29,26 @@ export function painPresent(ctx: QuestionContext, painType: PainType): Question 
   };
 }
 
+/**
+ * Creates pain interview questions for E4 movement assessments.
+ * Uses getE4PainTypes() as the source of truth for which pain types apply.
+ */
 export function painInterviewAfterMovement(ctx: QuestionContext): Question[] {
-  const questions: Question[] = [
-    painPresent(ctx, PAIN_TYPES.PAIN),
-    painPresent(ctx, PAIN_TYPES.FAMILIAR),
-  ];
-
-  if (ctx.region === REGIONS.TEMPORALIS) {
-    questions.push(painPresent(ctx, PAIN_TYPES.FAMILIAR_HEADACHE));
+  if (!ctx.region) {
+    return [painPresent(ctx, PAIN_TYPES.PAIN), painPresent(ctx, PAIN_TYPES.FAMILIAR)];
   }
-
-  return questions;
+  const painTypes = getE4PainTypes(ctx.region);
+  return painTypes.map((painType) => painPresent(ctx, painType));
 }
 
+/**
+ * Creates pain interview questions for E9 palpation assessments.
+ * Uses getE9PainTypes() as the source of truth for which pain types apply.
+ */
 export function painInterviewDuringPalpation(ctx: QuestionContext): Question[] {
-  const questions: Question[] = [
-    painPresent(ctx, PAIN_TYPES.PAIN),
-    painPresent(ctx, PAIN_TYPES.FAMILIAR),
-  ];
-  if (
-    ctx.region === REGIONS.TEMPORALIS_ANT ||
-    ctx.region === REGIONS.TEMPORALIS_MEDIA ||
-    ctx.region === REGIONS.TEMPORALIS_POST
-  ) {
-    questions.push(painPresent(ctx, PAIN_TYPES.FAMILIAR_HEADACHE));
+  if (!ctx.region) {
+    return [painPresent(ctx, PAIN_TYPES.PAIN), painPresent(ctx, PAIN_TYPES.FAMILIAR)];
   }
-  questions.push(painPresent(ctx, PAIN_TYPES.REFERRED));
-
-  return questions;
+  const painTypes = getE9PainTypes(ctx.region);
+  return painTypes.map((painType) => painPresent(ctx, painType));
 }

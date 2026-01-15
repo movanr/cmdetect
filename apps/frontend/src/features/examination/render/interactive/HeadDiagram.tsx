@@ -11,26 +11,27 @@
 import { cn } from "@/lib/utils";
 import { useCallback, useState } from "react";
 import { getLabel } from "../../content/labels";
+import { REGIONS } from "../../model/region";
 import { SIDES, type Side } from "../../model/side";
 import {
-  type InteractiveRegion,
-  type RegionStatus,
   EMPTY_REGION_STATUS,
-  INTERACTIVE_REGIONS,
   REGION_STATE_COLORS,
   getRegionVisualState,
-  mapInteractiveToRegion,
+  type Region,
+  type RegionStatus,
 } from "./types";
 
 interface HeadDiagramProps {
   /** Which side this diagram represents */
   side: Side;
+  /** Regions to render (only regions with SVG paths will be shown) */
+  regions: readonly Region[];
   /** Status for each region */
-  regionStatuses: Record<InteractiveRegion, RegionStatus>;
+  regionStatuses: Record<Region, RegionStatus>;
   /** Currently selected region (if any) */
-  selectedRegion?: InteractiveRegion | null;
+  selectedRegion?: Region | null;
   /** Callback when a region is clicked */
-  onRegionClick: (region: InteractiveRegion) => void;
+  onRegionClick: (region: Region) => void;
   /** Optional className */
   className?: string;
   /** Whether interactions are disabled */
@@ -73,16 +74,20 @@ function getRegionStroke(status: RegionStatus, isSelected: boolean): string {
 
 export function HeadDiagram({
   side,
+  regions,
   regionStatuses,
   selectedRegion,
   onRegionClick,
   className,
   disabled = false,
 }: HeadDiagramProps) {
-  const [hoveredRegion, setHoveredRegion] = useState<InteractiveRegion | null>(null);
+  const [hoveredRegion, setHoveredRegion] = useState<Region | null>(null);
+
+  // Check if a region should be rendered
+  const shouldRender = (region: Region) => regions.includes(region);
 
   const handleRegionClick = useCallback(
-    (region: InteractiveRegion) => {
+    (region: Region) => {
       if (disabled) return;
       onRegionClick(region);
     },
@@ -90,7 +95,7 @@ export function HeadDiagram({
   );
 
   const handleMouseEnter = useCallback(
-    (region: InteractiveRegion) => {
+    (region: Region) => {
       if (disabled) return;
       setHoveredRegion(region);
     },
@@ -102,11 +107,10 @@ export function HeadDiagram({
   }, []);
 
   // Helper to get status for a region
-  const getStatus = (region: InteractiveRegion): RegionStatus =>
-    regionStatuses[region] ?? EMPTY_REGION_STATUS;
+  const getStatus = (region: Region): RegionStatus => regionStatuses[region] ?? EMPTY_REGION_STATUS;
 
   // Helper to get style for a region
-  const getRegionStyle = (region: InteractiveRegion) => {
+  const getRegionStyle = (region: Region) => {
     const status = getStatus(region);
     const isSelected = selectedRegion === region;
     const isHovered = hoveredRegion === region;
@@ -134,55 +138,63 @@ export function HeadDiagram({
     >
       <g transform={transform}>
         {/* Temporalis Region */}
-        <path
-          d="M 16.226143,8.4939593 C 14.902491,9.09664 13.147018,10.44807 11.988585,11.820112 c -0.746873,0.884593 -1.279787,1.958046 -1.656125,3.052895 -0.3901014,1.134889 -0.610968,2.351315 -0.5917544,3.551225 0.02333,1.456978 0.1798284,2.996154 0.8562214,4.286821 0.979284,1.868632 2.585518,3.471734 4.3981,4.551239 1.652224,0.984002 3.656077,1.260283 5.557361,1.54877 3.335063,0.506038 8.293587,0.285666 10.11534,0.297237 0.736758,0.0047 1.788814,-0.252884 2.91994,-0.479199 0.706306,-0.141318 1.482301,-0.180265 2.109427,-0.519485 0.521979,-0.282344 1.048379,-1.862858 1.243013,-2.360255 0.81994,-2.095398 1.482685,-5.096995 1.063331,-7.630653 -0.355218,-2.14616 -1.544818,-4.155731 -2.93525,-5.828717 C 33.877135,10.856898 32.309894,9.6887656 30.619413,8.904778 28.26313,7.8120143 24.706248,7.2630219 23.011842,7.2193489 22.049928,7.1945559 20.532917,7.257717 19.322784,7.4946223 18.258356,7.7030031 17.074807,8.1075482 16.226143,8.4939593 Z"
-          style={getRegionStyle(INTERACTIVE_REGIONS.TEMPORALIS)}
-          onClick={() => handleRegionClick(INTERACTIVE_REGIONS.TEMPORALIS)}
-          onMouseEnter={() => handleMouseEnter(INTERACTIVE_REGIONS.TEMPORALIS)}
-          onMouseLeave={handleMouseLeave}
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.TEMPORALIS))}
-        />
+        {shouldRender(REGIONS.TEMPORALIS) && (
+          <path
+            d="M 16.226143,8.4939593 C 14.902491,9.09664 13.147018,10.44807 11.988585,11.820112 c -0.746873,0.884593 -1.279787,1.958046 -1.656125,3.052895 -0.3901014,1.134889 -0.610968,2.351315 -0.5917544,3.551225 0.02333,1.456978 0.1798284,2.996154 0.8562214,4.286821 0.979284,1.868632 2.585518,3.471734 4.3981,4.551239 1.652224,0.984002 3.656077,1.260283 5.557361,1.54877 3.335063,0.506038 8.293587,0.285666 10.11534,0.297237 0.736758,0.0047 1.788814,-0.252884 2.91994,-0.479199 0.706306,-0.141318 1.482301,-0.180265 2.109427,-0.519485 0.521979,-0.282344 1.048379,-1.862858 1.243013,-2.360255 0.81994,-2.095398 1.482685,-5.096995 1.063331,-7.630653 -0.355218,-2.14616 -1.544818,-4.155731 -2.93525,-5.828717 C 33.877135,10.856898 32.309894,9.6887656 30.619413,8.904778 28.26313,7.8120143 24.706248,7.2630219 23.011842,7.2193489 22.049928,7.1945559 20.532917,7.257717 19.322784,7.4946223 18.258356,7.7030031 17.074807,8.1075482 16.226143,8.4939593 Z"
+            style={getRegionStyle(REGIONS.TEMPORALIS)}
+            onClick={() => handleRegionClick(REGIONS.TEMPORALIS)}
+            onMouseEnter={() => handleMouseEnter(REGIONS.TEMPORALIS)}
+            onMouseLeave={handleMouseLeave}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label={getLabel(REGIONS.TEMPORALIS)}
+          />
+        )}
 
         {/* Masseter Region */}
-        <path
-          d="m 28.060123,32.023158 c 0.04555,0.409969 -0.121972,3.162914 -0.273314,4.737425 -0.130469,1.357352 -0.395449,2.698937 -0.546624,4.054139 -0.111433,0.998935 -0.501164,2.026568 -0.265499,3.003681 0.172695,0.716025 0.630714,1.37584 1.176541,1.870399 0.565936,0.512778 1.305845,0.851007 2.049846,1.023306 0.872788,0.202124 1.90299,0.411319 2.687577,-0.02116 0.37743,-0.208045 0.70086,-0.580255 0.698914,-1.087726 -0.0027,-0.713355 -0.155541,-1.436941 -0.06118,-2.146477 0.131711,-0.990432 0.496483,-1.941271 0.865492,-2.869784 0.300947,-0.757252 0.738389,-1.452969 1.09325,-2.186504 0.452602,-0.935576 0.927418,-1.862342 1.321012,-2.824234 0.207332,-0.506691 0.546627,-1.548772 0.546627,-1.548772 0,0 -0.495906,-0.288723 -0.728835,-0.455523 -0.302708,-0.216768 -0.563911,-0.48772 -0.86549,-0.706057 -0.627768,-0.454491 -1.24916,-0.941002 -1.958744,-1.252685 -0.488949,-0.21477 -1.023654,-0.312772 -1.548773,-0.409969 -0.488044,-0.09033 -0.993273,-0.254371 -1.480443,-0.159432 -0.583437,0.1137 -1.020705,0.619338 -1.571549,0.842715 -0.204879,0.08308 -0.41762,0.161497 -0.637731,0.182208 -0.166976,0.01571 -0.501073,-0.04555 -0.501073,-0.04555 z"
-          style={getRegionStyle(INTERACTIVE_REGIONS.MASSETER)}
-          onClick={() => handleRegionClick(INTERACTIVE_REGIONS.MASSETER)}
-          onMouseEnter={() => handleMouseEnter(INTERACTIVE_REGIONS.MASSETER)}
-          onMouseLeave={handleMouseLeave}
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.MASSETER))}
-        />
+        {shouldRender(REGIONS.MASSETER) && (
+          <path
+            d="m 28.060123,32.023158 c 0.04555,0.409969 -0.121972,3.162914 -0.273314,4.737425 -0.130469,1.357352 -0.395449,2.698937 -0.546624,4.054139 -0.111433,0.998935 -0.501164,2.026568 -0.265499,3.003681 0.172695,0.716025 0.630714,1.37584 1.176541,1.870399 0.565936,0.512778 1.305845,0.851007 2.049846,1.023306 0.872788,0.202124 1.90299,0.411319 2.687577,-0.02116 0.37743,-0.208045 0.70086,-0.580255 0.698914,-1.087726 -0.0027,-0.713355 -0.155541,-1.436941 -0.06118,-2.146477 0.131711,-0.990432 0.496483,-1.941271 0.865492,-2.869784 0.300947,-0.757252 0.738389,-1.452969 1.09325,-2.186504 0.452602,-0.935576 0.927418,-1.862342 1.321012,-2.824234 0.207332,-0.506691 0.546627,-1.548772 0.546627,-1.548772 0,0 -0.495906,-0.288723 -0.728835,-0.455523 -0.302708,-0.216768 -0.563911,-0.48772 -0.86549,-0.706057 -0.627768,-0.454491 -1.24916,-0.941002 -1.958744,-1.252685 -0.488949,-0.21477 -1.023654,-0.312772 -1.548773,-0.409969 -0.488044,-0.09033 -0.993273,-0.254371 -1.480443,-0.159432 -0.583437,0.1137 -1.020705,0.619338 -1.571549,0.842715 -0.204879,0.08308 -0.41762,0.161497 -0.637731,0.182208 -0.166976,0.01571 -0.501073,-0.04555 -0.501073,-0.04555 z"
+            style={getRegionStyle(REGIONS.MASSETER)}
+            onClick={() => handleRegionClick(REGIONS.MASSETER)}
+            onMouseEnter={() => handleMouseEnter(REGIONS.MASSETER)}
+            onMouseLeave={handleMouseLeave}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label={getLabel(REGIONS.MASSETER)}
+          />
+        )}
 
         {/* TMJ Region */}
-        <ellipse
-          cx="25.685226"
-          cy="33.201492"
-          rx="1.8707678"
-          ry="2.568583"
-          style={getRegionStyle(INTERACTIVE_REGIONS.TMJ)}
-          onClick={() => handleRegionClick(INTERACTIVE_REGIONS.TMJ)}
-          onMouseEnter={() => handleMouseEnter(INTERACTIVE_REGIONS.TMJ)}
-          onMouseLeave={handleMouseLeave}
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.TMJ))}
-        />
+        {shouldRender(REGIONS.TMJ) && (
+          <ellipse
+            cx="25.685226"
+            cy="33.201492"
+            rx="1.8707678"
+            ry="2.568583"
+            style={getRegionStyle(REGIONS.TMJ)}
+            onClick={() => handleRegionClick(REGIONS.TMJ)}
+            onMouseEnter={() => handleMouseEnter(REGIONS.TMJ)}
+            onMouseLeave={handleMouseLeave}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label={getLabel(REGIONS.TMJ)}
+          />
+        )}
 
         {/* Non-Masticatory Region */}
-        <path
-          d="m 25.094104,38.975949 c 0,0 0.06732,1.371168 0.205028,3.005725 0.07649,0.907939 0.08784,1.913843 0.328888,2.553293 0.282896,0.750471 0.805736,1.423688 1.413309,1.947226 0.893897,0.770259 2.027119,1.242331 3.14069,1.63316 1.257786,0.441443 2.952611,0.931061 4.681357,1.343238 3.339277,0.796166 6.782155,1.263533 6.782155,1.263533 0,0 -7.764299,0.981012 -11.557731,-0.03141 -0.703679,-0.187803 -2.009232,-0.748805 -2.826621,-1.41331 C 26.56722,48.713247 26.010325,47.96605 25.596613,47.173145 25.176824,46.368592 24.999246,45.454212 24.811441,44.566373 24.706636,44.070916 24.658335,43.529086 24.623,43.058844 c -0.0204,-0.271435 0.03311,-0.920171 0.07428,-1.477597 0.09765,-1.321965 0.396824,-2.605298 0.396824,-2.605298 z"
-          style={getRegionStyle(INTERACTIVE_REGIONS.NON_MAST)}
-          onClick={() => handleRegionClick(INTERACTIVE_REGIONS.NON_MAST)}
-          onMouseEnter={() => handleMouseEnter(INTERACTIVE_REGIONS.NON_MAST)}
-          onMouseLeave={handleMouseLeave}
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.NON_MAST))}
-        />
+        {shouldRender(REGIONS.NON_MAST) && (
+          <path
+            d="m 25.094104,38.975949 c 0,0 0.06732,1.371168 0.205028,3.005725 0.07649,0.907939 0.08784,1.913843 0.328888,2.553293 0.282896,0.750471 0.805736,1.423688 1.413309,1.947226 0.893897,0.770259 2.027119,1.242331 3.14069,1.63316 1.257786,0.441443 2.952611,0.931061 4.681357,1.343238 3.339277,0.796166 6.782155,1.263533 6.782155,1.263533 0,0 -7.764299,0.981012 -11.557731,-0.03141 -0.703679,-0.187803 -2.009232,-0.748805 -2.826621,-1.41331 C 26.56722,48.713247 26.010325,47.96605 25.596613,47.173145 25.176824,46.368592 24.999246,45.454212 24.811441,44.566373 24.706636,44.070916 24.658335,43.529086 24.623,43.058844 c -0.0204,-0.271435 0.03311,-0.920171 0.07428,-1.477597 0.09765,-1.321965 0.396824,-2.605298 0.396824,-2.605298 z"
+            style={getRegionStyle(REGIONS.NON_MAST)}
+            onClick={() => handleRegionClick(REGIONS.NON_MAST)}
+            onMouseEnter={() => handleMouseEnter(REGIONS.NON_MAST)}
+            onMouseLeave={handleMouseLeave}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label={getLabel(REGIONS.NON_MAST)}
+          />
+        )}
       </g>
 
       {/* Decorative features (non-interactive) */}

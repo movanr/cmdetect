@@ -15,18 +15,17 @@ import { evaluateEnableWhen, type FormValues } from "../../form/evaluateEnableWh
 import { SIDES, type Side } from "../../model/side";
 import {
   type RegionId,
-  type InteractiveRegion,
+  type Region,
   type RegionStatus,
   type ExamProgress,
-  ALL_INTERACTIVE_REGIONS,
-  TOTAL_REGIONS,
   parseRegionId,
   buildRegionId,
-  mapInteractiveToRegion,
 } from "./types";
 
 interface UseInteractiveExamProps {
   movement: Movement;
+  /** Regions to assess */
+  regions: readonly Region[];
   /** Questions for this movement (from painInterviewAfterMovement for all sides/regions) */
   questions: Question[];
   /** Form values from watch() - passed from component to ensure reactivity */
@@ -45,13 +44,14 @@ interface UseInteractiveExamReturn {
   setAnswer: (question: Question, value: AnswerValue | undefined) => void;
   /** Toggle answer (set if different, clear if same) */
   toggleAnswer: (question: Question, value: AnswerValue) => void;
-  handleRegionClick: (side: Side, region: InteractiveRegion) => void;
+  handleRegionClick: (side: Side, region: Region) => void;
   handleDeselect: () => void;
   completeAllRegions: () => void;
 }
 
 export function useInteractiveExam({
   movement: _movement,
+  regions,
   questions,
   formValues: _formValues, // Used to trigger re-renders via watch(), but we use getValues() for reading
 }: UseInteractiveExamProps): UseInteractiveExamReturn {
@@ -70,9 +70,8 @@ export function useInteractiveExam({
   const getQuestionsForRegion = useCallback(
     (regionId: RegionId): Question[] => {
       const { side, region } = parseRegionId(regionId);
-      const regionConstant = mapInteractiveToRegion(region);
       return questions.filter(
-        (q) => q.context.side === side && q.context.region === regionConstant
+        (q) => q.context.side === side && q.context.region === region
       );
     },
     [questions]
@@ -183,7 +182,7 @@ export function useInteractiveExam({
     >;
 
     for (const side of Object.values(SIDES)) {
-      for (const region of ALL_INTERACTIVE_REGIONS) {
+      for (const region of regions) {
         const regionId = buildRegionId(side, region);
         statuses[regionId] = calculateRegionStatus(regionId);
       }
@@ -193,20 +192,21 @@ export function useInteractiveExam({
   })();
 
   // Calculate progress
+  const totalRegions = regions.length * 2; // Both sides
   const progress = useMemo((): ExamProgress => {
     const completed = Object.values(regionStatuses).filter(
       (s) => s.isComplete
     ).length;
     return {
       completed,
-      total: TOTAL_REGIONS,
-      percentage: Math.round((completed / TOTAL_REGIONS) * 100),
+      total: totalRegions,
+      percentage: Math.round((completed / totalRegions) * 100),
     };
-  }, [regionStatuses]);
+  }, [regionStatuses, totalRegions]);
 
   // Handle region click - just select/deselect, don't modify values
   const handleRegionClick = useCallback(
-    (side: Side, region: InteractiveRegion) => {
+    (side: Side, region: Region) => {
       const regionId = buildRegionId(side, region);
 
       if (selectedRegion === regionId) {
@@ -239,7 +239,7 @@ export function useInteractiveExam({
   // Complete all unanswered regions with pain=no
   const completeAllRegions = useCallback(() => {
     for (const side of Object.values(SIDES)) {
-      for (const region of ALL_INTERACTIVE_REGIONS) {
+      for (const region of regions) {
         const regionId = buildRegionId(side, region);
         const regionQuestions = getQuestionsForRegion(regionId);
         const painQ = regionQuestions.find(
@@ -258,7 +258,7 @@ export function useInteractiveExam({
     }
     // Deselect current region
     setSelectedRegion(null);
-  }, [getQuestionsForRegion, getValues, setValue, setSelectedRegion]);
+  }, [regions, getQuestionsForRegion, getValues, setValue, setSelectedRegion]);
 
   return {
     selectedRegion,
