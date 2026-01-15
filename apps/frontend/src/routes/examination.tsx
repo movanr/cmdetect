@@ -11,7 +11,6 @@ function ExaminationPage() {
       <ExaminationFormPage
         onSubmit={(values) => {
           console.log("Examination submitted:", values);
-          alert("Form submitted! Check console for values.");
         }}
       />
     </div>
