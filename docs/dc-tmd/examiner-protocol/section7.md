@@ -40,7 +40,7 @@
 
 **Figure 9.** (top) Opening pattern may be assessed with or without any reference lines. Illustrated is a ruler placed against the end of the maxillary central incisor; note that the edge of the ruler is about 2mm from the mesial incisal edge of the right central incisor. Because the lower lip deviated to the patient's left, it appears as though the mandible deviated to the left; however, inspection of the mandibular incisal midline reveals that that midline is also just to the patient's left of the ruler. Since the mandibular midline is within 2 mm of the maxillary midline and because the mandible opened along the path (not shown) illustrated by the ruler, this is a straight opening pattern. See illustrations in Figure 10 for further clarification. If the reference midline is an open incisal embrasure between two teeth (as shown here), placing the ruler against the incisal edge is a stable landmark compared to placing the ruler into the incisal embrasure.
 
-(bottom) In this illustration, the ruler is now placed to the facial side of the incisal embrasure, but *not* in the embrasure between the two maxillary central incisors. Since the mandibular midline has moved more than 2mm to the patient's right during opening, this would be classified as an uncorrected deviation.
+(bottom) In this illustration, the ruler is now placed to the facial side of the incisal embrasure, but _not_ in the embrasure between the two maxillary central incisors. Since the mandibular midline has moved more than 2mm to the patient's right during opening, this would be classified as an uncorrected deviation.
 
 **Figure 10a.** Illustration of the 4 types of opening patterns.
 
