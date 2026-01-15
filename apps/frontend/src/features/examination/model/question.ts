@@ -1,12 +1,13 @@
 import type { AnswerOption } from "./answer";
 import type { Movement } from "./movement";
 import type { Region } from "./region";
+import type { SemanticId } from "./semanticId";
 import type { Side } from "./side";
 import type { Unit } from "./units";
 
 export type EnableWhen = {
   dependsOn: {
-    semanticId: string;
+    semanticId: SemanticId;
     scope?: "local" | "ancestor" | "global";
   };
   operator: "equals" | "notEquals";
@@ -49,7 +50,7 @@ export type BaseQuestion = {
    * - diagnostic meaning
    * - analytics / rules
    */
-  semanticId: string;
+  semanticId: SemanticId;
 
   /**
    * Clinical / procedural context

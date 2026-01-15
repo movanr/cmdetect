@@ -1,6 +1,9 @@
 /**
  * InteractiveExamSection - Main container for the interactive E4 examination mode.
  *
+ * Generates questions from definitions and passes them to the hook and components.
+ * Questions are the single source of truth.
+ *
  * Layout:
  * - Bilateral head diagrams (patient's right on left of screen)
  * - Region status lists beside each diagram
@@ -8,12 +11,15 @@
  * - Progress footer
  */
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
+import { useFormContext } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { Movement } from "../../model/movement";
-import { SIDES } from "../../model/side";
+import { SIDES, type Side } from "../../model/side";
+import type { Question } from "../../model/question";
+import { painInterviewAfterMovement } from "../../definition/questions/pain";
 import {
   type InteractiveRegion,
   type RegionStatus,
@@ -21,6 +27,7 @@ import {
   EMPTY_REGION_STATUS,
   parseRegionId,
   buildRegionId,
+  mapInteractiveToRegion,
 } from "./types";
 import { useInteractiveExam } from "./useInteractiveExam";
 import { HeadDiagram } from "./HeadDiagram";
@@ -42,22 +49,39 @@ export function InteractiveExamSection({
   disabled = false,
   className,
 }: InteractiveExamSectionProps) {
+  const { watch } = useFormContext();
+
+  // Get form values - this triggers re-renders when values change
+  const formValues = watch();
+
+  // Generate ALL questions for this movement across all sides/regions
+  // This is the single source of truth from definitions
+  const questions = useMemo((): Question[] => {
+    const all: Question[] = [];
+    for (const side of Object.values(SIDES) as Side[]) {
+      for (const interactiveRegion of ALL_INTERACTIVE_REGIONS) {
+        const region = mapInteractiveToRegion(interactiveRegion);
+        all.push(...painInterviewAfterMovement({ movement, side, region }));
+      }
+    }
+    return all;
+  }, [movement]);
+
   const {
     selectedRegion,
     regionStatuses,
     handleRegionClick,
-    setPain,
-    setNoPain,
-    setFamiliarPain,
-    setNoFamiliarPain,
-    setFamiliarHeadache,
-    setNoFamiliarHeadache,
+    getQuestionsForRegion,
+    isQuestionEnabled,
+    toggleAnswer,
     completeAllRegions,
-  } = useInteractiveExam({ movement });
+  } = useInteractiveExam({ movement, questions, formValues });
 
   // Get statuses for a specific side
   const getStatusesForSide = useCallback(
-    (side: typeof SIDES.LEFT | typeof SIDES.RIGHT): Record<InteractiveRegion, RegionStatus> => {
+    (
+      side: typeof SIDES.LEFT | typeof SIDES.RIGHT
+    ): Record<InteractiveRegion, RegionStatus> => {
       const result: Record<InteractiveRegion, RegionStatus> = {} as Record<
         InteractiveRegion,
         RegionStatus
@@ -73,7 +97,9 @@ export function InteractiveExamSection({
 
   // Get selected region for a specific side
   const getSelectedForSide = useCallback(
-    (side: typeof SIDES.LEFT | typeof SIDES.RIGHT): InteractiveRegion | null => {
+    (
+      side: typeof SIDES.LEFT | typeof SIDES.RIGHT
+    ): InteractiveRegion | null => {
       if (!selectedRegion) return null;
       const { side: selectedSide, region } = parseRegionId(selectedRegion);
       return selectedSide === side ? region : null;
@@ -81,10 +107,10 @@ export function InteractiveExamSection({
     [selectedRegion]
   );
 
-  // Get status for selected region
-  const selectedStatus = selectedRegion
-    ? regionStatuses[selectedRegion] ?? EMPTY_REGION_STATUS
-    : null;
+  // Get questions for selected region
+  const selectedRegionQuestions = selectedRegion
+    ? getQuestionsForRegion(selectedRegion)
+    : [];
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -151,16 +177,12 @@ export function InteractiveExamSection({
           </div>
 
           {/* Inline pain badges - shown when a region is selected */}
-          {selectedRegion && selectedStatus && (
+          {selectedRegion && selectedRegionQuestions.length > 0 && (
             <InlinePainBadges
               selectedRegion={selectedRegion}
-              status={selectedStatus}
-              onSetPain={setPain}
-              onSetNoPain={setNoPain}
-              onSetFamiliarPain={setFamiliarPain}
-              onSetNoFamiliarPain={setNoFamiliarPain}
-              onSetFamiliarHeadache={setFamiliarHeadache}
-              onSetNoFamiliarHeadache={setNoFamiliarHeadache}
+              questions={selectedRegionQuestions}
+              isQuestionEnabled={isQuestionEnabled}
+              onToggleAnswer={toggleAnswer}
             />
           )}
         </CardContent>

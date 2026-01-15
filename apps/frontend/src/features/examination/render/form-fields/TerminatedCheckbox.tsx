@@ -13,12 +13,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { EXAMINATION_LABELS } from "../../content/labels";
+import { getLabel } from "../../content/labels";
+import { MEASUREMENT_IDS } from "../../model/measurement";
 
 interface TerminatedCheckboxProps {
   /** The field name (instanceId from the question) */
   name: string;
-  /** Custom label (default: from EXAMINATION_LABELS) */
+  /** Custom label (default: from content labels) */
   label?: string;
   /** Whether the field is disabled */
   disabled?: boolean;
@@ -33,7 +34,7 @@ export function TerminatedCheckbox({
   className,
 }: TerminatedCheckboxProps) {
   const { control } = useFormContext();
-  const displayLabel = label ?? EXAMINATION_LABELS.terminated?.text ?? "Abgebrochen";
+  const displayLabel = label ?? getLabel(MEASUREMENT_IDS.TERMINATED);
 
   return (
     <FormField

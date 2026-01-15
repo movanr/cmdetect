@@ -9,6 +9,7 @@
  */
 
 import { ANSWER_VALUES, YES_NO_OPTIONS } from "../../model/answer";
+import { MEASUREMENT_IDS } from "../../model/measurement";
 import { MOVEMENTS } from "../../model/movement";
 import { PAIN_TYPES } from "../../model/pain";
 import type {
@@ -21,6 +22,7 @@ import type {
 } from "../../model/question";
 import { buildInstanceId } from "../../model/questionInstance";
 import { REGIONS } from "../../model/region";
+import { type SemanticId } from "../../model/semanticId";
 import { SIDES } from "../../model/side";
 
 const QUESTIONNAIRE_ID = "examination";
@@ -40,7 +42,10 @@ const E4_PAIN_REGIONS = [
 /**
  * Creates a measurement question for opening distance.
  */
-function createMeasurementQuestion(semanticId: string, ctx: QuestionContext = {}): NumericQuestion {
+function createMeasurementQuestion(
+  semanticId: SemanticId,
+  ctx: QuestionContext = {}
+): NumericQuestion {
   return {
     questionnaireId: QUESTIONNAIRE_ID,
     semanticId,
@@ -59,7 +64,7 @@ function createMeasurementQuestion(semanticId: string, ctx: QuestionContext = {}
 function createTerminatedQuestion(
   movement: (typeof MOVEMENTS)[keyof typeof MOVEMENTS]
 ): BooleanQuestion {
-  const semanticId = "terminated";
+  const semanticId = MEASUREMENT_IDS.TERMINATED;
   const ctx: QuestionContext = { movement };
   return {
     questionnaireId: QUESTIONNAIRE_ID,
@@ -143,7 +148,7 @@ export function createE4Questions(): Question[] {
   const questions: Question[] = [];
 
   // Pain-free opening measurement
-  questions.push(createMeasurementQuestion("painFreeOpening"));
+  questions.push(createMeasurementQuestion(MEASUREMENT_IDS.PAIN_FREE_OPENING));
 
   // Maximum unassisted opening
   questions.push(createMeasurementQuestion(MOVEMENTS.MAX_UNASSISTED_OPENING));
@@ -165,7 +170,11 @@ export const E4_SECTION = {
   id: "E4",
   semanticId: "e4OpeningMovements",
   title: "Öffnungsbewegungen",
-  measurements: ["painFreeOpening", "maxUnassistedOpening", "maxAssistedOpening"] as const,
+  measurements: [
+    MEASUREMENT_IDS.PAIN_FREE_OPENING,
+    MOVEMENTS.MAX_UNASSISTED_OPENING,
+    MOVEMENTS.MAX_ASSISTED_OPENING,
+  ] as const,
   movements: [MOVEMENTS.MAX_UNASSISTED_OPENING, MOVEMENTS.MAX_ASSISTED_OPENING] as const,
   regions: E4_PAIN_REGIONS,
 } as const;

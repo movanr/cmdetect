@@ -19,10 +19,21 @@ import type { Region } from "../../model/region";
 import { REGIONS } from "../../model/region";
 import { SIDES, type Side } from "../../model/side";
 import { buildInstanceId } from "../../model/questionInstance";
-import { REGION_LABELS, SIDE_LABELS } from "../../content/labels";
+import { getLabel } from "../../content/labels";
 import { YesNoField } from "../form-fields/YesNoField";
 
 const QUESTIONNAIRE_ID = "examination";
+
+/**
+ * Ordered list of pain types as they appear in grid columns.
+ */
+const PAIN_TYPE_COLUMN_ORDER: readonly PainType[] = [
+  PAIN_TYPES.PAIN,
+  PAIN_TYPES.FAMILIAR,
+  PAIN_TYPES.FAMILIAR_HEADACHE,
+  PAIN_TYPES.REFERRED,
+  PAIN_TYPES.SPREADING,
+];
 
 interface PainInterviewGridProps {
   /** Movement context for E4 (opening movements) */
@@ -48,28 +59,6 @@ export function getE4PainTypes(region: Region): readonly PainType[] {
   }
   return [PAIN_TYPES.PAIN, PAIN_TYPES.FAMILIAR];
 }
-
-/**
- * Compact label for pain types in the grid header.
- */
-const PAIN_TYPE_SHORT_LABELS: Record<PainType, string> = {
-  [PAIN_TYPES.PAIN]: "S",
-  [PAIN_TYPES.FAMILIAR]: "B",
-  [PAIN_TYPES.FAMILIAR_HEADACHE]: "K",
-  [PAIN_TYPES.REFERRED]: "A",
-  [PAIN_TYPES.SPREADING]: "AB",
-};
-
-/**
- * Full label for pain types (used in tooltips/legends).
- */
-const PAIN_TYPE_FULL_LABELS: Record<PainType, string> = {
-  [PAIN_TYPES.PAIN]: "Schmerz",
-  [PAIN_TYPES.FAMILIAR]: "Bekannter Schmerz",
-  [PAIN_TYPES.FAMILIAR_HEADACHE]: "Bekannter Kopfschmerz",
-  [PAIN_TYPES.REFERRED]: "Ausstrahlend",
-  [PAIN_TYPES.SPREADING]: "Ausbreitend",
-};
 
 export function PainInterviewGrid({
   movement,
@@ -105,15 +94,6 @@ export function PainInterviewGrid({
 
   return (
     <div className={className}>
-      {/* Legend */}
-      <div className="mb-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
-        {Object.entries(PAIN_TYPE_SHORT_LABELS).map(([type, short]) => (
-          <span key={type}>
-            <strong>{short}</strong> = {PAIN_TYPE_FULL_LABELS[type as PainType]}
-          </span>
-        ))}
-      </div>
-
       {/* Grid */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
@@ -126,25 +106,26 @@ export function PainInterviewGrid({
                   className="p-2 text-center font-medium"
                   colSpan={maxPainTypes}
                 >
-                  {SIDE_LABELS[side]}
+                  {getLabel(side)}
                 </th>
               ))}
             </tr>
             <tr className="border-b bg-muted/30">
               <th />
               {Object.values(SIDES).map((side) => (
-                // Sub-header for pain types
+                // Sub-header for pain types - show full labels
                 <Fragment key={side}>
-                  {Array.from({ length: maxPainTypes }).map((_, i) => (
-                    <th
-                      key={`${side}-${i}`}
-                      className="p-1 text-center text-xs font-normal text-muted-foreground"
-                    >
-                      {i === 0 && PAIN_TYPE_SHORT_LABELS[PAIN_TYPES.PAIN]}
-                      {i === 1 && PAIN_TYPE_SHORT_LABELS[PAIN_TYPES.FAMILIAR]}
-                      {i === 2 && PAIN_TYPE_SHORT_LABELS[PAIN_TYPES.FAMILIAR_HEADACHE]}
-                    </th>
-                  ))}
+                  {Array.from({ length: maxPainTypes }).map((_, i) => {
+                    const painType = PAIN_TYPE_COLUMN_ORDER[i];
+                    return (
+                      <th
+                        key={`${side}-${i}`}
+                        className="p-1 text-center text-xs font-normal text-muted-foreground"
+                      >
+                        {painType ? getLabel(painType) : ""}
+                      </th>
+                    );
+                  })}
                 </Fragment>
               ))}
             </tr>
@@ -154,7 +135,7 @@ export function PainInterviewGrid({
               const painTypes = painTypesForRegion(region);
               return (
                 <tr key={region} className="border-b">
-                  <td className="p-2 font-medium">{REGION_LABELS[region]}</td>
+                  <td className="p-2 font-medium">{getLabel(region)}</td>
                   {Object.values(SIDES).map((side) => (
                     <Fragment key={side}>
                       {Array.from({ length: maxPainTypes }).map((_, i) => {

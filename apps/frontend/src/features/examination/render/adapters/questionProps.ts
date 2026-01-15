@@ -1,9 +1,4 @@
-import {
-  EXAMINATION_LABELS,
-  MOVEMENT_LABELS,
-  REGION_LABELS,
-  SIDE_LABELS,
-} from "../../content/labels";
+import { getLabel } from "../../content/labels";
 import type { Question } from "../../model/question";
 
 /**
@@ -17,7 +12,7 @@ export type QuestionDisplayProps = {
   label: string;
   /** Optional description/help text */
   description?: string;
-  /** Formatted context string, e.g. "Rechts / Temporalis" */
+  /** Formatted context string, e.g. "Rechte Seite / Temporalis" */
   contextLabel?: string;
 };
 
@@ -26,72 +21,33 @@ export type QuestionDisplayProps = {
  *
  * This adapter bridges the semantic model (which has semanticId) to the
  * render layer (which needs display labels). Content is resolved from
- * the content/labels.ts constants.
+ * the content/labels.ts via getLabel().
  *
  * @param question - The semantic question to resolve
  * @returns Display properties for rendering
  */
 export function resolveQuestionDisplay(question: Question): QuestionDisplayProps {
-  const labelEntry = EXAMINATION_LABELS[question.semanticId];
   const ctx = question.context;
 
   // Build context label from context properties
   const contextParts: string[] = [];
 
   if (ctx.side) {
-    const sideLabel = SIDE_LABELS[ctx.side];
-    if (sideLabel) {
-      contextParts.push(sideLabel);
-    }
+    contextParts.push(getLabel(ctx.side));
   }
 
   if (ctx.region) {
-    const regionLabel = REGION_LABELS[ctx.region];
-    if (regionLabel) {
-      contextParts.push(regionLabel);
-    }
+    contextParts.push(getLabel(ctx.region));
   }
 
   if (ctx.movement) {
-    const movementLabel = MOVEMENT_LABELS[ctx.movement];
-    if (movementLabel) {
-      contextParts.push(movementLabel);
-    }
+    contextParts.push(getLabel(ctx.movement));
   }
 
   return {
     id: question.instanceId,
-    label: labelEntry?.text ?? question.semanticId,
-    description: labelEntry?.description,
+    label: getLabel(question.semanticId),
+    description: undefined, // No descriptions for now - can be added later
     contextLabel: contextParts.length > 0 ? contextParts.join(" / ") : undefined,
   };
-}
-
-/**
- * Resolves just the label for a semanticId without a full question.
- * Useful for displaying standalone labels.
- */
-export function resolveLabel(semanticId: string): string {
-  return EXAMINATION_LABELS[semanticId]?.text ?? semanticId;
-}
-
-/**
- * Resolves a region to its display label.
- */
-export function resolveRegionLabel(region: string): string {
-  return REGION_LABELS[region] ?? region;
-}
-
-/**
- * Resolves a side to its display label.
- */
-export function resolveSideLabel(side: string): string {
-  return SIDE_LABELS[side] ?? side;
-}
-
-/**
- * Resolves a movement to its display label.
- */
-export function resolveMovementLabel(movement: string): string {
-  return MOVEMENT_LABELS[movement] ?? movement;
 }

@@ -1,170 +1,145 @@
 /**
  * InlinePainBadges - Pain assessment badges for selected region.
  *
- * Layout: [Region Label] Schmerz: [Nein] [Ja] | [Bekannter Schmerz] [Bekannter Kopfschmerz]
- *
- * Selecting familiar pain/headache automatically sets pain=yes.
+ * Dynamically renders badges from question definitions.
+ * Uses enableWhen to determine if follow-up questions are clickable.
  */
 
+import { useFormContext } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { Side } from "../../model/side";
-import {
-  type InteractiveRegion,
-  type RegionId,
-  type RegionStatus,
-  INTERACTIVE_REGIONS,
-  parseRegionId,
-} from "./types";
-
-const SIDE_LABELS: Record<Side, string> = {
-  left: "Linke Seite",
-  right: "Rechte Seite",
-};
-
-const REGION_LABELS: Record<InteractiveRegion, string> = {
-  [INTERACTIVE_REGIONS.TEMPORALIS]: "Temporalis",
-  [INTERACTIVE_REGIONS.MASSETER]: "Masseter",
-  [INTERACTIVE_REGIONS.TMJ]: "Kiefergelenk",
-  [INTERACTIVE_REGIONS.NON_MAST]: "Nicht-Kaumuskulatur",
-  [INTERACTIVE_REGIONS.OTHER_MAST]: "Andere Kaumuskeln",
-};
+import type { Question } from "../../model/question";
+import { ANSWER_VALUES, type AnswerValue } from "../../model/answer";
+import { PAIN_TYPES } from "../../model/pain";
+import { getLabel } from "../../content/labels";
+import type { RegionId } from "./types";
+import { parseRegionId, mapInteractiveToRegion } from "./types";
 
 interface InlinePainBadgesProps {
   selectedRegion: RegionId;
-  status: RegionStatus;
-  onSetPain: () => void;
-  onSetNoPain: () => void;
-  onSetFamiliarPain: () => void;
-  onSetNoFamiliarPain: () => void;
-  onSetFamiliarHeadache: () => void;
-  onSetNoFamiliarHeadache: () => void;
+  /** Questions for this specific region */
+  questions: Question[];
+  /** Check if a question is enabled */
+  isQuestionEnabled: (question: Question) => boolean;
+  /** Toggle answer callback */
+  onToggleAnswer: (question: Question, value: AnswerValue) => void;
   className?: string;
 }
 
 export function InlinePainBadges({
   selectedRegion,
-  status,
-  onSetPain,
-  onSetNoPain,
-  onSetFamiliarPain,
-  onSetNoFamiliarPain,
-  onSetFamiliarHeadache,
-  onSetNoFamiliarHeadache,
+  questions,
+  isQuestionEnabled,
+  onToggleAnswer,
   className,
 }: InlinePainBadgesProps) {
+  const { getValues } = useFormContext();
   const { side, region } = parseRegionId(selectedRegion);
-  const isTemporalis = region === INTERACTIVE_REGIONS.TEMPORALIS;
+  const regionConstant = mapInteractiveToRegion(region);
 
-  // Check if explicitly answered "no" (has data but not yes)
-  const isFamiliarPainNo = status.hasFamiliarPainData && !status.hasFamiliarPain;
-  const isFamiliarHeadacheNo = status.hasFamiliarHeadacheData && !status.hasFamiliarHeadache;
+  // Get region and side labels from centralized content
+  const regionLabel = getLabel(regionConstant);
+  const sideLabel = getLabel(side);
 
   return (
-    <div className={cn("flex flex-col items-center gap-3 p-3 bg-muted/50 rounded-lg", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-center gap-3 p-3 bg-muted/50 rounded-lg",
+        className
+      )}
+    >
       {/* Region label on top */}
       <span className="text-sm font-medium">
-        {REGION_LABELS[region]}, {SIDE_LABELS[side]}
+        {regionLabel}, {sideLabel}
       </span>
 
-      {/* Questions in vertical layout */}
+      {/* Questions in vertical layout - rendered dynamically */}
       <div className="flex flex-col gap-2">
-        {/* Pain yes/no */}
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-sm text-muted-foreground">Schmerz:</span>
-          <div className="flex items-center gap-1">
-            <Badge
-              variant={status.hasData && !status.isPainPositive ? "default" : "outline"}
-              className={cn(
-                "cursor-pointer select-none transition-colors",
-                status.hasData && !status.isPainPositive
-                  ? "hover:bg-primary/80"
-                  : "hover:bg-primary/10 hover:text-primary hover:border-primary"
-              )}
-              onClick={onSetNoPain}
-            >
-              Nein
-            </Badge>
-            <Badge
-              variant={status.isPainPositive ? "default" : "outline"}
-              className={cn(
-                "cursor-pointer select-none transition-colors",
-                status.isPainPositive
-                  ? "hover:bg-primary/80"
-                  : "hover:bg-primary/10 hover:text-primary hover:border-primary"
-              )}
-              onClick={onSetPain}
-            >
-              Ja
-            </Badge>
-          </div>
-        </div>
+        {questions.map((question) => {
+          const enabled = isQuestionEnabled(question);
+          // Use getValues() with instanceId path - RHF handles nested structure resolution
+          const currentValue = getValues(question.instanceId) as
+            | AnswerValue
+            | undefined;
+          const isYes = currentValue === ANSWER_VALUES.YES;
+          const isNo = currentValue === ANSWER_VALUES.NO;
+          const hasData = currentValue !== undefined && currentValue !== null;
 
-        {/* Familiar pain yes/no */}
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-sm text-muted-foreground">Bekannter Schmerz:</span>
-          <div className="flex items-center gap-1">
-            <Badge
-              variant={isFamiliarPainNo ? "default" : "outline"}
-              className={cn(
-                "cursor-pointer select-none transition-colors",
-                isFamiliarPainNo
-                  ? "hover:bg-primary/80"
-                  : "hover:bg-primary/10 hover:text-primary hover:border-primary"
-              )}
-              onClick={onSetNoFamiliarPain}
-            >
-              Nein
-            </Badge>
-            <Badge
-              variant={status.hasFamiliarPain ? "destructive" : "outline"}
-              className={cn(
-                "cursor-pointer select-none transition-colors",
-                status.hasFamiliarPain
-                  ? "hover:bg-destructive/80"
-                  : "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-              )}
-              onClick={onSetFamiliarPain}
-            >
-              Ja
-            </Badge>
-          </div>
-        </div>
+          // Get label from centralized content
+          const label = getLabel(question.semanticId);
 
-        {/* Familiar headache yes/no - only for Temporalis */}
-        {isTemporalis && (
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-muted-foreground flex items-center gap-1">
-              Bekannter Kopfschmerz:
-            </span>
-            <div className="flex items-center gap-1">
-              <Badge
-                variant={isFamiliarHeadacheNo ? "default" : "outline"}
+          // Determine if this is a "clinically significant" question (red when yes)
+          // Pain itself is not red, but familiar pain and familiar headache are
+          const isClinicallySignificant =
+            question.semanticId !== PAIN_TYPES.PAIN;
+
+          return (
+            <div
+              key={question.instanceId}
+              className="flex items-center justify-between gap-4"
+            >
+              <span
                 className={cn(
-                  "cursor-pointer select-none transition-colors",
-                  isFamiliarHeadacheNo
-                    ? "hover:bg-primary/80"
-                    : "hover:bg-primary/10 hover:text-primary hover:border-primary"
+                  "text-sm",
+                  enabled ? "text-muted-foreground" : "text-muted-foreground/50"
                 )}
-                onClick={onSetNoFamiliarHeadache}
               >
-                Nein
-              </Badge>
-              <Badge
-                variant={status.hasFamiliarHeadache ? "destructive" : "outline"}
-                className={cn(
-                  "cursor-pointer select-none transition-colors",
-                  status.hasFamiliarHeadache
-                    ? "hover:bg-destructive/80"
-                    : "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                )}
-                onClick={onSetFamiliarHeadache}
-              >
-                Ja
-              </Badge>
+                {label}:
+              </span>
+              <div className="flex items-center gap-1">
+                {/* "Nein" badge */}
+                <Badge
+                  variant={hasData && isNo ? "default" : "outline"}
+                  className={cn(
+                    "cursor-pointer select-none transition-colors",
+                    !enabled && "opacity-50 cursor-not-allowed",
+                    hasData && isNo
+                      ? "hover:bg-primary/80"
+                      : "hover:bg-primary/10 hover:text-primary hover:border-primary"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (enabled) {
+                      onToggleAnswer(question, ANSWER_VALUES.NO);
+                    }
+                  }}
+                >
+                  Nein
+                </Badge>
+
+                {/* "Ja" badge */}
+                <Badge
+                  variant={
+                    isYes
+                      ? isClinicallySignificant
+                        ? "destructive"
+                        : "default"
+                      : "outline"
+                  }
+                  className={cn(
+                    "cursor-pointer select-none transition-colors",
+                    !enabled && "opacity-50 cursor-not-allowed",
+                    isYes
+                      ? isClinicallySignificant
+                        ? "hover:bg-destructive/80"
+                        : "hover:bg-primary/80"
+                      : isClinicallySignificant
+                        ? "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                        : "hover:bg-primary/10 hover:text-primary hover:border-primary"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (enabled) {
+                      onToggleAnswer(question, ANSWER_VALUES.YES);
+                    }
+                  }}
+                >
+                  Ja
+                </Badge>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })}
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ export { SIDES, type Side } from "./model/side";
 
 // Re-export form utilities
 export { zodSchemaFromQuestions, zodSubmitSchemaFromQuestions } from "./form/schema/fromQuestions";
+export { evaluateEnableWhen, resolveDependency, type FormValues, type FormValueGetter } from "./form/evaluateEnableWhen";
 
 // Re-export content
-export { EXAMINATION_LABELS, REGION_LABELS, SIDE_LABELS, MOVEMENT_LABELS } from "./content";
+export { getLabel, SECTION_LABELS, type LabelId } from "./content";

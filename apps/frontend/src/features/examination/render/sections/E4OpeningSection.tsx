@@ -15,7 +15,8 @@ import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { MOVEMENTS } from "../../model/movement";
 import { REGIONS } from "../../model/region";
-import { SECTION_LABELS, EXAMINATION_LABELS } from "../../content/labels";
+import { getLabel, SECTION_LABELS } from "../../content/labels";
+import { MEASUREMENT_IDS } from "../../model/measurement";
 import { MeasurementField } from "../form-fields/MeasurementField";
 import { TerminatedCheckbox } from "../form-fields/TerminatedCheckbox";
 import { PainInterviewGrid, getE4PainTypes } from "./PainInterviewGrid";
@@ -83,6 +84,7 @@ function MovementSection({
         </p>
         {viewMode === "table" ? (
           <PainInterviewGrid
+            key={`grid-${movement}`}
             movement={movement}
             regions={E4_REGIONS}
             painTypesForRegion={getE4PainTypes}
@@ -90,6 +92,7 @@ function MovementSection({
           />
         ) : (
           <InteractiveExamSection
+            key={`interactive-${movement}`}
             movement={movement}
             disabled={isTerminated}
           />
@@ -132,23 +135,18 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
         <div>
           <MeasurementField
             name="examination.painFreeOpening"
-            label={EXAMINATION_LABELS.painFreeOpening.text}
+            label={getLabel(MEASUREMENT_IDS.PAIN_FREE_OPENING)}
             unit="mm"
             min={0}
             max={100}
           />
-          {EXAMINATION_LABELS.painFreeOpening.description && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {EXAMINATION_LABELS.painFreeOpening.description}
-            </p>
-          )}
         </div>
 
         {/* Maximum unassisted opening */}
         <MovementSection
-          title="Maximale unassistierte Mundöffnung"
+          title={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
           measurementId="examination.maxUnassistedOpening"
-          measurementLabel={EXAMINATION_LABELS.maxUnassistedOpening.text}
+          measurementLabel={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
           terminatedId="examination.terminated:movement=maxUnassistedOpening"
           movement={MOVEMENTS.MAX_UNASSISTED_OPENING}
           viewMode={viewMode}
@@ -156,9 +154,9 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
 
         {/* Maximum assisted opening */}
         <MovementSection
-          title="Maximale assistierte Mundöffnung"
+          title={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
           measurementId="examination.maxAssistedOpening"
-          measurementLabel={EXAMINATION_LABELS.maxAssistedOpening.text}
+          measurementLabel={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
           terminatedId="examination.terminated:movement=maxAssistedOpening"
           movement={MOVEMENTS.MAX_ASSISTED_OPENING}
           viewMode={viewMode}

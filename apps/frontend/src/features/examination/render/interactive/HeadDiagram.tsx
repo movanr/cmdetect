@@ -10,12 +10,16 @@
 
 import { cn } from "@/lib/utils";
 import { useCallback, useState } from "react";
-import type { Side } from "../../model/side";
+import { getLabel } from "../../content/labels";
+import { SIDES, type Side } from "../../model/side";
 import {
   type InteractiveRegion,
   type RegionStatus,
   EMPTY_REGION_STATUS,
   INTERACTIVE_REGIONS,
+  REGION_STATE_COLORS,
+  getRegionVisualState,
+  mapInteractiveToRegion,
 } from "./types";
 
 interface HeadDiagramProps {
@@ -33,54 +37,38 @@ interface HeadDiagramProps {
   disabled?: boolean;
 }
 
-/**
- * SVG-compatible colors (CSS variables don't work reliably in SVG inline styles)
- */
-const SVG_COLORS = {
-  // Fill colors
-  muted: "#f4f4f5", // zinc-100 - pending state
-  primaryLight: "rgba(59, 130, 246, 0.3)", // blue-500 30% - selected
-  primaryHover: "rgba(59, 130, 246, 0.1)", // blue-500 10% - hover
-  destructiveLight: "rgba(239, 68, 68, 0.2)", // red-500 20% - pain positive
-  greenLight: "rgba(34, 197, 94, 0.2)", // green-500 20% - no pain
-  // Stroke colors
-  primary: "#3b82f6", // blue-500 - selected
-  destructive: "#ef4444", // red-500 - pain positive
-  green: "#22c55e", // green-500 - no pain
-  border: "#e4e4e7", // zinc-200 - default border
+/** Selected state colors (SVG-compatible) */
+const SELECTED_COLORS = {
+  fill: "rgba(59, 130, 246, 0.3)", // blue-500 30%
+  stroke: "#3b82f6", // blue-500
 } as const;
 
+/** Hover state color */
+const HOVER_FILL = "rgba(59, 130, 246, 0.1)"; // blue-500 10%
+
 /**
- * Get fill color based on region status.
+ * Get fill color based on region status using visual state model.
  */
 function getRegionFill(status: RegionStatus, isSelected: boolean, isHovered: boolean): string {
   if (isSelected) {
-    return SVG_COLORS.primaryLight;
+    return SELECTED_COLORS.fill;
   }
-  if (isHovered && !status.isComplete) {
-    return SVG_COLORS.primaryHover;
+  const visualState = getRegionVisualState(status);
+  if (isHovered && visualState === "pending") {
+    return HOVER_FILL;
   }
-  if (status.isComplete) {
-    // Red only if clinically significant (familiar pain or familiar headache)
-    const isClinicallySignificant = status.hasFamiliarPain || status.hasFamiliarHeadache;
-    return isClinicallySignificant ? SVG_COLORS.destructiveLight : SVG_COLORS.greenLight;
-  }
-  return SVG_COLORS.muted;
+  return REGION_STATE_COLORS[visualState].fill;
 }
 
 /**
- * Get stroke color based on region status.
+ * Get stroke color based on region status using visual state model.
  */
 function getRegionStroke(status: RegionStatus, isSelected: boolean): string {
   if (isSelected) {
-    return SVG_COLORS.primary;
+    return SELECTED_COLORS.stroke;
   }
-  if (status.isComplete) {
-    // Red only if clinically significant (familiar pain or familiar headache)
-    const isClinicallySignificant = status.hasFamiliarPain || status.hasFamiliarHeadache;
-    return isClinicallySignificant ? SVG_COLORS.destructive : SVG_COLORS.green;
-  }
-  return SVG_COLORS.border;
+  const visualState = getRegionVisualState(status);
+  return REGION_STATE_COLORS[visualState].stroke;
 }
 
 export function HeadDiagram({
@@ -135,14 +123,14 @@ export function HeadDiagram({
 
   // Transform for mirroring (patient's right on left of screen)
   // Right side needs mirroring, left side is normal
-  const transform = side === "left" ? "matrix(-1,0,0,1,51.695081,0)" : "";
+  const transform = side === SIDES.LEFT ? "matrix(-1,0,0,1,51.695081,0)" : "";
 
   return (
     <svg
       viewBox="0 0 60 60"
       className={cn("w-full h-auto max-w-[180px]", className)}
       role="img"
-      aria-label={`Head diagram for ${side} side`}
+      aria-label={`Head diagram for ${getLabel(side)}`}
     >
       <g transform={transform}>
         {/* Temporalis Region */}
@@ -154,7 +142,7 @@ export function HeadDiagram({
           onMouseLeave={handleMouseLeave}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label="Temporalis"
+          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.TEMPORALIS))}
         />
 
         {/* Masseter Region */}
@@ -166,7 +154,7 @@ export function HeadDiagram({
           onMouseLeave={handleMouseLeave}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label="Masseter"
+          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.MASSETER))}
         />
 
         {/* TMJ Region */}
@@ -181,7 +169,7 @@ export function HeadDiagram({
           onMouseLeave={handleMouseLeave}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label="TMJ"
+          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.TMJ))}
         />
 
         {/* Non-Masticatory Region */}
@@ -193,7 +181,7 @@ export function HeadDiagram({
           onMouseLeave={handleMouseLeave}
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label="Non-masticatory"
+          aria-label={getLabel(mapInteractiveToRegion(INTERACTIVE_REGIONS.NON_MAST))}
         />
       </g>
 
@@ -217,7 +205,7 @@ export function HeadDiagram({
       </g>
       <g
         id="layer7"
-        transform={side === "left" ? "matrix(-1,0,0,1,51.695081,0)" : ""}
+        transform={side === SIDES.LEFT ? "matrix(-1,0,0,1,51.695081,0)" : ""}
         opacity="0.5"
       >
         {/* All the feature lines with reduced opacity and gray coloring */}

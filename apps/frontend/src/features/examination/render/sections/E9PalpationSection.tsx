@@ -17,7 +17,8 @@ import { ANSWER_VALUES } from "../../model/answer";
 import { PAIN_TYPES, type PainType } from "../../model/pain";
 import { buildInstanceId } from "../../model/questionInstance";
 import { SIDES, type Side } from "../../model/side";
-import { REGION_LABELS, SIDE_LABELS, SECTION_LABELS } from "../../content/labels";
+import { getLabel, SECTION_LABELS } from "../../content/labels";
+import { REGIONS } from "../../model/region";
 import { YesNoField } from "../form-fields/YesNoField";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -31,26 +32,15 @@ import {
 const QUESTIONNAIRE_ID = "examination";
 
 /**
- * Short labels for pain types in grid headers.
+ * Ordered list of pain types as they appear in grid columns.
  */
-const PAIN_TYPE_SHORT_LABELS: Record<PainType, string> = {
-  [PAIN_TYPES.PAIN]: "S",
-  [PAIN_TYPES.FAMILIAR]: "B",
-  [PAIN_TYPES.FAMILIAR_HEADACHE]: "K",
-  [PAIN_TYPES.REFERRED]: "A",
-  [PAIN_TYPES.SPREADING]: "AB",
-};
-
-/**
- * Full labels for pain types (legend).
- */
-const PAIN_TYPE_FULL_LABELS: Record<PainType, string> = {
-  [PAIN_TYPES.PAIN]: "Schmerz",
-  [PAIN_TYPES.FAMILIAR]: "Bekannter Schmerz",
-  [PAIN_TYPES.FAMILIAR_HEADACHE]: "Bekannter Kopfschmerz",
-  [PAIN_TYPES.REFERRED]: "Ausstrahlend",
-  [PAIN_TYPES.SPREADING]: "Ausbreitend",
-};
+const PAIN_TYPE_COLUMN_ORDER: readonly PainType[] = [
+  PAIN_TYPES.PAIN,
+  PAIN_TYPES.FAMILIAR,
+  PAIN_TYPES.FAMILIAR_HEADACHE,
+  PAIN_TYPES.REFERRED,
+  PAIN_TYPES.SPREADING,
+];
 
 interface PalpationGroupProps {
   title: string;
@@ -116,7 +106,7 @@ function PalpationGroup({
                   className="p-2 text-center font-medium"
                   colSpan={maxPainTypes}
                 >
-                  {SIDE_LABELS[side]}
+                  {getLabel(side)}
                 </th>
               ))}
             </tr>
@@ -124,23 +114,13 @@ function PalpationGroup({
               <th />
               {Object.values(SIDES).flatMap((side) =>
                 Array.from({ length: maxPainTypes }).map((_, i) => {
-                  // Show abbreviated pain type headers
-                  const painTypes = [
-                    PAIN_TYPES.PAIN,
-                    PAIN_TYPES.FAMILIAR,
-                    PAIN_TYPES.FAMILIAR_HEADACHE,
-                    PAIN_TYPES.REFERRED,
-                    PAIN_TYPES.SPREADING,
-                  ];
-                  const label = painTypes[i]
-                    ? PAIN_TYPE_SHORT_LABELS[painTypes[i]]
-                    : "";
+                  const painType = PAIN_TYPE_COLUMN_ORDER[i];
                   return (
                     <th
                       key={`${side}-header-${i}`}
                       className="p-1 text-center text-xs font-normal text-muted-foreground"
                     >
-                      {label}
+                      {painType ? getLabel(painType) : ""}
                     </th>
                   );
                 })
@@ -154,7 +134,7 @@ function PalpationGroup({
               return (
                 <tr key={zone} className="border-b">
                   <td className="p-2">
-                    <span className="font-medium">{REGION_LABELS[zone]}</span>
+                    <span className="font-medium">{getLabel(zone)}</span>
                     {pressure === "varies" && (
                       <span className="ml-2 text-xs text-muted-foreground">
                         ({zonePressure} kg)
@@ -206,19 +186,9 @@ export function E9PalpationSection({ className }: E9PalpationSectionProps) {
         <CardTitle>{SECTION_LABELS.E9}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* Legend */}
-        <div className="flex flex-wrap gap-4 rounded-lg bg-muted/50 p-3 text-xs">
-          {Object.entries(PAIN_TYPE_FULL_LABELS).map(([type, full]) => (
-            <span key={type}>
-              <strong>{PAIN_TYPE_SHORT_LABELS[type as PainType]}</strong> ={" "}
-              {full}
-            </span>
-          ))}
-        </div>
-
         {/* Temporalis */}
         <PalpationGroup
-          title="Temporalis"
+          title={getLabel(REGIONS.TEMPORALIS)}
           zones={TEMPORALIS_ZONES}
           pressure={1.0}
           getPainTypes={getE9PainTypes}
@@ -226,7 +196,7 @@ export function E9PalpationSection({ className }: E9PalpationSectionProps) {
 
         {/* Masseter */}
         <PalpationGroup
-          title="Masseter"
+          title={getLabel(REGIONS.MASSETER)}
           zones={MASSETER_ZONES}
           pressure={1.0}
           getPainTypes={getE9PainTypes}
@@ -234,7 +204,7 @@ export function E9PalpationSection({ className }: E9PalpationSectionProps) {
 
         {/* TMJ */}
         <PalpationGroup
-          title="Kiefergelenk (TMJ)"
+          title={getLabel(REGIONS.TMJ)}
           zones={TMJ_ZONES}
           pressure="varies"
           getPainTypes={getE9PainTypes}
