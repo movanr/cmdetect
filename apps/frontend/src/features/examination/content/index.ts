@@ -1,0 +1,9 @@
+export {
+  EXAMINATION_LABELS,
+  REGION_LABELS,
+  SIDE_LABELS,
+  MOVEMENT_LABELS,
+  SECTION_LABELS,
+} from "./labels";
+
+export { YES_NO_LABELS, ANSWER_OPTION_LABELS } from "./options";

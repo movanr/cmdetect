@@ -16,6 +16,7 @@ import { Route as PatientRouteImport } from './routes/patient'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KeySetupRouteImport } from './routes/key-setup'
 import { Route as InvitesRouteImport } from './routes/invites'
+import { Route as ExaminationRouteImport } from './routes/examination'
 import { Route as CasesRouteImport } from './routes/cases'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsSecurityRouteImport } from './routes/settings/security'
@@ -59,6 +60,11 @@ const KeySetupRoute = KeySetupRouteImport.update({
 const InvitesRoute = InvitesRouteImport.update({
   id: '/invites',
   path: '/invites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExaminationRoute = ExaminationRouteImport.update({
+  id: '/examination',
+  path: '/examination',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CasesRoute = CasesRouteImport.update({
@@ -110,6 +116,7 @@ const CasesIdAnamnesisRoute = CasesIdAnamnesisRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cases': typeof CasesRoute
+  '/examination': typeof ExaminationRoute
   '/invites': typeof InvitesRoute
   '/key-setup': typeof KeySetupRoute
   '/login': typeof LoginRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cases': typeof CasesRoute
+  '/examination': typeof ExaminationRoute
   '/invites': typeof InvitesRoute
   '/key-setup': typeof KeySetupRoute
   '/login': typeof LoginRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cases': typeof CasesRoute
+  '/examination': typeof ExaminationRoute
   '/invites': typeof InvitesRoute
   '/key-setup': typeof KeySetupRoute
   '/login': typeof LoginRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cases'
+    | '/examination'
     | '/invites'
     | '/key-setup'
     | '/login'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cases'
+    | '/examination'
     | '/invites'
     | '/key-setup'
     | '/login'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/cases'
+    | '/examination'
     | '/invites'
     | '/key-setup'
     | '/login'
@@ -220,6 +232,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CasesRoute: typeof CasesRoute
+  ExaminationRoute: typeof ExaminationRoute
   InvitesRoute: typeof InvitesRoute
   KeySetupRoute: typeof KeySetupRoute
   LoginRoute: typeof LoginRoute
@@ -280,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/invites'
       fullPath: '/invites'
       preLoaderRoute: typeof InvitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/examination': {
+      id: '/examination'
+      path: '/examination'
+      fullPath: '/examination'
+      preLoaderRoute: typeof ExaminationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cases': {
@@ -380,6 +400,7 @@ const CasesIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CasesRoute: CasesRoute,
+  ExaminationRoute: ExaminationRoute,
   InvitesRoute: InvitesRoute,
   KeySetupRoute: KeySetupRoute,
   LoginRoute: LoginRoute,
