@@ -11,33 +11,35 @@
  * - Interactive: SVG head diagram with guided questioning
  */
 
-import { useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
-import { E4_PAIN_REGIONS, getE4PainTypes } from "../../definition/sections/e4-opening";
-import { MOVEMENTS } from "../../model/movement";
-import { REGIONS } from "../../model/region";
-import { getLabel, SECTION_LABELS } from "../../content/labels";
-import { E4_INSTRUCTIONS } from "../../content/instructions";
-import { MEASUREMENT_IDS } from "../../model/measurement";
-import { MeasurementField } from "../form-fields/MeasurementField";
-import { TerminatedCheckbox } from "../form-fields/TerminatedCheckbox";
-import { PainInterviewGrid } from "./PainInterviewGrid";
-import { InteractiveExamSection, InstructionBlock, E4InteractiveWizard } from "../interactive";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import type { Region } from "../interactive/types";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMemo, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import type { StepInstruction } from "../../content/instructions";
+import { E4_INSTRUCTIONS } from "../../content/instructions";
+import { getLabel, SECTION_LABELS } from "../../content/labels";
+import {
+  createMeasurementQuestion,
+  createTerminatedQuestion,
+  E4_PAIN_REGIONS,
+  getE4PainTypes,
+} from "../../definition/sections/e4-opening";
+import { MEASUREMENT_IDS } from "../../model/measurement";
+import { MOVEMENTS } from "../../model/movement";
+import { REGIONS } from "../../model/region";
+import { MeasurementField } from "../form-fields/MeasurementField";
+import { TerminatedCheckbox } from "../form-fields/TerminatedCheckbox";
+import { E4InteractiveWizard, InstructionBlock, InteractiveExamSection } from "../interactive";
+import type { Region } from "../interactive/types";
+import { PainInterviewGrid } from "./PainInterviewGrid";
 
 /** View mode for pain interview */
 type ViewMode = "table" | "interactive";
 
 interface MovementSectionProps {
   title: string;
-  measurementId: string;
-  measurementLabel: string;
-  terminatedId: string;
   movement: (typeof MOVEMENTS)[keyof typeof MOVEMENTS];
   viewMode: ViewMode;
   regions: readonly Region[];
@@ -50,35 +52,35 @@ interface MovementSectionProps {
  */
 function MovementSection({
   title,
-  measurementId,
-  measurementLabel,
-  terminatedId,
   movement,
   viewMode,
   regions,
   instruction,
 }: MovementSectionProps) {
   const { watch } = useFormContext();
-  const isTerminated = watch(terminatedId) === true;
+
+  // Create question objects using factories - deterministic instanceIds bind to form state
+  const measurementQ = createMeasurementQuestion(movement);
+  const terminatedQ = createTerminatedQuestion(movement);
+
+  const isTerminated = watch(terminatedQ.instanceId) === true;
 
   return (
     <div className="space-y-4">
       {/* Instruction block - only in interactive mode */}
-      {viewMode === "interactive" && instruction && (
-        <InstructionBlock {...instruction} />
-      )}
+      {viewMode === "interactive" && instruction && <InstructionBlock {...instruction} />}
 
       <h4 className="font-medium">{title}</h4>
 
       <div className="flex items-center gap-6">
         <MeasurementField
-          name={measurementId}
-          label={measurementLabel}
-          unit="mm"
-          min={0}
-          max={100}
+          name={measurementQ.instanceId}
+          label={getLabel(measurementQ.semanticId)}
+          unit={measurementQ.unit}
+          min={measurementQ.min}
+          max={measurementQ.max}
         />
-        <TerminatedCheckbox name={terminatedId} />
+        <TerminatedCheckbox name={terminatedQ.instanceId} />
       </div>
 
       {/* Pain interview - table or interactive mode */}
@@ -122,9 +124,7 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
     if (includeExtraRegions) {
       return E4_PAIN_REGIONS;
     }
-    return E4_PAIN_REGIONS.filter(
-      (r) => r !== REGIONS.NON_MAST && r !== REGIONS.OTHER_MAST
-    );
+    return E4_PAIN_REGIONS.filter((r) => r !== REGIONS.NON_MAST && r !== REGIONS.OTHER_MAST);
   }, [includeExtraRegions]);
 
   return (
@@ -140,14 +140,14 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
                 checked={includeExtraRegions}
                 onCheckedChange={(checked) => setIncludeExtraRegions(checked === true)}
               />
-              <Label htmlFor="extra-regions" className="text-xs text-muted-foreground cursor-pointer">
+              <Label
+                htmlFor="extra-regions"
+                className="text-xs text-muted-foreground cursor-pointer"
+              >
                 Alle Regionen
               </Label>
             </div>
-            <Tabs
-              value={viewMode}
-              onValueChange={(v) => setViewMode(v as ViewMode)}
-            >
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
               <TabsList className="h-8">
                 <TabsTrigger value="table" className="text-xs px-3">
                   Tabelle
@@ -166,42 +166,42 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
           <E4InteractiveWizard regions={regions} />
         ) : (
           /* Table mode - traditional grid layout */
-          <>
-            {/* Pain-free opening - just a measurement, no pain interview */}
-            <div className="space-y-4">
-              <MeasurementField
-                name="examination.painFreeOpening"
-                label={getLabel(MEASUREMENT_IDS.PAIN_FREE_OPENING)}
-                unit="mm"
-                min={0}
-                max={100}
-              />
-            </div>
+          (() => {
+            // Create question using factory - deterministic instanceId binds to form state
+            const painFreeQ = createMeasurementQuestion(MEASUREMENT_IDS.PAIN_FREE_OPENING);
+            return (
+              <>
+                {/* Pain-free opening - just a measurement, no pain interview */}
+                <div className="space-y-4">
+                  <MeasurementField
+                    name={painFreeQ.instanceId}
+                    label={getLabel(painFreeQ.semanticId)}
+                    unit={painFreeQ.unit}
+                    min={painFreeQ.min}
+                    max={painFreeQ.max}
+                  />
+                </div>
 
-            {/* Maximum unassisted opening */}
-            <MovementSection
-              title={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
-              measurementId="examination.maxUnassistedOpening"
-              measurementLabel={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
-              terminatedId="examination.terminated:movement=maxUnassistedOpening"
-              movement={MOVEMENTS.MAX_UNASSISTED_OPENING}
-              viewMode={viewMode}
-              regions={regions}
-              instruction={E4_INSTRUCTIONS.maxUnassistedOpening}
-            />
+                {/* Maximum unassisted opening */}
+                <MovementSection
+                  title={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
+                  movement={MOVEMENTS.MAX_UNASSISTED_OPENING}
+                  viewMode={viewMode}
+                  regions={regions}
+                  instruction={E4_INSTRUCTIONS.maxUnassistedOpening}
+                />
 
-            {/* Maximum assisted opening */}
-            <MovementSection
-              title={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
-              measurementId="examination.maxAssistedOpening"
-              measurementLabel={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
-              terminatedId="examination.terminated:movement=maxAssistedOpening"
-              movement={MOVEMENTS.MAX_ASSISTED_OPENING}
-              viewMode={viewMode}
-              regions={regions}
-              instruction={E4_INSTRUCTIONS.maxAssistedOpening}
-            />
-          </>
+                {/* Maximum assisted opening */}
+                <MovementSection
+                  title={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
+                  movement={MOVEMENTS.MAX_ASSISTED_OPENING}
+                  viewMode={viewMode}
+                  regions={regions}
+                  instruction={E4_INSTRUCTIONS.maxAssistedOpening}
+                />
+              </>
+            );
+          })()
         )}
       </CardContent>
     </Card>

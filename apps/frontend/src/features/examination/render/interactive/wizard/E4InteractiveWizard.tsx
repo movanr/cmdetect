@@ -30,6 +30,7 @@ export function E4InteractiveWizard({
     currentStepIndex,
     steps,
     isComplete,
+    validationErrors,
     goToStep,
     completeCurrentStep,
     skipStep,
@@ -78,6 +79,7 @@ export function E4InteractiveWizard({
               regions={regions}
               onNext={completeCurrentStep}
               onSkip={skipStep}
+              validationErrors={validationErrors}
             />
           );
         }

@@ -39,6 +39,8 @@ interface E4PainInterviewStepProps {
   onNext: () => void;
   /** Callback when skipping this step */
   onSkip: () => void;
+  /** Validation errors for this step */
+  validationErrors?: Array<{ field: string; message: string }>;
   /** Optional className */
   className?: string;
 }
@@ -48,6 +50,7 @@ export function E4PainInterviewStep({
   regions,
   onNext,
   onSkip,
+  validationErrors,
   className,
 }: E4PainInterviewStepProps) {
   const { watch } = useFormContext();
@@ -213,6 +216,17 @@ export function E4PainInterviewStep({
           )}
         </CardContent>
       </Card>
+
+      {/* Validation error alert */}
+      {validationErrors && validationErrors.length > 0 && (
+        <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+          <span>Bitte alle Schmerzfragen beantworten</span>
+          <span className="ml-1">
+            ({validationErrors.length}{" "}
+            {validationErrors.length === 1 ? "Frage fehlt" : "Fragen fehlen"})
+          </span>
+        </div>
+      )}
 
       {/* Navigation buttons */}
       <div className="flex items-center justify-between pt-2 border-t">

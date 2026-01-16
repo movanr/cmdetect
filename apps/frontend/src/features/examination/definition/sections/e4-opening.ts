@@ -8,14 +8,13 @@
  * - Terminated indicator
  */
 
-import { ANSWER_VALUES, YES_NO_OPTIONS } from "../../model/answer";
+import { ANSWER_VALUES } from "../../model/answer";
 import { QUESTIONNAIRE_ID } from "../../model/constants";
 import { MEASUREMENT_IDS } from "../../model/measurement";
 import { MOVEMENTS } from "../../model/movement";
 import { PAIN_TYPES, type PainType } from "../../model/pain";
 import type {
   BooleanQuestion,
-  ChoiceQuestion,
   EnableWhen,
   NumericQuestion,
   Question,
@@ -25,6 +24,7 @@ import { buildInstanceId } from "../../model/questionInstance";
 import { REGIONS, type Region } from "../../model/region";
 import { type SemanticId } from "../../model/semanticId";
 import { SIDES } from "../../model/side";
+import { createPainQuestion } from "../questions/pain";
 
 /**
  * Regions assessed for pain during opening movements (E4).
@@ -52,8 +52,10 @@ export function getE4PainTypes(region: Region): readonly PainType[] {
 
 /**
  * Creates a measurement question for opening distance.
+ * Exported for use by any renderer - questions are stateless value objects
+ * that bind to form state via their deterministic instanceId.
  */
-function createMeasurementQuestion(
+export function createMeasurementQuestion(
   semanticId: SemanticId,
   ctx: QuestionContext = {}
 ): NumericQuestion {
@@ -71,8 +73,10 @@ function createMeasurementQuestion(
 
 /**
  * Creates a boolean question for terminated indicator.
+ * Exported for use by any renderer - questions are stateless value objects
+ * that bind to form state via their deterministic instanceId.
  */
-function createTerminatedQuestion(
+export function createTerminatedQuestion(
   movement: (typeof MOVEMENTS)[keyof typeof MOVEMENTS]
 ): BooleanQuestion {
   const semanticId = MEASUREMENT_IDS.TERMINATED;
@@ -83,31 +87,6 @@ function createTerminatedQuestion(
     instanceId: buildInstanceId(QUESTIONNAIRE_ID, semanticId, ctx),
     type: "boolean",
     context: ctx,
-  };
-}
-
-/**
- * Creates a pain presence question.
- *
- * @param ctx - Question context (side, region, movement)
- * @param painType - Type of pain to ask about
- * @param enableWhen - Optional condition for when this question is enabled
- */
-function createPainQuestion(
-  ctx: QuestionContext,
-  painType: (typeof PAIN_TYPES)[keyof typeof PAIN_TYPES],
-  enableWhen?: EnableWhen
-): ChoiceQuestion {
-  const semanticId = painType;
-  return {
-    questionnaireId: QUESTIONNAIRE_ID,
-    semanticId,
-    instanceId: buildInstanceId(QUESTIONNAIRE_ID, semanticId, ctx),
-    type: "choice",
-    context: ctx,
-    multiple: false,
-    answerOptions: YES_NO_OPTIONS,
-    enableWhen,
   };
 }
 
@@ -158,9 +137,8 @@ export function createE4Questions(): Question[] {
   // Pain-free opening measurement
   questions.push(createMeasurementQuestion(MEASUREMENT_IDS.PAIN_FREE_OPENING));
 
-  // Maximum unassisted opening
+  // Maximum unassisted opening (no terminated - per DC/TMD spec)
   questions.push(createMeasurementQuestion(MOVEMENTS.MAX_UNASSISTED_OPENING));
-  questions.push(createTerminatedQuestion(MOVEMENTS.MAX_UNASSISTED_OPENING));
   questions.push(...createPainInterviewForMovement(MOVEMENTS.MAX_UNASSISTED_OPENING));
 
   // Maximum assisted opening

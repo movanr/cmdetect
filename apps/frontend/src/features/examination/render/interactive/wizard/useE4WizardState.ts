@@ -8,21 +8,38 @@
 import { useCallback, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { E4_INSTRUCTIONS } from "../../../content/instructions";
+import { painInterviewAfterMovement } from "../../../definition/questions/pain";
+import {
+  createMeasurementQuestion,
+  createTerminatedQuestion,
+} from "../../../definition/sections/e4-opening";
 import { ANSWER_VALUES } from "../../../model/answer";
 import { QUESTIONNAIRE_ID } from "../../../model/constants";
 import { MEASUREMENT_IDS } from "../../../model/measurement";
 import { MOVEMENTS, type Movement } from "../../../model/movement";
 import { PAIN_TYPES } from "../../../model/pain";
 import { buildInstanceId } from "../../../model/questionInstance";
-import { SIDES } from "../../../model/side";
+import { SIDES, type Side } from "../../../model/side";
 import type { Region } from "../types";
 import type { E4Step, E4StepId, E4StepState, E4WizardActions, StepStatus } from "./types";
+import {
+  getStepFieldNames,
+  validateInterviewStep,
+  validateMeasurementStep,
+  type StepValidationResult,
+} from "./validation";
 
 /**
  * Step definitions for the E4 wizard.
  * Badges for measurement steps are derived from instruction.stepId.
  * Interview steps share the badge of their associated measurement step.
  */
+// Create questions using factories - deterministic instanceIds bind to form state
+const painFreeQ = createMeasurementQuestion(MEASUREMENT_IDS.PAIN_FREE_OPENING);
+const maxUnassistedQ = createMeasurementQuestion(MOVEMENTS.MAX_UNASSISTED_OPENING);
+const maxAssistedQ = createMeasurementQuestion(MOVEMENTS.MAX_ASSISTED_OPENING);
+const terminatedQ = createTerminatedQuestion(MOVEMENTS.MAX_ASSISTED_OPENING);
+
 const E4_STEPS: E4Step[] = [
   {
     id: "e4a-measurement",
@@ -30,7 +47,8 @@ const E4_STEPS: E4Step[] = [
     shortTitle: E4_INSTRUCTIONS.painFreeOpening.title,
     badge: E4_INSTRUCTIONS.painFreeOpening.stepId,
     type: "measurement",
-    measurementField: `${QUESTIONNAIRE_ID}.${MEASUREMENT_IDS.PAIN_FREE_OPENING}`,
+    measurementField: painFreeQ.instanceId,
+    measurementQuestion: painFreeQ,
     instruction: E4_INSTRUCTIONS.painFreeOpening,
   },
   {
@@ -40,8 +58,8 @@ const E4_STEPS: E4Step[] = [
     badge: E4_INSTRUCTIONS.maxUnassistedOpening.stepId,
     type: "measurement",
     movement: MOVEMENTS.MAX_UNASSISTED_OPENING,
-    measurementField: `${QUESTIONNAIRE_ID}.${MOVEMENTS.MAX_UNASSISTED_OPENING}`,
-    terminatedField: `${QUESTIONNAIRE_ID}.${MEASUREMENT_IDS.TERMINATED}:movement=${MOVEMENTS.MAX_UNASSISTED_OPENING}`,
+    measurementField: maxUnassistedQ.instanceId,
+    measurementQuestion: maxUnassistedQ,
     instruction: E4_INSTRUCTIONS.maxUnassistedOpening,
   },
   {
@@ -60,8 +78,9 @@ const E4_STEPS: E4Step[] = [
     badge: E4_INSTRUCTIONS.maxAssistedOpening.stepId,
     type: "measurement",
     movement: MOVEMENTS.MAX_ASSISTED_OPENING,
-    measurementField: `${QUESTIONNAIRE_ID}.${MOVEMENTS.MAX_ASSISTED_OPENING}`,
-    terminatedField: `${QUESTIONNAIRE_ID}.${MEASUREMENT_IDS.TERMINATED}:movement=${MOVEMENTS.MAX_ASSISTED_OPENING}`,
+    measurementField: maxAssistedQ.instanceId,
+    measurementQuestion: maxAssistedQ,
+    terminatedField: terminatedQ.instanceId,
     instruction: E4_INSTRUCTIONS.maxAssistedOpening,
   },
   {
@@ -93,6 +112,8 @@ interface UseE4WizardStateReturn extends E4WizardActions {
   isLastStep: boolean;
   /** Whether wizard is complete (past last step) */
   isComplete: boolean;
+  /** Validation errors for the current step */
+  validationErrors: Array<{ field: string; message: string }>;
 }
 
 /**
@@ -177,9 +198,12 @@ function getStepStatus(
 }
 
 export function useE4WizardState({ regions }: UseE4WizardStateProps): UseE4WizardStateReturn {
-  const { getValues, watch } = useFormContext();
+  const { getValues, watch, setError, clearErrors } = useFormContext();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [skippedSteps, setSkippedSteps] = useState<Set<E4StepId>>(new Set());
+  const [validationErrors, setValidationErrors] = useState<
+    Array<{ field: string; message: string }>
+  >([]);
 
   // Watch form values to trigger re-renders when they change
   // This ensures summaries update reactively
@@ -207,9 +231,10 @@ export function useE4WizardState({ regions }: UseE4WizardStateProps): UseE4Wizar
   const isLastStep = currentStepIndex === E4_STEPS.length - 1;
   const isComplete = currentStepIndex >= E4_STEPS.length;
 
-  // Navigate to specific step
+  // Navigate to specific step (clears validation errors)
   const goToStep = useCallback((index: number) => {
     if (index >= 0 && index < E4_STEPS.length) {
+      setValidationErrors([]);
       setCurrentStepIndex(index);
     }
   }, []);
@@ -228,19 +253,75 @@ export function useE4WizardState({ regions }: UseE4WizardStateProps): UseE4Wizar
     }
   }, [currentStepIndex]);
 
-  // Complete current step and advance
+  // Generate questions for an interview step
+  const getInterviewQuestions = useCallback(
+    (movement: Movement) => {
+      const questions = [];
+      for (const side of Object.values(SIDES) as Side[]) {
+        for (const region of regions) {
+          questions.push(...painInterviewAfterMovement({ movement, side, region }));
+        }
+      }
+      return questions;
+    },
+    [regions]
+  );
+
+  // Complete current step and advance (with validation)
   const completeCurrentStep = useCallback(() => {
-    // Remove from skipped if it was previously skipped
-    if (currentStepIndex < E4_STEPS.length) {
-      const currentStepId = E4_STEPS[currentStepIndex].id;
-      setSkippedSteps((prev) => {
-        const next = new Set(prev);
-        next.delete(currentStepId);
-        return next;
-      });
+    const currentStep = E4_STEPS[currentStepIndex];
+    if (!currentStep) return;
+
+    // Generate questions for interview validation
+    const questions =
+      currentStep.type === "interview" && currentStep.movement
+        ? getInterviewQuestions(currentStep.movement)
+        : [];
+
+    // Clear previous errors for this step's fields
+    const fieldNames = getStepFieldNames(currentStep, questions);
+    for (const fieldName of fieldNames) {
+      clearErrors(fieldName);
     }
+
+    // Validate based on step type
+    let validation: StepValidationResult;
+    if (currentStep.type === "measurement") {
+      validation = validateMeasurementStep(currentStep, getValues);
+    } else {
+      validation = validateInterviewStep(getValues, questions);
+    }
+
+    // If validation fails, set errors and block navigation
+    if (!validation.isValid) {
+      for (const error of validation.errors) {
+        setError(error.field, { type: "manual", message: error.message });
+      }
+      setValidationErrors(validation.errors);
+      return; // Block navigation
+    }
+
+    // Clear validation errors and proceed
+    setValidationErrors([]);
+
+    // Remove from skipped if it was previously skipped
+    const currentStepId = currentStep.id;
+    setSkippedSteps((prev) => {
+      const next = new Set(prev);
+      next.delete(currentStepId);
+      return next;
+    });
+
     nextStep();
-  }, [currentStepIndex, nextStep]);
+  }, [
+    currentStepIndex,
+    getValues,
+    setError,
+    clearErrors,
+    regions,
+    nextStep,
+    getInterviewQuestions,
+  ]);
 
   return {
     currentStepIndex,
@@ -249,6 +330,7 @@ export function useE4WizardState({ regions }: UseE4WizardStateProps): UseE4Wizar
     isFirstStep,
     isLastStep,
     isComplete,
+    validationErrors,
     goToStep,
     nextStep,
     skipStep,

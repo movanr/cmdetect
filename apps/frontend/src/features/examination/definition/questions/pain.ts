@@ -1,31 +1,33 @@
-import { ANSWER_VALUES, YES_NO_OPTIONS } from "../../model/answer";
+import { YES_NO_OPTIONS } from "../../model/answer";
 import { QUESTIONNAIRE_ID } from "../../model/constants";
-import { PAIN_TYPES, type PainType } from "../../model/pain";
-import type { EnableWhen, Question, QuestionContext } from "../../model/question";
+import { PAIN_TYPES } from "../../model/pain";
+import type { ChoiceQuestion, EnableWhen, Question, QuestionContext } from "../../model/question";
 import { buildInstanceId } from "../../model/questionInstance";
 import { getE4PainTypes } from "../sections/e4-opening";
 import { getE9PainTypes } from "../sections/e9-palpation";
 
-export function painPresent(ctx: QuestionContext, painType: PainType): Question {
-  const questionnaireId = QUESTIONNAIRE_ID;
+/**
+ * Creates a pain question.
+ *
+ * @param ctx - Question context (side, region, movement)
+ * @param painType - Type of pain to ask about
+ * @param enableWhen - Optional condition for when this question is enabled
+ */
+export function createPainQuestion(
+  ctx: QuestionContext,
+  painType: (typeof PAIN_TYPES)[keyof typeof PAIN_TYPES],
+  enableWhen?: EnableWhen
+): ChoiceQuestion {
   const semanticId = painType;
-  const instanceId = buildInstanceId(questionnaireId, semanticId, ctx);
-  const enableWhen: EnableWhen = {
-    dependsOn: {
-      semanticId: PAIN_TYPES.PAIN,
-    },
-    operator: "equals",
-    value: ANSWER_VALUES.YES,
-  };
   return {
-    questionnaireId,
+    questionnaireId: QUESTIONNAIRE_ID,
     semanticId,
-    instanceId,
+    instanceId: buildInstanceId(QUESTIONNAIRE_ID, semanticId, ctx),
     type: "choice",
     context: ctx,
     multiple: false,
     answerOptions: YES_NO_OPTIONS,
-    enableWhen: painType === PAIN_TYPES.PAIN ? undefined : enableWhen,
+    enableWhen,
   };
 }
 
@@ -35,10 +37,10 @@ export function painPresent(ctx: QuestionContext, painType: PainType): Question 
  */
 export function painInterviewAfterMovement(ctx: QuestionContext): Question[] {
   if (!ctx.region) {
-    return [painPresent(ctx, PAIN_TYPES.PAIN), painPresent(ctx, PAIN_TYPES.FAMILIAR)];
+    return [createPainQuestion(ctx, PAIN_TYPES.PAIN), createPainQuestion(ctx, PAIN_TYPES.FAMILIAR)];
   }
   const painTypes = getE4PainTypes(ctx.region);
-  return painTypes.map((painType) => painPresent(ctx, painType));
+  return painTypes.map((painType) => createPainQuestion(ctx, painType));
 }
 
 /**
@@ -47,8 +49,8 @@ export function painInterviewAfterMovement(ctx: QuestionContext): Question[] {
  */
 export function painInterviewDuringPalpation(ctx: QuestionContext): Question[] {
   if (!ctx.region) {
-    return [painPresent(ctx, PAIN_TYPES.PAIN), painPresent(ctx, PAIN_TYPES.FAMILIAR)];
+    return [createPainQuestion(ctx, PAIN_TYPES.PAIN), createPainQuestion(ctx, PAIN_TYPES.FAMILIAR)];
   }
   const painTypes = getE9PainTypes(ctx.region);
-  return painTypes.map((painType) => painPresent(ctx, painType));
+  return painTypes.map((painType) => createPainQuestion(ctx, painType));
 }

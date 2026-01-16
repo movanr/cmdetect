@@ -25,8 +25,6 @@ interface InstructionBlockProps extends StepInstruction {
  * └─────────────────────────────────────────────────┘
  */
 export function InstructionBlock({
-  stepId,
-  title,
   patientScript,
   examinerAction,
   className,

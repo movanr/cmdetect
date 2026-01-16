@@ -5,6 +5,8 @@
  * and navigation buttons.
  */
 
+import { useEffect } from "react";
+import { useFormContext } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +43,17 @@ export function E4MeasurementStep({
   onSkip,
   className,
 }: E4MeasurementStepProps) {
+  const { watch, clearErrors } = useFormContext();
+
+  // Watch terminated field and clear measurement error when checked
+  const terminatedValue = step.terminatedField ? watch(step.terminatedField) : undefined;
+
+  useEffect(() => {
+    if (terminatedValue === true && step.measurementField) {
+      clearErrors(step.measurementField);
+    }
+  }, [terminatedValue, step.measurementField, clearErrors]);
+
   return (
     <div
       className={cn(
@@ -61,13 +74,13 @@ export function E4MeasurementStep({
 
       {/* Measurement input */}
       <div className="flex items-center gap-6">
-        {step.measurementField && (
+        {step.measurementField && step.measurementQuestion && (
           <MeasurementField
             name={step.measurementField}
             label="Messung"
-            unit="mm"
-            min={0}
-            max={100}
+            unit={step.measurementQuestion.unit ?? "mm"}
+            min={step.measurementQuestion.min}
+            max={step.measurementQuestion.max}
           />
         )}
         {step.terminatedField && (

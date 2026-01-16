@@ -10,6 +10,7 @@
  */
 
 import type { Movement } from "../../../model/movement";
+import type { NumericQuestion } from "../../../model/question";
 import type {
   StepInstruction,
   PainInterviewInstruction,
@@ -53,6 +54,8 @@ export interface E4Step {
   movement?: Movement;
   /** Field name for measurement steps */
   measurementField?: string;
+  /** The question definition (for measurement steps) - single source of truth for min/max/unit */
+  measurementQuestion?: NumericQuestion;
   /** Field name for terminated checkbox (E4B/E4C only) */
   terminatedField?: string;
   /** Instruction to display */
