@@ -327,20 +327,25 @@ export function Axis2ScoreCard({
           {/* Grade scale */}
           <div className="relative">
             <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {GCPS_GRADE_SEGMENTS.map((segment, index) => (
-                <div
-                  key={segment.grade}
-                  className={`flex-1 ${segment.color} ${
-                    index === activeGradeIndex
-                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                      : "opacity-40"
-                  } flex flex-col items-center justify-center transition-all`}
-                >
-                  <span className="text-xs font-bold text-white drop-shadow-sm">
-                    {segment.label}
-                  </span>
-                </div>
-              ))}
+              {GCPS_GRADE_SEGMENTS.map((segment, index) => {
+                const isActive = index === activeGradeIndex;
+                return (
+                  <div
+                    key={segment.grade}
+                    className={`flex-1 ${
+                      isActive
+                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                        : "bg-gray-200"
+                    } flex flex-col items-center justify-center transition-all`}
+                  >
+                    <span
+                      className={`text-xs font-bold ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                    >
+                      {segment.label}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -398,20 +403,25 @@ export function Axis2ScoreCard({
                   Charakteristische Schmerzintensität: {gcpsScore.cpi}
                 </p>
                 <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                  {CPI_SEGMENTS.map((segment, index) => (
-                    <div
-                      key={segment.label}
-                      className={`${index === 0 ? "flex-[0.5]" : "flex-1"} ${segment.color} ${
-                        index === activeCPISegment
-                          ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                          : "opacity-40"
-                      } flex items-center justify-center transition-all`}
-                    >
-                      <span className="text-[9px] font-medium text-white drop-shadow-sm">
-                        {segment.range}
-                      </span>
-                    </div>
-                  ))}
+                  {CPI_SEGMENTS.map((segment, index) => {
+                    const isActive = index === activeCPISegment;
+                    return (
+                      <div
+                        key={segment.label}
+                        className={`${index === 0 ? "flex-[0.5]" : "flex-1"} ${
+                          isActive
+                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                            : "bg-gray-200"
+                        } flex items-center justify-center transition-all`}
+                      >
+                        <span
+                          className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                        >
+                          {segment.range}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="flex mt-1 text-[9px]">
                   <div
@@ -439,20 +449,25 @@ export function Axis2ScoreCard({
                   {gcpsScore.interferencePoints} BP
                 </p>
                 <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                  {INTERFERENCE_SEGMENTS.map((segment, index) => (
-                    <div
-                      key={segment.bp}
-                      className={`flex-1 ${segment.color} ${
-                        index === activeInterferenceSegment
-                          ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                          : "opacity-40"
-                      } flex items-center justify-center transition-all`}
-                    >
-                      <span className="text-[9px] font-medium text-white drop-shadow-sm">
-                        {segment.range}
-                      </span>
-                    </div>
-                  ))}
+                  {INTERFERENCE_SEGMENTS.map((segment, index) => {
+                    const isActive = index === activeInterferenceSegment;
+                    return (
+                      <div
+                        key={segment.bp}
+                        className={`flex-1 ${
+                          isActive
+                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                            : "bg-gray-200"
+                        } flex items-center justify-center transition-all`}
+                      >
+                        <span
+                          className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                        >
+                          {segment.range}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="flex mt-1 text-[9px]">
                   {INTERFERENCE_SEGMENTS.map((segment, index) => (
@@ -541,20 +556,25 @@ export function Axis2ScoreCard({
           {/* Limitation scale */}
           <div className="relative">
             <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {JFLS8_LIMITATION_SEGMENTS.map((segment, index) => (
-                <div
-                  key={segment.level}
-                  className={`flex-1 ${segment.color} ${
-                    index === activeLimitationIndex
-                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                      : "opacity-40"
-                  } flex flex-col items-center justify-center transition-all`}
-                >
-                  <span className="text-[10px] font-medium text-white drop-shadow-sm">
-                    {segment.range}
-                  </span>
-                </div>
-              ))}
+              {JFLS8_LIMITATION_SEGMENTS.map((segment, index) => {
+                const isActive = index === activeLimitationIndex;
+                return (
+                  <div
+                    key={segment.level}
+                    className={`flex-1 ${
+                      isActive
+                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                        : "bg-gray-200"
+                    } flex flex-col items-center justify-center transition-all`}
+                  >
+                    <span
+                      className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                    >
+                      {segment.range}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -660,20 +680,25 @@ export function Axis2ScoreCard({
           {/* Limitation scale */}
           <div className="relative">
             <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {JFLS20_LIMITATION_SEGMENTS.map((segment, index) => (
-                <div
-                  key={segment.level}
-                  className={`flex-1 ${segment.color} ${
-                    index === activeLimitationIndex
-                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                      : "opacity-40"
-                  } flex flex-col items-center justify-center transition-all`}
-                >
-                  <span className="text-[10px] font-medium text-white drop-shadow-sm">
-                    {segment.range}
-                  </span>
-                </div>
-              ))}
+              {JFLS20_LIMITATION_SEGMENTS.map((segment, index) => {
+                const isActive = index === activeLimitationIndex;
+                return (
+                  <div
+                    key={segment.level}
+                    className={`flex-1 ${
+                      isActive
+                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                        : "bg-gray-200"
+                    } flex flex-col items-center justify-center transition-all`}
+                  >
+                    <span
+                      className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                    >
+                      {segment.range}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -794,20 +819,25 @@ export function Axis2ScoreCard({
           {/* Risk scale */}
           <div className="relative">
             <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {OBC_RISK_SEGMENTS.map((segment, index) => (
-                <div
-                  key={segment.level}
-                  className={`flex-1 ${segment.color} ${
-                    index === activeRiskIndex
-                      ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                      : "opacity-40"
-                  } flex flex-col items-center justify-center transition-all`}
-                >
-                  <span className="text-[10px] font-medium text-white drop-shadow-sm">
-                    {segment.range}
-                  </span>
-                </div>
-              ))}
+              {OBC_RISK_SEGMENTS.map((segment, index) => {
+                const isActive = index === activeRiskIndex;
+                return (
+                  <div
+                    key={segment.level}
+                    className={`flex-1 ${
+                      isActive
+                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                        : "bg-gray-200"
+                    } flex flex-col items-center justify-center transition-all`}
+                  >
+                    <span
+                      className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                    >
+                      {segment.range}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -911,20 +941,25 @@ export function Axis2ScoreCard({
         <div className="relative">
           {/* Scale bar with segments */}
           <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-            {PHQ4_SEVERITY_SEGMENTS.map((segment, index) => (
-              <div
-                key={segment.label}
-                className={`flex-1 ${segment.color} ${
-                  index === activeSegment
-                    ? "ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md"
-                    : "opacity-40"
-                } flex flex-col items-center justify-center transition-all`}
-              >
-                <span className="text-[10px] font-medium text-white drop-shadow-sm">
-                  {segment.range}
-                </span>
-              </div>
-            ))}
+            {PHQ4_SEVERITY_SEGMENTS.map((segment, index) => {
+              const isActive = index === activeSegment;
+              return (
+                <div
+                  key={segment.label}
+                  className={`flex-1 ${
+                    isActive
+                      ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                      : "bg-gray-200"
+                  } flex flex-col items-center justify-center transition-all`}
+                >
+                  <span
+                    className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                  >
+                    {segment.range}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           {/* Cutoff line at 6 (50% position) */}
