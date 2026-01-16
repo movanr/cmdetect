@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, SkipForward, ArrowRight } from "lucide-react";
-import {
-  useExaminationForm,
-  type ExaminationStepId,
-} from "../form/use-examination-form";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { SkipForward, ArrowRight } from "lucide-react";
+import { useExaminationForm, type ExaminationStepId } from "../form/use-examination-form";
 import { QuestionField } from "./QuestionField";
 import { getLabel, getSideLabel, getRegionLabel } from "../labels";
 import type { QuestionInstance } from "../projections/to-instances";
 
+// Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
   "e4a",
   "e4b-measure",
@@ -17,16 +18,20 @@ const E4_STEP_ORDER: ExaminationStepId[] = [
   "e4c-interview",
 ];
 
-const E4_STEP_TITLES: Record<string, string> = {
-  "e4a": "E4a - Schmerzfreie Öffnung",
-  "e4b-measure": "E4b - Maximale Öffnung (unassistiert)",
-  "e4b-interview": "E4b - Interview (unassistiert)",
-  "e4c-measure": "E4c - Maximale Öffnung (assistiert)",
-  "e4c-interview": "E4c - Interview (assistiert)",
+const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
+  "e4a": { badge: "E4A", title: "Schmerzfreie Mundöffnung" },
+  "e4b-measure": { badge: "E4B", title: "Maximale aktive Mundöffnung" },
+  "e4b-interview": { badge: "E4B", title: "Schmerzbefragung" },
+  "e4c-measure": { badge: "E4C", title: "Maximale passive Mundöffnung" },
+  "e4c-interview": { badge: "E4C", title: "Schmerzbefragung" },
 };
 
-export function E4Section() {
-  const { validateStep, getInstancesForStep } = useExaminationForm();
+interface E4SectionProps {
+  onComplete?: () => void;
+}
+
+export function E4Section({ onComplete }: E4SectionProps) {
+  const { form, validateStep, getInstancesForStep } = useExaminationForm();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
@@ -34,78 +39,90 @@ export function E4Section() {
 
   const handleNext = async () => {
     const isValid = await validateStep(currentStepId);
-    if (isValid && !isLastStep) {
+    if (!isValid) return;
+
+    if (isLastStep) {
+      onComplete?.();
+    } else {
       setCurrentStepIndex((i) => i + 1);
     }
   };
 
   const handleSkip = () => {
-    if (!isLastStep) {
+    if (isLastStep) {
+      onComplete?.();
+    } else {
       setCurrentStepIndex((i) => i + 1);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Step indicator */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">E4 - Mundöffnung</h2>
-        <span className="text-sm text-muted-foreground">
-          Schritt {currentStepIndex + 1} / {E4_STEP_ORDER.length}
-        </span>
-      </div>
+  // Get summary for a step (for collapsed display)
+  const getStepSummary = (stepId: ExaminationStepId): string => {
+    const instances = getInstancesForStep(stepId);
+    const isInterview = String(stepId).endsWith("-interview");
 
-      {/* All steps as collapsible sections */}
-      <div className="space-y-2">
+    if (isInterview) {
+      // Check if any pain was reported
+      const hasPain = instances.some((inst) => {
+        if (inst.context.painType === "pain") {
+          const value = form.getValues(inst.path as keyof typeof form.getValues);
+          return value === "yes";
+        }
+        return false;
+      });
+      return hasPain ? "Schmerz" : "Kein Schmerz";
+    }
+
+    // Measurement step - show value
+    const measurementInst = instances.find((i) => i.renderType === "measurement");
+    if (measurementInst) {
+      const value = form.getValues(measurementInst.path as keyof typeof form.getValues);
+      if (value != null && value !== "") {
+        return `${value} mm`;
+      }
+    }
+    return "—";
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>E4 - Öffnungs- und Schließbewegungen</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
         {E4_STEP_ORDER.map((stepId, index) => {
-          const isPrevious = index < currentStepIndex;
-          const isFuture = index > currentStepIndex;
+          const isCurrent = index === currentStepIndex;
+          const isPast = index < currentStepIndex;
+          const config = E4_STEP_CONFIG[stepId];
           const stepInstances = getInstancesForStep(stepId);
           const isInterview = String(stepId).endsWith("-interview");
 
-          // Hide future steps
-          if (isFuture) return null;
-
-          // Collapsed previous step (clickable title bar)
-          if (isPrevious) {
+          // Current step - expanded
+          if (isCurrent) {
             return (
-              <div
-                key={stepId}
-                className="border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => setCurrentStepIndex(index)}
-              >
-                <div className="flex items-center justify-between p-3">
-                  <div className="flex items-center gap-2">
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{E4_STEP_TITLES[stepId]}</span>
+              <Card key={stepId} className="border shadow-none">
+                <CardHeader className="pb-0">
+                  <div className="flex items-center gap-3">
+                    <Badge className="rounded-full">{config.badge}</Badge>
+                    <CardTitle className="text-base">{config.title}</CardTitle>
                   </div>
-                </div>
-              </div>
-            );
-          }
-
-          // Expanded current step
-          return (
-            <div key={stepId} className="border rounded-lg">
-              <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{E4_STEP_TITLES[stepId]}</span>
-              </div>
-              <div className="p-4 space-y-4">
-                {isInterview ? (
-                  <InterviewStep instances={stepInstances} />
-                ) : (
-                  <MeasurementStep instances={stepInstances} />
-                )}
-                {/* Navigation buttons */}
-                <div className="flex items-center justify-between pt-4 border-t">
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {isInterview ? (
+                    <InterviewStep instances={stepInstances} />
+                  ) : (
+                    <MeasurementStep instances={stepInstances} />
+                  )}
+                </CardContent>
+                <Separator />
+                <CardFooter className="justify-between pt-4">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={handleSkip}
-                    className="text-muted-foreground"
                     disabled={isLastStep}
+                    className="text-muted-foreground"
                   >
                     <SkipForward className="h-4 w-4 mr-1" />
                     Überspringen
@@ -114,13 +131,36 @@ export function E4Section() {
                     {isLastStep ? "Abschließen" : "Weiter"}
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
-                </div>
+                </CardFooter>
+              </Card>
+            );
+          }
+
+          // Past or future step - collapsed row
+          return (
+            <div
+              key={stepId}
+              className={`flex items-center justify-between py-3 px-4 rounded-lg ${
+                isPast ? "cursor-pointer hover:bg-muted/50" : ""
+              }`}
+              onClick={isPast ? () => setCurrentStepIndex(index) : undefined}
+            >
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="rounded-full">
+                  {config.badge}
+                </Badge>
+                <span className={isPast ? "text-foreground" : "text-muted-foreground"}>
+                  {config.title}
+                </span>
               </div>
+              <span className="text-sm text-muted-foreground">
+                {isPast ? getStepSummary(stepId) : "—"}
+              </span>
             </div>
           );
         })}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -173,7 +213,7 @@ function InterviewColumn({
 
   return (
     <div className="space-y-4">
-      <h4 className="font-medium text-base border-b pb-1">{title}</h4>
+      <h4 className="font-medium text-sm border-b pb-2">{title}</h4>
       {Object.entries(byRegion).map(([region, regionQuestions]) => (
         <div key={region} className="space-y-2">
           <h5 className="text-sm font-medium text-muted-foreground">

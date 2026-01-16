@@ -1,4 +1,4 @@
-import { useForm, type FieldPath } from "react-hook-form";
+import { useFormContext, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { M } from "../model/nodes";
@@ -91,11 +91,36 @@ const baseSchema = schemaFromModel(EXAMINATION_MODEL);
 const schema = withEnableWhenRefinement(baseSchema, allInstances);
 type FormValues = z.infer<typeof baseSchema>;
 
+/** Form configuration for ExaminationForm to use with useForm() */
+export const examinationFormConfig = {
+  resolver: zodResolver(schema),
+  defaultValues: defaults as FormValues,
+};
+
+// Get step instances using the combined steps definition
+function getStepInstancesForExamination(
+  instances: QuestionInstance[],
+  stepId: ExaminationStepId
+): QuestionInstance[] {
+  const stepDef = EXAMINATION_STEPS[stepId];
+
+  if (typeof stepDef === "string" && stepDef.endsWith(".*")) {
+    // Wildcard: e.g., "e4.maxUnassisted.*" or "e9.left.*"
+    const prefix = stepDef.slice(0, -2); // Remove ".*"
+    return instances.filter((i) => i.path.startsWith(`${prefix}.`) && i.context.side);
+  }
+
+  // Explicit path array
+  const pathSet = new Set(stepDef as readonly string[]);
+  return instances.filter((i) => pathSet.has(i.path));
+}
+
+/**
+ * Hook for components that need examination form utilities.
+ * Must be used within a FormProvider (provided by ExaminationForm).
+ */
 export function useExaminationForm() {
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: defaults as FormValues,
-  });
+  const form = useFormContext<FormValues>();
 
   // Validate a specific step
   const validateStep = async (stepId: ExaminationStepId) => {
@@ -143,24 +168,6 @@ export function useExaminationForm() {
     getInstancesForStep,
     getInstancesForSection,
   };
-}
-
-// Get step instances using the combined steps definition
-function getStepInstancesForExamination(
-  instances: QuestionInstance[],
-  stepId: ExaminationStepId
-): QuestionInstance[] {
-  const stepDef = EXAMINATION_STEPS[stepId];
-
-  if (typeof stepDef === "string" && stepDef.endsWith(".*")) {
-    // Wildcard: e.g., "e4.maxUnassisted.*" or "e9.left.*"
-    const prefix = stepDef.slice(0, -2); // Remove ".*"
-    return instances.filter((i) => i.path.startsWith(`${prefix}.`) && i.context.side);
-  }
-
-  // Explicit path array
-  const pathSet = new Set(stepDef as readonly string[]);
-  return instances.filter((i) => pathSet.has(i.path));
 }
 
 export { EXAMINATION_STEPS };

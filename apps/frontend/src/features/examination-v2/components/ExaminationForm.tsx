@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useExaminationForm } from "../form/use-examination-form";
+import { examinationFormConfig } from "../form/use-examination-form";
 import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
 import { E4Section } from "./E4Section";
 import { E9Section } from "./E9Section";
 
+// Section component props
+interface SectionComponentProps {
+  onComplete?: () => void;
+}
+
 // Map section IDs to components
-const SECTION_COMPONENTS: Record<SectionId, React.ComponentType> = {
+const SECTION_COMPONENTS: Record<SectionId, React.ComponentType<SectionComponentProps>> = {
   e4: E4Section,
   e9: E9Section,
 };
@@ -18,7 +23,7 @@ interface ExaminationFormProps {
 }
 
 export function ExaminationForm({ onComplete }: ExaminationFormProps) {
-  const { form } = useExaminationForm();
+  const form = useForm(examinationFormConfig);
   const [currentSection, setCurrentSection] = useState<SectionId>(SECTION_REGISTRY[0].id);
 
   const handleSubmit = form.handleSubmit((values) => {
@@ -46,11 +51,16 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
             ))}
           </TabsList>
 
-          {SECTION_REGISTRY.map((section) => {
+          {SECTION_REGISTRY.map((section, index) => {
             const SectionComponent = SECTION_COMPONENTS[section.id];
+            const nextSection = SECTION_REGISTRY[index + 1]?.id;
+            const handleSectionComplete = nextSection
+              ? () => setCurrentSection(nextSection)
+              : undefined;
+
             return (
               <TabsContent key={section.id} value={section.id} className="mt-4">
-                <SectionComponent />
+                <SectionComponent onComplete={handleSectionComplete} />
               </TabsContent>
             );
           })}

@@ -21,7 +21,11 @@ const E9_STEP_TITLES: Record<string, string> = {
   "e9-right": "E9 - Rechts",
 };
 
-export function E9Section() {
+interface E9SectionProps {
+  onComplete?: () => void;
+}
+
+export function E9Section({ onComplete }: E9SectionProps) {
   const { validateStep, getInstancesForStep } = useExaminationForm();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
@@ -30,13 +34,19 @@ export function E9Section() {
 
   const handleNext = async () => {
     const isValid = await validateStep(currentStepId);
-    if (isValid && !isLastStep) {
+    if (!isValid) return;
+
+    if (isLastStep) {
+      onComplete?.();
+    } else {
       setCurrentStepIndex((i) => i + 1);
     }
   };
 
   const handleSkip = () => {
-    if (!isLastStep) {
+    if (isLastStep) {
+      onComplete?.();
+    } else {
       setCurrentStepIndex((i) => i + 1);
     }
   };
