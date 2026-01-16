@@ -17,16 +17,18 @@ import { E4_PAIN_REGIONS, getE4PainTypes } from "../../definition/sections/e4-op
 import { MOVEMENTS } from "../../model/movement";
 import { REGIONS } from "../../model/region";
 import { getLabel, SECTION_LABELS } from "../../content/labels";
+import { E4_INSTRUCTIONS } from "../../content/instructions";
 import { MEASUREMENT_IDS } from "../../model/measurement";
 import { MeasurementField } from "../form-fields/MeasurementField";
 import { TerminatedCheckbox } from "../form-fields/TerminatedCheckbox";
 import { PainInterviewGrid } from "./PainInterviewGrid";
-import { InteractiveExamSection } from "../interactive";
+import { InteractiveExamSection, InstructionBlock, E4InteractiveWizard } from "../interactive";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { Region } from "../interactive/types";
+import type { StepInstruction } from "../../content/instructions";
 
 /** View mode for pain interview */
 type ViewMode = "table" | "interactive";
@@ -39,6 +41,8 @@ interface MovementSectionProps {
   movement: (typeof MOVEMENTS)[keyof typeof MOVEMENTS];
   viewMode: ViewMode;
   regions: readonly Region[];
+  /** Instructions to display in interactive mode */
+  instruction?: StepInstruction;
 }
 
 /**
@@ -52,12 +56,18 @@ function MovementSection({
   movement,
   viewMode,
   regions,
+  instruction,
 }: MovementSectionProps) {
   const { watch } = useFormContext();
   const isTerminated = watch(terminatedId) === true;
 
   return (
     <div className="space-y-4">
+      {/* Instruction block - only in interactive mode */}
+      {viewMode === "interactive" && instruction && (
+        <InstructionBlock {...instruction} />
+      )}
+
       <h4 className="font-medium">{title}</h4>
 
       <div className="flex items-center gap-6">
@@ -151,38 +161,48 @@ export function E4OpeningSection({ className }: E4OpeningSectionProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* Pain-free opening - just a measurement, no pain interview */}
-        <div>
-          <MeasurementField
-            name="examination.painFreeOpening"
-            label={getLabel(MEASUREMENT_IDS.PAIN_FREE_OPENING)}
-            unit="mm"
-            min={0}
-            max={100}
-          />
-        </div>
+        {viewMode === "interactive" ? (
+          /* Interactive wizard mode - guided 5-step workflow */
+          <E4InteractiveWizard regions={regions} />
+        ) : (
+          /* Table mode - traditional grid layout */
+          <>
+            {/* Pain-free opening - just a measurement, no pain interview */}
+            <div className="space-y-4">
+              <MeasurementField
+                name="examination.painFreeOpening"
+                label={getLabel(MEASUREMENT_IDS.PAIN_FREE_OPENING)}
+                unit="mm"
+                min={0}
+                max={100}
+              />
+            </div>
 
-        {/* Maximum unassisted opening */}
-        <MovementSection
-          title={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
-          measurementId="examination.maxUnassistedOpening"
-          measurementLabel={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
-          terminatedId="examination.terminated:movement=maxUnassistedOpening"
-          movement={MOVEMENTS.MAX_UNASSISTED_OPENING}
-          viewMode={viewMode}
-          regions={regions}
-        />
+            {/* Maximum unassisted opening */}
+            <MovementSection
+              title={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
+              measurementId="examination.maxUnassistedOpening"
+              measurementLabel={getLabel(MOVEMENTS.MAX_UNASSISTED_OPENING)}
+              terminatedId="examination.terminated:movement=maxUnassistedOpening"
+              movement={MOVEMENTS.MAX_UNASSISTED_OPENING}
+              viewMode={viewMode}
+              regions={regions}
+              instruction={E4_INSTRUCTIONS.maxUnassistedOpening}
+            />
 
-        {/* Maximum assisted opening */}
-        <MovementSection
-          title={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
-          measurementId="examination.maxAssistedOpening"
-          measurementLabel={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
-          terminatedId="examination.terminated:movement=maxAssistedOpening"
-          movement={MOVEMENTS.MAX_ASSISTED_OPENING}
-          viewMode={viewMode}
-          regions={regions}
-        />
+            {/* Maximum assisted opening */}
+            <MovementSection
+              title={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
+              measurementId="examination.maxAssistedOpening"
+              measurementLabel={getLabel(MOVEMENTS.MAX_ASSISTED_OPENING)}
+              terminatedId="examination.terminated:movement=maxAssistedOpening"
+              movement={MOVEMENTS.MAX_ASSISTED_OPENING}
+              viewMode={viewMode}
+              regions={regions}
+              instruction={E4_INSTRUCTIONS.maxAssistedOpening}
+            />
+          </>
+        )}
       </CardContent>
     </Card>
   );

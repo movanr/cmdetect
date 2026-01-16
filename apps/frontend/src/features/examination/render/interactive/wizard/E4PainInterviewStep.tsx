@@ -1,65 +1,62 @@
 /**
- * InteractiveExamSection - Main container for the interactive E4 examination mode.
+ * E4PainInterviewStep - Step content for pain interview steps.
  *
- * Generates questions from definitions and passes them to the hook and components.
- * Questions are the single source of truth.
- *
- * Layout:
- * - Bilateral head diagrams (patient's right on left of screen)
- * - Region status lists beside each diagram
- * - Inline pain badges below (when region selected)
- * - Progress footer
+ * Wraps InteractiveExamSection with wizard navigation.
+ * "Keine weiteren Schmerzregionen" button advances to next step.
  */
 
 import { useCallback, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare } from "lucide-react";
-import type { Movement } from "../../model/movement";
-import { SIDES, type Side } from "../../model/side";
-import type { Question } from "../../model/question";
-import { painInterviewAfterMovement } from "../../definition/questions/pain";
-import { E4_INSTRUCTIONS } from "../../content/instructions";
+import { MessageSquare, CheckCircle2, SkipForward } from "lucide-react";
+import { SIDES, type Side } from "../../../model/side";
+import type { Question } from "../../../model/question";
+import { painInterviewAfterMovement } from "../../../definition/questions/pain";
+import { E4_INSTRUCTIONS } from "../../../content/instructions";
 import {
   type Region,
   type RegionStatus,
-  E4_PAIN_REGIONS,
   EMPTY_REGION_STATUS,
   parseRegionId,
   buildRegionId,
-} from "./types";
-import { useInteractiveExam } from "./useInteractiveExam";
-import { HeadDiagram } from "./HeadDiagram";
-import { RegionStatusList } from "./RegionStatusList";
-import { InlinePainBadges } from "./InlinePainBadges";
-import { ProgressFooter } from "./ProgressFooter";
+} from "../types";
+import { useInteractiveExam } from "../useInteractiveExam";
+import { HeadDiagram } from "../HeadDiagram";
+import { RegionStatusList } from "../RegionStatusList";
+import { InlinePainBadges } from "../InlinePainBadges";
+import type { E4Step } from "./types";
 
-interface InteractiveExamSectionProps {
-  /** Movement context (maxUnassistedOpening or maxAssistedOpening) */
-  movement: Movement;
-  /** Regions to assess - defaults to E4_PAIN_REGIONS */
-  regions?: readonly Region[];
-  /** Whether the section is disabled (e.g., if terminated) */
-  disabled?: boolean;
+interface E4PainInterviewStepProps {
+  /** Step definition */
+  step: E4Step;
+  /** Regions to assess */
+  regions: readonly Region[];
+  /** Callback when advancing to next step */
+  onNext: () => void;
+  /** Callback when skipping this step */
+  onSkip: () => void;
   /** Optional className */
   className?: string;
 }
 
-export function InteractiveExamSection({
-  movement,
-  regions = E4_PAIN_REGIONS,
-  disabled = false,
+export function E4PainInterviewStep({
+  step,
+  regions,
+  onNext,
+  onSkip,
   className,
-}: InteractiveExamSectionProps) {
+}: E4PainInterviewStepProps) {
   const { watch } = useFormContext();
+  const movement = step.movement!;
 
-  // Get form values - this triggers re-renders when values change
+  // Get form values for reactivity
   const formValues = watch();
 
-  // Generate ALL questions for this movement across all sides/regions
-  // This is the single source of truth from definitions
+  // Generate questions for this movement
   const questions = useMemo((): Question[] => {
     const all: Question[] = [];
     for (const side of Object.values(SIDES) as Side[]) {
@@ -82,9 +79,7 @@ export function InteractiveExamSection({
 
   // Get statuses for a specific side
   const getStatusesForSide = useCallback(
-    (
-      side: typeof SIDES.LEFT | typeof SIDES.RIGHT
-    ): Record<Region, RegionStatus> => {
+    (side: Side): Record<Region, RegionStatus> => {
       const result: Record<Region, RegionStatus> = {} as Record<
         Region,
         RegionStatus
@@ -100,9 +95,7 @@ export function InteractiveExamSection({
 
   // Get selected region for a specific side
   const getSelectedForSide = useCallback(
-    (
-      side: typeof SIDES.LEFT | typeof SIDES.RIGHT
-    ): Region | null => {
+    (side: Side): Region | null => {
       if (!selectedRegion) return null;
       const { side: selectedSide, region } = parseRegionId(selectedRegion);
       return selectedSide === side ? region : null;
@@ -115,8 +108,25 @@ export function InteractiveExamSection({
     ? getQuestionsForRegion(selectedRegion)
     : [];
 
+  // Handle completion - complete all regions and advance
+  const handleComplete = useCallback(() => {
+    completeAllRegions();
+    onNext();
+  }, [completeAllRegions, onNext]);
+
   return (
-    <div className={cn("space-y-4", className)}>
+    <div
+      className={cn(
+        "rounded-lg border border-primary/30 bg-card p-4 space-y-4",
+        className
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <Badge variant="default">{step.badge}</Badge>
+        <h3 className="font-semibold">{step.title}</h3>
+      </div>
+
       {/* Pain localization diagram */}
       <Card>
         <CardHeader className="pb-3">
@@ -126,8 +136,10 @@ export function InteractiveExamSection({
             <div className="flex items-start gap-2 text-sm text-muted-foreground">
               <MessageSquare className="mt-0.5 h-4 w-4 shrink-0" />
               <div>
-                <span className="italic">"{E4_INSTRUCTIONS.painInterview.prompt}"</span>
-                <span className="mx-2">→</span>
+                <span className="italic">
+                  "{E4_INSTRUCTIONS.painInterview.prompt}"
+                </span>
+                <span className="mx-2">-</span>
                 <span>{E4_INSTRUCTIONS.painInterview.guidance}</span>
               </div>
             </div>
@@ -148,7 +160,6 @@ export function InteractiveExamSection({
                   onRegionClick={(region) =>
                     handleRegionClick(SIDES.RIGHT, region)
                   }
-                  disabled={disabled}
                 />
                 <HeadDiagram
                   side={SIDES.RIGHT}
@@ -158,7 +169,6 @@ export function InteractiveExamSection({
                   onRegionClick={(region) =>
                     handleRegionClick(SIDES.RIGHT, region)
                   }
-                  disabled={disabled}
                 />
               </div>
             </div>
@@ -179,7 +189,6 @@ export function InteractiveExamSection({
                   onRegionClick={(region) =>
                     handleRegionClick(SIDES.LEFT, region)
                   }
-                  disabled={disabled}
                 />
                 <RegionStatusList
                   regions={regions}
@@ -188,7 +197,6 @@ export function InteractiveExamSection({
                   onRegionClick={(region) =>
                     handleRegionClick(SIDES.LEFT, region)
                   }
-                  disabled={disabled}
                 />
               </div>
             </div>
@@ -206,8 +214,23 @@ export function InteractiveExamSection({
         </CardContent>
       </Card>
 
-      {/* Completion button - always visible */}
-      <ProgressFooter onComplete={completeAllRegions} />
+      {/* Navigation buttons */}
+      <div className="flex items-center justify-between pt-2 border-t">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onSkip}
+          className="text-muted-foreground"
+        >
+          <SkipForward className="h-4 w-4 mr-1" />
+          Überspringen
+        </Button>
+        <Button type="button" onClick={handleComplete}>
+          <CheckCircle2 className="h-4 w-4 mr-2" />
+          Keine weiteren Schmerzregionen
+        </Button>
+      </div>
     </div>
   );
 }
