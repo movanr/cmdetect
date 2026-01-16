@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight, SkipForward, ArrowRight } from "lucide-react";
 import { useExaminationForm } from "../form/use-examination-form";
 import { QuestionField } from "./QuestionField";
 import { getLabel, getSideLabel, getRegionLabel } from "../labels";
@@ -21,11 +23,7 @@ export function E4Section() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const currentStepId = STEP_ORDER[currentStepIndex];
-  const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === STEP_ORDER.length - 1;
-
-  const instances = getInstancesForStep(currentStepId);
-  const isInterviewStep = currentStepId.endsWith("-interview");
 
   const handleNext = async () => {
     const isValid = await validateStep(currentStepId);
@@ -34,9 +32,9 @@ export function E4Section() {
     }
   };
 
-  const handlePrevious = () => {
-    if (!isFirstStep) {
-      setCurrentStepIndex((i) => i - 1);
+  const handleSkip = () => {
+    if (!isLastStep) {
+      setCurrentStepIndex((i) => i + 1);
     }
   };
 
@@ -54,46 +52,70 @@ export function E4Section() {
           </span>
         </div>
 
-        {/* Progress bar */}
-        <div className="flex gap-1">
-          {STEP_ORDER.map((_, idx) => (
-            <div
-              key={idx}
-              className={`h-1 flex-1 rounded ${
-                idx <= currentStepIndex ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
-        </div>
+        {/* All steps as collapsible sections */}
+        <div className="space-y-2">
+          {STEP_ORDER.map((stepId, index) => {
+            const isPrevious = index < currentStepIndex;
+            const isFuture = index > currentStepIndex;
+            const stepInstances = getInstancesForStep(stepId);
+            const isInterview = stepId.endsWith("-interview");
 
-        {/* Current step content */}
-        <div className="p-4 border rounded-lg space-y-4">
-          <h3 className="font-medium text-lg">{STEP_TITLES[currentStepId]}</h3>
+            // Hide future steps
+            if (isFuture) return null;
 
-          {isInterviewStep ? (
-            <InterviewStep instances={instances} />
-          ) : (
-            <MeasurementStep instances={instances} />
-          )}
-        </div>
+            // Collapsed previous step (clickable title bar)
+            if (isPrevious) {
+              return (
+                <div
+                  key={stepId}
+                  className="border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setCurrentStepIndex(index)}
+                >
+                  <div className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-2">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{STEP_TITLES[stepId]}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
-        {/* Navigation buttons */}
-        <div className="flex justify-between">
-          <button
-            type="button"
-            className="px-4 py-2 border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handlePrevious}
-            disabled={isFirstStep}
-          >
-            Zurück
-          </button>
-          <button
-            type="button"
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            onClick={handleNext}
-          >
-            {isLastStep ? "Abschließen" : "Weiter"}
-          </button>
+            // Expanded current step
+            return (
+              <div key={stepId} className="border rounded-lg">
+                <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{STEP_TITLES[stepId]}</span>
+                </div>
+                <div className="p-4 space-y-4">
+                  {isInterview ? (
+                    <InterviewStep instances={stepInstances} />
+                  ) : (
+                    <MeasurementStep instances={stepInstances} />
+                  )}
+                  {/* Navigation buttons */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkip}
+                      className="text-muted-foreground"
+                      disabled={isLastStep}
+                    >
+                      <SkipForward className="h-4 w-4 mr-1" />
+                      Überspringen
+                    </Button>
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Debug: Current Values */}

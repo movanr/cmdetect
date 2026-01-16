@@ -7,7 +7,15 @@ const painQuestionsForRegion = (region: E4Region) => {
   const questions = getPainQuestions(region);
   return M.group(
     Object.fromEntries(
-      questions.map((q) => [q, M.question(Q.yesNo({ required: true }))])
+      questions.map((q) => {
+        // Both familiarPain and familiarHeadache depend on pain
+        const enableWhen =
+          q === "familiarPain" || q === "familiarHeadache"
+            ? { sibling: "pain", equals: "yes" as const }
+            : undefined;
+
+        return [q, M.question(Q.yesNo({ required: true, enableWhen }))];
+      })
     )
   ) as GroupNode & { __children: Record<string, ModelNode> };
 };

@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 import type { QuestionInstance } from "../projections/to-instances";
 import { YesNoField } from "./inputs/YesNoField";
 import { MeasurementField } from "./inputs/MeasurementField";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFormContext, Controller } from "react-hook-form";
+import { useFieldEnabled } from "../hooks/use-field-enabled";
 
 interface QuestionFieldProps {
   instance: QuestionInstance;
@@ -12,6 +14,19 @@ interface QuestionFieldProps {
 
 export function QuestionField({ instance, label }: QuestionFieldProps) {
   const { renderType, path, config } = instance;
+  const { watch, setValue } = useFormContext();
+
+  const enabled = useFieldEnabled(instance);
+  const value = watch(path);
+
+  // Clear value when field becomes disabled
+  useEffect(() => {
+    if (!enabled && value != null) {
+      setValue(path, null);
+    }
+  }, [enabled, value, path, setValue]);
+
+  if (!enabled) return null;
 
   switch (renderType) {
     case "yesNo":

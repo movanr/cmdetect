@@ -7,44 +7,92 @@ import {
   instancesFromModel,
   defaultsFromModel,
   getStepInstances,
+  type QuestionInstance,
 } from "../projections/to-instances";
 import { createPathHelpers } from "./path-helpers";
 
-const schema = schemaWithRoot("e4", E4_MODEL);
-type FormValues = z.infer<typeof schema>;
+// Helper to get nested value by path
+function get(obj: unknown, path: string): unknown {
+  return path.split(".").reduce((acc: unknown, key) => {
+    if (acc && typeof acc === "object" && key in acc) {
+      return (acc as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
+}
 
-const e4Instances = instancesFromModel("e4", E4_MODEL);
-const e4Defaults = defaultsFromModel(E4_MODEL);
-const e4Paths = createPathHelpers<"e4">(e4Instances);
+// Add conditional validation for enableWhen fields
+function withEnableWhenRefinement<T extends z.ZodTypeAny>(
+  schema: T,
+  instances: QuestionInstance[]
+): z.ZodEffects<T, z.output<T>, z.input<T>> {
+  return schema.superRefine((data: unknown, ctx) => {
+    for (const inst of instances) {
+      if (!inst.enableWhen) continue;
+
+      const siblingPath = inst.path.replace(/\.[^.]+$/, `.${inst.enableWhen.sibling}`);
+      const siblingValue = get(data, siblingPath);
+      const currentValue = get(data, inst.path);
+
+      // Only require value if field is enabled
+      if (siblingValue === inst.enableWhen.equals && currentValue == null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Required",
+          path: inst.path.split("."),
+        });
+      }
+    }
+  });
+}
+
+// Generate instances and schema (generic naming for extensibility)
+const instances = instancesFromModel("e4", E4_MODEL);
+const defaults = defaultsFromModel(E4_MODEL);
+const pathHelpers = createPathHelpers(instances);
+
+const baseSchema = schemaWithRoot("e4", E4_MODEL);
+const schema = withEnableWhenRefinement(baseSchema, instances);
+type FormValues = z.infer<typeof baseSchema>;
 
 export function useExaminationForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { e4: e4Defaults } as FormValues,
+    defaultValues: { e4: defaults } as FormValues,
   });
 
   const validateStep = async (stepId: keyof typeof E4_STEPS) => {
-    const stepPaths = E4_STEPS[stepId];
+    const stepInstances = getStepInstances(instances, E4_STEPS, stepId, "e4");
+    const paths = stepInstances.map((i) => i.path as FieldPath<FormValues>);
 
-    if (typeof stepPaths === "string" && stepPaths.endsWith(".*")) {
-      // Wildcard: filter by context.side to get only interview questions
-      const prefix = "e4." + stepPaths.slice(0, -2);
-      const paths = e4Instances
-        .filter((i) => i.path.startsWith(prefix) && i.context.side)
-        .map((i) => i.path as FieldPath<FormValues>);
-      return form.trigger(paths);
+    // Run base schema validation
+    const baseValid = await form.trigger(paths);
+
+    // Check enableWhen conditions manually (superRefine doesn't run on partial trigger)
+    let enableWhenValid = true;
+    for (const inst of stepInstances) {
+      if (!inst.enableWhen) continue;
+
+      const siblingPath = inst.path.replace(/\.[^.]+$/, `.${inst.enableWhen.sibling}`);
+      const siblingValue = form.getValues(siblingPath as FieldPath<FormValues>);
+      const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
+
+      if (siblingValue === inst.enableWhen.equals && currentValue == null) {
+        form.setError(inst.path as FieldPath<FormValues>, {
+          type: "required",
+          message: "Required",
+        });
+        enableWhenValid = false;
+      }
     }
 
-    const pathsArray = stepPaths as readonly string[];
-    return form.trigger(
-      pathsArray.map((p) => `e4.${p}` as FieldPath<FormValues>)
-    );
+    return baseValid && enableWhenValid;
   };
 
   const getInstancesForStep = (stepId: keyof typeof E4_STEPS) =>
-    getStepInstances(e4Instances, E4_STEPS, stepId, "e4");
+    getStepInstances(instances, E4_STEPS, stepId, "e4");
 
-  return { form, instances: e4Instances, paths: e4Paths, validateStep, schema, getInstancesForStep };
+  return { form, instances, pathHelpers, validateStep, schema, getInstancesForStep };
 }
 
 export type { FormValues };

@@ -1,4 +1,5 @@
 import type { ModelNode } from "../model/nodes";
+import type { EnableWhen } from "../model/conditions";
 
 export type QuestionInstance = {
   path: string;
@@ -6,6 +7,7 @@ export type QuestionInstance = {
   renderType: string;
   context: Record<string, string>;
   config: Record<string, unknown>;
+  enableWhen?: EnableWhen;
 };
 
 export function instancesFromModel(
@@ -17,6 +19,7 @@ export function instancesFromModel(
   const currentPath = [...parentPath, rootKey];
 
   if (model.__nodeType === "question") {
+    const config = model.__primitive.config as { enableWhen?: EnableWhen };
     return [
       {
         path: currentPath.join("."),
@@ -24,6 +27,7 @@ export function instancesFromModel(
         renderType: model.__primitive.renderType,
         context,
         config: model.__primitive.config,
+        enableWhen: config.enableWhen,
       },
     ];
   }

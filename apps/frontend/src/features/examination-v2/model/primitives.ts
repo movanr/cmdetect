@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { EnableWhen } from "./conditions";
 
 type Primitive<T, TRender extends string, TConfig = Record<string, unknown>> = {
   renderType: TRender;
@@ -8,7 +9,7 @@ type Primitive<T, TRender extends string, TConfig = Record<string, unknown>> = {
 };
 
 type BooleanConfig = { required?: boolean };
-type YesNoConfig = { required?: boolean };
+type YesNoConfig = { required?: boolean; enableWhen?: EnableWhen };
 type MeasurementConfig = { unit?: string; min?: number; max?: number; required?: boolean };
 
 export const Q = {
@@ -21,12 +22,14 @@ export const Q = {
 
   yesNo: (config: YesNoConfig = {}): Primitive<"yes" | "no" | null, "yesNo", YesNoConfig> => ({
     renderType: "yesNo",
-    schema: config.required
-      ? z.enum(["yes", "no"], {
-          required_error: "Selection required",
-          invalid_type_error: "Selection required",
-        })
-      : z.enum(["yes", "no"]).nullable(),
+    // Fields with enableWhen use nullable schema; refinement handles conditional required
+    schema:
+      config.required && !config.enableWhen
+        ? z.enum(["yes", "no"], {
+            required_error: "Selection required",
+            invalid_type_error: "Selection required",
+          })
+        : z.enum(["yes", "no"]).nullable(),
     defaultValue: null,
     config,
   }),
