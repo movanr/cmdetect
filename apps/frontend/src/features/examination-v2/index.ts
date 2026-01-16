@@ -23,7 +23,9 @@ export { schemaFromModel, schemaWithRoot } from "./projections/to-schema";
 export {
   instancesFromModel,
   defaultsFromModel,
+  getStepInstances,
   type QuestionInstance,
+  type StepDefinition,
 } from "./projections/to-instances";
 
 // Form hooks
@@ -42,3 +44,14 @@ export {
 
 // Components
 export { E4Section } from "./components/E4Section";
+export { QuestionField } from "./components/QuestionField";
+export { YesNoInput, YesNoField } from "./components/inputs";
+export { MeasurementInput, MeasurementField } from "./components/inputs";
+
+// Labels
+export {
+  getLabel,
+  getSideLabel,
+  getRegionLabel,
+  getPainTypeLabel,
+} from "./labels";

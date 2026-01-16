@@ -6,6 +6,7 @@ import { schemaWithRoot } from "../projections/to-schema";
 import {
   instancesFromModel,
   defaultsFromModel,
+  getStepInstances,
 } from "../projections/to-instances";
 import { createPathHelpers } from "./path-helpers";
 
@@ -40,7 +41,10 @@ export function useExaminationForm() {
     );
   };
 
-  return { form, instances: e4Instances, paths: e4Paths, validateStep, schema };
+  const getInstancesForStep = (stepId: keyof typeof E4_STEPS) =>
+    getStepInstances(e4Instances, E4_STEPS, stepId, "e4");
+
+  return { form, instances: e4Instances, paths: e4Paths, validateStep, schema, getInstancesForStep };
 }
 
 export type { FormValues };

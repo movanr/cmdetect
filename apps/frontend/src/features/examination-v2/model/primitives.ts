@@ -1,34 +1,56 @@
 import { z } from "zod";
 
-type Primitive<T, TRender extends string> = {
+type Primitive<T, TRender extends string, TConfig = Record<string, unknown>> = {
   renderType: TRender;
   schema: z.ZodType<T>;
   defaultValue: T;
+  config: TConfig;
 };
 
+type BooleanConfig = { required?: boolean };
+type YesNoConfig = { required?: boolean };
+type MeasurementConfig = { unit?: string; min?: number; max?: number; required?: boolean };
+
 export const Q = {
-  boolean: (): Primitive<boolean, "checkbox"> => ({
+  boolean: (config: BooleanConfig = {}): Primitive<boolean, "checkbox", BooleanConfig> => ({
     renderType: "checkbox",
     schema: z.boolean(),
     defaultValue: false,
+    config,
   }),
 
-  yesNo: (): Primitive<"yes" | "no" | null, "yesNo"> => ({
+  yesNo: (config: YesNoConfig = {}): Primitive<"yes" | "no" | null, "yesNo", YesNoConfig> => ({
     renderType: "yesNo",
-    schema: z.enum(["yes", "no"]).nullable(),
+    schema: config.required
+      ? z.enum(["yes", "no"], {
+          required_error: "Selection required",
+          invalid_type_error: "Selection required",
+        })
+      : z.enum(["yes", "no"]).nullable(),
     defaultValue: null,
+    config,
   }),
 
   measurement: (
-    config: { unit?: string; min?: number; max?: number } = {}
-  ): Primitive<number | null, "measurement"> => ({
+    config: MeasurementConfig = {}
+  ): Primitive<number | null, "measurement", MeasurementConfig> => ({
     renderType: "measurement",
-    schema: z
-      .number()
-      .min(config.min ?? 0)
-      .max(config.max ?? 100)
-      .nullable(),
+    schema: config.required
+      ? z
+          .number()
+          .min(config.min ?? 0, { message: `Minimum: ${config.min ?? 0}` })
+          .max(config.max ?? 100, { message: `Maximum: ${config.max ?? 100}` })
+          .nullable()
+          .refine((v): v is number => v !== null && !Number.isNaN(v), {
+            message: "Wert erforderlich",
+          })
+      : z
+          .number()
+          .min(config.min ?? 0)
+          .max(config.max ?? 100)
+          .nullable(),
     defaultValue: null,
+    config,
   }),
 };
 

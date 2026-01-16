@@ -5,6 +5,7 @@ export type QuestionInstance = {
   labelKey?: string;
   renderType: string;
   context: Record<string, string>;
+  config: Record<string, unknown>;
 };
 
 export function instancesFromModel(
@@ -22,6 +23,7 @@ export function instancesFromModel(
         labelKey: model.__labelKey,
         renderType: model.__primitive.renderType,
         context,
+        config: model.__primitive.config,
       },
     ];
   }
@@ -49,6 +51,32 @@ function enrichContext(
     return { ...ctx, painType: key };
   }
   return ctx;
+}
+
+// Step definition: array of paths or wildcard string
+export type StepDefinition = readonly string[] | string;
+
+/**
+ * Get QuestionInstance[] for a specific step.
+ * Same filtering logic as getStepPaths but returns full instances.
+ */
+export function getStepInstances<TSteps extends Record<string, StepDefinition>>(
+  instances: QuestionInstance[],
+  steps: TSteps,
+  stepId: keyof TSteps,
+  rootKey: string
+): QuestionInstance[] {
+  const stepDef = steps[stepId];
+
+  if (typeof stepDef === "string" && stepDef.endsWith(".*")) {
+    // Wildcard: filter by prefix and context.side (interview questions)
+    const prefix = `${rootKey}.${stepDef.slice(0, -2)}`;
+    return instances.filter((i) => i.path.startsWith(prefix) && i.context.side);
+  }
+
+  // Explicit path array
+  const pathSet = new Set((stepDef as readonly string[]).map((p) => `${rootKey}.${p}`));
+  return instances.filter((i) => pathSet.has(i.path));
 }
 
 // Generate default values from model

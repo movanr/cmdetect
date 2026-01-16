@@ -6,7 +6,9 @@ import { SIDES, E4_REGIONS, getPainQuestions, type E4Region } from "../model/con
 const painQuestionsForRegion = (region: E4Region) => {
   const questions = getPainQuestions(region);
   return M.group(
-    Object.fromEntries(questions.map((q) => [q, M.question(Q.yesNo())]))
+    Object.fromEntries(
+      questions.map((q) => [q, M.question(Q.yesNo({ required: true }))])
+    )
   ) as GroupNode & { __children: Record<string, ModelNode> };
 };
 
@@ -24,18 +26,21 @@ const bilateral = () =>
 
 export const E4_MODEL = M.group({
   painFree: M.group({
-    measurement: M.question(Q.measurement({ unit: "mm" }), "painFreeOpening"),
+    measurement: M.question(
+      Q.measurement({ unit: "mm", required: true }),
+      "painFreeOpening"
+    ),
   }),
   maxUnassisted: M.group({
     measurement: M.question(
-      Q.measurement({ unit: "mm" }),
+      Q.measurement({ unit: "mm", required: true }),
       "maxUnassistedOpening"
     ),
     ...bilateral().__children,
   }),
   maxAssisted: M.group({
     measurement: M.question(
-      Q.measurement({ unit: "mm" }),
+      Q.measurement({ unit: "mm", required: true }),
       "maxAssistedOpening"
     ),
     terminated: M.question(Q.boolean(), "terminated"),
