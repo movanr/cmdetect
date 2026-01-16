@@ -25,32 +25,30 @@ export function MeasurementField<T extends FieldValues>({
   const { error } = getFieldState(name, formState);
 
   return (
-    <div className={cn("flex items-center justify-between gap-4", className)}>
-      {label && <span className="text-sm text-muted-foreground">{label}</span>}
-      <div className="flex flex-col items-end gap-1">
-        <Controller
-          name={name}
-          control={control}
-          render={({ field }) => (
-            <MeasurementInput
-              unit={unit}
-              min={min}
-              max={max}
-              disabled={disabled}
-              // Convert null to empty string for display
-              value={field.value ?? ""}
-              onChange={(e) => {
-                const val = e.target.value;
-                // Convert empty string to null, otherwise parse as number
-                field.onChange(val === "" ? null : Number(val));
-              }}
-              onBlur={field.onBlur}
-              ref={field.ref}
-            />
-          )}
-        />
-        {error && <span className="text-xs text-destructive">{error.message}</span>}
-      </div>
+    <div className={cn("flex flex-col items-start gap-1.5", className)}>
+      {label && <span className="text-sm font-medium">{label}</span>}
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <MeasurementInput
+            unit={unit}
+            min={min}
+            max={max}
+            disabled={disabled}
+            // Convert null to empty string for display
+            value={field.value ?? ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              // Convert empty string to null, otherwise parse as number
+              field.onChange(val === "" ? null : Number(val));
+            }}
+            onBlur={field.onBlur}
+            ref={field.ref}
+          />
+        )}
+      />
+      {error && <span className="text-xs text-destructive">{error.message}</span>}
     </div>
   );
 }

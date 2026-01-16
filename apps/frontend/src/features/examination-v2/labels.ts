@@ -2,6 +2,7 @@
 const LABELS: Record<string, string> = {
   // Measurement labels
   painFreeOpening: "Schmerzfreie Öffnung",
+  measurement: "Messung",
   maxUnassistedOpening: "Maximale Öffnung (unassistiert)",
   maxAssistedOpening: "Maximale Öffnung (assistiert)",
   terminated: "Abgebrochen",
@@ -41,19 +42,15 @@ const LABELS: Record<string, string> = {
 };
 
 export const getLabel = (key?: string): string | undefined =>
-  key ? LABELS[key] ?? key : undefined;
+  key ? (LABELS[key] ?? key) : undefined;
 
-export const getSideLabel = (side: string): string =>
-  LABELS[side] ?? side;
+export const getSideLabel = (side: string): string => LABELS[side] ?? side;
 
-export const getRegionLabel = (region: string): string =>
-  LABELS[region] ?? region;
+export const getRegionLabel = (region: string): string => LABELS[region] ?? region;
 
-export const getPainTypeLabel = (painType: string): string =>
-  LABELS[painType] ?? painType;
+export const getPainTypeLabel = (painType: string): string => LABELS[painType] ?? painType;
 
-export const getPalpationSiteLabel = (site: string): string =>
-  LABELS[site] ?? site;
+export const getPalpationSiteLabel = (site: string): string => LABELS[site] ?? site;
 
 export const getMuscleGroupLabel = (muscleGroup: string): string =>
   LABELS[`${muscleGroup}MuscleGroup`] ?? muscleGroup;

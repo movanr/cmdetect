@@ -1,26 +1,17 @@
+import { bilateralPainInterview, spreadChildren } from "../model/builders";
 import { M } from "../model/nodes";
 import { Q } from "../model/primitives";
-import { bilateralPainInterview, spreadChildren } from "../model/builders";
 
 export const E4_MODEL = M.group({
   painFree: M.group({
-    measurement: M.question(
-      Q.measurement({ unit: "mm", required: true }),
-      "painFreeOpening"
-    ),
+    measurement: M.question(Q.measurement({ unit: "mm", required: true }), "measurement"),
   }),
   maxUnassisted: M.group({
-    measurement: M.question(
-      Q.measurement({ unit: "mm", required: true }),
-      "maxUnassistedOpening"
-    ),
+    measurement: M.question(Q.measurement({ unit: "mm", required: true }), "measurement"),
     ...spreadChildren(bilateralPainInterview()),
   }),
   maxAssisted: M.group({
-    measurement: M.question(
-      Q.measurement({ unit: "mm", required: true }),
-      "maxAssistedOpening"
-    ),
+    measurement: M.question(Q.measurement({ unit: "mm", required: true }), "measurement"),
     terminated: M.question(Q.boolean(), "terminated"),
     ...spreadChildren(bilateralPainInterview()),
   }),

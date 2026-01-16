@@ -22,14 +22,7 @@ export const Q = {
 
   yesNo: (config: YesNoConfig = {}): Primitive<"yes" | "no" | null, "yesNo", YesNoConfig> => ({
     renderType: "yesNo",
-    // Fields with enableWhen use nullable schema; refinement handles conditional required
-    schema:
-      config.required && !config.enableWhen
-        ? z.enum(["yes", "no"], {
-            required_error: "Selection required",
-            invalid_type_error: "Selection required",
-          })
-        : z.enum(["yes", "no"]).nullable(),
+    schema: z.enum(["yes", "no"]).nullable(),
     defaultValue: null,
     config,
   }),
@@ -38,20 +31,7 @@ export const Q = {
     config: MeasurementConfig = {}
   ): Primitive<number | null, "measurement", MeasurementConfig> => ({
     renderType: "measurement",
-    schema: config.required
-      ? z
-          .number()
-          .min(config.min ?? 0, { message: `Minimum: ${config.min ?? 0}` })
-          .max(config.max ?? 100, { message: `Maximum: ${config.max ?? 100}` })
-          .nullable()
-          .refine((v): v is number => v !== null && !Number.isNaN(v), {
-            message: "Wert erforderlich",
-          })
-      : z
-          .number()
-          .min(config.min ?? 0)
-          .max(config.max ?? 100)
-          .nullable(),
+    schema: z.number().nullable(),
     defaultValue: null,
     config,
   }),

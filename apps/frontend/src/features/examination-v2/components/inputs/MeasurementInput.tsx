@@ -12,7 +12,7 @@ export const MeasurementInput = forwardRef<HTMLInputElement, MeasurementInputPro
     return (
       <div
         className={cn(
-          "inline-flex items-center rounded-xl border border-input bg-background shadow-xs",
+          "inline-flex items-center rounded-md border border-input bg-background shadow-xs",
           "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
           "has-[:disabled]:opacity-50 has-[:disabled]:cursor-not-allowed",
           className
@@ -23,7 +23,7 @@ export const MeasurementInput = forwardRef<HTMLInputElement, MeasurementInputPro
           type="number"
           inputMode="numeric"
           className={cn(
-            "w-16 border-0 bg-transparent shadow-none rounded-l-xl",
+            "w-16 border-0 bg-transparent shadow-none rounded-l-md",
             "focus-visible:ring-0 focus-visible:border-0",
             "text-lg font-medium text-right pr-2",
             "[appearance:textfield]",

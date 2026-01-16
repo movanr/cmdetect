@@ -1,51 +1,17 @@
-import { useFormContext, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useFormContext, type FieldPath } from "react-hook-form";
 import { z } from "zod";
 import { M } from "../model/nodes";
-import { schemaFromModel } from "../projections/to-schema";
 import {
-  instancesFromModel,
   defaultsFromModel,
+  instancesFromModel,
   type QuestionInstance,
   type StepDefinition,
 } from "../projections/to-instances";
-import { createPathHelpers } from "./path-helpers";
+import { schemaFromModel } from "../projections/to-schema";
 import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
-
-// Helper to get nested value by path
-function get(obj: unknown, path: string): unknown {
-  return path.split(".").reduce((acc: unknown, key) => {
-    if (acc && typeof acc === "object" && key in acc) {
-      return (acc as Record<string, unknown>)[key];
-    }
-    return undefined;
-  }, obj);
-}
-
-// Add conditional validation for enableWhen fields
-function withEnableWhenRefinement<T extends z.ZodTypeAny>(
-  schema: T,
-  instances: QuestionInstance[]
-): z.ZodEffects<T, z.output<T>, z.input<T>> {
-  return schema.superRefine((data: unknown, ctx) => {
-    for (const inst of instances) {
-      if (!inst.enableWhen) continue;
-
-      const siblingPath = inst.path.replace(/\.[^.]+$/, `.${inst.enableWhen.sibling}`);
-      const siblingValue = get(data, siblingPath);
-      const currentValue = get(data, inst.path);
-
-      // Only require value if field is enabled
-      if (siblingValue === inst.enableWhen.equals && currentValue == null) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Required",
-          path: inst.path.split("."),
-        });
-      }
-    }
-  });
-}
+import { createPathHelpers } from "./path-helpers";
+import { validateInstances } from "./validation";
 
 // Helper to prefix paths in step definitions
 function prefixStepPaths(
@@ -63,9 +29,7 @@ function prefixStepPaths(
 }
 
 // Build combined model from registry
-const EXAMINATION_MODEL = M.group(
-  Object.fromEntries(SECTION_REGISTRY.map((s) => [s.id, s.model]))
-);
+const EXAMINATION_MODEL = M.group(Object.fromEntries(SECTION_REGISTRY.map((s) => [s.id, s.model])));
 
 // Build combined steps from registry
 const EXAMINATION_STEPS = SECTION_REGISTRY.reduce(
@@ -87,13 +51,13 @@ for (const section of SECTION_REGISTRY) {
 const defaults = defaultsFromModel(EXAMINATION_MODEL);
 const pathHelpers = createPathHelpers(allInstances);
 
-const baseSchema = schemaFromModel(EXAMINATION_MODEL);
-const schema = withEnableWhenRefinement(baseSchema, allInstances);
-type FormValues = z.infer<typeof baseSchema>;
+// Schema is for type coercion only - all validation via validateInstances()
+const schema = schemaFromModel(EXAMINATION_MODEL);
+type FormValues = z.infer<typeof schema>;
 
 /** Form configuration for ExaminationForm to use with useForm() */
 export const examinationFormConfig = {
-  resolver: zodResolver(schema),
+  resolver: zodResolver(schema as z.ZodTypeAny),
   defaultValues: defaults as FormValues,
 };
 
@@ -123,32 +87,27 @@ export function useExaminationForm() {
   const form = useFormContext<FormValues>();
 
   // Validate a specific step
-  const validateStep = async (stepId: ExaminationStepId) => {
+  const validateStep = (stepId: ExaminationStepId): boolean => {
     const stepInstances = getStepInstancesForExamination(allInstances, stepId);
-    const paths = stepInstances.map((i) => i.path as FieldPath<FormValues>);
 
-    // Run base schema validation
-    const baseValid = await form.trigger(paths);
-
-    // Check enableWhen conditions manually (superRefine doesn't run on partial trigger)
-    let enableWhenValid = true;
+    // Clear existing errors for step fields
     for (const inst of stepInstances) {
-      if (!inst.enableWhen) continue;
-
-      const siblingPath = inst.path.replace(/\.[^.]+$/, `.${inst.enableWhen.sibling}`);
-      const siblingValue = form.getValues(siblingPath as FieldPath<FormValues>);
-      const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
-
-      if (siblingValue === inst.enableWhen.equals && currentValue == null) {
-        form.setError(inst.path as FieldPath<FormValues>, {
-          type: "required",
-          message: "Required",
-        });
-        enableWhenValid = false;
-      }
+      form.clearErrors(inst.path as FieldPath<FormValues>);
     }
 
-    return baseValid && enableWhenValid;
+    // Validate using the validation layer (single source of truth)
+    const getValue = (path: string) => form.getValues(path as FieldPath<FormValues>);
+    const result = validateInstances(stepInstances, getValue);
+
+    // Set errors via RHF
+    for (const error of result.errors) {
+      form.setError(error.path as FieldPath<FormValues>, {
+        type: "manual",
+        message: error.message,
+      });
+    }
+
+    return result.valid;
   };
 
   // Get instances for a specific step
