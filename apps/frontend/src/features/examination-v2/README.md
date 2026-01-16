@@ -56,3 +56,14 @@ function PainInterviewStep({ model, rootPath }) {
 | ✓      | Step wizard with navigation                                |
 | ✓      | Conditional visibility                                     |
 | ✓      | Dynamic rendering from `renderType`                        |
+
+## Add new section
+
+To add a new section (e.g., E5):
+
+1. Create sections/e5.model.ts with E5_MODEL and E5_STEPS
+2. Add to registry:  
+   { id: "e5", label: "E5: Lateralbewegungen", model: E5_MODEL, steps: E5_STEPS }
+3. Create components/E5Section.tsx
+4. Add to SECTION_COMPONENTS map in ExaminationForm.tsx
+5. Update SectionId type: "e4" | "e5" | "e9"

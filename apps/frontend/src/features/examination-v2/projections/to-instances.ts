@@ -1,5 +1,7 @@
-import type { ModelNode } from "../model/nodes";
 import type { EnableWhen } from "../model/conditions";
+import { E4_REGIONS } from "../model/contexts";
+import { E9_PALPATION_SITES, E9_SITE_CONFIG, type E9PalpationSite } from "../model/e9-contexts";
+import type { ModelNode } from "../model/nodes";
 
 export type QuestionInstance = {
   path: string;
@@ -35,25 +37,41 @@ export function instancesFromModel(
   const instances: QuestionInstance[] = [];
   for (const [key, child] of Object.entries(model.__children)) {
     const enrichedContext = enrichContext(context, key);
-    instances.push(
-      ...instancesFromModel(key, child, currentPath, enrichedContext)
-    );
+    instances.push(...instancesFromModel(key, child, currentPath, enrichedContext));
   }
   return instances;
 }
 
-// E4-specific context enrichment (refactor when adding E9)
-function enrichContext(
-  ctx: Record<string, string>,
-  key: string
-): Record<string, string> {
+// Pain question types shared by E4 and E9
+const PAIN_TYPES = [
+  "pain",
+  "familiarPain",
+  "familiarHeadache",
+  "referredPain",
+  "spreadingPain",
+] as const;
+
+// Context enrichment for E4 and E9
+function enrichContext(ctx: Record<string, string>, key: string): Record<string, string> {
+  // Shared: sides
   if (key === "left" || key === "right") return { ...ctx, side: key };
-  if (["temporalis", "masseter", "tmj", "otherMast", "nonMast"].includes(key)) {
+
+  // E4: regions
+  if (E4_REGIONS.includes(key as (typeof E4_REGIONS)[number])) {
     return { ...ctx, region: key };
   }
-  if (["pain", "familiarPain", "familiarHeadache"].includes(key)) {
+
+  // E9: palpation sites
+  if (E9_PALPATION_SITES.includes(key as E9PalpationSite)) {
+    const config = E9_SITE_CONFIG[key as E9PalpationSite];
+    return { ...ctx, site: key, muscleGroup: config.muscleGroup };
+  }
+
+  // Shared: pain types
+  if (PAIN_TYPES.includes(key as (typeof PAIN_TYPES)[number])) {
     return { ...ctx, painType: key };
   }
+
   return ctx;
 }
 

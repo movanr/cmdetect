@@ -1,15 +1,16 @@
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { E4_MODEL, E4_STEPS } from "../sections/e4.model";
-import { schemaWithRoot } from "../projections/to-schema";
+import { M } from "../model/nodes";
+import { schemaFromModel } from "../projections/to-schema";
 import {
   instancesFromModel,
   defaultsFromModel,
-  getStepInstances,
   type QuestionInstance,
+  type StepDefinition,
 } from "../projections/to-instances";
 import { createPathHelpers } from "./path-helpers";
+import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
 
 // Helper to get nested value by path
 function get(obj: unknown, path: string): unknown {
@@ -46,23 +47,59 @@ function withEnableWhenRefinement<T extends z.ZodTypeAny>(
   });
 }
 
-// Generate instances and schema (generic naming for extensibility)
-const instances = instancesFromModel("e4", E4_MODEL);
-const defaults = defaultsFromModel(E4_MODEL);
-const pathHelpers = createPathHelpers(instances);
+// Helper to prefix paths in step definitions
+function prefixStepPaths(
+  steps: Record<string, StepDefinition>,
+  prefix: string
+): Record<string, StepDefinition> {
+  return Object.fromEntries(
+    Object.entries(steps).map(([key, value]) => {
+      if (typeof value === "string") {
+        return [key, `${prefix}.${value}`];
+      }
+      return [key, value.map((p) => `${prefix}.${p}`)];
+    })
+  );
+}
 
-const baseSchema = schemaWithRoot("e4", E4_MODEL);
-const schema = withEnableWhenRefinement(baseSchema, instances);
+// Build combined model from registry
+const EXAMINATION_MODEL = M.group(
+  Object.fromEntries(SECTION_REGISTRY.map((s) => [s.id, s.model]))
+);
+
+// Build combined steps from registry
+const EXAMINATION_STEPS = SECTION_REGISTRY.reduce(
+  (acc, section) => ({
+    ...acc,
+    ...prefixStepPaths(section.steps, section.id),
+  }),
+  {} as Record<string, StepDefinition>
+);
+
+export type ExaminationStepId = keyof typeof EXAMINATION_STEPS;
+
+// Generate instances from combined model
+const allInstances: QuestionInstance[] = [];
+for (const section of SECTION_REGISTRY) {
+  allInstances.push(...instancesFromModel(section.id, section.model));
+}
+
+const defaults = defaultsFromModel(EXAMINATION_MODEL);
+const pathHelpers = createPathHelpers(allInstances);
+
+const baseSchema = schemaFromModel(EXAMINATION_MODEL);
+const schema = withEnableWhenRefinement(baseSchema, allInstances);
 type FormValues = z.infer<typeof baseSchema>;
 
 export function useExaminationForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { e4: defaults } as FormValues,
+    defaultValues: defaults as FormValues,
   });
 
-  const validateStep = async (stepId: keyof typeof E4_STEPS) => {
-    const stepInstances = getStepInstances(instances, E4_STEPS, stepId, "e4");
+  // Validate a specific step
+  const validateStep = async (stepId: ExaminationStepId) => {
+    const stepInstances = getStepInstancesForExamination(allInstances, stepId);
     const paths = stepInstances.map((i) => i.path as FieldPath<FormValues>);
 
     // Run base schema validation
@@ -89,10 +126,42 @@ export function useExaminationForm() {
     return baseValid && enableWhenValid;
   };
 
-  const getInstancesForStep = (stepId: keyof typeof E4_STEPS) =>
-    getStepInstances(instances, E4_STEPS, stepId, "e4");
+  // Get instances for a specific step
+  const getInstancesForStep = (stepId: ExaminationStepId) =>
+    getStepInstancesForExamination(allInstances, stepId);
 
-  return { form, instances, pathHelpers, validateStep, schema, getInstancesForStep };
+  // Get all instances for a specific section
+  const getInstancesForSection = (sectionId: SectionId) =>
+    allInstances.filter((i) => i.path.startsWith(`${sectionId}.`));
+
+  return {
+    form,
+    instances: allInstances,
+    pathHelpers,
+    validateStep,
+    schema,
+    getInstancesForStep,
+    getInstancesForSection,
+  };
 }
 
+// Get step instances using the combined steps definition
+function getStepInstancesForExamination(
+  instances: QuestionInstance[],
+  stepId: ExaminationStepId
+): QuestionInstance[] {
+  const stepDef = EXAMINATION_STEPS[stepId];
+
+  if (typeof stepDef === "string" && stepDef.endsWith(".*")) {
+    // Wildcard: e.g., "e4.maxUnassisted.*" or "e9.left.*"
+    const prefix = stepDef.slice(0, -2); // Remove ".*"
+    return instances.filter((i) => i.path.startsWith(`${prefix}.`) && i.context.side);
+  }
+
+  // Explicit path array
+  const pathSet = new Set(stepDef as readonly string[]);
+  return instances.filter((i) => pathSet.has(i.path));
+}
+
+export { EXAMINATION_STEPS };
 export type { FormValues };

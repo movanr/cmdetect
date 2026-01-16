@@ -1,36 +1,6 @@
-import { M, type GroupNode, type ModelNode } from "../model/nodes";
+import { M } from "../model/nodes";
 import { Q } from "../model/primitives";
-import { SIDES, E4_REGIONS, getPainQuestions, type E4Region } from "../model/contexts";
-
-// Build pain interview for one region
-const painQuestionsForRegion = (region: E4Region) => {
-  const questions = getPainQuestions(region);
-  return M.group(
-    Object.fromEntries(
-      questions.map((q) => {
-        // Both familiarPain and familiarHeadache depend on pain
-        const enableWhen =
-          q === "familiarPain" || q === "familiarHeadache"
-            ? { sibling: "pain", equals: "yes" as const }
-            : undefined;
-
-        return [q, M.question(Q.yesNo({ required: true, enableWhen }))];
-      })
-    )
-  ) as GroupNode & { __children: Record<string, ModelNode> };
-};
-
-// Build all regions for one side
-const regionsForSide = () =>
-  M.group(
-    Object.fromEntries(E4_REGIONS.map((r) => [r, painQuestionsForRegion(r)]))
-  ) as GroupNode & { __children: Record<string, ModelNode> };
-
-// Build bilateral (left + right)
-const bilateral = () =>
-  M.group(Object.fromEntries(SIDES.map((s) => [s, regionsForSide()]))) as GroupNode & {
-    __children: Record<string, ModelNode>;
-  };
+import { bilateralPainInterview, spreadChildren } from "../model/builders";
 
 export const E4_MODEL = M.group({
   painFree: M.group({
@@ -44,7 +14,7 @@ export const E4_MODEL = M.group({
       Q.measurement({ unit: "mm", required: true }),
       "maxUnassistedOpening"
     ),
-    ...bilateral().__children,
+    ...spreadChildren(bilateralPainInterview()),
   }),
   maxAssisted: M.group({
     measurement: M.question(
@@ -52,11 +22,11 @@ export const E4_MODEL = M.group({
       "maxAssistedOpening"
     ),
     terminated: M.question(Q.boolean(), "terminated"),
-    ...bilateral().__children,
+    ...spreadChildren(bilateralPainInterview()),
   }),
 });
 
-// Steps - just arrays of paths or wildcard
+// Steps - arrays of paths or wildcard patterns
 export const E4_STEPS = {
   e4a: ["painFree.measurement"],
   "e4b-measure": ["maxUnassisted.measurement"],

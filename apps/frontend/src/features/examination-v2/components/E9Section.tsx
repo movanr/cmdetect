@@ -6,31 +6,27 @@ import {
   type ExaminationStepId,
 } from "../form/use-examination-form";
 import { QuestionField } from "./QuestionField";
-import { getLabel, getSideLabel, getRegionLabel } from "../labels";
+import {
+  getLabel,
+  getPalpationSiteLabel,
+  getMuscleGroupLabel,
+} from "../labels";
 import type { QuestionInstance } from "../projections/to-instances";
+import { E9_MUSCLE_GROUPS } from "../model/e9-contexts";
 
-const E4_STEP_ORDER: ExaminationStepId[] = [
-  "e4a",
-  "e4b-measure",
-  "e4b-interview",
-  "e4c-measure",
-  "e4c-interview",
-];
+const E9_STEP_ORDER: ExaminationStepId[] = ["e9-left", "e9-right"];
 
-const E4_STEP_TITLES: Record<string, string> = {
-  "e4a": "E4a - Schmerzfreie Öffnung",
-  "e4b-measure": "E4b - Maximale Öffnung (unassistiert)",
-  "e4b-interview": "E4b - Interview (unassistiert)",
-  "e4c-measure": "E4c - Maximale Öffnung (assistiert)",
-  "e4c-interview": "E4c - Interview (assistiert)",
+const E9_STEP_TITLES: Record<string, string> = {
+  "e9-left": "E9 - Links",
+  "e9-right": "E9 - Rechts",
 };
 
-export function E4Section() {
+export function E9Section() {
   const { validateStep, getInstancesForStep } = useExaminationForm();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
-  const currentStepId = E4_STEP_ORDER[currentStepIndex];
-  const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
+  const currentStepId = E9_STEP_ORDER[currentStepIndex];
+  const isLastStep = currentStepIndex === E9_STEP_ORDER.length - 1;
 
   const handleNext = async () => {
     const isValid = await validateStep(currentStepId);
@@ -49,19 +45,18 @@ export function E4Section() {
     <div className="space-y-6">
       {/* Step indicator */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">E4 - Mundöffnung</h2>
+        <h2 className="text-xl font-semibold">E9 - Palpation Muskeln & TMJ</h2>
         <span className="text-sm text-muted-foreground">
-          Schritt {currentStepIndex + 1} / {E4_STEP_ORDER.length}
+          Schritt {currentStepIndex + 1} / {E9_STEP_ORDER.length}
         </span>
       </div>
 
       {/* All steps as collapsible sections */}
       <div className="space-y-2">
-        {E4_STEP_ORDER.map((stepId, index) => {
+        {E9_STEP_ORDER.map((stepId, index) => {
           const isPrevious = index < currentStepIndex;
           const isFuture = index > currentStepIndex;
           const stepInstances = getInstancesForStep(stepId);
-          const isInterview = String(stepId).endsWith("-interview");
 
           // Hide future steps
           if (isFuture) return null;
@@ -77,7 +72,7 @@ export function E4Section() {
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center gap-2">
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{E4_STEP_TITLES[stepId]}</span>
+                    <span className="font-medium">{E9_STEP_TITLES[stepId]}</span>
                   </div>
                 </div>
               </div>
@@ -89,14 +84,10 @@ export function E4Section() {
             <div key={stepId} className="border rounded-lg">
               <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{E4_STEP_TITLES[stepId]}</span>
+                <span className="font-medium">{E9_STEP_TITLES[stepId]}</span>
               </div>
               <div className="p-4 space-y-4">
-                {isInterview ? (
-                  <InterviewStep instances={stepInstances} />
-                ) : (
-                  <MeasurementStep instances={stepInstances} />
-                )}
+                <PalpationStep instances={stepInstances} />
                 {/* Navigation buttons */}
                 <div className="flex items-center justify-between pt-4 border-t">
                   <Button
@@ -124,63 +115,60 @@ export function E4Section() {
   );
 }
 
-// Measurement step: simple list of fields
-function MeasurementStep({ instances }: { instances: QuestionInstance[] }) {
-  return (
-    <div className="space-y-4">
-      {instances.map((instance) => (
-        <QuestionField
-          key={instance.path}
-          instance={instance}
-          label={getLabel(instance.labelKey)}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Interview step: two-column layout by side, grouped by region
-function InterviewStep({ instances }: { instances: QuestionInstance[] }) {
-  const leftQuestions = instances.filter((i) => i.context.side === "left");
-  const rightQuestions = instances.filter((i) => i.context.side === "right");
-
-  return (
-    <div className="grid grid-cols-2 gap-6">
-      <InterviewColumn title={getSideLabel("left")} questions={leftQuestions} />
-      <InterviewColumn title={getSideLabel("right")} questions={rightQuestions} />
-    </div>
-  );
-}
-
-// Group questions by region and render
-function InterviewColumn({
-  title,
-  questions,
-}: {
-  title: string;
-  questions: QuestionInstance[];
-}) {
-  // Group by region
-  const byRegion = questions.reduce<Record<string, QuestionInstance[]>>(
+// Group questions by muscle group and site
+function PalpationStep({ instances }: { instances: QuestionInstance[] }) {
+  // Group by muscleGroup context
+  const byMuscleGroup = instances.reduce<Record<string, QuestionInstance[]>>(
     (acc, q) => {
-      const region = q.context.region ?? "unknown";
-      if (!acc[region]) acc[region] = [];
-      acc[region].push(q);
+      const group = q.context.muscleGroup ?? "unknown";
+      if (!acc[group]) acc[group] = [];
+      acc[group].push(q);
       return acc;
     },
     {}
   );
 
   return (
-    <div className="space-y-4">
-      <h4 className="font-medium text-base border-b pb-1">{title}</h4>
-      {Object.entries(byRegion).map(([region, regionQuestions]) => (
-        <div key={region} className="space-y-2">
+    <div className="space-y-6">
+      {E9_MUSCLE_GROUPS.map((group) => {
+        const groupQuestions = byMuscleGroup[group];
+        if (!groupQuestions?.length) return null;
+
+        return (
+          <div key={group} className="space-y-4">
+            <h4 className="font-medium text-base border-b pb-1">
+              {getMuscleGroupLabel(group)}
+            </h4>
+            <SiteQuestions questions={groupQuestions} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Group questions by palpation site within a muscle group
+function SiteQuestions({ questions }: { questions: QuestionInstance[] }) {
+  // Group by site
+  const bySite = questions.reduce<Record<string, QuestionInstance[]>>(
+    (acc, q) => {
+      const site = q.context.site ?? "unknown";
+      if (!acc[site]) acc[site] = [];
+      acc[site].push(q);
+      return acc;
+    },
+    {}
+  );
+
+  return (
+    <div className="space-y-4 pl-2">
+      {Object.entries(bySite).map(([site, siteQuestions]) => (
+        <div key={site} className="space-y-2">
           <h5 className="text-sm font-medium text-muted-foreground">
-            {getRegionLabel(region)}
+            {getPalpationSiteLabel(site)}
           </h5>
           <div className="pl-2 space-y-1">
-            {regionQuestions.map((instance) => (
+            {siteQuestions.map((instance) => (
               <QuestionField
                 key={instance.path}
                 instance={instance}

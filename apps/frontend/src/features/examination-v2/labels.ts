@@ -10,13 +10,30 @@ const LABELS: Record<string, string> = {
   pain: "Schmerz",
   familiarPain: "Bekannter Schmerz",
   familiarHeadache: "Bekannte Kopfschmerzen",
+  referredPain: "Übertragener Schmerz",
+  spreadingPain: "Ausbreitender Schmerz",
 
-  // Region labels
+  // E4 Region labels
   temporalis: "Temporalis",
   masseter: "Masseter",
   tmj: "TMJ",
   otherMast: "Andere Kaumusk.",
   nonMast: "Nicht-Kaumusk.",
+
+  // E9 Palpation site labels
+  temporalisPosterior: "Temporalis (posterior)",
+  temporalisMiddle: "Temporalis (mitte)",
+  temporalisAnterior: "Temporalis (anterior)",
+  masseterOrigin: "Masseter (Ursprung)",
+  masseterBody: "Masseter (Körper)",
+  masseterInsertion: "Masseter (Ansatz)",
+  tmjLateralPole: "TMJ (lateraler Pol)",
+  tmjAroundLateralPole: "TMJ (um lateralen Pol)",
+
+  // E9 Muscle group labels
+  temporalisMuscleGroup: "Temporalis",
+  masseterMuscleGroup: "Masseter",
+  tmjMuscleGroup: "Kiefergelenk (TMJ)",
 
   // Side labels
   left: "Links",
@@ -34,3 +51,9 @@ export const getRegionLabel = (region: string): string =>
 
 export const getPainTypeLabel = (painType: string): string =>
   LABELS[painType] ?? painType;
+
+export const getPalpationSiteLabel = (site: string): string =>
+  LABELS[site] ?? site;
+
+export const getMuscleGroupLabel = (muscleGroup: string): string =>
+  LABELS[`${muscleGroup}MuscleGroup`] ?? muscleGroup;
