@@ -868,7 +868,7 @@ export function Axis2ScoreCard({
           {isHighRisk && (
             <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
               <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Trägt zur Entstehung von CMD bei</span>
+              <span className="text-sm font-medium">Risikofaktor zur Entstehung von CMD</span>
             </div>
           )}
         </CardHeader>
