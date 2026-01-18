@@ -291,8 +291,10 @@ export function PainDrawingCanvas({
             />
           )}
 
-          {/* Existing elements */}
-          {elements.map(renderElement)}
+          {/* Existing elements - rendered in order: shading, points, arrows (arrows on top) */}
+          {elements.filter((e) => e.type === 'shade').map(renderElement)}
+          {elements.filter((e) => e.type === 'point').map(renderElement)}
+          {elements.filter((e) => e.type === 'arrow').map(renderElement)}
 
           {/* Current stroke being drawn */}
           {isDrawing && currentStroke.length >= 4 && (

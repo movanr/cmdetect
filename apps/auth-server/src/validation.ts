@@ -10,6 +10,7 @@
  */
 const QUESTIONNAIRE_IDS = [
   "dc-tmd-sq",
+  "dc-tmd-pain-drawing",
   "phq-4",
   "gcps-1m",
   "jfls-8",

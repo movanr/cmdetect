@@ -33,6 +33,11 @@ import {
 import { SQWizard, useSQForm } from "../features/sq";
 import type { SQAnswers } from "../features/sq";
 
+// Pain Drawing - canvas-based drawing wizard
+import { PainDrawingWizard } from "../features/pain-drawing";
+import type { PainDrawingData, TransitionPhase as PainDrawingTransitionPhase } from "../features/pain-drawing";
+import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+
 // Form components
 import { PersonalDataForm } from "./-components/PersonalDataForm";
 import type { PersonalDataFormValues } from "./-components/personalDataSchema";
@@ -383,6 +388,27 @@ function PatientFlowPage() {
     const questionnaireNumber = questionnaireIndex + 1;
     const totalQuestionnaires = QUESTIONNAIRE_FLOW.length;
     const { title } = flowItem.questionnaire;
+
+    // Pain Drawing uses full viewport - render without outer chrome
+    if (currentQuestionnaireId === QUESTIONNAIRE_ID.PAIN_DRAWING) {
+      return (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentQuestionnaireId}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            <PainDrawingWrapper
+              transitionPhase={transitionPhase}
+              onTransitionPhaseComplete={handleTransitionPhaseComplete}
+              onComplete={handleQuestionnaireComplete}
+            />
+          </motion.div>
+        </AnimatePresence>
+      );
+    }
 
     // Animation variants for content transitions
     const contentVariants = {
@@ -813,5 +839,47 @@ function GenericQuestionnaireWrapper({
         onComplete={onComplete}
       />
     </FormProvider>
+  );
+}
+
+/**
+ * Wrapper for Pain Drawing wizard (canvas-based DC/TMD pain drawing)
+ * Strips PNG exports before submission (only vector data is stored)
+ */
+function PainDrawingWrapper({
+  transitionPhase,
+  onTransitionPhaseComplete,
+  onComplete,
+}: {
+  transitionPhase: TransitionPhase;
+  onTransitionPhaseComplete: (phase: TransitionPhase) => void;
+  onComplete: (data: Record<string, unknown>) => void;
+}) {
+  const handleComplete = (data: PainDrawingData) => {
+    // Strip pngExport from each drawing before submission (only store vector data)
+    const strippedDrawings = Object.fromEntries(
+      Object.entries(data.drawings).map(([imageId, drawing]) => [
+        imageId,
+        {
+          imageId: drawing.imageId,
+          elements: drawing.elements,
+          // pngExport intentionally omitted
+        },
+      ])
+    );
+
+    onComplete({
+      drawings: strippedDrawings,
+      completedAt: data.completedAt,
+      version: data.version,
+    });
+  };
+
+  return (
+    <PainDrawingWizard
+      transitionPhase={transitionPhase as PainDrawingTransitionPhase}
+      onTransitionPhaseComplete={onTransitionPhaseComplete as (phase: PainDrawingTransitionPhase) => void}
+      onComplete={handleComplete}
+    />
   );
 }

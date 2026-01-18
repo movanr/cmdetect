@@ -9,6 +9,7 @@ import {
   OBC_QUESTIONNAIRE,
   PHQ4_QUESTIONNAIRE,
   SQ_METADATA,
+  QUESTIONNAIRE_ID,
   isQuestionnaireEnabled,
 } from "@cmdetect/questionnaires";
 import type { GenericQuestionnaire, QuestionnaireFlowItem } from "../types";
@@ -22,12 +23,21 @@ const SQ_FLOW_PLACEHOLDER: GenericQuestionnaire = {
   questions: [],
 };
 
+// Pain Drawing is custom (uses canvas-based wizard)
+const PAIN_DRAWING_PLACEHOLDER: GenericQuestionnaire = {
+  id: QUESTIONNAIRE_ID.PAIN_DRAWING,
+  title: "Schmerzzeichnung",
+  version: "1.0",
+  questions: [],
+};
+
 /**
  * All possible questionnaire flow items in order
  * Filtering is done by isQuestionnaireEnabled() from the shared config
  */
 const ALL_FLOW_ITEMS: QuestionnaireFlowItem[] = [
   { questionnaire: SQ_FLOW_PLACEHOLDER, isCustom: true },
+  { questionnaire: PAIN_DRAWING_PLACEHOLDER, isCustom: true },
   { questionnaire: GCPS_1M_QUESTIONNAIRE },
   { questionnaire: JFLS8_QUESTIONNAIRE },
   { questionnaire: PHQ4_QUESTIONNAIRE },

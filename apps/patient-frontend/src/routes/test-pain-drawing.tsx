@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PainDrawingWizard } from './-components/pain-drawing';
-import type { PainDrawingData } from './-components/pain-drawing/types';
+import { PainDrawingWizard } from '../features/pain-drawing';
+import type { PainDrawingData, ImageDrawingData } from '../features/pain-drawing';
 
 export const Route = createFileRoute('/test-pain-drawing')({
   component: TestPainDrawingPage,
@@ -72,7 +72,7 @@ function TestPainDrawingPage() {
 
               <div className="space-y-2">
                 <p className="font-medium">Drawings Summary:</p>
-                {Object.entries(completedData.drawings).map(
+                {(Object.entries(completedData.drawings) as [string, ImageDrawingData][]).map(
                   ([imageId, drawing]) => (
                     <div
                       key={imageId}
@@ -91,7 +91,7 @@ function TestPainDrawingPage() {
               <div className="pt-4 space-y-2">
                 <p className="font-medium text-sm">PNG Previews:</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(completedData.drawings)
+                  {(Object.entries(completedData.drawings) as [string, ImageDrawingData][])
                     .filter(([, drawing]) => drawing.pngExport)
                     .map(([imageId, drawing]) => (
                       <div key={imageId} className="space-y-1">

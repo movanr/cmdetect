@@ -6,7 +6,7 @@ import type { ImageConfig, ImageId, WizardStep } from "./types";
 export const DRAWING_STYLES = {
   shade: {
     stroke: "#dc2626", // red-600
-    strokeWidth: 24,
+    strokeWidth: 16,
     opacity: 0.5,
     lineCap: "round" as const,
     lineJoin: "round" as const,
@@ -17,9 +17,9 @@ export const DRAWING_STYLES = {
     radius: 12,
   },
   arrow: {
-    stroke: "#dc2626", // red-600
+    stroke: "#1d4ed8", // blue-700
     strokeWidth: 4,
-    fill: "#dc2626",
+    fill: "#1d4ed8", // blue-700
     pointerLength: 16,
     pointerWidth: 14,
   },
@@ -77,10 +77,6 @@ export const IMAGE_CONFIGS: Record<ImageId, ImageConfig> = {
  */
 export const WIZARD_STEPS: WizardStep[] = [
   {
-    type: "instruction",
-    title: "Anleitung",
-  },
-  {
     type: "drawing",
     imageId: "head-right",
     title: "Gesicht rechts",
@@ -122,16 +118,18 @@ export const INSTRUCTION_TEXT = {
   ],
   tools: [
     {
-      name: "Schattieren",
-      description: "Markieren Sie Schmerzbereiche durch Ausmalen",
+      name: "Schraffieren",
+      description: "Schraffieren Sie alle Gebiete, in denen Sie unterschiedliche Schmerzen haben.",
     },
     {
       name: "Punkt",
-      description: "Setzen Sie einen Punkt fuer praezise Schmerzstellen",
+      description:
+        "Wenn es einen genauen Punkt gibt, wo der Schmerz lokalisiert ist, kennzeichnen Sie ihn mit einem ausgefüllten Punkt.",
     },
     {
       name: "Pfeil",
-      description: "Zeigen Sie die Richtung von ausstrahlenden Schmerzen",
+      description:
+        "Wenn Ihr Schmerz von einem zu einem anderen Ort wandert, nutzen Sie Pfeile um den Weg aufzuzeigen.",
     },
   ],
   footer: 'Tippen Sie auf "Weiter" um zu beginnen.',

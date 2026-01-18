@@ -1,5 +1,6 @@
 // Main component
 export { PainDrawingWizard } from './PainDrawingWizard';
+export type { TransitionPhase } from './PainDrawingWizard';
 
 // Sub-components (for advanced usage)
 export { PainDrawingCanvas } from './PainDrawingCanvas';
