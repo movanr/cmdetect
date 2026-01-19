@@ -64,6 +64,18 @@ export { createStepValidator, getStepPaths } from "./form/use-step-validation";
 export { E4Section } from "./components/E4Section";
 export { E9Section } from "./components/E9Section";
 export { ExaminationForm } from "./components/ExaminationForm";
+export { HeadDiagram } from "./components/HeadDiagram";
+export {
+  EMPTY_REGION_STATUS,
+  REGION_VISUAL_STATES,
+  REGION_STATE_COLORS,
+  getRegionVisualState,
+  parseRegionId,
+  buildRegionId,
+  type RegionStatus,
+  type RegionVisualState,
+  type RegionId,
+} from "./components/HeadDiagram/types";
 export { MeasurementField, MeasurementInput, YesNoField, YesNoInput } from "./components/inputs";
 export { QuestionField } from "./components/QuestionField";
 
