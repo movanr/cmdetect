@@ -3,37 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, SkipForward } from "lucide-react";
 import { useState } from "react";
-import { useExaminationForm, type ExaminationStepId } from "../form/use-examination-form";
-import { InterviewStep, MeasurementStep, StepBar, type StepStatus } from "./ui";
+import { useExaminationForm, type ExaminationStepId } from "../../form/use-examination-form";
+import { PalpationStep, StepBar, type StepStatus } from "../ui";
 
-// Step configuration
-const E4_STEP_ORDER: ExaminationStepId[] = [
-  "e4a",
-  "e4b-measure",
-  "e4b-interview",
-  "e4c-measure",
-  "e4c-interview",
-];
+const E9_STEP_ORDER: ExaminationStepId[] = ["e9-left", "e9-right"];
 
-const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
-  e4a: { badge: "E4A", title: "Schmerzfreie Mundöffnung" },
-  "e4b-measure": { badge: "E4B", title: "Maximale aktive Mundöffnung" },
-  "e4b-interview": { badge: "E4B", title: "Schmerzbefragung" },
-  "e4c-measure": { badge: "E4C", title: "Maximale passive Mundöffnung" },
-  "e4c-interview": { badge: "E4C", title: "Schmerzbefragung" },
+const E9_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
+  "e9-left": { badge: "E9", title: "Palpation Links" },
+  "e9-right": { badge: "E9", title: "Palpation Rechts" },
 };
 
-interface E4SectionProps {
+interface E9SectionProps {
   onComplete?: () => void;
 }
 
-export function E4Section({ onComplete }: E4SectionProps) {
+export function E9Section({ onComplete }: E9SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>({});
 
-  const currentStepId = E4_STEP_ORDER[currentStepIndex];
-  const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
+  const currentStepId = E9_STEP_ORDER[currentStepIndex];
+  const isLastStep = currentStepIndex === E9_STEP_ORDER.length - 1;
+
+  const getStepStatus = (stepId: ExaminationStepId, index: number): StepStatus => {
+    if (index === currentStepIndex) return "active";
+    if (stepStatuses[stepId]) return stepStatuses[stepId];
+    return "pending";
+  };
 
   const handleNext = async () => {
     const isValid = await validateStep(currentStepId);
@@ -58,51 +54,31 @@ export function E4Section({ onComplete }: E4SectionProps) {
     }
   };
 
-  const getStepStatus = (stepId: ExaminationStepId, index: number): StepStatus => {
-    if (index === currentStepIndex) return "active";
-    if (stepStatuses[stepId]) return stepStatuses[stepId];
-    return "pending";
-  };
-
   // Get summary for a step (for collapsed display)
   const getStepSummary = (stepId: ExaminationStepId): string => {
     const instances = getInstancesForStep(stepId);
-    const isInterview = String(stepId).endsWith("-interview");
 
-    if (isInterview) {
-      // Check if any pain was reported
-      const hasPain = instances.some((inst) => {
-        if (inst.context.painType === "pain") {
-          const value = form.getValues(inst.path as keyof typeof form.getValues);
-          return value === "yes";
-        }
-        return false;
-      });
-      return hasPain ? "Schmerz" : "Kein Schmerz";
-    }
-
-    // Measurement step - show value
-    const measurementInst = instances.find((i) => i.renderType === "measurement");
-    if (measurementInst) {
-      const value = form.getValues(measurementInst.path as keyof typeof form.getValues);
-      if (value != null && value !== "") {
-        return `${value} mm`;
+    // Check if any pain was reported
+    const hasPain = instances.some((inst) => {
+      if (inst.context.painType === "pain") {
+        const value = form.getValues(inst.path as keyof typeof form.getValues);
+        return value === "yes";
       }
-    }
-    return "—";
+      return false;
+    });
+    return hasPain ? "Schmerz" : "Kein Schmerz";
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>E4 - Öffnungs- und Schließbewegungen</CardTitle>
+        <CardTitle>E9 - Palpation Muskeln & TMJ</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {E4_STEP_ORDER.map((stepId, index) => {
-          const config = E4_STEP_CONFIG[stepId];
+        {E9_STEP_ORDER.map((stepId, index) => {
+          const config = E9_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);
           const stepInstances = getInstancesForStep(stepId);
-          const isInterview = String(stepId).endsWith("-interview");
 
           if (status === "active") {
             return (
@@ -117,11 +93,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
                 </div>
 
                 {/* Content */}
-                {isInterview ? (
-                  <InterviewStep instances={stepInstances} />
-                ) : (
-                  <MeasurementStep instances={stepInstances} />
-                )}
+                <PalpationStep instances={stepInstances} />
 
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-2 border-t">

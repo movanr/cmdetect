@@ -1,11 +1,11 @@
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { examinationFormConfig } from "../form/use-examination-form";
 import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
-import { E4Section } from "./E4Section";
-import { E9Section } from "./E9Section";
+import { E4Section } from "./sections/E4Section";
+import { E9Section } from "./sections/E9Section";
 
 // Section component props
 interface SectionComponentProps {
@@ -36,10 +36,7 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
   return (
     <FormProvider {...form}>
       <div className="space-y-6">
-        <Tabs
-          value={currentSection}
-          onValueChange={(v) => setCurrentSection(v as SectionId)}
-        >
+        <Tabs value={currentSection} onValueChange={(v) => setCurrentSection(v as SectionId)}>
           <TabsList
             className="grid w-full"
             style={{ gridTemplateColumns: `repeat(${SECTION_REGISTRY.length}, 1fr)` }}
@@ -72,9 +69,7 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
 
         {/* Debug: Current Values */}
         <details className="border rounded">
-          <summary className="p-2 cursor-pointer font-medium text-sm">
-            Debug: Form Values
-          </summary>
+          <summary className="p-2 cursor-pointer font-medium text-sm">Debug: Form Values</summary>
           <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-64">
             {JSON.stringify(allValues, null, 2)}
           </pre>
