@@ -1,12 +1,15 @@
-// TODO: Das sollte alles Zod sein. Zu viel Potential Fehler zu haben.
-
 /**
  * Validation utilities for auth server endpoints
+ * Uses Zod for runtime validation with type-safe schemas
  */
+import { z } from "zod";
+import {
+  getAnswersSchema,
+  checkSQCompletion,
+} from "@cmdetect/questionnaires";
 
 /**
  * Known questionnaire IDs that the system accepts
- * Note: Keep in sync with @cmdetect/questionnaires package
  */
 const QUESTIONNAIRE_IDS = [
   "dc-tmd-sq",
@@ -16,7 +19,9 @@ const QUESTIONNAIRE_IDS = [
   "jfls-8",
   "jfls-20",
   "obc",
-];
+] as const;
+
+const QuestionnaireIdSchema = z.enum(QUESTIONNAIRE_IDS);
 
 export interface ValidationResult {
   valid: boolean;
@@ -24,126 +29,178 @@ export interface ValidationResult {
 }
 
 /**
+ * UUID validation schema
+ */
+const UUIDSchema = z.string().regex(
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  "Invalid UUID format"
+);
+
+/**
  * Validates UUID format
  */
 export function validateUUID(uuid: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return typeof uuid === 'string' && uuidRegex.test(uuid);
+  return UUIDSchema.safeParse(uuid).success;
 }
+
+/**
+ * Invite token validation schema
+ */
+const InviteTokenSchema = z.object({
+  invite_token: UUIDSchema,
+});
 
 /**
  * Validates invite token format and structure
  */
-export function validateInviteToken(invite_token: any): ValidationResult {
-  if (!invite_token || typeof invite_token !== 'string') {
-    return { valid: false, error: "Invalid invite token format" };
-  }
-  if (!validateUUID(invite_token)) {
-    return { valid: false, error: "Invalid invite token format" };
+export function validateInviteToken(invite_token: unknown): ValidationResult {
+  const result = InviteTokenSchema.safeParse({ invite_token });
+  if (!result.success) {
+    return {
+      valid: false,
+      error: result.error.issues[0]?.message ?? "Invalid invite token format",
+    };
   }
   return { valid: true };
 }
 
 /**
- * Known questionnaire IDs reference for validation
+ * Questionnaire response input schema
  */
-const KNOWN_QUESTIONNAIRE_IDS = QUESTIONNAIRE_IDS;
+const QuestionnaireResponseInputSchema = z.object({
+  questionnaire_id: QuestionnaireIdSchema,
+  questionnaire_version: z.string().min(1, "questionnaire_version is required"),
+  answers: z.record(z.string(), z.unknown()),
+});
 
 /**
  * Validates questionnaire response data structure
+ * - Validates base structure (questionnaire_id, version, answers)
+ * - Validates answers against questionnaire-specific schema
  */
-export function validateQuestionnaireResponseData(response_data: any): ValidationResult {
-  if (!response_data || typeof response_data !== 'object') {
-    return { valid: false, error: "Response data must be an object" };
+export function validateQuestionnaireResponseData(
+  response_data: unknown
+): ValidationResult {
+  // 1. Validate base structure
+  const baseResult = QuestionnaireResponseInputSchema.safeParse(response_data);
+  if (!baseResult.success) {
+    const issue = baseResult.error.issues[0];
+    return {
+      valid: false,
+      error: issue?.message ?? "Invalid response data",
+    };
   }
 
-  // Validate questionnaire_id
-  if (!response_data.questionnaire_id || typeof response_data.questionnaire_id !== 'string') {
-    return { valid: false, error: "questionnaire_id is required and must be a string" };
-  }
-
-  if (!KNOWN_QUESTIONNAIRE_IDS.includes(response_data.questionnaire_id)) {
-    return { valid: false, error: `Unknown questionnaire_id. Must be one of: ${KNOWN_QUESTIONNAIRE_IDS.join(', ')}` };
-  }
-
-  // Validate questionnaire_version
-  if (!response_data.questionnaire_version || typeof response_data.questionnaire_version !== 'string') {
-    return { valid: false, error: "questionnaire_version is required and must be a string" };
-  }
-
-  // Validate answers (empty answers are allowed - some questionnaires support skipping)
-  if (!response_data.answers || typeof response_data.answers !== 'object') {
-    return { valid: false, error: "answers is required and must be an object" };
+  // 2. Validate answers against questionnaire-specific schema
+  const answersSchema = getAnswersSchema(baseResult.data.questionnaire_id);
+  const answersResult = answersSchema.safeParse(baseResult.data.answers);
+  if (!answersResult.success) {
+    const issue = answersResult.error.issues[0];
+    return {
+      valid: false,
+      error: `Invalid answers: ${issue?.message ?? "validation failed"}`,
+    };
   }
 
   return { valid: true };
 }
+
+/**
+ * Check if SQ is complete and whether screening is negative
+ * Used for early completion logic
+ */
+export function isSQComplete(answers: unknown): {
+  complete: boolean;
+  screeningNegative: boolean;
+} {
+  return checkSQCompletion(answers);
+}
+
+/**
+ * Consent data validation schema
+ */
+const ConsentDataSchema = z.object({
+  consent_given: z.boolean(),
+  consent_text: z.string().min(1, "consent_text is required"),
+  consent_version: z.string().min(1, "consent_version is required"),
+});
 
 /**
  * Validates patient consent data structure
  */
-export function validateConsentData(consent_data: any): ValidationResult {
-  if (!consent_data || typeof consent_data !== "object") {
-    return { valid: false, error: "Invalid consent data" };
+export function validateConsentData(consent_data: unknown): ValidationResult {
+  const result = ConsentDataSchema.safeParse(consent_data);
+  if (!result.success) {
+    const issue = result.error.issues[0];
+    return {
+      valid: false,
+      error: issue?.message ?? "Invalid consent data",
+    };
   }
-
-  if (typeof consent_data.consent_given !== "boolean") {
-    return { valid: false, error: "consent_given must be a boolean" };
-  }
-
-  if (!consent_data.consent_text || typeof consent_data.consent_text !== "string") {
-    return { valid: false, error: "consent_text is required and must be a string" };
-  }
-
-  if (!consent_data.consent_version || typeof consent_data.consent_version !== "string") {
-    return { valid: false, error: "consent_version is required and must be a string" };
-  }
-
   return { valid: true };
 }
 
 /**
- * Validates questionnaire response data structure
+ * Generic response data schema (minimal validation)
  */
-export function validateResponseData(response_data: any): ValidationResult {
-  if (!response_data || typeof response_data !== "object") {
+const ResponseDataSchema = z.object({}).passthrough();
+
+/**
+ * Validates questionnaire response data structure (minimal)
+ */
+export function validateResponseData(response_data: unknown): ValidationResult {
+  const result = ResponseDataSchema.safeParse(response_data);
+  if (!result.success) {
     return { valid: false, error: "Invalid response data" };
   }
-
   return { valid: true };
 }
 
 /**
  * Validates role switching request data
  */
-export function validateRoleData(role: any): ValidationResult {
-  if (!role || typeof role !== 'string') {
-    return { valid: false, error: "Role is required and must be a string" };
+export function validateRoleData(role: unknown): ValidationResult {
+  const result = z.string().min(1, "Role is required").safeParse(role);
+  if (!result.success) {
+    return {
+      valid: false,
+      error: result.error.issues[0]?.message ?? "Role is required",
+    };
   }
-
   return { valid: true };
 }
 
 /**
+ * Encrypted patient personal data schema
+ */
+const PatientPersonalDataSchema = z.object({
+  first_name_encrypted: z
+    .string()
+    .min(1, "first_name_encrypted is required and must be a non-empty string"),
+  last_name_encrypted: z
+    .string()
+    .min(1, "last_name_encrypted is required and must be a non-empty string"),
+  date_of_birth_encrypted: z
+    .string()
+    .min(
+      1,
+      "date_of_birth_encrypted is required and must be a non-empty string"
+    ),
+});
+
+/**
  * Validates encrypted patient personal data structure
  */
-export function validatePatientPersonalData(patient_data: any): ValidationResult {
-  if (!patient_data || typeof patient_data !== "object") {
-    return { valid: false, error: "Invalid patient personal data" };
+export function validatePatientPersonalData(
+  patient_data: unknown
+): ValidationResult {
+  const result = PatientPersonalDataSchema.safeParse(patient_data);
+  if (!result.success) {
+    const issue = result.error.issues[0];
+    return {
+      valid: false,
+      error: issue?.message ?? "Invalid patient personal data",
+    };
   }
-
-  // Validate all required encrypted fields
-  if (!patient_data.first_name_encrypted || typeof patient_data.first_name_encrypted !== "string" || patient_data.first_name_encrypted.trim().length === 0) {
-    return { valid: false, error: "first_name_encrypted is required and must be a non-empty string" };
-  }
-
-  if (!patient_data.last_name_encrypted || typeof patient_data.last_name_encrypted !== "string" || patient_data.last_name_encrypted.trim().length === 0) {
-    return { valid: false, error: "last_name_encrypted is required and must be a non-empty string" };
-  }
-
-  if (!patient_data.date_of_birth_encrypted || typeof patient_data.date_of_birth_encrypted !== "string" || patient_data.date_of_birth_encrypted.trim().length === 0) {
-    return { valid: false, error: "date_of_birth_encrypted is required and must be a non-empty string" };
-  }
-
   return { valid: true };
 }

@@ -281,3 +281,33 @@ export const QUESTIONNAIRE_TITLES: Record<string, string> = {
   [QUESTIONNAIRE_ID.JFLS20]: "JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)",
   [QUESTIONNAIRE_ID.OBC]: "OBC - Oral Behaviors Checklist",
 };
+
+// ============================================================================
+// Validation (Zod schemas for runtime validation)
+// ============================================================================
+export {
+  // Common schemas
+  CompositeNumberAnswerSchema,
+  YesNoSchema,
+  LikertSchema,
+  // SQ schemas
+  SQAnswersSchema,
+  SQPainFrequencySchema,
+  isSQScreeningNegative,
+  // Generic schemas
+  GenericAnswersSchema,
+  OptionalAnswersSchema,
+  // Response data schema
+  ResponseDataSchema,
+  // Registry and helpers
+  questionnaireSchemas,
+  getAnswersSchema,
+  validateQuestionnaireResponse,
+  checkSQCompletion,
+  // Types (only new ones not already in ./types)
+  type YesNo,
+  type SQPainFrequency,
+  type GenericAnswers,
+  type ResponseData,
+  type ValidationResult,
+} from "./validation";

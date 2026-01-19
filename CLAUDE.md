@@ -343,11 +343,44 @@ All test users use password: `TestPassword123!`
   - Modern React with ESM imports
   - Browser-native module system
 
-- **Shared Packages** (`packages/config`): ESM (`"type": "module"`)
+- **Shared Packages** (`packages/config`, `packages/questionnaires`): ESM (`"type": "module"`)
   - Uses ESM but consumable by both CommonJS and ESM packages
   - TypeScript compiles to ESM with proper extensions
 
 This configuration is intentional and allows each package to use the optimal module system for its runtime environment.
+
+### ESM/CJS Bridge (questionnaires package)
+
+The `@cmdetect/questionnaires` package requires special handling because it's consumed by both:
+- **ESM consumers** (frontends) → use `import` → get `dist/index.js`
+- **CommonJS consumers** (auth-server) → use `require` → get `dist/index.cjs`
+
+**How it works:**
+
+1. **Dual format build** via `tsup` (see `packages/questionnaires/tsup.config.ts`):
+   ```typescript
+   format: ["esm", "cjs"]  // Outputs both .js and .cjs
+   ```
+
+2. **Conditional exports** in `package.json`:
+   ```json
+   "exports": {
+     ".": {
+       "import": { "default": "./dist/index.js" },
+       "require": { "default": "./dist/index.cjs" }
+     }
+   }
+   ```
+
+3. **Bundled dependencies** for Docker (zod is bundled, not external):
+   ```typescript
+   noExternal: ["zod"]  // Bundle into output for portability
+   ```
+
+**If auth-server switches to ESM** (e.g., migrating to Hono/Elysia with `"type": "module"`):
+- Remove `"cjs"` from tsup format array
+- Simplify exports to ESM-only
+- The dual-format complexity goes away
 
 ### Database Connection Details
 
