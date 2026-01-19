@@ -110,14 +110,14 @@ export function DiagramInterviewStep({
 
   return (
     <div className="space-y-4">
-      {/* Head diagrams with region status lists */}
-      <div className="flex justify-center gap-8">
+      {/* Head diagrams with region status lists - full width layout */}
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-4">
         {/* Right side (patient's right, displayed on left) */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col gap-2">
           <span className="text-sm font-medium text-muted-foreground">
             {getSideLabel("right")}
           </span>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-3">
             <RegionStatusList
               regions={SVG_REGIONS}
               regionStatuses={rightStatuses}
@@ -131,24 +131,26 @@ export function DiagramInterviewStep({
               regionStatuses={rightStatuses}
               selectedRegion={selectedSide === "right" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "right")}
+              className="max-w-[220px]"
             />
           </div>
         </div>
 
-        <Separator orientation="vertical" className="h-auto self-stretch" />
+        <Separator orientation="vertical" className="h-auto" />
 
         {/* Left side (patient's left, displayed on right) */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-end gap-2">
           <span className="text-sm font-medium text-muted-foreground">
             {getSideLabel("left")}
           </span>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-3">
             <HeadDiagram
               side="left"
               regions={SVG_REGIONS}
               regionStatuses={leftStatuses}
               selectedRegion={selectedSide === "left" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "left")}
+              className="max-w-[220px]"
             />
             <RegionStatusList
               regions={SVG_REGIONS}

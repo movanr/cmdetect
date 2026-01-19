@@ -105,6 +105,8 @@ export default [
         HTMLElement: "readonly",
         HTMLInputElement: "readonly",
         Element: "readonly",
+        SVGElement: "readonly",
+        SVGSVGElement: "readonly",
         BufferSource: "readonly",
         Blob: "readonly",
         File: "readonly",
