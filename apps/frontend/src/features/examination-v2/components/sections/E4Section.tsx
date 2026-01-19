@@ -1,10 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, SkipForward } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle, SkipForward } from "lucide-react";
 import { useState } from "react";
-import { useExaminationForm, type ExaminationStepId } from "../../form/use-examination-form";
-import { InterviewStep, MeasurementStep, StepBar, type StepStatus } from "../ui";
+import type { FieldPath } from "react-hook-form";
+import {
+  useExaminationForm,
+  type ExaminationStepId,
+  type FormValues,
+} from "../../form/use-examination-form";
+import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
+import { DiagramInterviewStep, MeasurementStep, StepBar, type StepStatus } from "../ui";
 
 // Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
@@ -31,11 +37,40 @@ export function E4Section({ onComplete }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>({});
+  const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
 
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
+  const isInterview = String(currentStepId).endsWith("-interview");
+  const stepInstances = getInstancesForStep(currentStepId);
+
+  // Set all unanswered pain questions to "no"
+  const handleNoMorePainRegions = () => {
+    const painInstances = stepInstances.filter((i) => i.context.painType === "pain");
+    for (const inst of painInstances) {
+      const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
+      if (currentValue == null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        form.setValue(inst.path as FieldPath<FormValues>, "no" as any);
+      }
+    }
+    // Clear any validation errors since we've filled in the missing values
+    setIncompleteRegions([]);
+  };
 
   const handleNext = async () => {
+    // For interview steps, validate completeness first
+    if (isInterview) {
+      const result = validateInterviewCompletion(stepInstances, (path) =>
+        form.getValues(path as FieldPath<FormValues>)
+      );
+      if (!result.valid) {
+        setIncompleteRegions(result.incompleteRegions);
+        return;
+      }
+      setIncompleteRegions([]);
+    }
+
     const isValid = await validateStep(currentStepId);
     if (!isValid) return;
 
@@ -49,6 +84,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
   };
 
   const handleSkip = () => {
+    setIncompleteRegions([]);
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
 
     if (isLastStep) {
@@ -101,10 +137,11 @@ export function E4Section({ onComplete }: E4SectionProps) {
         {E4_STEP_ORDER.map((stepId, index) => {
           const config = E4_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);
-          const stepInstances = getInstancesForStep(stepId);
-          const isInterview = String(stepId).endsWith("-interview");
 
           if (status === "active") {
+            const stepIsInterview = String(stepId).endsWith("-interview");
+            const hasErrors = incompleteRegions.length > 0;
+
             return (
               <div
                 key={stepId}
@@ -117,10 +154,23 @@ export function E4Section({ onComplete }: E4SectionProps) {
                 </div>
 
                 {/* Content */}
-                {isInterview ? (
-                  <InterviewStep instances={stepInstances} />
+                {stepIsInterview ? (
+                  <DiagramInterviewStep
+                    instances={stepInstances}
+                    incompleteRegions={incompleteRegions}
+                  />
                 ) : (
                   <MeasurementStep instances={stepInstances} />
+                )}
+
+                {/* Validation error message */}
+                {hasErrors && (
+                  <div className="flex items-center gap-2 text-sm text-destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>
+                      {`Bitte vervollständigen Sie alle Schmerzregionen vor dem Fortfahren`}
+                    </span>
+                  </div>
                 )}
 
                 {/* Footer */}
@@ -135,10 +185,18 @@ export function E4Section({ onComplete }: E4SectionProps) {
                     <SkipForward className="h-4 w-4 mr-1" />
                     Überspringen
                   </Button>
-                  <Button type="button" onClick={handleNext}>
-                    {isLastStep ? "Abschließen" : "Weiter"}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {stepIsInterview && (
+                      <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Keine weiteren Schmerzregionen
+                      </Button>
+                    )}
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             );

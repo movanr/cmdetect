@@ -1,6 +1,85 @@
+import type { MovementRegion, Side } from "../model/regions";
 import type { QuestionInstance } from "../projections/to-instances";
 
 type ValueGetter = (path: string) => unknown;
+
+/**
+ * Represents a region with incomplete pain interview data.
+ */
+export interface IncompleteRegion {
+  region: MovementRegion;
+  side: Side;
+  missingPain: boolean;
+  missingFamiliarPain: boolean;
+  missingFamiliarHeadache: boolean;
+}
+
+export interface InterviewValidationResult {
+  valid: boolean;
+  incompleteRegions: IncompleteRegion[];
+}
+
+/**
+ * Validate that all pain interview questions are complete.
+ *
+ * Rules:
+ * - All pain questions must be answered (not undefined)
+ * - If pain=yes, familiarPain must be answered
+ * - If pain=yes AND region is temporalis, familiarHeadache must also be answered
+ */
+export function validateInterviewCompletion(
+  instances: QuestionInstance[],
+  getValue: ValueGetter
+): InterviewValidationResult {
+  const incompleteRegions: IncompleteRegion[] = [];
+
+  // Group instances by region and side
+  const regionGroups = new Map<string, QuestionInstance[]>();
+  for (const inst of instances) {
+    const { region, side } = inst.context;
+    if (!region || !side) continue;
+    const key = `${region}-${side}`;
+    const existing = regionGroups.get(key);
+    if (existing) {
+      existing.push(inst);
+    } else {
+      regionGroups.set(key, [inst]);
+    }
+  }
+
+  // Check each region/side combination
+  for (const [key, questions] of regionGroups) {
+    const [region, side] = key.split("-") as [MovementRegion, Side];
+
+    const painQ = questions.find((q) => q.context.painType === "pain");
+    const familiarPainQ = questions.find((q) => q.context.painType === "familiarPain");
+    const familiarHeadacheQ = questions.find((q) => q.context.painType === "familiarHeadache");
+
+    const painValue = painQ ? getValue(painQ.path) : null;
+    const familiarPainValue = familiarPainQ ? getValue(familiarPainQ.path) : null;
+    const familiarHeadacheValue = familiarHeadacheQ ? getValue(familiarHeadacheQ.path) : null;
+
+    const missingPain = painValue == null;
+    const missingFamiliarPain = painValue === "yes" && familiarPainValue == null;
+    const missingFamiliarHeadache =
+      painValue === "yes" && familiarHeadacheQ != null && familiarHeadacheValue == null;
+
+    if (missingPain || missingFamiliarPain || missingFamiliarHeadache) {
+      incompleteRegions.push({
+        region,
+        side,
+        missingPain,
+        missingFamiliarPain,
+        missingFamiliarHeadache,
+      });
+    }
+  }
+
+  return {
+    valid: incompleteRegions.length === 0,
+    incompleteRegions,
+  };
+}
 
 export interface ValidationResult {
   valid: boolean;
