@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, ArrowRight, CheckCircle, SkipForward } from "lucide-react";
+import { ArrowRight, CheckCircle, SkipForward } from "lucide-react";
 import { useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import {
@@ -140,7 +140,6 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
           if (status === "active") {
             const stepIsInterview = String(stepId).endsWith("-interview");
-            const hasErrors = incompleteRegions.length > 0;
 
             return (
               <div
@@ -161,16 +160,6 @@ export function E4Section({ onComplete }: E4SectionProps) {
                   />
                 ) : (
                   <MeasurementStep instances={stepInstances} />
-                )}
-
-                {/* Validation error message */}
-                {hasErrors && (
-                  <div className="flex items-center gap-2 text-sm text-destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>
-                      {`Bitte vervollständigen Sie alle Schmerzregionen vor dem Fortfahren`}
-                    </span>
-                  </div>
                 )}
 
                 {/* Footer */}

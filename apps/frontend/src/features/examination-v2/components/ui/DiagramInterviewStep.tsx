@@ -74,16 +74,18 @@ export function DiagramInterviewStep({
 
   // Watch all instance paths to trigger re-renders on value changes
   const watchPaths = instances.map((i) => i.path);
-  watch(watchPaths);
+  const watchedValues = watch(watchPaths);
 
   // Compute region statuses for both sides
+  // Include watchedValues in deps to recompute when form values change
   const leftStatuses = useMemo(() => {
     const statuses: Partial<Record<MovementRegion, RegionStatus>> = {};
     for (const region of SVG_REGIONS) {
       statuses[region] = computeRegionStatus(region, "left", instances, getValues);
     }
     return statuses;
-  }, [instances, getValues]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [instances, getValues, watchedValues]);
 
   const rightStatuses = useMemo(() => {
     const statuses: Partial<Record<MovementRegion, RegionStatus>> = {};
@@ -91,16 +93,30 @@ export function DiagramInterviewStep({
       statuses[region] = computeRegionStatus(region, "right", instances, getValues);
     }
     return statuses;
-  }, [instances, getValues]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [instances, getValues, watchedValues]);
 
-  // Filter incomplete regions by side
+  // Filter incomplete regions, excluding any that are now complete
+  // This makes validation errors disappear reactively as users fill in values
   const leftIncomplete = useMemo(
-    () => incompleteRegions.filter((r) => r.side === "left"),
-    [incompleteRegions]
+    () =>
+      incompleteRegions.filter(
+        (r) => r.side === "left" && !leftStatuses[r.region]?.isComplete
+      ),
+    [incompleteRegions, leftStatuses]
   );
   const rightIncomplete = useMemo(
-    () => incompleteRegions.filter((r) => r.side === "right"),
-    [incompleteRegions]
+    () =>
+      incompleteRegions.filter(
+        (r) => r.side === "right" && !rightStatuses[r.region]?.isComplete
+      ),
+    [incompleteRegions, rightStatuses]
+  );
+
+  // Combined filtered list for the selected region panel
+  const filteredIncomplete = useMemo(
+    () => [...leftIncomplete, ...rightIncomplete],
+    [leftIncomplete, rightIncomplete]
   );
 
   const handleRegionClick = useCallback((region: MovementRegion, side: Side) => {
@@ -167,6 +183,7 @@ export function DiagramInterviewStep({
           region={selectedRegion}
           side={selectedSide}
           questions={instances}
+          incompleteRegions={filteredIncomplete}
         />
       )}
     </div>
