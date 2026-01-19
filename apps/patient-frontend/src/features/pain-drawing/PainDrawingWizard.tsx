@@ -9,7 +9,6 @@ import { PainDrawingCanvas } from './PainDrawingCanvas';
 import { DrawingToolbar } from './DrawingToolbar';
 import { ReviewStep } from './ReviewStep';
 import { usePainDrawing } from './hooks/usePainDrawing';
-import { useCanvasExport } from './hooks/useCanvasExport';
 import { useDrawingHistory } from './hooks/useDrawingHistory';
 
 export type TransitionPhase =
@@ -42,7 +41,6 @@ export function PainDrawingWizard({
   const [activeTool, setActiveTool] = useState<DrawingTool>('shade');
   const [showHelp, setShowHelp] = useState(true); // Show help on first load
   const stageRef = useRef<Konva.Stage>(null);
-  const { exportToDataUrl } = useCanvasExport();
 
   // Transition phase tracking
   const isTransitioning = transitionPhase !== "active";
@@ -71,7 +69,6 @@ export function PainDrawingWizard({
   const {
     drawings,
     updateElements,
-    updatePngExport,
     getExportData,
   } = usePainDrawing();
 
@@ -134,23 +131,12 @@ export function PainDrawingWizard({
     }
   }, [historyElements]);
 
-  const exportCurrentCanvas = useCallback(() => {
-    if (step.type === 'drawing' && step.imageId && stageRef.current) {
-      const dataUrl = exportToDataUrl(stageRef.current);
-      if (dataUrl) {
-        updatePngExport(step.imageId, dataUrl);
-      }
-    }
-  }, [exportToDataUrl, step, updatePngExport]);
-
   const goToReview = useCallback(() => {
     setCurrentStep(reviewStepIndex);
     setIsEditMode(false);
   }, [reviewStepIndex]);
 
   const handleNext = useCallback(() => {
-    exportCurrentCanvas();
-
     if (isReviewStep) {
       const data = getExportData();
       onComplete(data);
@@ -159,17 +145,15 @@ export function PainDrawingWizard({
     } else {
       setCurrentStep((prev) => prev + 1);
     }
-  }, [exportCurrentCanvas, getExportData, goToReview, isEditMode, isReviewStep, onComplete]);
+  }, [getExportData, goToReview, isEditMode, isReviewStep, onComplete]);
 
   const handlePrevious = useCallback(() => {
-    exportCurrentCanvas();
-
     if (isEditMode) {
       goToReview();
     } else if (!isFirstStep) {
       setCurrentStep((prev) => prev - 1);
     }
-  }, [exportCurrentCanvas, goToReview, isEditMode, isFirstStep]);
+  }, [goToReview, isEditMode, isFirstStep]);
 
   const handleEditStep = useCallback((stepIndex: number) => {
     setIsEditMode(true);

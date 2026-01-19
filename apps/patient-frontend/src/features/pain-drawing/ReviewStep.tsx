@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IMAGE_CONFIGS, WIZARD_STEPS } from "./constants";
 import type { ImageDrawingData, ImageId } from "./types";
+import { DrawingPreview } from "./DrawingPreview";
 
 interface ReviewStepProps {
   drawings: Record<ImageId, ImageDrawingData>;
@@ -36,21 +37,11 @@ export function ReviewStep({ drawings, onEditStep }: ReviewStepProps) {
               </CardHeader>
               <CardContent className="p-3 pt-0">
                 <div className="relative aspect-square bg-muted rounded-md overflow-hidden">
-                  {drawing?.pngExport ? (
-                    <img
-                      src={drawing.pngExport}
-                      alt={config.label}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <img
-                        src={config.src}
-                        alt={config.label}
-                        className="w-full h-full object-contain opacity-50"
-                      />
-                    </div>
-                  )}
+                  <DrawingPreview
+                    imageConfig={config}
+                    elements={drawing?.elements ?? []}
+                    size={140}
+                  />
 
                   {/* Overlay indicator */}
                   <div className="absolute bottom-1 right-1">

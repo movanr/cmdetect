@@ -856,23 +856,7 @@ function PainDrawingWrapper({
   onComplete: (data: Record<string, unknown>) => void;
 }) {
   const handleComplete = (data: PainDrawingData) => {
-    // Strip pngExport from each drawing before submission (only store vector data)
-    const strippedDrawings = Object.fromEntries(
-      Object.entries(data.drawings).map(([imageId, drawing]) => [
-        imageId,
-        {
-          imageId: drawing.imageId,
-          elements: drawing.elements,
-          // pngExport intentionally omitted
-        },
-      ])
-    );
-
-    onComplete({
-      drawings: strippedDrawings,
-      completedAt: data.completedAt,
-      version: data.version,
-    });
+    onComplete(data as unknown as Record<string, unknown>);
   };
 
   return (

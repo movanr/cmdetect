@@ -31,7 +31,6 @@ export type DrawingElement = ShadingStroke | PointMarker | ArrowMarker;
 export interface ImageDrawingData {
   imageId: ImageId;
   elements: DrawingElement[];
-  pngExport?: string; // base64
 }
 
 export interface PainDrawingData {

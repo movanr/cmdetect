@@ -27,7 +27,6 @@ function createEmptyDrawings(): Record<ImageId, ImageDrawingData> {
 export interface UsePainDrawingReturn {
   drawings: Record<ImageId, ImageDrawingData>;
   updateElements: (imageId: ImageId, elements: DrawingElement[]) => void;
-  updatePngExport: (imageId: ImageId, pngExport: string) => void;
   getExportData: () => PainDrawingData;
   reset: () => void;
   hasAnyDrawing: boolean;
@@ -45,19 +44,6 @@ export function usePainDrawing(): UsePainDrawingReturn {
         [imageId]: {
           ...prev[imageId],
           elements,
-        },
-      }));
-    },
-    []
-  );
-
-  const updatePngExport = useCallback(
-    (imageId: ImageId, pngExport: string) => {
-      setDrawings((prev) => ({
-        ...prev,
-        [imageId]: {
-          ...prev[imageId],
-          pngExport,
         },
       }));
     },
@@ -83,7 +69,6 @@ export function usePainDrawing(): UsePainDrawingReturn {
   return {
     drawings,
     updateElements,
-    updatePngExport,
     getExportData,
     reset,
     hasAnyDrawing,
