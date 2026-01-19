@@ -19,10 +19,7 @@ export function ScaleQuestion({ question, onNavigateNext }: ScaleQuestionProps) 
 
   const handleSelect = (value: string) => {
     setValue(question.id, value);
-    // Brief delay to show selection feedback before navigating
-    setTimeout(() => {
-      onNavigateNext();
-    }, 200);
+    onNavigateNext();
   };
 
   // Generate 0-10 options

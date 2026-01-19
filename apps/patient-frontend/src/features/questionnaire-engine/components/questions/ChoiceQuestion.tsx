@@ -27,10 +27,7 @@ export function ChoiceQuestion({
 
   const handleSelect = (value: string) => {
     setValue(question.id, value);
-    // Brief delay to show selection feedback before navigating
-    setTimeout(() => {
-      onNavigateNext();
-    }, 350);
+    onNavigateNext();
   };
 
   return (
