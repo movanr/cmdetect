@@ -4,9 +4,7 @@
  * Auto-navigates on selection with brief animation feedback
  */
 
-import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ScoredOption } from "@cmdetect/questionnaires";
 import type { GenericQuestion } from "../../types";
@@ -24,17 +22,11 @@ export function ChoiceQuestion({
   instruction,
   onNavigateNext,
 }: ChoiceQuestionProps) {
-  const { setValue } = useFormContext<Record<string, string>>();
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
-
-  // Reset selection state when question changes
-  useEffect(() => {
-    setSelectedValue(null);
-  }, [question.id]);
+  const { setValue, watch } = useFormContext<Record<string, string | undefined>>();
+  const selectedValue = watch(question.id);
 
   const handleSelect = (value: string) => {
     setValue(question.id, value);
-    setSelectedValue(value);
     // Brief delay to show selection feedback before navigating
     setTimeout(() => {
       onNavigateNext();
@@ -58,21 +50,19 @@ export function ChoiceQuestion({
         {options.map((option) => {
           const isSelected = selectedValue === option.value;
           return (
-            <motion.button
+            <button
               key={option.value}
               type="button"
-              animate={isSelected ? { scale: [1, 1.02, 1] } : {}}
-              transition={{ duration: 0.25 }}
               className={cn(
-                "w-full h-12 text-base font-medium text-left px-4 rounded-md border transition-colors",
+                "w-full h-12 text-base font-medium text-left px-4 rounded-md border transition-all duration-150",
                 isSelected
-                  ? "bg-primary text-primary-foreground border-primary"
+                  ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary ring-offset-2"
                   : "bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground"
               )}
               onClick={() => handleSelect(option.value)}
             >
               {option.label}
-            </motion.button>
+            </button>
           );
         })}
       </div>

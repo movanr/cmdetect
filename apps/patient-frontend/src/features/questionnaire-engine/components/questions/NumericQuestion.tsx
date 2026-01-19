@@ -4,11 +4,11 @@
  * Requires explicit "Weiter" button click
  */
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
 import type { GenericQuestion } from "../../types";
 
 type NumericQuestionProps = {
@@ -16,10 +16,7 @@ type NumericQuestionProps = {
   onNavigateNext: () => void;
 };
 
-export function NumericQuestion({
-  question,
-  onNavigateNext,
-}: NumericQuestionProps) {
+export function NumericQuestion({ question, onNavigateNext }: NumericQuestionProps) {
   const { control, watch } = useFormContext<Record<string, unknown>>();
   const [error, setError] = useState<string | null>(null);
   const currentValue = watch(question.id);
@@ -35,9 +32,7 @@ export function NumericQuestion({
     }
 
     if (isNaN(value) || value < range.min || value > range.max) {
-      setError(
-        `Bitte geben Sie einen Wert zwischen ${range.min} und ${range.max} ein`
-      );
+      setError(`Bitte geben Sie einen Wert zwischen ${range.min} und ${range.max} ein`);
       return;
     }
 
@@ -51,9 +46,7 @@ export function NumericQuestion({
       <p className="text-lg font-medium leading-relaxed">{question.text}</p>
 
       {/* Note if present */}
-      {question.note && (
-        <p className="text-sm text-muted-foreground italic">{question.note}</p>
-      )}
+      {question.note && <p className="text-sm text-muted-foreground italic">{question.note}</p>}
 
       {/* Numeric input */}
       <div className="space-y-2">
@@ -69,8 +62,7 @@ export function NumericQuestion({
                 max={range.max}
                 value={(field.value as string | number | undefined) ?? ""}
                 onChange={(e) => {
-                  const val =
-                    e.target.value === "" ? undefined : Number(e.target.value);
+                  const val = e.target.value === "" ? undefined : Number(e.target.value);
                   field.onChange(val);
                   setError(null);
                 }}
@@ -78,9 +70,7 @@ export function NumericQuestion({
                 className="text-2xl text-center w-24 h-14"
               />
               {question.unit && (
-                <span className="text-lg text-muted-foreground">
-                  {question.unit}
-                </span>
+                <span className="text-lg text-muted-foreground">{question.unit}</span>
               )}
             </div>
           )}
