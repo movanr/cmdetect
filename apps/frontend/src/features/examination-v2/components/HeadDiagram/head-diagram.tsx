@@ -12,13 +12,13 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getLabel } from "../../labels";
 import type { MovementRegion, Side } from "../../model/regions";
+import HeadSvg from "./head-diagram.svg?react";
 import {
   EMPTY_REGION_STATUS,
   REGION_STATE_COLORS,
   getRegionVisualState,
   type RegionStatus,
 } from "./types";
-import HeadSvg from "./head-diagram.svg?react";
 
 // Region IDs in the SVG that match MovementRegion type
 const REGION_IDS: MovementRegion[] = ["temporalis", "masseter", "tmj", "nonMast"];
@@ -63,8 +63,7 @@ export function HeadDiagram({
 
   // Helper to get status for a region
   const getStatus = useCallback(
-    (region: MovementRegion): RegionStatus =>
-      regionStatuses[region] ?? EMPTY_REGION_STATUS,
+    (region: MovementRegion): RegionStatus => regionStatuses[region] ?? EMPTY_REGION_STATUS,
     [regionStatuses]
   );
 
@@ -100,9 +99,7 @@ export function HeadDiagram({
       }
 
       // Determine stroke color
-      const stroke = isSelected
-        ? SELECTED_COLORS.stroke
-        : REGION_STATE_COLORS[visualState].stroke;
+      const stroke = isSelected ? SELECTED_COLORS.stroke : REGION_STATE_COLORS[visualState].stroke;
 
       // Apply styles
       element.style.fill = fill;
@@ -145,14 +142,10 @@ export function HeadDiagram({
 
   // Mirror transform for left side (patient's left displayed on right of screen)
   // The SVG is drawn with nose pointing right, so left side needs mirroring
-  const containerStyle: React.CSSProperties =
-    side === "left" ? { transform: "scaleX(-1)" } : {};
+  const containerStyle: React.CSSProperties = side === "left" ? { transform: "scaleX(-1)" } : {};
 
   return (
-    <div
-      className={cn("w-[180px] h-auto", className)}
-      style={containerStyle}
-    >
+    <div className={cn("w-[280px] h-auto", className)} style={containerStyle}>
       <HeadSvg
         ref={svgRef}
         className="w-full h-auto"
