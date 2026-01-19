@@ -38,8 +38,11 @@ export function PainDrawingScoreCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
 
-  // Handle no data case
-  if (!data) {
+  // Check if data is empty (null, undefined, empty object, or missing drawings)
+  const hasData = data && data.drawings && Object.keys(data.drawings).length > 0;
+
+  // Handle no data case (including empty submissions from SQ screening negative)
+  if (!hasData) {
     return (
       <Card className="bg-muted/30">
         <CardHeader className="p-4">

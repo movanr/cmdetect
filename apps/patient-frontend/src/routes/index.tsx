@@ -88,6 +88,9 @@ function PatientFlowPage() {
   const [transitionPhase, setTransitionPhase] = useState<TransitionPhase>("active");
   const [nextQuestionnaireId, setNextQuestionnaireId] = useState<string | null>(null);
 
+  // Completion type tracking (full vs early when SQ screening is negative)
+  const [completionType, setCompletionType] = useState<"full" | "early">("full");
+
   // Ref to prevent double validation (React Strict Mode)
   const hasValidatedToken = useRef(false);
 
@@ -274,6 +277,28 @@ function PatientFlowPage() {
     await personalDataMutation.mutateAsync(data);
   };
 
+  // Submit empty questionnaires for early completion (SQ screening negative)
+  const submitEmptyQuestionnaires = useCallback(
+    async () => {
+      // Get all questionnaires after SQ
+      const sqIndex = QUESTIONNAIRE_FLOW.findIndex(
+        (item) => item.questionnaire.id === QUESTIONNAIRE_ID.SQ
+      );
+      const remainingQuestionnaires = QUESTIONNAIRE_FLOW.slice(sqIndex + 1);
+
+      // Submit empty responses for each remaining questionnaire
+      for (const item of remainingQuestionnaires) {
+        const { id, version } = item.questionnaire;
+        await questionnaireSubmitMutation.mutateAsync({
+          questionnaire_id: id,
+          questionnaire_version: version ?? "1.0",
+          answers: {}, // Empty answers
+        });
+      }
+    },
+    [questionnaireSubmitMutation]
+  );
+
   // Generic questionnaire completion handler - memoized to avoid unnecessary re-renders
   const handleQuestionnaireComplete = useCallback(
     async (answers: Record<string, unknown>) => {
@@ -301,11 +326,42 @@ function PatientFlowPage() {
         if (result.submitQuestionnaireResponse.success) {
           setPendingSubmission(null);
 
-          // Determine next questionnaire (or completion)
+          // Check for early completion: SQ with all "no" screening answers
+          // Screening questions: SQ1 (pain), SQ5 (headache), SQ8 (joint noises), SQ9 (closed locking), SQ13 (open locking)
+          const sqAnswers = answers as SQAnswers;
+          const isScreeningNegative =
+            currentQuestionnaireId === QUESTIONNAIRE_ID.SQ &&
+            sqAnswers.SQ1 === "no" &&
+            sqAnswers.SQ5 === "no" &&
+            sqAnswers.SQ8 === "no" &&
+            sqAnswers.SQ9 === "no" &&
+            sqAnswers.SQ13 === "no";
+
+          if (isScreeningNegative) {
+            // Submit empty responses for remaining questionnaires
+            try {
+              await submitEmptyQuestionnaires();
+              setCompletionType("early");
+              setNextQuestionnaireId(null); // Will trigger completion
+              setTransitionPhase("completing");
+              return;
+            } catch (err) {
+              // If empty submissions fail, continue with normal flow
+              setSubmissionError(
+                err instanceof Error
+                  ? err.message
+                  : "Fragebogen konnte nicht übermittelt werden"
+              );
+              return;
+            }
+          }
+
+          // Normal flow: determine next questionnaire (or completion)
           const nextItem = getNextFlowItem(currentQuestionnaireId);
           if (nextItem) {
             setNextQuestionnaireId(nextItem.questionnaire.id);
           } else {
+            setCompletionType("full");
             setNextQuestionnaireId(null); // Will trigger completion
           }
 
@@ -325,7 +381,7 @@ function PatientFlowPage() {
         );
       }
     },
-    [currentQuestionnaireId, questionnaireSubmitMutation]
+    [currentQuestionnaireId, questionnaireSubmitMutation, submitEmptyQuestionnaires]
   );
 
   // Retry pending submission
@@ -728,8 +784,9 @@ function PatientFlowPage() {
                     transition={{ delay: 0.4 }}
                     className="text-muted-foreground"
                   >
-                    Ihre Angaben wurden erfolgreich an{" "}
-                    {organizationName || "Ihre Praxis"} übermittelt.
+                    {completionType === "early"
+                      ? "Basierend auf Ihren Antworten sind keine weiteren Fragen erforderlich."
+                      : `Ihre Angaben wurden erfolgreich an ${organizationName || "Ihre Praxis"} übermittelt.`}
                   </motion.p>
                 </div>
 
@@ -746,7 +803,11 @@ function PatientFlowPage() {
                   </div>
                   <div className="flex items-center justify-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-600" />
-                    <span>{QUESTIONNAIRE_FLOW.length} Fragebögen abgeschlossen</span>
+                    <span>
+                      {completionType === "early"
+                        ? "Screening-Fragebogen abgeschlossen"
+                        : `${QUESTIONNAIRE_FLOW.length} Fragebögen abgeschlossen`}
+                    </span>
                   </div>
                 </motion.div>
 

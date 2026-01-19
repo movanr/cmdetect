@@ -5,8 +5,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { QUESTIONNAIRE_ID, isQuestionnaireEnabled } from "@cmdetect/questionnaires";
-import { ClipboardList } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  QUESTIONNAIRE_ID,
+  isQuestionnaireEnabled,
+  type SQAnswers,
+} from "@cmdetect/questionnaires";
+import { ClipboardList, CheckCircle2 } from "lucide-react";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
 import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
@@ -33,6 +38,17 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
   // Extract pain drawing data from response
   const painDrawingData = painDrawingResponse?.answers as PainDrawingData | undefined;
 
+  // Check if SQ screening is negative (all screening questions answered "no")
+  // Screening questions: SQ1 (pain), SQ5 (headache), SQ8 (joint noises), SQ9 (closed locking), SQ13 (open locking)
+  const sqAnswers = sqResponse?.answers as SQAnswers | undefined;
+  const isScreeningNegative = sqAnswers
+    ? sqAnswers.SQ1 === "no" &&
+      sqAnswers.SQ5 === "no" &&
+      sqAnswers.SQ8 === "no" &&
+      sqAnswers.SQ9 === "no" &&
+      sqAnswers.SQ13 === "no"
+    : false;
+
   // Check if there are any responses at all
   if (responses.length === 0) {
     return (
@@ -54,13 +70,29 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
         <CardTitle>Fragebögen-Übersicht</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Negative Screening Banner */}
+        {isScreeningNegative && (
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <AlertTitle className="text-green-800">Screening negativ</AlertTitle>
+            <AlertDescription className="text-green-700">
+              Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine
+              Hinweise auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* SQ Section - Symptom Questionnaire */}
         {isQuestionnaireEnabled(QUESTIONNAIRE_ID.SQ) && (
           <section>
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
               Achse 1 - Symptomfragebogen
             </h3>
-            <SQStatusCard response={sqResponse} onStartReview={onStartReview} />
+            <SQStatusCard
+              response={sqResponse}
+              onStartReview={onStartReview}
+              isScreeningNegative={isScreeningNegative}
+            />
           </section>
         )}
 

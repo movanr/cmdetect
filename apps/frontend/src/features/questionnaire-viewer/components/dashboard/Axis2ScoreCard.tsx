@@ -259,8 +259,11 @@ export function Axis2ScoreCard({
 }: Axis2ScoreCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Placeholder card for future questionnaires (OBC, JFLS)
-  if (isPlaceholder || !answers) {
+  // Check if answers is empty (null, undefined, or empty object)
+  const hasData = answers && Object.keys(answers).length > 0;
+
+  // Placeholder card for future questionnaires or empty submissions (SQ screening negative)
+  if (isPlaceholder || !hasData) {
     return (
       <Card className="bg-muted/30">
         <CardHeader className="p-4">
