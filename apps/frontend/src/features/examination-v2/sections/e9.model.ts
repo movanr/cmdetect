@@ -1,15 +1,15 @@
-import { SIDES } from "../model/contexts";
 import {
-  E9_PALPATION_SITES,
-  getE9PalpationQuestions,
-  type E9PalpationSite,
-} from "../model/e9-contexts";
+  SIDES,
+  PALPATION_SITES,
+  getPalpationPainQuestions,
+  type PalpationSite,
+} from "../model/regions";
 import { M, type GroupNode, type ModelNode } from "../model/nodes";
 import { Q } from "../model/primitives";
 
 // Build pain questions for one palpation site
-const palpationQuestionsForSite = (site: E9PalpationSite) => {
-  const questions = getE9PalpationQuestions(site);
+const palpationQuestionsForSite = (site: PalpationSite) => {
+  const questions = getPalpationPainQuestions(site);
   return M.group(
     Object.fromEntries(
       questions.map((q) => {
@@ -25,7 +25,7 @@ const palpationQuestionsForSite = (site: E9PalpationSite) => {
 // Build all sites for one side
 const sitesForSide = () =>
   M.group(
-    Object.fromEntries(E9_PALPATION_SITES.map((site) => [site, palpationQuestionsForSite(site)]))
+    Object.fromEntries(PALPATION_SITES.map((site) => [site, palpationQuestionsForSite(site)]))
   ) as GroupNode & { __children: Record<string, ModelNode> };
 
 // Build bilateral (left + right)

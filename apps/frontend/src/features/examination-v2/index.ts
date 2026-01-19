@@ -1,15 +1,24 @@
-// Model primitives and nodes
-export { E4_REGIONS, getPainQuestions, SIDES, type E4Region, type Side } from "./model/contexts";
+// Anatomical regions and sites (unified source of truth)
 export {
-  E9_MUSCLE_GROUPS,
-  E9_PAIN_QUESTIONS,
-  E9_PALPATION_SITES as E9_PALPATION_SITES,
-  E9_SITE_CONFIG,
-  getE9PalpationQuestions,
-  type E9MuscleGroup,
-  type E9PainQuestion,
-  type E9PalpationSite as E9PalpationSite,
-} from "./model/e9-contexts";
+  // Sides
+  SIDES,
+  type Side,
+  // Movement regions (E4, E5)
+  MOVEMENT_REGIONS,
+  SVG_REGIONS,
+  getMovementPainQuestions,
+  type MovementRegion,
+  // Palpation sites (E9)
+  PALPATION_SITES,
+  MUSCLE_GROUPS,
+  SITE_CONFIG,
+  PALPATION_PAIN_QUESTIONS,
+  getPalpationPainQuestions,
+  type PalpationSite,
+  type MuscleGroup,
+  type PalpationPainQuestion,
+  type SiteConfig,
+} from "./model/regions";
 export {
   M,
   type GroupNode,

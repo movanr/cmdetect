@@ -1,6 +1,11 @@
 import type { EnableWhen } from "../model/conditions";
-import { E4_REGIONS } from "../model/contexts";
-import { E9_PALPATION_SITES, E9_SITE_CONFIG, type E9PalpationSite } from "../model/e9-contexts";
+import {
+  MOVEMENT_REGIONS,
+  PALPATION_SITES,
+  SITE_CONFIG,
+  type MovementRegion,
+  type PalpationSite,
+} from "../model/regions";
 import type { ModelNode } from "../model/nodes";
 
 export type QuestionInstance = {
@@ -56,14 +61,14 @@ function enrichContext(ctx: Record<string, string>, key: string): Record<string,
   // Shared: sides
   if (key === "left" || key === "right") return { ...ctx, side: key };
 
-  // E4: regions
-  if (E4_REGIONS.includes(key as (typeof E4_REGIONS)[number])) {
+  // E4/E5: movement regions
+  if (MOVEMENT_REGIONS.includes(key as MovementRegion)) {
     return { ...ctx, region: key };
   }
 
   // E9: palpation sites
-  if (E9_PALPATION_SITES.includes(key as E9PalpationSite)) {
-    const config = E9_SITE_CONFIG[key as E9PalpationSite];
+  if (PALPATION_SITES.includes(key as PalpationSite)) {
+    const config = SITE_CONFIG[key as PalpationSite];
     return { ...ctx, site: key, muscleGroup: config.muscleGroup };
   }
 

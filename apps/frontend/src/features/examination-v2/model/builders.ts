@@ -3,7 +3,12 @@
  */
 import { M, type GroupNode, type ModelNode } from "./nodes";
 import { Q } from "./primitives";
-import { SIDES, E4_REGIONS, getPainQuestions, type E4Region } from "./contexts";
+import {
+  SIDES,
+  MOVEMENT_REGIONS,
+  getMovementPainQuestions,
+  type MovementRegion,
+} from "./regions";
 
 type GroupWithChildren = GroupNode & { __children: Record<string, ModelNode> };
 
@@ -13,8 +18,8 @@ type GroupWithChildren = GroupNode & { __children: Record<string, ModelNode> };
  * - familiarPain (enableWhen: pain === 'yes')
  * - familiarHeadache (temporalis only, enableWhen: pain === 'yes')
  */
-const painQuestionsForRegion = (region: E4Region): GroupWithChildren => {
-  const questions = getPainQuestions(region);
+const painQuestionsForRegion = (region: MovementRegion): GroupWithChildren => {
+  const questions = getMovementPainQuestions(region);
   return M.group(
     Object.fromEntries(
       questions.map((q) => {
@@ -35,7 +40,7 @@ const painQuestionsForRegion = (region: E4Region): GroupWithChildren => {
  */
 const regionsForSide = (): GroupWithChildren =>
   M.group(
-    Object.fromEntries(E4_REGIONS.map((r) => [r, painQuestionsForRegion(r)]))
+    Object.fromEntries(MOVEMENT_REGIONS.map((r) => [r, painQuestionsForRegion(r)]))
   ) as GroupWithChildren;
 
 /**
