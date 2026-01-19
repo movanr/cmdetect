@@ -3,6 +3,7 @@
  */
 
 import { Request, Response } from "express";
+import { ENABLED_QUESTIONNAIRES } from "@cmdetect/questionnaires";
 import { DatabaseService } from "./database";
 import { sendActionError, sendActionSuccess } from "./errors";
 import {
@@ -54,19 +55,6 @@ export class ActionHandlers {
   }
 
   /**
-   * Required questionnaires that must be submitted before marking flow as complete
-   * Note: Keep in sync with @cmdetect/questionnaires ENABLED_QUESTIONNAIRES
-   */
-  private static readonly REQUIRED_QUESTIONNAIRES = [
-    "dc-tmd-sq",
-    "phq-4",
-    "gcps-1m",
-    "jfls-8",
-    // "jfls-20",  // Disabled
-    "obc",
-  ];
-
-  /**
    * Handles questionnaire response submission
    */
   async submitQuestionnaireResponse(req: Request, res: Response): Promise<void> {
@@ -115,10 +103,10 @@ export class ActionHandlers {
       responsePayload
     );
 
-    // Check if all required questionnaires are now submitted
-    const submittedQuestionnaires = await this.db.getSubmittedQuestionnaireIds(patientRecord.id);
-    const allComplete = ActionHandlers.REQUIRED_QUESTIONNAIRES.every((id) =>
-      submittedQuestionnaires.includes(id)
+    // Check if all enabled questionnaires are now submitted
+    const submittedIds = await this.db.getSubmittedQuestionnaireIds(patientRecord.id);
+    const allComplete = ENABLED_QUESTIONNAIRES.every((id) =>
+      submittedIds.includes(id)
     );
 
     if (allComplete) {

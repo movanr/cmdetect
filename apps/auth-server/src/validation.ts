@@ -6,22 +6,15 @@ import { z } from "zod";
 import {
   getAnswersSchema,
   checkSQCompletion,
+  QUESTIONNAIRE_IDS,
 } from "@cmdetect/questionnaires";
 
 /**
- * Known questionnaire IDs that the system accepts
+ * Schema for questionnaire IDs - uses single source of truth from package
  */
-const QUESTIONNAIRE_IDS = [
-  "dc-tmd-sq",
-  "dc-tmd-pain-drawing",
-  "phq-4",
-  "gcps-1m",
-  "jfls-8",
-  "jfls-20",
-  "obc",
-] as const;
-
-const QuestionnaireIdSchema = z.enum(QUESTIONNAIRE_IDS);
+const QuestionnaireIdSchema = z.enum(
+  QUESTIONNAIRE_IDS as [string, ...string[]]
+);
 
 export interface ValidationResult {
   valid: boolean;
