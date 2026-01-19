@@ -192,7 +192,10 @@ export function Header() {
             {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2 min-h-[44px] min-w-[44px] px-2 md:px-3"
+                >
                   <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     {userName.charAt(0).toUpperCase()}
                   </div>
@@ -202,7 +205,7 @@ export function Header() {
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{userName}</p>
@@ -216,14 +219,20 @@ export function Header() {
 
                 {/* Team - only show for org_admin */}
                 {activeRole === roles.ORG_ADMIN && (
-                  <DropdownMenuItem onClick={() => navigate({ to: "/team" })}>
+                  <DropdownMenuItem
+                    onClick={() => navigate({ to: "/team" })}
+                    className="min-h-[44px] py-3"
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     <span>{t.nav.team}</span>
                   </DropdownMenuItem>
                 )}
 
                 {/* Settings */}
-                <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
+                <DropdownMenuItem
+                  onClick={() => navigate({ to: "/settings" })}
+                  className="min-h-[44px] py-3"
+                >
                   <Settings className="h-4 w-4 mr-2" />
                   <span>{t.nav.settings}</span>
                 </DropdownMenuItem>
@@ -240,6 +249,7 @@ export function Header() {
                         key={role}
                         onClick={() => handleRoleSwitch(role)}
                         disabled={role === activeRole}
+                        className="min-h-[44px] py-3"
                       >
                         <Shield className="h-4 w-4 mr-2" />
                         {roleLabels[role]}
@@ -254,7 +264,10 @@ export function Header() {
                 )}
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="min-h-[44px] py-3"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{t.nav.signOut}</span>
                 </DropdownMenuItem>

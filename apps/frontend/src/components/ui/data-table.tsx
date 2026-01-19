@@ -10,11 +10,27 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
+type ResponsiveBreakpoint = 'sm' | 'md' | 'lg' | 'xl'
+
 interface Column<T> {
   key: keyof T | 'actions'
   header: string
   width?: string
   render?: (value: any, row: T) => ReactNode
+  /** Hide this column below the specified breakpoint */
+  hideBelow?: ResponsiveBreakpoint
+}
+
+/** Maps breakpoint to Tailwind classes for hiding columns below that breakpoint */
+function getHideClass(hideBelow?: ResponsiveBreakpoint): string {
+  if (!hideBelow) return ''
+  const classes: Record<ResponsiveBreakpoint, string> = {
+    sm: 'hidden sm:table-cell',
+    md: 'hidden md:table-cell',
+    lg: 'hidden lg:table-cell',
+    xl: 'hidden xl:table-cell',
+  }
+  return classes[hideBelow]
 }
 
 interface DataTableProps<T> {
@@ -47,7 +63,10 @@ export function DataTable<T extends Record<string, any>>({
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
-                  <TableHead key={String(column.key)}>
+                  <TableHead
+                    key={String(column.key)}
+                    className={getHideClass(column.hideBelow)}
+                  >
                     {column.header}
                   </TableHead>
                 ))}
@@ -57,7 +76,10 @@ export function DataTable<T extends Record<string, any>>({
               {Array.from({ length: 5 }).map((_, index) => (
                 <TableRow key={index}>
                   {columns.map((column) => (
-                    <TableCell key={String(column.key)}>
+                    <TableCell
+                      key={String(column.key)}
+                      className={getHideClass(column.hideBelow)}
+                    >
                       <Skeleton className="h-4 w-full" />
                     </TableCell>
                   ))}
@@ -86,7 +108,10 @@ export function DataTable<T extends Record<string, any>>({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={String(column.key)}>
+                <TableHead
+                  key={String(column.key)}
+                  className={getHideClass(column.hideBelow)}
+                >
                   {column.header}
                 </TableHead>
               ))}
@@ -100,7 +125,10 @@ export function DataTable<T extends Record<string, any>>({
                 className={onRowClick ? "cursor-pointer hover:bg-muted/50" : undefined}
               >
                 {columns.map((column) => (
-                  <TableCell key={String(column.key)}>
+                  <TableCell
+                    key={String(column.key)}
+                    className={getHideClass(column.hideBelow)}
+                  >
                     {column.key === 'actions' && actions ? (
                       actions(row)
                     ) : column.render ? (

@@ -134,6 +134,7 @@ export function CasesView() {
       key: "date_of_birth_encrypted" as keyof PatientRecord,
       header: t.columns.dob,
       width: "15%",
+      hideBelow: "md" as const,
       render: (_: any, record: PatientRecord) => {
         const patientData = decryptedData[record.id];
 
@@ -149,6 +150,7 @@ export function CasesView() {
       key: "clinic_internal_id" as keyof PatientRecord,
       header: t.columns.internalId,
       width: "15%",
+      hideBelow: "md" as const,
       render: (value: string) => (
         <span className="truncate block" title={value || undefined}>
           {value || "-"}
@@ -159,6 +161,7 @@ export function CasesView() {
       key: "patient_data_completed_at" as keyof PatientRecord,
       header: t.columns.submitted,
       width: "15%",
+      hideBelow: "lg" as const,
       render: (value: string) =>
         value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : "-",
     },
@@ -174,6 +177,7 @@ export function CasesView() {
       key: "last_viewed_at" as keyof PatientRecord,
       header: t.columns.lastViewed,
       width: "15%",
+      hideBelow: "lg" as const,
       render: (value: string) =>
         value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : "-",
     },
@@ -181,6 +185,7 @@ export function CasesView() {
       key: "last_viewed_by" as keyof PatientRecord,
       header: t.columns.lastViewedBy,
       width: "12%",
+      hideBelow: "xl" as const,
       render: (_: any, record: PatientRecord) => {
         if (!record.last_viewed_by) {
           return <span className="text-muted-foreground">-</span>;

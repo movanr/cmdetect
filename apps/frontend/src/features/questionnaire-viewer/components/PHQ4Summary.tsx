@@ -41,13 +41,13 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
       </CardHeader>
 
       {/* Table */}
-      <CardContent className="p-0">
-        <Table className="table-fixed">
+      <CardContent className="p-0 overflow-x-auto">
+        <Table>
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableHead className="w-auto" />
+              <TableHead className="min-w-[180px]" />
               {PHQ4_OPTIONS.map((opt) => (
-                <TableHead key={opt.value} className="text-center px-1 py-1 w-[32px]">
+                <TableHead key={opt.value} className="text-center px-1 py-1 w-[40px] min-w-[40px]">
                   <div className="text-xs font-semibold">{opt.value}</div>
                 </TableHead>
               ))}
@@ -60,7 +60,7 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
 
               return (
                 <TableRow key={questionId}>
-                  <TableCell className="p-2 text-sm">
+                  <TableCell className="p-2 text-sm whitespace-normal">
                     <span className="text-muted-foreground mr-1">
                       {String.fromCharCode(97 + index)}.
                     </span>

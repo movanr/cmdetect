@@ -106,7 +106,7 @@ function OBCSection({ title, questions, answers, options }: SectionProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
+      <CardContent className="p-0 overflow-x-auto">
         {!hasRelevantAnswers && !isExpanded ? (
           // No relevant answers message
           <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
@@ -114,12 +114,12 @@ function OBCSection({ title, questions, answers, options }: SectionProps) {
           </div>
         ) : (
           // Table with questions
-          <Table className="table-fixed">
+          <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
-                <TableHead className="w-[200px]" />
+                <TableHead className="min-w-[180px]" />
                 {SCALE_OPTIONS.map((value) => (
-                  <TableHead key={value} className="text-center px-0 py-1 w-[28px]">
+                  <TableHead key={value} className="text-center px-1 py-1 w-[36px] min-w-[36px]">
                     <div className="text-xs font-semibold">{value}</div>
                   </TableHead>
                 ))}
@@ -133,12 +133,12 @@ function OBCSection({ title, questions, answers, options }: SectionProps) {
 
                 return (
                   <TableRow key={questionId} className={isHighlighted ? "bg-orange-50" : ""}>
-                    <TableCell className="p-2 text-sm">
+                    <TableCell className="p-2 text-sm whitespace-normal">
                       <span className="text-muted-foreground mr-1">{questionNum}.</span>
                       {OBC_QUESTION_LABELS[questionId]}
                     </TableCell>
                     {SCALE_OPTIONS.map((value) => (
-                      <TableCell key={value} className="px-0 py-1 text-center">
+                      <TableCell key={value} className="px-1 py-1 text-center">
                         <div
                           className={`w-4 h-4 rounded-full border-[1.5px] mx-auto flex items-center justify-center ${
                             selectedValue === value

@@ -46,15 +46,15 @@ export function JFLS20Summary({ answers }: JFLS20SummaryProps) {
       </CardHeader>
 
       {/* Matrix Table */}
-      <CardContent className="p-0">
-        <Table className="table-fixed">
+      <CardContent className="p-0 overflow-x-auto">
+        <Table>
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
-              <TableHead className="w-[180px]" />
+              <TableHead className="min-w-[160px]" />
               {SCALE_OPTIONS.map((value) => (
                 <TableHead
                   key={value}
-                  className="text-center px-0 py-1 w-[24px]"
+                  className="text-center px-1 py-1 w-[32px] min-w-[32px]"
                 >
                   <div className="text-xs font-semibold">{value}</div>
                 </TableHead>
@@ -67,14 +67,14 @@ export function JFLS20Summary({ answers }: JFLS20SummaryProps) {
 
               return (
                 <TableRow key={questionId}>
-                  <TableCell className="p-2 text-sm">
+                  <TableCell className="p-2 text-sm whitespace-normal">
                     <span className="text-muted-foreground mr-1">
                       {index + 1}.
                     </span>
                     {JFLS20_QUESTION_LABELS[questionId]}
                   </TableCell>
                   {SCALE_OPTIONS.map((value) => (
-                    <TableCell key={value} className="px-0 py-1 text-center">
+                    <TableCell key={value} className="px-1 py-1 text-center">
                       <div
                         className={`w-4 h-4 rounded-full border-[1.5px] mx-auto flex items-center justify-center ${
                           selectedValue === value
