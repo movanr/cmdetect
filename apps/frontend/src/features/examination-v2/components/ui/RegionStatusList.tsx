@@ -1,22 +1,16 @@
 /**
  * RegionStatusList - Clickable list of regions with status indicators.
- *
- * Displays interactive regions with visual feedback:
- * - ○ Gray circle: Pending (no data)
- * - ✓ Green check: Negative (pain = no)
- * - ● Blue filled: Positive (pain = yes, no significant findings)
- * - ● Red filled: Significant (familiar pain or headache = yes)
- * - ⚡ Zap icon: Familiar headache positive
  */
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertCircle, Check, Circle, Zap } from "lucide-react";
+import { AlertCircle, Check, Circle } from "lucide-react";
+import type { IncompleteRegion } from "../../form/validation";
 import { getRegionLabel } from "../../labels";
 import type { MovementRegion } from "../../model/regions";
-import type { IncompleteRegion } from "../../form/validation";
 import {
   REGION_STATE_COLORS,
+  REGION_STATE_COLORS_SELECTED,
   REGION_VISUAL_STATES,
   getRegionVisualState,
   type RegionStatus,
@@ -51,6 +45,10 @@ const EMPTY_STATUS: RegionStatus = {
 
 /**
  * Status indicator component using visual state model.
+ * - Pending: light gray circle outline (no data)
+ * - Undefined: light gray circle outline (pain=yes, familiar not yet answered)
+ * - Negative: dark gray check (complete, no significant findings)
+ * - Positive: blue filled circle (familiar pain confirmed)
  */
 function StatusIndicator({ status }: { status: RegionStatus }) {
   const visualState = getRegionVisualState(status);
@@ -58,32 +56,18 @@ function StatusIndicator({ status }: { status: RegionStatus }) {
 
   switch (visualState) {
     case REGION_VISUAL_STATES.PENDING:
-      return <Circle className="h-4 w-4 text-muted-foreground" strokeWidth={2} />;
+    case REGION_VISUAL_STATES.UNDEFINED:
+      // Light gray = incomplete
+      return <Circle className="h-4 w-4 text-zinc-300" strokeWidth={2} />;
     case REGION_VISUAL_STATES.NEGATIVE:
-      return <Check className="h-4 w-4 text-green-600" strokeWidth={3} />;
+      // Dark gray = complete, no significant findings
+      return <Check className="h-4 w-4 text-zinc-500" strokeWidth={3} />;
     case REGION_VISUAL_STATES.POSITIVE:
-      return <div className="h-4 w-4 rounded-full bg-primary" />;
-    case REGION_VISUAL_STATES.SIGNIFICANT:
-      return <div className="h-4 w-4 rounded-full bg-destructive" />;
+      // Blue = significant finding (familiar pain confirmed)
+      return <div className="h-4 w-4 rounded-full bg-blue-500" />;
     default:
       return <Circle className={cn("h-4 w-4", colors.text)} strokeWidth={2} />;
   }
-}
-
-/**
- * Small headache icon shown when familiar headache is positive.
- */
-function HeadacheIcon({ status }: { status: RegionStatus }) {
-  if (!status.hasFamiliarHeadache) {
-    return null;
-  }
-
-  return (
-    <Zap
-      className="h-3.5 w-3.5 text-destructive ml-auto"
-      aria-label="Bekannte Kopfschmerzen"
-    />
-  );
 }
 
 export function RegionStatusList({
@@ -106,6 +90,8 @@ export function RegionStatusList({
 
         const label = getRegionLabel(region);
 
+        const selectedColors = REGION_STATE_COLORS_SELECTED[visualState];
+
         return (
           <div key={region} className="flex flex-col">
             <Button
@@ -116,23 +102,19 @@ export function RegionStatusList({
               onClick={() => onRegionClick(region)}
               className={cn(
                 "h-8 justify-start gap-2 px-2 text-sm font-normal",
-                isSelected && "bg-primary/10 ring-1 ring-primary",
+                isSelected && selectedColors.bgClass,
+                isSelected && selectedColors.ringClass,
                 visualState !== REGION_VISUAL_STATES.PENDING && colors.text,
-                incomplete && "ring-1 ring-destructive"
+                incomplete && !isSelected && "ring-1 ring-destructive"
               )}
             >
               <StatusIndicator status={status} />
               <span className="truncate">{label}</span>
-              <HeadacheIcon status={status} />
-              {incomplete && (
-                <AlertCircle className="h-3.5 w-3.5 text-destructive ml-auto" />
-              )}
+              {incomplete && <AlertCircle className="h-3.5 w-3.5 text-destructive ml-auto" />}
             </Button>
             {incomplete && (
               <span className="text-xs text-destructive pl-6 pb-1">
-                {incomplete.missingPain
-                  ? "Schmerzangabe fehlt"
-                  : "Bitte vervollständigen"}
+                {incomplete.missingPain ? "Schmerzangabe fehlt" : "Bitte vervollständigen"}
               </span>
             )}
           </div>

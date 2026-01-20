@@ -147,6 +147,7 @@ export function DiagramInterviewStep({
               regionStatuses={rightStatuses}
               selectedRegion={selectedSide === "right" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "right")}
+              incompleteRegions={rightIncomplete}
             />
           </div>
         </div>
@@ -165,6 +166,7 @@ export function DiagramInterviewStep({
               regionStatuses={leftStatuses}
               selectedRegion={selectedSide === "left" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "left")}
+              incompleteRegions={leftIncomplete}
             />
             <RegionStatusList
               regions={SVG_REGIONS}

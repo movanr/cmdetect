@@ -1,19 +1,12 @@
 /**
  * RegionStatusList - Clickable list of regions with status indicators.
  *
- * Displays the 5 interactive regions with visual feedback:
- * - ○ Gray circle: Pending (no data)
- * - ✓ Green check: Negative (pain = no)
- * - ● Blue filled: Positive (pain = yes, no significant findings)
- * - ● Red filled: Significant (familiar pain or headache = yes)
- * - ⚡ Zap icon: Familiar headache positive
  */
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Check, Circle, Zap } from "lucide-react";
+import { Check, Circle } from "lucide-react";
 import { getLabel } from "../../content/labels";
-import { PAIN_TYPES } from "../../model/pain";
 import {
   type Region,
   type RegionStatus,
@@ -59,20 +52,6 @@ function StatusIndicator({ status }: { status: RegionStatus }) {
   }
 }
 
-/**
- * Small headache icon shown when familiar headache is positive.
- */
-function HeadacheIcon({ status }: { status: RegionStatus }) {
-  if (!status.hasFamiliarHeadache) {
-    return null;
-  }
-
-  const label = getLabel(PAIN_TYPES.FAMILIAR_HEADACHE);
-  return (
-    <Zap className="h-3.5 w-3.5 text-destructive ml-auto" aria-label={label} />
-  );
-}
-
 export function RegionStatusList({
   regions,
   regionStatuses,
@@ -108,7 +87,6 @@ export function RegionStatusList({
           >
             <StatusIndicator status={status} />
             <span className="truncate">{label}</span>
-            <HeadacheIcon status={status} />
           </Button>
         );
       })}

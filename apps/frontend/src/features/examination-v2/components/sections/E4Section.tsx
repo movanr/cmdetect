@@ -38,6 +38,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>({});
   const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
+  const [diagramKey, setDiagramKey] = useState(0);
 
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
@@ -56,6 +57,8 @@ export function E4Section({ onComplete }: E4SectionProps) {
     }
     // Clear any validation errors since we've filled in the missing values
     setIncompleteRegions([]);
+    // Reset diagram selection by forcing remount
+    setDiagramKey((k) => k + 1);
   };
 
   const handleNext = async () => {
@@ -155,6 +158,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
                 {/* Content */}
                 {stepIsInterview ? (
                   <DiagramInterviewStep
+                    key={diagramKey}
                     instances={stepInstances}
                     incompleteRegions={incompleteRegions}
                   />
