@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { useSession } from "../../lib/auth";
 import { Header } from "../navigation/Header";
 import { cn } from "@/lib/utils";
-import { Check, X, Menu } from "lucide-react";
+import { Check, X, Menu, Lock } from "lucide-react";
 import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsTabletPortrait } from "@/hooks/use-mobile";
+import { canAccessStep, type MainStep } from "../../features/case-workflow";
 
 export type CaseStep = "anamnesis" | "examination" | "evaluation" | "documentation" | "export";
 
@@ -72,6 +73,8 @@ export function CaseLayout({
 
   const isStepCompleted = (stepId: CaseStep) => completedSteps.includes(stepId);
   const isStepCurrent = (stepId: CaseStep) => stepId === currentStep;
+  const completedStepsSet = new Set<MainStep>(completedSteps);
+  const isStepAccessible = (stepId: CaseStep) => canAccessStep(stepId as MainStep, completedStepsSet);
 
   const handleCloseCase = () => {
     navigate({ to: "/cases" });
@@ -120,13 +123,42 @@ export function CaseLayout({
         {steps.map((step) => {
           const completed = isStepCompleted(step.id);
           const current = isStepCurrent(step.id);
+          const accessible = isStepAccessible(step.id);
 
-          // Only anamnesis route exists for now
-          if (step.id === "anamnesis") {
+          // Implemented routes: anamnesis and examination
+          const hasRoute = step.id === "anamnesis" || step.id === "examination";
+
+          // Step indicator component
+          const stepIndicator = (
+            <div
+              className={cn(
+                "flex items-center justify-center w-6 h-6 rounded-full border-2 flex-shrink-0",
+                current && "border-primary-foreground bg-primary-foreground text-primary",
+                !current && completed && "border-primary bg-primary text-primary-foreground",
+                !current && !completed && accessible && "border-muted-foreground",
+                !current && !completed && !accessible && "border-muted-foreground/50"
+              )}
+            >
+              {completed ? (
+                <Check className="h-4 w-4" />
+              ) : !accessible ? (
+                <Lock className="h-3 w-3" />
+              ) : (
+                <span className="text-xs">{step.order}</span>
+              )}
+            </div>
+          );
+
+          // Render as Link if route exists and step is accessible
+          if (hasRoute && accessible) {
+            const route = step.id === "anamnesis"
+              ? "/cases/$id/anamnesis"
+              : "/cases/$id/examination";
+
             return (
               <Link
                 key={step.id}
-                to="/cases/$id/anamnesis"
+                to={route}
                 params={{ id: caseId }}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
@@ -136,29 +168,13 @@ export function CaseLayout({
                   !current && !completed && "text-muted-foreground hover:bg-muted"
                 )}
               >
-                {/* Step indicator */}
-                <div
-                  className={cn(
-                    "flex items-center justify-center w-6 h-6 rounded-full border-2 flex-shrink-0",
-                    current && "border-primary-foreground bg-primary-foreground text-primary",
-                    !current && completed && "border-primary bg-primary text-primary-foreground",
-                    !current && !completed && "border-muted-foreground"
-                  )}
-                >
-                  {completed ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <span className="text-xs">{step.order}</span>
-                  )}
-                </div>
-
-                {/* Step label */}
+                {stepIndicator}
                 <span>{step.label}</span>
               </Link>
             );
           }
 
-          // Placeholder for other steps (not yet implemented)
+          // Render as non-interactive div for inaccessible or unimplemented steps
           return (
             <div
               key={step.id}
@@ -166,26 +182,11 @@ export function CaseLayout({
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
                 current && "bg-primary text-primary-foreground",
                 !current && completed && "text-foreground",
-                !current && !completed && "text-muted-foreground"
+                !current && !completed && accessible && "text-muted-foreground",
+                !current && !completed && !accessible && "text-muted-foreground/50"
               )}
             >
-              {/* Step indicator */}
-              <div
-                className={cn(
-                  "flex items-center justify-center w-6 h-6 rounded-full border-2 flex-shrink-0",
-                  current && "border-primary-foreground bg-primary-foreground text-primary",
-                  !current && completed && "border-primary bg-primary text-primary-foreground",
-                  !current && !completed && "border-muted-foreground"
-                )}
-              >
-                {completed ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <span className="text-xs">{step.order}</span>
-                )}
-              </div>
-
-              {/* Step label */}
+              {stepIndicator}
               <span>{step.label}</span>
             </div>
           );

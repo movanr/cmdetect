@@ -1,13 +1,15 @@
 /**
- * Anamnesis Layout Route
+ * Examination Layout Route
  *
- * Layout component for the Anamnesis workflow step.
- * Provides sub-step navigation tabs and renders child routes via Outlet.
+ * Layout component for the Examination workflow step.
+ * Provides section tabs and renders child routes via Outlet.
+ * Requires anamnesis to be completed (gating enforced).
  */
 
 import { useEffect, useState } from "react";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { FormProvider, useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
@@ -18,10 +20,12 @@ import {
   getStepDefinition,
   SubStepTabs,
   useCaseProgress,
+  useStepGating,
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
+import { examinationFormConfig } from "../features/examination-v2/form/use-examination-form";
 
-// GraphQL queries (same as original)
+// GraphQL query for patient record
 const GET_PATIENT_RECORD = graphql(`
   query GetPatientRecord($id: String!) {
     patient_record_by_pk(id: $id) {
@@ -44,24 +48,18 @@ const GET_PATIENT_RECORD = graphql(`
   }
 `);
 
-const UPDATE_VIEWED = graphql(`
-  mutation UpdateViewed($id: String!) {
-    update_patient_record_by_pk(pk_columns: { id: $id }, _set: { viewed: true }) {
-      id
-      viewed
-    }
-  }
-`);
-
-export const Route = createFileRoute("/cases_/$id/anamnesis")({
-  component: AnamnesisLayout,
+export const Route = createFileRoute("/cases_/$id/examination")({
+  component: ExaminationLayout,
 });
 
-function AnamnesisLayout() {
+function ExaminationLayout() {
   const { id } = Route.useParams();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
+
+  // Create examination form (provides FormContext to children)
+  const form = useForm(examinationFormConfig);
 
   // Fetch patient record
   const { data, isLoading: isRecordLoading } = useQuery({
@@ -72,7 +70,7 @@ function AnamnesisLayout() {
   const record = data?.patient_record_by_pk;
 
   // Fetch questionnaire responses for workflow progress
-  const { data: responses } = useQuestionnaireResponses(id);
+  const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
@@ -81,21 +79,23 @@ function AnamnesisLayout() {
     hasPatientData: !!record?.patient_data_completed_at,
   });
 
-  // Update last viewed mutation
-  const updateViewedMutation = useMutation({
-    mutationFn: ({ id }: { id: string }) => execute(UPDATE_VIEWED, { id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["patient-record", id] });
-      queryClient.invalidateQueries({ queryKey: ["patient-records"] });
-    },
+  // Check step gating
+  const { isCurrentStepAccessible, redirectStep } = useStepGating({
+    caseId: id,
+    completedSteps,
+    currentStep: "examination",
   });
 
-  // Update last_viewed on mount
+  // Redirect if step is not accessible
   useEffect(() => {
-    if (record?.id && !updateViewedMutation.isPending) {
-      updateViewedMutation.mutate({ id: record.id });
+    if (!isRecordLoading && !isResponsesLoading && !isCurrentStepAccessible && redirectStep) {
+      navigate({
+        to: `/cases/$id/${redirectStep}`,
+        params: { id },
+        replace: true,
+      });
     }
-  }, [record?.id]);
+  }, [isRecordLoading, isResponsesLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
 
   // Decrypt patient data
   useEffect(() => {
@@ -122,9 +122,9 @@ function AnamnesisLayout() {
     decrypt();
   }, [record?.first_name_encrypted]);
 
-  // Get anamnesis step definition for sub-steps
-  const anamnesisStep = getStepDefinition("anamnesis");
-  const subSteps = anamnesisStep?.subSteps ?? [];
+  // Get examination step definition for sub-steps
+  const examinationStep = getStepDefinition("examination");
+  const subSteps = examinationStep?.subSteps ?? [];
 
   // Format patient display data
   const patientName =
@@ -139,12 +139,12 @@ function AnamnesisLayout() {
   // Convert Set to array for CaseLayout
   const completedStepsArray = Array.from(completedSteps);
 
-  // Show loading only for initial record load, not for decryption
-  if (isRecordLoading) {
+  // Loading or gating redirect in progress
+  if (isRecordLoading || isResponsesLoading || !isCurrentStepAccessible) {
     return (
       <CaseLayout
         caseId={id}
-        currentStep="anamnesis"
+        currentStep="examination"
         completedSteps={completedStepsArray}
       >
         <div className="flex items-center justify-center p-8">
@@ -158,24 +158,26 @@ function AnamnesisLayout() {
     <CaseLayout
       caseId={id}
       patientInternalId={record?.clinic_internal_id ?? undefined}
-      currentStep="anamnesis"
+      currentStep="examination"
       completedSteps={completedStepsArray}
       patientName={patientName}
       patientDob={patientDob}
       isDecrypting={isDecrypting}
     >
-      <div className="space-y-4">
-        {/* Sub-step navigation tabs */}
-        <SubStepTabs
-          caseId={id}
-          parentStep="anamnesis"
-          subSteps={subSteps}
-          className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
-        />
+      <FormProvider {...form}>
+        <div className="space-y-4">
+          {/* Sub-step navigation tabs */}
+          <SubStepTabs
+            caseId={id}
+            parentStep="examination"
+            subSteps={subSteps}
+            className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
+          />
 
-        {/* Child route content */}
-        <Outlet />
-      </div>
+          {/* Child route content */}
+          <Outlet />
+        </div>
+      </FormProvider>
     </CaseLayout>
   );
 }

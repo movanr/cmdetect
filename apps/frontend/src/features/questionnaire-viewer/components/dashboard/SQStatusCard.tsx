@@ -3,29 +3,22 @@
  * Allows starting the interactive review wizard with the patient
  */
 
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatDistanceToNow } from "@/lib/date-utils";
 import {
-  ChevronDown,
-  ChevronUp,
-  PlayCircle,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
-import {
-  SQ_OFFICE_USE_QUESTIONS,
   SQ_ENABLE_WHEN,
+  SQ_OFFICE_USE_QUESTIONS,
   isQuestionIdEnabled,
 } from "@cmdetect/questionnaires";
-import { formatDistanceToNow } from "@/lib/date-utils";
+import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { SQReadOnlyView } from "./SQReadOnlyView";
 
 interface SQStatusCardProps {
   response: QuestionnaireResponse | undefined;
-  onStartReview: () => void;
   /** Whether SQ screening is negative (all screening questions answered "no") */
   isScreeningNegative?: boolean;
 }
@@ -47,11 +40,7 @@ function countPendingConfirmations(answers: Record<string, unknown>): number {
   }).length;
 }
 
-export function SQStatusCard({
-  response,
-  onStartReview,
-  isScreeningNegative = false,
-}: SQStatusCardProps) {
+export function SQStatusCard({ response, isScreeningNegative = false }: SQStatusCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // No SQ data
@@ -63,9 +52,7 @@ export function SQStatusCard({
             <AlertCircle className="h-5 w-5 text-muted-foreground" />
             <div>
               <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
-              <p className="text-sm text-muted-foreground mt-1">
-                Noch nicht eingereicht
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Noch nicht eingereicht</p>
             </div>
           </div>
         </CardContent>
@@ -81,9 +68,9 @@ export function SQStatusCard({
     <Card className="overflow-hidden py-0 gap-0">
       {/* Header */}
       <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
               {isScreeningNegative ? (
                 <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -97,27 +84,22 @@ export function SQStatusCard({
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-amber-600 border-amber-300">
-                  Ausstehend
+                  Bestätigung mit Patienten Ausstehend
                 </Badge>
               )}
             </div>
 
             <p className="text-sm text-muted-foreground mt-1">
-              Eingereicht{" "}
-              {formatDistanceToNow(new Date(submittedAt), { addSuffix: true })}
+              Eingereicht {formatDistanceToNow(new Date(submittedAt), { addSuffix: true })}
               {isReviewed && reviewedAt && (
-                <>
-                  {" "}
-                  · Überprüft{" "}
-                  {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}
-                </>
+                <> · Überprüft {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}</>
               )}
             </p>
 
             {/* Negative screening message */}
             {isScreeningNegative && (
               <p className="text-sm text-green-700 mt-2">
-                Alle 5 Screening-Fragen mit "Nein" beantwortet – keine CMD-Symptome.
+                Alle 5 Screening-Fragen mit &quot;Nein&quot; beantwortet - keine CMD-Symptome.
               </p>
             )}
 
@@ -127,20 +109,19 @@ export function SQStatusCard({
                 <AlertCircle className="h-4 w-4" />
                 <span>
                   {pendingConfirmations}{" "}
-                  {pendingConfirmations === 1
-                    ? "Frage benötigt"
-                    : "Fragen benötigen"}{" "}
+                  {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"}{" "}
                   Seitenbestätigung
                 </span>
               </div>
             )}
           </div>
 
+          {/* Details toggle */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-muted-foreground"
+            className="text-muted-foreground flex-shrink-0"
           >
             {isExpanded ? (
               <>
@@ -153,18 +134,6 @@ export function SQStatusCard({
             )}
           </Button>
         </div>
-
-        {/* Start review button - hidden for negative screening */}
-        {!isScreeningNegative && (
-          <div className="mt-4">
-            <Button onClick={onStartReview} className="w-full sm:w-auto">
-              <PlayCircle className="mr-2 h-4 w-4" />
-              {isReviewed
-                ? "Erneut mit Patient überprüfen"
-                : "Überprüfung mit Patient starten"}
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Expandable details */}

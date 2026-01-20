@@ -3,18 +3,15 @@
  * Shows Axis 2 assessments (PHQ-4, OBC, JFLS), SQ status, and Pain Drawing
  */
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  QUESTIONNAIRE_ID,
-  isQuestionnaireEnabled,
-  type SQAnswers,
-} from "@cmdetect/questionnaires";
-import { ClipboardList, CheckCircle2 } from "lucide-react";
-import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
-import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
 import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
+import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
+import { QUESTIONNAIRE_ID, isQuestionnaireEnabled, type SQAnswers } from "@cmdetect/questionnaires";
+import { ArrowRight, CheckCircle2, ClipboardList } from "lucide-react";
+import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import { SQStatusCard } from "./SQStatusCard";
 
@@ -64,10 +61,22 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
     );
   }
 
+  // Determine if we should show the next step button
+  const showNextStepButton = sqResponse && !isScreeningNegative;
+  const isReviewed = !!sqResponse?.reviewedAt;
+  const nextStepLabel = isReviewed ? "Erneut mit Patient bestätigen" : "Mit Patient bestätigen";
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Fragebögen-Übersicht</CardTitle>
+        {/* Top navigation button */}
+        {showNextStepButton && (
+          <Button onClick={onStartReview}>
+            {nextStepLabel}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Negative Screening Banner */}
@@ -76,8 +85,8 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <AlertTitle className="text-green-800">Screening negativ</AlertTitle>
             <AlertDescription className="text-green-700">
-              Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine
-              Hinweise auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
+              Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine Hinweise
+              auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
             </AlertDescription>
           </Alert>
         )}
@@ -88,11 +97,7 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
               Achse 1 - Symptomfragebogen
             </h3>
-            <SQStatusCard
-              response={sqResponse}
-              onStartReview={onStartReview}
-              isScreeningNegative={isScreeningNegative}
-            />
+            <SQStatusCard response={sqResponse} isScreeningNegative={isScreeningNegative} />
           </section>
         )}
 
@@ -114,7 +119,9 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
                 title="GCPS - Graduierung chronischer Schmerzen"
                 subtitle="1-Monats-Version"
                 answers={
-                  gcps1mResponse ? (gcps1mResponse.answers as Record<string, string | number>) : null
+                  gcps1mResponse
+                    ? (gcps1mResponse.answers as Record<string, string | number>)
+                    : null
                 }
               />
             )}
@@ -158,6 +165,16 @@ export function DashboardView({ responses, onStartReview }: DashboardViewProps) 
             )}
           </div>
         </section>
+
+        {/* Bottom navigation */}
+        {showNextStepButton && (
+          <div className="flex justify-end pt-2 border-t">
+            <Button onClick={onStartReview}>
+              {nextStepLabel}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
