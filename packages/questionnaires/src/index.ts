@@ -121,6 +121,8 @@ export {
   SQ_TOTAL_SCREENS,
   SQ_METADATA,
   SQ_QUESTION_LABELS,
+  SQ_DISPLAY_IDS,
+  SQ_QUESTION_SHORT_LABELS,
   getScreenIndexById,
   getQuestionById,
 } from "./sq/questions";

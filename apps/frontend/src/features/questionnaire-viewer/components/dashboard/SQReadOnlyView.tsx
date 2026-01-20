@@ -7,6 +7,8 @@ import {
   SQ_SECTION_NAMES_ORDER,
   SQ_QUESTION_ORDER,
   SQ_QUESTION_LABELS,
+  SQ_DISPLAY_IDS,
+  SQ_QUESTION_SHORT_LABELS,
   SQ_ENABLE_WHEN,
   SQ_OFFICE_USE_QUESTIONS,
   SQ_YES_NO_LABELS,
@@ -101,21 +103,20 @@ export function SQReadOnlyView({ answers }: SQReadOnlyViewProps) {
   });
 
   return (
-    <div className="space-y-4">
-      {SQ_SECTION_NAMES_ORDER.map((section) => {
-        const sectionAnswers = answersBySection[section];
-        if (!sectionAnswers || sectionAnswers.length === 0) return null;
+    <div className="border rounded-lg">
+      <div className="grid grid-cols-[auto_1fr_auto] gap-x-3 px-4 py-2">
+        {SQ_SECTION_NAMES_ORDER.map((section, sectionIdx) => {
+          const sectionAnswers = answersBySection[section];
+          if (!sectionAnswers || sectionAnswers.length === 0) return null;
 
-        return (
-          <div key={section}>
-            {/* Section header */}
-            <h5 className="font-medium text-sm text-muted-foreground uppercase tracking-wide mb-2">
-              {section}
-            </h5>
+          return (
+            <div key={section} className="col-span-3 grid grid-cols-subgrid">
+              {/* Section header */}
+              <h5 className={`col-span-3 font-medium text-sm text-muted-foreground uppercase tracking-wide py-2 ${sectionIdx > 0 ? "border-t mt-2" : ""}`}>
+                {section}
+              </h5>
 
-            <div className="border rounded-lg divide-y">
               {sectionAnswers.map(({ id, answer }) => {
-                const label = SQ_QUESTION_LABELS[id];
                 const isOfficeUseQuestion = SQ_OFFICE_USE_QUESTIONS.has(id);
                 const { hasOfficeUse, sides } = isOfficeUseQuestion
                   ? getOfficeUseStatus(id, answers)
@@ -126,39 +127,41 @@ export function SQReadOnlyView({ answers }: SQReadOnlyViewProps) {
                   isOfficeUseQuestion && answer === "yes" && !hasOfficeUse;
 
                 return (
-                  <div key={id} className="px-4 py-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-muted-foreground">
-                          {label?.text}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-sm font-medium">
-                          {formatAnswer(id, answer)}
-                        </span>
-                        {hasOfficeUse && (
-                          <Badge variant="outline" className="text-xs">
-                            {sides.join(", ")}
-                          </Badge>
-                        )}
-                        {needsConfirmation && (
-                          <Badge
-                            variant="outline"
-                            className="text-xs text-amber-600 border-amber-300"
-                          >
-                            Bestätigung fehlt
-                          </Badge>
-                        )}
-                      </div>
+                  <div key={id} className="col-span-3 grid grid-cols-subgrid py-1.5">
+                    {/* Display ID */}
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {SQ_DISPLAY_IDS[id]}
+                    </span>
+                    {/* Question text */}
+                    <span className="text-sm">
+                      {SQ_QUESTION_SHORT_LABELS[id]}
+                    </span>
+                    {/* Answer and badges */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        {formatAnswer(id, answer)}
+                      </span>
+                      {hasOfficeUse && (
+                        <Badge variant="outline" className="text-xs">
+                          {sides.join(", ")}
+                        </Badge>
+                      )}
+                      {needsConfirmation && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs text-amber-600 border-amber-300"
+                        >
+                          Bestätigung fehlt
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

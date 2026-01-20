@@ -298,3 +298,57 @@ export const SQ_QUESTION_LABELS: Record<SQQuestionId, { text: string; section: s
   Object.fromEntries(
     SQ_SCREENS.map((q) => [q.id, { text: getDisplayText(q), section: getSectionName(q.id) }])
   ) as Record<SQQuestionId, { text: string; section: string }>;
+
+/**
+ * Map internal SQ IDs to DC/TMD form display IDs (SF = Symptom-Fragebogen)
+ * These match the German paper form numbering system
+ */
+export const SQ_DISPLAY_IDS: Record<SQQuestionId, string> = {
+  SQ1: "SF1",
+  SQ2: "SF2",
+  SQ3: "SF3",
+  SQ4_A: "SF4a",
+  SQ4_B: "SF4b",
+  SQ4_C: "SF4c",
+  SQ4_D: "SF4d",
+  SQ5: "SF5",
+  SQ6: "SF6",
+  SQ7_A: "SF7a",
+  SQ7_B: "SF7b",
+  SQ7_C: "SF7c",
+  SQ7_D: "SF7d",
+  SQ8: "SF8",
+  SQ9: "SF9",
+  SQ10: "SF10",
+  SQ11: "SF11",
+  SQ12: "SF12",
+  SQ13: "SF13",
+  SQ14: "SF14",
+};
+
+/**
+ * Short German labels for each SQ question
+ * Condensed descriptions for quick review in practitioner dashboard
+ */
+export const SQ_QUESTION_SHORT_LABELS: Record<SQQuestionId, string> = {
+  SQ1: "Schmerzen im Kiefer/Schläfe/Ohr (jemals)",
+  SQ2: "Schmerzbeginn (Dauer)",
+  SQ3: "Schmerzhäufigkeit (letzte 30 Tage)",
+  SQ4_A: "Aktivität beeinflusst Schmerzen: Kauen harter Nahrung",
+  SQ4_B: "Aktivität beeinflusst Schmerzen: Mundöffnung/Kieferbewegung",
+  SQ4_C: "Aktivität beeinflusst Schmerzen: Pressen/Knirschen/Kaugummi",
+  SQ4_D: "Aktivität beeinflusst Schmerzen: Reden/Küssen/Gähnen",
+  SQ5: "Schläfenkopfschmerzen (letzte 30 Tage)",
+  SQ6: "Kopfschmerzbeginn (Dauer)",
+  SQ7_A: "Aktivität beeinflusst Kopfschmerzen: Kauen",
+  SQ7_B: "Aktivität beeinflusst Kopfschmerzen: Mundöffnung",
+  SQ7_C: "Aktivität beeinflusst Kopfschmerzen: Pressen/Knirschen",
+  SQ7_D: "Aktivität beeinflusst Kopfschmerzen: Reden/Küssen/Gähnen",
+  SQ8: "Kiefergelenkgeräusche (letzte 30 Tage)",
+  SQ9: "Kiefersperre geschlossen (jemals)",
+  SQ10: "Kiefersperre: Einschränkung beim Essen",
+  SQ11: "Kiefersperre mit Lösung (letzte 30 Tage)",
+  SQ12: "Kiefersperre gegenwärtig",
+  SQ13: "Kiefersperre offen (letzte 30 Tage)",
+  SQ14: "Maßnahme zum Schließen nötig",
+};
