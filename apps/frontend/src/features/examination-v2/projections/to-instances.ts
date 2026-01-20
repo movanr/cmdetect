@@ -57,7 +57,7 @@ const PAIN_TYPES = [
 ] as const;
 
 // Context enrichment for E4 and E9
-function enrichContext(ctx: Record<string, string>, key: string): Record<string, string> {
+export function enrichContext(ctx: Record<string, string>, key: string): Record<string, string> {
   // Shared: sides
   if (key === "left" || key === "right") return { ...ctx, side: key };
 

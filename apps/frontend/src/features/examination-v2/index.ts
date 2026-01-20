@@ -54,6 +54,7 @@ export { schemaFromModel, schemaWithRoot } from "./projections/to-schema";
 export { createPathHelpers, type PathHelpers } from "./form/path-helpers";
 export {
   EXAMINATION_STEPS,
+  examinationFormConfig,
   useExaminationForm,
   type ExaminationStepId,
   type FormValues,

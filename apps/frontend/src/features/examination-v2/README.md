@@ -67,3 +67,18 @@ To add a new section (e.g., E5):
 3. Create components/E5Section.tsx
 4. Add to SECTION_COMPONENTS map in ExaminationForm.tsx
 5. Update SectionId type: "e4" | "e5" | "e9"
+
+## Issues
+
+Critical Gaps  
+ ┌──────────────────────────┬──────────┬───────────────────────────────────────────────────────┐  
+ │ Issue │ Priority │ Location │  
+ ├──────────────────────────┼──────────┼───────────────────────────────────────────────────────┤  
+ │ No tests │ HIGH │ Entire feature lacks unit/integration tests │  
+ ├──────────────────────────┼──────────┼───────────────────────────────────────────────────────┤  
+ │ No data persistence │ HIGH │ Form doesn't connect to GraphQL backend │  
+ ├──────────────────────────┼──────────┼───────────────────────────────────────────────────────┤  
+ │ Debug code in production │ MEDIUM │ ExaminationForm.tsx:70-76 - visible form values panel │  
+ ├──────────────────────────┼──────────┼───────────────────────────────────────────────────────┤  
+ │ Path type casting │ LOW │ Multiple files use as FieldPath<FormValues> casts │  
+ └──────────────────────────┴──────────┴───────────────────────────────────────────────────────┘
