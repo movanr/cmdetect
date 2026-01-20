@@ -25,10 +25,10 @@ export const JFLS8_REFERENCE_VALUES = {
 /**
  * Limitation level interpretations with German labels
  */
-const LIMITATION_INTERPRETATIONS: Record<JFLS8LimitationLevel, { label: string; labelDe: string }> = {
-  normal: { label: "Normal", labelDe: "Normale Funktion" },
-  mild: { label: "Mild", labelDe: "Leichte Einschränkung" },
-  significant: { label: "Significant", labelDe: "Deutliche Einschränkung" },
+const LIMITATION_INTERPRETATIONS: Record<JFLS8LimitationLevel, { label: string }> = {
+  normal: { label: "Normale Funktion" },
+  mild: { label: "Leichte Einschränkung" },
+  significant: { label: "Deutliche Einschränkung" },
 };
 
 /**
@@ -82,7 +82,7 @@ export function calculateJFLS8Score(answers: JFLS8Answers): JFLS8Score {
   // Calculate mean if valid
   let globalScore: number | null = null;
   let limitationLevel: JFLS8LimitationLevel | null = null;
-  let limitationInterpretation: { label: string; labelDe: string } | null = null;
+  let limitationInterpretation: { label: string } | null = null;
 
   if (isValid && answeredCount > 0) {
     const sum = values.reduce((acc, val) => acc + val, 0);

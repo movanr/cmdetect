@@ -97,11 +97,11 @@ export const JFLS20_REFERENCE_VALUES = {
  */
 const LIMITATION_INTERPRETATIONS: Record<
   JFLS20LimitationLevel,
-  { label: string; labelDe: string }
+  { label: string }
 > = {
-  normal: { label: "Normal", labelDe: "Normale Funktion" },
-  mild: { label: "Mild", labelDe: "Leichte Einschränkung" },
-  significant: { label: "Significant", labelDe: "Deutliche Einschränkung" },
+  normal: { label: "Normale Funktion" },
+  mild: { label: "Leichte Einschränkung" },
+  significant: { label: "Deutliche Einschränkung" },
 };
 
 /**
@@ -160,7 +160,7 @@ function calculateSubscaleScore(
 
   let score: number | null = null;
   let limitationLevel: JFLS20LimitationLevel | null = null;
-  let limitationInterpretation: { label: string; labelDe: string } | null = null;
+  let limitationInterpretation: { label: string } | null = null;
 
   if (isValid && answeredCount > 0) {
     const sum = values.reduce((acc, val) => acc + val, 0);
@@ -224,7 +224,7 @@ export function calculateJFLS20Score(answers: JFLS20Answers): JFLS20Score {
   // Calculate global score
   let globalScore: number | null = null;
   let limitationLevel: JFLS20LimitationLevel | null = null;
-  let limitationInterpretation: { label: string; labelDe: string } | null = null;
+  let limitationInterpretation: { label: string } | null = null;
 
   if (isValid && answeredCount > 0) {
     const sum = allValues.reduce((acc, val) => acc + val, 0);
@@ -285,13 +285,13 @@ export function getJFLS20SubscaleItems(
 }
 
 /**
- * Subscale labels for display
+ * Subscale labels for display (German only)
  */
 export const JFLS20_SUBSCALE_LABELS: Record<
   JFLS20SubscaleId,
-  { label: string; labelDe: string }
+  { label: string }
 > = {
-  mastication: { label: "Mastication", labelDe: "Kauen" },
-  mobility: { label: "Mobility", labelDe: "Mobilität" },
-  communication: { label: "Communication", labelDe: "Kommunikation" },
+  mastication: { label: "Kauen" },
+  mobility: { label: "Mobilität" },
+  communication: { label: "Kommunikation" },
 };

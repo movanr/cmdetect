@@ -78,30 +78,30 @@ export type OBCQuestionnaire = {
   questions: OBCQuestion[];
 };
 
+import { z } from "zod";
+import {
+  OBCRiskLevelSchema,
+  OBCRiskInterpretationSchema,
+  OBCScoreSchema,
+} from "../schemas/scores";
+
 /**
  * OBC risk level based on TMD prevalence comparison
  * - normal: Score 0-16, represents normal behaviors
  * - elevated: Score 17-24, occurs 2x more often in TMD patients
  * - high: Score 25+, occurs 17x more often in TMD patients
+ * Derived from Zod schema for single source of truth.
  */
-export type OBCRiskLevel = "normal" | "elevated" | "high";
+export type OBCRiskLevel = z.infer<typeof OBCRiskLevelSchema>;
 
 /**
- * OBC risk interpretation with labels
+ * OBC risk interpretation with label (German only)
+ * Derived from Zod schema for single source of truth.
  */
-export type OBCRiskInterpretation = {
-  label: string;
-  labelDe: string;
-};
+export type OBCRiskInterpretation = z.infer<typeof OBCRiskInterpretationSchema>;
 
 /**
  * Complete OBC score result
+ * Derived from Zod schema for single source of truth.
  */
-export type OBCScore = {
-  totalScore: number;
-  maxScore: number;
-  answeredCount: number;
-  totalQuestions: number;
-  riskLevel: OBCRiskLevel;
-  riskInterpretation: OBCRiskInterpretation;
-};
+export type OBCScore = z.infer<typeof OBCScoreSchema>;

@@ -23,11 +23,11 @@ import type {
  * Dysfunktionaler chronischer Schmerz (Grade III-IV): ≥ 3 BP
  */
 const GRADE_INTERPRETATIONS: Record<GCPSGrade, GCPSGradeInterpretation> = {
-  0: { grade: 0, label: "None", labelDe: "Kein Schmerz" },
-  1: { grade: 1, label: "Low Intensity", labelDe: "Geringe Schmerzintensität" },
-  2: { grade: 2, label: "High Intensity", labelDe: "Hohe Schmerzintensität" },
-  3: { grade: 3, label: "Moderately Limiting", labelDe: "Mäßige Einschränkung" },
-  4: { grade: 4, label: "Severely Limiting", labelDe: "Hochgradige Einschränkung" },
+  0: { grade: 0, label: "Kein Schmerz" },
+  1: { grade: 1, label: "Geringe Schmerzintensität" },
+  2: { grade: 2, label: "Hohe Schmerzintensität" },
+  3: { grade: 3, label: "Mäßige Einschränkung" },
+  4: { grade: 4, label: "Hochgradige Einschränkung" },
 };
 
 /**

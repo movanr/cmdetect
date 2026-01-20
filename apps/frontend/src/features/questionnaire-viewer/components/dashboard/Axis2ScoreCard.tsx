@@ -374,7 +374,7 @@ export function Axis2ScoreCard({
               Grad {gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1]}
             </span>
             <span className="ml-2 text-sm font-medium">
-              - {gcpsScore.gradeInterpretation.labelDe}
+              - {gcpsScore.gradeInterpretation.label}
             </span>
           </div>
 
@@ -604,7 +604,7 @@ export function Axis2ScoreCard({
                 <span className="text-2xl font-bold">{jflsScore.globalScore.toFixed(2)}</span>
                 <span className="text-lg text-muted-foreground ml-1">/ {jflsScore.maxScore}</span>
                 <span className="ml-3 text-sm font-medium">
-                  {jflsScore.limitationInterpretation?.labelDe}
+                  {jflsScore.limitationInterpretation?.label}
                 </span>
               </>
             ) : (
@@ -728,7 +728,7 @@ export function Axis2ScoreCard({
                 <span className="text-2xl font-bold">{jflsScore.globalScore.toFixed(2)}</span>
                 <span className="text-lg text-muted-foreground ml-1">/ {jflsScore.maxScore}</span>
                 <span className="ml-3 text-sm font-medium">
-                  {jflsScore.limitationInterpretation?.labelDe}
+                  {jflsScore.limitationInterpretation?.label}
                 </span>
               </>
             ) : (
@@ -749,17 +749,17 @@ export function Axis2ScoreCard({
           {/* Subscales */}
           <div className="flex flex-wrap justify-center gap-4 mt-4 pt-3 border-t text-sm">
             <JFLS20SubscaleDisplay
-              label={JFLS20_SUBSCALE_LABELS.mastication.labelDe}
+              label={JFLS20_SUBSCALE_LABELS.mastication.label}
               subscale={jflsScore.subscales.mastication}
               refValues={JFLS20_REFERENCE_VALUES.mastication}
             />
             <JFLS20SubscaleDisplay
-              label={JFLS20_SUBSCALE_LABELS.mobility.labelDe}
+              label={JFLS20_SUBSCALE_LABELS.mobility.label}
               subscale={jflsScore.subscales.mobility}
               refValues={JFLS20_REFERENCE_VALUES.mobility}
             />
             <JFLS20SubscaleDisplay
-              label={JFLS20_SUBSCALE_LABELS.communication.labelDe}
+              label={JFLS20_SUBSCALE_LABELS.communication.label}
               subscale={jflsScore.subscales.communication}
               refValues={JFLS20_REFERENCE_VALUES.communication}
             />
@@ -864,7 +864,7 @@ export function Axis2ScoreCard({
           <div className="flex items-center justify-center mt-3">
             <span className="text-2xl font-bold">{obcScore.totalScore}</span>
             <span className="text-lg text-muted-foreground ml-1">/ {obcScore.maxScore}</span>
-            <span className="ml-3 text-sm font-medium">{obcScore.riskInterpretation.labelDe}</span>
+            <span className="ml-3 text-sm font-medium">{obcScore.riskInterpretation.label}</span>
           </div>
 
           {/* High risk warning */}
@@ -991,7 +991,7 @@ export function Axis2ScoreCard({
         <div className="flex items-center justify-center mt-3">
           <span className="text-2xl font-bold">{score.total}</span>
           <span className="text-lg text-muted-foreground ml-1">/ {score.maxTotal}</span>
-          <span className="ml-3 text-sm font-medium">{interpretation.text}</span>
+          <span className="ml-3 text-sm font-medium">{interpretation.label}</span>
         </div>
 
         {/* Clinical relevance alert */}

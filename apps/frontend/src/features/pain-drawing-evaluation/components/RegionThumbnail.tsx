@@ -45,7 +45,7 @@ export function RegionThumbnail({
 
       {/* Region label */}
       <span className="mt-1.5 text-xs font-medium text-center">
-        {config.labelDe}
+        {config.label}
       </span>
 
       {/* Status badge */}

@@ -48,8 +48,7 @@ export interface PainDrawingData {
 export interface ImageConfig {
   id: ImageId;
   src: string;
-  label: string;
-  labelDe: string;
+  label: string; // German only
   aspectRatio: number; // height / width
   mirror?: boolean; // horizontally flip the image
 }
@@ -78,8 +77,8 @@ export interface PainPatterns {
 }
 
 export interface PainInterpretation {
-  labelDe: string;
-  descriptionDe: string;
+  label: string; // German only
+  description: string; // German only
 }
 
 export interface PainDrawingScore {
@@ -94,8 +93,7 @@ export interface PainDrawingScore {
 
 // Severity segment for UI display
 export interface SeveritySegment {
-  label: string;
-  labelDe: string;
+  label: string; // Display label (e.g., "0", "≥1")
   min: number;
   max: number;
   color: string;

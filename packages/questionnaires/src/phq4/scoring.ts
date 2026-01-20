@@ -56,13 +56,13 @@ export function calculatePHQ4Score(answers: PHQ4Answers): PHQ4Score {
  */
 export function getPHQ4Interpretation(score: PHQ4Score): PHQ4Interpretation {
   if (score.total <= 2) {
-    return { severity: "none", text: "Normal" };
+    return { severity: "none", label: "Normal" };
   } else if (score.total <= 5) {
-    return { severity: "mild", text: "Mild" };
+    return { severity: "mild", label: "Mild" };
   } else if (score.total <= 8) {
-    return { severity: "moderate", text: "Moderat" };
+    return { severity: "moderate", label: "Moderat" };
   } else {
-    return { severity: "severe", text: "Schwer" };
+    return { severity: "severe", label: "Schwer" };
   }
 }
 
@@ -72,7 +72,7 @@ export function getPHQ4Interpretation(score: PHQ4Score): PHQ4Interpretation {
  */
 export function getSubscaleInterpretation(score: number): PHQ4SubscaleResult {
   if (score >= 3) {
-    return { positive: true, text: "Auffällig (≥3)" };
+    return { positive: true, label: "Auffällig (≥3)" };
   }
-  return { positive: false, text: "Unauffällig (<3)" };
+  return { positive: false, label: "Unauffällig (<3)" };
 }

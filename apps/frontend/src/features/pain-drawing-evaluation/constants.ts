@@ -42,37 +42,32 @@ export const IMAGE_CONFIGS: Record<ImageId, ImageConfig> = {
   mouth: {
     id: "mouth",
     src: "/images/pain-drawing/mouth.jpeg",
-    label: "Mouth",
-    labelDe: "Mund",
+    label: "Mund",
     aspectRatio: 1.608, // 849 / 528
   },
   "head-right": {
     id: "head-right",
     src: "/images/pain-drawing/head-left.png", // Mirrored version of head-left
-    label: "Face Right",
-    labelDe: "Gesicht rechts",
+    label: "Gesicht rechts",
     aspectRatio: 1.356, // Same as head-left
     mirror: true,
   },
   "head-left": {
     id: "head-left",
     src: "/images/pain-drawing/head-left.png",
-    label: "Face Left",
-    labelDe: "Gesicht links",
+    label: "Gesicht links",
     aspectRatio: 1.356, // 1601 / 1181
   },
   "body-front": {
     id: "body-front",
     src: "/images/pain-drawing/body-front.png",
-    label: "Body Front",
-    labelDe: "Vorderseite",
+    label: "Vorderseite",
     aspectRatio: 1.905, // 1579 / 829
   },
   "body-back": {
     id: "body-back",
     src: "/images/pain-drawing/body-back.png",
-    label: "Body Back",
-    labelDe: "Rückseite",
+    label: "Rückseite",
     aspectRatio: 1.905, // 1579 / 829
   },
 };
@@ -95,7 +90,6 @@ export const REGION_ORDER: ImageId[] = [
 export const SEVERITY_SEGMENTS: SeveritySegment[] = [
   {
     label: "0",
-    labelDe: "",
     min: 0,
     max: 0,
     color: "bg-green-500",
@@ -103,7 +97,6 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
   },
   {
     label: "≥1",
-    labelDe: "",
     min: 1,
     max: 1,
     color: "bg-yellow-400",
@@ -111,7 +104,6 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
   },
   {
     label: "≥2",
-    labelDe: "",
     min: 2,
     max: 2,
     color: "bg-yellow-500",
@@ -119,7 +111,6 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
   },
   {
     label: "≥3",
-    labelDe: "",
     min: 3,
     max: 3,
     color: "bg-orange-500",
@@ -127,7 +118,6 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
   },
   {
     label: "≥4",
-    labelDe: "",
     min: 4,
     max: 4,
     color: "bg-orange-600",
@@ -135,7 +125,6 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
   },
   {
     label: "≥5",
-    labelDe: "",
     min: 5,
     max: 5,
     color: "bg-red-500",
@@ -144,24 +133,24 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
 ];
 
 /**
- * Risk level interpretations in German
+ * Risk level interpretations (German only)
  */
 export const RISK_INTERPRETATIONS = {
   none: {
-    labelDe: "Keine Schmerzangabe",
-    descriptionDe: "Patient hat keine Schmerzareale markiert.",
+    label: "Keine Schmerzangabe",
+    description: "Patient hat keine Schmerzareale markiert.",
   },
   localized: {
-    labelDe: "Lokalisierter Schmerz",
-    descriptionDe: "Schmerz auf eine Region begrenzt.",
+    label: "Lokalisierter Schmerz",
+    description: "Schmerz auf eine Region begrenzt.",
   },
   regional: {
-    labelDe: "Regionaler Schmerz",
-    descriptionDe: "Schmerz in mehreren benachbarten Regionen.",
+    label: "Regionaler Schmerz",
+    description: "Schmerz in mehreren benachbarten Regionen.",
   },
   widespread: {
-    labelDe: "Weitverbreiteter Schmerz",
-    descriptionDe:
+    label: "Weitverbreiteter Schmerz",
+    description:
       "Schmerz in vielen Körperbereichen. Erhöhtes Risiko für chronische Schmerzen.",
   },
 } as const;

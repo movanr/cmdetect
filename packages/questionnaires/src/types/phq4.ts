@@ -41,43 +41,34 @@ export type PHQ4Questionnaire = {
  */
 export type PHQ4Answers = Partial<Record<PHQ4QuestionId, string>>;
 
+import { z } from "zod";
+import {
+  PHQ4SeveritySchema,
+  PHQ4ScoreSchema,
+  PHQ4InterpretationSchema,
+  PHQ4SubscaleResultSchema,
+} from "../schemas/scores";
+
 /**
  * PHQ-4 calculated scores
+ * Derived from Zod schema for single source of truth.
  */
-export type PHQ4Score = {
-  /** Total score (0-12) */
-  total: number;
-  /** Maximum possible total */
-  maxTotal: number;
-  /** GAD-2 subscale score (PHQ4_C + PHQ4_D, 0-6) */
-  anxiety: number;
-  /** Maximum anxiety subscale */
-  maxAnxiety: number;
-  /** PHQ-2 subscale score (PHQ4_A + PHQ4_B, 0-6) */
-  depression: number;
-  /** Maximum depression subscale */
-  maxDepression: number;
-};
+export type PHQ4Score = z.infer<typeof PHQ4ScoreSchema>;
 
 /**
  * PHQ-4 severity levels
+ * Derived from Zod schema for single source of truth.
  */
-export type PHQ4Severity = "none" | "mild" | "moderate" | "severe";
+export type PHQ4Severity = z.infer<typeof PHQ4SeveritySchema>;
 
 /**
- * PHQ-4 interpretation with German text
+ * PHQ-4 interpretation with label (German only)
+ * Derived from Zod schema for single source of truth.
  */
-export type PHQ4Interpretation = {
-  severity: PHQ4Severity;
-  text: string; // German
-};
+export type PHQ4Interpretation = z.infer<typeof PHQ4InterpretationSchema>;
 
 /**
  * PHQ-4 subscale screening result
+ * Derived from Zod schema for single source of truth.
  */
-export type PHQ4SubscaleResult = {
-  /** Whether the subscale is positive (score >= 3) */
-  positive: boolean;
-  /** German text describing the result */
-  text: string;
-};
+export type PHQ4SubscaleResult = z.infer<typeof PHQ4SubscaleResultSchema>;

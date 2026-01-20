@@ -326,3 +326,46 @@ export {
   type ResponseData,
   type ValidationResult,
 } from "./validation";
+
+// ============================================================================
+// Score Schemas (Zod schemas - single source of truth for score types)
+// ============================================================================
+export {
+  // GCPS schemas
+  GCPSGradeSchema,
+  GCPSCPILevelSchema,
+  GCPSGradeInterpretationSchema,
+  GCPS1MScoreSchema,
+  // PHQ-4 schemas
+  PHQ4SeveritySchema,
+  PHQ4ScoreSchema,
+  PHQ4InterpretationSchema,
+  PHQ4SubscaleResultSchema,
+  // JFLS-8 schemas
+  JFLS8LimitationLevelSchema,
+  JFLS8LimitationInterpretationSchema,
+  JFLS8ScoreSchema,
+  // JFLS-20 schemas
+  JFLS20LimitationLevelSchema,
+  JFLS20LimitationInterpretationSchema,
+  JFLS20SubscaleScoreSchema,
+  JFLS20ScoreSchema,
+  // OBC schemas
+  OBCRiskLevelSchema,
+  OBCRiskInterpretationSchema,
+  OBCScoreSchema,
+  // Pain Drawing schemas
+  PainDrawingImageIdSchema,
+  PainDrawingRiskLevelSchema,
+  PainDrawingElementCountsSchema,
+  PainDrawingPatternsSchema,
+  PainDrawingInterpretationSchema,
+  PainDrawingScoreSchema,
+  // PDF Export schemas
+  AnamnesisExportMetadataSchema,
+  AnamnesisExportPatientSchema,
+  SQExportDataSchema,
+  PainDrawingExportDataSchema,
+  AnamnesisExportQuestionnairesSchema,
+  AnamnesisExportDataSchema,
+} from "./schemas";

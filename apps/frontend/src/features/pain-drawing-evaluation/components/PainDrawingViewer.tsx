@@ -70,7 +70,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
                       : "text-muted-foreground"
                   }`}
                 >
-                  {segment.labelDe}
+                  {segment.label}
                 </div>
               ))}
             </div>
@@ -81,7 +81,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
             <span className="text-3xl font-bold">{score.regionCount}</span>
             <span className="text-xl text-muted-foreground ml-1">/ 5</span>
             <span className="ml-3 text-lg font-medium">
-              {score.interpretation.labelDe}
+              {score.interpretation.label}
             </span>
           </div>
 
@@ -100,7 +100,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
             <div className="flex flex-wrap gap-2 justify-center pt-2 border-t">
               {score.affectedRegions.map((regionId) => (
                 <Badge key={regionId} variant="secondary">
-                  {IMAGE_CONFIGS[regionId].labelDe}
+                  {IMAGE_CONFIGS[regionId].label}
                 </Badge>
               ))}
             </div>
@@ -127,7 +127,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
                     value={regionId}
                     className="relative text-xs"
                   >
-                    {config.labelDe}
+                    {config.label}
                     {hasElements && (
                       <span className="absolute -top-1 -right-1 size-2 rounded-full bg-red-500" />
                     )}

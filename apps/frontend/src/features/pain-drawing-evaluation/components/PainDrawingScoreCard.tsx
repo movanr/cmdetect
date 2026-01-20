@@ -163,7 +163,7 @@ export function PainDrawingScoreCard({
         <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between pr-8">
-              <span>{selectedRegion ? IMAGE_CONFIGS[selectedRegion].labelDe : ""}</span>
+              <span>{selectedRegion ? IMAGE_CONFIGS[selectedRegion].label : ""}</span>
               <span className="text-sm font-normal text-muted-foreground">
                 {selectedRegion ? REGION_ORDER.indexOf(selectedRegion) + 1 : 0} /{" "}
                 {REGION_ORDER.length}

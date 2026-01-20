@@ -63,18 +63,25 @@ export type JFLS20Questionnaire = {
  */
 export type JFLS20Answers = Partial<Record<JFLS20QuestionId, string>>;
 
-/**
- * JFLS-20 limitation level (same as JFLS-8)
- */
-export type JFLS20LimitationLevel = "normal" | "mild" | "significant";
+import { z } from "zod";
+import {
+  JFLS20LimitationLevelSchema,
+  JFLS20LimitationInterpretationSchema,
+  JFLS20SubscaleScoreSchema,
+  JFLS20ScoreSchema,
+} from "../schemas/scores";
 
 /**
- * JFLS-20 limitation interpretation
+ * JFLS-20 limitation level (same as JFLS-8)
+ * Derived from Zod schema for single source of truth.
  */
-export type JFLS20LimitationInterpretation = {
-  label: string;
-  labelDe: string;
-};
+export type JFLS20LimitationLevel = z.infer<typeof JFLS20LimitationLevelSchema>;
+
+/**
+ * JFLS-20 limitation interpretation (German only)
+ * Derived from Zod schema for single source of truth.
+ */
+export type JFLS20LimitationInterpretation = z.infer<typeof JFLS20LimitationInterpretationSchema>;
 
 /**
  * JFLS-20 subscale identifiers
@@ -87,35 +94,12 @@ export type JFLS20SubscaleId = "mastication" | "mobility" | "communication";
 
 /**
  * JFLS-20 subscale score result
+ * Derived from Zod schema for single source of truth.
  */
-export type JFLS20SubscaleScore = {
-  score: number | null;
-  answeredCount: number;
-  totalQuestions: number;
-  missingCount: number;
-  isValid: boolean;
-  limitationLevel: JFLS20LimitationLevel | null;
-  limitationInterpretation: JFLS20LimitationInterpretation | null;
-};
+export type JFLS20SubscaleScore = z.infer<typeof JFLS20SubscaleScoreSchema>;
 
 /**
  * Complete JFLS-20 score result with subscales
+ * Derived from Zod schema for single source of truth.
  */
-export type JFLS20Score = {
-  /** Global score: mean of all items (max 2 missing allowed) */
-  globalScore: number | null;
-  /** Alternative global: mean of 3 subscale scores (all must be valid) */
-  subscaleGlobalScore: number | null;
-  maxScore: number;
-  answeredCount: number;
-  totalQuestions: number;
-  missingCount: number;
-  isValid: boolean;
-  limitationLevel: JFLS20LimitationLevel | null;
-  limitationInterpretation: JFLS20LimitationInterpretation | null;
-  subscales: {
-    mastication: JFLS20SubscaleScore;
-    mobility: JFLS20SubscaleScore;
-    communication: JFLS20SubscaleScore;
-  };
-};
+export type JFLS20Score = z.infer<typeof JFLS20ScoreSchema>;

@@ -51,32 +51,30 @@ export type JFLS8Questionnaire = {
  */
 export type JFLS8Answers = Partial<Record<JFLS8QuestionId, string>>;
 
+import { z } from "zod";
+import {
+  JFLS8LimitationLevelSchema,
+  JFLS8LimitationInterpretationSchema,
+  JFLS8ScoreSchema,
+} from "../schemas/scores";
+
 /**
  * JFLS-8 limitation level based on reference values
  * - normal: <0.5 (within healthy range, ref: 0.16)
  * - mild: 0.5-1.5 (between healthy and chronic TMD)
  * - significant: ≥1.5 (chronic TMD range, ref: 1.74)
+ * Derived from Zod schema for single source of truth.
  */
-export type JFLS8LimitationLevel = "normal" | "mild" | "significant";
+export type JFLS8LimitationLevel = z.infer<typeof JFLS8LimitationLevelSchema>;
 
 /**
- * JFLS-8 limitation interpretation
+ * JFLS-8 limitation interpretation (German only)
+ * Derived from Zod schema for single source of truth.
  */
-export type JFLS8LimitationInterpretation = {
-  label: string;
-  labelDe: string;
-};
+export type JFLS8LimitationInterpretation = z.infer<typeof JFLS8LimitationInterpretationSchema>;
 
 /**
  * Complete JFLS-8 score result
+ * Derived from Zod schema for single source of truth.
  */
-export type JFLS8Score = {
-  globalScore: number | null;
-  maxScore: number;
-  answeredCount: number;
-  totalQuestions: number;
-  missingCount: number;
-  isValid: boolean;
-  limitationLevel: JFLS8LimitationLevel | null;
-  limitationInterpretation: JFLS8LimitationInterpretation | null;
-};
+export type JFLS8Score = z.infer<typeof JFLS8ScoreSchema>;

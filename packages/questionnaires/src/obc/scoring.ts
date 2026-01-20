@@ -16,10 +16,10 @@ import { OBC_QUESTION_ORDER } from "./questions";
 /**
  * Risk level interpretations with German labels
  */
-const RISK_INTERPRETATIONS: Record<OBCRiskLevel, { label: string; labelDe: string }> = {
-  normal: { label: "Normal", labelDe: "Normale Verhaltensweisen" },
-  elevated: { label: "Elevated", labelDe: "Erhöhtes Risiko" },
-  high: { label: "High", labelDe: "Hohes Risiko" },
+const RISK_INTERPRETATIONS: Record<OBCRiskLevel, { label: string }> = {
+  normal: { label: "Normale Verhaltensweisen" },
+  elevated: { label: "Erhöhtes Risiko" },
+  high: { label: "Hohes Risiko" },
 };
 
 /**

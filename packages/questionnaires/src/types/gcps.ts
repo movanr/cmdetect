@@ -74,45 +74,34 @@ export type GCPS1MQuestionnaire = {
  */
 export type GCPS1MAnswers = Partial<Record<GCPS1MQuestionId, string | number>>;
 
-/**
- * GCPS Chronic Pain Grade (0-IV)
- */
-export type GCPSGrade = 0 | 1 | 2 | 3 | 4;
+import { z } from "zod";
+import {
+  GCPSGradeSchema,
+  GCPSCPILevelSchema,
+  GCPSGradeInterpretationSchema,
+  GCPS1MScoreSchema,
+} from "../schemas/scores";
 
 /**
- * GCPS Grade interpretation with labels
+ * GCPS Chronic Pain Grade (0-IV)
+ * Derived from Zod schema for single source of truth.
  */
-export type GCPSGradeInterpretation = {
-  grade: GCPSGrade;
-  label: string; // e.g., "Low Intensity", "High Intensity"
-  labelDe: string; // German label
-};
+export type GCPSGrade = z.infer<typeof GCPSGradeSchema>;
+
+/**
+ * GCPS Grade interpretation with label (German only)
+ * Derived from Zod schema for single source of truth.
+ */
+export type GCPSGradeInterpretation = z.infer<typeof GCPSGradeInterpretationSchema>;
 
 /**
  * CPI (Characteristic Pain Intensity) interpretation
+ * Derived from Zod schema for single source of truth.
  */
-export type GCPSCPILevel = "none" | "low" | "high";
+export type GCPSCPILevel = z.infer<typeof GCPSCPILevelSchema>;
 
 /**
  * GCPS 1-month calculated scores
+ * Derived from Zod schema for single source of truth.
  */
-export type GCPS1MScore = {
-  /** Characteristic Pain Intensity (mean of items 2-4 × 10), range 0-100 */
-  cpi: number;
-  /** CPI level interpretation */
-  cpiLevel: GCPSCPILevel;
-  /** Interference Score (mean of items 6-8 × 10), range 0-100 */
-  interferenceScore: number;
-  /** Interference points derived from score (0-3) */
-  interferencePoints: number;
-  /** Disability days from item 5 */
-  disabilityDays: number;
-  /** Disability days points (0-3) */
-  disabilityDaysPoints: number;
-  /** Total disability points (interference + days), range 0-6 */
-  totalDisabilityPoints: number;
-  /** Final Chronic Pain Grade (0-IV) */
-  grade: GCPSGrade;
-  /** Grade interpretation */
-  gradeInterpretation: GCPSGradeInterpretation;
-};
+export type GCPS1MScore = z.infer<typeof GCPS1MScoreSchema>;

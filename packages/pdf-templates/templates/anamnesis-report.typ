@@ -87,25 +87,25 @@
 }
 
 #if gcps1m-data != none {
-  summary-rows.push(([GCPS (Chronische Schmerzen)], [Grad #gcps1m-data.grade], [0-IV], [#gcps1m-data.gradeInterpretation.labelDe]))
+  summary-rows.push(([GCPS (Chronische Schmerzen)], [Grad #gcps1m-data.grade], [0-IV], [#gcps1m-data.gradeInterpretation.label]))
 }
 
 #if jfls8-data != none and jfls8-data.isValid and jfls8-data.globalScore != none {
-  let interp = if jfls8-data.limitationInterpretation != none { jfls8-data.limitationInterpretation.labelDe } else { "-" }
+  let interp = if jfls8-data.limitationInterpretation != none { jfls8-data.limitationInterpretation.label } else { "-" }
   summary-rows.push(([JFLS-8 (Kieferfunktion)], [#str(calc.round(jfls8-data.globalScore, digits: 1))], [0-10], [#interp]))
 }
 
 #if jfls20-data != none and jfls20-data.isValid and jfls20-data.globalScore != none {
-  let interp = if jfls20-data.limitationInterpretation != none { jfls20-data.limitationInterpretation.labelDe } else { "-" }
+  let interp = if jfls20-data.limitationInterpretation != none { jfls20-data.limitationInterpretation.label } else { "-" }
   summary-rows.push(([JFLS-20 (Kieferfunktion erweitert)], [#str(calc.round(jfls20-data.globalScore, digits: 1))], [0-10], [#interp]))
 }
 
 #if obc-data != none {
-  summary-rows.push(([OBC (Orale Verhaltensweisen)], [#obc-data.totalScore / #obc-data.maxScore], [0-84], [#obc-data.riskInterpretation.labelDe]))
+  summary-rows.push(([OBC (Orale Verhaltensweisen)], [#obc-data.totalScore / #obc-data.maxScore], [0-84], [#obc-data.riskInterpretation.label]))
 }
 
 #if painDrawing-data != none {
-  summary-rows.push(([Schmerzzeichnung], [#painDrawing-data.score.regionCount / 5 Regionen], [0-5], [#painDrawing-data.score.interpretation.labelDe]))
+  summary-rows.push(([Schmerzzeichnung], [#painDrawing-data.score.regionCount / 5 Regionen], [0-5], [#painDrawing-data.score.interpretation.label]))
 }
 
 #if sq-data != none {
@@ -174,7 +174,7 @@
     columns: (1fr, auto),
     stroke: 0.5pt,
     inset: 6pt,
-    [Chronifizierungsgrad], [*Grad #gcps1m-data.grade* - #gcps1m-data.gradeInterpretation.labelDe],
+    [Chronifizierungsgrad], [*Grad #gcps1m-data.grade* - #gcps1m-data.gradeInterpretation.label],
     [Charakteristische Schmerzintensitaet (CPI)], [#gcps1m-data.cpi / 100 (#gcps1m-data.cpiLevel)],
     [Beeintraechtigungswert], [#gcps1m-data.interferenceScore / 100],
     [Beeintraechtigungspunkte], [#gcps1m-data.interferencePoints BP],
@@ -202,7 +202,7 @@
       stroke: 0.5pt,
       inset: 6pt,
       [Globaler Score], [*#str(calc.round(jfls8-data.globalScore, digits: 2))* / #jfls8-data.maxScore],
-      [Einschraenkungsniveau], [#if jfls8-data.limitationInterpretation != none { jfls8-data.limitationInterpretation.labelDe } else { "-" }],
+      [Einschraenkungsniveau], [#if jfls8-data.limitationInterpretation != none { jfls8-data.limitationInterpretation.label } else { "-" }],
       [Beantwortete Fragen], [#jfls8-data.answeredCount / #jfls8-data.totalQuestions],
     )
 
@@ -228,7 +228,7 @@
       stroke: 0.5pt,
       inset: 6pt,
       [Globaler Score], [*#str(calc.round(jfls20-data.globalScore, digits: 2))* / #jfls20-data.maxScore],
-      [Einschraenkungsniveau], [#if jfls20-data.limitationInterpretation != none { jfls20-data.limitationInterpretation.labelDe } else { "-" }],
+      [Einschraenkungsniveau], [#if jfls20-data.limitationInterpretation != none { jfls20-data.limitationInterpretation.label } else { "-" }],
       [Beantwortete Fragen], [#jfls20-data.answeredCount / #jfls20-data.totalQuestions],
     )
 
@@ -269,7 +269,7 @@
     stroke: 0.5pt,
     inset: 6pt,
     [Gesamtpunktzahl], [*#obc-data.totalScore* / #obc-data.maxScore],
-    [Risikoniveau], [#obc-data.riskInterpretation.labelDe],
+    [Risikoniveau], [#obc-data.riskInterpretation.label],
     [Beantwortete Fragen], [#obc-data.answeredCount / #obc-data.totalQuestions],
   )
 
@@ -298,7 +298,7 @@
     stroke: 0.5pt,
     inset: 6pt,
     [Betroffene Regionen], [*#score.regionCount* / 5],
-    [Schmerzausbreitung], [#score.interpretation.labelDe],
+    [Schmerzausbreitung], [#score.interpretation.label],
     [Gesamtanzahl Markierungen], [#score.totalElements],
   )
 
