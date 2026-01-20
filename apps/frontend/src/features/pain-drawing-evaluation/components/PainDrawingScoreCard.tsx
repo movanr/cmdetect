@@ -4,21 +4,16 @@
  * Follows the Axis2ScoreCard pattern for consistent UI
  */
 
-import { useState } from "react";
-import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import { IMAGE_CONFIGS, REGION_ORDER, SEVERITY_SEGMENTS } from "../constants";
 import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
 import type { ImageId, PainDrawingData } from "../types";
-import { RegionThumbnail } from "./RegionThumbnail";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
+import { RegionThumbnail } from "./RegionThumbnail";
 
 interface PainDrawingScoreCardProps {
   data: PainDrawingData | null;
@@ -48,9 +43,7 @@ export function PainDrawingScoreCard({
         <CardHeader className="p-4">
           <div>
             <h4 className="font-medium text-muted-foreground">{title}</h4>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
             <p className="text-sm text-muted-foreground mt-2">Keine Daten</p>
           </div>
         </CardHeader>
@@ -70,9 +63,7 @@ export function PainDrawingScoreCard({
           <div className="flex items-start justify-between mb-4">
             <div>
               <h4 className="font-medium">{title}</h4>
-              {subtitle && (
-                <p className="text-sm text-muted-foreground">{subtitle}</p>
-              )}
+              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
             </div>
             <Button
               variant="ghost"
@@ -93,7 +84,7 @@ export function PainDrawingScoreCard({
           </div>
 
           {/* Severity label */}
-          <p className="text-sm text-muted-foreground mb-2">Betroffene Regionen</p>
+          <p className="text-sm text-muted-foreground mb-2">Anzahl schmerzhafter Körperstellen</p>
 
           {/* Severity scale */}
           <div className="relative">
@@ -122,45 +113,19 @@ export function PainDrawingScoreCard({
             </div>
           </div>
 
-          {/* Labels under scale */}
-          <div className="flex mt-1 text-[9px]">
-            {SEVERITY_SEGMENTS.map((segment, index) => (
-              <div
-                key={segment.label}
-                className={`flex-1 text-center ${
-                  index === activeSegmentIndex
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {segment.labelDe}
-              </div>
-            ))}
-          </div>
-
-          {/* Score display */}
-          <div className="flex items-center justify-center mt-3">
-            <span className="text-2xl font-bold">{score.regionCount}</span>
-            <span className="text-lg text-muted-foreground ml-1">/ 5</span>
-            <span className="ml-3 text-sm font-medium">
-              {score.regionCount === 1 ? "Region" : "Regionen"}
-            </span>
-          </div>
-
-          {/* Interpretation */}
-          <div className="text-center mt-1">
-            <span className="text-sm text-muted-foreground">
-              {score.interpretation.labelDe}
-            </span>
-          </div>
+          {/* Risk interpretation - only shown when pain is marked */}
+          {score.regionCount >= 1 && (
+            <p className="text-center text-sm text-muted-foreground mt-2">
+              Jede mit Schmerzen markierte Körperstelle erhöht das Risiko, eine weitere
+              Schmerzerkrankung sowie chronische Schmerzen zu entwickeln.
+            </p>
+          )}
 
           {/* Widespread pain warning */}
           {isWidespread && (
             <div className="flex items-center justify-center gap-1.5 mt-3 text-red-600">
               <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">
-                Schmerz in mehreren Körperbereichen
-              </span>
+              <span className="text-sm font-medium">Schmerz in mehreren Körperbereichen</span>
             </div>
           )}
         </CardHeader>
@@ -200,7 +165,8 @@ export function PainDrawingScoreCard({
             <DialogTitle className="flex items-center justify-between pr-8">
               <span>{selectedRegion ? IMAGE_CONFIGS[selectedRegion].labelDe : ""}</span>
               <span className="text-sm font-normal text-muted-foreground">
-                {selectedRegion ? REGION_ORDER.indexOf(selectedRegion) + 1 : 0} / {REGION_ORDER.length}
+                {selectedRegion ? REGION_ORDER.indexOf(selectedRegion) + 1 : 0} /{" "}
+                {REGION_ORDER.length}
               </span>
             </DialogTitle>
           </DialogHeader>
@@ -213,7 +179,8 @@ export function PainDrawingScoreCard({
                   size="icon"
                   onClick={() => {
                     const currentIndex = REGION_ORDER.indexOf(selectedRegion);
-                    const prevIndex = (currentIndex - 1 + REGION_ORDER.length) % REGION_ORDER.length;
+                    const prevIndex =
+                      (currentIndex - 1 + REGION_ORDER.length) % REGION_ORDER.length;
                     setSelectedRegion(REGION_ORDER[prevIndex]);
                   }}
                   className="shrink-0"
