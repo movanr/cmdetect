@@ -91,6 +91,19 @@ export type {
   JFLS20SubscaleId,
   JFLS20SubscaleScore,
   JFLS20Score,
+  // PDF Export types
+  AnamnesisExportData,
+  AnamnesisExportMetadata,
+  AnamnesisExportPatient,
+  AnamnesisExportQuestionnaires,
+  SQExportData,
+  PainDrawingExportData,
+  PainDrawingScore,
+  PainDrawingImageId,
+  PainDrawingRiskLevel,
+  PainDrawingElementCounts,
+  PainDrawingPatterns,
+  PainDrawingInterpretation,
 } from "./types";
 
 // ============================================================================

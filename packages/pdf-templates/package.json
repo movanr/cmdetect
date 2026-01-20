@@ -1,0 +1,16 @@
+{
+  "name": "@cmdetect/pdf-templates",
+  "version": "1.0.0",
+  "description": "Typst templates for PDF generation",
+  "type": "module",
+  "exports": {
+    "./templates/*": "./templates/*"
+  },
+  "files": [
+    "templates",
+    "fonts"
+  ],
+  "scripts": {
+    "lint": "echo 'No linting for templates'"
+  }
+}
