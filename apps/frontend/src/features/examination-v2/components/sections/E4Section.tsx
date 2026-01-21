@@ -10,7 +10,14 @@ import {
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
-import { DiagramInterviewStep, MeasurementStep, StepBar, type StepStatus } from "../ui";
+import { E4_INSTRUCTIONS } from "../../content/instructions";
+import {
+  DiagramInterviewStep,
+  InstructionBlock,
+  MeasurementStep,
+  StepBar,
+  type StepStatus,
+} from "../ui";
 
 // Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
@@ -27,6 +34,18 @@ const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
   "e4b-interview": { badge: "E4B", title: "Schmerzbefragung" },
   "e4c-measure": { badge: "E4C", title: "Maximale passive Mundöffnung" },
   "e4c-interview": { badge: "E4C", title: "Schmerzbefragung" },
+};
+
+// Map step IDs to instruction keys
+const E4_STEP_INSTRUCTIONS: Record<
+  string,
+  "painFreeOpening" | "maxUnassistedOpening" | "maxAssistedOpening" | "painInterview"
+> = {
+  e4a: "painFreeOpening",
+  "e4b-measure": "maxUnassistedOpening",
+  "e4b-interview": "painInterview",
+  "e4c-measure": "maxAssistedOpening",
+  "e4c-interview": "painInterview",
 };
 
 interface E4SectionProps {
@@ -154,6 +173,34 @@ export function E4Section({ onComplete }: E4SectionProps) {
                   <Badge>{config.badge}</Badge>
                   <h3 className="font-semibold">{config.title}</h3>
                 </div>
+
+                {/* Instruction */}
+                {(() => {
+                  const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
+                  const instruction = E4_INSTRUCTIONS[instructionKey];
+
+                  if (stepIsInterview && "prompt" in instruction) {
+                    // Pain interview guidance
+                    return (
+                      <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
+                        <div className="text-muted-foreground italic">"{instruction.prompt}"</div>
+                        <div className="text-muted-foreground text-xs">{instruction.guidance}</div>
+                      </div>
+                    );
+                  }
+
+                  if (!stepIsInterview && "patientScript" in instruction) {
+                    // Measurement step instruction
+                    return (
+                      <InstructionBlock
+                        patientScript={instruction.patientScript}
+                        examinerAction={instruction.examinerAction}
+                      />
+                    );
+                  }
+
+                  return null;
+                })()}
 
                 {/* Content */}
                 {stepIsInterview ? (

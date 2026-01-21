@@ -17,3 +17,4 @@ export {
   RegionStatusList,
   type RegionStatusListProps,
 } from "./RegionStatusList";
+export { InstructionBlock } from "./InstructionBlock";
