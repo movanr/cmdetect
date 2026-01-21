@@ -10,7 +10,7 @@ import {
   type MovementRegion,
 } from "./regions";
 
-type GroupWithChildren = GroupNode & { __children: Record<string, ModelNode> };
+type GroupWithChildren<C extends Record<string, ModelNode> = Record<string, ModelNode>> = GroupNode<C>;
 
 /**
  * Build pain questions for one region.

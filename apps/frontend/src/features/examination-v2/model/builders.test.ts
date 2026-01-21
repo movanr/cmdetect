@@ -3,7 +3,7 @@ import { bilateralPainInterview, spreadChildren } from "./builders";
 import { M } from "./nodes";
 import { Q } from "./primitives";
 import { SIDES, MOVEMENT_REGIONS } from "./regions";
-import type { QuestionNode, GroupNode } from "./nodes";
+import type { QuestionNode, GroupNode, ModelNode } from "./nodes";
 
 describe("model builders", () => {
   describe("bilateralPainInterview", () => {
@@ -172,7 +172,9 @@ describe("model builders", () => {
       });
 
       // Verify the nested structure is preserved
-      const leftSide = combined.__children.left as GroupNode;
+      // TypeScript can't infer spread properties, so we cast __children
+      const children = combined.__children as Record<string, ModelNode>;
+      const leftSide = children.left as GroupNode;
       const leftTemporalis = leftSide.__children.temporalis as GroupNode;
       expect(leftTemporalis.__children).toHaveProperty("pain");
       expect(leftTemporalis.__children).toHaveProperty("familiarPain");

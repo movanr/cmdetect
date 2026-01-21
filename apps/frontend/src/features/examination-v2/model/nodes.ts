@@ -1,36 +1,42 @@
+import type { z } from "zod";
 import type { AnyPrimitive } from "./primitives";
 
-export type QuestionNode = {
+export type QuestionNode<P extends AnyPrimitive = AnyPrimitive> = {
   __nodeType: "question";
-  __primitive: AnyPrimitive;
+  __primitive: P;
   __labelKey?: string;
 };
 
-export type GroupNode = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type GroupNode<C extends Record<string, any> = Record<string, any>> = {
   __nodeType: "group";
-  __children: Record<string, ModelNode>;
+  __children: C;
 };
 
 export type ModelNode = QuestionNode | GroupNode;
 
 export const M = {
-  question: (primitive: AnyPrimitive, labelKey?: string): QuestionNode => ({
+  question: <P extends AnyPrimitive>(
+    primitive: P,
+    labelKey?: string
+  ): QuestionNode<P> => ({
     __nodeType: "question",
     __primitive: primitive,
     __labelKey: labelKey,
   }),
 
-  group: <T extends Record<string, ModelNode>>(
-    children: T
-  ): GroupNode & { __children: T } => ({
+  group: <C extends Record<string, ModelNode>>(children: C): GroupNode<C> => ({
     __nodeType: "group",
     __children: children,
   }),
 };
 
 // Type helper for inferring form values from model
-export type InferModelType<T extends ModelNode> = T extends QuestionNode
-  ? ReturnType<T["__primitive"]["schema"]["parse"]>
-  : T extends GroupNode
-    ? { [K in keyof T["__children"]]: InferModelType<T["__children"][K]> }
-    : never;
+export type InferModelType<T extends ModelNode> =
+  T extends QuestionNode<infer P>
+    ? P extends { schema: z.ZodType<infer U> }
+      ? U
+      : never
+    : T extends GroupNode<infer C>
+      ? { [K in keyof C]: InferModelType<C[K]> }
+      : never;
