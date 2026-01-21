@@ -504,5 +504,130 @@ describe("validation", () => {
         "e4.lateralRight",
       ]);
     });
+
+    describe("measurement with terminated sibling", () => {
+      it("shows 'Bitte Messwert eingeben' for measurement without terminated sibling", () => {
+        const instances: QuestionInstance[] = [
+          {
+            path: "e4.painFree.measurement",
+            renderType: "measurement",
+            context: {},
+            config: { required: true, min: 0, max: 60 },
+          },
+        ];
+
+        const values: Record<string, unknown> = {
+          "e4.painFree.measurement": null,
+          // No terminated sibling exists
+        };
+
+        const result = validateInstances(instances, (path) => values[path]);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0]).toEqual({
+          path: "e4.painFree.measurement",
+          message: "Bitte Messwert eingeben",
+        });
+      });
+
+      it("shows alternate message when terminated sibling exists but is unchecked", () => {
+        const instances: QuestionInstance[] = [
+          {
+            path: "e4.maxAssisted.measurement",
+            renderType: "measurement",
+            context: {},
+            config: { required: true, min: 0, max: 60 },
+          },
+        ];
+
+        const values: Record<string, unknown> = {
+          "e4.maxAssisted.measurement": null,
+          "e4.maxAssisted.terminated": false, // sibling exists but unchecked
+        };
+
+        const result = validateInstances(instances, (path) => values[path]);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0]).toEqual({
+          path: "e4.maxAssisted.measurement",
+          message: "Bitte Messwert eingeben oder 'Abgebrochen' ankreuzen",
+        });
+      });
+
+      it("allows empty measurement when terminated sibling is checked", () => {
+        const instances: QuestionInstance[] = [
+          {
+            path: "e4.maxAssisted.measurement",
+            renderType: "measurement",
+            context: {},
+            config: { required: true, min: 0, max: 60 },
+          },
+        ];
+
+        const values: Record<string, unknown> = {
+          "e4.maxAssisted.measurement": null,
+          "e4.maxAssisted.terminated": true, // sibling checked = measurement not required
+        };
+
+        const result = validateInstances(instances, (path) => values[path]);
+
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+      });
+
+      it("validates normally when measurement has value regardless of terminated", () => {
+        const instances: QuestionInstance[] = [
+          {
+            path: "e4.maxAssisted.measurement",
+            renderType: "measurement",
+            context: {},
+            config: { required: true, min: 0, max: 60 },
+          },
+        ];
+
+        // With terminated false
+        const values1: Record<string, unknown> = {
+          "e4.maxAssisted.measurement": 35,
+          "e4.maxAssisted.terminated": false,
+        };
+        const result1 = validateInstances(instances, (path) => values1[path]);
+        expect(result1.valid).toBe(true);
+
+        // With terminated true
+        const values2: Record<string, unknown> = {
+          "e4.maxAssisted.measurement": 35,
+          "e4.maxAssisted.terminated": true,
+        };
+        const result2 = validateInstances(instances, (path) => values2[path]);
+        expect(result2.valid).toBe(true);
+      });
+
+      it("still validates range even when terminated sibling exists", () => {
+        const instances: QuestionInstance[] = [
+          {
+            path: "e4.maxAssisted.measurement",
+            renderType: "measurement",
+            context: {},
+            config: { required: true, min: 0, max: 60 },
+          },
+        ];
+
+        const values: Record<string, unknown> = {
+          "e4.maxAssisted.measurement": 100, // exceeds max
+          "e4.maxAssisted.terminated": false,
+        };
+
+        const result = validateInstances(instances, (path) => values[path]);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0]).toEqual({
+          path: "e4.maxAssisted.measurement",
+          message: "Maximum: 60",
+        });
+      });
+    });
   });
 });

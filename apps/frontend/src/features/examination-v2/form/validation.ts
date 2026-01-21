@@ -100,6 +100,14 @@ export function isFieldEnabled(
 }
 
 /**
+ * Helper to get sibling terminated path from a measurement path.
+ * e.g., "e4.maxAssisted.measurement" → "e4.maxAssisted.terminated"
+ */
+function getTerminatedSiblingPath(path: string): string {
+  return path.replace(/\.[^.]+$/, ".terminated");
+}
+
+/**
  * Single source of truth for all form validation rules.
  * Returns a list of errors for the given instances.
  */
@@ -116,13 +124,47 @@ export function validateInstances(
     const value = getValue(instance.path);
     const config = instance.config as { required?: boolean; min?: number; max?: number };
 
-    // Required validation
-    if (config.required && (value == null || value === "")) {
-      errors.push({ path: instance.path, message: "Dieses Feld ist erforderlich" });
-      continue; // Skip further checks for this field
+    // Measurement-specific required validation
+    if (instance.renderType === "measurement" && config.required) {
+      const terminatedPath = getTerminatedSiblingPath(instance.path);
+      const terminatedValue = getValue(terminatedPath);
+
+      // Check if terminated sibling exists (not undefined) and is checked
+      const hasTerminatedSibling = terminatedValue !== undefined;
+      const isTerminated = terminatedValue === true;
+
+      if (value == null || value === "") {
+        if (isTerminated) {
+          // Terminated is checked - measurement not required, skip validation
+          continue;
+        }
+        // Choose message based on whether terminated sibling exists
+        const message = hasTerminatedSibling
+          ? "Bitte Messwert eingeben oder 'Abgebrochen' ankreuzen"
+          : "Bitte Messwert eingeben";
+        errors.push({ path: instance.path, message });
+        continue;
+      }
+
+      // Range validation for measurements with values
+      const numValue = Number(value);
+      const min = config.min ?? 0;
+      const max = config.max ?? 100;
+      if (numValue < min) {
+        errors.push({ path: instance.path, message: `Minimum: ${min}` });
+      } else if (numValue > max) {
+        errors.push({ path: instance.path, message: `Maximum: ${max}` });
+      }
+      continue;
     }
 
-    // Range validation for measurements
+    // Generic required validation (non-measurement fields)
+    if (config.required && (value == null || value === "")) {
+      errors.push({ path: instance.path, message: "Dieses Feld ist erforderlich" });
+      continue;
+    }
+
+    // Range validation for non-required measurements with values
     if (instance.renderType === "measurement" && value != null && value !== "") {
       const numValue = Number(value);
       const min = config.min ?? 0;

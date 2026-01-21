@@ -59,7 +59,21 @@ function CheckboxField<T extends FieldValues>({
   name: FieldPath<T>;
   label?: string;
 }) {
-  const { control } = useFormContext<T>();
+  const { control, clearErrors } = useFormContext<T>();
+
+  // Check if this is a "terminated" checkbox that should clear sibling measurement error
+  const isTerminatedCheckbox = name.endsWith(".terminated");
+  const siblingMeasurementPath = isTerminatedCheckbox
+    ? (name.replace(/\.terminated$/, ".measurement") as FieldPath<T>)
+    : null;
+
+  const handleCheckedChange = (checked: boolean, onChange: (value: boolean) => void) => {
+    onChange(checked);
+    // When terminated is checked, clear the error on the sibling measurement field
+    if (checked && siblingMeasurementPath) {
+      clearErrors(siblingMeasurementPath);
+    }
+  };
 
   return (
     <Controller
@@ -70,7 +84,9 @@ function CheckboxField<T extends FieldValues>({
           <Checkbox
             id={name}
             checked={field.value}
-            onCheckedChange={field.onChange}
+            onCheckedChange={(checked) =>
+              handleCheckedChange(checked === true, field.onChange)
+            }
           />
           {label && (
             <label htmlFor={name} className="text-sm text-muted-foreground">

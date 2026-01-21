@@ -24,7 +24,7 @@ export function YesNoField<T extends FieldValues>({
   disabled,
   className,
 }: YesNoFieldProps<T>) {
-  const { control } = useFormContext<T>();
+  const { control, clearErrors } = useFormContext<T>();
 
   return (
     <FormField
@@ -38,7 +38,11 @@ export function YesNoField<T extends FieldValues>({
           <FormControl>
             <YesNoInput
               value={field.value}
-              onChange={field.onChange}
+              onChange={(value) => {
+                field.onChange(value);
+                // Clear error when user makes a selection
+                clearErrors(name);
+              }}
               disabled={disabled}
               labels={labels}
             />

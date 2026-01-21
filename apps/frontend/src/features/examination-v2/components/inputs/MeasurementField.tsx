@@ -28,7 +28,7 @@ export function MeasurementField<T extends FieldValues>({
   disabled,
   className,
 }: MeasurementFieldProps<T>) {
-  const { control } = useFormContext<T>();
+  const { control, clearErrors } = useFormContext<T>();
 
   return (
     <FormField
@@ -49,6 +49,8 @@ export function MeasurementField<T extends FieldValues>({
                 const val = e.target.value;
                 // Convert empty string to null, otherwise parse as number
                 field.onChange(val === "" ? null : Number(val));
+                // Clear error when user starts typing
+                clearErrors(name);
               }}
               onBlur={field.onBlur}
               ref={field.ref}
