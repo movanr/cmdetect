@@ -118,7 +118,7 @@ export function validateInstances(
 
     // Required validation
     if (config.required && (value == null || value === "")) {
-      errors.push({ path: instance.path, message: "Required" });
+      errors.push({ path: instance.path, message: "Dieses Feld ist erforderlich" });
       continue; // Skip further checks for this field
     }
 

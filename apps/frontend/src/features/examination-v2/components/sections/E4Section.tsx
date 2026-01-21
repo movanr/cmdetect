@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, CheckCircle, SkipForward } from "lucide-react";
 import { useState } from "react";
 import type { FieldPath } from "react-hook-form";
+import { E4_INSTRUCTIONS } from "../../content/instructions";
 import {
   useExaminationForm,
   type ExaminationStepId,
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
-import { E4_INSTRUCTIONS } from "../../content/instructions";
 import {
   DiagramInterviewStep,
   InstructionBlock,
@@ -29,11 +29,11 @@ const E4_STEP_ORDER: ExaminationStepId[] = [
 ];
 
 const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
-  e4a: { badge: "E4A", title: "Schmerzfreie Mundöffnung" },
-  "e4b-measure": { badge: "E4B", title: "Maximale aktive Mundöffnung" },
-  "e4b-interview": { badge: "E4B", title: "Schmerzbefragung" },
-  "e4c-measure": { badge: "E4C", title: "Maximale passive Mundöffnung" },
-  "e4c-interview": { badge: "E4C", title: "Schmerzbefragung" },
+  e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
+  "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
+  "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
+  "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
+  "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
 };
 
 // Map step IDs to instruction keys
@@ -153,7 +153,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>E4 - Öffnungs- und Schließbewegungen</CardTitle>
+        <CardTitle>U4 - Öffnungs- und Schließbewegungen</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {E4_STEP_ORDER.map((stepId, index) => {

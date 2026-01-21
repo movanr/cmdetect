@@ -1,5 +1,12 @@
 import { cn } from "@/lib/utils";
-import { Controller, useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
+import { useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { MeasurementInput } from "./MeasurementInput";
 
 interface MeasurementFieldProps<T extends FieldValues> {
@@ -21,34 +28,35 @@ export function MeasurementField<T extends FieldValues>({
   disabled,
   className,
 }: MeasurementFieldProps<T>) {
-  const { control, getFieldState, formState } = useFormContext<T>();
-  const { error } = getFieldState(name, formState);
+  const { control } = useFormContext<T>();
 
   return (
-    <div className={cn("flex flex-col items-start gap-1.5", className)}>
-      {label && <span className="text-sm font-medium">{label}</span>}
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <MeasurementInput
-            unit={unit}
-            min={min}
-            max={max}
-            disabled={disabled}
-            // Convert null to empty string for display
-            value={field.value ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              // Convert empty string to null, otherwise parse as number
-              field.onChange(val === "" ? null : Number(val));
-            }}
-            onBlur={field.onBlur}
-            ref={field.ref}
-          />
-        )}
-      />
-      {error && <span className="text-xs text-destructive">{error.message}</span>}
-    </div>
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={cn("flex flex-col items-start gap-2", className)}>
+          {label && <FormLabel className="font-medium">{label}</FormLabel>}
+          <FormControl>
+            <MeasurementInput
+              unit={unit}
+              min={min}
+              max={max}
+              disabled={disabled}
+              // Convert null to empty string for display
+              value={field.value ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Convert empty string to null, otherwise parse as number
+                field.onChange(val === "" ? null : Number(val));
+              }}
+              onBlur={field.onBlur}
+              ref={field.ref}
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }

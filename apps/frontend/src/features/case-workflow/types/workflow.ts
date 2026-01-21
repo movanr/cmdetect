@@ -81,8 +81,8 @@ export const MAIN_STEPS: StepDefinition[] = [
     label: "Untersuchung",
     order: 2,
     subSteps: [
-      { id: "e4", label: "E4: Mundöffnung", order: 1, route: "e4" },
-      { id: "e9", label: "E9: Palpation", order: 2, route: "e9" },
+      { id: "e4", label: "U4: Mundöffnung", order: 1, route: "e4" },
+      { id: "e9", label: "U9: Palpation", order: 2, route: "e9" },
     ],
   },
   {

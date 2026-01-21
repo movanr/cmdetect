@@ -1,4 +1,11 @@
-import { Controller, useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
+import { useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { YesNoInput } from "./YesNoInput";
 import { cn } from "@/lib/utils";
 
@@ -17,30 +24,28 @@ export function YesNoField<T extends FieldValues>({
   disabled,
   className,
 }: YesNoFieldProps<T>) {
-  const { control, getFieldState, formState } = useFormContext<T>();
-  // Pass formState to getFieldState to subscribe to updates
-  const { error } = getFieldState(name, formState);
+  const { control } = useFormContext<T>();
 
   return (
-    <div className={cn("flex items-center justify-between gap-4", className)}>
-      {label && (
-        <span className="text-sm text-muted-foreground">{label}</span>
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={cn("flex items-center justify-between gap-4", className)}>
+          {label && (
+            <FormLabel className="text-muted-foreground font-normal">{label}</FormLabel>
+          )}
+          <FormControl>
+            <YesNoInput
+              value={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+              labels={labels}
+            />
+          </FormControl>
+          <FormMessage className="text-xs" />
+        </FormItem>
       )}
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <YesNoInput
-            value={field.value}
-            onChange={field.onChange}
-            disabled={disabled}
-            labels={labels}
-          />
-        )}
-      />
-      {error && (
-        <span className="text-xs text-destructive">{error.message}</span>
-      )}
-    </div>
+    />
   );
 }
