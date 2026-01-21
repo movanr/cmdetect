@@ -100,14 +100,19 @@ export function PainDrawingWizard({
 
   // Keep refs for callbacks to avoid stale closures
   const updateElementsRef = useRef(updateElements);
-  updateElementsRef.current = updateElements;
   const currentImageIdRef = useRef(currentImageId);
+
+  // Update refs in effect to avoid accessing during render
+  useEffect(() => {
+    updateElementsRef.current = updateElements;
+  });
 
   // Reset history and tool when image changes
   useEffect(() => {
     if (currentImageId && currentImageId !== currentImageIdRef.current) {
       currentImageIdRef.current = currentImageId;
       setElements(drawings[currentImageId].elements);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional reset on image change
       setActiveTool('shade'); // Reset to default tool
     }
   }, [currentImageId, drawings, setElements]);

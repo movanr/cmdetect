@@ -55,6 +55,7 @@ export function CaseLayout({
   // Close sidebar when switching from tablet to desktop
   useEffect(() => {
     if (!isTabletPortrait) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync sidebar state with viewport change
       setSidebarOpen(false);
     }
   }, [isTabletPortrait]);

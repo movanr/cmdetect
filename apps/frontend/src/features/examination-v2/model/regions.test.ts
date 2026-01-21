@@ -8,7 +8,6 @@ import {
   SITE_CONFIG,
   getMovementPainQuestions,
   getPalpationPainQuestions,
-  type MovementRegion,
   type PalpationSite,
 } from "./regions";
 

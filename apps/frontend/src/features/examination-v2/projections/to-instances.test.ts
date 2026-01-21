@@ -56,7 +56,7 @@ describe("to-instances projections", () => {
     });
 
     it("preserves enableWhen from config", () => {
-      const enableWhen = { path: "some.path", operator: "eq" as const, value: "yes" };
+      const enableWhen = { sibling: "pain", equals: "yes" };
       const model = M.question(Q.yesNo({ enableWhen }));
       const instances = instancesFromModel("testKey", model);
 

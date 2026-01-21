@@ -36,9 +36,10 @@ export function QuestionScreen({
         <MatrixRowQuestion question={question} onNavigateNext={onNavigateNext} />
       );
 
-    default:
+    default: {
       // TypeScript exhaustive check
       const _exhaustive: never = question;
       throw new Error(`Unknown question type: ${_exhaustive}`);
+    }
   }
 }

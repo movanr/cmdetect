@@ -37,7 +37,7 @@ export function SubStepTabs({
         {subSteps.map((subStep) => (
           <Link
             key={subStep.id}
-            to={`/cases/$id/${parentStep}/${subStep.route}`}
+            to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
             params={{ id: caseId }}
             className={cn(
               "px-4 py-2.5 text-sm font-medium rounded-t-md transition-colors",
@@ -81,7 +81,7 @@ export function SubStepTabsCompact({
       {subSteps.map((subStep) => (
         <Link
           key={subStep.id}
-          to={`/cases/$id/${parentStep}/${subStep.route}`}
+          to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
           params={{ id: caseId }}
           className={cn(
             "flex-1 px-3 py-1.5 text-sm font-medium rounded-md text-center transition-colors",

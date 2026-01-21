@@ -151,7 +151,8 @@ export function PainDrawingCanvas({
       x: pos.x / canvasSize.scale,
       y: pos.y / canvasSize.scale,
     };
-  }, [canvasSize.scale, stageRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasSize.scale]);
 
   const handleMouseDown = useCallback(() => {
     const pos = getPointerPosition();

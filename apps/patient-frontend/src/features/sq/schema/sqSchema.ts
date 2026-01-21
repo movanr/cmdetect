@@ -38,10 +38,11 @@ export function createScreenSchema(question: SQQuestion): z.ZodTypeAny {
       });
     }
 
-    default:
+    default: {
       // TypeScript exhaustive check
       const _exhaustive: never = question;
       throw new Error(`Unknown question type: ${_exhaustive}`);
+    }
   }
 }
 

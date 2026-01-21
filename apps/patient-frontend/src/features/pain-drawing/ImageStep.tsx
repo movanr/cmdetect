@@ -27,7 +27,11 @@ export function ImageStep({
   const imageConfig = IMAGE_CONFIGS[imageId];
   const isFirstRender = useRef(true);
   const onElementsChangeRef = useRef(onElementsChange);
-  onElementsChangeRef.current = onElementsChange;
+
+  // Update ref in effect to avoid accessing during render
+  useEffect(() => {
+    onElementsChangeRef.current = onElementsChange;
+  });
 
   const {
     elements,
