@@ -14,6 +14,10 @@ export {
   type DiagramInterviewStepProps,
 } from "./DiagramInterviewStep";
 export {
+  TableInterviewStep,
+  type TableInterviewStepProps,
+} from "./TableInterviewStep";
+export {
   RegionStatusList,
   type RegionStatusListProps,
 } from "./RegionStatusList";

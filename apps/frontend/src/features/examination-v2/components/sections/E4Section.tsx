@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, CheckCircle, SkipForward } from "lucide-react";
 import { useState } from "react";
 import type { FieldPath } from "react-hook-form";
@@ -19,8 +20,11 @@ import {
   InstructionBlock,
   MeasurementStep,
   StepBar,
+  TableInterviewStep,
   type StepStatus,
 } from "../ui";
+import { getLabel } from "../../labels";
+import { QuestionField } from "../QuestionField";
 
 // Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
@@ -62,6 +66,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
   const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
   const [diagramKey, setDiagramKey] = useState(0);
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
+  const [viewMode, setViewMode] = useState<"stepwise" | "form">("stepwise");
 
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
@@ -157,121 +162,198 @@ export function E4Section({ onComplete }: E4SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>U4 - Öffnungs- und Schließbewegungen</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>U4 - Öffnungs- und Schließbewegungen</CardTitle>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="alle-regionen-header"
+                checked={includeAllRegions}
+                onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
+              />
+              <Label
+                htmlFor="alle-regionen-header"
+                className="text-xs text-muted-foreground cursor-pointer"
+              >
+                Alle Regionen
+              </Label>
+            </div>
+            <Tabs
+              value={viewMode}
+              onValueChange={(v) => setViewMode(v as "stepwise" | "form")}
+            >
+              <TabsList className="h-8">
+                <TabsTrigger value="stepwise" className="text-xs px-3">
+                  Schrittweise
+                </TabsTrigger>
+                <TabsTrigger value="form" className="text-xs px-3">
+                  Formular
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {E4_STEP_ORDER.map((stepId, index) => {
-          const config = E4_STEP_CONFIG[stepId];
-          const status = getStepStatus(stepId, index);
-
-          if (status === "active") {
-            const stepIsInterview = String(stepId).endsWith("-interview");
-
-            return (
-              <div
-                key={stepId}
-                className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
-              >
-                {/* Header */}
-                <div className="flex items-center gap-2">
-                  <Badge>{config.badge}</Badge>
-                  <h3 className="font-semibold">{config.title}</h3>
-                </div>
-
-                {/* Instruction */}
-                {(() => {
-                  const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
-                  const instruction = E4_INSTRUCTIONS[instructionKey];
-
-                  if (stepIsInterview && "prompt" in instruction) {
-                    // Pain interview guidance
-                    return (
-                      <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
-                        <div className="text-muted-foreground italic">"{instruction.prompt}"</div>
-                        <div className="text-muted-foreground text-xs">{instruction.guidance}</div>
-                      </div>
-                    );
-                  }
-
-                  if (!stepIsInterview && "patientScript" in instruction) {
-                    // Measurement step instruction
-                    return (
-                      <InstructionBlock
-                        patientScript={instruction.patientScript}
-                        examinerAction={instruction.examinerAction}
-                      />
-                    );
-                  }
-
-                  return null;
-                })()}
-
-                {/* Content */}
-                {stepIsInterview ? (
-                  <DiagramInterviewStep
-                    key={diagramKey}
-                    instances={stepInstances}
-                    incompleteRegions={incompleteRegions}
-                    regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
-                  />
-                ) : (
-                  <MeasurementStep instances={stepInstances} />
-                )}
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <div className="flex items-center gap-4">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleSkip}
-                      className="text-muted-foreground"
-                    >
-                      <SkipForward className="h-4 w-4 mr-1" />
-                      Überspringen
-                    </Button>
-                    {stepIsInterview && (
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="alle-regionen"
-                          checked={includeAllRegions}
-                          onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
-                        />
-                        <Label htmlFor="alle-regionen" className="text-sm cursor-pointer">
-                          Alle Regionen
-                        </Label>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {stepIsInterview && (
-                      <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Keine weiteren Schmerzregionen
-                      </Button>
-                    )}
-                    <Button type="button" onClick={handleNext}>
-                      {isLastStep ? "Abschließen" : "Weiter"}
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                </div>
+        {viewMode === "form" ? (
+          /* Compact form view - all sections at once */
+          <div className="space-y-8">
+            {/* E4A: Schmerzfreie Mundöffnung */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">U4A</Badge>
+                <h4 className="font-medium">Schmerzfreie Mundöffnung</h4>
               </div>
-            );
-          }
+              {getInstancesForStep("e4a").map((instance) => (
+                <QuestionField
+                  key={instance.path}
+                  instance={instance}
+                  label={getLabel(instance.labelKey)}
+                />
+              ))}
+            </div>
 
-          // Collapsed step - using StepBar component
-          return (
-            <StepBar
-              key={stepId}
-              config={config}
-              status={status}
-              summary={status === "pending" ? "—" : getStepSummary(stepId)}
-              onClick={() => setCurrentStepIndex(index)}
-            />
-          );
-        })}
+            {/* E4B: Maximale aktive Mundöffnung */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">U4B</Badge>
+                <h4 className="font-medium">Maximale aktive Mundöffnung</h4>
+              </div>
+              {getInstancesForStep("e4b-measure").map((instance) => (
+                <QuestionField
+                  key={instance.path}
+                  instance={instance}
+                  label={getLabel(instance.labelKey)}
+                />
+              ))}
+              <TableInterviewStep
+                instances={getInstancesForStep("e4b-interview")}
+                regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
+              />
+            </div>
+
+            {/* E4C: Maximale passive Mundöffnung */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">U4C</Badge>
+                <h4 className="font-medium">Maximale passive Mundöffnung</h4>
+              </div>
+              {getInstancesForStep("e4c-measure").map((instance) => (
+                <QuestionField
+                  key={instance.path}
+                  instance={instance}
+                  label={getLabel(instance.labelKey)}
+                />
+              ))}
+              <TableInterviewStep
+                instances={getInstancesForStep("e4c-interview")}
+                regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
+              />
+            </div>
+          </div>
+        ) : (
+          /* Stepwise wizard view */
+          E4_STEP_ORDER.map((stepId, index) => {
+            const config = E4_STEP_CONFIG[stepId];
+            const status = getStepStatus(stepId, index);
+
+            if (status === "active") {
+              const stepIsInterview = String(stepId).endsWith("-interview");
+
+              return (
+                <div
+                  key={stepId}
+                  className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+                >
+                  {/* Header */}
+                  <div className="flex items-center gap-2">
+                    <Badge>{config.badge}</Badge>
+                    <h3 className="font-semibold">{config.title}</h3>
+                  </div>
+
+                  {/* Instruction */}
+                  {(() => {
+                    const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
+                    const instruction = E4_INSTRUCTIONS[instructionKey];
+
+                    if (stepIsInterview && "prompt" in instruction) {
+                      // Pain interview guidance
+                      return (
+                        <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
+                          <div className="text-muted-foreground italic">"{instruction.prompt}"</div>
+                          <div className="text-muted-foreground text-xs">{instruction.guidance}</div>
+                        </div>
+                      );
+                    }
+
+                    if (!stepIsInterview && "patientScript" in instruction) {
+                      // Measurement step instruction
+                      return (
+                        <InstructionBlock
+                          patientScript={instruction.patientScript}
+                          examinerAction={instruction.examinerAction}
+                        />
+                      );
+                    }
+
+                    return null;
+                  })()}
+
+                  {/* Content */}
+                  {stepIsInterview ? (
+                    <DiagramInterviewStep
+                      key={diagramKey}
+                      instances={stepInstances}
+                      incompleteRegions={incompleteRegions}
+                      regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
+                    />
+                  ) : (
+                    <MeasurementStep instances={stepInstances} />
+                  )}
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <div className="flex items-center gap-4">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSkip}
+                        className="text-muted-foreground"
+                      >
+                        <SkipForward className="h-4 w-4 mr-1" />
+                        Überspringen
+                      </Button>
+                    </div>
+                    <div className="flex gap-2">
+                      {stepIsInterview && (
+                        <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Keine weiteren Schmerzregionen
+                        </Button>
+                      )}
+                      <Button type="button" onClick={handleNext}>
+                        {isLastStep ? "Abschließen" : "Weiter"}
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Collapsed step - using StepBar component
+            return (
+              <StepBar
+                key={stepId}
+                config={config}
+                status={status}
+                summary={status === "pending" ? "—" : getStepSummary(stepId)}
+                onClick={() => setCurrentStepIndex(index)}
+              />
+            );
+          })
+        )}
       </CardContent>
     </Card>
   );

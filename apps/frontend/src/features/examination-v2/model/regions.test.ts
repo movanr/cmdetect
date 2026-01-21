@@ -1,17 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  SIDES,
-  SIDE_KEYS,
-  REGIONS,
-  REGION_KEYS,
-  SVG_REGIONS,
-  PALPATION_SITES,
-  PALPATION_SITE_KEYS,
   MUSCLE_GROUPS,
   MUSCLE_GROUP_KEYS,
   PAIN_TYPES,
   PAIN_TYPE_KEYS,
+  PALPATION_SITES,
+  PALPATION_SITE_KEYS,
+  REGIONS,
+  REGION_KEYS,
+  SIDES,
+  SIDE_KEYS,
   SITE_CONFIG,
+  SVG_REGIONS,
   getMovementPainQuestions,
   getPalpationPainQuestions,
   type PalpationSite,
@@ -85,7 +85,7 @@ describe("regions", () => {
     it("contains all pain types with German labels", () => {
       expect(PAIN_TYPES.pain).toBe("Schmerz");
       expect(PAIN_TYPES.familiarPain).toBe("Bekannter Schmerz");
-      expect(PAIN_TYPES.familiarHeadache).toBe("Bekannte Kopfschmerzen");
+      expect(PAIN_TYPES.familiarHeadache).toBe("Bekannter Kopfschmerz");
       expect(PAIN_TYPES.referredPain).toBe("Übertragener Schmerz");
       expect(PAIN_TYPES.spreadingPain).toBe("Ausbreitender Schmerz");
       expect(PAIN_TYPE_KEYS).toHaveLength(5);

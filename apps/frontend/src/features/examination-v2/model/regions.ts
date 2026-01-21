@@ -81,7 +81,7 @@ export const MUSCLE_GROUP_KEYS = Object.keys(MUSCLE_GROUPS) as MuscleGroup[];
 export const PAIN_TYPES = {
   pain: "Schmerz",
   familiarPain: "Bekannter Schmerz",
-  familiarHeadache: "Bekannte Kopfschmerzen",
+  familiarHeadache: "Bekannter Kopfschmerz",
   referredPain: "Übertragener Schmerz",
   spreadingPain: "Ausbreitender Schmerz",
 } as const;
