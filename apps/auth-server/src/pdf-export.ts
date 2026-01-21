@@ -17,10 +17,113 @@ import { auth } from "./auth";
 import { sendHttpError } from "./errors";
 import { $typst } from "@myriaddreamin/typst.ts/dist/cjs/contrib/snippet.cjs";
 
-// Import validation schemas from questionnaires package (single source of truth)
-import { AnamnesisExportDataSchema } from "@cmdetect/questionnaires";
+// Import validation schemas and questionnaire definitions from questionnaires package
+import {
+  AnamnesisExportDataSchema,
+  // PHQ-4 definitions
+  PHQ4_QUESTIONS,
+  PHQ4_QUESTION_ORDER,
+  PHQ4_METADATA,
+  PHQ4_OPTION_LABELS,
+  // GCPS-1M definitions
+  GCPS_1M_QUESTIONS,
+  GCPS_1M_QUESTION_ORDER,
+  GCPS_1M_METADATA,
+  GCPS_1M_OPTION_LABELS,
+  // JFLS-8 definitions
+  JFLS8_QUESTIONS,
+  JFLS8_QUESTION_ORDER,
+  JFLS8_METADATA,
+  JFLS8_OPTION_LABELS,
+  // JFLS-20 definitions
+  JFLS20_QUESTIONS,
+  JFLS20_QUESTION_ORDER,
+  JFLS20_METADATA,
+  JFLS20_OPTION_LABELS,
+  // OBC definitions
+  OBC_QUESTIONS,
+  OBC_QUESTION_ORDER,
+  OBC_METADATA,
+  OBC_SLEEP_OPTION_LABELS,
+  OBC_WAKING_OPTION_LABELS,
+  // SQ definitions
+  SQ_METADATA,
+  SQ_QUESTION_ORDER,
+  SQ_QUESTION_SHORT_LABELS,
+  SQ_DISPLAY_IDS,
+  SQ_YES_NO_LABELS,
+  SQ_PAIN_FREQUENCY_LABELS,
+} from "@cmdetect/questionnaires";
 
 export type AnamnesisExportDataInput = z.infer<typeof AnamnesisExportDataSchema>;
+
+/**
+ * Questionnaire definitions for Typst template
+ * These are static and imported from the questionnaires package
+ */
+const QUESTIONNAIRE_DEFINITIONS = {
+  phq4: {
+    metadata: PHQ4_METADATA,
+    questions: PHQ4_QUESTION_ORDER.map((id) => ({
+      id,
+      text: PHQ4_QUESTIONS[id].text,
+    })),
+    optionLabels: PHQ4_OPTION_LABELS,
+  },
+  gcps1m: {
+    metadata: GCPS_1M_METADATA,
+    questions: GCPS_1M_QUESTION_ORDER.map((id) => ({
+      id,
+      text: GCPS_1M_QUESTIONS[id].text,
+    })),
+    optionLabels: GCPS_1M_OPTION_LABELS,
+  },
+  jfls8: {
+    metadata: JFLS8_METADATA,
+    questions: JFLS8_QUESTION_ORDER.map((id) => ({
+      id,
+      text: JFLS8_QUESTIONS[id].text,
+    })),
+    optionLabels: JFLS8_OPTION_LABELS,
+  },
+  jfls20: {
+    metadata: JFLS20_METADATA,
+    questions: JFLS20_QUESTION_ORDER.map((id) => ({
+      id,
+      text: JFLS20_QUESTIONS[id].text,
+    })),
+    optionLabels: JFLS20_OPTION_LABELS,
+  },
+  obc: {
+    metadata: OBC_METADATA,
+    questions: OBC_QUESTION_ORDER.map((id) => ({
+      id,
+      text: OBC_QUESTIONS[id].text,
+    })),
+    sleepOptionLabels: OBC_SLEEP_OPTION_LABELS,
+    wakingOptionLabels: OBC_WAKING_OPTION_LABELS,
+  },
+  sq: {
+    metadata: SQ_METADATA,
+    questions: SQ_QUESTION_ORDER.map((id) => ({
+      id,
+      displayId: SQ_DISPLAY_IDS[id],
+      text: SQ_QUESTION_SHORT_LABELS[id],
+    })),
+    yesNoLabels: SQ_YES_NO_LABELS,
+    painFrequencyLabels: SQ_PAIN_FREQUENCY_LABELS,
+  },
+} as const;
+
+/**
+ * Build complete data for Typst template by combining payload with questionnaire definitions
+ */
+function buildTypstData(input: AnamnesisExportDataInput) {
+  return {
+    ...input,
+    definitions: QUESTIONNAIRE_DEFINITIONS,
+  };
+}
 
 // ============================================================================
 // PDF Generation
@@ -67,8 +170,10 @@ function toTypstValue(value: unknown): string {
       return "(:)";
     }
     const pairs = entries.map(([k, v]) => {
-      // Keys with hyphens need quoting in Typst
-      const key = k.includes("-") ? `"${k}"` : k;
+      // Keys need quoting in Typst if they contain hyphens or are numeric strings
+      // (numeric strings like "0" would otherwise become integer keys)
+      const needsQuoting = k.includes("-") || /^\d+$/.test(k);
+      const key = needsQuoting ? `"${k}"` : k;
       return `${key}: ${toTypstValue(v)}`;
     });
     return `(${pairs.join(", ")})`;
@@ -89,10 +194,13 @@ async function compileTypstToPdf(
   // Read the template file
   const templateContent = fs.readFileSync(templatePath, "utf-8");
 
+  // Build complete data including questionnaire definitions
+  const completeData = buildTypstData(data);
+
   // Convert data to Typst dictionary literal (not JSON)
   // Typst's json.decode has issues with backticks and requires a proper string,
   // so we inject native Typst dict syntax instead
-  const typstData = toTypstValue(data);
+  const typstData = toTypstValue(completeData);
 
   // Create a modified template that includes the data as a variable
   const templateWithData = `

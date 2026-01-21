@@ -33,7 +33,8 @@ app.use(
 );
 
 // JSON middleware after auth handler
-app.use(express.json());
+// Increased limit for PDF export payloads with pain drawing images
+app.use(express.json({ limit: "2mb" }));
 
 // Hasura Actions
 app.post(

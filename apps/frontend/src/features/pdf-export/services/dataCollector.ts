@@ -124,31 +124,46 @@ export async function assembleExportData(
   // PHQ-4
   if (phq4Response) {
     const phq4Answers = phq4Response.answers as Record<string, string>;
-    questionnaires.phq4 = calculatePHQ4Score(phq4Answers);
+    questionnaires.phq4 = {
+      score: calculatePHQ4Score(phq4Answers),
+      answers: phq4Answers,
+    };
   }
 
   // GCPS-1M
   if (gcps1mResponse) {
     const gcpsAnswers = gcps1mResponse.answers as GCPS1MAnswers;
-    questionnaires.gcps1m = calculateGCPS1MScore(gcpsAnswers);
+    questionnaires.gcps1m = {
+      score: calculateGCPS1MScore(gcpsAnswers),
+      answers: gcpsAnswers as Record<string, string | number>,
+    };
   }
 
   // JFLS-8
   if (jfls8Response) {
     const jflsAnswers = jfls8Response.answers as JFLS8Answers;
-    questionnaires.jfls8 = calculateJFLS8Score(jflsAnswers);
+    questionnaires.jfls8 = {
+      score: calculateJFLS8Score(jflsAnswers),
+      answers: jflsAnswers as Record<string, string>,
+    };
   }
 
   // JFLS-20
   if (jfls20Response) {
     const jflsAnswers = jfls20Response.answers as JFLS20Answers;
-    questionnaires.jfls20 = calculateJFLS20Score(jflsAnswers);
+    questionnaires.jfls20 = {
+      score: calculateJFLS20Score(jflsAnswers),
+      answers: jflsAnswers as Record<string, string>,
+    };
   }
 
   // OBC
   if (obcResponse) {
     const obcAnswers = obcResponse.answers as OBCAnswers;
-    questionnaires.obc = calculateOBCScore(obcAnswers);
+    questionnaires.obc = {
+      score: calculateOBCScore(obcAnswers),
+      answers: obcAnswers as Record<string, string>,
+    };
   }
 
   // Pain Drawing

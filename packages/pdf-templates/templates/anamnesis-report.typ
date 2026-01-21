@@ -1,6 +1,7 @@
 // CMDetect Anamnesis Report Template
 // Simple, clean clinical layout with tables
 // All text in German
+// Structure: Axis 1 (SQ Symptom Questionnaire) + Axis 2 (Psychosocial Questionnaires)
 
 // Data is injected as Typst dictionary at compile time
 #let data = json(sys.inputs.data)
@@ -37,6 +38,18 @@
   v(0.5em)
 }
 
+// Axis heading (larger, with background)
+#let axis-heading(title) = {
+  v(1.5em)
+  block(
+    fill: luma(240),
+    inset: 8pt,
+    width: 100%,
+    text(weight: "bold", size: 14pt, title)
+  )
+  v(0.5em)
+}
+
 // ============================================================================
 // Title and Patient Info
 // ============================================================================
@@ -44,7 +57,7 @@
 #align(center)[
   #text(size: 16pt, weight: "bold")[Anamnese-Bericht]
   #v(0.3em)
-  #text(size: 10pt, fill: gray)[DC/TMD Symptom-Fragebogen Auswertung]
+  #text(size: 10pt, fill: gray)[DC/TMD Auswertung]
 ]
 
 #v(1em)
@@ -64,12 +77,7 @@
   [*Export:*], [#data.metadata.exportDate.slice(0, 10)],
 )
 
-// ============================================================================
-// Score Summary
-// ============================================================================
-
-#section-heading("Zusammenfassung der Auswertungen")
-
+// Extract questionnaire data
 #let phq4-data = data.questionnaires.at("phq4", default: none)
 #let gcps1m-data = data.questionnaires.at("gcps1m", default: none)
 #let jfls8-data = data.questionnaires.at("jfls8", default: none)
@@ -78,86 +86,178 @@
 #let sq-data = data.questionnaires.at("sq", default: none)
 #let painDrawing-data = data.at("painDrawing", default: none)
 
-// Build summary rows dynamically
+// ============================================================================
+// AXIS 1: DC/TMD Symptom-Fragebogen
+// ============================================================================
+
+#axis-heading("Achse I: DC/TMD Symptom-Fragebogen")
+
+#if sq-data != none {
+  let sq-def = data.definitions.sq
+  let sq-answers = sq-data.at("answers", default: (:))
+
+  // Screening result summary
+  table(
+    columns: (1fr, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    [*Screening-Ergebnis*], [#if sq-data.screeningNegative { text(fill: green.darken(20%))[Negativ] } else { text(fill: red.darken(20%), weight: "bold")[Positiv] }],
+    [*Bewertung*], [#if sq-data.screeningNegative { "Keine CMD-Symptome" } else { "Weitere Untersuchung empfohlen" }],
+  )
+
+  if sq-data.at("reviewedAt", default: none) != none {
+    v(0.3em)
+    text(size: 9pt, fill: gray)[Geprueft am: #sq-data.reviewedAt.slice(0, 10)]
+  }
+
+  // Questions and answers table
+  v(0.5em)
+  text(weight: "bold", size: 10pt)[Antworten:]
+  v(0.3em)
+
+  // Helper to format SQ answer values
+  let format-sq-answer(q-id, answer-value) = {
+    if answer-value == none { return "-" }
+
+    // Handle composite number answers (duration fields)
+    if type(answer-value) == dictionary {
+      let years = answer-value.at("years", default: 0)
+      let months = answer-value.at("months", default: 0)
+      if years > 0 and months > 0 {
+        return str(years) + " Jahre, " + str(months) + " Monate"
+      } else if years > 0 {
+        return str(years) + " Jahre"
+      } else if months > 0 {
+        return str(months) + " Monate"
+      } else {
+        return "0"
+      }
+    }
+
+    // Handle SQ3 pain frequency
+    if q-id == "SQ3" {
+      return sq-def.painFrequencyLabels.at(str(answer-value), default: str(answer-value))
+    }
+
+    // Handle yes/no answers
+    return sq-def.yesNoLabels.at(str(answer-value), default: str(answer-value))
+  }
+
+  let question-rows = ()
+  for (i, q) in sq-def.questions.enumerate() {
+    let answer-value = sq-answers.at(q.id, default: none)
+    let answer-display = format-sq-answer(q.id, answer-value)
+    question-rows.push(([#q.displayId], [#q.text], [#answer-display]))
+  }
+
+  table(
+    columns: (auto, 1fr, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    table.header([*ID*], [*Frage*], [*Antwort*]),
+    ..question-rows.flatten()
+  )
+} else {
+  text(fill: gray)[Keine Daten vorhanden]
+}
+
+// ============================================================================
+// AXIS 2: Psychosoziale Fragebögen
+// ============================================================================
+
+#axis-heading("Achse II: Psychosoziale Fragebögen")
+
+// Build summary rows for Axis 2 questionnaires
 #let summary-rows = ()
 
 #if phq4-data != none {
-  let assessment = if phq4-data.total <= 2 { "Normal" } else if phq4-data.total <= 5 { "Leicht" } else if phq4-data.total <= 8 { "Moderat" } else { "Schwer" }
-  summary-rows.push(([PHQ-4 (Psychische Belastung)], [#phq4-data.total / #phq4-data.maxTotal], [0-12], [#assessment]))
+  let phq4-score = phq4-data.score
+  let assessment = if phq4-score.total <= 2 { "Normal" } else if phq4-score.total <= 5 { "Leicht" } else if phq4-score.total <= 8 { "Moderat" } else { "Schwer" }
+  summary-rows.push(([PHQ-4 (Psychische Belastung)], [#phq4-score.total / #phq4-score.maxTotal], [0-12], [#assessment]))
 }
 
 #if gcps1m-data != none {
-  summary-rows.push(([GCPS (Chronische Schmerzen)], [Grad #gcps1m-data.grade], [0-IV], [#gcps1m-data.gradeInterpretation.label]))
+  let gcps-score = gcps1m-data.score
+  summary-rows.push(([GCPS (Chronische Schmerzen)], [Grad #gcps-score.grade], [0-IV], [#gcps-score.gradeInterpretation.label]))
 }
 
-#if jfls8-data != none and jfls8-data.isValid and jfls8-data.globalScore != none {
-  let interp = if jfls8-data.limitationInterpretation != none { jfls8-data.limitationInterpretation.label } else { "-" }
-  summary-rows.push(([JFLS-8 (Kieferfunktion)], [#str(calc.round(jfls8-data.globalScore, digits: 1))], [0-10], [#interp]))
+#if jfls8-data != none and jfls8-data.score.isValid and jfls8-data.score.globalScore != none {
+  let jfls8-score = jfls8-data.score
+  let interp = if jfls8-score.limitationInterpretation != none { jfls8-score.limitationInterpretation.label } else { "-" }
+  summary-rows.push(([JFLS-8 (Kieferfunktion)], [#str(calc.round(jfls8-score.globalScore, digits: 1))], [0-10], [#interp]))
 }
 
-#if jfls20-data != none and jfls20-data.isValid and jfls20-data.globalScore != none {
-  let interp = if jfls20-data.limitationInterpretation != none { jfls20-data.limitationInterpretation.label } else { "-" }
-  summary-rows.push(([JFLS-20 (Kieferfunktion erweitert)], [#str(calc.round(jfls20-data.globalScore, digits: 1))], [0-10], [#interp]))
+#if jfls20-data != none and jfls20-data.score.isValid and jfls20-data.score.globalScore != none {
+  let jfls20-score = jfls20-data.score
+  let interp = if jfls20-score.limitationInterpretation != none { jfls20-score.limitationInterpretation.label } else { "-" }
+  summary-rows.push(([JFLS-20 (Kieferfunktion erweitert)], [#str(calc.round(jfls20-score.globalScore, digits: 1))], [0-10], [#interp]))
 }
 
 #if obc-data != none {
-  summary-rows.push(([OBC (Orale Verhaltensweisen)], [#obc-data.totalScore / #obc-data.maxScore], [0-84], [#obc-data.riskInterpretation.label]))
+  let obc-score = obc-data.score
+  summary-rows.push(([OBC (Orale Verhaltensweisen)], [#obc-score.totalScore / #obc-score.maxScore], [0-84], [#obc-score.riskInterpretation.label]))
 }
 
 #if painDrawing-data != none {
   summary-rows.push(([Schmerzzeichnung], [#painDrawing-data.score.regionCount / 5 Regionen], [0-5], [#painDrawing-data.score.interpretation.label]))
 }
 
-#if sq-data != none {
-  let result = if sq-data.screeningNegative { "Negativ" } else { "Positiv" }
-  let assessment = if sq-data.screeningNegative { "Keine Symptome" } else { "Weitere Untersuchung" }
-  summary-rows.push(([DC/TMD Symptom-Fragebogen], [#result], [-], [#assessment]))
-}
+#if summary-rows.len() > 0 {
+  section-heading("Zusammenfassung")
 
-#table(
-  columns: (1fr, auto, auto, auto),
-  stroke: 0.5pt,
-  inset: 6pt,
-  table.header([*Fragebogen*], [*Ergebnis*], [*Bereich*], [*Bewertung*]),
-  ..summary-rows.flatten()
-)
+  table(
+    columns: (1fr, auto, auto, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    table.header([*Fragebogen*], [*Ergebnis*], [*Bereich*], [*Bewertung*]),
+    ..summary-rows.flatten()
+  )
+}
 
 // ============================================================================
 // PHQ-4 Details
 // ============================================================================
 
 #if phq4-data != none {
-  section-heading("PHQ-4 - Gesundheitsfragebogen fuer Patienten")
+  let phq4-def = data.definitions.phq4
+  let phq4-score = phq4-data.score
+  let phq4-answers = phq4-data.at("answers", default: (:))
+
+  section-heading(phq4-def.metadata.title)
 
   text(size: 9pt, fill: gray)[
-    Wie oft fuehlten Sie sich im Verlauf der letzten 2 Wochen durch die folgenden Beschwerden beeintraechtigt?
+    #phq4-def.metadata.instruction
   ]
 
   v(0.5em)
+
+  // Build question rows dynamically from definitions
+  let question-rows = ()
+  for (i, q) in phq4-def.questions.enumerate() {
+    let answer-value = phq4-answers.at(q.id, default: none)
+    let answer-label = if answer-value != none {
+      // Convert to string for dictionary lookup (answers may be integers)
+      phq4-def.optionLabels.at(str(answer-value), default: str(answer-value))
+    } else { "-" }
+    question-rows.push(([#(i + 1)], [#q.text], [#answer-label]))
+  }
 
   table(
     columns: (auto, 1fr, auto),
     stroke: 0.5pt,
     inset: 6pt,
     table.header([*Nr.*], [*Frage*], [*Antwort*]),
-    [1], [Nervositaet, Aengstlichkeit oder Anspannung],
-    [#if phq4-data.at("answers", default: none) != none { phq4-data.answers.at("PHQ4_C", default: "-") } else { "-" }],
-    [2], [Nicht in der Lage sein, Sorgen zu stoppen oder zu kontrollieren],
-    [#if phq4-data.at("answers", default: none) != none { phq4-data.answers.at("PHQ4_D", default: "-") } else { "-" }],
-    [3], [Wenig Interesse oder Freude an Ihren Taetigkeiten],
-    [#if phq4-data.at("answers", default: none) != none { phq4-data.answers.at("PHQ4_A", default: "-") } else { "-" }],
-    [4], [Niedergeschlagenheit, Schwermut oder Hoffnungslosigkeit],
-    [#if phq4-data.at("answers", default: none) != none { phq4-data.answers.at("PHQ4_B", default: "-") } else { "-" }],
+    ..question-rows.flatten()
   )
 
   v(0.3em)
   text(size: 9pt)[
-    *Auswertung:* Gesamt #phq4-data.total / #phq4-data.maxTotal |
-    Angst (GAD-2): #phq4-data.anxiety / #phq4-data.maxAnxiety |
-    Depression (PHQ-2): #phq4-data.depression / #phq4-data.maxDepression
+    *Auswertung:* Gesamt #phq4-score.total / #phq4-score.maxTotal |
+    Angst (GAD-2): #phq4-score.anxiety / #phq4-score.maxAnxiety |
+    Depression (PHQ-2): #phq4-score.depression / #phq4-score.maxDepression
   ]
 
-  if phq4-data.total >= 6 {
+  if phq4-score.total >= 6 {
     v(0.3em)
     text(weight: "bold", size: 9pt)[Hinweis: Klinisch auffaellig (>= 6 Punkte) - Weitere Abklaerung empfohlen]
   }
@@ -168,25 +268,50 @@
 // ============================================================================
 
 #if gcps1m-data != none {
-  section-heading("GCPS - Stufenskala fuer chronische Schmerzen (1-Monats-Version)")
+  let gcps-def = data.definitions.gcps1m
+  let gcps-score = gcps1m-data.score
+  let gcps-answers = gcps1m-data.at("answers", default: (:))
 
+  section-heading(gcps-def.metadata.title)
+
+  // Score summary table
   table(
     columns: (1fr, auto),
     stroke: 0.5pt,
     inset: 6pt,
-    [Chronifizierungsgrad], [*Grad #gcps1m-data.grade* - #gcps1m-data.gradeInterpretation.label],
-    [Charakteristische Schmerzintensitaet (CPI)], [#gcps1m-data.cpi / 100 (#gcps1m-data.cpiLevel)],
-    [Beeintraechtigungswert], [#gcps1m-data.interferenceScore / 100],
-    [Beeintraechtigungspunkte], [#gcps1m-data.interferencePoints BP],
-    [Beeintraechtigungstage], [#gcps1m-data.disabilityDays #if gcps1m-data.disabilityDays == 1 { "Tag" } else { "Tage" }],
-    [Tage-Punkte], [#gcps1m-data.disabilityDaysPoints BP],
-    [Gesamt-Beeintraechtigungspunkte], [#gcps1m-data.totalDisabilityPoints / 6 BP],
+    [Chronifizierungsgrad], [*Grad #gcps-score.grade* - #gcps-score.gradeInterpretation.label],
+    [Charakteristische Schmerzintensitaet (CPI)], [#gcps-score.cpi / 100 (#gcps-score.cpiLevel)],
+    [Beeintraechtigungswert], [#gcps-score.interferenceScore / 100],
+    [Beeintraechtigungspunkte], [#gcps-score.interferencePoints BP],
+    [Beeintraechtigungstage], [#gcps-score.disabilityDays #if gcps-score.disabilityDays == 1 { "Tag" } else { "Tage" }],
+    [Tage-Punkte], [#gcps-score.disabilityDaysPoints BP],
+    [Gesamt-Beeintraechtigungspunkte], [#gcps-score.totalDisabilityPoints / 6 BP],
   )
 
-  if gcps1m-data.grade >= 3 {
+  if gcps-score.grade >= 3 {
     v(0.3em)
     text(weight: "bold", size: 9pt)[Hinweis: Dysfunktionaler chronischer Schmerz]
   }
+
+  // Questions and answers
+  v(0.5em)
+  text(weight: "bold", size: 10pt)[Antworten:]
+  v(0.3em)
+
+  let question-rows = ()
+  for (i, q) in gcps-def.questions.enumerate() {
+    let answer-value = gcps-answers.at(q.id, default: none)
+    let answer-display = if answer-value != none { str(answer-value) } else { "-" }
+    question-rows.push(([#(i + 1)], [#q.text], [#answer-display]))
+  }
+
+  table(
+    columns: (auto, 1fr, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    table.header([*Nr.*], [*Frage*], [*Antwort*]),
+    ..question-rows.flatten()
+  )
 }
 
 // ============================================================================
@@ -194,16 +319,20 @@
 // ============================================================================
 
 #if jfls8-data != none {
-  section-heading("JFLS-8 - Kieferfunktions-Einschraenkungsskala (Kurzform)")
+  let jfls8-def = data.definitions.jfls8
+  let jfls8-score = jfls8-data.score
+  let jfls8-answers = jfls8-data.at("answers", default: (:))
 
-  if jfls8-data.isValid and jfls8-data.globalScore != none {
+  section-heading(jfls8-def.metadata.title)
+
+  if jfls8-score.isValid and jfls8-score.globalScore != none {
     table(
       columns: (1fr, auto),
       stroke: 0.5pt,
       inset: 6pt,
-      [Globaler Score], [*#str(calc.round(jfls8-data.globalScore, digits: 2))* / #jfls8-data.maxScore],
-      [Einschraenkungsniveau], [#if jfls8-data.limitationInterpretation != none { jfls8-data.limitationInterpretation.label } else { "-" }],
-      [Beantwortete Fragen], [#jfls8-data.answeredCount / #jfls8-data.totalQuestions],
+      [Globaler Score], [*#str(calc.round(jfls8-score.globalScore, digits: 2))* / #jfls8-score.maxScore],
+      [Einschraenkungsniveau], [#if jfls8-score.limitationInterpretation != none { jfls8-score.limitationInterpretation.label } else { "-" }],
+      [Beantwortete Fragen], [#jfls8-score.answeredCount / #jfls8-score.totalQuestions],
     )
 
     v(0.3em)
@@ -211,8 +340,31 @@
       Referenzwerte: Gesund = 0.16 | TMD-Patienten = 1.74
     ]
   } else {
-    text(fill: gray)[Zu viele fehlende Antworten (#jfls8-data.missingCount / #jfls8-data.totalQuestions)]
+    text(fill: gray)[Zu viele fehlende Antworten (#jfls8-score.missingCount / #jfls8-score.totalQuestions)]
   }
+
+  // Questions and answers
+  v(0.5em)
+  text(weight: "bold", size: 10pt)[Antworten:]
+  v(0.3em)
+
+  let question-rows = ()
+  for (i, q) in jfls8-def.questions.enumerate() {
+    let answer-value = jfls8-answers.at(q.id, default: none)
+    let answer-label = if answer-value != none {
+      // Convert to string for dictionary lookup (answers may be integers)
+      jfls8-def.optionLabels.at(str(answer-value), default: str(answer-value))
+    } else { "-" }
+    question-rows.push(([#(i + 1)], [#q.text], [#answer-label]))
+  }
+
+  table(
+    columns: (auto, 1fr, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    table.header([*Nr.*], [*Frage*], [*Antwort*]),
+    ..question-rows.flatten()
+  )
 }
 
 // ============================================================================
@@ -220,23 +372,27 @@
 // ============================================================================
 
 #if jfls20-data != none {
-  section-heading("JFLS-20 - Kieferfunktions-Einschraenkungsskala (Erweitert)")
+  let jfls20-def = data.definitions.jfls20
+  let jfls20-score = jfls20-data.score
+  let jfls20-answers = jfls20-data.at("answers", default: (:))
 
-  if jfls20-data.isValid and jfls20-data.globalScore != none {
+  section-heading(jfls20-def.metadata.title)
+
+  if jfls20-score.isValid and jfls20-score.globalScore != none {
     table(
       columns: (1fr, auto),
       stroke: 0.5pt,
       inset: 6pt,
-      [Globaler Score], [*#str(calc.round(jfls20-data.globalScore, digits: 2))* / #jfls20-data.maxScore],
-      [Einschraenkungsniveau], [#if jfls20-data.limitationInterpretation != none { jfls20-data.limitationInterpretation.label } else { "-" }],
-      [Beantwortete Fragen], [#jfls20-data.answeredCount / #jfls20-data.totalQuestions],
+      [Globaler Score], [*#str(calc.round(jfls20-score.globalScore, digits: 2))* / #jfls20-score.maxScore],
+      [Einschraenkungsniveau], [#if jfls20-score.limitationInterpretation != none { jfls20-score.limitationInterpretation.label } else { "-" }],
+      [Beantwortete Fragen], [#jfls20-score.answeredCount / #jfls20-score.totalQuestions],
     )
 
     v(0.5em)
     text(weight: "bold", size: 10pt)[Subskalen:]
     v(0.3em)
 
-    let subs = jfls20-data.subscales
+    let subs = jfls20-score.subscales
     table(
       columns: (1fr, auto, auto),
       stroke: 0.5pt,
@@ -253,8 +409,31 @@
       [#subs.communication.answeredCount / #subs.communication.totalQuestions],
     )
   } else {
-    text(fill: gray)[Zu viele fehlende Antworten (#jfls20-data.missingCount / #jfls20-data.totalQuestions)]
+    text(fill: gray)[Zu viele fehlende Antworten (#jfls20-score.missingCount / #jfls20-score.totalQuestions)]
   }
+
+  // Questions and answers
+  v(0.5em)
+  text(weight: "bold", size: 10pt)[Antworten:]
+  v(0.3em)
+
+  let question-rows = ()
+  for (i, q) in jfls20-def.questions.enumerate() {
+    let answer-value = jfls20-answers.at(q.id, default: none)
+    let answer-label = if answer-value != none {
+      // Convert to string for dictionary lookup (answers may be integers)
+      jfls20-def.optionLabels.at(str(answer-value), default: str(answer-value))
+    } else { "-" }
+    question-rows.push(([#(i + 1)], [#q.text], [#answer-label]))
+  }
+
+  table(
+    columns: (auto, 1fr, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    table.header([*Nr.*], [*Frage*], [*Antwort*]),
+    ..question-rows.flatten()
+  )
 }
 
 // ============================================================================
@@ -262,15 +441,19 @@
 // ============================================================================
 
 #if obc-data != none {
-  section-heading("OBC - Oral Behaviors Checklist")
+  let obc-def = data.definitions.obc
+  let obc-score = obc-data.score
+  let obc-answers = obc-data.at("answers", default: (:))
+
+  section-heading(obc-def.metadata.title)
 
   table(
     columns: (1fr, auto),
     stroke: 0.5pt,
     inset: 6pt,
-    [Gesamtpunktzahl], [*#obc-data.totalScore* / #obc-data.maxScore],
-    [Risikoniveau], [#obc-data.riskInterpretation.label],
-    [Beantwortete Fragen], [#obc-data.answeredCount / #obc-data.totalQuestions],
+    [Gesamtpunktzahl], [*#obc-score.totalScore* / #obc-score.maxScore],
+    [Risikoniveau], [#obc-score.riskInterpretation.label],
+    [Beantwortete Fragen], [#obc-score.answeredCount / #obc-score.totalQuestions],
   )
 
   v(0.3em)
@@ -278,10 +461,35 @@
     Schwellenwerte: Normal (0-16) | Erhoeht (17-24) | Hoch (25+)
   ]
 
-  if obc-data.riskLevel == "high" {
+  if obc-score.riskLevel == "high" {
     v(0.3em)
     text(weight: "bold", size: 9pt)[Hinweis: Risikofaktor zur Entstehung von CMD (17x haeufiger bei Score >= 25)]
   }
+
+  // Questions and answers
+  v(0.5em)
+  text(weight: "bold", size: 10pt)[Antworten:]
+  v(0.3em)
+
+  let question-rows = ()
+  for (i, q) in obc-def.questions.enumerate() {
+    let answer-value = obc-answers.at(q.id, default: none)
+    // OBC_1 uses sleep option labels, all others use waking option labels
+    let option-labels = if q.id == "OBC_1" { obc-def.sleepOptionLabels } else { obc-def.wakingOptionLabels }
+    let answer-label = if answer-value != none {
+      // Convert to string for dictionary lookup (answers may be integers)
+      option-labels.at(str(answer-value), default: str(answer-value))
+    } else { "-" }
+    question-rows.push(([#(i + 1)], [#q.text], [#answer-label]))
+  }
+
+  table(
+    columns: (auto, 1fr, auto),
+    stroke: 0.5pt,
+    inset: 6pt,
+    table.header([*Nr.*], [*Frage*], [*Antwort*]),
+    ..question-rows.flatten()
+  )
 }
 
 // ============================================================================
@@ -326,29 +534,6 @@
   if score.patterns.hasWidespreadPain {
     v(0.3em)
     text(weight: "bold", size: 9pt)[Hinweis: Verbreiteter Schmerz - Kann auf Fibromyalgie hinweisen]
-  }
-}
-
-// ============================================================================
-// SQ Details
-// ============================================================================
-
-#if sq-data != none {
-  section-heading("DC/TMD Symptom-Fragebogen (SQ)")
-
-  if sq-data.screeningNegative {
-    text(weight: "bold")[Screening-Ergebnis: Negativ]
-    v(0.3em)
-    text[Keine CMD-Symptome angegeben. Keine weitere klinische Untersuchung erforderlich.]
-  } else {
-    text(weight: "bold")[Screening-Ergebnis: Positiv]
-    v(0.3em)
-    text[CMD-Symptome angegeben. Weitere klinische Untersuchung empfohlen.]
-  }
-
-  if sq-data.at("reviewedAt", default: none) != none {
-    v(0.3em)
-    text(size: 9pt, fill: gray)[Geprueft am: #sq-data.reviewedAt.slice(0, 10)]
   }
 }
 

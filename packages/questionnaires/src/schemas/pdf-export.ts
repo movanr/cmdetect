@@ -67,22 +67,56 @@ export const PainDrawingExportDataSchema = z.object({
 });
 
 // ============================================================================
+// Individual Questionnaire Export Schemas (score + answers)
+// ============================================================================
+
+/** PHQ-4 export data with score and answers */
+export const PHQ4ExportDataSchema = z.object({
+  score: PHQ4ScoreSchema,
+  answers: z.record(z.string(), z.string()),
+});
+
+/** GCPS-1M export data with score and answers */
+export const GCPS1MExportDataSchema = z.object({
+  score: GCPS1MScoreSchema,
+  answers: z.record(z.string(), z.union([z.string(), z.number()])),
+});
+
+/** JFLS-8 export data with score and answers */
+export const JFLS8ExportDataSchema = z.object({
+  score: JFLS8ScoreSchema,
+  answers: z.record(z.string(), z.string()),
+});
+
+/** JFLS-20 export data with score and answers */
+export const JFLS20ExportDataSchema = z.object({
+  score: JFLS20ScoreSchema,
+  answers: z.record(z.string(), z.string()),
+});
+
+/** OBC export data with score and answers */
+export const OBCExportDataSchema = z.object({
+  score: OBCScoreSchema,
+  answers: z.record(z.string(), z.string()),
+});
+
+// ============================================================================
 // Questionnaires Container Schema
 // ============================================================================
 
 export const AnamnesisExportQuestionnairesSchema = z.object({
-  /** DC/TMD Symptom Questionnaire */
+  /** DC/TMD Symptom Questionnaire (already has answers) */
   sq: SQExportDataSchema.optional(),
   /** PHQ-4 psychosocial screening */
-  phq4: PHQ4ScoreSchema.optional(),
+  phq4: PHQ4ExportDataSchema.optional(),
   /** GCPS 1-month graded chronic pain scale */
-  gcps1m: GCPS1MScoreSchema.optional(),
+  gcps1m: GCPS1MExportDataSchema.optional(),
   /** JFLS-8 jaw function limitation (short form) */
-  jfls8: JFLS8ScoreSchema.optional(),
+  jfls8: JFLS8ExportDataSchema.optional(),
   /** JFLS-20 jaw function limitation (full form) */
-  jfls20: JFLS20ScoreSchema.optional(),
+  jfls20: JFLS20ExportDataSchema.optional(),
   /** Oral Behaviors Checklist */
-  obc: OBCScoreSchema.optional(),
+  obc: OBCExportDataSchema.optional(),
 });
 
 // ============================================================================
