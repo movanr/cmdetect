@@ -372,7 +372,7 @@ describe("validation", () => {
 
       expect(result.valid).toBe(false);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toEqual({ path: "e4.pain", message: "Required" });
+      expect(result.errors[0]).toEqual({ path: "e4.pain", message: "Dieses Feld ist erforderlich" });
     });
 
     it("allows empty non-required fields", () => {

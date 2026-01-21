@@ -1,56 +1,87 @@
-// Label translations for examination fields
-const LABELS: Record<string, string> = {
-  // Measurement labels
-  painFreeOpening: "Schmerzfreie Öffnung",
-  measurement: "Messung",
-  maxUnassistedOpening: "Maximale Öffnung (unassistiert)",
-  maxAssistedOpening: "Maximale Öffnung (assistiert)",
-  terminated: "Abgebrochen",
+/**
+ * UI labels not tied to anatomical regions.
+ *
+ * For anatomical labels (regions, sides, palpation sites, muscle groups, pain types),
+ * import directly from ./model/regions.ts where they are co-located with their types.
+ */
 
-  // Pain question labels
-  pain: "Schmerz",
-  familiarPain: "Bekannter Schmerz",
-  familiarHeadache: "Bekannte Kopfschmerzen",
-  referredPain: "Übertragener Schmerz",
-  spreadingPain: "Ausbreitender Schmerz",
+import type { SectionId } from "./sections/registry";
+import {
+  MUSCLE_GROUPS,
+  PAIN_TYPES,
+  PALPATION_SITES,
+  REGIONS,
+  SIDES,
+  type MuscleGroup,
+  type PainType,
+  type PalpationSite,
+  type Region,
+  type Side,
+} from "./model/regions";
 
-  // E4 Region labels
-  temporalis: "Temporalis",
-  masseter: "Masseter",
-  tmj: "TMJ",
-  otherMast: "Andere Kaumusk.",
-  nonMast: "Nicht-Kaumusk.",
-
-  // E9 Palpation site labels
-  temporalisPosterior: "Temporalis (posterior)",
-  temporalisMiddle: "Temporalis (mitte)",
-  temporalisAnterior: "Temporalis (anterior)",
-  masseterOrigin: "Masseter (Ursprung)",
-  masseterBody: "Masseter (Körper)",
-  masseterInsertion: "Masseter (Ansatz)",
-  tmjLateralPole: "TMJ (lateraler Pol)",
-  tmjAroundLateralPole: "TMJ (um lateralen Pol)",
-
-  // E9 Muscle group labels
-  temporalisMuscleGroup: "Temporalis",
-  masseterMuscleGroup: "Masseter",
-  tmjMuscleGroup: "Kiefergelenk (TMJ)",
-
-  // Side labels
-  left: "Links",
-  right: "Rechts",
+// === SECTION LABELS ===
+export const SECTION_LABELS: Record<SectionId, { title: string; cardTitle: string }> = {
+  e4: { title: "U4: Mundöffnung", cardTitle: "U4 - Öffnungs- und Schließbewegungen" },
+  e9: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & TMJ" },
 };
 
-export const getLabel = (key?: string): string | undefined =>
-  key ? (LABELS[key] ?? key) : undefined;
+// === STEP LABELS ===
+export type StepId =
+  | "e4a"
+  | "e4b-measure"
+  | "e4b-interview"
+  | "e4c-measure"
+  | "e4c-interview"
+  | "e9-left"
+  | "e9-right";
 
-export const getSideLabel = (side: string): string => LABELS[side] ?? side;
+export const STEP_LABELS: Record<StepId, { badge: string; title: string }> = {
+  e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
+  "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
+  "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
+  "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
+  "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
+  "e9-left": { badge: "U9", title: "Palpation Links" },
+  "e9-right": { badge: "U9", title: "Palpation Rechts" },
+};
 
-export const getRegionLabel = (region: string): string => LABELS[region] ?? region;
+// === COMMON UI LABELS ===
+export const COMMON = {
+  yes: "Ja",
+  no: "Nein",
+  pain: "Schmerz",
+  noPain: "Kein Schmerz",
+  noMorePainRegions: "Keine weiteren Schmerzregionen",
+  terminated: "Abgebrochen",
+  measurement: "Messung",
+  painFreeOpening: "Schmerzfreie Öffnung",
+  maxUnassistedOpening: "Maximale Öffnung (unassistiert)",
+  maxAssistedOpening: "Maximale Öffnung (assistiert)",
+} as const;
 
-export const getPainTypeLabel = (painType: string): string => LABELS[painType] ?? painType;
+// === LABEL LOOKUP FUNCTIONS ===
+// These provide type-safe label lookups using the constants from regions.ts
 
-export const getPalpationSiteLabel = (site: string): string => LABELS[site] ?? site;
+/** Get label for a side */
+export const getSideLabel = (side: Side): string => SIDES[side];
 
-export const getMuscleGroupLabel = (muscleGroup: string): string =>
-  LABELS[`${muscleGroup}MuscleGroup`] ?? muscleGroup;
+/** Get label for a region */
+export const getRegionLabel = (region: Region): string => REGIONS[region];
+
+/** Get label for a pain type */
+export const getPainTypeLabel = (painType: PainType): string => PAIN_TYPES[painType];
+
+/** Get label for a palpation site */
+export const getPalpationSiteLabel = (site: PalpationSite): string => PALPATION_SITES[site];
+
+/** Get label for a muscle group */
+export const getMuscleGroupLabel = (muscleGroup: MuscleGroup): string => MUSCLE_GROUPS[muscleGroup];
+
+/**
+ * Generic label lookup for labelKey strings (used by QuestionInstance).
+ * Falls back to key if not found in COMMON.
+ */
+export const getLabel = (key?: string): string | undefined => {
+  if (!key) return undefined;
+  return (COMMON as Record<string, string>)[key] ?? key;
+};

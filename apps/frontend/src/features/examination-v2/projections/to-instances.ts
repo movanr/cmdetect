@@ -1,9 +1,9 @@
 import type { EnableWhen } from "../model/conditions";
 import {
-  MOVEMENT_REGIONS,
-  PALPATION_SITES,
+  REGION_KEYS,
+  PALPATION_SITE_KEYS,
   SITE_CONFIG,
-  type MovementRegion,
+  type Region,
   type PalpationSite,
 } from "../model/regions";
 import type { ModelNode } from "../model/nodes";
@@ -62,12 +62,12 @@ export function enrichContext(ctx: Record<string, string>, key: string): Record<
   if (key === "left" || key === "right") return { ...ctx, side: key };
 
   // E4/E5: movement regions
-  if (MOVEMENT_REGIONS.includes(key as MovementRegion)) {
+  if (REGION_KEYS.includes(key as Region)) {
     return { ...ctx, region: key };
   }
 
   // E9: palpation sites
-  if (PALPATION_SITES.includes(key as PalpationSite)) {
+  if (PALPATION_SITE_KEYS.includes(key as PalpationSite)) {
     const config = SITE_CONFIG[key as PalpationSite];
     return { ...ctx, site: key, muscleGroup: config.muscleGroup };
   }

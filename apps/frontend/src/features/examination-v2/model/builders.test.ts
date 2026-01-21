@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { bilateralPainInterview, spreadChildren } from "./builders";
 import { M } from "./nodes";
 import { Q } from "./primitives";
-import { SIDES, MOVEMENT_REGIONS } from "./regions";
+import { SIDE_KEYS, REGION_KEYS } from "./regions";
 import type { QuestionNode, GroupNode, ModelNode } from "./nodes";
 
 describe("model builders", () => {
@@ -13,7 +13,7 @@ describe("model builders", () => {
       expect(interview.__nodeType).toBe("group");
       expect(interview.__children).toHaveProperty("left");
       expect(interview.__children).toHaveProperty("right");
-      expect(Object.keys(interview.__children)).toHaveLength(SIDES.length);
+      expect(Object.keys(interview.__children)).toHaveLength(SIDE_KEYS.length);
     });
 
     it("includes all 5 movement regions per side", () => {
@@ -22,10 +22,10 @@ describe("model builders", () => {
       const leftSide = interview.__children.left as GroupNode;
       const rightSide = interview.__children.right as GroupNode;
 
-      expect(Object.keys(leftSide.__children)).toHaveLength(MOVEMENT_REGIONS.length);
-      expect(Object.keys(rightSide.__children)).toHaveLength(MOVEMENT_REGIONS.length);
+      expect(Object.keys(leftSide.__children)).toHaveLength(REGION_KEYS.length);
+      expect(Object.keys(rightSide.__children)).toHaveLength(REGION_KEYS.length);
 
-      for (const region of MOVEMENT_REGIONS) {
+      for (const region of REGION_KEYS) {
         expect(leftSide.__children).toHaveProperty(region);
         expect(rightSide.__children).toHaveProperty(region);
       }

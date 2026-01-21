@@ -1,4 +1,5 @@
 import { getLabel, getPalpationSiteLabel } from "../../labels";
+import type { PalpationSite } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import { QuestionField } from "../QuestionField";
 
@@ -20,7 +21,7 @@ export function SiteQuestions({ questions }: SiteQuestionsProps) {
       {Object.entries(bySite).map(([site, siteQuestions]) => (
         <div key={site} className="space-y-2">
           <h5 className="text-sm font-medium text-muted-foreground">
-            {getPalpationSiteLabel(site)}
+            {getPalpationSiteLabel(site as PalpationSite)}
           </h5>
           <div className="pl-2 space-y-1">
             {siteQuestions.map((instance) => (

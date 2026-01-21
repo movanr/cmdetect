@@ -1,5 +1,5 @@
 import { getMuscleGroupLabel } from "../../labels";
-import { MUSCLE_GROUPS } from "../../model/regions";
+import { MUSCLE_GROUP_KEYS } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import { SiteQuestions } from "./SiteQuestions";
 
@@ -18,7 +18,7 @@ export function PalpationStep({ instances }: PalpationStepProps) {
 
   return (
     <div className="space-y-6">
-      {MUSCLE_GROUPS.map((group) => {
+      {MUSCLE_GROUP_KEYS.map((group) => {
         const groupQuestions = byMuscleGroup[group];
         if (!groupQuestions?.length) return null;
 

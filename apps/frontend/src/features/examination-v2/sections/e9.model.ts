@@ -1,6 +1,6 @@
 import {
-  SIDES,
-  PALPATION_SITES,
+  SIDE_KEYS,
+  PALPATION_SITE_KEYS,
   getPalpationPainQuestions,
   type PalpationSite,
 } from "../model/regions";
@@ -25,12 +25,12 @@ const palpationQuestionsForSite = (site: PalpationSite) => {
 // Build all sites for one side
 const sitesForSide = () =>
   M.group(
-    Object.fromEntries(PALPATION_SITES.map((site) => [site, palpationQuestionsForSite(site)]))
+    Object.fromEntries(PALPATION_SITE_KEYS.map((site) => [site, palpationQuestionsForSite(site)]))
   ) as GroupNode & { __children: Record<string, ModelNode> };
 
 // Build bilateral (left + right)
 const bilateral = () =>
-  M.group(Object.fromEntries(SIDES.map((s) => [s, sitesForSide()]))) as GroupNode & {
+  M.group(Object.fromEntries(SIDE_KEYS.map((s) => [s, sitesForSide()]))) as GroupNode & {
     __children: Record<string, ModelNode>;
   };
 

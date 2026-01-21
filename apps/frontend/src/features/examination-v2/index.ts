@@ -12,17 +12,28 @@ export {
   getMovementPainQuestions,
   getPalpationPainQuestions,
   // Movement regions (E4, E5)
-  MOVEMENT_REGIONS,
+  REGIONS,
+  REGION_KEYS,
+  MOVEMENT_REGIONS, // deprecated alias
+  // Muscle groups
   MUSCLE_GROUPS,
+  MUSCLE_GROUP_KEYS,
+  // Pain types
+  PAIN_TYPES,
+  PAIN_TYPE_KEYS,
   PALPATION_PAIN_QUESTIONS,
   // Palpation sites (E9)
   PALPATION_SITES,
+  PALPATION_SITE_KEYS,
   // Sides
   SIDES,
+  SIDE_KEYS,
   SITE_CONFIG,
   SVG_REGIONS,
-  type MovementRegion,
+  type MovementRegion, // deprecated alias
+  type Region,
   type MuscleGroup,
+  type PainType,
   type PalpationPainQuestion,
   type PalpationSite,
   type Side,
@@ -82,10 +93,14 @@ export { E9Section } from "./components/sections/E9Section";
 
 // Labels
 export {
+  COMMON,
   getLabel,
   getMuscleGroupLabel,
   getPainTypeLabel,
   getPalpationSiteLabel,
   getRegionLabel,
   getSideLabel,
+  SECTION_LABELS,
+  STEP_LABELS,
+  type StepId,
 } from "./labels";

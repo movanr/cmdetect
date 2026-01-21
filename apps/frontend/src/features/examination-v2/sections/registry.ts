@@ -16,13 +16,13 @@ export interface SectionConfig {
 export const SECTION_REGISTRY: SectionConfig[] = [
   {
     id: "e4",
-    label: "E4: Mundöffnung",
+    label: "U4: Mundöffnung",
     model: E4_MODEL,
     steps: E4_STEPS,
   },
   {
     id: "e9",
-    label: "E9: Palpation",
+    label: "U9: Palpation",
     model: E9_MODEL,
     steps: E9_STEPS,
   },

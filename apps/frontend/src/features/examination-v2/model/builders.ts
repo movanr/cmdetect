@@ -4,10 +4,10 @@
 import { M, type GroupNode, type ModelNode } from "./nodes";
 import { Q } from "./primitives";
 import {
-  SIDES,
-  MOVEMENT_REGIONS,
+  SIDE_KEYS,
+  REGION_KEYS,
   getMovementPainQuestions,
-  type MovementRegion,
+  type Region,
 } from "./regions";
 
 type GroupWithChildren<C extends Record<string, ModelNode> = Record<string, ModelNode>> = GroupNode<C>;
@@ -18,7 +18,7 @@ type GroupWithChildren<C extends Record<string, ModelNode> = Record<string, Mode
  * - familiarPain (enableWhen: pain === 'yes')
  * - familiarHeadache (temporalis only, enableWhen: pain === 'yes')
  */
-const painQuestionsForRegion = (region: MovementRegion): GroupWithChildren => {
+const painQuestionsForRegion = (region: Region): GroupWithChildren => {
   const questions = getMovementPainQuestions(region);
   return M.group(
     Object.fromEntries(
@@ -40,7 +40,7 @@ const painQuestionsForRegion = (region: MovementRegion): GroupWithChildren => {
  */
 const regionsForSide = (): GroupWithChildren =>
   M.group(
-    Object.fromEntries(MOVEMENT_REGIONS.map((r) => [r, painQuestionsForRegion(r)]))
+    Object.fromEntries(REGION_KEYS.map((r) => [r, painQuestionsForRegion(r)]))
   ) as GroupWithChildren;
 
 /**
@@ -51,7 +51,7 @@ const regionsForSide = (): GroupWithChildren =>
  */
 export const bilateralPainInterview = (): GroupWithChildren =>
   M.group(
-    Object.fromEntries(SIDES.map((s) => [s, regionsForSide()]))
+    Object.fromEntries(SIDE_KEYS.map((s) => [s, regionsForSide()]))
   ) as GroupWithChildren;
 
 /**

@@ -1,10 +1,16 @@
 import { describe, it, expect } from "vitest";
 import {
   SIDES,
-  MOVEMENT_REGIONS,
+  SIDE_KEYS,
+  REGIONS,
+  REGION_KEYS,
   SVG_REGIONS,
   PALPATION_SITES,
+  PALPATION_SITE_KEYS,
   MUSCLE_GROUPS,
+  MUSCLE_GROUP_KEYS,
+  PAIN_TYPES,
+  PAIN_TYPE_KEYS,
   SITE_CONFIG,
   getMovementPainQuestions,
   getPalpationPainQuestions,
@@ -12,23 +18,37 @@ import {
 } from "./regions";
 
 describe("regions", () => {
-  describe("constants", () => {
-    it("SIDES contains left and right", () => {
-      expect(SIDES).toContain("left");
-      expect(SIDES).toContain("right");
-      expect(SIDES).toHaveLength(2);
+  describe("SIDES", () => {
+    it("contains left and right with German labels", () => {
+      expect(SIDES.left).toBe("Links");
+      expect(SIDES.right).toBe("Rechts");
+      expect(SIDE_KEYS).toHaveLength(2);
+      expect(SIDE_KEYS).toContain("left");
+      expect(SIDE_KEYS).toContain("right");
+    });
+  });
+
+  describe("REGIONS", () => {
+    it("contains all 5 regions with German labels", () => {
+      expect(REGIONS.temporalis).toBe("Temporalis");
+      expect(REGIONS.masseter).toBe("Masseter");
+      expect(REGIONS.tmj).toBe("TMJ");
+      expect(REGIONS.otherMast).toBe("Andere Kaumusk.");
+      expect(REGIONS.nonMast).toBe("Nicht-Kaumusk.");
+      expect(REGION_KEYS).toHaveLength(5);
     });
 
-    it("MOVEMENT_REGIONS contains all 5 regions", () => {
-      expect(MOVEMENT_REGIONS).toContain("temporalis");
-      expect(MOVEMENT_REGIONS).toContain("masseter");
-      expect(MOVEMENT_REGIONS).toContain("tmj");
-      expect(MOVEMENT_REGIONS).toContain("otherMast");
-      expect(MOVEMENT_REGIONS).toContain("nonMast");
-      expect(MOVEMENT_REGIONS).toHaveLength(5);
+    it("REGION_KEYS contains all region keys", () => {
+      expect(REGION_KEYS).toContain("temporalis");
+      expect(REGION_KEYS).toContain("masseter");
+      expect(REGION_KEYS).toContain("tmj");
+      expect(REGION_KEYS).toContain("otherMast");
+      expect(REGION_KEYS).toContain("nonMast");
     });
+  });
 
-    it("SVG_REGIONS excludes otherMast (not anatomically renderable)", () => {
+  describe("SVG_REGIONS", () => {
+    it("excludes otherMast (not anatomically renderable)", () => {
       expect(SVG_REGIONS).toContain("temporalis");
       expect(SVG_REGIONS).toContain("masseter");
       expect(SVG_REGIONS).toContain("tmj");
@@ -36,24 +56,39 @@ describe("regions", () => {
       expect(SVG_REGIONS).not.toContain("otherMast");
       expect(SVG_REGIONS).toHaveLength(4);
     });
+  });
 
-    it("PALPATION_SITES contains all 8 sites", () => {
-      expect(PALPATION_SITES).toHaveLength(8);
-      expect(PALPATION_SITES).toContain("temporalisPosterior");
-      expect(PALPATION_SITES).toContain("temporalisMiddle");
-      expect(PALPATION_SITES).toContain("temporalisAnterior");
-      expect(PALPATION_SITES).toContain("masseterOrigin");
-      expect(PALPATION_SITES).toContain("masseterBody");
-      expect(PALPATION_SITES).toContain("masseterInsertion");
-      expect(PALPATION_SITES).toContain("tmjLateralPole");
-      expect(PALPATION_SITES).toContain("tmjAroundLateralPole");
+  describe("PALPATION_SITES", () => {
+    it("contains all 8 sites with German labels", () => {
+      expect(PALPATION_SITES.temporalisPosterior).toBe("Temporalis (posterior)");
+      expect(PALPATION_SITES.temporalisMiddle).toBe("Temporalis (mitte)");
+      expect(PALPATION_SITES.temporalisAnterior).toBe("Temporalis (anterior)");
+      expect(PALPATION_SITES.masseterOrigin).toBe("Masseter (Ursprung)");
+      expect(PALPATION_SITES.masseterBody).toBe("Masseter (Körper)");
+      expect(PALPATION_SITES.masseterInsertion).toBe("Masseter (Ansatz)");
+      expect(PALPATION_SITES.tmjLateralPole).toBe("TMJ (lateraler Pol)");
+      expect(PALPATION_SITES.tmjAroundLateralPole).toBe("TMJ (um lateralen Pol)");
+      expect(PALPATION_SITE_KEYS).toHaveLength(8);
     });
+  });
 
-    it("MUSCLE_GROUPS contains temporalis, masseter, tmj", () => {
-      expect(MUSCLE_GROUPS).toContain("temporalis");
-      expect(MUSCLE_GROUPS).toContain("masseter");
-      expect(MUSCLE_GROUPS).toContain("tmj");
-      expect(MUSCLE_GROUPS).toHaveLength(3);
+  describe("MUSCLE_GROUPS", () => {
+    it("contains temporalis, masseter, tmj with German labels", () => {
+      expect(MUSCLE_GROUPS.temporalis).toBe("Temporalis");
+      expect(MUSCLE_GROUPS.masseter).toBe("Masseter");
+      expect(MUSCLE_GROUPS.tmj).toBe("Kiefergelenk (TMJ)");
+      expect(MUSCLE_GROUP_KEYS).toHaveLength(3);
+    });
+  });
+
+  describe("PAIN_TYPES", () => {
+    it("contains all pain types with German labels", () => {
+      expect(PAIN_TYPES.pain).toBe("Schmerz");
+      expect(PAIN_TYPES.familiarPain).toBe("Bekannter Schmerz");
+      expect(PAIN_TYPES.familiarHeadache).toBe("Bekannte Kopfschmerzen");
+      expect(PAIN_TYPES.referredPain).toBe("Übertragener Schmerz");
+      expect(PAIN_TYPES.spreadingPain).toBe("Ausbreitender Schmerz");
+      expect(PAIN_TYPE_KEYS).toHaveLength(5);
     });
   });
 
@@ -236,7 +271,7 @@ describe("regions", () => {
     });
 
     it("all palpation sites have config entries", () => {
-      for (const site of PALPATION_SITES) {
+      for (const site of PALPATION_SITE_KEYS) {
         expect(SITE_CONFIG[site]).toBeDefined();
         expect(SITE_CONFIG[site].muscleGroup).toBeDefined();
         expect(typeof SITE_CONFIG[site].pressure).toBe("number");

@@ -1,4 +1,5 @@
 import { getLabel, getRegionLabel } from "../../labels";
+import type { Region } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import { QuestionField } from "../QuestionField";
 
@@ -21,7 +22,7 @@ export function InterviewColumn({ title, questions }: InterviewColumnProps) {
       <h4 className="font-medium text-sm border-b pb-2">{title}</h4>
       {Object.entries(byRegion).map(([region, regionQuestions]) => (
         <div key={region} className="space-y-2">
-          <h5 className="text-sm font-medium text-muted-foreground">{getRegionLabel(region)}</h5>
+          <h5 className="text-sm font-medium text-muted-foreground">{getRegionLabel(region as Region)}</h5>
           <div className="pl-2 space-y-1">
             {regionQuestions.map((instance) => (
               <QuestionField
