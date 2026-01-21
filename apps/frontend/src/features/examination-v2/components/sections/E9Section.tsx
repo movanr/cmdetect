@@ -72,7 +72,7 @@ export function E9Section({ onComplete }: E9SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>E9 - Palpation Muskeln & TMJ</CardTitle>
+        <CardTitle>E9 - Palpation Muskeln & Kiefergelenk</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {E9_STEP_ORDER.map((stepId, index) => {

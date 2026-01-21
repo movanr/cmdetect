@@ -2,7 +2,7 @@
  * HeadDiagram - Interactive SVG head diagram with clickable anatomical regions.
  *
  * Features:
- * - 4 clickable regions: temporalis, masseter, TMJ, non-masticatory
+ * - 4 clickable regions: temporalis, masseter, tmj, non-masticatory
  * - Visual feedback based on region status (pending, pain positive, no pain)
  * - Selected state with darker shades of clinical colors
  * - Stripe pattern overlay for incomplete/validation error regions
@@ -192,7 +192,7 @@ export function HeadDiagram({
   const containerStyle: React.CSSProperties = side === "left" ? { transform: "scaleX(-1)" } : {};
 
   return (
-    <div className={cn("w-[240px] h-auto", className)} style={containerStyle}>
+    <div className={cn("w-[200px] sm:w-[240px] h-auto shrink-0", className)} style={containerStyle}>
       <HeadSvg
         ref={svgRef}
         className="w-full h-auto"

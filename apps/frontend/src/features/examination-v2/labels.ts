@@ -5,7 +5,6 @@
  * import directly from ./model/regions.ts where they are co-located with their types.
  */
 
-import type { SectionId } from "./sections/registry";
 import {
   MUSCLE_GROUPS,
   PAIN_TYPES,
@@ -18,11 +17,12 @@ import {
   type Region,
   type Side,
 } from "./model/regions";
+import type { SectionId } from "./sections/registry";
 
 // === SECTION LABELS ===
 export const SECTION_LABELS: Record<SectionId, { title: string; cardTitle: string }> = {
   e4: { title: "U4: Mundöffnung", cardTitle: "U4 - Öffnungs- und Schließbewegungen" },
-  e9: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & TMJ" },
+  e9: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & Kiefergelenk" },
 };
 
 // === STEP LABELS ===

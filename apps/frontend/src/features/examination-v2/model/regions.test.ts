@@ -32,7 +32,7 @@ describe("regions", () => {
     it("contains all 5 regions with German labels", () => {
       expect(REGIONS.temporalis).toBe("Temporalis");
       expect(REGIONS.masseter).toBe("Masseter");
-      expect(REGIONS.tmj).toBe("TMJ");
+      expect(REGIONS.tmj).toBe("Kiefergelenk");
       expect(REGIONS.otherMast).toBe("Andere Kaumusk.");
       expect(REGIONS.nonMast).toBe("Nicht-Kaumusk.");
       expect(REGION_KEYS).toHaveLength(5);
@@ -66,8 +66,8 @@ describe("regions", () => {
       expect(PALPATION_SITES.masseterOrigin).toBe("Masseter (Ursprung)");
       expect(PALPATION_SITES.masseterBody).toBe("Masseter (Körper)");
       expect(PALPATION_SITES.masseterInsertion).toBe("Masseter (Ansatz)");
-      expect(PALPATION_SITES.tmjLateralPole).toBe("TMJ (lateraler Pol)");
-      expect(PALPATION_SITES.tmjAroundLateralPole).toBe("TMJ (um lateralen Pol)");
+      expect(PALPATION_SITES.tmjLateralPole).toBe("Kiefergelenk (lateraler Pol)");
+      expect(PALPATION_SITES.tmjAroundLateralPole).toBe("Kiefergelenk (um lateralen Pol)");
       expect(PALPATION_SITE_KEYS).toHaveLength(8);
     });
   });
@@ -76,7 +76,7 @@ describe("regions", () => {
     it("contains temporalis, masseter, tmj with German labels", () => {
       expect(MUSCLE_GROUPS.temporalis).toBe("Temporalis");
       expect(MUSCLE_GROUPS.masseter).toBe("Masseter");
-      expect(MUSCLE_GROUPS.tmj).toBe("Kiefergelenk (TMJ)");
+      expect(MUSCLE_GROUPS.tmj).toBe("Kiefergelenk (Kiefergelenk)");
       expect(MUSCLE_GROUP_KEYS).toHaveLength(3);
     });
   });
@@ -208,7 +208,7 @@ describe("regions", () => {
       const masseterQuestions = getPalpationPainQuestions("masseterBody");
       expect(masseterQuestions).toEqual(["pain", "familiarPain", "spreadingPain", "referredPain"]);
 
-      // TMJ should have: pain, familiarPain, referredPain
+      // tmj should have: pain, familiarPain, referredPain
       const tmjQuestions = getPalpationPainQuestions("tmjLateralPole");
       expect(tmjQuestions).toEqual(["pain", "familiarPain", "referredPain"]);
     });
@@ -265,7 +265,7 @@ describe("regions", () => {
       expect(SITE_CONFIG.masseterBody.muscleGroup).toBe("masseter");
       expect(SITE_CONFIG.masseterInsertion.muscleGroup).toBe("masseter");
 
-      // TMJ group
+      // tmj group
       expect(SITE_CONFIG.tmjLateralPole.muscleGroup).toBe("tmj");
       expect(SITE_CONFIG.tmjAroundLateralPole.muscleGroup).toBe("tmj");
     });

@@ -129,20 +129,21 @@ export function DiagramInterviewStep({
 
   return (
     <div className="space-y-4">
-      {/* Head diagrams with region status lists - lists aligned to card edges */}
-      <div className="flex justify-between items-start">
+      {/* Head diagrams with region status lists - lists on outer edges */}
+      <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-6 md:gap-8">
         {/* Right side (patient's right, displayed on left) */}
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col gap-2 w-full md:w-auto">
+          <span className="text-sm font-medium text-muted-foreground text-center md:text-left">
             {getSideLabel("right")}
           </span>
-          <div className="flex items-start gap-4">
+          <div className="flex items-start justify-center md:justify-start gap-3 md:gap-4">
             <RegionStatusList
               regions={regions}
               regionStatuses={rightStatuses}
               selectedRegion={selectedSide === "right" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "right")}
               incompleteRegions={rightIncomplete}
+              className="shrink-0"
             />
             <HeadDiagram
               side="right"
@@ -155,14 +156,15 @@ export function DiagramInterviewStep({
           </div>
         </div>
 
-        <Separator orientation="vertical" className="h-auto self-stretch mx-4" />
+        {/* Vertical separator - hidden on mobile/tablet */}
+        <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
 
         {/* Left side (patient's left, displayed on right) */}
-        <div className="flex flex-col items-end gap-2">
-          <span className="text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col gap-2 w-full md:w-auto">
+          <span className="text-sm font-medium text-muted-foreground text-center md:text-end">
             {getSideLabel("left")}
           </span>
-          <div className="flex items-start gap-4">
+          <div className="flex items-start justify-center md:justify-end gap-3 md:gap-4">
             <HeadDiagram
               side="left"
               regions={regions}
@@ -177,6 +179,7 @@ export function DiagramInterviewStep({
               selectedRegion={selectedSide === "left" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "left")}
               incompleteRegions={leftIncomplete}
+              className="shrink-0"
             />
           </div>
         </div>

@@ -25,7 +25,7 @@ export const SIDE_KEYS = Object.keys(SIDES) as Side[];
 export const REGIONS = {
   temporalis: "Temporalis",
   masseter: "Masseter",
-  tmj: "TMJ",
+  tmj: "Kiefergelenk",
   otherMast: "Andere Kaumusk.", // other masticatory muscles
   nonMast: "Nicht-Kaumusk.", // non-masticatory structures
 } as const;
@@ -62,8 +62,8 @@ export const PALPATION_SITES = {
   masseterOrigin: "Masseter (Ursprung)",
   masseterBody: "Masseter (Körper)",
   masseterInsertion: "Masseter (Ansatz)",
-  tmjLateralPole: "TMJ (lateraler Pol)",
-  tmjAroundLateralPole: "TMJ (um lateralen Pol)",
+  tmjLateralPole: "Kiefergelenk (lateraler Pol)",
+  tmjAroundLateralPole: "Kiefergelenk (um lateralen Pol)",
 } as const;
 export type PalpationSite = keyof typeof PALPATION_SITES;
 export const PALPATION_SITE_KEYS = Object.keys(PALPATION_SITES) as PalpationSite[];
@@ -72,7 +72,7 @@ export const PALPATION_SITE_KEYS = Object.keys(PALPATION_SITES) as PalpationSite
 export const MUSCLE_GROUPS = {
   temporalis: "Temporalis",
   masseter: "Masseter",
-  tmj: "Kiefergelenk (TMJ)",
+  tmj: "Kiefergelenk (Kiefergelenk)",
 } as const;
 export type MuscleGroup = keyof typeof MUSCLE_GROUPS;
 export const MUSCLE_GROUP_KEYS = Object.keys(MUSCLE_GROUPS) as MuscleGroup[];
