@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { ArrowRight, CheckCircle, SkipForward } from "lucide-react";
 import { useState } from "react";
 import type { FieldPath } from "react-hook-form";
@@ -11,6 +13,7 @@ import {
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
+import { ALL_REGIONS, BASE_REGIONS } from "../../model/regions";
 import {
   DiagramInterviewStep,
   InstructionBlock,
@@ -58,6 +61,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>({});
   const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
   const [diagramKey, setDiagramKey] = useState(0);
+  const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
@@ -208,6 +212,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
                     key={diagramKey}
                     instances={stepInstances}
                     incompleteRegions={incompleteRegions}
+                    regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
                   />
                 ) : (
                   <MeasurementStep instances={stepInstances} />
@@ -215,16 +220,30 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-2 border-t">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSkip}
-                    className="text-muted-foreground"
-                  >
-                    <SkipForward className="h-4 w-4 mr-1" />
-                    Überspringen
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSkip}
+                      className="text-muted-foreground"
+                    >
+                      <SkipForward className="h-4 w-4 mr-1" />
+                      Überspringen
+                    </Button>
+                    {stepIsInterview && (
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="alle-regionen"
+                          checked={includeAllRegions}
+                          onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
+                        />
+                        <Label htmlFor="alle-regionen" className="text-sm cursor-pointer">
+                          Alle Regionen
+                        </Label>
+                      </div>
+                    )}
+                  </div>
                   <div className="flex gap-2">
                     {stepIsInterview && (
                       <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>

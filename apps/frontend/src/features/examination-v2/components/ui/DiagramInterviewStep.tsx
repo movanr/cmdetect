@@ -5,7 +5,7 @@ import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { RegionPainQuestions } from "./RegionPainQuestions";
 import { RegionStatusList } from "./RegionStatusList";
-import { SVG_REGIONS, type MovementRegion, type Side } from "../../model/regions";
+import { BASE_REGIONS, type MovementRegion, type Side, type Region } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import type { IncompleteRegion } from "../../form/validation";
 import { getSideLabel } from "../../labels";
@@ -14,6 +14,8 @@ export interface DiagramInterviewStepProps {
   instances: QuestionInstance[];
   /** Regions with validation errors (incomplete data) */
   incompleteRegions?: IncompleteRegion[];
+  /** Regions to display in diagram and list. Defaults to BASE_REGIONS (temporalis, masseter, tmj) */
+  regions?: readonly Region[];
 }
 
 /**
@@ -67,6 +69,7 @@ function computeRegionStatus(
 export function DiagramInterviewStep({
   instances,
   incompleteRegions = [],
+  regions = BASE_REGIONS,
 }: DiagramInterviewStepProps) {
   const { watch, getValues } = useFormContext();
   const [selectedRegion, setSelectedRegion] = useState<MovementRegion | null>(null);
@@ -80,21 +83,21 @@ export function DiagramInterviewStep({
   // Include watchedValues in deps to recompute when form values change
   const leftStatuses = useMemo(() => {
     const statuses: Partial<Record<MovementRegion, RegionStatus>> = {};
-    for (const region of SVG_REGIONS) {
+    for (const region of regions) {
       statuses[region] = computeRegionStatus(region, "left", instances, getValues);
     }
     return statuses;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [instances, getValues, watchedValues]);
+  }, [instances, getValues, watchedValues, regions]);
 
   const rightStatuses = useMemo(() => {
     const statuses: Partial<Record<MovementRegion, RegionStatus>> = {};
-    for (const region of SVG_REGIONS) {
+    for (const region of regions) {
       statuses[region] = computeRegionStatus(region, "right", instances, getValues);
     }
     return statuses;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [instances, getValues, watchedValues]);
+  }, [instances, getValues, watchedValues, regions]);
 
   // Filter incomplete regions, excluding any that are now complete
   // This makes validation errors disappear reactively as users fill in values
@@ -135,7 +138,7 @@ export function DiagramInterviewStep({
           </span>
           <div className="flex items-start gap-4">
             <RegionStatusList
-              regions={SVG_REGIONS}
+              regions={regions}
               regionStatuses={rightStatuses}
               selectedRegion={selectedSide === "right" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "right")}
@@ -143,7 +146,7 @@ export function DiagramInterviewStep({
             />
             <HeadDiagram
               side="right"
-              regions={SVG_REGIONS}
+              regions={regions}
               regionStatuses={rightStatuses}
               selectedRegion={selectedSide === "right" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "right")}
@@ -162,14 +165,14 @@ export function DiagramInterviewStep({
           <div className="flex items-start gap-4">
             <HeadDiagram
               side="left"
-              regions={SVG_REGIONS}
+              regions={regions}
               regionStatuses={leftStatuses}
               selectedRegion={selectedSide === "left" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "left")}
               incompleteRegions={leftIncomplete}
             />
             <RegionStatusList
-              regions={SVG_REGIONS}
+              regions={regions}
               regionStatuses={leftStatuses}
               selectedRegion={selectedSide === "left" ? selectedRegion : null}
               onRegionClick={(r) => handleRegionClick(r, "left")}

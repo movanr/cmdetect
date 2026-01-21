@@ -41,6 +41,12 @@ export const MOVEMENT_REGIONS = REGION_KEYS;
 // Regions visible on head diagram (excludes otherMast - not anatomically renderable)
 export const SVG_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj", "nonMast"];
 
+// Base regions - the 3 primary regions (temporalis, masseter, tmj)
+export const BASE_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
+
+// All regions for interview (all 5 regions)
+export const ALL_REGIONS: readonly Region[] = REGION_KEYS;
+
 // Pain questions per region - temporalis gets familiarHeadache, others don't
 export const getMovementPainQuestions = (region: Region) =>
   region === "temporalis"
