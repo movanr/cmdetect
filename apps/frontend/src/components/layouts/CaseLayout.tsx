@@ -7,7 +7,7 @@ import { Check, X, Menu, Lock } from "lucide-react";
 import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { useIsTabletPortrait } from "@/hooks/use-mobile";
+import { useIsNotDesktop } from "@/hooks/use-mobile";
 import { canAccessStep, type MainStep } from "../../features/case-workflow";
 
 export type CaseStep = "anamnesis" | "examination" | "evaluation" | "documentation" | "export";
@@ -42,7 +42,7 @@ export function CaseLayout({
   const navigate = useNavigate();
   const { data: session } = useSession();
   const t = getTranslations();
-  const isTabletPortrait = useIsTabletPortrait();
+  const isNotDesktop = useIsNotDesktop();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Redirect to login if not authenticated
@@ -52,13 +52,13 @@ export function CaseLayout({
     }
   }, [session, navigate]);
 
-  // Close sidebar when switching from tablet to desktop
+  // Close sidebar when switching to desktop (>= 1280px)
   useEffect(() => {
-    if (!isTabletPortrait) {
+    if (!isNotDesktop) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync sidebar state with viewport change
       setSidebarOpen(false);
     }
-  }, [isTabletPortrait]);
+  }, [isNotDesktop]);
 
   if (!session) {
     return null;
@@ -209,28 +209,26 @@ export function CaseLayout({
           </SheetContent>
         </Sheet>
 
-        {/* Static sidebar for desktop (lg and up) */}
-        <aside className="hidden lg:block w-56 border-r bg-background flex-shrink-0 overflow-y-auto">
+        {/* Static sidebar for desktop (xl and up, >= 1280px) */}
+        <aside className="hidden xl:block w-56 border-r bg-background flex-shrink-0 overflow-y-auto">
           {sidebarContent}
         </aside>
 
         {/* Main content */}
         <main className="flex-1 overflow-auto">
-          {/* Sidebar toggle button for tablet portrait */}
-          {isTabletPortrait && (
-            <div className="sticky top-0 z-10 bg-background border-b px-4 py-2 lg:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarOpen(true)}
-                className="min-h-[44px] min-w-[44px] p-2"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="ml-2">Menu</span>
-              </Button>
-            </div>
-          )}
-          <div className="px-4 py-6 lg:px-8 lg:py-8">{children}</div>
+          {/* Sidebar toggle button - visible below xl breakpoint (< 1280px) */}
+          <div className="sticky top-0 z-10 bg-background border-b px-4 py-2 xl:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+              className="min-h-[44px] min-w-[44px] p-2"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="ml-2">Menu</span>
+            </Button>
+          </div>
+          <div className="px-4 py-6 xl:px-8 xl:py-8">{children}</div>
         </main>
       </div>
     </div>

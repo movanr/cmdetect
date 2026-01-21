@@ -1,7 +1,7 @@
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
-const TABLET_BREAKPOINT = 1024
+const DESKTOP_BREAKPOINT = 1280  // xl breakpoint - sidebar shows at this width and above
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
@@ -20,26 +20,30 @@ export function useIsMobile() {
 }
 
 /**
- * Returns true for tablet portrait screens (768px to 1023px)
- * This covers iPad portrait mode where sidebar should be collapsible
+ * Returns true when below desktop breakpoint (< 1280px)
+ * This indicates when the sidebar should be hidden and hamburger menu shown
  */
-export function useIsTabletPortrait() {
-  const [isTabletPortrait, setIsTabletPortrait] = React.useState<boolean | undefined>(undefined)
+export function useIsNotDesktop() {
+  const [isNotDesktop, setIsNotDesktop] = React.useState<boolean | undefined>(undefined)
 
   React.useEffect(() => {
-    const mql = window.matchMedia(
-      `(min-width: ${MOBILE_BREAKPOINT}px) and (max-width: ${TABLET_BREAKPOINT - 1}px)`
-    )
+    const mql = window.matchMedia(`(max-width: ${DESKTOP_BREAKPOINT - 1}px)`)
     const onChange = () => {
-      const width = window.innerWidth
-      setIsTabletPortrait(width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT)
+      setIsNotDesktop(window.innerWidth < DESKTOP_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
     onChange()
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  return !!isTabletPortrait
+  return !!isNotDesktop
+}
+
+/**
+ * @deprecated Use useIsNotDesktop() instead - this function now uses 1280px breakpoint
+ */
+export function useIsTabletPortrait() {
+  return useIsNotDesktop()
 }
 
 export type Breakpoint = 'mobile' | 'tablet' | 'desktop'
@@ -47,8 +51,8 @@ export type Breakpoint = 'mobile' | 'tablet' | 'desktop'
 /**
  * Returns the current breakpoint: 'mobile', 'tablet', or 'desktop'
  * - mobile: < 768px
- * - tablet: 768px to 1023px (iPad portrait)
- * - desktop: >= 1024px (iPad landscape and larger)
+ * - tablet: 768px to 1279px
+ * - desktop: >= 1280px (xl breakpoint, static sidebar visible)
  */
 export function useBreakpoint(): Breakpoint {
   const [breakpoint, setBreakpoint] = React.useState<Breakpoint>('desktop')
@@ -58,7 +62,7 @@ export function useBreakpoint(): Breakpoint {
       const width = window.innerWidth
       if (width < MOBILE_BREAKPOINT) {
         setBreakpoint('mobile')
-      } else if (width < TABLET_BREAKPOINT) {
+      } else if (width < DESKTOP_BREAKPOINT) {
         setBreakpoint('tablet')
       } else {
         setBreakpoint('desktop')
