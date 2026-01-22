@@ -168,6 +168,29 @@ export const PALPATION_MODE_QUESTIONS: Record<PalpationMode, readonly PalpationP
   extended: ["pain", "familiarPain", "familiarHeadache", "referredPain", "spreadingPain"],
 };
 
+// === SITE DETAIL MODES (E9) ===
+// Toggle between detailed (8 individual sites) and grouped (3 muscle groups) views
+export const SITE_DETAIL_MODES = {
+  detailed: "Detailliert",
+  grouped: "Gruppiert",
+} as const;
+export type SiteDetailMode = keyof typeof SITE_DETAIL_MODES;
+export const SITE_DETAIL_MODE_KEYS = Object.keys(SITE_DETAIL_MODES) as SiteDetailMode[];
+
+// Map muscle groups to their constituent palpation sites
+export const SITES_BY_GROUP: Record<MuscleGroup, readonly PalpationSite[]> = {
+  temporalis: ["temporalisPosterior", "temporalisMiddle", "temporalisAnterior"],
+  masseter: ["masseterOrigin", "masseterBody", "masseterInsertion"],
+  tmj: ["tmjLateralPole", "tmjAroundLateralPole"],
+};
+
+// Group-level question applicability (derived from site configs)
+export const GROUP_CONFIG: Record<MuscleGroup, { hasHeadache: boolean; hasSpreading: boolean }> = {
+  temporalis: { hasHeadache: true, hasSpreading: true },
+  masseter: { hasHeadache: false, hasSpreading: true },
+  tmj: { hasHeadache: false, hasSpreading: false },
+};
+
 // Returns the list of pain questions applicable to a given palpation site (in correct order)
 export function getPalpationPainQuestions(site: PalpationSite): PalpationPainQuestion[] {
   const config = SITE_CONFIG[site];
