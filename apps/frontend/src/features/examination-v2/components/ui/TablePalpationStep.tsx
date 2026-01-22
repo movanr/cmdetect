@@ -5,6 +5,7 @@ import { YesNoField } from "../inputs/YesNoField";
 import {
   PALPATION_SITES,
   PALPATION_PAIN_QUESTIONS,
+  SITE_CONFIG,
   getPalpationPainQuestions,
   type PalpationSite,
   type PalpationPainQuestion,
@@ -120,7 +121,12 @@ export function TablePalpationStep({ instances }: TablePalpationStepProps) {
                     isLastInGroup && !isLastGroup && "border-b-2 border-muted-foreground/30"
                   )}
                 >
-                  <td className="p-2 font-medium">{PALPATION_SITES[site]}</td>
+                  <td className="p-2">
+                    <span className="font-medium">{PALPATION_SITES[site]}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {SITE_CONFIG[site].pressure} kg
+                    </span>
+                  </td>
                   {PALPATION_PAIN_QUESTIONS.map((painType) => {
                     // Check if this pain type applies to this site
                     const applies = appliesTo(site, painType);
