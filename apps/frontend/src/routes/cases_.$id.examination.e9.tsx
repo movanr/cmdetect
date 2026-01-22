@@ -13,11 +13,5 @@ export const Route = createFileRoute("/cases_/$id/examination/e9")({
 });
 
 function ExaminationE9Page() {
-  // Navigate back to examination overview or next step on completion
-  const handleComplete = () => {
-    // TODO: Navigate to next workflow step (evaluation) when implemented
-    console.log("Examination E9 completed");
-  };
-
-  return <E9Section onComplete={handleComplete} />;
+  return <E9Section />;
 }

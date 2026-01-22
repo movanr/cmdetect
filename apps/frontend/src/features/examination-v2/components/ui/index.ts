@@ -18,6 +18,10 @@ export {
   type TableInterviewStepProps,
 } from "./TableInterviewStep";
 export {
+  TablePalpationStep,
+  type TablePalpationStepProps,
+} from "./TablePalpationStep";
+export {
   RegionStatusList,
   type RegionStatusListProps,
 } from "./RegionStatusList";

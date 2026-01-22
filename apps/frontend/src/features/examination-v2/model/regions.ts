@@ -14,8 +14,8 @@
 
 // === SIDES (shared across all sections) ===
 export const SIDES = {
-  left: "Links",
-  right: "Rechts",
+  left: "Linke Seite",
+  right: "Rechte Seite",
 } as const;
 export type Side = keyof typeof SIDES;
 export const SIDE_KEYS = Object.keys(SIDES) as Side[];
@@ -51,13 +51,13 @@ export const getMovementPainQuestions = (region: Region) =>
 // 8 specific palpation sites for muscle examination
 export const PALPATION_SITES = {
   temporalisPosterior: "Temporalis (posterior)",
-  temporalisMiddle: "Temporalis (mitte)",
+  temporalisMiddle: "Temporalis (media)",
   temporalisAnterior: "Temporalis (anterior)",
   masseterOrigin: "Masseter (Ursprung)",
   masseterBody: "Masseter (Körper)",
   masseterInsertion: "Masseter (Ansatz)",
   tmjLateralPole: "Kiefergelenk (lateraler Pol)",
-  tmjAroundLateralPole: "Kiefergelenk (um lateralen Pol)",
+  tmjAroundLateralPole: "Kiefergelenk (um den lateralen Pol)",
 } as const;
 export type PalpationSite = keyof typeof PALPATION_SITES;
 export const PALPATION_SITE_KEYS = Object.keys(PALPATION_SITES) as PalpationSite[];

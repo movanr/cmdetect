@@ -20,8 +20,8 @@ import {
 describe("regions", () => {
   describe("SIDES", () => {
     it("contains left and right with German labels", () => {
-      expect(SIDES.left).toBe("Links");
-      expect(SIDES.right).toBe("Rechts");
+      expect(SIDES.left).toBe("Linke Seite");
+      expect(SIDES.right).toBe("Rechte Seite");
       expect(SIDE_KEYS).toHaveLength(2);
       expect(SIDE_KEYS).toContain("left");
       expect(SIDE_KEYS).toContain("right");
