@@ -12,7 +12,7 @@ export type MainStep = "anamnesis" | "examination" | "evaluation" | "documentati
 
 // Sub-step identifiers for each main step
 export type AnamnesisSubStep = "review" | "wizard";
-export type ExaminationSubStep = "e4" | "e9";
+export type ExaminationSubStep = "e1" | "e2" | "e3" | "e4" | "e5" | "e6" | "e7" | "e8" | "e9" | "e10";
 
 // Union of all sub-step types
 export type SubStep = AnamnesisSubStep | ExaminationSubStep;
@@ -81,8 +81,11 @@ export const MAIN_STEPS: StepDefinition[] = [
     label: "Untersuchung",
     order: 2,
     subSteps: [
-      { id: "e4", label: "U4: Mundöffnung", order: 1, route: "e4" },
-      { id: "e9", label: "U9: Palpation", order: 2, route: "e9" },
+      { id: "e1", label: "U1: Schmerzlokalisation", order: 1, route: "e1" },
+      { id: "e2", label: "U2: Schneidezahnbeziehungen", order: 2, route: "e2" },
+      { id: "e3", label: "U3: Öffnungsmuster", order: 3, route: "e3" },
+      { id: "e4", label: "U4: Mundöffnung", order: 4, route: "e4" },
+      { id: "e9", label: "U9: Palpation", order: 5, route: "e9" },
     ],
   },
   {

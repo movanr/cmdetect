@@ -3,6 +3,8 @@ import type { FieldPath, FieldValues } from "react-hook-form";
 import type { QuestionInstance } from "../projections/to-instances";
 import { YesNoField } from "./inputs/YesNoField";
 import { MeasurementField } from "./inputs/MeasurementField";
+import { EnumField } from "./inputs/EnumField";
+import { CheckboxGroupField } from "./inputs/CheckboxGroupField";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFormContext, Controller } from "react-hook-form";
 import { useFieldEnabled } from "../hooks/use-field-enabled";
@@ -45,6 +47,26 @@ export function QuestionField({ instance, label }: QuestionFieldProps) {
 
     case "checkbox":
       return <CheckboxField name={path as FieldPath<FieldValues>} label={label} />;
+
+    case "enum":
+      return (
+        <EnumField
+          name={path as FieldPath<FieldValues>}
+          options={config.options as readonly string[]}
+          labels={config.labels as Record<string, string> | undefined}
+          label={label}
+        />
+      );
+
+    case "checkboxGroup":
+      return (
+        <CheckboxGroupField
+          name={path as FieldPath<FieldValues>}
+          options={config.options as readonly string[]}
+          labels={config.labels as Record<string, string> | undefined}
+          label={label}
+        />
+      );
 
     default:
       return null;

@@ -4,16 +4,23 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { examinationFormConfig } from "../form/use-examination-form";
 import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
+import { E1Section } from "./sections/E1Section";
+import { E2Section } from "./sections/E2Section";
+import { E3Section } from "./sections/E3Section";
 import { E4Section } from "./sections/E4Section";
 import { E9Section } from "./sections/E9Section";
 
 // Section component props
 interface SectionComponentProps {
   onComplete?: () => void;
+  onSkip?: () => void;
 }
 
-// Map section IDs to components
-const SECTION_COMPONENTS: Record<SectionId, React.ComponentType<SectionComponentProps>> = {
+// Map section IDs to components (only implemented sections)
+const SECTION_COMPONENTS: Partial<Record<SectionId, React.ComponentType<SectionComponentProps>>> = {
+  e1: E1Section,
+  e2: E2Section,
+  e3: E3Section,
   e4: E4Section,
   e9: E9Section,
 };
@@ -54,10 +61,19 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
             const handleSectionComplete = nextSection
               ? () => setCurrentSection(nextSection)
               : undefined;
+            const handleSectionSkip = nextSection
+              ? () => setCurrentSection(nextSection)
+              : undefined;
 
             return (
               <TabsContent key={section.id} value={section.id} className="mt-4">
-                <SectionComponent onComplete={handleSectionComplete} />
+                {SectionComponent ? (
+                  <SectionComponent onComplete={handleSectionComplete} onSkip={handleSectionSkip} />
+                ) : (
+                  <div className="p-4 text-muted-foreground">
+                    Abschnitt {section.label} ist noch nicht implementiert.
+                  </div>
+                )}
               </TabsContent>
             );
           })}

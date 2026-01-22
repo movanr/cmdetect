@@ -5,17 +5,29 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { ALL_REGIONS, BASE_REGIONS } from "../../model/regions";
-import { TableInterviewStep } from "../ui";
+import { SectionFooter, TableInterviewStep } from "../ui";
 import { getLabel } from "../../labels";
 import { QuestionField } from "../QuestionField";
 
 interface E4SectionProps {
   onComplete?: () => void;
+  onSkip?: () => void;
 }
 
-export function E4Section({ onComplete: _onComplete }: E4SectionProps) {
-  const { getInstancesForStep } = useExaminationForm();
+export function E4Section({ onComplete, onSkip }: E4SectionProps) {
+  const { getInstancesForStep, validateStep } = useExaminationForm();
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
+
+  const handleNext = () => {
+    // Validate all E4 steps
+    const isValid =
+      validateStep("e4a") &&
+      validateStep("e4b-measure") &&
+      validateStep("e4c-measure");
+    if (isValid) {
+      onComplete?.();
+    }
+  };
 
   return (
     <Card>
@@ -91,6 +103,7 @@ export function E4Section({ onComplete: _onComplete }: E4SectionProps) {
           />
         </div>
       </CardContent>
+      <SectionFooter onNext={handleNext} onSkip={onSkip} />
     </Card>
   );
 }

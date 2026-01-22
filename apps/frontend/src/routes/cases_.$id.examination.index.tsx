@@ -1,7 +1,7 @@
 /**
  * Examination Index Route
  *
- * Redirects to the first section (E4) when accessing /cases/$id/examination directly.
+ * Redirects to the first section (E1) when accessing /cases/$id/examination directly.
  */
 
 import { createFileRoute, Navigate } from "@tanstack/react-router";
@@ -12,5 +12,5 @@ export const Route = createFileRoute("/cases_/$id/examination/")({
 
 function ExaminationIndexRedirect() {
   const { id } = Route.useParams();
-  return <Navigate to="/cases/$id/examination/e4" params={{ id }} replace />;
+  return <Navigate to="/cases/$id/examination/e1" params={{ id }} replace />;
 }

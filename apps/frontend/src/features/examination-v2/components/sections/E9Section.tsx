@@ -3,13 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { SECTION_LABELS } from "../../labels";
 import { SIDES, type PalpationMode, type SiteDetailMode } from "../../model/regions";
-import { TablePalpationStep } from "../ui";
+import { SectionFooter, TablePalpationStep } from "../ui";
 import { PalpationModeToggle } from "../inputs/PalpationModeToggle";
 import { SiteDetailModeToggle } from "../inputs/SiteDetailModeToggle";
 
-export function E9Section() {
-  const { getInstancesForStep } = useExaminationForm();
+interface E9SectionProps {
+  onComplete?: () => void;
+  onSkip?: () => void;
+  /** If true, shows "Abschließen" instead of "Weiter" */
+  isLastSection?: boolean;
+}
+
+export function E9Section({ onComplete, onSkip, isLastSection = true }: E9SectionProps) {
+  const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, setValue } = useFormContext();
+
+  const handleNext = () => {
+    const isValid = validateStep("e9-right") && validateStep("e9-left");
+    if (isValid) {
+      onComplete?.();
+    }
+  };
 
   const rightInstances = getInstancesForStep("e9-right");
   const leftInstances = getInstancesForStep("e9-left");
@@ -19,7 +33,7 @@ export function E9Section() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>{SECTION_LABELS.e9.cardTitle}</CardTitle>
+        <CardTitle>{SECTION_LABELS.e9?.cardTitle ?? "U9 - Palpation"}</CardTitle>
         <div className="flex gap-2">
           <PalpationModeToggle
             value={palpationMode}
@@ -58,6 +72,7 @@ export function E9Section() {
           />
         </div>
       </CardContent>
+      <SectionFooter onNext={handleNext} onSkip={onSkip} isLastSection={isLastSection} />
     </Card>
   );
 }

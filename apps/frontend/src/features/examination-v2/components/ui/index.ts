@@ -26,3 +26,4 @@ export {
   type RegionStatusListProps,
 } from "./RegionStatusList";
 export { InstructionBlock } from "./InstructionBlock";
+export { SectionFooter, type SectionFooterProps } from "./SectionFooter";

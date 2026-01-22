@@ -2,7 +2,6 @@
  * Examination E4 Section Route
  *
  * E4: Opening and Closing Movements examination section.
- * First section of the Examination workflow.
  */
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -24,5 +23,13 @@ function ExaminationE4Page() {
     });
   };
 
-  return <E4Section onComplete={handleComplete} />;
+  // Skip also navigates to next section
+  const handleSkip = () => {
+    navigate({
+      to: "/cases/$id/examination/e9",
+      params: { id },
+    });
+  };
+
+  return <E4Section onComplete={handleComplete} onSkip={handleSkip} />;
 }
