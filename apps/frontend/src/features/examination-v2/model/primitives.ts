@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { EnableWhen } from "./conditions";
+import type { PalpationMode } from "./regions";
 
 type Primitive<T, TRender extends string, TConfig = Record<string, unknown>> = {
   renderType: TRender;
@@ -34,6 +35,13 @@ export const Q = {
     schema: z.number().nullable(),
     defaultValue: null,
     config,
+  }),
+
+  palpationMode: (): Primitive<PalpationMode, "palpationMode", Record<string, never>> => ({
+    renderType: "palpationMode",
+    schema: z.enum(["basic", "standard", "extended"]),
+    defaultValue: "standard",
+    config: {},
   }),
 };
 

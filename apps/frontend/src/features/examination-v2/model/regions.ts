@@ -151,6 +151,23 @@ export const PALPATION_PAIN_QUESTIONS = [
 ] as const;
 export type PalpationPainQuestion = (typeof PALPATION_PAIN_QUESTIONS)[number];
 
+// === PALPATION MODES (E9) ===
+// Per DC/TMD protocol, different palpation durations reveal different diagnostic depths
+export const PALPATION_MODES = {
+  basic: "Basis (2 Sek.)",
+  standard: "Standard (5 Sek.)",
+  extended: "Erweitert",
+} as const;
+export type PalpationMode = keyof typeof PALPATION_MODES;
+export const PALPATION_MODE_KEYS = Object.keys(PALPATION_MODES) as PalpationMode[];
+
+// Questions shown per palpation mode (cumulative depth)
+export const PALPATION_MODE_QUESTIONS: Record<PalpationMode, readonly PalpationPainQuestion[]> = {
+  basic: ["pain", "familiarPain", "familiarHeadache"],
+  standard: ["pain", "familiarPain", "familiarHeadache", "referredPain"],
+  extended: ["pain", "familiarPain", "familiarHeadache", "referredPain", "spreadingPain"],
+};
+
 // Returns the list of pain questions applicable to a given palpation site (in correct order)
 export function getPalpationPainQuestions(site: PalpationSite): PalpationPainQuestion[] {
   const config = SITE_CONFIG[site];

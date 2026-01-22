@@ -34,7 +34,11 @@ const bilateral = () =>
     __children: Record<string, ModelNode>;
   };
 
-export const E9_MODEL = bilateral();
+// E9_MODEL includes palpation mode setting at root level plus bilateral palpation sites
+export const E9_MODEL = M.group({
+  palpationMode: M.question(Q.palpationMode()),
+  ...bilateral().__children,
+}) as GroupNode & { __children: Record<string, ModelNode> };
 
 // Steps - split by side for cleaner UX
 export const E9_STEPS = {

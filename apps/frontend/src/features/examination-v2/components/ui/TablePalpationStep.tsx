@@ -4,17 +4,19 @@ import { cn } from "@/lib/utils";
 import { YesNoField } from "../inputs/YesNoField";
 import {
   PALPATION_SITES,
-  PALPATION_PAIN_QUESTIONS,
   SITE_CONFIG,
   getPalpationPainQuestions,
+  PALPATION_MODE_QUESTIONS,
   type PalpationSite,
   type PalpationPainQuestion,
+  type PalpationMode,
   type MuscleGroup,
 } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 
 export interface TablePalpationStepProps {
   instances: QuestionInstance[];
+  palpationMode: PalpationMode;
 }
 
 // Multi-line column headers (official DC/TMD terminology)
@@ -48,8 +50,11 @@ const SITE_GROUPS: { group: MuscleGroup; sites: PalpationSite[] }[] = [
  * Shows one side at a time with all 8 palpation sites in rows and 5 pain types in columns.
  * Visual separators between muscle groups (Temporalis / Masseter / Kiefergelenk).
  */
-export function TablePalpationStep({ instances }: TablePalpationStepProps) {
+export function TablePalpationStep({ instances, palpationMode }: TablePalpationStepProps) {
   const { watch } = useFormContext();
+
+  // Get visible pain questions based on palpation mode
+  const visibleQuestions = PALPATION_MODE_QUESTIONS[palpationMode];
 
   // Watch all instance paths to trigger re-renders on value changes
   const watchPaths = instances.map((i) => i.path);
@@ -94,7 +99,7 @@ export function TablePalpationStep({ instances }: TablePalpationStepProps) {
         <thead>
           <tr className="border-b bg-muted/30">
             <th className="p-2 text-left font-normal text-muted-foreground min-w-[180px]" />
-            {PALPATION_PAIN_QUESTIONS.map((painType) => (
+            {visibleQuestions.map((painType) => (
               <th
                 key={painType}
                 className="p-1 text-center text-xs font-normal text-muted-foreground whitespace-nowrap"
@@ -127,7 +132,7 @@ export function TablePalpationStep({ instances }: TablePalpationStepProps) {
                       {SITE_CONFIG[site].pressure} kg
                     </span>
                   </td>
-                  {PALPATION_PAIN_QUESTIONS.map((painType) => {
+                  {visibleQuestions.map((painType) => {
                     // Check if this pain type applies to this site
                     const applies = appliesTo(site, painType);
 
