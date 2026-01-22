@@ -156,6 +156,9 @@ importers:
       '@cmdetect/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@cmdetect/dc-tmd':
+        specifier: workspace:*
+        version: link:../../packages/dc-tmd
       '@cmdetect/questionnaires':
         specifier: workspace:*
         version: link:../../packages/questionnaires
@@ -465,6 +468,15 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
+  packages/dc-tmd:
+    devDependencies:
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(tsx@4.20.5)(typescript@5.9.2)
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
