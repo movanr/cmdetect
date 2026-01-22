@@ -10,22 +10,23 @@ import {
   PAIN_TYPES,
   PALPATION_SITES,
   REGIONS,
+  SECTIONS,
   SIDES,
   type MuscleGroup,
   type PainType,
   type PalpationSite,
   type Region,
+  type SectionId,
   type Side,
 } from "./model/regions";
-import type { SectionId } from "./sections/registry";
 
 // === SECTION LABELS ===
 export const SECTION_LABELS: Partial<Record<SectionId, { title: string; cardTitle: string }>> = {
-  e1: { title: "U1: Schmerzlokalisation", cardTitle: "U1 - Schmerzlokalisation" },
-  e2: { title: "U2: Schneidezahnbeziehungen", cardTitle: "U2 - Schneidezahnbeziehungen" },
-  e3: { title: "U3: Öffnungsmuster", cardTitle: "U3 - Öffnungsmuster" },
-  e4: { title: "U4: Mundöffnung", cardTitle: "U4 - Öffnungs- und Schließbewegungen" },
-  e9: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & Kiefergelenk" },
+  [SECTIONS.e1]: { title: "U1: Schmerzlokalisation", cardTitle: "U1 - Schmerzlokalisation" },
+  [SECTIONS.e2]: { title: "U2: Schneidezahnbeziehungen", cardTitle: "U2 - Schneidezahnbeziehungen" },
+  [SECTIONS.e3]: { title: "U3: Öffnungsmuster", cardTitle: "U3 - Öffnungsmuster" },
+  [SECTIONS.e4]: { title: "U4: Mundöffnung", cardTitle: "U4 - Öffnungs- und Schließbewegungen" },
+  [SECTIONS.e9]: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & Kiefergelenk" },
 };
 
 // === STEP LABELS ===

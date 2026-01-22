@@ -8,6 +8,7 @@
 // IDs
 export * from "./ids/anatomy";
 export * from "./ids/diagnosis";
+export * from "./ids/examination";
 
 // Types
 export * from "./types/results";

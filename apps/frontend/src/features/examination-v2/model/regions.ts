@@ -51,4 +51,14 @@ export {
   // Site-group mappings
   SITES_BY_GROUP,
   GROUP_CONFIG,
+  // Examination protocol IDs
+  SECTIONS,
+  type SectionId,
+  SECTION_KEYS,
+  OPENING_TYPES,
+  type OpeningType,
+  OPENING_TYPE_KEYS,
+  MEASUREMENT_FIELDS,
+  type MeasurementField,
+  MEASUREMENT_FIELD_KEYS,
 } from "@cmdetect/dc-tmd";

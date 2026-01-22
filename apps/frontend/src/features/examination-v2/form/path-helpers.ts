@@ -1,7 +1,11 @@
+import type { OpeningType, Side } from "@cmdetect/dc-tmd";
 import type { QuestionInstance } from "../projections/to-instances";
 
 /** Template literal type for form paths with a given root */
 type FormPath<TRoot extends string> = TRoot | `${TRoot}.${string}`;
+
+/** Opening types that have pain interview questions (excludes painFree) */
+type InterviewOpeningType = Exclude<OpeningType, "painFree">;
 
 /**
  * Creates path helper functions from question instances.
@@ -42,7 +46,7 @@ export function createPathHelpers<TRoot extends string>(
       ),
 
     /** Get paths for a specific side */
-    bySide: (side: "left" | "right"): Path[] =>
+    bySide: (side: Side): Path[] =>
       instances
         .filter((i) => i.context.side === side)
         .map((i) => i.path as Path),
@@ -66,7 +70,7 @@ export function createPathHelpers<TRoot extends string>(
         .map((i) => i.path as Path),
 
     /** Get interview questions (pain questions with side context) */
-    interviewQuestions: (section?: "maxUnassisted" | "maxAssisted"): Path[] => {
+    interviewQuestions: (section?: InterviewOpeningType): Path[] => {
       let filtered = instances.filter(
         (i) => i.context.side && i.context.painType
       );
