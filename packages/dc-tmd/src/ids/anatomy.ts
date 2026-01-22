@@ -42,10 +42,11 @@ export const BASE_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"]
 export const ALL_REGIONS: readonly Region[] = REGION_KEYS;
 
 // Pain questions per region - temporalis gets familiarHeadache, others don't
+// Uses satisfies to ensure all values are valid PainTypes
 export const getMovementPainQuestions = (region: Region) =>
   region === "temporalis"
-    ? (["pain", "familiarPain", "familiarHeadache"] as const)
-    : (["pain", "familiarPain"] as const);
+    ? (["pain", "familiarPain", "familiarHeadache"] as const satisfies readonly PainType[])
+    : (["pain", "familiarPain"] as const satisfies readonly PainType[]);
 
 // === PALPATION SITES (E9) ===
 // 8 specific palpation sites for muscle examination
@@ -142,13 +143,16 @@ export const SITE_CONFIG: Record<PalpationSite, SiteConfig> = {
 };
 
 // Pain question types for E9 palpation (in display order)
+// Uses satisfies to ensure all values are valid PainTypes while preserving tuple type
 export const PALPATION_PAIN_QUESTIONS = [
   "pain",
   "familiarPain",
   "familiarHeadache",
   "spreadingPain",
   "referredPain",
-] as const;
+] as const satisfies readonly PainType[];
+
+// Type is derived from PainType, removing conceptual duplication
 export type PalpationPainQuestion = (typeof PALPATION_PAIN_QUESTIONS)[number];
 
 // === PALPATION MODES (E9) ===
