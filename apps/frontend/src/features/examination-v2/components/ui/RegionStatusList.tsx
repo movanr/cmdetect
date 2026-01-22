@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { AlertCircle, Check, Circle } from "lucide-react";
 import type { IncompleteRegion } from "../../form/validation";
 import { getRegionLabel } from "../../labels";
-import type { MovementRegion } from "../../model/regions";
+import type { Region } from "../../model/regions";
 import {
   REGION_STATE_COLORS,
   REGION_STATE_COLORS_SELECTED,
@@ -18,13 +18,13 @@ import {
 
 export interface RegionStatusListProps {
   /** Regions to display */
-  regions: readonly MovementRegion[];
+  regions: readonly Region[];
   /** Status for each region */
-  regionStatuses: Partial<Record<MovementRegion, RegionStatus>>;
+  regionStatuses: Partial<Record<Region, RegionStatus>>;
   /** Currently selected region (if any) */
-  selectedRegion?: MovementRegion | null;
+  selectedRegion?: Region | null;
   /** Callback when a region is clicked */
-  onRegionClick: (region: MovementRegion) => void;
+  onRegionClick: (region: Region) => void;
   /** Optional className */
   className?: string;
   /** Whether interactions are disabled */

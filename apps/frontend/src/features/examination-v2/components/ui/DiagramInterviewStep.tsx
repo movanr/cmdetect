@@ -5,7 +5,7 @@ import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { RegionPainQuestions } from "./RegionPainQuestions";
 import { RegionStatusList } from "./RegionStatusList";
-import { BASE_REGIONS, type MovementRegion, type Side, type Region } from "../../model/regions";
+import { BASE_REGIONS, type Region, type Side } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import type { IncompleteRegion } from "../../form/validation";
 import { getSideLabel } from "../../labels";
@@ -22,7 +22,7 @@ export interface DiagramInterviewStepProps {
  * Compute RegionStatus from question instances and form values.
  */
 function computeRegionStatus(
-  region: MovementRegion,
+  region: Region,
   side: Side,
   instances: QuestionInstance[],
   getValues: (path: string) => unknown
@@ -72,7 +72,7 @@ export function DiagramInterviewStep({
   regions = BASE_REGIONS,
 }: DiagramInterviewStepProps) {
   const { watch, getValues } = useFormContext();
-  const [selectedRegion, setSelectedRegion] = useState<MovementRegion | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
   const [selectedSide, setSelectedSide] = useState<Side>("right");
 
   // Watch all instance paths to trigger re-renders on value changes
@@ -82,7 +82,7 @@ export function DiagramInterviewStep({
   // Compute region statuses for both sides
   // Include watchedValues in deps to recompute when form values change
   const leftStatuses = useMemo(() => {
-    const statuses: Partial<Record<MovementRegion, RegionStatus>> = {};
+    const statuses: Partial<Record<Region, RegionStatus>> = {};
     for (const region of regions) {
       statuses[region] = computeRegionStatus(region, "left", instances, getValues);
     }
@@ -91,7 +91,7 @@ export function DiagramInterviewStep({
   }, [instances, getValues, watchedValues, regions]);
 
   const rightStatuses = useMemo(() => {
-    const statuses: Partial<Record<MovementRegion, RegionStatus>> = {};
+    const statuses: Partial<Record<Region, RegionStatus>> = {};
     for (const region of regions) {
       statuses[region] = computeRegionStatus(region, "right", instances, getValues);
     }
@@ -122,7 +122,7 @@ export function DiagramInterviewStep({
     [leftIncomplete, rightIncomplete]
   );
 
-  const handleRegionClick = useCallback((region: MovementRegion, side: Side) => {
+  const handleRegionClick = useCallback((region: Region, side: Side) => {
     setSelectedRegion(region);
     setSelectedSide(side);
   }, []);

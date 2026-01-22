@@ -2,12 +2,12 @@ import { AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getLabel, getRegionLabel, getSideLabel } from "../../labels";
 import type { QuestionInstance } from "../../projections/to-instances";
-import type { MovementRegion, Side } from "../../model/regions";
+import type { Region, Side } from "../../model/regions";
 import type { IncompleteRegion } from "../../form/validation";
 import { QuestionField } from "../QuestionField";
 
 export interface RegionPainQuestionsProps {
-  region: MovementRegion;
+  region: Region;
   side: Side;
   questions: QuestionInstance[];
   className?: string;

@@ -1,4 +1,4 @@
-import type { MovementRegion, Side } from "../model/regions";
+import type { Region, Side } from "../model/regions";
 import type { QuestionInstance } from "../projections/to-instances";
 
 type ValueGetter = (path: string) => unknown;
@@ -7,7 +7,7 @@ type ValueGetter = (path: string) => unknown;
  * Represents a region with incomplete pain interview data.
  */
 export interface IncompleteRegion {
-  region: MovementRegion;
+  region: Region;
   side: Side;
   missingPain: boolean;
   missingFamiliarPain: boolean;
@@ -49,7 +49,7 @@ export function validateInterviewCompletion(
 
   // Check each region/side combination
   for (const [key, questions] of regionGroups) {
-    const [region, side] = key.split("-") as [MovementRegion, Side];
+    const [region, side] = key.split("-") as [Region, Side];
 
     const painQ = questions.find((q) => q.context.painType === "pain");
     const familiarPainQ = questions.find((q) => q.context.painType === "familiarPain");

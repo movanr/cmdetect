@@ -14,7 +14,6 @@ export {
   // Movement regions (E4, E5)
   REGIONS,
   REGION_KEYS,
-  MOVEMENT_REGIONS, // deprecated alias
   // Muscle groups
   MUSCLE_GROUPS,
   MUSCLE_GROUP_KEYS,
@@ -30,7 +29,6 @@ export {
   SIDE_KEYS,
   SITE_CONFIG,
   SVG_REGIONS,
-  type MovementRegion, // deprecated alias
   type Region,
   type MuscleGroup,
   type PainType,

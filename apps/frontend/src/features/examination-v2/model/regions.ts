@@ -32,12 +32,6 @@ export const REGIONS = {
 export type Region = keyof typeof REGIONS;
 export const REGION_KEYS = Object.keys(REGIONS) as Region[];
 
-// Legacy aliases for backwards compatibility during migration
-/** @deprecated Use `Region` instead */
-export type MovementRegion = Region;
-/** @deprecated Use `REGION_KEYS` instead */
-export const MOVEMENT_REGIONS = REGION_KEYS;
-
 // Regions visible on head diagram (excludes otherMast - not anatomically renderable)
 export const SVG_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj", "nonMast"];
 

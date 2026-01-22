@@ -5,13 +5,13 @@
  * Mirrors v1 examination pattern for consistency.
  */
 
-import type { MovementRegion, Side } from "../../model/regions";
+import type { Region, Side } from "../../model/regions";
 
 /**
  * Unique identifier for a region including side.
  * Format: "{side}-{region}" e.g., "left-temporalis"
  */
-export type RegionId = `${Side}-${MovementRegion}`;
+export type RegionId = `${Side}-${Region}`;
 
 /**
  * Status of a single region for display purposes.
@@ -182,15 +182,15 @@ export const REGION_STATE_COLORS_SELECTED = {
  */
 export function parseRegionId(regionId: RegionId): {
   side: Side;
-  region: MovementRegion;
+  region: Region;
 } {
-  const [side, region] = regionId.split("-") as [Side, MovementRegion];
+  const [side, region] = regionId.split("-") as [Side, Region];
   return { side, region };
 }
 
 /**
  * Build a RegionId from side and region.
  */
-export function buildRegionId(side: Side, region: MovementRegion): RegionId {
+export function buildRegionId(side: Side, region: Region): RegionId {
   return `${side}-${region}`;
 }

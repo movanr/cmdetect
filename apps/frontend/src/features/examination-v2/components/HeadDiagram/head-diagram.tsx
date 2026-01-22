@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 import type { IncompleteRegion } from "../../form/validation";
 import { getLabel } from "../../labels";
-import type { MovementRegion, Side } from "../../model/regions";
+import { SVG_REGIONS, type Region, type Side } from "../../model/regions";
 import HeadSvg from "./head-diagram.svg?react";
 import {
   EMPTY_REGION_STATUS,
@@ -24,20 +24,17 @@ import {
   type RegionStatus,
 } from "./types";
 
-// Region IDs in the SVG that match MovementRegion type
-const REGION_IDS: MovementRegion[] = ["temporalis", "masseter", "tmj", "nonMast"];
-
 interface HeadDiagramProps {
   /** Which side this diagram represents */
   side: Side;
   /** Regions to render (only regions with SVG paths will be shown) */
-  regions: readonly MovementRegion[];
+  regions: readonly Region[];
   /** Status for each region */
-  regionStatuses: Partial<Record<MovementRegion, RegionStatus>>;
+  regionStatuses: Partial<Record<Region, RegionStatus>>;
   /** Currently selected region (if any) */
-  selectedRegion?: MovementRegion | null;
+  selectedRegion?: Region | null;
   /** Callback when a region is clicked */
-  onRegionClick: (region: MovementRegion) => void;
+  onRegionClick: (region: Region) => void;
   /** Optional className */
   className?: string;
   /** Whether interactions are disabled */
@@ -63,7 +60,7 @@ export function HeadDiagram({
 
   // Helper to get status for a region
   const getStatus = useCallback(
-    (region: MovementRegion): RegionStatus => regionStatuses[region] ?? EMPTY_REGION_STATUS,
+    (region: Region): RegionStatus => regionStatuses[region] ?? EMPTY_REGION_STATUS,
     [regionStatuses]
   );
 
@@ -107,7 +104,7 @@ export function HeadDiagram({
     const svg = svgRef.current;
     if (!svg) return;
 
-    for (const regionId of REGION_IDS) {
+    for (const regionId of SVG_REGIONS) {
       const element = svg.querySelector(`#${regionId}`) as SVGElement | null;
       if (!element) continue;
 
@@ -179,8 +176,8 @@ export function HeadDiagram({
     (e: React.MouseEvent<SVGSVGElement>) => {
       if (disabled) return;
       const target = e.target as SVGElement;
-      const regionId = target.id as MovementRegion;
-      if (REGION_IDS.includes(regionId) && regions.includes(regionId)) {
+      const regionId = target.id as Region;
+      if (SVG_REGIONS.includes(regionId) && regions.includes(regionId)) {
         onRegionClick(regionId);
       }
     },
