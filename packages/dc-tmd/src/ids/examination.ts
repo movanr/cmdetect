@@ -5,6 +5,8 @@
  * Pain types are in anatomy.ts.
  */
 
+import { REGIONS } from "./anatomy";
+
 // === SECTIONS (E1-E10) ===
 export const SECTIONS = {
   e1: "e1",
@@ -21,17 +23,57 @@ export const SECTIONS = {
 export type SectionId = keyof typeof SECTIONS;
 export const SECTION_KEYS = Object.keys(SECTIONS) as SectionId[];
 
-// === E1 FIELDS (Pain Location) ===
+// === E1 FIELDS (Pain & Headache Location) ===
 export const E1_FIELDS = {
   painLocation: "painLocation",
+  headacheLocation: "headacheLocation",
 } as const;
 export type E1Field = keyof typeof E1_FIELDS;
 
+// === E1 PAIN LOCATION OPTIONS ===
+// Reuses REGIONS from anatomy.ts + adds "none" option
+export const E1_PAIN_LOCATIONS = {
+  none: "Keine",
+  ...REGIONS, // temporalis, masseter, tmj, otherMast, nonMast
+} as const;
+export type E1PainLocation = keyof typeof E1_PAIN_LOCATIONS;
+export const E1_PAIN_LOCATION_KEYS = Object.keys(E1_PAIN_LOCATIONS) as E1PainLocation[];
+
+// === E1 HEADACHE LOCATION OPTIONS ===
+export const E1_HEADACHE_LOCATIONS = {
+  none: "Keine",
+  temporalis: REGIONS.temporalis, // "Temporalis"
+  other: "Andere",
+} as const;
+export type E1HeadacheLocation = keyof typeof E1_HEADACHE_LOCATIONS;
+export const E1_HEADACHE_LOCATION_KEYS = Object.keys(E1_HEADACHE_LOCATIONS) as E1HeadacheLocation[];
+
 // === E2 FIELDS (Incisal Relationships) ===
 export const E2_FIELDS = {
+  referenceTooth: "referenceTooth",
+  horizontalOverjet: "horizontalOverjet",
   verticalOverlap: "verticalOverlap",
+  midlineDeviation: "midlineDeviation",
 } as const;
 export type E2Field = keyof typeof E2_FIELDS;
+
+// === E2 REFERENCE TOOTH OPTIONS (FDI notation) ===
+export const E2_REFERENCE_TEETH = {
+  tooth11: "11",
+  tooth21: "21",
+  other: "Anderer",
+} as const;
+export type E2ReferenceTooth = keyof typeof E2_REFERENCE_TEETH;
+export const E2_REFERENCE_TOOTH_KEYS = Object.keys(E2_REFERENCE_TEETH) as E2ReferenceTooth[];
+
+// === E2 MIDLINE DIRECTION OPTIONS ===
+export const E2_MIDLINE_DIRECTIONS = {
+  right: "Rechts",
+  left: "Links",
+  na: "N/A",
+} as const;
+export type E2MidlineDirection = keyof typeof E2_MIDLINE_DIRECTIONS;
+export const E2_MIDLINE_DIRECTION_KEYS = Object.keys(E2_MIDLINE_DIRECTIONS) as E2MidlineDirection[];
 
 // === E3 FIELDS (Opening Pattern) ===
 export const E3_FIELDS = {
@@ -39,6 +81,16 @@ export const E3_FIELDS = {
   deviation: "deviation",
 } as const;
 export type E3Field = keyof typeof E3_FIELDS;
+
+// === E3 OPENING PATTERN OPTIONS ===
+export const E3_OPENING_PATTERNS = {
+  straight: "Gerade",
+  correctedDeviation: "Korrigierte Deviation",
+  uncorrectedRight: "Unkorrigierte Deviation nach rechts",
+  uncorrectedLeft: "Unkorrigierte Deviation nach links",
+} as const;
+export type E3OpeningPattern = keyof typeof E3_OPENING_PATTERNS;
+export const E3_OPENING_PATTERN_KEYS = Object.keys(E3_OPENING_PATTERNS) as E3OpeningPattern[];
 
 // === OPENING TYPES (E4 sub-groups) ===
 export const OPENING_TYPES = {

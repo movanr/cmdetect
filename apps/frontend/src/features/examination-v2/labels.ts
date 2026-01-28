@@ -21,8 +21,11 @@ import {
 // === SECTION LABELS ===
 export const SECTION_LABELS: Partial<Record<SectionId, { title: string; cardTitle: string }>> = {
   [SECTIONS.e1]: { title: "U1: Schmerzlokalisation", cardTitle: "U1 - Schmerzlokalisation" },
-  [SECTIONS.e2]: { title: "U2: Schneidezahnbeziehungen", cardTitle: "U2 - Schneidezahnbeziehungen" },
-  [SECTIONS.e3]: { title: "U3: Öffnungsmuster", cardTitle: "U3 - Öffnungsmuster" },
+  [SECTIONS.e2]: {
+    title: "U2: Schneidekantenverhältnisse",
+    cardTitle: "U2 - Schneidekantenverhältnisse",
+  },
+  [SECTIONS.e3]: { title: "U3: Öffnungsmuster", cardTitle: "U3 - Öffnungs- und Schließmuster" },
   [SECTIONS.e4]: { title: "U4: Mundöffnung", cardTitle: "U4 - Öffnungs- und Schließbewegungen" },
   [SECTIONS.e9]: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & Kiefergelenk" },
 };
@@ -42,7 +45,7 @@ export type StepId =
 
 export const STEP_LABELS: Record<StepId, { badge: string; title: string }> = {
   "e1-all": { badge: "U1", title: "Schmerzlokalisation" },
-  "e2-all": { badge: "U2", title: "Schneidezahnbeziehungen" },
+  "e2-all": { badge: "U2", title: "Schneidekantenverhältnisse" },
   "e3-all": { badge: "U3", title: "Öffnungsmuster" },
   e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
   "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },

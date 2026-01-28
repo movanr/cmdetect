@@ -7,53 +7,52 @@
  * - Midline deviation (direction + mm if applicable)
  */
 
+import {
+  E2_FIELDS,
+  E2_MIDLINE_DIRECTION_KEYS,
+  E2_MIDLINE_DIRECTIONS,
+  E2_REFERENCE_TEETH,
+  E2_REFERENCE_TOOTH_KEYS,
+} from "@cmdetect/dc-tmd";
 import { M } from "../model/nodes";
 import { Q } from "../model/primitives";
 
-// Reference tooth options
-const REFERENCE_TOOTH_OPTIONS = ["tooth8", "tooth9", "other"] as const;
-
-const REFERENCE_TOOTH_LABELS: Record<(typeof REFERENCE_TOOTH_OPTIONS)[number], string> = {
-  tooth8: "#8 (11)",
-  tooth9: "#9 (21)",
-  other: "Anderer",
-};
-
-// Midline deviation direction options
-const MIDLINE_DIRECTION_OPTIONS = ["right", "left", "na"] as const;
-
-const MIDLINE_DIRECTION_LABELS: Record<(typeof MIDLINE_DIRECTION_OPTIONS)[number], string> = {
-  right: "Rechts",
-  left: "Links",
-  na: "N/A",
-};
-
 export const E2_MODEL = M.group({
   // Reference tooth selection
-  referenceTooth: M.question(
-    Q.enum({
-      options: REFERENCE_TOOTH_OPTIONS,
-      labels: REFERENCE_TOOTH_LABELS,
-      required: true,
-    }),
-    "referenceTooth"
-  ),
+  [E2_FIELDS.referenceTooth]: M.group({
+    selection: M.question(
+      Q.enum({
+        options: E2_REFERENCE_TOOTH_KEYS,
+        labels: E2_REFERENCE_TEETH,
+        required: true,
+      }),
+      "referenceToothSelection"
+    ),
+    otherTooth: M.question(
+      Q.text({
+        placeholder: "Zahnnummer",
+        required: false,
+        enableWhen: { sibling: "selection", equals: "other" },
+      }),
+      "referenceToothOther"
+    ),
+  }),
   // Horizontal overjet (can be negative for anterior cross-bite)
-  horizontalOverjet: M.question(
+  [E2_FIELDS.horizontalOverjet]: M.question(
     Q.measurement({ unit: "mm", required: true, allowNegative: true }),
     "horizontalOverjet"
   ),
   // Vertical overlap (can be negative for anterior open-bite)
-  verticalOverlap: M.question(
+  [E2_FIELDS.verticalOverlap]: M.question(
     Q.measurement({ unit: "mm", required: true, allowNegative: true }),
     "verticalOverlap"
   ),
   // Midline deviation
-  midlineDeviation: M.group({
+  [E2_FIELDS.midlineDeviation]: M.group({
     direction: M.question(
       Q.enum({
-        options: MIDLINE_DIRECTION_OPTIONS,
-        labels: MIDLINE_DIRECTION_LABELS,
+        options: E2_MIDLINE_DIRECTION_KEYS,
+        labels: E2_MIDLINE_DIRECTIONS,
         required: true,
       }),
       "midlineDirection"
@@ -73,20 +72,11 @@ export const E2_MODEL = M.group({
 // Steps - all fields shown together
 export const E2_STEPS = {
   "e2-all": [
-    "referenceTooth",
-    "horizontalOverjet",
-    "verticalOverlap",
-    "midlineDeviation.direction",
-    "midlineDeviation.mm",
+    `${E2_FIELDS.referenceTooth}.selection`,
+    `${E2_FIELDS.referenceTooth}.otherTooth`,
+    E2_FIELDS.horizontalOverjet,
+    E2_FIELDS.verticalOverlap,
+    `${E2_FIELDS.midlineDeviation}.direction`,
+    `${E2_FIELDS.midlineDeviation}.mm`,
   ],
 } as const;
-
-// Export types for use elsewhere
-export type ReferenceToothOption = (typeof REFERENCE_TOOTH_OPTIONS)[number];
-export type MidlineDirectionOption = (typeof MIDLINE_DIRECTION_OPTIONS)[number];
-export {
-  REFERENCE_TOOTH_OPTIONS,
-  REFERENCE_TOOTH_LABELS,
-  MIDLINE_DIRECTION_OPTIONS,
-  MIDLINE_DIRECTION_LABELS,
-};

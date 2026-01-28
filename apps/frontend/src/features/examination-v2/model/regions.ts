@@ -10,6 +10,19 @@
 export {
   ALL_REGIONS,
   BASE_REGIONS,
+  // E1 options
+  E1_HEADACHE_LOCATION_KEYS,
+  E1_HEADACHE_LOCATIONS,
+  E1_PAIN_LOCATION_KEYS,
+  E1_PAIN_LOCATIONS,
+  // E2 options
+  E2_MIDLINE_DIRECTION_KEYS,
+  E2_MIDLINE_DIRECTIONS,
+  E2_REFERENCE_TEETH,
+  E2_REFERENCE_TOOTH_KEYS,
+  // E3 options
+  E3_OPENING_PATTERN_KEYS,
+  E3_OPENING_PATTERNS,
   getMovementPainQuestions,
   getPalpationPainQuestions,
   GROUP_CONFIG,
@@ -47,6 +60,14 @@ export {
   // Site-group mappings
   SITES_BY_GROUP,
   SVG_REGIONS,
+  // E1 types
+  type E1HeadacheLocation,
+  type E1PainLocation,
+  // E2 types
+  type E2MidlineDirection,
+  type E2ReferenceTooth,
+  // E3 types
+  type E3OpeningPattern,
   type MeasurementField,
   type OpeningType,
   type PainType,

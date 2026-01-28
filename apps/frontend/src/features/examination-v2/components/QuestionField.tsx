@@ -5,6 +5,7 @@ import { YesNoField } from "./inputs/YesNoField";
 import { MeasurementField } from "./inputs/MeasurementField";
 import { EnumField } from "./inputs/EnumField";
 import { CheckboxGroupField } from "./inputs/CheckboxGroupField";
+import { TextField } from "./inputs/TextField";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFormContext, Controller } from "react-hook-form";
 import { useFieldEnabled } from "../hooks/use-field-enabled";
@@ -65,6 +66,15 @@ export function QuestionField({ instance, label }: QuestionFieldProps) {
           options={config.options as readonly string[]}
           labels={config.labels as Record<string, string> | undefined}
           label={label}
+        />
+      );
+
+    case "text":
+      return (
+        <TextField
+          name={path as FieldPath<FieldValues>}
+          label={label}
+          placeholder={config.placeholder as string | undefined}
         />
       );
 

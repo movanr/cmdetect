@@ -25,7 +25,8 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
   const instances = getInstancesForStep("e2-all");
 
   // Find specific instances for layout
-  const referenceTooth = instances.find((i) => i.path === "e2.referenceTooth");
+  const referenceToothSelection = instances.find((i) => i.path === "e2.referenceTooth.selection");
+  const referenceToothOther = instances.find((i) => i.path === "e2.referenceTooth.otherTooth");
   const horizontalOverjet = instances.find((i) => i.path === "e2.horizontalOverjet");
   const verticalOverlap = instances.find((i) => i.path === "e2.verticalOverlap");
   const midlineDirection = instances.find((i) => i.path === "e2.midlineDeviation.direction");
@@ -41,7 +42,7 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>U2 - Schneidezahnbeziehungen</CardTitle>
+        <CardTitle>U2 - Schneidekantenverhältnisse</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* Reference Tooth */}
@@ -50,7 +51,10 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
             <Badge variant="outline">U2</Badge>
             <h4 className="font-medium">Referenzzahn</h4>
           </div>
-          {referenceTooth && <QuestionField instance={referenceTooth} />}
+          <div className="flex items-center gap-4">
+            {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
+            {referenceToothOther && <QuestionField instance={referenceToothOther} />}
+          </div>
         </div>
 
         {/* Measurements */}
@@ -64,9 +68,7 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
               <QuestionField instance={verticalOverlap} label="Vertikaler Overlap" />
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Negative Werte: Overjet bei anteriorem Kreuzbiss, Overlap bei anteriorem offenen Biss
-          </p>
+          <p className="text-xs text-muted-foreground">Negative Werte möglich</p>
         </div>
 
         {/* Midline Deviation */}

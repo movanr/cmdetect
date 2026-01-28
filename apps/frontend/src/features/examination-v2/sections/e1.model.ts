@@ -5,68 +5,47 @@
  * E1b: Location of Headache (Last 30 days) - bilateral
  */
 
+import {
+  E1_FIELDS,
+  E1_HEADACHE_LOCATION_KEYS,
+  E1_HEADACHE_LOCATIONS,
+  E1_PAIN_LOCATION_KEYS,
+  E1_PAIN_LOCATIONS,
+} from "@cmdetect/dc-tmd";
 import { M } from "../model/nodes";
 import { Q } from "../model/primitives";
 
-// Pain location options for E1a
-const PAIN_LOCATION_OPTIONS = [
-  "none",
-  "temporalis",
-  "masseter",
-  "tmj",
-  "otherMuscles",
-  "nonMast",
-] as const;
-
-const PAIN_LOCATION_LABELS: Record<(typeof PAIN_LOCATION_OPTIONS)[number], string> = {
-  none: "Keine",
-  temporalis: "Temporalis",
-  masseter: "Masseter",
-  tmj: "Kiefergelenk",
-  otherMuscles: "Andere Kaumuskulatur",
-  nonMast: "Andere Strukturen",
-};
-
-// Headache location options for E1b
-const HEADACHE_LOCATION_OPTIONS = ["none", "temporal", "other"] as const;
-
-const HEADACHE_LOCATION_LABELS: Record<(typeof HEADACHE_LOCATION_OPTIONS)[number], string> = {
-  none: "Keine",
-  temporal: "Temporal",
-  other: "Andere",
-};
-
 export const E1_MODEL = M.group({
   // E1a: Pain location (bilateral)
-  painLocation: M.group({
+  [E1_FIELDS.painLocation]: M.group({
     right: M.question(
       Q.checkboxGroup({
-        options: PAIN_LOCATION_OPTIONS,
-        labels: PAIN_LOCATION_LABELS,
+        options: E1_PAIN_LOCATION_KEYS,
+        labels: E1_PAIN_LOCATIONS,
       }),
       "painLocationRight"
     ),
     left: M.question(
       Q.checkboxGroup({
-        options: PAIN_LOCATION_OPTIONS,
-        labels: PAIN_LOCATION_LABELS,
+        options: E1_PAIN_LOCATION_KEYS,
+        labels: E1_PAIN_LOCATIONS,
       }),
       "painLocationLeft"
     ),
   }),
   // E1b: Headache location (bilateral)
-  headacheLocation: M.group({
+  [E1_FIELDS.headacheLocation]: M.group({
     right: M.question(
       Q.checkboxGroup({
-        options: HEADACHE_LOCATION_OPTIONS,
-        labels: HEADACHE_LOCATION_LABELS,
+        options: E1_HEADACHE_LOCATION_KEYS,
+        labels: E1_HEADACHE_LOCATIONS,
       }),
       "headacheLocationRight"
     ),
     left: M.question(
       Q.checkboxGroup({
-        options: HEADACHE_LOCATION_OPTIONS,
-        labels: HEADACHE_LOCATION_LABELS,
+        options: E1_HEADACHE_LOCATION_KEYS,
+        labels: E1_HEADACHE_LOCATIONS,
       }),
       "headacheLocationLeft"
     ),
@@ -76,14 +55,9 @@ export const E1_MODEL = M.group({
 // Steps - all fields shown together in a single step
 export const E1_STEPS = {
   "e1-all": [
-    "painLocation.right",
-    "painLocation.left",
-    "headacheLocation.right",
-    "headacheLocation.left",
+    `${E1_FIELDS.painLocation}.right`,
+    `${E1_FIELDS.painLocation}.left`,
+    `${E1_FIELDS.headacheLocation}.right`,
+    `${E1_FIELDS.headacheLocation}.left`,
   ],
 } as const;
-
-// Export types for use in labels
-export type PainLocationOption = (typeof PAIN_LOCATION_OPTIONS)[number];
-export type HeadacheLocationOption = (typeof HEADACHE_LOCATION_OPTIONS)[number];
-export { PAIN_LOCATION_OPTIONS, PAIN_LOCATION_LABELS, HEADACHE_LOCATION_OPTIONS, HEADACHE_LOCATION_LABELS };

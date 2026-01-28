@@ -12,6 +12,7 @@ type Primitive<T, TRender extends string, TConfig = Record<string, unknown>> = {
 type BooleanConfig = { required?: boolean };
 type YesNoConfig = { required?: boolean; enableWhen?: EnableWhen };
 type MeasurementConfig = { unit?: string; min?: number; max?: number; required?: boolean; allowNegative?: boolean; enableWhen?: EnableWhen };
+type TextConfig = { placeholder?: string; required?: boolean; enableWhen?: EnableWhen };
 type EnumConfig<T extends string> = { options: readonly T[]; required?: boolean; labels?: Record<T, string>; enableWhen?: EnableWhen };
 type CheckboxGroupConfig<T extends string> = { options: readonly T[]; required?: boolean; labels?: Record<T, string> };
 
@@ -35,6 +36,13 @@ export const Q = {
   ): Primitive<number | null, "measurement", MeasurementConfig> => ({
     renderType: "measurement",
     schema: z.number().nullable(),
+    defaultValue: null,
+    config,
+  }),
+
+  text: (config: TextConfig = {}): Primitive<string | null, "text", TextConfig> => ({
+    renderType: "text",
+    schema: z.string().nullable(),
     defaultValue: null,
     config,
   }),

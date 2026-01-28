@@ -26,7 +26,7 @@ export const SECTION_REGISTRY: SectionConfig[] = [
   },
   {
     id: SECTIONS.e2,
-    label: "U2: Schneidezahnbeziehungen",
+    label: "U2: Schneidekantenverhältnisse",
     model: E2_MODEL,
     steps: E2_STEPS,
   },
