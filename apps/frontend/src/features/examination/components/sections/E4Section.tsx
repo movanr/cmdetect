@@ -19,16 +19,20 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
-  const handleNext = () => {
-    // Validate all E4 steps including interview with region context
+  // Extract validation logic to avoid duplication between handleNext and checkIncomplete
+  const validateE4 = () => {
     const interviewContext = { includeAllRegions };
-    const isValid =
+    return (
       validateStep("e4a") &&
       validateStep("e4b-measure") &&
       validateStep("e4b-interview", interviewContext) &&
       validateStep("e4c-measure") &&
-      validateStep("e4c-interview", interviewContext);
-    if (isValid) {
+      validateStep("e4c-interview", interviewContext)
+    );
+  };
+
+  const handleNext = () => {
+    if (validateE4()) {
       onComplete?.();
     }
   };
@@ -111,16 +115,7 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
         onNext={handleNext}
         onSkip={onSkip}
         warnOnSkip
-        checkIncomplete={() => {
-          const interviewContext = { includeAllRegions };
-          return !(
-            validateStep("e4a") &&
-            validateStep("e4b-measure") &&
-            validateStep("e4b-interview", interviewContext) &&
-            validateStep("e4c-measure") &&
-            validateStep("e4c-interview", interviewContext)
-          );
-        }}
+        checkIncomplete={() => !validateE4()}
       />
     </Card>
   );

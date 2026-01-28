@@ -24,13 +24,17 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
   const palpationMode = watch("e9.palpationMode") as PalpationMode;
   const siteDetailMode = watch("e9.siteDetailMode") as SiteDetailMode;
 
-  const handleNext = () => {
-    // Pass palpation mode context to validate only visible questions
+  // Extract validation logic to avoid duplication between handleNext and checkIncomplete
+  const validateE9 = () => {
     const palpationContext = { palpationMode, siteDetailMode };
-    const isValid =
+    return (
       validateStep("e9-right", palpationContext) &&
-      validateStep("e9-left", palpationContext);
-    if (isValid) {
+      validateStep("e9-left", palpationContext)
+    );
+  };
+
+  const handleNext = () => {
+    if (validateE9()) {
       onComplete?.();
     }
   };
@@ -82,13 +86,7 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
         onSkip={onSkip}
         isLastSection={isLastSection}
         warnOnSkip
-        checkIncomplete={() => {
-          const palpationContext = { palpationMode, siteDetailMode };
-          return !(
-            validateStep("e9-right", palpationContext) &&
-            validateStep("e9-left", palpationContext)
-          );
-        }}
+        checkIncomplete={() => !validateE9()}
       />
     </Card>
   );

@@ -56,7 +56,7 @@ export function MeasurementField<T extends FieldValues>({
               ref={field.ref}
             />
           </FormControl>
-          <FormMessage />
+          <FormMessage className="text-xs" />
         </FormItem>
       )}
     />
