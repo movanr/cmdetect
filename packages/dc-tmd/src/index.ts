@@ -4,7 +4,7 @@
  * Single source of truth for DC/TMD anatomical regions, diagnostic criteria IDs,
  * and the criteria DSL for expressing diagnostic rules.
  *
- * Used by examination-v2 and the diagnostics feature.
+ * Used by examination and the diagnostics feature.
  */
 
 // IDs

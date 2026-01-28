@@ -2,7 +2,7 @@
  * Re-exports DC/TMD anatomical IDs from the shared package.
  *
  * This module re-exports all anatomical regions from @cmdetect/dc-tmd
- * for use in examination-v2 components.
+ * for use in examination components.
  *
  * @see packages/dc-tmd/src/ids/anatomy.ts for the source definitions
  */

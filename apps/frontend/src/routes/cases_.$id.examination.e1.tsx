@@ -6,7 +6,7 @@
  */
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { E1Section } from "../features/examination-v2";
+import { E1Section } from "../features/examination";
 
 export const Route = createFileRoute("/cases_/$id/examination/e1")({
   component: ExaminationE1Page,

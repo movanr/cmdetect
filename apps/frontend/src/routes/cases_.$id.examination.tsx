@@ -23,7 +23,7 @@ import {
   useStepGating,
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { examinationFormConfig } from "../features/examination-v2/form/use-examination-form";
+import { examinationFormConfig } from "../features/examination/form/use-examination-form";
 
 // GraphQL query for patient record
 const GET_PATIENT_RECORD = graphql(`
