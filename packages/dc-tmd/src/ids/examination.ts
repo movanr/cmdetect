@@ -21,6 +21,25 @@ export const SECTIONS = {
 export type SectionId = keyof typeof SECTIONS;
 export const SECTION_KEYS = Object.keys(SECTIONS) as SectionId[];
 
+// === E1 FIELDS (Pain Location) ===
+export const E1_FIELDS = {
+  painLocation: "painLocation",
+} as const;
+export type E1Field = keyof typeof E1_FIELDS;
+
+// === E2 FIELDS (Incisal Relationships) ===
+export const E2_FIELDS = {
+  verticalOverlap: "verticalOverlap",
+} as const;
+export type E2Field = keyof typeof E2_FIELDS;
+
+// === E3 FIELDS (Opening Pattern) ===
+export const E3_FIELDS = {
+  openingPattern: "openingPattern",
+  deviation: "deviation",
+} as const;
+export type E3Field = keyof typeof E3_FIELDS;
+
 // === OPENING TYPES (E4 sub-groups) ===
 export const OPENING_TYPES = {
   painFree: "painFree",
@@ -37,3 +56,20 @@ export const MEASUREMENT_FIELDS = {
 } as const;
 export type MeasurementField = keyof typeof MEASUREMENT_FIELDS;
 export const MEASUREMENT_FIELD_KEYS = Object.keys(MEASUREMENT_FIELDS) as MeasurementField[];
+
+// === E5 MOVEMENT TYPES (Lateral/Protrusive) ===
+export const MOVEMENT_TYPES = {
+  lateralLeft: "lateralLeft",
+  lateralRight: "lateralRight",
+  protrusive: "protrusive",
+} as const;
+export type MovementType = keyof typeof MOVEMENT_TYPES;
+export const MOVEMENT_TYPE_KEYS = Object.keys(MOVEMENT_TYPES) as MovementType[];
+
+// === E6-E8 JOINT SOUNDS ===
+export const JOINT_SOUNDS = {
+  click: "click",
+  crepitus: "crepitus",
+} as const;
+export type JointSound = keyof typeof JOINT_SOUNDS;
+export const JOINT_SOUND_KEYS = Object.keys(JOINT_SOUNDS) as JointSound[];

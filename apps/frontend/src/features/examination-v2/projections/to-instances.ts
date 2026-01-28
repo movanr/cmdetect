@@ -69,7 +69,7 @@ export function enrichContext(ctx: Record<string, string>, key: string): Record<
   // E9: palpation sites
   if (PALPATION_SITE_KEYS.includes(key as PalpationSite)) {
     const config = SITE_CONFIG[key as PalpationSite];
-    return { ...ctx, site: key, muscleGroup: config.muscleGroup };
+    return { ...ctx, site: key, region: config.region };
   }
 
   // Shared: pain types

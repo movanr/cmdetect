@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  MUSCLE_GROUPS,
-  MUSCLE_GROUP_KEYS,
   PAIN_TYPES,
   PAIN_TYPE_KEYS,
+  PALPATION_REGIONS,
   PALPATION_SITES,
   PALPATION_SITE_KEYS,
   REGIONS,
@@ -72,12 +71,12 @@ describe("regions", () => {
     });
   });
 
-  describe("MUSCLE_GROUPS", () => {
-    it("contains temporalis, masseter, tmj with German labels", () => {
-      expect(MUSCLE_GROUPS.temporalis).toBe("Temporalis");
-      expect(MUSCLE_GROUPS.masseter).toBe("Masseter");
-      expect(MUSCLE_GROUPS.tmj).toBe("Kiefergelenk (Kiefergelenk)");
-      expect(MUSCLE_GROUP_KEYS).toHaveLength(3);
+  describe("PALPATION_REGIONS", () => {
+    it("contains the 3 regions with palpation sites", () => {
+      expect(PALPATION_REGIONS).toContain("temporalis");
+      expect(PALPATION_REGIONS).toContain("masseter");
+      expect(PALPATION_REGIONS).toContain("tmj");
+      expect(PALPATION_REGIONS).toHaveLength(3);
     });
   });
 
@@ -254,26 +253,26 @@ describe("regions", () => {
       expect(SITE_CONFIG.tmjAroundLateralPole.hasSpreading).toBe(false);
     });
 
-    it("all sites have correct muscleGroup assignment", () => {
-      // Temporalis group
-      expect(SITE_CONFIG.temporalisPosterior.muscleGroup).toBe("temporalis");
-      expect(SITE_CONFIG.temporalisMiddle.muscleGroup).toBe("temporalis");
-      expect(SITE_CONFIG.temporalisAnterior.muscleGroup).toBe("temporalis");
+    it("all sites have correct region assignment", () => {
+      // Temporalis region
+      expect(SITE_CONFIG.temporalisPosterior.region).toBe("temporalis");
+      expect(SITE_CONFIG.temporalisMiddle.region).toBe("temporalis");
+      expect(SITE_CONFIG.temporalisAnterior.region).toBe("temporalis");
 
-      // Masseter group
-      expect(SITE_CONFIG.masseterOrigin.muscleGroup).toBe("masseter");
-      expect(SITE_CONFIG.masseterBody.muscleGroup).toBe("masseter");
-      expect(SITE_CONFIG.masseterInsertion.muscleGroup).toBe("masseter");
+      // Masseter region
+      expect(SITE_CONFIG.masseterOrigin.region).toBe("masseter");
+      expect(SITE_CONFIG.masseterBody.region).toBe("masseter");
+      expect(SITE_CONFIG.masseterInsertion.region).toBe("masseter");
 
-      // tmj group
-      expect(SITE_CONFIG.tmjLateralPole.muscleGroup).toBe("tmj");
-      expect(SITE_CONFIG.tmjAroundLateralPole.muscleGroup).toBe("tmj");
+      // TMJ region
+      expect(SITE_CONFIG.tmjLateralPole.region).toBe("tmj");
+      expect(SITE_CONFIG.tmjAroundLateralPole.region).toBe("tmj");
     });
 
     it("all palpation sites have config entries", () => {
       for (const site of PALPATION_SITE_KEYS) {
         expect(SITE_CONFIG[site]).toBeDefined();
-        expect(SITE_CONFIG[site].muscleGroup).toBeDefined();
+        expect(SITE_CONFIG[site].region).toBeDefined();
         expect(typeof SITE_CONFIG[site].pressure).toBe("number");
         expect(typeof SITE_CONFIG[site].hasHeadache).toBe("boolean");
         expect(typeof SITE_CONFIG[site].hasSpreading).toBe("boolean");

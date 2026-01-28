@@ -14,9 +14,8 @@ export {
   // Movement regions (E4, E5)
   REGIONS,
   REGION_KEYS,
-  // Muscle groups
-  MUSCLE_GROUPS,
-  MUSCLE_GROUP_KEYS,
+  // Palpation regions (E9) - the 3 regions with palpation sites
+  PALPATION_REGIONS,
   // Pain types
   PAIN_TYPES,
   PAIN_TYPE_KEYS,
@@ -30,7 +29,6 @@ export {
   SITE_CONFIG,
   SVG_REGIONS,
   type Region,
-  type MuscleGroup,
   type PainType,
   type PalpationPainQuestion,
   type PalpationSite,
@@ -100,7 +98,6 @@ export { SectionFooter, type SectionFooterProps } from "./components/ui/SectionF
 export {
   COMMON,
   getLabel,
-  getMuscleGroupLabel,
   getPainTypeLabel,
   getPalpationSiteLabel,
   getRegionLabel,

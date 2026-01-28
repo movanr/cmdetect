@@ -6,13 +6,11 @@
  */
 
 import {
-  MUSCLE_GROUPS,
   PAIN_TYPES,
   PALPATION_SITES,
   REGIONS,
   SECTIONS,
   SIDES,
-  type MuscleGroup,
   type PainType,
   type PalpationSite,
   type Region,
@@ -83,9 +81,6 @@ export const getPainTypeLabel = (painType: PainType): string => PAIN_TYPES[painT
 
 /** Get label for a palpation site */
 export const getPalpationSiteLabel = (site: PalpationSite): string => PALPATION_SITES[site];
-
-/** Get label for a muscle group */
-export const getMuscleGroupLabel = (muscleGroup: MuscleGroup): string => MUSCLE_GROUPS[muscleGroup];
 
 /**
  * Generic label lookup for labelKey strings (used by QuestionInstance).

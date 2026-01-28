@@ -1,12 +1,12 @@
 /**
  * DC/TMD Result Types - Types for diagnostic evaluation results.
  *
- * These types define the structure for representing:
+ * These types define the region for representing:
  * - Examination findings at specific anatomical locations
  * - Diagnostic conclusions based on DC/TMD criteria
  */
 
-import type { Side, Region, PalpationSite, MuscleGroup } from "../ids/anatomy";
+import type { PalpationSite, Region, Side } from "../ids/anatomy";
 import type { DiagnosisId } from "../ids/diagnosis";
 
 /**
@@ -14,10 +14,8 @@ import type { DiagnosisId } from "../ids/diagnosis";
  */
 export interface LocationResult {
   side: Side;
-  structure: "muscle" | "tmj";
   region?: Region;
   palpationSite?: PalpationSite;
-  muscleGroup?: MuscleGroup;
   isPositive: boolean;
 }
 

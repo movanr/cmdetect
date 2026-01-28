@@ -5,7 +5,7 @@
  * - Sides (left/right)
  * - Movement regions (E4, E5): 5 regions for pain assessment during jaw movements
  * - Palpation sites (E9): 8 specific sites for muscle examination
- * - Muscle groups for E9
+ * - Palpation regions (E9): 3 regions with palpation sites
  * - Pain question types
  *
  * Pattern: Objects serve as both type source AND label lookup.
@@ -63,14 +63,9 @@ export const PALPATION_SITES = {
 export type PalpationSite = keyof typeof PALPATION_SITES;
 export const PALPATION_SITE_KEYS = Object.keys(PALPATION_SITES) as PalpationSite[];
 
-// === MUSCLE GROUPS (E9) ===
-export const MUSCLE_GROUPS = {
-  temporalis: "Temporalis",
-  masseter: "Masseter",
-  tmj: "Kiefergelenk (Kiefergelenk)",
-} as const;
-export type MuscleGroup = keyof typeof MUSCLE_GROUPS;
-export const MUSCLE_GROUP_KEYS = Object.keys(MUSCLE_GROUPS) as MuscleGroup[];
+// === PALPATION REGIONS (E9) ===
+// The 3 regions that have palpation sites: temporalis, masseter, tmj
+export const PALPATION_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
 
 // === PAIN QUESTION TYPES ===
 export const PAIN_TYPES = {
@@ -85,7 +80,7 @@ export const PAIN_TYPE_KEYS = Object.keys(PAIN_TYPES) as PainType[];
 
 // Site configuration: pressure (kg), and which optional questions apply
 export interface SiteConfig {
-  muscleGroup: MuscleGroup;
+  region: Region;
   pressure: number;
   hasHeadache: boolean;
   hasSpreading: boolean;
@@ -93,49 +88,49 @@ export interface SiteConfig {
 
 export const SITE_CONFIG: Record<PalpationSite, SiteConfig> = {
   temporalisPosterior: {
-    muscleGroup: "temporalis",
+    region: "temporalis",
     pressure: 1.0,
     hasHeadache: true,
     hasSpreading: true,
   },
   temporalisMiddle: {
-    muscleGroup: "temporalis",
+    region: "temporalis",
     pressure: 1.0,
     hasHeadache: true,
     hasSpreading: true,
   },
   temporalisAnterior: {
-    muscleGroup: "temporalis",
+    region: "temporalis",
     pressure: 1.0,
     hasHeadache: true,
     hasSpreading: true,
   },
   masseterOrigin: {
-    muscleGroup: "masseter",
+    region: "masseter",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: true,
   },
   masseterBody: {
-    muscleGroup: "masseter",
+    region: "masseter",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: true,
   },
   masseterInsertion: {
-    muscleGroup: "masseter",
+    region: "masseter",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: true,
   },
   tmjLateralPole: {
-    muscleGroup: "tmj",
+    region: "tmj",
     pressure: 0.5,
     hasHeadache: false,
     hasSpreading: false,
   },
   tmjAroundLateralPole: {
-    muscleGroup: "tmj",
+    region: "tmj",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: false,
@@ -182,17 +177,27 @@ export type SiteDetailMode = keyof typeof SITE_DETAIL_MODES;
 export const SITE_DETAIL_MODE_KEYS = Object.keys(SITE_DETAIL_MODES) as SiteDetailMode[];
 
 // Map muscle groups to their constituent palpation sites
-export const SITES_BY_GROUP: Record<MuscleGroup, readonly PalpationSite[]> = {
+export const SITES_BY_GROUP: Record<Region, readonly PalpationSite[]> = {
   temporalis: ["temporalisPosterior", "temporalisMiddle", "temporalisAnterior"],
   masseter: ["masseterOrigin", "masseterBody", "masseterInsertion"],
   tmj: ["tmjLateralPole", "tmjAroundLateralPole"],
+  otherMast: [], // TODO add palpation sites
+  nonMast: [], // TODO add palpation sites
 };
 
 // Group-level question applicability (derived from site configs)
-export const GROUP_CONFIG: Record<MuscleGroup, { hasHeadache: boolean; hasSpreading: boolean }> = {
+export const GROUP_CONFIG: Record<Region, { hasHeadache: boolean; hasSpreading: boolean }> = {
   temporalis: { hasHeadache: true, hasSpreading: true },
   masseter: { hasHeadache: false, hasSpreading: true },
   tmj: { hasHeadache: false, hasSpreading: false },
+  otherMast: {
+    hasHeadache: false,
+    hasSpreading: false,
+  },
+  nonMast: {
+    hasHeadache: false,
+    hasSpreading: false,
+  },
 };
 
 // Returns the list of pain questions applicable to a given palpation site (in correct order)

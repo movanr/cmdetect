@@ -473,6 +473,10 @@ importers:
         version: 5.9.2
 
   packages/dc-tmd:
+    dependencies:
+      '@cmdetect/questionnaires':
+        specifier: workspace:*
+        version: link:../questionnaires
     devDependencies:
       tsup:
         specifier: ^8.5.0
@@ -480,6 +484,9 @@ importers:
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/node@24.3.1)(jsdom@26.1.0)(tsx@4.20.5)
 
   packages/pdf-templates: {}
 

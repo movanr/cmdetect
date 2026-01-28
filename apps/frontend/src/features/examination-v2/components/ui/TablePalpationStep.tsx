@@ -8,14 +8,14 @@ import {
   SITE_CONFIG,
   getPalpationPainQuestions,
   PALPATION_MODE_QUESTIONS,
-  MUSCLE_GROUPS,
-  MUSCLE_GROUP_KEYS,
+  PALPATION_REGIONS,
+  REGIONS,
   SITES_BY_GROUP,
   GROUP_CONFIG,
   type PalpationSite,
   type PalpationPainQuestion,
   type PalpationMode,
-  type MuscleGroup,
+  type Region,
   type SiteDetailMode,
 } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
@@ -35,8 +35,8 @@ const PAIN_TYPE_LABELS: Record<PalpationPainQuestion, string[]> = {
   referredPain: ["Übertragener", "Schmerz"],
 };
 
-// Group sites by muscle group for visual separators
-const SITE_GROUPS: { group: MuscleGroup; sites: PalpationSite[] }[] = [
+// Group sites by region for visual separators
+const SITE_GROUPS: { group: Region; sites: PalpationSite[] }[] = [
   {
     group: "temporalis",
     sites: ["temporalisPosterior", "temporalisMiddle", "temporalisAnterior"],
@@ -119,7 +119,7 @@ export function TablePalpationStep({
   };
 
   // Check if a question should be enabled for a group (at least one site's pain must be "yes")
-  const isGroupEnabled = (group: MuscleGroup, painType: PalpationPainQuestion) => {
+  const isGroupEnabled = (group: Region, painType: PalpationPainQuestion) => {
     if (painType === "pain") return true;
 
     // Check if any site in the group has pain === "yes"
@@ -139,7 +139,7 @@ export function TablePalpationStep({
   };
 
   // Check if a pain type applies to a group
-  const appliesToGroup = (group: MuscleGroup, painType: PalpationPainQuestion) => {
+  const appliesToGroup = (group: Region, painType: PalpationPainQuestion) => {
     const config = GROUP_CONFIG[group];
     if (painType === "pain" || painType === "familiarPain" || painType === "referredPain") {
       return true;
@@ -149,9 +149,9 @@ export function TablePalpationStep({
     return false;
   };
 
-  // Get aggregated value for a muscle group and pain type
+  // Get aggregated value for a region and pain type
   const getGroupValue = useCallback(
-    (group: MuscleGroup, painType: PalpationPainQuestion): "yes" | "no" | null => {
+    (group: Region, painType: PalpationPainQuestion): "yes" | "no" | null => {
       const sites = SITES_BY_GROUP[group];
       const values = sites
         .filter((site) => appliesTo(site, painType))
@@ -168,7 +168,7 @@ export function TablePalpationStep({
 
   // Set value for all sites in a group
   const setGroupValue = useCallback(
-    (group: MuscleGroup, painType: PalpationPainQuestion, value: "yes" | "no" | null) => {
+    (group: Region, painType: PalpationPainQuestion, value: "yes" | "no" | null) => {
       const sites = SITES_BY_GROUP[group];
       for (const site of sites) {
         // Only set for sites where this pain type applies
@@ -264,11 +264,11 @@ export function TablePalpationStep({
     </tbody>
   );
 
-  // Render grouped view (3 muscle groups with aggregated values)
+  // Render grouped view (3 palpation regions with aggregated values)
   const renderGroupedBody = () => (
     <tbody>
-      {MUSCLE_GROUP_KEYS.map((group, groupIndex) => {
-        const isLastGroup = groupIndex === MUSCLE_GROUP_KEYS.length - 1;
+      {PALPATION_REGIONS.map((group, groupIndex) => {
+        const isLastGroup = groupIndex === PALPATION_REGIONS.length - 1;
 
         return (
           <tr
@@ -276,7 +276,7 @@ export function TablePalpationStep({
             className={cn("border-b", !isLastGroup && "border-b-2 border-muted-foreground/30")}
           >
             <td className="p-2">
-              <span className="font-medium">{MUSCLE_GROUPS[group]}</span>
+              <span className="font-medium">{REGIONS[group]}</span>
             </td>
             {visibleQuestions.map((painType) => {
               // Check if this pain type applies to this group
