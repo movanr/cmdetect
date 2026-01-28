@@ -9,7 +9,6 @@
  */
 
 import { SECTIONS } from "@cmdetect/dc-tmd";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
@@ -46,39 +45,38 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
       <CardHeader>
         <CardTitle>{getSectionCardTitle(SECTIONS.e2)}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {/* Reference Tooth */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">U2</Badge>
-            <h4 className="font-medium">Referenzzahn</h4>
-          </div>
-          <div className="flex items-center gap-4">
-            {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
-            {referenceToothOther && <QuestionField instance={referenceToothOther} />}
-          </div>
-        </div>
-
-        {/* Measurements */}
-        <div className="space-y-4">
-          <h4 className="font-medium">Messungen</h4>
-          <div className="grid grid-cols-2 gap-6">
-            {horizontalOverjet && (
-              <QuestionField instance={horizontalOverjet} label="Horizontaler Overjet" />
-            )}
-            {verticalOverlap && (
-              <QuestionField instance={verticalOverlap} label="Vertikaler Overlap" />
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">Negative Werte möglich</p>
-        </div>
-
-        {/* Midline Deviation */}
-        <div className="space-y-4">
-          <h4 className="font-medium">Mittellinienabweichung</h4>
+      <CardContent>
+        <div className="max-w-sm mx-auto space-y-8">
+          {/* Reference Tooth */}
           <div className="space-y-4">
-            {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
-            {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
+            <h4 className="font-medium">Referenzzahn</h4>
+            <div className="space-y-4">
+              {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
+              {referenceToothOther && <QuestionField instance={referenceToothOther} />}
+            </div>
+          </div>
+
+          {/* Measurements */}
+          <div className="space-y-4">
+            <h4 className="font-medium">Messungen</h4>
+            <div className="space-y-4">
+              {horizontalOverjet && (
+                <QuestionField instance={horizontalOverjet} label="Horizontaler Overjet" />
+              )}
+              {verticalOverlap && (
+                <QuestionField instance={verticalOverlap} label="Vertikaler Overlap" />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">Negative Werte möglich</p>
+          </div>
+
+          {/* Midline Deviation */}
+          <div className="space-y-4">
+            <h4 className="font-medium">Mittellinienabweichung</h4>
+            <div className="space-y-4">
+              {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
+              {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
+            </div>
           </div>
         </div>
       </CardContent>

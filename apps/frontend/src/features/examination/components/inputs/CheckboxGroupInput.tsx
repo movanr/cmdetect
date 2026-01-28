@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 export interface CheckboxGroupInputProps<T extends string> {
   value: T[];
@@ -16,7 +15,7 @@ export interface CheckboxGroupInputProps<T extends string> {
 }
 
 /**
- * Controlled checkbox group input for multi-select options.
+ * Controlled checkbox group input with button-like styling.
  */
 export function CheckboxGroupInput<T extends string>({
   value,
@@ -50,24 +49,35 @@ export function CheckboxGroupInput<T extends string>({
     <div
       className={cn(
         direction === "horizontal"
-          ? "flex flex-wrap gap-4"
+          ? "flex flex-wrap gap-2"
           : "flex flex-col gap-2",
         className
       )}
     >
-      {options.map((option) => (
-        <div key={option} className="flex items-center gap-2">
-          <Checkbox
-            id={getId(option)}
-            checked={value.includes(option)}
-            onCheckedChange={(checked) => handleToggle(option, checked === true)}
-            disabled={disabled}
-          />
-          <Label htmlFor={getId(option)} className="text-sm font-normal cursor-pointer">
-            {getLabel(option)}
-          </Label>
-        </div>
-      ))}
+      {options.map((option) => {
+        const isSelected = value.includes(option);
+        return (
+          <label
+            key={option}
+            htmlFor={getId(option)}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md border cursor-pointer transition-colors",
+              isSelected
+                ? "border-primary bg-primary/5"
+                : "border-input hover:bg-accent hover:border-accent-foreground/20",
+              disabled && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <Checkbox
+              id={getId(option)}
+              checked={isSelected}
+              onCheckedChange={(checked) => handleToggle(option, checked === true)}
+              disabled={disabled}
+            />
+            <span className="text-sm font-normal">{getLabel(option)}</span>
+          </label>
+        );
+      })}
     </div>
   );
 }

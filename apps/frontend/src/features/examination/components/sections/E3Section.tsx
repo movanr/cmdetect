@@ -42,12 +42,11 @@ export function E3Section({ onComplete, onSkip }: E3SectionProps) {
           <Badge variant="secondary">Zusatz</Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">U3</Badge>
+      <CardContent>
+        <div className="max-w-sm mx-auto space-y-4">
           <h4 className="font-medium">{SECTION_LABELS.e3.full}</h4>
+          {pattern && <QuestionField instance={pattern} />}
         </div>
-        {pattern && <QuestionField instance={pattern} />}
       </CardContent>
       <SectionFooter onNext={handleNext} onSkip={onSkip} />
     </Card>
