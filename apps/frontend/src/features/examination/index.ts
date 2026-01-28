@@ -87,6 +87,14 @@ export {
 } from "./components/HeadDiagram/types";
 export { MeasurementField, MeasurementInput, YesNoField, YesNoInput } from "./components/inputs";
 export { QuestionField } from "./components/QuestionField";
+export {
+  RegionDropdown,
+  computeSummaryState,
+  SUMMARY_LABELS,
+  type RegionDropdownProps,
+  type RegionPainValues,
+  type RegionSummaryState,
+} from "./components/RegionDropdown";
 export { E1Section } from "./components/sections/E1Section";
 export { E2Section } from "./components/sections/E2Section";
 export { E3Section } from "./components/sections/E3Section";

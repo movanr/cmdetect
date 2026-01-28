@@ -3,33 +3,262 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getLabel, getSectionCardTitle } from "../../labels";
-import { ALL_REGIONS, BASE_REGIONS } from "../../model/regions";
+import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/regions";
+import type { QuestionInstance } from "../../projections/to-instances";
+import { HeadDiagram } from "../HeadDiagram/head-diagram";
+import { type RegionStatus } from "../HeadDiagram/types";
+import { RegionDropdown } from "../RegionDropdown";
 import { QuestionField } from "../QuestionField";
-import { SectionFooter, TableInterviewStep } from "../ui";
+import { SectionFooter } from "../ui";
 
 interface E4SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
 }
 
+/** Display order for sides: right first (patient's right shown on left side of screen) */
+const SIDE_ORDER: Side[] = ["right", "left"];
+
+/** Expanded region state per side */
+type ExpandedState = { left: Region | null; right: Region | null };
+
+/**
+ * Compute RegionStatus for a single region/side from form values.
+ */
+function computeRegionStatus(
+  region: Region,
+  side: Side,
+  instances: QuestionInstance[],
+  getValue: (path: string) => unknown
+): RegionStatus {
+  const regionInstances = instances.filter(
+    (i) => i.context.region === region && i.context.side === side
+  );
+
+  const painInst = regionInstances.find((i) => i.context.painType === "pain");
+  const familiarPainInst = regionInstances.find((i) => i.context.painType === "familiarPain");
+  const familiarHeadacheInst = regionInstances.find(
+    (i) => i.context.painType === "familiarHeadache"
+  );
+
+  const painValue = painInst ? (getValue(painInst.path) as string | null) : null;
+  const familiarPainValue = familiarPainInst
+    ? (getValue(familiarPainInst.path) as string | null)
+    : null;
+  const familiarHeadacheValue = familiarHeadacheInst
+    ? (getValue(familiarHeadacheInst.path) as string | null)
+    : null;
+
+  const hasData = painValue != null;
+  const isPainPositive = painValue === "yes";
+  const hasFamiliarPainData = familiarPainValue != null;
+  const hasFamiliarPain = familiarPainValue === "yes";
+  const hasFamiliarHeadacheData = familiarHeadacheValue != null;
+  const hasFamiliarHeadache = familiarHeadacheValue === "yes";
+
+  // Complete if:
+  // - pain = no, OR
+  // - pain = yes AND familiarPain answered AND (no familiarHeadache question OR familiarHeadache answered)
+  let isComplete = false;
+  if (hasData) {
+    if (!isPainPositive) {
+      isComplete = true;
+    } else {
+      const hasFamiliarHeadacheQuestion = familiarHeadacheInst != null;
+      isComplete =
+        hasFamiliarPainData && (!hasFamiliarHeadacheQuestion || hasFamiliarHeadacheData);
+    }
+  }
+
+  return {
+    hasData,
+    isPainPositive,
+    hasFamiliarPainData,
+    hasFamiliarPain,
+    hasFamiliarHeadacheData,
+    hasFamiliarHeadache,
+    isComplete,
+  };
+}
+
+/**
+ * InterviewSubsection - HeadDiagram + RegionDropdowns for one subsection (E4B or E4C).
+ */
+interface InterviewSubsectionProps {
+  instances: QuestionInstance[];
+  regions: readonly Region[];
+  expanded: ExpandedState;
+  onExpandChange: (side: Side, region: Region | null) => void;
+  incompleteRegions: IncompleteRegion[];
+}
+
+function InterviewSubsection({
+  instances,
+  regions,
+  expanded,
+  onExpandChange,
+  incompleteRegions,
+}: InterviewSubsectionProps) {
+  const { getValues, watch } = useFormContext();
+
+  // Watch all instance paths to trigger re-renders
+  const watchPaths = instances.map((i) => i.path);
+  watch(watchPaths);
+
+  // Compute region statuses for the diagram
+  const computeStatuses = useCallback(
+    (side: Side): Partial<Record<Region, RegionStatus>> => {
+      const statuses: Partial<Record<Region, RegionStatus>> = {};
+      for (const region of regions) {
+        statuses[region] = computeRegionStatus(region, side, instances, getValues);
+      }
+      return statuses;
+    },
+    [regions, instances, getValues]
+  );
+
+  // Get instances for a specific region/side
+  const getRegionInstances = useCallback(
+    (region: Region, side: Side) =>
+      instances.filter((i) => i.context.region === region && i.context.side === side),
+    [instances]
+  );
+
+  // Get incomplete region for a specific region/side
+  const getIncompleteRegion = useCallback(
+    (region: Region, side: Side) =>
+      incompleteRegions.find((r) => r.region === region && r.side === side),
+    [incompleteRegions]
+  );
+
+  // Handle diagram region click - toggle dropdown
+  const handleRegionClick = useCallback(
+    (side: Side) => (region: Region) => {
+      const currentExpanded = expanded[side];
+      // Toggle: if same region, close; otherwise open clicked region
+      onExpandChange(side, currentExpanded === region ? null : region);
+    },
+    [expanded, onExpandChange]
+  );
+
+  // Handle dropdown expansion change
+  const handleDropdownExpand = useCallback(
+    (side: Side, region: Region) => (isExpanded: boolean) => {
+      onExpandChange(side, isExpanded ? region : null);
+    },
+    [onExpandChange]
+  );
+
+  // Filter incomplete regions by side
+  const getIncompleteRegionsForSide = useCallback(
+    (side: Side) => incompleteRegions.filter((r) => r.side === side),
+    [incompleteRegions]
+  );
+
+  return (
+    <div className="flex gap-6">
+      {SIDE_ORDER.map((side) => {
+        const sideLabel = side === "right" ? "Rechte Seite" : "Linke Seite";
+        const statuses = computeStatuses(side);
+        const sideIncompleteRegions = getIncompleteRegionsForSide(side);
+
+        return (
+          <div key={side} className="flex-1 min-w-0">
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">{sideLabel}</h4>
+
+            {/* HeadDiagram */}
+            <div className="flex justify-center mb-4">
+              <HeadDiagram
+                side={side}
+                regions={regions}
+                regionStatuses={statuses}
+                selectedRegion={expanded[side]}
+                onRegionClick={handleRegionClick(side)}
+                incompleteRegions={sideIncompleteRegions}
+                className="w-[160px] sm:w-[180px]"
+              />
+            </div>
+
+            {/* RegionDropdowns */}
+            <div className="space-y-2">
+              {regions.map((region) => (
+                <RegionDropdown
+                  key={region}
+                  region={region}
+                  side={side}
+                  instances={getRegionInstances(region, side)}
+                  isExpanded={expanded[side] === region}
+                  onExpandChange={handleDropdownExpand(side, region)}
+                  incompleteRegion={getIncompleteRegion(region, side)}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function E4Section({ onComplete, onSkip }: E4SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
+  const { getValues } = useFormContext();
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
-  // Extract validation logic to avoid duplication between handleNext and checkIncomplete
-  const validateE4 = () => {
+  // Track expanded dropdowns for E4B and E4C
+  const [e4bExpanded, setE4bExpanded] = useState<ExpandedState>({ left: null, right: null });
+  const [e4cExpanded, setE4cExpanded] = useState<ExpandedState>({ left: null, right: null });
+
+  // Track whether validation has been triggered (only show errors after Next/Skip click)
+  const [hasValidated, setHasValidated] = useState(false);
+  const [e4bIncomplete, setE4bIncomplete] = useState<IncompleteRegion[]>([]);
+  const [e4cIncomplete, setE4cIncomplete] = useState<IncompleteRegion[]>([]);
+
+  // Determine which regions to show
+  const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
+
+  // Get instances for each step
+  const e4aInstances = getInstancesForStep("e4a");
+  const e4bMeasureInstances = getInstancesForStep("e4b-measure");
+  const e4bInterviewInstances = getInstancesForStep("e4b-interview");
+  const e4cMeasureInstances = getInstancesForStep("e4c-measure");
+  const e4cInterviewInstances = getInstancesForStep("e4c-interview");
+
+  // Handle expanded state changes
+  const handleE4bExpandChange = useCallback((side: Side, region: Region | null) => {
+    setE4bExpanded((prev) => ({ ...prev, [side]: region }));
+  }, []);
+
+  const handleE4cExpandChange = useCallback((side: Side, region: Region | null) => {
+    setE4cExpanded((prev) => ({ ...prev, [side]: region }));
+  }, []);
+
+  // Validation for all E4 steps - updates incomplete regions for visual feedback
+  const validateE4 = useCallback(() => {
+    setHasValidated(true);
+
     const interviewContext = { includeAllRegions };
-    return (
-      validateStep("e4a") &&
-      validateStep("e4b-measure") &&
-      validateStep("e4b-interview", interviewContext) &&
-      validateStep("e4c-measure") &&
-      validateStep("e4c-interview", interviewContext)
-    );
-  };
+
+    // Compute incomplete regions for visual feedback
+    const e4bResult = validateInterviewCompletion(e4bInterviewInstances, getValues, interviewContext);
+    const e4cResult = validateInterviewCompletion(e4cInterviewInstances, getValues, interviewContext);
+    setE4bIncomplete(e4bResult.incompleteRegions);
+    setE4cIncomplete(e4cResult.incompleteRegions);
+
+    // Run all step validations (avoid short-circuit to show all errors at once)
+    const e4aValid = validateStep("e4a");
+    const e4bMeasureValid = validateStep("e4b-measure");
+    const e4bInterviewValid = validateStep("e4b-interview", interviewContext);
+    const e4cMeasureValid = validateStep("e4c-measure");
+    const e4cInterviewValid = validateStep("e4c-interview", interviewContext);
+
+    return e4aValid && e4bMeasureValid && e4bInterviewValid && e4cMeasureValid && e4cInterviewValid;
+  }, [validateStep, includeAllRegions, e4bInterviewInstances, e4cInterviewInstances, getValues]);
 
   const handleNext = () => {
     if (validateE4()) {
@@ -64,7 +293,7 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
             <Badge variant="outline">U4A</Badge>
             <h4 className="font-medium">Schmerzfreie Mundöffnung</h4>
           </div>
-          {getInstancesForStep("e4a").map((instance) => (
+          {e4aInstances.map((instance) => (
             <QuestionField
               key={instance.path}
               instance={instance}
@@ -79,16 +308,19 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
             <Badge variant="outline">U4B</Badge>
             <h4 className="font-medium">Maximale aktive Mundöffnung</h4>
           </div>
-          {getInstancesForStep("e4b-measure").map((instance) => (
+          {e4bMeasureInstances.map((instance) => (
             <QuestionField
               key={instance.path}
               instance={instance}
               label={getLabel(instance.labelKey)}
             />
           ))}
-          <TableInterviewStep
-            instances={getInstancesForStep("e4b-interview")}
-            regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
+          <InterviewSubsection
+            instances={e4bInterviewInstances}
+            regions={regions}
+            expanded={e4bExpanded}
+            onExpandChange={handleE4bExpandChange}
+            incompleteRegions={hasValidated ? e4bIncomplete : []}
           />
         </div>
 
@@ -98,16 +330,19 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
             <Badge variant="outline">U4C</Badge>
             <h4 className="font-medium">Maximale passive Mundöffnung</h4>
           </div>
-          {getInstancesForStep("e4c-measure").map((instance) => (
+          {e4cMeasureInstances.map((instance) => (
             <QuestionField
               key={instance.path}
               instance={instance}
               label={getLabel(instance.labelKey)}
             />
           ))}
-          <TableInterviewStep
-            instances={getInstancesForStep("e4c-interview")}
-            regions={includeAllRegions ? ALL_REGIONS : BASE_REGIONS}
+          <InterviewSubsection
+            instances={e4cInterviewInstances}
+            regions={regions}
+            expanded={e4cExpanded}
+            onExpandChange={handleE4cExpandChange}
+            incompleteRegions={hasValidated ? e4cIncomplete : []}
           />
         </div>
       </CardContent>

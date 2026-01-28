@@ -27,10 +27,10 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
   // Extract validation logic to avoid duplication between handleNext and checkIncomplete
   const validateE9 = () => {
     const palpationContext = { palpationMode, siteDetailMode };
-    return (
-      validateStep("e9-right", palpationContext) &&
-      validateStep("e9-left", palpationContext)
-    );
+    // Run all step validations (avoid short-circuit to show all errors at once)
+    const rightValid = validateStep("e9-right", palpationContext);
+    const leftValid = validateStep("e9-left", palpationContext);
+    return rightValid && leftValid;
   };
 
   const handleNext = () => {
