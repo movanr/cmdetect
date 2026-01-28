@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -20,9 +21,6 @@ interface E4SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
 }
-
-/** Display order for sides: right first (patient's right shown on left side of screen) */
-const SIDE_ORDER: Side[] = ["right", "left"];
 
 /** Expanded region state per side */
 type ExpandedState = { left: Region | null; right: Region | null };
@@ -159,47 +157,50 @@ function InterviewSubsection({
     [incompleteRegions]
   );
 
+  // Render a single side panel
+  const renderSidePanel = (side: Side) => {
+    const sideLabel = side === "right" ? "Rechte Seite" : "Linke Seite";
+    const statuses = computeStatuses(side);
+    const sideIncompleteRegions = getIncompleteRegionsForSide(side);
+
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground">{sideLabel}</span>
+
+        {/* HeadDiagram */}
+        <HeadDiagram
+          side={side}
+          regions={regions}
+          regionStatuses={statuses}
+          selectedRegion={expanded[side]}
+          onRegionClick={handleRegionClick(side)}
+          incompleteRegions={sideIncompleteRegions}
+          className="w-[200px] sm:w-[220px]"
+        />
+
+        {/* RegionDropdowns */}
+        <div className="w-80 space-y-2">
+          {regions.map((region) => (
+            <RegionDropdown
+              key={region}
+              region={region}
+              side={side}
+              instances={getRegionInstances(region, side)}
+              isExpanded={expanded[side] === region}
+              onExpandChange={handleDropdownExpand(side, region)}
+              incompleteRegion={getIncompleteRegion(region, side)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex gap-6">
-      {SIDE_ORDER.map((side) => {
-        const sideLabel = side === "right" ? "Rechte Seite" : "Linke Seite";
-        const statuses = computeStatuses(side);
-        const sideIncompleteRegions = getIncompleteRegionsForSide(side);
-
-        return (
-          <div key={side} className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-muted-foreground mb-3">{sideLabel}</h4>
-
-            {/* HeadDiagram */}
-            <div className="flex justify-center mb-4">
-              <HeadDiagram
-                side={side}
-                regions={regions}
-                regionStatuses={statuses}
-                selectedRegion={expanded[side]}
-                onRegionClick={handleRegionClick(side)}
-                incompleteRegions={sideIncompleteRegions}
-                className="w-[200px] sm:w-[220px]"
-              />
-            </div>
-
-            {/* RegionDropdowns */}
-            <div className="space-y-2">
-              {regions.map((region) => (
-                <RegionDropdown
-                  key={region}
-                  region={region}
-                  side={side}
-                  instances={getRegionInstances(region, side)}
-                  isExpanded={expanded[side] === region}
-                  onExpandChange={handleDropdownExpand(side, region)}
-                  incompleteRegion={getIncompleteRegion(region, side)}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+    <div className="flex justify-center items-start gap-8 md:gap-16">
+      {renderSidePanel("right")}
+      <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+      {renderSidePanel("left")}
     </div>
   );
 }
