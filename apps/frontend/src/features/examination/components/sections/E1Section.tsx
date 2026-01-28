@@ -6,9 +6,9 @@
  * - E1b: Headache location in the last 30 days
  */
 
-import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SECTIONS } from "@cmdetect/dc-tmd";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
@@ -51,11 +51,11 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
           </div>
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Rechts</h5>
+              <h5 className="text-sm font-medium text-muted-foreground">Rechte Seite</h5>
               {painRight && <QuestionField instance={painRight} />}
             </div>
             <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Links</h5>
+              <h5 className="text-sm font-medium text-muted-foreground">Linke Seite</h5>
               {painLeft && <QuestionField instance={painLeft} />}
             </div>
           </div>
@@ -69,11 +69,11 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
           </div>
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Rechts</h5>
+              <h5 className="text-sm font-medium text-muted-foreground">Rechte Seite</h5>
               {headacheRight && <QuestionField instance={headacheRight} />}
             </div>
             <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Links</h5>
+              <h5 className="text-sm font-medium text-muted-foreground">Linke Seite</h5>
               {headacheLeft && <QuestionField instance={headacheLeft} />}
             </div>
           </div>

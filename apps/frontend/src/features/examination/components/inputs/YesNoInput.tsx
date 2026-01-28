@@ -30,13 +30,13 @@ export function YesNoInput({
     >
       <ToggleGroupItem
         value="no"
-        className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        className="rounded-full px-4 data-[state=on]:bg-gray-600 data-[state=on]:text-white"
       >
         {labels.no}
       </ToggleGroupItem>
       <ToggleGroupItem
         value="yes"
-        className="rounded-full px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        className="rounded-full px-4 data-[state=on]:bg-blue-500 data-[state=on]:text-white"
       >
         {labels.yes}
       </ToggleGroupItem>
