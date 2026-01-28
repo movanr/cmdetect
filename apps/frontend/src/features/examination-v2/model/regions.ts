@@ -25,6 +25,11 @@ export {
   E3_OPENING_PATTERNS,
   getMovementPainQuestions,
   getPalpationPainQuestions,
+  // Section label helpers
+  getSectionBadge,
+  getSectionCardTitle,
+  getSectionNumber,
+  getSectionTitle,
   GROUP_CONFIG,
   MEASUREMENT_FIELD_KEYS,
   MEASUREMENT_FIELDS,
@@ -48,6 +53,8 @@ export {
   // Movement regions (E4, E5)
   REGIONS,
   SECTION_KEYS,
+  // Section labels (German)
+  SECTION_LABELS,
   // Examination protocol IDs
   SECTIONS,
   SIDE_KEYS,

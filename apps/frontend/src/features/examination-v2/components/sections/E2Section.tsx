@@ -8,9 +8,11 @@
  * - Midline deviation (direction + conditional mm)
  */
 
+import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExaminationForm } from "../../form/use-examination-form";
+import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { SectionFooter } from "../ui";
 
@@ -42,7 +44,7 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>U2 - Schneidekantenverhältnisse</CardTitle>
+        <CardTitle>{getSectionCardTitle(SECTIONS.e2)}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* Reference Tooth */}

@@ -3,32 +3,28 @@
  *
  * For anatomical labels (regions, sides, palpation sites, muscle groups, pain types),
  * import directly from ./model/regions.ts where they are co-located with their types.
+ *
+ * Section labels are now defined in @cmdetect/dc-tmd and re-exported here.
  */
 
 import {
+  getSectionBadge,
+  getSectionCardTitle,
+  getSectionTitle,
   PAIN_TYPES,
   PALPATION_SITES,
   REGIONS,
+  SECTION_LABELS,
   SECTIONS,
   SIDES,
   type PainType,
   type PalpationSite,
   type Region,
-  type SectionId,
   type Side,
 } from "./model/regions";
 
-// === SECTION LABELS ===
-export const SECTION_LABELS: Partial<Record<SectionId, { title: string; cardTitle: string }>> = {
-  [SECTIONS.e1]: { title: "U1: Schmerzlokalisation", cardTitle: "U1 - Schmerzlokalisation" },
-  [SECTIONS.e2]: {
-    title: "U2: Schneidekantenverhältnisse",
-    cardTitle: "U2 - Schneidekantenverhältnisse",
-  },
-  [SECTIONS.e3]: { title: "U3: Öffnungsmuster", cardTitle: "U3 - Öffnungs- und Schließmuster" },
-  [SECTIONS.e4]: { title: "U4: Mundöffnung", cardTitle: "U4 - Öffnungs- und Schließbewegungen" },
-  [SECTIONS.e9]: { title: "U9: Palpation", cardTitle: "U9 - Palpation Muskeln & Kiefergelenk" },
-};
+// Re-export section label utilities from dc-tmd
+export { getSectionBadge, getSectionCardTitle, getSectionTitle, SECTION_LABELS };
 
 // === STEP LABELS ===
 export type StepId =
@@ -44,16 +40,16 @@ export type StepId =
   | "e9-right";
 
 export const STEP_LABELS: Record<StepId, { badge: string; title: string }> = {
-  "e1-all": { badge: "U1", title: "Schmerzlokalisation" },
-  "e2-all": { badge: "U2", title: "Schneidekantenverhältnisse" },
-  "e3-all": { badge: "U3", title: "Öffnungsmuster" },
+  "e1-all": { badge: getSectionBadge(SECTIONS.e1), title: SECTION_LABELS.e1.short },
+  "e2-all": { badge: getSectionBadge(SECTIONS.e2), title: SECTION_LABELS.e2.short },
+  "e3-all": { badge: getSectionBadge(SECTIONS.e3), title: SECTION_LABELS.e3.short },
   e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
   "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
   "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
   "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
   "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
-  "e9-left": { badge: "U9", title: "Palpation Links" },
-  "e9-right": { badge: "U9", title: "Palpation Rechts" },
+  "e9-left": { badge: getSectionBadge(SECTIONS.e9), title: "Palpation Links" },
+  "e9-right": { badge: getSectionBadge(SECTIONS.e9), title: "Palpation Rechts" },
 };
 
 // === COMMON UI LABELS ===

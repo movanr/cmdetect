@@ -1,13 +1,14 @@
+import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useExaminationForm } from "../../form/use-examination-form";
+import { getLabel, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS } from "../../model/regions";
-import { SectionFooter, TableInterviewStep } from "../ui";
-import { getLabel } from "../../labels";
 import { QuestionField } from "../QuestionField";
+import { SectionFooter, TableInterviewStep } from "../ui";
 
 interface E4SectionProps {
   onComplete?: () => void;
@@ -33,7 +34,7 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>U4 - Öffnungs- und Schließbewegungen</CardTitle>
+          <CardTitle>{getSectionCardTitle(SECTIONS.e4)}</CardTitle>
           <div className="flex items-center gap-2">
             <Checkbox
               id="alle-regionen-header"

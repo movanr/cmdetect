@@ -1,4 +1,4 @@
-import { SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
+import { getSectionTitle, SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
 import type { GroupNode, ModelNode } from "../model/nodes";
 import type { StepDefinition } from "../projections/to-instances";
 import { E1_MODEL, E1_STEPS } from "./e1.model";
@@ -20,31 +20,31 @@ export interface SectionConfig {
 export const SECTION_REGISTRY: SectionConfig[] = [
   {
     id: SECTIONS.e1,
-    label: "U1: Schmerzlokalisation",
+    label: getSectionTitle(SECTIONS.e1),
     model: E1_MODEL,
     steps: E1_STEPS,
   },
   {
     id: SECTIONS.e2,
-    label: "U2: Schneidekantenverhältnisse",
+    label: getSectionTitle(SECTIONS.e2),
     model: E2_MODEL,
     steps: E2_STEPS,
   },
   {
     id: SECTIONS.e3,
-    label: "U3: Öffnungsmuster",
+    label: getSectionTitle(SECTIONS.e3),
     model: E3_MODEL,
     steps: E3_STEPS,
   },
   {
     id: SECTIONS.e4,
-    label: "U4: Mundöffnung",
+    label: getSectionTitle(SECTIONS.e4),
     model: E4_MODEL,
     steps: E4_STEPS,
   },
   {
     id: SECTIONS.e9,
-    label: "U9: Palpation",
+    label: getSectionTitle(SECTIONS.e9),
     model: E9_MODEL,
     steps: E9_STEPS,
   },

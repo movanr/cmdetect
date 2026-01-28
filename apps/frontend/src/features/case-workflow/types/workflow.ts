@@ -5,7 +5,7 @@
  * Steps follow clinical pattern: Anamnesis -> Examination -> Evaluation -> Documentation -> Export
  */
 
-import { SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
+import { getSectionTitle, SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
 import type { QuestionnaireResponse } from "../../questionnaire-viewer/hooks/useQuestionnaireResponses";
 
 // Main workflow steps
@@ -82,11 +82,11 @@ export const MAIN_STEPS: StepDefinition[] = [
     label: "Untersuchung",
     order: 2,
     subSteps: [
-      { id: SECTIONS.e1, label: "U1: Schmerzlokalisation", order: 1, route: SECTIONS.e1 },
-      { id: SECTIONS.e2, label: "U2: Schneidekantenverhältnisse", order: 2, route: SECTIONS.e2 },
-      { id: SECTIONS.e3, label: "U3: Öffnungsmuster", order: 3, route: SECTIONS.e3 },
-      { id: SECTIONS.e4, label: "U4: Mundöffnung", order: 4, route: SECTIONS.e4 },
-      { id: SECTIONS.e9, label: "U9: Palpation", order: 5, route: SECTIONS.e9 },
+      { id: SECTIONS.e1, label: getSectionTitle(SECTIONS.e1), order: 1, route: SECTIONS.e1 },
+      { id: SECTIONS.e2, label: getSectionTitle(SECTIONS.e2), order: 2, route: SECTIONS.e2 },
+      { id: SECTIONS.e3, label: getSectionTitle(SECTIONS.e3), order: 3, route: SECTIONS.e3 },
+      { id: SECTIONS.e4, label: getSectionTitle(SECTIONS.e4), order: 4, route: SECTIONS.e4 },
+      { id: SECTIONS.e9, label: getSectionTitle(SECTIONS.e9), order: 5, route: SECTIONS.e9 },
     ],
   },
   {

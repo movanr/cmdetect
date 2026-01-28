@@ -1,3 +1,4 @@
+import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +15,9 @@ import {
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
+import { getLabel, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS } from "../../model/regions";
+import { QuestionField } from "../QuestionField";
 import {
   DiagramInterviewStep,
   InstructionBlock,
@@ -23,8 +26,6 @@ import {
   TableInterviewStep,
   type StepStatus,
 } from "../ui";
-import { getLabel } from "../../labels";
-import { QuestionField } from "../QuestionField";
 
 // Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
@@ -163,7 +164,7 @@ export function E4SectionStepwise({ onComplete }: E4SectionProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>U4 - Öffnungs- und Schließbewegungen</CardTitle>
+          <CardTitle>{getSectionCardTitle(SECTIONS.e4)}</CardTitle>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Checkbox

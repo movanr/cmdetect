@@ -6,9 +6,11 @@
  * - E1b: Headache location in the last 30 days
  */
 
+import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExaminationForm } from "../../form/use-examination-form";
+import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { SectionFooter } from "../ui";
 
@@ -38,7 +40,7 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>U1 - Schmerzlokalisation</CardTitle>
+        <CardTitle>{getSectionCardTitle(SECTIONS.e1)}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* E1A: Pain Location */}

@@ -23,6 +23,35 @@ export const SECTIONS = {
 export type SectionId = keyof typeof SECTIONS;
 export const SECTION_KEYS = Object.keys(SECTIONS) as SectionId[];
 
+// === SECTION LABELS (German) ===
+// short: concise name for menus/badges, full: complete name for card titles
+export const SECTION_LABELS: Record<SectionId, { short: string; full: string }> = {
+  e1: { short: "Schmerzlokalisation", full: "Schmerzlokalisation" },
+  e2: { short: "Schneidekantenverhältnisse", full: "Schneidekantenverhältnisse" },
+  e3: { short: "Öffnungsmuster", full: "Öffnungs- und Schließmuster" },
+  e4: { short: "Mundöffnung", full: "Öffnungs- und Schließbewegungen" },
+  e5: { short: "Lateralbewegungen", full: "Lateral- und Protrusionsbewegungen" },
+  e6: { short: "Gelenkgeräusche Öffnung", full: "Gelenkgeräusche bei Öffnung" },
+  e7: { short: "Gelenkgeräusche Lateral", full: "Gelenkgeräusche bei Lateralbewegungen" },
+  e8: { short: "Gelenkblockierung", full: "Gelenkblockierung" },
+  e9: { short: "Palpation", full: "Palpation Muskeln & Kiefergelenk" },
+  e10: { short: "Ergänzende Untersuchungen", full: "Ergänzende Untersuchungen" },
+};
+
+/** Get section number from ID (e.g., "e3" -> "3", "e10" -> "10") */
+export const getSectionNumber = (id: SectionId): string => id.slice(1);
+
+/** Get section title with U-prefix (e.g., "U3: Öffnungsmuster") */
+export const getSectionTitle = (id: SectionId): string =>
+  `U${getSectionNumber(id)}: ${SECTION_LABELS[id].short}`;
+
+/** Get section card title with U-prefix (e.g., "U3 - Öffnungs- und Schließmuster") */
+export const getSectionCardTitle = (id: SectionId): string =>
+  `U${getSectionNumber(id)} - ${SECTION_LABELS[id].full}`;
+
+/** Get section badge (e.g., "U3") */
+export const getSectionBadge = (id: SectionId): string => `U${getSectionNumber(id)}`;
+
 // === E1 FIELDS (Pain & Headache Location) ===
 export const E1_FIELDS = {
   painLocation: "painLocation",
