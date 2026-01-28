@@ -48,7 +48,12 @@ export function E3Section({ onComplete, onSkip }: E3SectionProps) {
           {pattern && <QuestionField instance={pattern} />}
         </div>
       </CardContent>
-      <SectionFooter onNext={handleNext} onSkip={onSkip} />
+      <SectionFooter
+        onNext={handleNext}
+        onSkip={onSkip}
+        warnOnSkip
+        checkIncomplete={() => !validateStep("e3-all")}
+      />
     </Card>
   );
 }

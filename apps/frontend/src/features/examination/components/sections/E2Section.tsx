@@ -80,7 +80,12 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
           </div>
         </div>
       </CardContent>
-      <SectionFooter onNext={handleNext} onSkip={onSkip} />
+      <SectionFooter
+        onNext={handleNext}
+        onSkip={onSkip}
+        warnOnSkip
+        checkIncomplete={() => !validateStep("e2-all")}
+      />
     </Card>
   );
 }

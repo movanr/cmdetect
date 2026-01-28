@@ -19,17 +19,21 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, setValue } = useFormContext();
 
-  const handleNext = () => {
-    const isValid = validateStep("e9-right") && validateStep("e9-left");
-    if (isValid) {
-      onComplete?.();
-    }
-  };
-
   const rightInstances = getInstancesForStep("e9-right");
   const leftInstances = getInstancesForStep("e9-left");
   const palpationMode = watch("e9.palpationMode") as PalpationMode;
   const siteDetailMode = watch("e9.siteDetailMode") as SiteDetailMode;
+
+  const handleNext = () => {
+    // Pass palpation mode context to validate only visible questions
+    const palpationContext = { palpationMode, siteDetailMode };
+    const isValid =
+      validateStep("e9-right", palpationContext) &&
+      validateStep("e9-left", palpationContext);
+    if (isValid) {
+      onComplete?.();
+    }
+  };
 
   return (
     <Card>
@@ -73,7 +77,19 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
           />
         </div>
       </CardContent>
-      <SectionFooter onNext={handleNext} onSkip={onSkip} isLastSection={isLastSection} />
+      <SectionFooter
+        onNext={handleNext}
+        onSkip={onSkip}
+        isLastSection={isLastSection}
+        warnOnSkip
+        checkIncomplete={() => {
+          const palpationContext = { palpationMode, siteDetailMode };
+          return !(
+            validateStep("e9-right", palpationContext) &&
+            validateStep("e9-left", palpationContext)
+          );
+        }}
+      />
     </Card>
   );
 }

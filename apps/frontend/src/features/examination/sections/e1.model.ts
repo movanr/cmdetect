@@ -22,6 +22,7 @@ export const E1_MODEL = M.group({
       Q.checkboxGroup({
         options: E1_PAIN_LOCATION_KEYS,
         labels: E1_PAIN_LOCATIONS,
+        required: true,
       }),
       "painLocationRight"
     ),
@@ -29,6 +30,7 @@ export const E1_MODEL = M.group({
       Q.checkboxGroup({
         options: E1_PAIN_LOCATION_KEYS,
         labels: E1_PAIN_LOCATIONS,
+        required: true,
       }),
       "painLocationLeft"
     ),
@@ -39,6 +41,7 @@ export const E1_MODEL = M.group({
       Q.checkboxGroup({
         options: E1_HEADACHE_LOCATION_KEYS,
         labels: E1_HEADACHE_LOCATIONS,
+        required: true,
       }),
       "headacheLocationRight"
     ),
@@ -46,6 +49,7 @@ export const E1_MODEL = M.group({
       Q.checkboxGroup({
         options: E1_HEADACHE_LOCATION_KEYS,
         labels: E1_HEADACHE_LOCATIONS,
+        required: true,
       }),
       "headacheLocationLeft"
     ),

@@ -11,7 +11,13 @@ import {
 import { schemaFromModel } from "../projections/to-schema";
 import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
 import { createPathHelpers } from "./path-helpers";
-import { validateInstances } from "./validation";
+import {
+  validateInstances,
+  validateInterviewCompletion,
+  validatePalpationCompletion,
+  type ValidationContext,
+  type ValidationResult,
+} from "./validation";
 
 // Helper to prefix paths in step definitions
 function prefixStepPaths(
@@ -86,8 +92,13 @@ function getStepInstancesForExamination(
 export function useExaminationForm() {
   const form = useFormContext<FormValues>();
 
-  // Validate a specific step
-  const validateStep = (stepId: ExaminationStepId): boolean => {
+  /**
+   * Validate a specific step.
+   *
+   * @param stepId - The step to validate
+   * @param context - Optional context for conditional validation (e.g., includeAllRegions, palpationMode)
+   */
+  const validateStep = (stepId: ExaminationStepId, context?: ValidationContext): boolean => {
     const stepInstances = getStepInstancesForExamination(allInstances, stepId);
 
     // Clear existing errors for step fields
@@ -95,9 +106,65 @@ export function useExaminationForm() {
       form.clearErrors(inst.path as FieldPath<FormValues>);
     }
 
-    // Validate using the validation layer (single source of truth)
     const getValue = (path: string) => form.getValues(path as FieldPath<FormValues>);
-    const result = validateInstances(stepInstances, getValue);
+
+    // Route to appropriate validator based on step type
+    let result: ValidationResult;
+
+    // Interview steps (e4b-interview, e4c-interview) use validateInterviewCompletion
+    if (stepId === "e4b-interview" || stepId === "e4c-interview") {
+      const interviewResult = validateInterviewCompletion(stepInstances, getValue, context);
+      // Convert to ValidationResult format
+      const errors: Array<{ path: string; message: string }> = [];
+      for (const incomplete of interviewResult.incompleteRegions) {
+        // Find the paths for the missing questions and add errors
+        for (const inst of stepInstances) {
+          if (
+            inst.context.region === incomplete.region &&
+            inst.context.side === incomplete.side
+          ) {
+            if (incomplete.missingPain && inst.context.painType === "pain") {
+              errors.push({ path: inst.path, message: "Bitte auswählen" });
+            }
+            if (incomplete.missingFamiliarPain && inst.context.painType === "familiarPain") {
+              errors.push({ path: inst.path, message: "Bitte auswählen" });
+            }
+            if (incomplete.missingFamiliarHeadache && inst.context.painType === "familiarHeadache") {
+              errors.push({ path: inst.path, message: "Bitte auswählen" });
+            }
+          }
+        }
+      }
+      result = { valid: interviewResult.valid, errors };
+    }
+    // Palpation steps (e9-right, e9-left) use validatePalpationCompletion
+    else if (stepId === "e9-right" || stepId === "e9-left") {
+      const palpationResult = validatePalpationCompletion(stepInstances, getValue, context);
+      // Convert to ValidationResult format
+      const errors: Array<{ path: string; message: string }> = [];
+      for (const incomplete of palpationResult.incompleteSites) {
+        for (const missingQ of incomplete.missingQuestions) {
+          // Find the path for this missing question
+          // Note: context uses "site" not "palpationSite"
+          const inst = stepInstances.find(
+            (i) =>
+              i.context.side === incomplete.side &&
+              i.context.painType === missingQ &&
+              (context?.siteDetailMode === "grouped"
+                ? i.context.region === incomplete.site
+                : i.context.site === incomplete.site)
+          );
+          if (inst) {
+            errors.push({ path: inst.path, message: "Bitte auswählen" });
+          }
+        }
+      }
+      result = { valid: palpationResult.valid, errors };
+    }
+    // All other steps use validateInstances (for measurements, etc.)
+    else {
+      result = validateInstances(stepInstances, getValue);
+    }
 
     // Set errors via RHF
     for (const error of result.errors) {

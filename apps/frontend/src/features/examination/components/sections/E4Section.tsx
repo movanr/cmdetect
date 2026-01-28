@@ -20,11 +20,14 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
   const handleNext = () => {
-    // Validate all E4 steps
+    // Validate all E4 steps including interview with region context
+    const interviewContext = { includeAllRegions };
     const isValid =
       validateStep("e4a") &&
       validateStep("e4b-measure") &&
-      validateStep("e4c-measure");
+      validateStep("e4b-interview", interviewContext) &&
+      validateStep("e4c-measure") &&
+      validateStep("e4c-interview", interviewContext);
     if (isValid) {
       onComplete?.();
     }
@@ -104,7 +107,21 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
           />
         </div>
       </CardContent>
-      <SectionFooter onNext={handleNext} onSkip={onSkip} />
+      <SectionFooter
+        onNext={handleNext}
+        onSkip={onSkip}
+        warnOnSkip
+        checkIncomplete={() => {
+          const interviewContext = { includeAllRegions };
+          return !(
+            validateStep("e4a") &&
+            validateStep("e4b-measure") &&
+            validateStep("e4b-interview", interviewContext) &&
+            validateStep("e4c-measure") &&
+            validateStep("e4c-interview", interviewContext)
+          );
+        }}
+      />
     </Card>
   );
 }
