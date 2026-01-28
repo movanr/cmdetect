@@ -12,7 +12,7 @@
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 import type { IncompleteRegion } from "../../form/validation";
-import { getLabel } from "../../labels";
+import { getRegionLabel, getSideLabel } from "../../labels";
 import { SVG_REGIONS, type Region, type Side } from "../../model/regions";
 import HeadSvg from "./head-diagram.svg?react";
 import {
@@ -99,7 +99,7 @@ export function HeadDiagram({
     defs.appendChild(pattern);
   }, []);
 
-  // Apply styles to regions
+  // Apply styles and tooltips to regions
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -148,6 +148,16 @@ export function HeadDiagram({
       element.style.cursor = disabled ? "default" : "pointer";
       element.style.transition = "fill 0.2s ease, stroke 0.2s ease";
 
+      // Add tooltip via SVG <title> element
+      const titleId = `${regionId}-title`;
+      let titleEl = element.querySelector(`#${titleId}`) as SVGTitleElement | null;
+      if (!titleEl) {
+        titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        titleEl.setAttribute("id", titleId);
+        element.insertBefore(titleEl, element.firstChild);
+      }
+      titleEl.textContent = getRegionLabel(regionId);
+
       // Handle stripe pattern overlay for incomplete regions
       const patternOverlayId = `${regionId}-incomplete-overlay`;
       let overlay = svg.querySelector(`#${patternOverlayId}`) as SVGElement | null;
@@ -194,7 +204,7 @@ export function HeadDiagram({
         ref={svgRef}
         className="w-full h-auto"
         role="img"
-        aria-label={`Head diagram for ${getLabel(side)}`}
+        aria-label={`Head diagram for ${getSideLabel(side)}`}
         onClick={handleClick}
       />
     </div>

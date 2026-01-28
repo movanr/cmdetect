@@ -63,7 +63,7 @@ export function CheckboxGroupInput<T extends string>({
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-md border cursor-pointer transition-colors",
               isSelected
-                ? "border-primary bg-primary/5"
+                ? "border-blue-500 bg-blue-500/5"
                 : "border-input hover:bg-accent hover:border-accent-foreground/20",
               disabled && "opacity-50 cursor-not-allowed"
             )}
@@ -73,6 +73,7 @@ export function CheckboxGroupInput<T extends string>({
               checked={isSelected}
               onCheckedChange={(checked) => handleToggle(option, checked === true)}
               disabled={disabled}
+              className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
             />
             <span className="text-sm font-normal">{getLabel(option)}</span>
           </label>

@@ -9,11 +9,12 @@
  * bidirectionally linked to the checkbox groups.
  */
 
-import { useCallback, useMemo } from "react";
-import { useFormContext } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { SECTIONS, SVG_REGIONS, type Region, type Side } from "@cmdetect/dc-tmd";
+import { useCallback, useMemo } from "react";
+import { useFormContext } from "react-hook-form";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
@@ -41,10 +42,7 @@ interface E1SectionProps {
  * Compute RegionStatus for E1 based on checkbox values.
  * For E1, there are no familiar pain questions - just selection status.
  */
-function computeE1RegionStatus(
-  region: Region,
-  values: string[] | undefined
-): RegionStatus {
+function computeE1RegionStatus(region: Region, values: string[] | undefined): RegionStatus {
   const isSelected = values?.includes(region) ?? false;
   return {
     hasData: true,
@@ -177,37 +175,33 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
             <h4 className="font-medium">Schmerzlokalisation (letzte 30 Tage)</h4>
           </div>
 
-          {/* HeadDiagrams for pain location */}
-          <div className="flex justify-center gap-8">
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">Rechts</span>
+          {/* Unified diagram + checkboxes layout */}
+          <div className="flex justify-center items-start gap-8 md:gap-16">
+            {/* Right side panel */}
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Rechte Seite</span>
               <HeadDiagram
                 side="right"
                 regions={E1_PAIN_SVG_REGIONS}
                 regionStatuses={painRightStatuses}
                 onRegionClick={(region) => handlePainRegionClick(region, "right")}
               />
+              <div className="w-44">{painRight && <QuestionField instance={painRight} />}</div>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">Links</span>
+
+            {/* Vertical separator */}
+            <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+
+            {/* Left side panel */}
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Linke Seite</span>
               <HeadDiagram
                 side="left"
                 regions={E1_PAIN_SVG_REGIONS}
                 regionStatuses={painLeftStatuses}
                 onRegionClick={(region) => handlePainRegionClick(region, "left")}
               />
-            </div>
-          </div>
-
-          {/* Checkbox groups for pain location */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Rechte Seite</h5>
-              {painRight && <QuestionField instance={painRight} />}
-            </div>
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Linke Seite</h5>
-              {painLeft && <QuestionField instance={painLeft} />}
+              <div className="w-44">{painLeft && <QuestionField instance={painLeft} />}</div>
             </div>
           </div>
         </div>
@@ -219,9 +213,10 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
             <h4 className="font-medium">Kopfschmerzlokalisation (letzte 30 Tage)</h4>
           </div>
 
-          {/* HeadDiagrams for headache location (temporalis only) */}
-          <div className="flex justify-center gap-8">
-            <div className="flex flex-col items-center gap-2">
+          {/* Unified diagram + checkboxes layout */}
+          <div className="flex justify-center items-start gap-8 md:gap-16">
+            {/* Right side panel */}
+            <div className="flex flex-col items-center gap-3">
               <span className="text-sm font-medium text-muted-foreground">Rechts</span>
               <HeadDiagram
                 side="right"
@@ -229,8 +224,16 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
                 regionStatuses={headacheRightStatuses}
                 onRegionClick={(region) => handleHeadacheRegionClick(region, "right")}
               />
+              <div className="w-44">
+                {headacheRight && <QuestionField instance={headacheRight} />}
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
+
+            {/* Vertical separator */}
+            <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+
+            {/* Left side panel */}
+            <div className="flex flex-col items-center gap-3">
               <span className="text-sm font-medium text-muted-foreground">Links</span>
               <HeadDiagram
                 side="left"
@@ -238,18 +241,9 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
                 regionStatuses={headacheLeftStatuses}
                 onRegionClick={(region) => handleHeadacheRegionClick(region, "left")}
               />
-            </div>
-          </div>
-
-          {/* Checkbox groups for headache location */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Rechte Seite</h5>
-              {headacheRight && <QuestionField instance={headacheRight} />}
-            </div>
-            <div className="space-y-2">
-              <h5 className="text-sm font-medium text-muted-foreground">Linke Seite</h5>
-              {headacheLeft && <QuestionField instance={headacheLeft} />}
+              <div className="w-44">
+                {headacheLeft && <QuestionField instance={headacheLeft} />}
+              </div>
             </div>
           </div>
         </div>
