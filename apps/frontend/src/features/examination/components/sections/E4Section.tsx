@@ -313,7 +313,7 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
           ))}
         </div>
 
-        {/* E4B: Maximale aktive Mundöffnung */}
+        {/* E4B: Schmerz nach Maximaler nicht-unterstützter Mundöffnung */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Badge variant="outline">U4B</Badge>
@@ -326,13 +326,18 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
               label={getLabel(instance.labelKey)}
             />
           ))}
-          <InterviewSubsection
-            instances={e4bInterviewInstances}
-            regions={regions}
-            expanded={e4bExpanded}
-            onExpandChange={handleE4bExpandChange}
-            incompleteRegions={hasValidated ? e4bIncomplete : []}
-          />
+          <div className="space-y-3">
+            <h5 className="font-medium text-sm">
+              Schmerzbefragung nach Maximaler aktiver Mundöffnung
+            </h5>
+            <InterviewSubsection
+              instances={e4bInterviewInstances}
+              regions={regions}
+              expanded={e4bExpanded}
+              onExpandChange={handleE4bExpandChange}
+              incompleteRegions={hasValidated ? e4bIncomplete : []}
+            />
+          </div>
         </div>
 
         {/* E4C: Maximale passive Mundöffnung */}
@@ -348,13 +353,18 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
               label={getLabel(instance.labelKey)}
             />
           ))}
-          <InterviewSubsection
-            instances={e4cInterviewInstances}
-            regions={regions}
-            expanded={e4cExpanded}
-            onExpandChange={handleE4cExpandChange}
-            incompleteRegions={hasValidated ? e4cIncomplete : []}
-          />
+          <div className="space-y-3">
+            <h5 className="font-medium text-sm">
+              Schmerzbefragung nach Maximaler passiver Mundöffnung
+            </h5>
+            <InterviewSubsection
+              instances={e4cInterviewInstances}
+              regions={regions}
+              expanded={e4cExpanded}
+              onExpandChange={handleE4cExpandChange}
+              incompleteRegions={hasValidated ? e4cIncomplete : []}
+            />
+          </div>
         </div>
       </CardContent>
       <SectionFooter
