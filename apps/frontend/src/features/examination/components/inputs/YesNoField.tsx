@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
 import {
   FormField,
@@ -24,7 +25,16 @@ export function YesNoField<T extends FieldValues>({
   disabled,
   className,
 }: YesNoFieldProps<T>) {
-  const { control, clearErrors } = useFormContext<T>();
+  const { control, clearErrors, watch, setValue } = useFormContext<T>();
+
+  const value = watch(name);
+
+  // Clear value when field becomes disabled
+  useEffect(() => {
+    if (disabled && value != null) {
+      setValue(name, null as any);
+    }
+  }, [disabled, value, name, setValue]);
 
   return (
     <FormField
