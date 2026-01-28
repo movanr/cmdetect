@@ -1,19 +1,19 @@
-import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { SECTIONS } from "@cmdetect/dc-tmd";
 import { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
 import { useExaminationForm } from "../../form/use-examination-form";
+import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
 import { getLabel, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import { type RegionStatus } from "../HeadDiagram/types";
-import { RegionDropdown } from "../RegionDropdown";
 import { QuestionField } from "../QuestionField";
+import { RegionDropdown } from "../RegionDropdown";
 import { SectionFooter } from "../ui";
 
 interface E4SectionProps {
@@ -70,8 +70,7 @@ function computeRegionStatus(
       isComplete = true;
     } else {
       const hasFamiliarHeadacheQuestion = familiarHeadacheInst != null;
-      isComplete =
-        hasFamiliarPainData && (!hasFamiliarHeadacheQuestion || hasFamiliarHeadacheData);
+      isComplete = hasFamiliarPainData && (!hasFamiliarHeadacheQuestion || hasFamiliarHeadacheData);
     }
   }
 
@@ -180,7 +179,7 @@ function InterviewSubsection({
                 selectedRegion={expanded[side]}
                 onRegionClick={handleRegionClick(side)}
                 incompleteRegions={sideIncompleteRegions}
-                className="w-[160px] sm:w-[180px]"
+                className="w-[200px] sm:w-[220px]"
               />
             </div>
 
@@ -207,7 +206,7 @@ function InterviewSubsection({
 
 export function E4Section({ onComplete, onSkip }: E4SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
-  const { getValues } = useFormContext();
+  const { getValues, watch } = useFormContext<Record<string, unknown>>();
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
   // Track expanded dropdowns for E4B and E4C
@@ -216,8 +215,6 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
 
   // Track whether validation has been triggered (only show errors after Next/Skip click)
   const [hasValidated, setHasValidated] = useState(false);
-  const [e4bIncomplete, setE4bIncomplete] = useState<IncompleteRegion[]>([]);
-  const [e4cIncomplete, setE4cIncomplete] = useState<IncompleteRegion[]>([]);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
@@ -229,6 +226,25 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
   const e4cMeasureInstances = getInstancesForStep("e4c-measure");
   const e4cInterviewInstances = getInstancesForStep("e4c-interview");
 
+  // Watch interview fields to trigger re-render when values change
+  const e4bWatchPaths = e4bInterviewInstances.map((i) => i.path);
+  const e4cWatchPaths = e4cInterviewInstances.map((i) => i.path);
+  watch(e4bWatchPaths);
+  watch(e4cWatchPaths);
+
+  // Compute incomplete regions inline (light computation, re-runs on watch trigger)
+  const interviewContext = { includeAllRegions };
+  const e4bIncomplete = validateInterviewCompletion(
+    e4bInterviewInstances,
+    getValues,
+    interviewContext
+  ).incompleteRegions;
+  const e4cIncomplete = validateInterviewCompletion(
+    e4cInterviewInstances,
+    getValues,
+    interviewContext
+  ).incompleteRegions;
+
   // Handle expanded state changes
   const handleE4bExpandChange = useCallback((side: Side, region: Region | null) => {
     setE4bExpanded((prev) => ({ ...prev, [side]: region }));
@@ -238,17 +254,11 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
     setE4cExpanded((prev) => ({ ...prev, [side]: region }));
   }, []);
 
-  // Validation for all E4 steps - updates incomplete regions for visual feedback
+  // Validation for all E4 steps
   const validateE4 = useCallback(() => {
     setHasValidated(true);
 
     const interviewContext = { includeAllRegions };
-
-    // Compute incomplete regions for visual feedback
-    const e4bResult = validateInterviewCompletion(e4bInterviewInstances, getValues, interviewContext);
-    const e4cResult = validateInterviewCompletion(e4cInterviewInstances, getValues, interviewContext);
-    setE4bIncomplete(e4bResult.incompleteRegions);
-    setE4cIncomplete(e4cResult.incompleteRegions);
 
     // Run all step validations (avoid short-circuit to show all errors at once)
     const e4aValid = validateStep("e4a");
@@ -258,7 +268,7 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
     const e4cInterviewValid = validateStep("e4c-interview", interviewContext);
 
     return e4aValid && e4bMeasureValid && e4bInterviewValid && e4cMeasureValid && e4cInterviewValid;
-  }, [validateStep, includeAllRegions, e4bInterviewInstances, e4cInterviewInstances, getValues]);
+  }, [validateStep, includeAllRegions]);
 
   const handleNext = () => {
     if (validateE4()) {
