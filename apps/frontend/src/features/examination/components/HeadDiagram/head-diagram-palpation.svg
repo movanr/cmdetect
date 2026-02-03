@@ -284,7 +284,9 @@
        style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:24px;font-family:Arial;writing-mode:lr-tb;direction:ltr;display:inline;fill:#374151;stroke:none;stroke-width:1"
        x="364.72104"
        y="96.860184"
-       id="text-anterior"><tspan
+       id="text-anterior"
+       display="none"
+       visibility="hidden"><tspan
          id="tspan-anterior"
          x="364.72104"
          y="96.860184"
@@ -292,7 +294,9 @@
        style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:24px;font-family:Arial;writing-mode:lr-tb;direction:ltr;display:inline;fill:#374151;stroke:none;stroke-width:1"
        x="64.962952"
        y="109.30094"
-       id="text-posterior"><tspan
+       id="text-posterior"
+       display="none"
+       visibility="hidden"><tspan
          id="tspan-posterior"
          x="64.962952"
          y="109.30094"
@@ -300,7 +304,9 @@
        style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:24px;font-family:Arial;writing-mode:lr-tb;direction:ltr;display:inline;fill:#374151;stroke:none;stroke-width:1"
        x="221.57114"
        y="47.714111"
-       id="text-middle"><tspan
+       id="text-middle"
+       display="none"
+       visibility="hidden"><tspan
          id="tspan-middle"
          x="221.57114"
          y="47.714111"
@@ -403,7 +409,9 @@
        style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:24px;font-family:Arial;writing-mode:lr-tb;direction:ltr;fill:#374151;stroke:none;stroke-width:1"
        x="396.30481"
        y="362.16385"
-       id="text-origin"><tspan
+       id="text-origin"
+       display="none"
+       visibility="hidden"><tspan
          id="tspan-origin"
          x="396.30481"
          y="362.16385"
@@ -411,7 +419,9 @@
        style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:24px;font-family:Arial;writing-mode:lr-tb;direction:ltr;fill:#374151;stroke:none;stroke-width:1"
        x="382.43903"
        y="467.01367"
-       id="text-insertion"><tspan
+       id="text-insertion"
+       display="none"
+       visibility="hidden"><tspan
          id="tspan-insertion"
          x="382.43903"
          y="467.01367"
@@ -419,7 +429,9 @@
        style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:24px;font-family:Arial;writing-mode:lr-tb;direction:ltr;fill:#374151;stroke:none;stroke-width:1"
        x="384.54767"
        y="417.8959"
-       id="text-body"><tspan
+       id="text-body"
+       display="none"
+       visibility="hidden"><tspan
          id="tspan-body"
          x="384.54767"
          y="417.8959"

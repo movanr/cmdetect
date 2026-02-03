@@ -106,26 +106,6 @@ export function HeadDiagramPalpation({
     defs.appendChild(pattern);
   }, []);
 
-  // Counter-transform text labels when mirrored (left side)
-  // This keeps labels readable while the head shape is mirrored
-  useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
-
-    const textElements = svg.querySelectorAll("text");
-    textElements.forEach((text) => {
-      if (side === "left") {
-        // Get the text bounding box to calculate proper flip point
-        const bbox = text.getBBox();
-        const centerX = bbox.x + bbox.width / 2;
-        // Flip around the text's center point
-        text.setAttribute("transform", `translate(${2 * centerX}, 0) scale(-1, 1)`);
-      } else {
-        text.removeAttribute("transform");
-      }
-    });
-  }, [side]);
-
   // Apply styles to clickable region paths (only for diagram sites, excludes TMJ)
   useEffect(() => {
     const svg = svgRef.current;

@@ -152,25 +152,25 @@ export const REGION_STROKE_WIDTH = {
  */
 export const REGION_STATE_COLORS_SELECTED = {
   [REGION_VISUAL_STATES.PENDING]: {
-    fill: "#a1a1aa", // zinc-400 (opaque, darker than base)
+    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40% opacity
     stroke: "#71717a", // zinc-500
     bgClass: "bg-zinc-100",
     ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
-    fill: "#a1a1aa", // zinc-400 (opaque, darker than base)
+    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40% opacity
     stroke: "#71717a", // zinc-500
     bgClass: "bg-zinc-100",
     ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
-    fill: "#71717a", // zinc-500 (opaque, darker than base)
+    fill: "rgba(113, 113, 122, 0.4)", // zinc-500 @ 40% opacity
     stroke: "#52525b", // zinc-600
     bgClass: "bg-zinc-200",
     ringClass: "ring-1 ring-zinc-500",
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
-    fill: "#60a5fa", // blue-400 (opaque, darker than base)
+    fill: "rgba(96, 165, 250, 0.4)", // blue-400 @ 40% opacity
     stroke: "#2563eb", // blue-600
     bgClass: "bg-blue-100",
     ringClass: "ring-1 ring-blue-600",
