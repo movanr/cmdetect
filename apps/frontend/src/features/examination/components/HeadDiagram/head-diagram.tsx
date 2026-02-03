@@ -173,10 +173,10 @@ export function HeadDiagram({
       let strokeDasharray: string = "none";
 
       if (isIncomplete) {
-        // Validation error: light red fill + red border
+        // Validation error: light red fill + red dashed border
         fill = "rgba(239, 68, 68, 0.1)"; // red-500 10%
         stroke = "#ef4444"; // red-500
-        strokeDasharray = "2 1"; // dashed
+        strokeDasharray = "4 3"; // thinner dashes with more spacing
       } else if (isSelected) {
         fill = REGION_STATE_COLORS_SELECTED[visualState].fill;
         stroke = REGION_STATE_COLORS_SELECTED[visualState].stroke;
@@ -187,12 +187,14 @@ export function HeadDiagram({
       }
 
       // Apply styles (set both attribute and style to ensure override)
+      // Use thinner stroke for incomplete regions to make dashed line more delicate
+      const strokeWidth = isIncomplete ? "6" : isSelected ? "12" : "10";
       element.setAttribute("fill", fill);
       element.setAttribute("stroke", stroke);
-      element.setAttribute("stroke-width", isSelected ? "12" : "10");
+      element.setAttribute("stroke-width", strokeWidth);
       element.style.fill = fill;
       element.style.stroke = stroke;
-      element.style.strokeWidth = isSelected ? "12" : "10";
+      element.style.strokeWidth = strokeWidth;
       element.style.strokeDasharray = strokeDasharray;
       element.style.cursor = disabled ? "default" : "pointer";
       element.style.transition = "fill 0.2s ease, stroke 0.2s ease";
