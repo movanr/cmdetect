@@ -222,8 +222,19 @@ export function HeadDiagramPalpation({
         fill = "#4ade80"; // green-400
         stroke = "#000000"; // black
       } else {
-        fill = REGION_STATE_COLORS[visualState].fill;
-        stroke = REGION_STATE_COLORS[visualState].stroke;
+        // Unselected circles: use solid colors for better visibility
+        // (REGION_STATE_COLORS are too transparent for small circles)
+        if (visualState === "pending" || visualState === "undefined") {
+          fill = "#d4d4d8"; // zinc-300
+          stroke = "#71717a"; // zinc-500
+        } else if (visualState === "negative") {
+          fill = "#a1a1aa"; // zinc-400
+          stroke = "#52525b"; // zinc-600
+        } else {
+          // positive
+          fill = "#93c5fd"; // blue-300
+          stroke = "#3b82f6"; // blue-500
+        }
       }
 
       // Apply styles to all circles in this site's group
