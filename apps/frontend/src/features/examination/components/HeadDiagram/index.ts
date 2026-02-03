@@ -10,12 +10,15 @@ export { HeadDiagramPalpation } from "./head-diagram-palpation";
 
 // Types and constants
 export {
+  ALL_CLICKABLE_REGION_IDS,
   ALL_PALPATION_CIRCLE_IDS,
   buildRegionId,
   buildSiteId,
+  CLICKABLE_REGION_IDS,
   EMPTY_REGION_STATUS,
   EMPTY_SITE_STATUS,
   getCirclePalpationSite,
+  getRegionPalpationSite,
   getRegionVisualState,
   PALPATION_CIRCLE_GROUPS,
   parseRegionId,

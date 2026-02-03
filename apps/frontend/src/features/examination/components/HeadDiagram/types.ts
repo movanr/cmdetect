@@ -267,6 +267,39 @@ export const PALPATION_CIRCLE_GROUPS: Record<PalpationSite, readonly string[]> =
 export const ALL_PALPATION_CIRCLE_IDS = Object.values(PALPATION_CIRCLE_GROUPS).flat();
 
 /**
+ * Clickable region path IDs in the SVG.
+ * These are larger hit areas for selecting palpation site groups.
+ */
+export const CLICKABLE_REGION_IDS: Record<PalpationSite, string> = {
+  temporalisPosterior: "temporalisPosterior",
+  temporalisMiddle: "temporalisMiddle",
+  temporalisAnterior: "temporalisAnterior",
+  masseterOrigin: "masseterOrigin",
+  masseterBody: "masseterBody",
+  masseterInsertion: "masseterInsertion",
+  // TMJ uses the circles directly (no separate region paths)
+  tmjLateralPole: "tmjLateralPole",
+  tmjAroundLateralPole: "tmjAroundLateralPole",
+};
+
+/**
+ * All clickable region IDs (flat list).
+ */
+export const ALL_CLICKABLE_REGION_IDS = Object.values(CLICKABLE_REGION_IDS);
+
+/**
+ * Map a region ID to its palpation site.
+ */
+export function getRegionPalpationSite(regionId: string): PalpationSite | null {
+  for (const [site, id] of Object.entries(CLICKABLE_REGION_IDS)) {
+    if (id === regionId) {
+      return site as PalpationSite;
+    }
+  }
+  return null;
+}
+
+/**
  * Map a circle ID to its parent palpation site.
  */
 export function getCirclePalpationSite(circleId: string): PalpationSite | null {

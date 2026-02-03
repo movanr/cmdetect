@@ -16,13 +16,15 @@ import type { PalpationSite, Side, SiteDetailMode } from "../../model/regions";
 import { PALPATION_SITE_KEYS, SITES_BY_GROUP } from "../../model/regions";
 import HeadSvg from "./head-diagram-palpation.svg?react";
 import {
+  ALL_CLICKABLE_REGION_IDS,
   ALL_PALPATION_CIRCLE_IDS,
+  CLICKABLE_REGION_IDS,
   EMPTY_SITE_STATUS,
   getCirclePalpationSite,
+  getRegionPalpationSite,
   PALPATION_CIRCLE_GROUPS,
   REGION_STATE_COLORS,
   REGION_STATE_COLORS_SELECTED,
-  REGION_STROKE_WIDTH,
   getRegionVisualState,
   type SiteStatus,
 } from "./types";
@@ -126,6 +128,55 @@ export function HeadDiagramPalpation({
     });
   }, [side]);
 
+  // Apply styles to clickable region paths
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    for (const site of PALPATION_SITE_KEYS) {
+      const regionId = CLICKABLE_REGION_IDS[site];
+      const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
+      if (!region) continue;
+
+      const status = getStatus(site);
+      const isSelected = selectedSite === site;
+      const visualState = getRegionVisualState(status);
+      const isIncomplete = incompleteSites.some((s) => s.site === site);
+
+      // Determine fill/stroke based on selection and validation state
+      let fill: string;
+      let stroke: string;
+
+      if (isIncomplete) {
+        fill = "rgba(239, 68, 68, 0.1)"; // red-500 10%
+        stroke = "#ef4444"; // red-500
+      } else if (isSelected) {
+        fill = REGION_STATE_COLORS_SELECTED[visualState].fill;
+        stroke = REGION_STATE_COLORS_SELECTED[visualState].stroke;
+      } else {
+        // Transparent fill for non-selected regions (clickable but invisible)
+        fill = "transparent";
+        stroke = "none";
+      }
+
+      region.style.fill = fill;
+      region.style.stroke = stroke;
+      region.style.strokeWidth = isSelected ? "2" : "1";
+      region.style.cursor = disabled ? "default" : "pointer";
+      region.style.transition = "fill 0.2s ease, stroke 0.2s ease";
+
+      // Add tooltip
+      const titleId = `${regionId}-title`;
+      let titleEl = region.querySelector(`#${titleId}`) as SVGTitleElement | null;
+      if (!titleEl) {
+        titleEl = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        titleEl.setAttribute("id", titleId);
+        region.insertBefore(titleEl, region.firstChild);
+      }
+      titleEl.textContent = getPalpationSiteLabel(site);
+    }
+  }, [siteStatuses, selectedSite, disabled, getStatus, incompleteSites]);
+
   // Apply styles to palpation site circles
   useEffect(() => {
     const svg = svgRef.current;
@@ -147,7 +198,7 @@ export function HeadDiagramPalpation({
         // Validation error: light gray fill + red dashed border
         fill = "#f4f4f5"; // zinc-100
         stroke = "#ef4444"; // red-500
-        strokeDasharray = "0.2 0.1"; // dashed (scaled for circle size)
+        strokeDasharray = "2 1"; // dashed (scaled for flattened SVG)
       } else if (isSelected) {
         fill = REGION_STATE_COLORS_SELECTED[visualState].fill;
         stroke = REGION_STATE_COLORS_SELECTED[visualState].stroke;
@@ -163,12 +214,8 @@ export function HeadDiagramPalpation({
 
         circle.style.fill = fill;
         circle.style.stroke = stroke;
-        // Scale stroke width for circles (they're much smaller than region paths)
-        circle.style.strokeWidth = isSelected
-          ? "0.25"
-          : REGION_STROKE_WIDTH.default === "0.5"
-            ? "0.15"
-            : "0.15";
+        // Stroke width for circles (SVG is flattened, no scale transform)
+        circle.style.strokeWidth = isSelected ? "2.5" : "1.5";
         circle.style.strokeDasharray = strokeDasharray;
         circle.style.cursor = disabled ? "default" : "pointer";
         circle.style.transition = "fill 0.2s ease, stroke 0.2s ease";
@@ -191,31 +238,52 @@ export function HeadDiagramPalpation({
     (e: React.MouseEvent<SVGSVGElement>) => {
       if (disabled) return;
       const target = e.target as SVGElement;
-      const circleId = target.id;
+      const elementId = target.id;
 
-      // Check if this is a palpation circle
-      if (!ALL_PALPATION_CIRCLE_IDS.includes(circleId)) return;
-
-      const site = getCirclePalpationSite(circleId);
-      if (!site) return;
-
-      // In grouped mode, clicking any site in a region should select
-      // a representative site (the first one in that region's group)
-      if (siteDetailMode === "grouped") {
-        // Find which region this site belongs to
-        for (const [, sites] of Object.entries(SITES_BY_GROUP)) {
-          if ((sites as readonly PalpationSite[]).includes(site)) {
-            // Use the first site of the region as representative
-            const firstSite = sites[0];
-            if (firstSite) {
-              onSiteClick(firstSite);
+      // First check if this is a clickable region path
+      if (ALL_CLICKABLE_REGION_IDS.includes(elementId)) {
+        const site = getRegionPalpationSite(elementId);
+        if (site) {
+          // In grouped mode, map to representative site
+          if (siteDetailMode === "grouped") {
+            for (const [, sites] of Object.entries(SITES_BY_GROUP)) {
+              if ((sites as readonly PalpationSite[]).includes(site)) {
+                const firstSite = sites[0];
+                if (firstSite) {
+                  onSiteClick(firstSite);
+                }
+                return;
+              }
             }
-            return;
           }
+          onSiteClick(site);
+          return;
         }
       }
 
-      onSiteClick(site);
+      // Then check if this is a palpation circle
+      if (ALL_PALPATION_CIRCLE_IDS.includes(elementId)) {
+        const site = getCirclePalpationSite(elementId);
+        if (!site) return;
+
+        // In grouped mode, clicking any site in a region should select
+        // a representative site (the first one in that region's group)
+        if (siteDetailMode === "grouped") {
+          // Find which region this site belongs to
+          for (const [, sites] of Object.entries(SITES_BY_GROUP)) {
+            if ((sites as readonly PalpationSite[]).includes(site)) {
+              // Use the first site of the region as representative
+              const firstSite = sites[0];
+              if (firstSite) {
+                onSiteClick(firstSite);
+              }
+              return;
+            }
+          }
+        }
+
+        onSiteClick(site);
+      }
     },
     [disabled, onSiteClick, siteDetailMode]
   );
