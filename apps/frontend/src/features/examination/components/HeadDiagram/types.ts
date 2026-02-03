@@ -235,11 +235,25 @@ export type SiteStatus = RegionStatus;
 export const EMPTY_SITE_STATUS: SiteStatus = EMPTY_REGION_STATUS;
 
 /**
+ * Palpation sites that are rendered in the SVG diagram.
+ * TMJ sites are NOT in the diagram - they are only selectable via dropdowns.
+ */
+export const DIAGRAM_PALPATION_SITES: readonly PalpationSite[] = [
+  "temporalisPosterior",
+  "temporalisMiddle",
+  "temporalisAnterior",
+  "masseterOrigin",
+  "masseterBody",
+  "masseterInsertion",
+];
+
+/**
  * Circle IDs in the SVG for each palpation site.
  * Maps palpation sites to their corresponding SVG circle element IDs.
  * Used by HeadDiagramPalpation to apply styles and handle clicks.
+ * Note: Only includes sites that are rendered in the diagram (excludes TMJ).
  */
-export const PALPATION_CIRCLE_GROUPS: Record<PalpationSite, readonly string[]> = {
+export const PALPATION_CIRCLE_GROUPS: Partial<Record<PalpationSite, readonly string[]>> = {
   // Temporalis sites (3 circles each, arranged in columns)
   temporalisPosterior: [
     "temporalisPosterior-1",
@@ -256,9 +270,7 @@ export const PALPATION_CIRCLE_GROUPS: Record<PalpationSite, readonly string[]> =
   masseterOrigin: ["masseterOrigin-1", "masseterOrigin-2", "masseterOrigin-3"],
   masseterBody: ["masseterBody-1", "masseterBody-2", "masseterBody-3"],
   masseterInsertion: ["masseterInsertion-1", "masseterInsertion-2", "masseterInsertion-3"],
-  // TMJ sites (1 circle each)
-  tmjLateralPole: ["tmjLateralPole"],
-  tmjAroundLateralPole: ["tmjAroundLateralPole"],
+  // TMJ sites are NOT in the diagram - selected via dropdowns only
 };
 
 /**
@@ -269,17 +281,16 @@ export const ALL_PALPATION_CIRCLE_IDS = Object.values(PALPATION_CIRCLE_GROUPS).f
 /**
  * Clickable region path IDs in the SVG.
  * These are larger hit areas for selecting palpation site groups.
+ * Note: Only includes sites that are rendered in the diagram (excludes TMJ).
  */
-export const CLICKABLE_REGION_IDS: Record<PalpationSite, string> = {
+export const CLICKABLE_REGION_IDS: Partial<Record<PalpationSite, string>> = {
   temporalisPosterior: "temporalisPosterior",
   temporalisMiddle: "temporalisMiddle",
   temporalisAnterior: "temporalisAnterior",
   masseterOrigin: "masseterOrigin",
   masseterBody: "masseterBody",
   masseterInsertion: "masseterInsertion",
-  // TMJ uses the circles directly (no separate region paths)
-  tmjLateralPole: "tmjLateralPole",
-  tmjAroundLateralPole: "tmjAroundLateralPole",
+  // TMJ sites are NOT in the diagram - selected via dropdowns only
 };
 
 /**

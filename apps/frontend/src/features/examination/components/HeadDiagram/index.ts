@@ -15,6 +15,7 @@ export {
   buildRegionId,
   buildSiteId,
   CLICKABLE_REGION_IDS,
+  DIAGRAM_PALPATION_SITES,
   EMPTY_REGION_STATUS,
   EMPTY_SITE_STATUS,
   getCirclePalpationSite,

@@ -2,9 +2,10 @@
  * HeadDiagramPalpation - Interactive SVG head diagram for palpation sites (E9).
  *
  * Features:
- * - 8 palpation sites with clickable circles (3 per temporalis/masseter area, 2 for TMJ)
+ * - 6 palpation sites with clickable circles (3 per temporalis/masseter area)
+ * - TMJ sites are NOT in the diagram - they are selected via dropdowns only
  * - Visual feedback based on site status (pending, pain positive, no pain)
- * - Selected state with darker shades of clinical colors
+ * - Selected state with green highlight and black border
  * - Stripe pattern overlay for incomplete/validation error sites
  * - Mirrored for left/right sides (patient's right displayed on left)
  */
@@ -12,13 +13,13 @@
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 import { getPalpationSiteLabel, getSideLabel } from "../../labels";
-import type { PalpationSite, Side, SiteDetailMode } from "../../model/regions";
-import { PALPATION_SITE_KEYS, SITES_BY_GROUP } from "../../model/regions";
+import type { PalpationSite, Side } from "../../model/regions";
 import HeadSvg from "./head-diagram-palpation.svg?react";
 import {
   ALL_CLICKABLE_REGION_IDS,
   ALL_PALPATION_CIRCLE_IDS,
   CLICKABLE_REGION_IDS,
+  DIAGRAM_PALPATION_SITES,
   EMPTY_SITE_STATUS,
   getCirclePalpationSite,
   getRegionPalpationSite,
@@ -48,8 +49,6 @@ interface HeadDiagramPalpationProps {
   disabled?: boolean;
   /** Sites with validation errors */
   incompleteSites?: IncompleteSite[];
-  /** Whether to show grouped or detailed sites */
-  siteDetailMode: SiteDetailMode;
 }
 
 /** Stripe pattern ID for incomplete sites */
@@ -63,7 +62,6 @@ export function HeadDiagramPalpation({
   className,
   disabled = false,
   incompleteSites = [],
-  siteDetailMode,
 }: HeadDiagramPalpationProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -128,13 +126,14 @@ export function HeadDiagramPalpation({
     });
   }, [side]);
 
-  // Apply styles to clickable region paths
+  // Apply styles to clickable region paths (only for diagram sites, excludes TMJ)
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
 
-    for (const site of PALPATION_SITE_KEYS) {
+    for (const site of DIAGRAM_PALPATION_SITES) {
       const regionId = CLICKABLE_REGION_IDS[site];
+      if (!regionId) continue;
       const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
       if (!region) continue;
 
@@ -177,13 +176,14 @@ export function HeadDiagramPalpation({
     }
   }, [siteStatuses, selectedSite, disabled, getStatus, incompleteSites]);
 
-  // Apply styles to palpation site circles
+  // Apply styles to palpation site circles (only for diagram sites, excludes TMJ)
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
 
-    for (const site of PALPATION_SITE_KEYS) {
+    for (const site of DIAGRAM_PALPATION_SITES) {
       const circleIds = PALPATION_CIRCLE_GROUPS[site];
+      if (!circleIds) continue;
       const status = getStatus(site);
       const isSelected = selectedSite === site;
       const visualState = getRegionVisualState(status);
@@ -245,18 +245,6 @@ export function HeadDiagramPalpation({
       if (ALL_CLICKABLE_REGION_IDS.includes(elementId)) {
         const site = getRegionPalpationSite(elementId);
         if (site) {
-          // In grouped mode, map to representative site
-          if (siteDetailMode === "grouped") {
-            for (const [, sites] of Object.entries(SITES_BY_GROUP)) {
-              if ((sites as readonly PalpationSite[]).includes(site)) {
-                const firstSite = sites[0];
-                if (firstSite) {
-                  onSiteClick(firstSite);
-                }
-                return;
-              }
-            }
-          }
           onSiteClick(site);
           return;
         }
@@ -265,28 +253,12 @@ export function HeadDiagramPalpation({
       // Then check if this is a palpation circle
       if (ALL_PALPATION_CIRCLE_IDS.includes(elementId)) {
         const site = getCirclePalpationSite(elementId);
-        if (!site) return;
-
-        // In grouped mode, clicking any site in a region should select
-        // a representative site (the first one in that region's group)
-        if (siteDetailMode === "grouped") {
-          // Find which region this site belongs to
-          for (const [, sites] of Object.entries(SITES_BY_GROUP)) {
-            if ((sites as readonly PalpationSite[]).includes(site)) {
-              // Use the first site of the region as representative
-              const firstSite = sites[0];
-              if (firstSite) {
-                onSiteClick(firstSite);
-              }
-              return;
-            }
-          }
+        if (site) {
+          onSiteClick(site);
         }
-
-        onSiteClick(site);
       }
     },
-    [disabled, onSiteClick, siteDetailMode]
+    [disabled, onSiteClick]
   );
 
   // Mirror transform for left side (patient's left displayed on right of screen)
