@@ -52,11 +52,14 @@ const E4C_PHASES: ProcedurePhase[] = [
     id: "prep",
     name: "Vorbereitung",
     patientScript: [
-      { text: "Ich werde jetzt versuchen, Ihren Mund ", style: "verbatim" },
+      { text: "Gleich werde ich versuchen, ", style: "verbatim" },
       { text: "wenn möglich", style: "optional" },
-      { text: " weiter zu öffnen. ", style: "verbatim" },
       {
-        text: "Wenn Sie möchten dass ich aufhöre, heben Sie bitte Ihre Hand.",
+        text: " Ihren Mund mit meinen Fingern noch weiter zu öffnen. ",
+        style: "verbatim",
+      },
+      {
+        text: "Wenn Sie möchten, dass ich aufhöre, heben Sie bitte Ihre Hand. Dann werde ich sofort aufhören.",
         style: "verbatim",
       },
     ],
@@ -71,12 +74,15 @@ const E4C_PHASES: ProcedurePhase[] = [
     name: "Durchführung",
     patientScript: [
       {
-        text: "Bitte öffnen Sie jetzt so weit wie möglich, auch wenn es schmerzhaft ist.",
+        text: "Bitte öffnen Sie jetzt so weit wie möglich, auch wenn es schmerzhaft ist, so wie Sie es eben schon gemacht haben.",
         style: "verbatim",
       },
       { text: " Pause ", style: "optional" },
-      { text: "Sie spüren jetzt meine Finger.", style: "flexible" },
-      { text: " Entspannen Sie bitte Ihren Kiefer.", style: "verbatim" },
+      { text: "Sie spüren jetzt gleich meine Finger.", style: "flexible" },
+      {
+        text: " Bitte entspannen Sie Ihren Kiefer, so dass ich Ihnen helfen kann, noch weiter zu öffnen, wenn möglich.",
+        style: "verbatim",
+      },
     ],
     examinerSteps: [
       "Lineal wie bei E4A positionieren",
@@ -141,9 +147,9 @@ export const E4_RICH_INSTRUCTIONS = {
     stepId: "U4A",
     title: "Schmerzfreie Mundöffnung",
     patientScript:
-      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dass Schmerzen auftreten.",
+      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
     examinerAction: "Interinzisale Distanz messen",
-    crossReferences: [{ section: "4.1", label: "Öffnungsbewegung" }],
+    crossReferences: [{ section: "4.5", label: "Öffnungsbewegung" }],
   } satisfies RichStepInstruction,
 
   /** E4B - Maximum unassisted opening (moderate complexity) */
@@ -159,12 +165,12 @@ export const E4_RICH_INSTRUCTIONS = {
     ],
     examinerAction: "Interinzisale Distanz messen",
     examinerSteps: [
-      "Lineal an Inzisalkante der oberen Schneidezähne anlegen",
-      "Distanz zur Inzisalkante der unteren Schneidezähne messen",
+      "Lineal an Inzisalkante der unteren Schneidezähne anlegen",
+      "Distanz zur Inzisalkante der oberen Schneidezähne messen",
       "Vertikalen Überbiss addieren falls nötig",
     ],
     crossReferences: [
-      { section: "4.2", label: "Aktive Öffnung" },
+      { section: "4.5", label: "Aktive Öffnung" },
       { section: "6.2.1", label: "Schmerzlokalisation" },
     ],
   } satisfies RichStepInstruction,
@@ -174,15 +180,18 @@ export const E4_RICH_INSTRUCTIONS = {
     stepId: "U4C",
     title: "Maximale passive Mundöffnung",
     patientScript: [
-      { text: "Ich werde jetzt versuchen, Ihren Mund ", style: "verbatim" },
+      { text: "Gleich werde ich versuchen, ", style: "verbatim" },
       { text: "wenn möglich", style: "optional" },
-      { text: " weiter zu öffnen.", style: "verbatim" },
+      {
+        text: " Ihren Mund mit meinen Fingern noch weiter zu öffnen.",
+        style: "verbatim",
+      },
     ],
     examinerAction: "Scherentechnik anwenden, Distanz messen",
     phases: E4C_PHASES,
     warnings: [E4C_SAFETY_WARNING],
     crossReferences: [
-      { section: "4.3", label: "Passive Öffnung" },
+      { section: "4.5", label: "Passive Öffnung" },
       { section: "6.2.1", label: "Schmerzlokalisation" },
     ],
     tips: [
@@ -219,7 +228,7 @@ export const E4_INSTRUCTIONS = {
     stepId: "U4A",
     title: "Schmerzfreie Mundöffnung",
     patientScript:
-      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dass Schmerzen auftreten.",
+      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
     examinerAction: "Interinzisale Distanz messen",
   } satisfies StepInstruction,
 
@@ -237,7 +246,7 @@ export const E4_INSTRUCTIONS = {
     stepId: "U4C",
     title: "Maximale passive Mundöffnung",
     patientScript:
-      "Darf ich Ihren Mund weiter öffnen? Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.",
+      "Ich werde jetzt versuchen, Ihren Mund weiter zu öffnen. Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.",
     examinerAction: "Scherentechnik anwenden, Distanz messen",
   } satisfies StepInstruction,
 
