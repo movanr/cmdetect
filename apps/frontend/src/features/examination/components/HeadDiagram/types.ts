@@ -5,7 +5,7 @@
  * Mirrors v1 examination pattern for consistency.
  */
 
-import type { Region, Side } from "../../model/regions";
+import type { PalpationSite, Region, Side } from "../../model/regions";
 
 /**
  * Unique identifier for a region including side.
@@ -108,31 +108,31 @@ export const REGION_STATE_COLORS = {
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "#f4f4f5", // zinc-100
-    stroke: "#e4e4e7", // zinc-200
+    fill: "#d4d4d8", // zinc-300 (more visible)
+    stroke: "#a1a1aa", // zinc-400
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
     // Light gray = pain=yes but familiar not yet answered
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "#f4f4f5", // zinc-100
-    stroke: "#e4e4e7", // zinc-200
+    fill: "#d4d4d8", // zinc-300 (more visible)
+    stroke: "#a1a1aa", // zinc-400
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
     // Dark gray = complete, no significant findings
     text: "text-zinc-600",
     bg: "bg-zinc-200",
     border: "border-zinc-400",
-    fill: "rgba(161, 161, 170, 0.3)", // zinc-400 30%
-    stroke: "#a1a1aa", // zinc-400
+    fill: "#a1a1aa", // zinc-400 (opaque)
+    stroke: "#71717a", // zinc-500
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
     // Blue = significant finding (familiar pain positive)
     text: "text-blue-700",
     bg: "bg-blue-100",
     border: "border-blue-500",
-    fill: "rgba(59, 130, 246, 0.25)", // blue-500 25%
+    fill: "#93c5fd", // blue-300 (opaque)
     stroke: "#3b82f6", // blue-500
   },
 } as const;
@@ -152,25 +152,25 @@ export const REGION_STROKE_WIDTH = {
  */
 export const REGION_STATE_COLORS_SELECTED = {
   [REGION_VISUAL_STATES.PENDING]: {
-    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 40%
-    stroke: "#a1a1aa", // zinc-400
+    fill: "#a1a1aa", // zinc-400 (opaque, darker than base)
+    stroke: "#71717a", // zinc-500
     bgClass: "bg-zinc-100",
     ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
-    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 40%
-    stroke: "#a1a1aa", // zinc-400
+    fill: "#a1a1aa", // zinc-400 (opaque, darker than base)
+    stroke: "#71717a", // zinc-500
     bgClass: "bg-zinc-100",
     ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
-    fill: "rgba(113, 113, 122, 0.5)", // zinc-500 50%
-    stroke: "#71717a", // zinc-500
+    fill: "#71717a", // zinc-500 (opaque, darker than base)
+    stroke: "#52525b", // zinc-600
     bgClass: "bg-zinc-200",
     ringClass: "ring-1 ring-zinc-500",
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
-    fill: "rgba(59, 130, 246, 0.5)", // blue-500 50%
+    fill: "#60a5fa", // blue-400 (opaque, darker than base)
     stroke: "#2563eb", // blue-600
     bgClass: "bg-blue-100",
     ringClass: "ring-1 ring-blue-600",
@@ -193,4 +193,87 @@ export function parseRegionId(regionId: RegionId): {
  */
 export function buildRegionId(side: Side, region: Region): RegionId {
   return `${side}-${region}`;
+}
+
+// =============================================================================
+// Palpation Site Visual Model (E9)
+// =============================================================================
+
+/**
+ * Unique identifier for a palpation site including side.
+ * Format: "{side}-{site}" e.g., "left-temporalisPosterior"
+ */
+export type SiteId = `${Side}-${PalpationSite}`;
+
+/**
+ * Build a SiteId from side and palpation site.
+ */
+export function buildSiteId(side: Side, site: PalpationSite): SiteId {
+  return `${side}-${site}`;
+}
+
+/**
+ * Parse a SiteId into its components.
+ */
+export function parseSiteId(siteId: SiteId): {
+  side: Side;
+  site: PalpationSite;
+} {
+  const [side, site] = siteId.split("-") as [Side, PalpationSite];
+  return { side, site };
+}
+
+/**
+ * Status for a palpation site - reuses RegionStatus structure.
+ * Both regions and palpation sites use the same pain questions.
+ */
+export type SiteStatus = RegionStatus;
+
+/**
+ * Default empty status for a palpation site.
+ */
+export const EMPTY_SITE_STATUS: SiteStatus = EMPTY_REGION_STATUS;
+
+/**
+ * Circle IDs in the SVG for each palpation site.
+ * Maps palpation sites to their corresponding SVG circle element IDs.
+ * Used by HeadDiagramPalpation to apply styles and handle clicks.
+ */
+export const PALPATION_CIRCLE_GROUPS: Record<PalpationSite, readonly string[]> = {
+  // Temporalis sites (3 circles each, arranged in columns)
+  temporalisPosterior: [
+    "temporalisPosterior-1",
+    "temporalisPosterior-2",
+    "temporalisPosterior-3",
+  ],
+  temporalisMiddle: ["temporalisMiddle-1", "temporalisMiddle-2", "temporalisMiddle-3"],
+  temporalisAnterior: [
+    "temporalisAnterior-1",
+    "temporalisAnterior-2",
+    "temporalisAnterior-3",
+  ],
+  // Masseter sites (3 circles each, arranged in rows)
+  masseterOrigin: ["masseterOrigin-1", "masseterOrigin-2", "masseterOrigin-3"],
+  masseterBody: ["masseterBody-1", "masseterBody-2", "masseterBody-3"],
+  masseterInsertion: ["masseterInsertion-1", "masseterInsertion-2", "masseterInsertion-3"],
+  // TMJ sites (1 circle each)
+  tmjLateralPole: ["tmjLateralPole"],
+  tmjAroundLateralPole: ["tmjAroundLateralPole"],
+};
+
+/**
+ * All palpation circle IDs in the SVG (flat list).
+ */
+export const ALL_PALPATION_CIRCLE_IDS = Object.values(PALPATION_CIRCLE_GROUPS).flat();
+
+/**
+ * Map a circle ID to its parent palpation site.
+ */
+export function getCirclePalpationSite(circleId: string): PalpationSite | null {
+  for (const [site, circles] of Object.entries(PALPATION_CIRCLE_GROUPS)) {
+    if (circles.includes(circleId)) {
+      return site as PalpationSite;
+    }
+  }
+  return null;
 }
