@@ -200,8 +200,9 @@ export function HeadDiagramPalpation({
         stroke = "#ef4444"; // red-500
         strokeDasharray = "2 1"; // dashed (scaled for flattened SVG)
       } else if (isSelected) {
-        fill = REGION_STATE_COLORS_SELECTED[visualState].fill;
-        stroke = REGION_STATE_COLORS_SELECTED[visualState].stroke;
+        // Selected: green highlight with black border
+        fill = "#4ade80"; // green-400
+        stroke = "#000000"; // black
       } else {
         fill = REGION_STATE_COLORS[visualState].fill;
         stroke = REGION_STATE_COLORS[visualState].stroke;
