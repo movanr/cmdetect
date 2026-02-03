@@ -175,7 +175,6 @@ function InterviewSubsection({
           selectedRegion={expanded[side]}
           onRegionClick={handleRegionClick(side)}
           incompleteRegions={sideIncompleteRegions}
-          className="w-[200px] sm:w-[220px]"
         />
 
         {/* RegionDropdowns */}

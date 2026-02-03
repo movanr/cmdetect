@@ -168,7 +168,6 @@ function PalpationSubsection({
         selectedSite={expanded}
         onSiteClick={handleSiteClick}
         incompleteSites={diagramIncompleteSites}
-        className="w-[200px] sm:w-[220px]"
       />
 
       {/* PalpationSiteDropdowns */}

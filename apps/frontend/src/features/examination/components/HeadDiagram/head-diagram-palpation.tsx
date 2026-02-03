@@ -246,7 +246,7 @@ export function HeadDiagramPalpation({
   const containerStyle: React.CSSProperties = side === "left" ? { transform: "scaleX(-1)" } : {};
 
   return (
-    <div className={cn("w-[200px] sm:w-[240px] h-auto shrink-0", className)} style={containerStyle}>
+    <div className={cn("w-[280px] sm:w-[320px] h-auto shrink-0", className)} style={containerStyle}>
       <HeadSvg
         ref={svgRef}
         className="w-full h-auto"
