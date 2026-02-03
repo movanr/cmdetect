@@ -108,32 +108,32 @@ export const REGION_STATE_COLORS = {
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "#d4d4d8", // zinc-300 (more visible)
-    stroke: "#a1a1aa", // zinc-400
+    fill: "rgba(212, 212, 216, 0.4)", // zinc-300 @ 40%
+    stroke: "rgba(161, 161, 170, 0.6)", // zinc-400 @ 60%
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
     // Light gray = pain=yes but familiar not yet answered
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "#d4d4d8", // zinc-300 (more visible)
-    stroke: "#a1a1aa", // zinc-400
+    fill: "rgba(212, 212, 216, 0.4)", // zinc-300 @ 40%
+    stroke: "rgba(161, 161, 170, 0.6)", // zinc-400 @ 60%
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
     // Dark gray = complete, no significant findings
     text: "text-zinc-600",
     bg: "bg-zinc-200",
     border: "border-zinc-400",
-    fill: "#a1a1aa", // zinc-400 (opaque)
-    stroke: "#71717a", // zinc-500
+    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40%
+    stroke: "rgba(113, 113, 122, 0.6)", // zinc-500 @ 60%
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
     // Blue = significant finding (familiar pain positive)
     text: "text-blue-700",
     bg: "bg-blue-100",
     border: "border-blue-500",
-    fill: "#93c5fd", // blue-300 (opaque)
-    stroke: "#3b82f6", // blue-500
+    fill: "rgba(147, 197, 253, 0.5)", // blue-300 @ 50%
+    stroke: "rgba(59, 130, 246, 0.8)", // blue-500 @ 80%
   },
 } as const;
 

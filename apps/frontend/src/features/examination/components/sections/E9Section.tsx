@@ -222,9 +222,10 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
     palpationContext
   ).incompleteSites;
 
-  // Handle expanded state changes
+  // Handle expanded state changes - only one site selectable at a time across both sides
   const handleExpandChange = useCallback((side: Side, site: PalpationSite | null) => {
-    setExpanded((prev) => ({ ...prev, [side]: site }));
+    const otherSide = side === "left" ? "right" : "left";
+    setExpanded({ [side]: site, [otherSide]: null } as ExpandedState);
   }, []);
 
   // Extract validation logic to avoid duplication between handleNext and checkIncomplete

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
 import { getPalpationSiteLabel, getSideLabel } from "../../labels";
 import type { PalpationSite, Side } from "../../model/regions";
-import HeadSvg from "./head-diagram-palpation.svg?react";
+import HeadSvg from "./head-diagram.svg?react";
 import {
   ALL_CLICKABLE_REGION_IDS,
   ALL_PALPATION_CIRCLE_IDS,
@@ -104,6 +104,44 @@ export function HeadDiagramPalpation({
 
     pattern.appendChild(line);
     defs.appendChild(pattern);
+  }, []);
+
+  // Hide E4-specific region paths and clip paths (not needed for palpation)
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    // Hide E4 regions (tmj, nonMast - only needed for movement regions)
+    const e4Regions = ["tmj", "nonMast"];
+    for (const regionId of e4Regions) {
+      const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
+      if (region) {
+        region.style.display = "none";
+      }
+    }
+
+    // Make clip path shapes invisible (but keep in DOM for clip-path references)
+    const clipShapes = ["temporalis-clip", "masseter-clip"];
+    for (const clipId of clipShapes) {
+      const clip = svg.querySelector(`#${clipId}`) as SVGElement | null;
+      if (clip) {
+        clip.style.fill = "none";
+        clip.style.stroke = "none";
+      }
+    }
+
+    // Style base temporalis/masseter paths (keep original thick strokes)
+    // Set pointer-events: none so clicks pass through to clickable regions underneath
+    const baseRegions = ["temporalis", "masseter"];
+    for (const regionId of baseRegions) {
+      const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
+      if (region) {
+        region.style.fill = "rgba(200, 200, 200, 0.15)";
+        region.style.stroke = "rgba(136, 136, 136, 0.4)";
+        region.style.strokeWidth = "10";
+        region.style.pointerEvents = "none";
+      }
+    }
   }, []);
 
   // Apply styles to clickable region paths (only for diagram sites, excludes TMJ)

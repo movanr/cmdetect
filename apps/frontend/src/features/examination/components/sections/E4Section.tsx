@@ -245,13 +245,15 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
     interviewContext
   ).incompleteRegions;
 
-  // Handle expanded state changes
+  // Handle expanded state changes - only one region selectable at a time across both sides
   const handleE4bExpandChange = useCallback((side: Side, region: Region | null) => {
-    setE4bExpanded((prev) => ({ ...prev, [side]: region }));
+    const otherSide = side === "left" ? "right" : "left";
+    setE4bExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
   }, []);
 
   const handleE4cExpandChange = useCallback((side: Side, region: Region | null) => {
-    setE4cExpanded((prev) => ({ ...prev, [side]: region }));
+    const otherSide = side === "left" ? "right" : "left";
+    setE4cExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
   }, []);
 
   // Validation for all E4 steps

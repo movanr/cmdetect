@@ -19,7 +19,6 @@ import {
   EMPTY_REGION_STATUS,
   REGION_STATE_COLORS,
   REGION_STATE_COLORS_SELECTED,
-  REGION_STROKE_WIDTH,
   getRegionVisualState,
   type RegionStatus,
 } from "./types";
@@ -45,6 +44,13 @@ interface HeadDiagramProps {
 
 /** Stripe pattern ID for incomplete regions */
 const INCOMPLETE_PATTERN_ID = "incomplete-stripe-pattern";
+
+/** Map regions to their background image element IDs in the SVG */
+const REGION_BACKGROUND_IDS: Partial<Record<Region, string>> = {
+  temporalis: "background-temporalis",
+  masseter: "background-masseter",
+  // tmj and nonMast don't have background images
+};
 
 export function HeadDiagram({
   side,
@@ -99,6 +105,47 @@ export function HeadDiagram({
     defs.appendChild(pattern);
   }, []);
 
+  // Hide palpation-specific groups and clip paths (only needed for E9)
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    // Hide palpation groups
+    const palpationGroups = ["temporalis-palpation", "masseter-palpation"];
+    for (const groupId of palpationGroups) {
+      const group = svg.querySelector(`#${groupId}`) as SVGElement | null;
+      if (group) {
+        group.style.display = "none";
+      }
+    }
+
+    // Hide palpation-specific region paths (temporalis-anterior, temporalis-middle, etc.)
+    const palpationRegions = [
+      "temporalis-anterior",
+      "temporalis-middle",
+      "temporalis-posterior",
+      "masseter-origin",
+      "masseter-body",
+      "masseter-insertion",
+    ];
+    for (const regionId of palpationRegions) {
+      const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
+      if (region) {
+        region.style.display = "none";
+      }
+    }
+
+    // Make clip path shapes invisible (but keep in DOM for clip-path references)
+    const clipShapes = ["temporalis-clip", "masseter-clip"];
+    for (const clipId of clipShapes) {
+      const clip = svg.querySelector(`#${clipId}`) as SVGElement | null;
+      if (clip) {
+        clip.style.fill = "none";
+        clip.style.stroke = "none";
+      }
+    }
+  }, []);
+
   // Apply styles and tooltips to regions
   useEffect(() => {
     const svg = svgRef.current;
@@ -126,24 +173,26 @@ export function HeadDiagram({
       let strokeDasharray: string = "none";
 
       if (isIncomplete) {
-        // Validation error: light gray fill + red dashed border
-        fill = "#f4f4f5"; // zinc-100 (light gray)
+        // Validation error: light red fill + red border
+        fill = "rgba(239, 68, 68, 0.1)"; // red-500 10%
         stroke = "#ef4444"; // red-500
         strokeDasharray = "2 1"; // dashed
       } else if (isSelected) {
         fill = REGION_STATE_COLORS_SELECTED[visualState].fill;
         stroke = REGION_STATE_COLORS_SELECTED[visualState].stroke;
       } else {
+        // Use status-based colors for non-selected regions
         fill = REGION_STATE_COLORS[visualState].fill;
         stroke = REGION_STATE_COLORS[visualState].stroke;
       }
 
-      // Apply styles
+      // Apply styles (set both attribute and style to ensure override)
+      element.setAttribute("fill", fill);
+      element.setAttribute("stroke", stroke);
+      element.setAttribute("stroke-width", isSelected ? "12" : "10");
       element.style.fill = fill;
       element.style.stroke = stroke;
-      element.style.strokeWidth = isSelected
-        ? REGION_STROKE_WIDTH.selected
-        : REGION_STROKE_WIDTH.default;
+      element.style.strokeWidth = isSelected ? "12" : "10";
       element.style.strokeDasharray = strokeDasharray;
       element.style.cursor = disabled ? "default" : "pointer";
       element.style.transition = "fill 0.2s ease, stroke 0.2s ease";
@@ -177,6 +226,15 @@ export function HeadDiagram({
       } else if (overlay) {
         // Hide overlay if region is complete
         overlay.style.display = "none";
+      }
+    }
+
+    // Show/hide background images based on visible regions
+    for (const [region, backgroundId] of Object.entries(REGION_BACKGROUND_IDS)) {
+      const background = svg.querySelector(`#${backgroundId}`) as SVGElement | null;
+      if (background) {
+        const shouldShowBackground = regions.includes(region as Region);
+        background.style.display = shouldShowBackground ? "" : "none";
       }
     }
   }, [regions, regionStatuses, selectedRegion, disabled, getStatus, incompleteRegions]);
