@@ -27,3 +27,15 @@ export {
 } from "./RegionStatusList";
 export { InstructionBlock } from "./InstructionBlock";
 export { SectionFooter, type SectionFooterProps } from "./SectionFooter";
+
+// Rich instruction components
+export { TextSegmentRenderer } from "./TextSegmentRenderer";
+export { SafetyWarningBanner, SafetyWarnings } from "./SafetyWarningBanner";
+export { ExpandableDetails } from "./ExpandableDetails";
+export { RichInstructionBlock, richInstructionToProps } from "./RichInstructionBlock";
+export { PhaseInstructionBlock } from "./PhaseInstructionBlock";
+export {
+  PainInterviewFlow,
+  PainInterviewFlowCompact,
+  PainInterviewBlock,
+} from "./PainInterviewFlow";

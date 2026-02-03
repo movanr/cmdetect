@@ -24,7 +24,7 @@ import {
   getCirclePalpationSite,
   getRegionPalpationSite,
   PALPATION_CIRCLE_GROUPS,
-  REGION_STATE_COLORS,
+  // REGION_STATE_COLORS not used - using site-specific styles instead
   REGION_STATE_COLORS_SELECTED,
   getRegionVisualState,
   type SiteStatus,

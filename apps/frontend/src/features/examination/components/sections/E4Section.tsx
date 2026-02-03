@@ -9,7 +9,10 @@ import { ArrowRight, CheckCircle, ChevronLeft, SkipForward } from "lucide-react"
 import { useCallback, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import { E4_INSTRUCTIONS } from "../../content/instructions";
+import {
+  E4_INSTRUCTIONS,
+  E4_RICH_INSTRUCTIONS,
+} from "../../content/instructions";
 import {
   useExaminationForm,
   type ExaminationStepId,
@@ -23,7 +26,15 @@ import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import { type RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
 import { RegionDropdown } from "../RegionDropdown";
-import { InstructionBlock, MeasurementStep, StepBar, type StepStatus } from "../ui";
+import {
+  InstructionBlock,
+  MeasurementStep,
+  PainInterviewBlock,
+  PhaseInstructionBlock,
+  RichInstructionBlock,
+  StepBar,
+  type StepStatus,
+} from "../ui";
 
 // Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
@@ -251,6 +262,9 @@ export function E4Section({ onComplete }: E4SectionProps) {
   // Track expanded dropdowns for interview steps
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
 
+  // Track E4C phase completion (show measurement after phases complete)
+  const [e4cPhasesComplete, setE4cPhasesComplete] = useState(false);
+
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
@@ -271,6 +285,10 @@ export function E4Section({ onComplete }: E4SectionProps) {
     if (!isFirstStep) {
       setIncompleteRegions([]);
       setExpanded({ left: null, right: null });
+      // Reset E4C phases if going back from E4C measure
+      if (currentStepId === "e4c-measure") {
+        setE4cPhasesComplete(false);
+      }
       setCurrentStepIndex((i) => i - 1);
     }
   };
@@ -278,6 +296,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
   const handleSkip = () => {
     setIncompleteRegions([]);
     setExpanded({ left: null, right: null });
+    setE4cPhasesComplete(false);
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
 
     if (isLastStep) {
@@ -321,6 +340,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
     setExpanded({ left: null, right: null });
+    setE4cPhasesComplete(false);
 
     if (isLastStep) {
       onComplete?.();
@@ -328,6 +348,11 @@ export function E4Section({ onComplete }: E4SectionProps) {
       setCurrentStepIndex((i) => i + 1);
     }
   };
+
+  // Handle E4C phase completion - transition to measurement
+  const handleE4cPhasesComplete = useCallback(() => {
+    setE4cPhasesComplete(true);
+  }, []);
 
   const getStepStatus = (stepId: ExaminationStepId, index: number): StepStatus => {
     if (index === currentStepIndex) return "active";
@@ -363,6 +388,68 @@ export function E4Section({ onComplete }: E4SectionProps) {
     return "—";
   };
 
+  // Render instruction block based on step type
+  const renderInstruction = (stepId: string, stepIsInterview: boolean) => {
+    const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
+    const legacyInstruction = E4_INSTRUCTIONS[instructionKey];
+
+    // Pain interview - use rich instruction with flow
+    if (stepIsInterview) {
+      const interviewInstruction = E4_RICH_INSTRUCTIONS.painInterview;
+      return <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />;
+    }
+
+    // E4C measurement - multi-phase procedure
+    if (stepId === "e4c-measure") {
+      const e4cInstruction = E4_RICH_INSTRUCTIONS.maxAssistedOpening;
+      if (e4cInstruction.phases && !e4cPhasesComplete) {
+        // Show phase-by-phase instruction
+        return (
+          <PhaseInstructionBlock
+            phases={e4cInstruction.phases}
+            globalWarnings={e4cInstruction.warnings}
+            onComplete={handleE4cPhasesComplete}
+          />
+        );
+      }
+      // Phases complete or no phases - show summary instruction
+      return (
+        <RichInstructionBlock
+          patientScript={e4cInstruction.patientScript}
+          examinerAction={e4cInstruction.examinerAction}
+          warnings={e4cInstruction.warnings}
+          tips={e4cInstruction.tips}
+          crossReferences={e4cInstruction.crossReferences}
+        />
+      );
+    }
+
+    // E4B measurement - rich instruction with expandable details
+    if (stepId === "e4b-measure") {
+      const e4bInstruction = E4_RICH_INSTRUCTIONS.maxUnassistedOpening;
+      return (
+        <RichInstructionBlock
+          patientScript={e4bInstruction.patientScript}
+          examinerAction={e4bInstruction.examinerAction}
+          examinerSteps={e4bInstruction.examinerSteps}
+          crossReferences={e4bInstruction.crossReferences}
+        />
+      );
+    }
+
+    // E4A and fallback - simple instruction block
+    if ("patientScript" in legacyInstruction) {
+      return (
+        <InstructionBlock
+          patientScript={legacyInstruction.patientScript}
+          examinerAction={legacyInstruction.examinerAction}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -390,6 +477,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
           if (status === "active") {
             const stepIsInterview = String(stepId).endsWith("-interview");
+            const isE4cMeasureInPhases = stepId === "e4c-measure" && !e4cPhasesComplete;
 
             return (
               <div
@@ -403,34 +491,9 @@ export function E4Section({ onComplete }: E4SectionProps) {
                 </div>
 
                 {/* Instruction */}
-                {(() => {
-                  const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
-                  const instruction = E4_INSTRUCTIONS[instructionKey];
+                {renderInstruction(stepId, stepIsInterview)}
 
-                  if (stepIsInterview && "prompt" in instruction) {
-                    // Pain interview guidance
-                    return (
-                      <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
-                        <div className="text-muted-foreground italic">&ldquo;{instruction.prompt}&rdquo;</div>
-                        <div className="text-muted-foreground text-xs">{instruction.guidance}</div>
-                      </div>
-                    );
-                  }
-
-                  if (!stepIsInterview && "patientScript" in instruction) {
-                    // Measurement step instruction
-                    return (
-                      <InstructionBlock
-                        patientScript={instruction.patientScript}
-                        examinerAction={instruction.examinerAction}
-                      />
-                    );
-                  }
-
-                  return null;
-                })()}
-
-                {/* Content */}
+                {/* Content - hide measurement during E4C phases */}
                 {stepIsInterview ? (
                   <InterviewSubsection
                     instances={stepInstances}
@@ -439,7 +502,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
                     onExpandChange={handleExpandChange}
                     incompleteRegions={incompleteRegions}
                   />
-                ) : stepId === "e4a" ? (
+                ) : isE4cMeasureInPhases ? null : stepId === "e4a" ? (
                   // E4A uses QuestionField directly for the pain-free opening measurement
                   <div className="space-y-2">
                     {stepInstances.map((instance) => (
@@ -454,47 +517,49 @@ export function E4Section({ onComplete }: E4SectionProps) {
                   <MeasurementStep instances={stepInstances} />
                 )}
 
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  {/* Left: Back button */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleBack}
-                    disabled={isFirstStep}
-                    className="text-muted-foreground"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Zurück
-                  </Button>
-
-                  {/* Right: Action buttons */}
-                  <div className="flex gap-2">
-                    {stepIsInterview && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleNoMorePainRegions}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Keine weiteren Schmerzgebiete
-                      </Button>
-                    )}
+                {/* Footer - hide during E4C phases (PhaseInstructionBlock has its own nav) */}
+                {!isE4cMeasureInPhases && (
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    {/* Left: Back button */}
                     <Button
                       type="button"
                       variant="ghost"
-                      onClick={handleSkip}
+                      onClick={handleBack}
+                      disabled={isFirstStep}
                       className="text-muted-foreground"
                     >
-                      <SkipForward className="h-4 w-4 mr-1" />
-                      Überspringen
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Zurück
                     </Button>
-                    <Button type="button" onClick={handleNext}>
-                      {isLastStep ? "Abschließen" : "Weiter"}
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
+
+                    {/* Right: Action buttons */}
+                    <div className="flex gap-2">
+                      {stepIsInterview && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleNoMorePainRegions}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Keine weiteren Schmerzgebiete
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handleSkip}
+                        className="text-muted-foreground"
+                      >
+                        <SkipForward className="h-4 w-4 mr-1" />
+                        Überspringen
+                      </Button>
+                      <Button type="button" onClick={handleNext}>
+                        {isLastStep ? "Abschließen" : "Weiter"}
+                        <ArrowRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             );
           }
