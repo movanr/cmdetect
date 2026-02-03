@@ -1,12 +1,20 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
+import { ArrowRight, CheckCircle, ChevronLeft, SkipForward } from "lucide-react";
 import { useCallback, useState } from "react";
+import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import { useExaminationForm } from "../../form/use-examination-form";
+import { E4_INSTRUCTIONS } from "../../content/instructions";
+import {
+  useExaminationForm,
+  type ExaminationStepId,
+  type FormValues,
+} from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
 import { getLabel, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/regions";
@@ -15,7 +23,36 @@ import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import { type RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
 import { RegionDropdown } from "../RegionDropdown";
-import { SectionFooter } from "../ui";
+import { InstructionBlock, MeasurementStep, StepBar, type StepStatus } from "../ui";
+
+// Step configuration
+const E4_STEP_ORDER: ExaminationStepId[] = [
+  "e4a",
+  "e4b-measure",
+  "e4b-interview",
+  "e4c-measure",
+  "e4c-interview",
+];
+
+const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
+  e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
+  "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
+  "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
+  "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
+  "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
+};
+
+// Map step IDs to instruction keys
+const E4_STEP_INSTRUCTIONS: Record<
+  string,
+  "painFreeOpening" | "maxUnassistedOpening" | "maxAssistedOpening" | "painInterview"
+> = {
+  e4a: "painFreeOpening",
+  "e4b-measure": "maxUnassistedOpening",
+  "e4b-interview": "painInterview",
+  "e4c-measure": "maxAssistedOpening",
+  "e4c-interview": "painInterview",
+};
 
 interface E4SectionProps {
   onComplete?: () => void;
@@ -204,78 +241,126 @@ function InterviewSubsection({
   );
 }
 
-export function E4Section({ onComplete, onSkip }: E4SectionProps) {
-  const { getInstancesForStep, validateStep } = useExaminationForm();
-  const { getValues, watch } = useFormContext<Record<string, unknown>>();
+export function E4Section({ onComplete }: E4SectionProps) {
+  const { form, validateStep, getInstancesForStep } = useExaminationForm();
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>({});
+  const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
-  // Track expanded dropdowns for E4B and E4C
-  const [e4bExpanded, setE4bExpanded] = useState<ExpandedState>({ left: null, right: null });
-  const [e4cExpanded, setE4cExpanded] = useState<ExpandedState>({ left: null, right: null });
+  // Track expanded dropdowns for interview steps
+  const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
 
-  // Track whether validation has been triggered (only show errors after Next/Skip click)
-  const [hasValidated, setHasValidated] = useState(false);
+  const currentStepId = E4_STEP_ORDER[currentStepIndex];
+  const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
+  const isFirstStep = currentStepIndex === 0;
+  const isInterview = String(currentStepId).endsWith("-interview");
+  const stepInstances = getInstancesForStep(currentStepId);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
 
-  // Get instances for each step
-  const e4aInstances = getInstancesForStep("e4a");
-  const e4bMeasureInstances = getInstancesForStep("e4b-measure");
-  const e4bInterviewInstances = getInstancesForStep("e4b-interview");
-  const e4cMeasureInstances = getInstancesForStep("e4c-measure");
-  const e4cInterviewInstances = getInstancesForStep("e4c-interview");
-
-  // Watch interview fields to trigger re-render when values change
-  const e4bWatchPaths = e4bInterviewInstances.map((i) => i.path);
-  const e4cWatchPaths = e4cInterviewInstances.map((i) => i.path);
-  watch(e4bWatchPaths);
-  watch(e4cWatchPaths);
-
-  // Compute incomplete regions inline (light computation, re-runs on watch trigger)
-  const interviewContext = { includeAllRegions };
-  const e4bIncomplete = validateInterviewCompletion(
-    e4bInterviewInstances,
-    getValues,
-    interviewContext
-  ).incompleteRegions;
-  const e4cIncomplete = validateInterviewCompletion(
-    e4cInterviewInstances,
-    getValues,
-    interviewContext
-  ).incompleteRegions;
-
   // Handle expanded state changes - only one region selectable at a time across both sides
-  const handleE4bExpandChange = useCallback((side: Side, region: Region | null) => {
+  const handleExpandChange = useCallback((side: Side, region: Region | null) => {
     const otherSide = side === "left" ? "right" : "left";
-    setE4bExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
+    setExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
   }, []);
 
-  const handleE4cExpandChange = useCallback((side: Side, region: Region | null) => {
-    const otherSide = side === "left" ? "right" : "left";
-    setE4cExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
-  }, []);
+  // Navigation handlers
+  const handleBack = () => {
+    if (!isFirstStep) {
+      setIncompleteRegions([]);
+      setExpanded({ left: null, right: null });
+      setCurrentStepIndex((i) => i - 1);
+    }
+  };
 
-  // Validation for all E4 steps
-  const validateE4 = useCallback(() => {
-    setHasValidated(true);
+  const handleSkip = () => {
+    setIncompleteRegions([]);
+    setExpanded({ left: null, right: null });
+    setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
 
-    const interviewContext = { includeAllRegions };
+    if (isLastStep) {
+      onComplete?.();
+    } else {
+      setCurrentStepIndex((i) => i + 1);
+    }
+  };
 
-    // Run all step validations (avoid short-circuit to show all errors at once)
-    const e4aValid = validateStep("e4a");
-    const e4bMeasureValid = validateStep("e4b-measure");
-    const e4bInterviewValid = validateStep("e4b-interview", interviewContext);
-    const e4cMeasureValid = validateStep("e4c-measure");
-    const e4cInterviewValid = validateStep("e4c-interview", interviewContext);
-
-    return e4aValid && e4bMeasureValid && e4bInterviewValid && e4cMeasureValid && e4cInterviewValid;
-  }, [validateStep, includeAllRegions]);
+  // Set all unanswered pain questions to "no"
+  const handleNoMorePainRegions = () => {
+    const painInstances = stepInstances.filter((i) => i.context.painType === "pain");
+    for (const inst of painInstances) {
+      const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
+      if (currentValue == null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        form.setValue(inst.path as FieldPath<FormValues>, "no" as any);
+      }
+    }
+    // Clear any validation errors since we've filled in the missing values
+    setIncompleteRegions([]);
+    // Reset expanded state
+    setExpanded({ left: null, right: null });
+  };
 
   const handleNext = () => {
-    if (validateE4()) {
-      onComplete?.();
+    // For interview steps, validate completeness first
+    if (isInterview) {
+      const result = validateInterviewCompletion(stepInstances, (path) =>
+        form.getValues(path as FieldPath<FormValues>)
+      );
+      if (!result.valid) {
+        setIncompleteRegions(result.incompleteRegions);
+        return;
+      }
+      setIncompleteRegions([]);
     }
+
+    const isValid = validateStep(currentStepId);
+    if (!isValid) return;
+
+    setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
+    setExpanded({ left: null, right: null });
+
+    if (isLastStep) {
+      onComplete?.();
+    } else {
+      setCurrentStepIndex((i) => i + 1);
+    }
+  };
+
+  const getStepStatus = (stepId: ExaminationStepId, index: number): StepStatus => {
+    if (index === currentStepIndex) return "active";
+    if (stepStatuses[stepId]) return stepStatuses[stepId];
+    return "pending";
+  };
+
+  // Get summary for a step (for collapsed display)
+  const getStepSummary = (stepId: ExaminationStepId): string => {
+    const instances = getInstancesForStep(stepId);
+    const stepIsInterview = String(stepId).endsWith("-interview");
+
+    if (stepIsInterview) {
+      // Check if any pain was reported
+      const hasPain = instances.some((inst) => {
+        if (inst.context.painType === "pain") {
+          const value = form.getValues(inst.path as keyof typeof form.getValues);
+          return value === "yes";
+        }
+        return false;
+      });
+      return hasPain ? "Schmerz" : "Kein Schmerz";
+    }
+
+    // Measurement step - show value
+    const measurementInst = instances.find((i) => i.renderType === "measurement");
+    if (measurementInst) {
+      const value = form.getValues(measurementInst.path as keyof typeof form.getValues);
+      if (value != null && value !== "") {
+        return `${value} mm`;
+      }
+    }
+    return "—";
   };
 
   return (
@@ -298,82 +383,134 @@ export function E4Section({ onComplete, onSkip }: E4SectionProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {/* E4A: Schmerzfreie Mundöffnung */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">U4A</Badge>
-            <h4 className="font-medium">Schmerzfreie Mundöffnung</h4>
-          </div>
-          {e4aInstances.map((instance) => (
-            <QuestionField
-              key={instance.path}
-              instance={instance}
-              label={getLabel(instance.labelKey)}
-            />
-          ))}
-        </div>
+      <CardContent className="space-y-3">
+        {E4_STEP_ORDER.map((stepId, index) => {
+          const config = E4_STEP_CONFIG[stepId];
+          const status = getStepStatus(stepId, index);
 
-        {/* E4B: Schmerz nach Maximaler nicht-unterstützter Mundöffnung */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">U4B</Badge>
-            <h4 className="font-medium">Maximale aktive Mundöffnung</h4>
-          </div>
-          {e4bMeasureInstances.map((instance) => (
-            <QuestionField
-              key={instance.path}
-              instance={instance}
-              label={getLabel(instance.labelKey)}
-            />
-          ))}
-          <div className="space-y-3">
-            <h5 className="font-medium text-sm">
-              Schmerzbefragung nach Maximaler aktiver Mundöffnung
-            </h5>
-            <InterviewSubsection
-              instances={e4bInterviewInstances}
-              regions={regions}
-              expanded={e4bExpanded}
-              onExpandChange={handleE4bExpandChange}
-              incompleteRegions={hasValidated ? e4bIncomplete : []}
-            />
-          </div>
-        </div>
+          if (status === "active") {
+            const stepIsInterview = String(stepId).endsWith("-interview");
 
-        {/* E4C: Maximale passive Mundöffnung */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">U4C</Badge>
-            <h4 className="font-medium">Maximale passive Mundöffnung</h4>
-          </div>
-          {e4cMeasureInstances.map((instance) => (
-            <QuestionField
-              key={instance.path}
-              instance={instance}
-              label={getLabel(instance.labelKey)}
+            return (
+              <div
+                key={stepId}
+                className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+              >
+                {/* Header */}
+                <div className="flex items-center gap-2">
+                  <Badge>{config.badge}</Badge>
+                  <h3 className="font-semibold">{config.title}</h3>
+                </div>
+
+                {/* Instruction */}
+                {(() => {
+                  const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
+                  const instruction = E4_INSTRUCTIONS[instructionKey];
+
+                  if (stepIsInterview && "prompt" in instruction) {
+                    // Pain interview guidance
+                    return (
+                      <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
+                        <div className="text-muted-foreground italic">&ldquo;{instruction.prompt}&rdquo;</div>
+                        <div className="text-muted-foreground text-xs">{instruction.guidance}</div>
+                      </div>
+                    );
+                  }
+
+                  if (!stepIsInterview && "patientScript" in instruction) {
+                    // Measurement step instruction
+                    return (
+                      <InstructionBlock
+                        patientScript={instruction.patientScript}
+                        examinerAction={instruction.examinerAction}
+                      />
+                    );
+                  }
+
+                  return null;
+                })()}
+
+                {/* Content */}
+                {stepIsInterview ? (
+                  <InterviewSubsection
+                    instances={stepInstances}
+                    regions={regions}
+                    expanded={expanded}
+                    onExpandChange={handleExpandChange}
+                    incompleteRegions={incompleteRegions}
+                  />
+                ) : stepId === "e4a" ? (
+                  // E4A uses QuestionField directly for the pain-free opening measurement
+                  <div className="space-y-2">
+                    {stepInstances.map((instance) => (
+                      <QuestionField
+                        key={instance.path}
+                        instance={instance}
+                        label={getLabel(instance.labelKey)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <MeasurementStep instances={stepInstances} />
+                )}
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-2 border-t">
+                  {/* Left: Back button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleBack}
+                    disabled={isFirstStep}
+                    className="text-muted-foreground"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Zurück
+                  </Button>
+
+                  {/* Right: Action buttons */}
+                  <div className="flex gap-2">
+                    {stepIsInterview && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleNoMorePainRegions}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Keine weiteren Schmerzgebiete
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleSkip}
+                      className="text-muted-foreground"
+                    >
+                      <SkipForward className="h-4 w-4 mr-1" />
+                      Überspringen
+                    </Button>
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // Collapsed step - using StepBar component
+          return (
+            <StepBar
+              key={stepId}
+              config={config}
+              status={status}
+              summary={status === "pending" ? "—" : getStepSummary(stepId)}
+              onClick={() => setCurrentStepIndex(index)}
             />
-          ))}
-          <div className="space-y-3">
-            <h5 className="font-medium text-sm">
-              Schmerzbefragung nach Maximaler passiver Mundöffnung
-            </h5>
-            <InterviewSubsection
-              instances={e4cInterviewInstances}
-              regions={regions}
-              expanded={e4cExpanded}
-              onExpandChange={handleE4cExpandChange}
-              incompleteRegions={hasValidated ? e4cIncomplete : []}
-            />
-          </div>
-        </div>
+          );
+        })}
       </CardContent>
-      <SectionFooter
-        onNext={handleNext}
-        onSkip={onSkip}
-        warnOnSkip
-        checkIncomplete={() => !validateE4()}
-      />
     </Card>
   );
 }
