@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -245,6 +255,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
   // Track expanded dropdowns for interview steps
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
 
   const currentStepId = E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
@@ -261,6 +272,30 @@ export function E4Section({ onComplete }: E4SectionProps) {
     setExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
   }, []);
 
+  // Check if current step has incomplete data
+  const checkStepIncomplete = useCallback((): boolean => {
+    if (isInterview) {
+      const result = validateInterviewCompletion(stepInstances, (path) =>
+        form.getValues(path as FieldPath<FormValues>)
+      );
+      return !result.valid;
+    }
+    // For measurement steps, check required fields
+    for (const instance of stepInstances) {
+      const config = instance.config as { required?: boolean };
+      if (config.required) {
+        const value = form.getValues(instance.path as FieldPath<FormValues>) as unknown;
+        if (instance.renderType === "measurement") {
+          const terminatedPath = instance.path.replace(/\.[^.]+$/, ".terminated") as FieldPath<FormValues>;
+          const terminatedValue = form.getValues(terminatedPath) as unknown;
+          if (terminatedValue === true) continue;
+        }
+        if (value == null || value === "") return true;
+      }
+    }
+    return false;
+  }, [isInterview, stepInstances, form]);
+
   // Navigation handlers
   const handleBack = () => {
     if (!isFirstStep) {
@@ -270,16 +305,28 @@ export function E4Section({ onComplete }: E4SectionProps) {
     }
   };
 
-  const handleSkip = () => {
+  const performSkip = () => {
     setIncompleteRegions([]);
     setExpanded({ left: null, right: null });
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
-
     if (isLastStep) {
       onComplete?.();
     } else {
       setCurrentStepIndex((i) => i + 1);
     }
+  };
+
+  const handleSkip = () => {
+    if (checkStepIncomplete()) {
+      setShowSkipDialog(true);
+    } else {
+      performSkip();
+    }
+  };
+
+  const handleConfirmSkip = () => {
+    setShowSkipDialog(false);
+    performSkip();
   };
 
   // Set all unanswered pain questions to "no"
@@ -512,6 +559,25 @@ export function E4Section({ onComplete }: E4SectionProps) {
             />
           );
         })}
+
+        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
+              <AlertDialogDescription>
+                Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
+                fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
+                ergänzen.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmSkip}>
+                Überspringen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
