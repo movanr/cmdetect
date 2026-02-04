@@ -10,7 +10,10 @@
  */
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
+import { BookOpen } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { SECTIONS, SVG_REGIONS, type Region, type Side } from "@cmdetect/dc-tmd";
 import { useCallback, useMemo } from "react";
@@ -164,8 +167,14 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{getSectionCardTitle(SECTIONS.e1)}</CardTitle>
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/protocol/$section" params={{ section: "e1" }}>
+            <BookOpen className="h-4 w-4 mr-1" />
+            Protokoll
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* E1A: Pain Location */}

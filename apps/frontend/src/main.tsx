@@ -29,6 +29,17 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
+// Track navigation for protocol back button
+router.subscribe('onResolved', ({ toLocation, fromLocation }) => {
+  const toPath = toLocation.pathname;
+  const fromPath = fromLocation?.pathname;
+
+  // When entering protocol from outside, store the return URL
+  if (toPath.startsWith('/protocol') && fromPath && !fromPath.startsWith('/protocol')) {
+    sessionStorage.setItem('protocol-return-url', fromPath);
+  }
+});
+
 // Render the app
 const rootElement = document.getElementById("app");
 if (rootElement && !rootElement.innerHTML) {

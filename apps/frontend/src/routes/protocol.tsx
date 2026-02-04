@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -89,6 +89,7 @@ const navItems: NavItem[] = [
 ];
 
 function ProtocolLayout() {
+  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -105,11 +106,17 @@ function ProtocolLayout() {
     <div className="flex h-screen overflow-hidden">
       <aside className="w-80 border-r bg-muted/30 flex flex-col overflow-hidden">
         <div className="p-4 border-b">
-          <Button variant="ghost" size="sm" asChild className="mb-2">
-            <Link to="/">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Zurück
-            </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mb-2"
+            onClick={() => {
+              const returnUrl = sessionStorage.getItem('protocol-return-url') || '/';
+              navigate({ to: returnUrl });
+            }}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Zurück
           </Button>
           <h2 className="font-semibold text-lg">DC/TMD Protokoll</h2>
           <p className="text-sm text-muted-foreground">
