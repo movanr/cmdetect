@@ -15,7 +15,8 @@ import {
   type FigureData,
 } from "@/features/protocol/lib/figures";
 import { Link } from "@tanstack/react-router";
-import { BookOpen, ExternalLink, Image, MousePointerClick, Pause } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight, ExternalLink, Image, MousePointerClick, Pause } from "lucide-react";
+import { useState } from "react";
 import type {
   CrossReference,
   ProcedureFlowStep,
@@ -245,7 +246,7 @@ function CrossReferenceLinks({
 }
 
 /**
- * Protocol references section with three categories:
+ * Protocol references section with three categories (collapsible):
  * - Concise specification (section 4 quick reference)
  * - Complete specification (section 5 detailed protocol)
  * - Additional information (section 2, 6 general instructions)
@@ -259,6 +260,8 @@ function ProtocolReferences({
   completeSpec?: CrossReference[];
   additionalInfo?: CrossReference[];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   const hasConcise = conciseSpec && conciseSpec.length > 0;
   const hasComplete = completeSpec && completeSpec.length > 0;
   const hasAdditional = additionalInfo && additionalInfo.length > 0;
@@ -266,10 +269,27 @@ function ProtocolReferences({
   if (!hasConcise && !hasComplete && !hasAdditional) return null;
 
   return (
-    <div className="space-y-1 mt-2">
-      {hasConcise && <CrossReferenceLinks references={conciseSpec} label="Kurzspezifikation" />}
-      {hasComplete && <CrossReferenceLinks references={completeSpec} label="Vollständig" />}
-      {hasAdditional && <CrossReferenceLinks references={additionalInfo} label="Zusatzinfo" />}
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {isOpen ? (
+          <ChevronDown className="h-3 w-3" />
+        ) : (
+          <ChevronRight className="h-3 w-3" />
+        )}
+        <BookOpen className="h-3 w-3" />
+        <span>Protokoll-Referenzen</span>
+      </button>
+      {isOpen && (
+        <div className="space-y-1 mt-2 ml-4 pl-2 border-l border-muted">
+          {hasConcise && <CrossReferenceLinks references={conciseSpec} label="Kurzspezifikation" />}
+          {hasComplete && <CrossReferenceLinks references={completeSpec} label="Vollständig" />}
+          {hasAdditional && <CrossReferenceLinks references={additionalInfo} label="Zusatzinfo" />}
+        </div>
+      )}
     </div>
   );
 }

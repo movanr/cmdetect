@@ -282,6 +282,8 @@ export const E4_RICH_INSTRUCTIONS = {
     additionalInfo: [
       // 2.5(d): Pain-free opening is the only exception to "move despite pain"
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+      // 8.3: Verbatim verbal instructions
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Wörtliche Anweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -310,6 +312,8 @@ export const E4_RICH_INSTRUCTIONS = {
     additionalInfo: [
       // 2.5(d): "move even if painful" applies here
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+      // 8.3: Verbatim verbal instructions
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Wörtliche Anweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -339,6 +343,8 @@ export const E4_RICH_INSTRUCTIONS = {
     additionalInfo: [
       // 2.5(e): E4C is the only examiner-assisted movement (scissor technique)
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+      // 8.3: Verbatim verbal instructions for assisted opening
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Wörtliche Anweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -371,6 +377,8 @@ export const E4_RICH_INSTRUCTIONS = {
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
       // 6.2: Movement-induced pain inquiry, familiar pain inquiry
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+      // 8.2: Verbatim pain inquiry instructions
+      { section: "section8", anchor: "82-untersuchungsbezogene-schmerzbefragung", label: "8.2 Wörtliche Schmerzbefragung" },
     ],
   } satisfies RichPainInterviewInstruction,
 
@@ -404,6 +412,8 @@ export const E4_RICH_INSTRUCTIONS = {
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
       // 6.2: Movement-induced pain inquiry, familiar pain inquiry
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+      // 8.2: Verbatim pain inquiry instructions
+      { section: "section8", anchor: "82-untersuchungsbezogene-schmerzbefragung", label: "8.2 Wörtliche Schmerzbefragung" },
     ],
   } satisfies RichPainInterviewInstruction,
 } as const;
