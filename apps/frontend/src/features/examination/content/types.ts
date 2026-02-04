@@ -59,24 +59,44 @@ export interface RichStepInstruction {
   warnings?: SafetyWarning[]; // Safety warnings
   crossReferences?: CrossReference[];
   tips?: string[];
+  /** Optional hint about app interaction for this step */
+  appAction?: string;
 }
 
-/** Pain interview flow step */
-export interface PainInterviewFlowStep {
+/**
+ * Generic procedure flow step - used for pain interviews, measurements, etc.
+ * Displays as numbered steps with optional descriptions and app hints.
+ */
+export interface ProcedureFlowStep {
   id: string;
-  /** Short label for the step (e.g., "Schmerz?") */
-  question: string;
-  /** Full German text for the examiner to say/ask */
+  /** Short label for the step (e.g., "Anweisung", "Messen") */
+  label: string;
+  /** Full text - patient script or examiner instruction */
   description?: string;
   /** Optional hint about app interaction for this step */
   appAction?: string;
 }
 
+/** @deprecated Use ProcedureFlowStep instead */
+export type PainInterviewFlowStep = ProcedureFlowStep;
+
 /** Pain interview instruction with flow */
 export interface RichPainInterviewInstruction {
   title: string;
   prompt: string;
-  flow: PainInterviewFlowStep[];
+  flow: ProcedureFlowStep[];
+}
+
+/** Measurement instruction with step-based flow */
+export interface RichMeasurementInstruction {
+  stepId: string;
+  title: string;
+  /** Step-by-step procedure flow */
+  flow: ProcedureFlowStep[];
+  /** Safety warnings */
+  warnings?: SafetyWarning[];
+  /** Cross-references to protocol sections */
+  crossReferences?: CrossReference[];
 }
 
 /**

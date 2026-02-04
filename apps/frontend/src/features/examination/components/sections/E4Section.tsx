@@ -10,10 +10,7 @@ import { ArrowRight, BookOpen, CheckCircle, ChevronLeft, SkipForward } from "luc
 import { useCallback, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import {
-  E4_INSTRUCTIONS,
-  E4_RICH_INSTRUCTIONS,
-} from "../../content/instructions";
+import { E4_RICH_INSTRUCTIONS } from "../../content/instructions";
 import {
   useExaminationForm,
   type ExaminationStepId,
@@ -28,10 +25,9 @@ import { type RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
 import { RegionDropdown } from "../RegionDropdown";
 import {
-  InstructionBlock,
+  MeasurementFlowBlock,
   MeasurementStep,
   PainInterviewBlock,
-  RichInstructionBlock,
   StepBar,
   type StepStatus,
 } from "../ui";
@@ -51,18 +47,6 @@ const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
   "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
   "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
   "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
-};
-
-// Map step IDs to instruction keys
-const E4_STEP_INSTRUCTIONS: Record<
-  string,
-  "painFreeOpening" | "maxUnassistedOpening" | "maxAssistedOpening" | "painInterview"
-> = {
-  e4a: "painFreeOpening",
-  "e4b-measure": "maxUnassistedOpening",
-  "e4b-interview": "painInterview",
-  "e4c-measure": "maxAssistedOpening",
-  "e4c-interview": "painInterview",
 };
 
 interface E4SectionProps {
@@ -376,51 +360,25 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
   // Render instruction block based on step type
   const renderInstruction = (stepId: string, stepIsInterview: boolean) => {
-    const instructionKey = E4_STEP_INSTRUCTIONS[stepId];
-    const legacyInstruction = E4_INSTRUCTIONS[instructionKey];
-
-    // Pain interview - use rich instruction with flow
+    // Pain interview - use pain interview flow
     if (stepIsInterview) {
       const interviewInstruction = E4_RICH_INSTRUCTIONS.painInterview;
       return <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />;
     }
 
-    // E4C measurement - rich instruction with expandable details (same style as E4B)
-    if (stepId === "e4c-measure") {
-      const e4cInstruction = E4_RICH_INSTRUCTIONS.maxAssistedOpening;
-      return (
-        <RichInstructionBlock
-          patientScript={e4cInstruction.patientScript}
-          examinerAction={e4cInstruction.examinerAction}
-          examinerSteps={e4cInstruction.examinerSteps}
-          warnings={e4cInstruction.warnings}
-          tips={e4cInstruction.tips}
-          crossReferences={e4cInstruction.crossReferences}
-        />
-      );
+    // E4A - pain-free opening measurement (step-based flow)
+    if (stepId === "e4a") {
+      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.painFreeOpening} />;
     }
 
-    // E4B measurement - rich instruction with expandable details
+    // E4B measurement - step-based flow
     if (stepId === "e4b-measure") {
-      const e4bInstruction = E4_RICH_INSTRUCTIONS.maxUnassistedOpening;
-      return (
-        <RichInstructionBlock
-          patientScript={e4bInstruction.patientScript}
-          examinerAction={e4bInstruction.examinerAction}
-          examinerSteps={e4bInstruction.examinerSteps}
-          crossReferences={e4bInstruction.crossReferences}
-        />
-      );
+      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxUnassistedOpening} />;
     }
 
-    // E4A and fallback - simple instruction block
-    if ("patientScript" in legacyInstruction) {
-      return (
-        <InstructionBlock
-          patientScript={legacyInstruction.patientScript}
-          examinerAction={legacyInstruction.examinerAction}
-        />
-      );
+    // E4C measurement - step-based flow with safety warning
+    if (stepId === "e4c-measure") {
+      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxAssistedOpening} />;
     }
 
     return null;

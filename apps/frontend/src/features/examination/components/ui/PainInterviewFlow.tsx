@@ -1,36 +1,36 @@
 /**
- * PainInterviewFlow - Clear step-by-step instructions for pain interview.
+ * ProcedureFlow - Step-by-step instructions for clinical procedures.
  *
- * Displays the DC-TMD pain interview protocol for movement-induced pain:
- * 1. Ask if patient had pain with movement
- * 2. Patient shows with finger where pain was felt
- * 3. Examiner touches area to confirm and identify underlying structure
- * 4. Ask if pain is familiar (+ headache question if temporalis)
+ * Generic component used for:
+ * - Pain interviews (movement-induced pain assessment)
+ * - Measurement procedures (opening, excursions)
+ * - Any numbered step-based clinical workflow
  */
 
 import { MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type {
-  PainInterviewFlowStep,
+  ProcedureFlowStep,
+  RichMeasurementInstruction,
   RichPainInterviewInstruction,
 } from "../../content/types";
 
-interface PainInterviewFlowProps {
+interface ProcedureFlowProps {
   /** Flow steps to display */
-  flow: PainInterviewFlowStep[];
+  flow: ProcedureFlowStep[];
   /** Optional className */
   className?: string;
 }
 
 /**
- * Single interview step with number, label and description.
+ * Single procedure step with number, label and description.
  */
-function InterviewStep({
+function ProcedureStep({
   step,
   stepNumber,
   isLast,
 }: {
-  step: PainInterviewFlowStep;
+  step: ProcedureFlowStep;
   stepNumber: number;
   isLast: boolean;
 }) {
@@ -47,7 +47,7 @@ function InterviewStep({
 
       {/* Step content */}
       <div className={cn("pb-4", isLast && "pb-0")}>
-        <div className="font-medium text-sm text-foreground">{step.question}</div>
+        <div className="font-medium text-sm text-foreground">{step.label}</div>
         {step.description && (
           <div className="mt-1 text-sm text-muted-foreground italic">
             „{step.description}"
@@ -65,14 +65,14 @@ function InterviewStep({
 }
 
 /**
- * Renders the pain interview as a numbered step-by-step list.
+ * Renders a procedure as a numbered step-by-step list.
  */
-export function PainInterviewFlow({ flow, className }: PainInterviewFlowProps) {
+export function ProcedureFlow({ flow, className }: ProcedureFlowProps) {
   return (
     <div className={cn("rounded-md border border-muted p-4", className)}>
       <div className="space-y-0">
         {flow.map((step, index) => (
-          <InterviewStep
+          <ProcedureStep
             key={step.id}
             step={step}
             stepNumber={index + 1}
@@ -84,14 +84,17 @@ export function PainInterviewFlow({ flow, className }: PainInterviewFlowProps) {
   );
 }
 
+/** @deprecated Use ProcedureFlow instead */
+export const PainInterviewFlow = ProcedureFlow;
+
 /**
- * Compact version for smaller spaces - just shows the flow.
+ * Compact version for smaller spaces - just shows the flow labels.
  */
-export function PainInterviewFlowCompact({
+export function ProcedureFlowCompact({
   flow,
   className,
 }: {
-  flow?: PainInterviewFlowStep[];
+  flow?: ProcedureFlowStep[];
   className?: string;
 }) {
   if (!flow || flow.length === 0) return null;
@@ -101,15 +104,18 @@ export function PainInterviewFlowCompact({
       {flow.map((step, i) => (
         <span key={step.id}>
           {i > 0 && " → "}
-          {step.question}
+          {step.label}
         </span>
       ))}
     </div>
   );
 }
 
+/** @deprecated Use ProcedureFlowCompact instead */
+export const PainInterviewFlowCompact = ProcedureFlowCompact;
+
 /**
- * Full pain interview instruction block.
+ * Pain interview instruction block with flow steps.
  */
 export function PainInterviewBlock({
   instruction,
@@ -121,7 +127,37 @@ export function PainInterviewBlock({
 }) {
   return (
     <div className={cn("space-y-3", className)}>
-      <PainInterviewFlow flow={instruction.flow} />
+      <ProcedureFlow flow={instruction.flow} />
+    </div>
+  );
+}
+
+/**
+ * Measurement instruction block with flow steps and optional warnings.
+ */
+export function MeasurementFlowBlock({
+  instruction,
+  className,
+}: {
+  instruction: RichMeasurementInstruction;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      {/* Safety warnings - prominent, always first */}
+      {instruction.warnings && instruction.warnings.length > 0 && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+          {instruction.warnings.map((warning, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="text-amber-600">⚠️</span>
+              <span>{warning.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Step-by-step flow */}
+      <ProcedureFlow flow={instruction.flow} />
     </div>
   );
 }

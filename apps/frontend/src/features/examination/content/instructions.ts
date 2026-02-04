@@ -7,9 +7,9 @@
  */
 
 import type {
-  PainInterviewFlowStep,
+  ProcedureFlowStep,
+  RichMeasurementInstruction,
   RichPainInterviewInstruction,
-  RichStepInstruction,
   SafetyWarning,
 } from "./types";
 
@@ -60,31 +60,119 @@ const E4C_SAFETY_WARNING: SafetyWarning = {
  *
  * NOTE: Referred pain inquiry is NOT part of movement-induced pain - only for palpation.
  */
-const PAIN_INTERVIEW_FLOW: PainInterviewFlowStep[] = [
+const PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
     id: "pain",
-    question: "Schmerz bei Bewegung?",
+    label: "Schmerz bei Bewegung?",
     description: "Hatten Sie bei dieser Bewegung Schmerzen?",
   },
   {
     id: "locate",
-    question: "Lokalisation",
+    label: "Lokalisation",
     description:
       "Zeigen Sie mit dem Finger auf alle Bereiche, in denen Sie Schmerzen gespürt haben.",
   },
   {
     id: "confirm",
-    question: "Bestätigung",
+    label: "Bestätigung",
     description:
       "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
     appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
   },
   {
     id: "done",
-    question: "Keine weiteren Schmerzbereiche",
+    label: "Keine weiteren Schmerzbereiche",
     description:
       "Gibt es noch weitere Bereiche? Falls nein, abschließen.",
     appAction: 'Button „Keine weiteren Schmerzbereiche"',
+  },
+];
+
+// ============================================================================
+// E4 Measurement Flows (Step-based procedures)
+// ============================================================================
+
+/**
+ * E4A - Pain-free opening measurement flow.
+ * Simple 3-step procedure based on DC-TMD protocol section 4.5.
+ */
+const E4A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "script",
+    label: "Anweisung",
+    description:
+      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
+  },
+  {
+    id: "ruler",
+    label: "Lineal anlegen",
+    description: "0-Marke an Inzisalkante des unteren Referenzzahns",
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    description: "Interinzisale Distanz ablesen",
+    appAction: "Messwert in mm eingeben",
+  },
+];
+
+/**
+ * E4B - Maximum unassisted opening measurement flow.
+ * Same technique as E4A but patient opens maximally despite pain.
+ */
+const E4B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "script",
+    label: "Anweisung",
+    description:
+      "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
+  },
+  {
+    id: "ruler",
+    label: "Lineal anlegen",
+    description: "0-Marke an Inzisalkante des unteren Referenzzahns",
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    description: "Interinzisale Distanz ablesen",
+    appAction: "Messwert in mm eingeben",
+  },
+];
+
+/**
+ * E4C - Maximum assisted opening measurement flow.
+ * Scissor technique with safety warning.
+ */
+const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "announce",
+    label: "Ankündigung",
+    description:
+      "Gleich werde ich versuchen, Ihren Mund mit meinen Fingern noch weiter zu öffnen. Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.",
+  },
+  {
+    id: "ruler",
+    label: "Lineal anlegen",
+    description: "0-Marke an Inzisalkante des unteren Referenzzahns",
+  },
+  {
+    id: "open",
+    label: "Patient öffnet",
+    description:
+      "Bitte öffnen Sie jetzt so weit wie möglich, auch wenn es schmerzhaft ist, so wie Sie es eben schon gemacht haben.",
+  },
+  {
+    id: "technique",
+    label: "Scherentechnik",
+    description:
+      "Daumen auf obere, Zeigefinger auf untere Schneidezähne. Mäßigen Druck anwenden bis Gewebswiderstand.",
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    description: "Interinzisale Distanz ablesen",
+    appAction: "Messwert in mm eingeben",
   },
 ];
 
@@ -98,66 +186,36 @@ const PAIN_INTERVIEW_FLOW: PainInterviewFlowStep[] = [
  * Based on DC-TMD Examiner Protocol Section 4
  */
 export const E4_RICH_INSTRUCTIONS = {
-  /** E4A - Pain-free opening (simple, no phases) */
+  /** E4A - Pain-free opening (step-based flow) */
   painFreeOpening: {
     stepId: "U4A",
     title: "Schmerzfreie Mundöffnung",
-    patientScript:
-      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
-    examinerAction: "Interinzisale Distanz messen",
+    flow: E4A_MEASUREMENT_FLOW,
     crossReferences: [{ section: "4.5", label: "Öffnungsbewegung" }],
-  } satisfies RichStepInstruction,
+  } satisfies RichMeasurementInstruction,
 
-  /** E4B - Maximum unassisted opening (moderate complexity) */
+  /** E4B - Maximum unassisted opening (step-based flow) */
   maxUnassistedOpening: {
     stepId: "U4B",
     title: "Maximale aktive Mundöffnung",
-    patientScript: [
-      {
-        text: "Öffnen Sie Ihren Mund so weit wie möglich, ",
-        style: "verbatim",
-      },
-      { text: "auch wenn es schmerzhaft ist.", style: "verbatim" },
-    ],
-    examinerAction: "Interinzisale Distanz messen",
-    examinerSteps: [
-      "Lineal an Inzisalkante der unteren Schneidezähne anlegen",
-      "Distanz zur Inzisalkante der oberen Schneidezähne messen",
-      "Vertikalen Überbiss addieren falls nötig",
-    ],
+    flow: E4B_MEASUREMENT_FLOW,
     crossReferences: [
       { section: "4.5", label: "Aktive Öffnung" },
       { section: "6.2.1", label: "Schmerzlokalisation" },
     ],
-  } satisfies RichStepInstruction,
+  } satisfies RichMeasurementInstruction,
 
-  /** E4C - Maximum assisted opening */
+  /** E4C - Maximum assisted opening (step-based flow with safety warning) */
   maxAssistedOpening: {
     stepId: "U4C",
     title: "Maximale passive Mundöffnung",
-    patientScript: [
-      { text: "Ich werde jetzt versuchen, ", style: "verbatim" },
-      { text: "wenn möglich", style: "optional" },
-      { text: ", Ihren Mund mit meinen Fingern noch weiter zu öffnen.", style: "verbatim" },
-      { text: " Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.", style: "verbatim" },
-    ],
-    examinerAction: "Scherentechnik anwenden, Distanz messen",
-    examinerSteps: [
-      "Patient maximal öffnen lassen",
-      "Daumen auf obere, Zeigefinger auf untere Schneidezähne",
-      "Mäßigen Druck anwenden bis Gewebswiderstand",
-      "Interinzisale Distanz ablesen",
-    ],
+    flow: E4C_MEASUREMENT_FLOW,
     warnings: [E4C_SAFETY_WARNING],
-    tips: [
-      "Klinisches Urteil anwenden - nicht überdehnen",
-      "Messung muss mindestens so groß sein wie bei E4B",
-    ],
     crossReferences: [
       { section: "4.5", label: "Passive Öffnung" },
       { section: "6.2.1", label: "Schmerzlokalisation" },
     ],
-  } satisfies RichStepInstruction,
+  } satisfies RichMeasurementInstruction,
 
   /** Pain interview after movement */
   painInterview: {

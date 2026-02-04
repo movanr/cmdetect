@@ -127,10 +127,7 @@ export interface ValidationResult {
  * Check if a field is enabled based on its enableWhen condition.
  * Disabled fields should not be validated.
  */
-export function isFieldEnabled(
-  instance: QuestionInstance,
-  getSiblingValue: ValueGetter
-): boolean {
+export function isFieldEnabled(instance: QuestionInstance, getSiblingValue: ValueGetter): boolean {
   if (!instance.enableWhen) return true;
   const siblingPath = instance.path.replace(/\.[^.]+$/, `.${instance.enableWhen.sibling}`);
   return getSiblingValue(siblingPath) === instance.enableWhen.equals;
@@ -177,7 +174,7 @@ export function validateInstances(
         }
         // Choose message based on whether terminated sibling exists
         const message = hasTerminatedSibling
-          ? "Bitte Messwert eingeben oder 'Abgebrochen' ankreuzen"
+          ? "Bitte Messwert eingeben oder 'Abgebrochen' anklicken"
           : "Bitte Messwert eingeben";
         errors.push({ path: instance.path, message });
         continue;

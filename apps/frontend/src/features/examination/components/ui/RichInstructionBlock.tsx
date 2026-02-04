@@ -13,7 +13,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { BookOpen, MessageSquare, Ruler } from "lucide-react";
+import { BookOpen, MessageSquare, MousePointerClick, Ruler } from "lucide-react";
 import type { CrossReference, PatientScript, RichStepInstruction, SafetyWarning } from "../../content/types";
 import { ExpandableDetails } from "./ExpandableDetails";
 import { SafetyWarnings } from "./SafetyWarningBanner";
@@ -32,6 +32,8 @@ interface RichInstructionBlockProps {
   crossReferences?: CrossReference[];
   /** Tips for the examiner */
   tips?: string[];
+  /** Optional hint about app interaction for this step */
+  appAction?: string;
   /** Optional className */
   className?: string;
 }
@@ -89,6 +91,7 @@ export function RichInstructionBlock({
   warnings,
   crossReferences,
   tips,
+  appAction,
   className,
 }: RichInstructionBlockProps) {
   const hasWarnings = warnings && warnings.length > 0;
@@ -115,6 +118,14 @@ export function RichInstructionBlock({
           <Ruler className="h-3.5 w-3.5 shrink-0" />
           <span>{examinerAction}</span>
         </div>
+
+        {/* App action hint */}
+        {appAction && (
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded w-fit">
+            <MousePointerClick className="h-3 w-3 shrink-0" />
+            <span>{appAction}</span>
+          </div>
+        )}
       </div>
 
       {/* Expandable details section */}
@@ -139,5 +150,6 @@ export function richInstructionToProps(instruction: RichStepInstruction): RichIn
     warnings: instruction.warnings,
     crossReferences: instruction.crossReferences,
     tips: instruction.tips,
+    appAction: instruction.appAction,
   };
 }

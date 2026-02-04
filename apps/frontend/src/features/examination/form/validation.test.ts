@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import type { QuestionInstance } from "../projections/to-instances";
 import {
-  validateInterviewCompletion,
   isFieldEnabled,
   validateInstances,
+  validateInterviewCompletion,
   type IncompleteRegion,
 } from "./validation";
-import type { QuestionInstance } from "../projections/to-instances";
 
 describe("validation", () => {
   describe("validateInterviewCompletion", () => {
@@ -372,7 +372,10 @@ describe("validation", () => {
 
       expect(result.valid).toBe(false);
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toEqual({ path: "e4.pain", message: "Dieses Feld ist erforderlich" });
+      expect(result.errors[0]).toEqual({
+        path: "e4.pain",
+        message: "Dieses Feld ist erforderlich",
+      });
     });
 
     it("allows empty non-required fields", () => {
@@ -552,7 +555,7 @@ describe("validation", () => {
         expect(result.errors).toHaveLength(1);
         expect(result.errors[0]).toEqual({
           path: "e4.maxAssisted.measurement",
-          message: "Bitte Messwert eingeben oder 'Abgebrochen' ankreuzen",
+          message: "Bitte Messwert eingeben oder 'Abgebrochen' anklicken",
         });
       });
 

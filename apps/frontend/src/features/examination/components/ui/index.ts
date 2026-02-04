@@ -35,7 +35,10 @@ export { ExpandableDetails } from "./ExpandableDetails";
 export { RichInstructionBlock, richInstructionToProps } from "./RichInstructionBlock";
 export { PhaseInstructionBlock } from "./PhaseInstructionBlock";
 export {
+  ProcedureFlow,
+  ProcedureFlowCompact,
   PainInterviewFlow,
   PainInterviewFlowCompact,
   PainInterviewBlock,
+  MeasurementFlowBlock,
 } from "./PainInterviewFlow";

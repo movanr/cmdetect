@@ -60,7 +60,7 @@ export const COMMON = {
   noPain: "Kein Schmerz",
   noMorePainRegions: "Keine weiteren Schmerzregionen",
   terminated: "Abgebrochen",
-  measurement: "Messung",
+  measurement: "Messwert",
   painFreeOpening: "Schmerzfreie Öffnung",
   maxUnassistedOpening: "Maximale Öffnung (unassistiert)",
   maxAssistedOpening: "Maximale Öffnung (assistiert)",
