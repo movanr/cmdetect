@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E6. Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung
+## U6. Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung
 
 ### Allgemeine Anweisungen für den Untersucher
 

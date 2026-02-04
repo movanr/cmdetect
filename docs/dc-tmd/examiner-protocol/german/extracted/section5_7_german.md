@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E7. Kiefergelenkgeräusche bei Laterotrusion und Protrusion
+## U7. Kiefergelenkgeräusche bei Laterotrusion und Protrusion
 
 ### Allgemeines
 

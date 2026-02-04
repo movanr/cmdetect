@@ -2,7 +2,7 @@
 
 ## 4.1 Überblick
 
-Der beabsichtigte Benutzer der Kurzspezifikationen ist die Person (Kliniker oder Forscher), die empirisch validierte diagnostische Kriterien für temporomandibuläre Dysfunktionen verwenden möchte, während sie eine einfache Untersuchung beibehält. Die verbalen Anweisungen und zugehörigen Verfahren, die für jede Komponente der klinischen Untersuchung verwendet werden, sind hier in Tabellenformat zur schnellen Referenz aufgelistet. Der Leser sollte Abschnitt 2 (Allgemeine Anweisungen) für den vollständigen Kontext der Untersuchung heranziehen. Eine vollständige Beschreibung der Verfahren ist in Abschnitt 3 bereitgestellt, und die vollständig operationalisierte Version dieser Verfahren ist in Abschnitt 5 bereitgestellt. Abbildungen, wie unten referenziert, finden sich in Abschnitt 7. Die Nummerierung der Untersuchungsverfahren in diesem Abschnitt entspricht der in Abschnitt 5 sowie auf dem DC/TMD-Untersuchungsformular (Abschnitt 8).
+Der vorgesehene Benutzer der Kurzspezifikationen ist die Person (Kliniker oder Forscher), die empirisch validierte diagnostische Kriterien für temporomandibuläre Dysfunktionen verwenden möchte, während sie eine einfache Untersuchung beibehält. Die verbalen Anweisungen und zugehörigen Verfahren, die für jede Komponente der klinischen Untersuchung verwendet werden, sind hier in Tabellenformat zur schnellen Referenz aufgelistet. Der Leser sollte Abschnitt 2 (Allgemeine Anweisungen) für den vollständigen Kontext der Untersuchung heranziehen. Eine vollständige Beschreibung der Verfahren ist in Abschnitt 3 bereitgestellt, und die vollständig operationalisierte Version dieser Verfahren ist in Abschnitt 5 bereitgestellt. Abbildungen, wie unten referenziert, finden sich in Abschnitt 7. Die Nummerierung der Untersuchungsverfahren in diesem Abschnitt entspricht der in Abschnitt 5 sowie auf dem DC/TMD-Untersuchungsformular (Abschnitt 8).
 
 ## 4.2 Untersuchungsbezogene Schmerzbefragung
 
@@ -28,7 +28,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E1. Untersucherbestätigung der Schmerz- und Kopfschmerzlokalisationen
+### U1. Untersucherbestätigung der Schmerz- und Kopfschmerzlokalisationen
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -40,7 +40,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E1a - Schmerzlokalisation in den letzten 30 Tagen** | Fragen Sie den Patienten, ob er in einem der gerade durch Berührung identifizierten Bereiche *in den letzten 30 Tagen* Schmerzen hatte.<br><br>Wenn er „JA" antwortet, bitten Sie ihn, mit einer Fingerspitze auf jeden der Bereiche zu zeigen, wo er *in den letzten 30 Tagen* Schmerzen gefühlt hat.<br><br>WENN „JA", sagen Sie ihm, dass Sie bestätigen möchten, wo er Schmerz berichtet. | - Der Untersucher berührt den/die berichteten Schmerzbereich(e), um zu bestätigen, dass der Schmerz in einer Kaustruktur(en) lokalisiert ist. |
+| **U1a - Schmerzlokalisation in den letzten 30 Tagen** | Fragen Sie den Patienten, ob er in einem der gerade durch Berührung identifizierten Bereiche *in den letzten 30 Tagen* Schmerzen hatte.<br><br>Wenn er „JA" antwortet, bitten Sie ihn, mit einer Fingerspitze auf jeden der Bereiche zu zeigen, wo er *in den letzten 30 Tagen* Schmerzen gefühlt hat.<br><br>WENN „JA", sagen Sie ihm, dass Sie bestätigen möchten, wo er Schmerz berichtet. | - Der Untersucher berührt den/die berichteten Schmerzbereich(e), um zu bestätigen, dass der Schmerz in einer Kaustruktur(en) lokalisiert ist. |
 
 **Abbildungen 2 & 3:** Schmerzmeldung durch Patienten und Bestätigung durch Untersucher
 
@@ -48,11 +48,11 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E1b - Kopfschmerzlokalisation in den letzten 30 Tagen** | Fragen Sie den Patienten, ob er *in den letzten 30 Tagen* Kopfschmerzen hatte.<br><br>Wenn er „JA" antwortet, bitten Sie ihn, mit einer Fingerspitze auf jeden der Bereiche zu zeigen, wo er *in den letzten 30 Tagen* Kopfschmerzen gefühlt hat.<br><br>WENN „JA", sagen Sie ihm, dass Sie bestätigen möchten, wo er Kopfschmerz berichtet. | - Der Untersucher berührt den/die berichteten Schmerzbereich(e), um die Kopfschmerzlokalisation(en) zu bestätigen. |
+| **U1b - Kopfschmerzlokalisation in den letzten 30 Tagen** | Fragen Sie den Patienten, ob er *in den letzten 30 Tagen* Kopfschmerzen hatte.<br><br>Wenn er „JA" antwortet, bitten Sie ihn, mit einer Fingerspitze auf jeden der Bereiche zu zeigen, wo er *in den letzten 30 Tagen* Kopfschmerzen gefühlt hat.<br><br>WENN „JA", sagen Sie ihm, dass Sie bestätigen möchten, wo er Kopfschmerz berichtet. | - Der Untersucher berührt den/die berichteten Schmerzbereich(e), um die Kopfschmerzlokalisation(en) zu bestätigen. |
 
 ---
 
-### E2. Schneidekantenverhältnisse
+### U2. Schneidekantenverhältnisse
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -92,7 +92,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E3. Öffnungsmuster (Ergänzend)
+### U3. Öffnungsmuster (Ergänzend)
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -106,11 +106,11 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E4. Öffnungsbewegungen
+### U4. Öffnungsbewegungen
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E4A. Schmerzfreie Öffnung** | Bitten Sie den Patienten, seinen Mund so weit wie möglich zu öffnen, ohne Schmerz zu fühlen, oder, wenn er bereits Schmerz verspürt, so weit wie möglich zu öffnen, ohne seinen aktuellen Schmerz zu verstärken. | - Messen Sie den Interinzisalabstand zwischen den Oberkiefer- und Unterkiefer-Referenzzähnen. |
+| **U4A. Schmerzfreie Öffnung** | Bitten Sie den Patienten, seinen Mund so weit wie möglich zu öffnen, ohne Schmerz zu fühlen, oder, wenn er bereits Schmerz verspürt, so weit wie möglich zu öffnen, ohne seinen aktuellen Schmerz zu verstärken. | - Messen Sie den Interinzisalabstand zwischen den Oberkiefer- und Unterkiefer-Referenzzähnen. |
 
 **Abbildung 11:** Messung der schmerzfreien Öffnung
 
@@ -118,7 +118,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E4B. Maximale nicht-unterstützte Öffnung** | Bitten Sie den Patienten, so weit wie möglich zu öffnen, auch wenn es schmerzhaft ist. | - Messen Sie den Interinzisalabstand zwischen den Oberkiefer- und Unterkiefer-Referenzzähnen. |
+| **U4B. Maximale nicht-unterstützte Öffnung** | Bitten Sie den Patienten, so weit wie möglich zu öffnen, auch wenn es schmerzhaft ist. | - Messen Sie den Interinzisalabstand zwischen den Oberkiefer- und Unterkiefer-Referenzzähnen. |
 
 **Abbildung 12:** Messung der maximalen nicht-unterstützten Öffnung
 
@@ -126,7 +126,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E4B. Schmerz nach MNÖ** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
+| **U4B. Schmerz nach MNÖ** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
 
 **Abbildung 13:** Patient zeigt auf Schmerzbereich, Untersucher bestätigt Struktur
 
@@ -134,7 +134,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E4C. Maximale unterstützte Öffnung** | Holen Sie die Erlaubnis des Patienten ein, seinen Mund weiter „aufzudehnen". Informieren Sie den Patienten, dass er, wenn er möchte, dass Sie aufhören, seine Hand heben soll. | - Nachdem der Patient geöffnet hat, platzieren Sie den Daumen auf den zentralen Oberkieferschneidezähnen des Patienten und kreuzen Sie den Zeigefinger über zu den zentralen Unterkieferschneidezähnen.<br>- Drücken Sie mit mäßigem Druck den Mund weiter auf.<br>- Messen Sie den Interinzisalabstand zwischen den Oberkiefer- und Unterkieferzähnen.<br>- Es ist kritisch, dass diese Messung mindestens gleich der für die maximale nicht-unterstützte Öffnung gemessenen ist. |
+| **U4C. Maximale unterstützte Öffnung** | Holen Sie die Erlaubnis des Patienten ein, seinen Mund weiter „aufzudehnen". Informieren Sie den Patienten, dass er, wenn er möchte, dass Sie aufhören, seine Hand heben soll. | - Nachdem der Patient geöffnet hat, platzieren Sie den Daumen auf den zentralen Oberkieferschneidezähnen des Patienten und kreuzen Sie den Zeigefinger über zu den zentralen Unterkieferschneidezähnen.<br>- Drücken Sie mit mäßigem Druck den Mund weiter auf.<br>- Messen Sie den Interinzisalabstand zwischen den Oberkiefer- und Unterkieferzähnen.<br>- Es ist kritisch, dass diese Messung mindestens gleich der für die maximale nicht-unterstützte Öffnung gemessenen ist. |
 
 **Abbildung 14:** Schmerzlokalisation während maximaler Öffnung
 
@@ -142,7 +142,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E4C Schmerz nach MUÖ** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz als Ergebnis der Manipulation des Untersuchers erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomischen Strukturen, die der Patient als Orte seines Schmerzes identifiziert hat. |
+| **U4C Schmerz nach MUÖ** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz als Ergebnis der Manipulation des Untersuchers erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomischen Strukturen, die der Patient als Orte seines Schmerzes identifiziert hat. |
 
 **Abbildungen 15 & 16:** Maximale unterstützte Öffnung - Scherenposition; Patient zeigt auf Schmerz, Untersucher bestätigt
 
@@ -150,16 +150,16 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E4D. Öffnung beendet** | \<keine\> | - Notieren Sie, ob der Patient seine Hand gehoben hat, um zu beenden. |
-| **E4E. Anpassung der vertikalen Messungen** *(siehe Abschnitt 2 für weitere Details)* | \<keine\> | - Die Messungen von schmerzfreier, maximaler nicht-unterstützter und maximaler unterstützter Öffnung stellen die Lücke zwischen den Schneidekanten dar.<br>- Die Gesamtöffnung ist die Summe aus inzisalem Überbiss + der gemessenen Öffnung zwischen den Schneidekanten. |
+| **U4D. Öffnung beendet** | \<keine\> | - Notieren Sie, ob der Patient seine Hand gehoben hat, um zu beenden. |
+| **U4E. Anpassung der vertikalen Messungen** *(siehe Abschnitt 2 für weitere Details)* | \<keine\> | - Die Messungen von schmerzfreier, maximaler nicht-unterstützter und maximaler unterstützter Öffnung stellen die Lücke zwischen den Schneidekanten dar.<br>- Die Gesamtöffnung ist die Summe aus inzisalem Überbiss + der gemessenen Öffnung zwischen den Schneidekanten. |
 
 ---
 
-### E5. Laterale & protrusiver Bewegungen
+### U5. Laterale & protrusiver Bewegungen
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E5A Rechte laterale Exkursion** | Bitten Sie den Patienten, leicht zu öffnen und seinen Kiefer so weit wie möglich nach rechts zu bewegen, auch wenn es schmerzhaft ist. | - Messen Sie von der Oberkiefer-Referenzmittellinie zur Unterkiefer-Referenzmittellinie. |
+| **U5A Rechte laterale Exkursion** | Bitten Sie den Patienten, leicht zu öffnen und seinen Kiefer so weit wie möglich nach rechts zu bewegen, auch wenn es schmerzhaft ist. | - Messen Sie von der Oberkiefer-Referenzmittellinie zur Unterkiefer-Referenzmittellinie. |
 
 **Abbildung 17:** Messung der rechten lateralen Exkursion
 
@@ -167,7 +167,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E5A Schmerz nach Exkursion** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz bei der Bewegung erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
+| **U5A Schmerz nach Exkursion** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz bei der Bewegung erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
 
 **Abbildung 18:** Patient zeigt auf Schmerzbereiche während lateraler Bewegung
 
@@ -175,7 +175,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E5B Linke laterale Exkursion** | Bitten Sie den Patienten, leicht zu öffnen und seinen Kiefer so weit wie möglich nach links zu bewegen, auch wenn es schmerzhaft ist. | - Messen Sie von der Oberkiefer-Referenzmittellinie zur Unterkiefer-Referenzmittellinie. |
+| **U5B Linke laterale Exkursion** | Bitten Sie den Patienten, leicht zu öffnen und seinen Kiefer so weit wie möglich nach links zu bewegen, auch wenn es schmerzhaft ist. | - Messen Sie von der Oberkiefer-Referenzmittellinie zur Unterkiefer-Referenzmittellinie. |
 
 **Abbildung 19:** Messung der linken lateralen Exkursion
 
@@ -183,11 +183,11 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E5B Schmerz nach Exkursion** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz bei der Bewegung erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
+| **U5B Schmerz nach Exkursion** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz bei der Bewegung erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E5C Protrusionsexkursion** | Bitten Sie den Patienten, leicht zu öffnen und seinen Kiefer so weit wie möglich nach vorne zu bewegen, auch wenn es schmerzhaft ist. | - Messen Sie den Abstand von der bukkalen Oberfläche des Unterkieferzahns zur bukkalen Oberfläche des Oberkieferzahns. |
+| **U5C Protrusionsexkursion** | Bitten Sie den Patienten, leicht zu öffnen und seinen Kiefer so weit wie möglich nach vorne zu bewegen, auch wenn es schmerzhaft ist. | - Messen Sie den Abstand von der bukkalen Oberfläche des Unterkieferzahns zur bukkalen Oberfläche des Oberkieferzahns. |
 
 **Abbildung 20:** Protrusionsmessung
 
@@ -195,8 +195,8 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
-| **E5C Schmerz nach Protrusion** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz bei der Bewegung erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
-| **E5D. Anpassung der lateralen und protrusiven Bewegungen** *(siehe Abschnitt 2 für weitere Details)* | \<keine\> | - Um rechte und linke laterale Bewegungen genau zu vergleichen und den lateralen Bewegungsspielraum zu berichten, müssen gemessene rechte und linke laterale Bewegungen angepasst werden, indem eine etwaige Mittellinienabweichung einbezogen wird.<br>- Um die volle Protrusion zu berichten, addieren Sie den inzisalen Overjet (horizontalen Überbiss) zur Protrusionsmessung. |
+| **U5C Schmerz nach Protrusion** | Bitten Sie den Patienten, mit seinem/seinen Finger(n) alle Bereiche zu identifizieren, wo Schmerz bei der Bewegung erfahren wurde. Führen Sie die Schmerzbefragung durch. | - Bestätigen Sie die anatomische(n) Struktur(en), die der Patient als Ort(e) seines Schmerzes identifiziert hat. |
+| **U5D. Anpassung der lateralen und protrusiven Bewegungen** *(siehe Abschnitt 2 für weitere Details)* | \<keine\> | - Um rechte und linke laterale Bewegungen genau zu vergleichen und den lateralen Bewegungsspielraum zu berichten, müssen gemessene rechte und linke laterale Bewegungen angepasst werden, indem eine etwaige Mittellinienabweichung einbezogen wird.<br>- Um die volle Protrusion zu berichten, addieren Sie den inzisalen Overjet (horizontalen Überbiss) zur Protrusionsmessung. |
 
 **Abbildung 21:** Alternative Methode zur Messung der lateralen Exkursion
 
@@ -204,7 +204,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E6. Kiefergelenkgeräusche während Öffnungs- und Schließbewegungen
+### U6. Kiefergelenkgeräusche während Öffnungs- und Schließbewegungen
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -223,7 +223,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E7. Kiefergelenkgeräusche während lateraler und protrusiver Bewegungen
+### U7. Kiefergelenkgeräusche während lateraler und protrusiver Bewegungen
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -240,7 +240,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E8. Gelenkarretierung
+### U8. Gelenkarretierung
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -249,7 +249,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E9. Muskel- und Kiefergelenkschmerz bei Palpation
+### U9. Muskel- und Kiefergelenkschmerz bei Palpation
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -305,7 +305,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E10. Ergänzende Palpationsstellen (0,5 kg)
+### U10. Ergänzende Palpationsstellen (0,5 kg)
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|
@@ -338,7 +338,7 @@ Das Untersuchungsformular ist so organisiert, dass eine „Nein"-Antwort in eine
 
 ---
 
-### E11. Untersucherkommentare
+### U11. Untersucherkommentare
 
 | UNTERSUCHUNGSPUNKT | KOMMUNIKATION MIT DEM PATIENTEN | UNTERSUCHERVERFAHREN |
 |-----------|--------------------------|-------------------|

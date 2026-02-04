@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E8. Gelenkarretierung
+## U8. Gelenkarretierung
 
 ### Arretierung im geschlossenen Zustand
 

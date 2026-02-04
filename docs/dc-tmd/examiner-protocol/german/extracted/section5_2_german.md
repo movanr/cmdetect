@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E2. Schneidekantenverhältnisse
+## U2. Schneidekantenverhältnisse
 
 ### Wählen Sie Referenzzähne im Ober- und Unterkiefer aus
 
@@ -15,7 +15,7 @@
 **Untersuchungsverfahren:**
 
 - Die potentiellen Referenzzähne im Oberkiefer und Unterkiefer müssen gleichzeitig beurteilt werden, weil sie zusammen ausgewählt werden.
-- Wählen Sie den rechten zentralen Oberkiefer-Schneidezahn (US #8, FDI #11), wenn dessen Schneidekante horizontal verläuft, der Zahn vertikal ausgerichtet und nicht rotiert ist, anderenfalls wählen Sie Zahn 21, wenn er diesen Kriterien besser entspricht. Siehe Kapitel 3, E2 für weitere Anweisungen. Tragen Sie den ausgewählten Zahn in das Untersuchungsformular ein.
+- Wählen Sie den rechten zentralen Oberkiefer-Schneidezahn (US #8, FDI #11), wenn dessen Schneidekante horizontal verläuft, der Zahn vertikal ausgerichtet und nicht rotiert ist, anderenfalls wählen Sie Zahn 21, wenn er diesen Kriterien besser entspricht. Siehe Kapitel 3, U2 für weitere Anweisungen. Tragen Sie den ausgewählten Zahn in das Untersuchungsformular ein.
 - Beachten Sie, dass die mesiodistale Mitte des Oberkiefer-Referenzzahnes die spezifische Oberkieferreferenzposition für alle Messungen des vertikalen und protrusiven Bewegungsspielraums ist.
 - Wählen Sie den Unterkiefer-Referenzzahn aus, der dem mesio-distalen Mittelpunkt des Oberkiefer-Referenzzahnes gegenübersteht.
 - Der Punkt auf der Inzisalkante des Unterkiefer-Referenzzahnes, die der mesio-distalen Mitte des Oberkiefer-Referenzzahnes gegenüberliegt, ist die Unterkieferreferenzposition für alle Messungen des vertikalen Bewegungsspielraums.

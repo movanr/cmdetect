@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E3. Öffnungsmuster (ergänzend)
+## U3. Öffnungsmuster (ergänzend)
 
 ### Öffnungsmuster
 

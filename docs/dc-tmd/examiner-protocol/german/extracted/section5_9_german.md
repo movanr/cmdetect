@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E9. Muskel- und Kiefergelenkschmerzen bei Palpation
+## U9. Muskel- und Kiefergelenkschmerzen bei Palpation
 
 ### Allgemeine Instruktionen
 

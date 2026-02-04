@@ -1,10 +1,10 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E5. Laterotrusions- und Protrusionsbewegungen
+## U5. Laterotrusions- und Protrusionsbewegungen
 
 ### 5A. Laterotrusion nach rechts
 
-#### E5A – Laterotrusion nach rechts
+#### U5A – Laterotrusion nach rechts
 
 *Abbildung 17*
 *Auch: Abbildung 21*
@@ -37,7 +37,7 @@
 
 ---
 
-#### E5A – Schmerz nach Bewegung
+#### U5A – Schmerz nach Bewegung
 
 *Abbildung 18*
 
@@ -58,7 +58,7 @@
 
 ### 5B. Laterotrusion nach links
 
-#### E5B – Laterotrusion nach links
+#### U5B – Laterotrusion nach links
 
 *Abbildung 19*
 *Auch: Abbildung 21*
@@ -91,7 +91,7 @@
 
 ---
 
-#### E5B – Schmerz nach Bewegung
+#### U5B – Schmerz nach Bewegung
 
 *Abbildung 18*
 
@@ -112,7 +112,7 @@
 
 ### 5C. Protrusion
 
-#### E5C – Protrusion
+#### U5C – Protrusion
 
 *Abbildung 20*
 
@@ -142,7 +142,7 @@
 
 ---
 
-#### E5C – Schmerz nach Bewegung
+#### U5C – Schmerz nach Bewegung
 
 *Abbildung 18*
 

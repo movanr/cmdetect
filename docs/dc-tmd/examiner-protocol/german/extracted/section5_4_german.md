@@ -1,6 +1,6 @@
 # DC/TMD Protocol 5: Complete Specifications
 
-## E4. Öffnungs- und Schließbewegungen
+## U4. Öffnungs- und Schließbewegungen
 
 ### 4A. Schmerzfreie Öffnung
 
@@ -16,7 +16,7 @@
 
 ---
 
-#### E4A – Schmerzfreie Öffnung
+#### U4A – Schmerzfreie Öffnung
 
 *Abbildung 11*
 
@@ -48,7 +48,7 @@
 
 ---
 
-#### E4B – Maximale nicht-unterstützte Öffnung
+#### U4B – Maximale nicht-unterstützte Öffnung
 
 *Abbildung 12*
 
@@ -64,7 +64,7 @@
 
 ---
 
-#### E4B – Schmerz nach Maximaler nicht-unterstützter Öffnung
+#### U4B – Schmerz nach Maximaler nicht-unterstützter Öffnung
 
 *Abbildung 13*
 
@@ -97,7 +97,7 @@
 
 ---
 
-#### E4C – Maximale unterstützte Öffnung
+#### U4C – Maximale unterstützte Öffnung
 
 *Abbildung 14*
 
@@ -124,7 +124,7 @@
 
 ---
 
-#### E4C – Schmerz nach Maximaler unterstützter Öffnung
+#### U4C – Schmerz nach Maximaler unterstützter Öffnung
 
 *Abbildungen 15 & 16*
 
@@ -145,7 +145,7 @@
 
 ### 4D. Maximale unterstützte Öffnung → Abgebrochen
 
-#### E4D – Öffnung abgebrochen
+#### U4D – Öffnung abgebrochen
 
 **Anweisungen:**
 

@@ -18,7 +18,7 @@ Der Patientenname, Untersuchername und das Datum werden am Anfang des Untersuchu
 
 ## 3.4 Anweisungen an den Patienten
 
-Standardanweisungen umfassen den Aufbau einer Beziehung zum Patienten, die Erklärung, was „Schmerz" für Untersuchungszwecke bedeutet, die Einführung von „bekanntem Schmerz" und „bekanntem Kopfschmerz", und den Hinweis, dass der interessierende Zeitraum die letzten 30 Tage sind. Diese Anweisungen sind in E1, Abschnitt 5 aufgeführt.
+Standardanweisungen umfassen den Aufbau einer Beziehung zum Patienten, die Erklärung, was „Schmerz" für Untersuchungszwecke bedeutet, die Einführung von „bekanntem Schmerz" und „bekanntem Kopfschmerz", und den Hinweis, dass der interessierende Zeitraum die letzten 30 Tage sind. Diese Anweisungen sind in U1, Abschnitt 5 aufgeführt.
 
 ## 3.5 Beschreibung der Verfahren
 
@@ -26,7 +26,7 @@ Jeder Abschnitt der Untersuchung ist gemäß dem DC/TMD-Untersuchungsformular or
 
 ---
 
-### E1 Untersucherbestätigung der Schmerz- und Kopfschmerzlokalisation
+### U1 Untersucherbestätigung der Schmerz- und Kopfschmerzlokalisation
 
 **Begründung.** Patienten beschreiben in der Schmerzanamnese typischerweise die Lokalisation der Symptome in anatomischen Begriffen (z.B. „Kiefergelenk", „Gelenk"). Der Untersucher muss jedoch die Symptombereiche durch Identifikation anatomischer Landmarken benennen. Folglich fordern die Anweisungen für die gesamte Untersuchung den Patienten auf, auf den Schmerzbereich zu zeigen, anstatt dem Patienten zu erlauben, den betroffenen Bereich namentlich anzugeben. Dieser erste Schritt in der Untersuchung orientiert den Patienten auf die interessierenden Bereiche bezüglich Schmerz und jeglicher anderer Symptommeldungen, gefolgt von der Bestätigung der anatomischen Strukturen durch den Untersucher, die mit den Schmerzbeschwerden assoziiert sind.
 
@@ -34,15 +34,15 @@ Jeder Abschnitt der Untersuchung ist gemäß dem DC/TMD-Untersuchungsformular or
 
 **Verfahren.** Die interessierenden Bereiche für die Symptommeldung werden durch leichte Berührung identifiziert, wobei der Untersucher jeden Bereich nacheinander berührt. Die Bereiche werden nicht benannt.
 
-**E1_a Schmerz.** Fragen Sie den Patienten, ob er in einem der identifizierten Bereiche innerhalb der letzten 30 Tage Schmerzen hatte. Der Untersucher fragt nach spezifischen Schmerzlokalisationen. Eine Nachfrage, ob auch andere Schmerzbereiche auftreten, sollte für dieses und jedes andere Verfahren immer in Betracht gezogen und gestellt werden, abhängig davon, wie der Patient auf die Frage antwortet. Der Patient wird an diesem Punkt der Untersuchung daran erinnert, immer alle Schmerzbereiche zu melden, wenn nach Schmerzlokalisationen gefragt wird.
+**U1_a Schmerz.** Fragen Sie den Patienten, ob er in einem der identifizierten Bereiche innerhalb der letzten 30 Tage Schmerzen hatte. Der Untersucher fragt nach spezifischen Schmerzlokalisationen. Eine Nachfrage, ob auch andere Schmerzbereiche auftreten, sollte für dieses und jedes andere Verfahren immer in Betracht gezogen und gestellt werden, abhängig davon, wie der Patient auf die Frage antwortet. Der Patient wird an diesem Punkt der Untersuchung daran erinnert, immer alle Schmerzbereiche zu melden, wenn nach Schmerzlokalisationen gefragt wird.
 
-**E1_b Kopfschmerz.** Bitten Sie den Patienten, alle Lokalisationen von Kopfschmerz zu zeigen, die innerhalb der letzten 30 Tage erfahren wurden. Wenn der Patient fragt, ob „Kopfschmerz" sich von „Schmerz" unterscheidet (wie im vorherigen Punkt, E1_a), informieren Sie den Patienten, dass jede Person Schmerz unterschiedlich erlebt, und wenn ein bestimmter Schmerz als „Kopfschmerz" erlebt wird, dann sollte das gemeldet werden. Kopfschmerzlokalisationsoptionen sind „Temporalis", „andere" und „keine" für jeweils rechts und links. Zum Beispiel würde ein bilateraler frontaler Kopfschmerz als „andere" auf jeder Seite angegeben werden.
+**U1_b Kopfschmerz.** Bitten Sie den Patienten, alle Lokalisationen von Kopfschmerz zu zeigen, die innerhalb der letzten 30 Tage erfahren wurden. Wenn der Patient fragt, ob „Kopfschmerz" sich von „Schmerz" unterscheidet (wie im vorherigen Punkt, U1_a), informieren Sie den Patienten, dass jede Person Schmerz unterschiedlich erlebt, und wenn ein bestimmter Schmerz als „Kopfschmerz" erlebt wird, dann sollte das gemeldet werden. Kopfschmerzlokalisationsoptionen sind „Temporalis", „andere" und „keine" für jeweils rechts und links. Zum Beispiel würde ein bilateraler frontaler Kopfschmerz als „andere" auf jeder Seite angegeben werden.
 
-**Wiederholte Beurteilung.** Im Verlauf der Untersuchung wird die Schmerzlokalisation konsistent als Reaktion auf Schmerzprovokationsverfahren beurteilt. Der Patient kann nachträglich Schmerz in einem Bereich berichten, der zuvor während E1 nicht identifiziert wurde. Der Untersucher kehrt dann zu E1 zurück und bestätigt mit dem Patienten, dass der neue Bereich, der zuvor nicht gemeldet wurde, einbezogen werden sollte. Die Antworten in den Abschnitten E1_a oder E1_b werden entsprechend aktualisiert, um die überarbeitete Meldung anatomischer Lokalisationen widerzuspiegeln, die mit Schmerz während der letzten 30 Tage verbunden sind. Ein neuer Bereich kann zu dem bereits in E1_a oder E1_b gemeldeten Satz hinzugefügt werden, oder ein bereits gemeldeter Bereich könnte auch als Ergebnis einer nachträglichen Klärung zu einem beliebigen Zeitpunkt während der Untersuchung entfernt werden.
+**Wiederholte Beurteilung.** Im Verlauf der Untersuchung wird die Schmerzlokalisation konsistent als Reaktion auf Schmerzprovokationsverfahren beurteilt. Der Patient kann nachträglich Schmerz in einem Bereich berichten, der zuvor während U1 nicht identifiziert wurde. Der Untersucher kehrt dann zu U1 zurück und bestätigt mit dem Patienten, dass der neue Bereich, der zuvor nicht gemeldet wurde, einbezogen werden sollte. Die Antworten in den Abschnitten U1_a oder U1_b werden entsprechend aktualisiert, um die überarbeitete Meldung anatomischer Lokalisationen widerzuspiegeln, die mit Schmerz während der letzten 30 Tage verbunden sind. Ein neuer Bereich kann zu dem bereits in U1_a oder U1_b gemeldeten Satz hinzugefügt werden, oder ein bereits gemeldeter Bereich könnte auch als Ergebnis einer nachträglichen Klärung zu einem beliebigen Zeitpunkt während der Untersuchung entfernt werden.
 
 ---
 
-### E2 Schneidekantenverhältnisse
+### U2 Schneidekantenverhältnisse
 
 **Begründung.** Die Oberkiefer- und Unterkieferschneidezähne dienen als stabile Landmarken für reliable Messungen des Bewegungsspielraums des Unterkiefers in vertikalen sowie horizontalen Bewegungsebenen.
 
@@ -68,7 +68,7 @@ Wenn die Abweichung 1,0 mm oder mehr beträgt, wählen Sie eine der folgenden dr
 
 ---
 
-### E3 Öffnungsmuster (Ergänzend)
+### U3 Öffnungsmuster (Ergänzend)
 
 **Begründung.** Angesichts der Schwierigkeit, eine reliable Beurteilung vorzunehmen, und des seltenen Nutzens für den Beitrag zu einer formalen DC/TMD-Diagnose wurde dieses Verfahren nicht als Kernkomponente der DC/TMD aufgenommen. Der Test hat jedoch vermuteten Nutzen für die häufige Diagnose von Diskusverlagerung ohne Reposition mit Limitation und für weniger häufige Diagnosen (zum Beispiel Muskelkontrakturen oder Schutzspannung) sowie für die Identifikation adaptiver Muster als Reaktion auf Zustände wie unilateralen Masseter-Schmerz oder Diskusverlagerung. Der Hauptgrund für die Beibehaltung des Tests auf routinemäßiger Basis ist jedoch, dass er als nützliches „Aufwärm"-Verfahren für den Patienten dient, bevor der Patient aufgefordert wird, die Öffnungsmobilitätsbewegungen durchzuführen, die gemessen werden.
 
@@ -84,37 +84,37 @@ c. ***Unkorrigierte Abweichung*** *(spezifizieren Sie rechts oder links).* Dies 
 
 ---
 
-### E4 Öffnungsbewegungen
+### U4 Öffnungsbewegungen
 
 **Begründung.** Mobilitätstests adressieren ein Kernzeichen von TMD, sind eine der reliabelsten klinischen Messungen und sind ein klinisch geeignetes Ergebnismaß.
 
-**Allgemein.** Messungen werden zwischen den Schneidekanten der Oberkiefer- und Unterkiefer-Referenzzähne vorgenommen, wie in E2 beschrieben. Die spezifischen Anweisungen, die jede dieser verschiedenen Messungen operationalisieren, sind in den Abschnitten 4 und 5 aufgeführt. Schmerzfreie Öffnung und maximale nicht-unterstützte Öffnung sind patientenbasierte Messungen, während maximale unterstützte Öffnung untersucherbasiert ist.
+**Allgemein.** Messungen werden zwischen den Schneidekanten der Oberkiefer- und Unterkiefer-Referenzzähne vorgenommen, wie in U2 beschrieben. Die spezifischen Anweisungen, die jede dieser verschiedenen Messungen operationalisieren, sind in den Abschnitten 4 und 5 aufgeführt. Schmerzfreie Öffnung und maximale nicht-unterstützte Öffnung sind patientenbasierte Messungen, während maximale unterstützte Öffnung untersucherbasiert ist.
 
-**E4_A Schmerzfreie Öffnung.** Der Patient öffnet für die Messung. In bestimmten Settings könnte die Wiederholung des Tests angemessen sein, wenn die schmerzfreie Öffnung weniger als 30 mm beträgt, um mögliche niedrige Ausreißerwerte zu beurteilen.
+**U4_A Schmerzfreie Öffnung.** Der Patient öffnet für die Messung. In bestimmten Settings könnte die Wiederholung des Tests angemessen sein, wenn die schmerzfreie Öffnung weniger als 30 mm beträgt, um mögliche niedrige Ausreißerwerte zu beurteilen.
 
-**E4_B Maximale nicht-unterstützte Öffnung.** Der Patient öffnet für die Messung. Fragen Sie den Patienten nach etwaigen Schmerzen, die durch dieses Verfahren produziert wurden.
+**U4_B Maximale nicht-unterstützte Öffnung.** Der Patient öffnet für die Messung. Fragen Sie den Patienten nach etwaigen Schmerzen, die durch dieses Verfahren produziert wurden.
 
-**E4_C Maximale unterstützte Öffnung.** Der Patient öffnet für die Messung. Die Abfolge der Schritte, wie sie von den verbalen Anweisungen gesteuert wird, ist darauf ausgelegt, den Einfluss von Schutzspannung aufgrund von Unsicherheit seitens des Patienten zu minimieren, aber Schutzspannung tritt auf, und während ein standardisiertes Verfahren bei der Erkennung von Schutzspannung hilft, ist die Identifikation von Schutzspannung zu diesem Zeitpunkt nicht operationalisiert. Der Untersucher hat die Option, das Verfahren zu wiederholen, wenn er glaubt, dass der Patient das Verfahren vorzeitig beendet hat oder mit Widerstand reagiert hat. Kooperation und Beziehung zwischen Untersucher und Patient sind kritisch für den Erfolg dieses besonderen Verfahrens. Fragen Sie den Patienten nach etwaigen Schmerzen, die durch dieses Verfahren produziert wurden.
+**U4_C Maximale unterstützte Öffnung.** Der Patient öffnet für die Messung. Die Abfolge der Schritte, wie sie von den verbalen Anweisungen gesteuert wird, ist darauf ausgelegt, den Einfluss von Schutzspannung aufgrund von Unsicherheit seitens des Patienten zu minimieren, aber Schutzspannung tritt auf, und während ein standardisiertes Verfahren bei der Erkennung von Schutzspannung hilft, ist die Identifikation von Schutzspannung zu diesem Zeitpunkt nicht operationalisiert. Der Untersucher hat die Option, das Verfahren zu wiederholen, wenn er glaubt, dass der Patient das Verfahren vorzeitig beendet hat oder mit Widerstand reagiert hat. Kooperation und Beziehung zwischen Untersucher und Patient sind kritisch für den Erfolg dieses besonderen Verfahrens. Fragen Sie den Patienten nach etwaigen Schmerzen, die durch dieses Verfahren produziert wurden.
 
-**E4_D Öffnung beendet.** Wenn der Patient dem Untersucher anzeigt, dass das Verfahren beendet werden sollte, wird [Ja] bestätigt. Wenn der Patient anzeigt, dass das Verfahren beendet werden soll, gleichzeitig mit der Wahrnehmung des Untersuchers, dass die unterstützte Öffnung ihr Maximum erreicht hat, sollte [Nein] bestätigt werden. Für alle anderen Situationen sollte [Nein] bestätigt werden.
+**U4_D Öffnung beendet.** Wenn der Patient dem Untersucher anzeigt, dass das Verfahren beendet werden sollte, wird [Ja] bestätigt. Wenn der Patient anzeigt, dass das Verfahren beendet werden soll, gleichzeitig mit der Wahrnehmung des Untersuchers, dass die unterstützte Öffnung ihr Maximum erreicht hat, sollte [Nein] bestätigt werden. Für alle anderen Situationen sollte [Nein] bestätigt werden.
 
 ---
 
-### E5 Laterale und protrusiver Bewegungen
+### U5 Laterale und protrusiver Bewegungen
 
 **Begründung.** Exkursive Bewegungen ergänzen die Öffnungsbewegungen für eine vollständige Beurteilung der Kiefermobilität. Diese Messungen sind ergänzend und können ausgelassen werden. Die Begründung für die Beurteilung lateraler Bewegungen ist die Dokumentation des Ausmaßes der Exkursionsbewegung(en) und etwaiger resultierender (induzierter) Schmerzen. Darüber hinaus dient die Messung exkursiver Bewegungen in bestimmten Settings dazu zu dokumentieren, ob die Kondylusbewegung limitiert versus normal war. Das Untersuchungsformular bietet Felder zur Dokumentation des Bewegungsausmaßes.
 
 **Allgemein.** Laterale Exkursionsmessungen werden zwischen den Oberkiefer- und Unterkiefer-Referenzmittellinien vorgenommen, während protrusiver Exkursionsmessungen zwischen den Labialflächen der Oberkiefer- und Unterkiefer-Referenzzähne vorgenommen werden. Wenn der Patient eine Bewegung nicht ausführen kann, zeigen Sie dies auf dem Dokumentationsformular an, indem Sie den Abschnitt leer lassen. Für die lateralen Exkursionsbewegungen, wenn der Patient verwirrt ist, in welche Richtung er seinen Kiefer bewegen soll, berühren Sie die ipsilaterale Seite des Gesichts, der Lippe oder sogar der Schulter und bitten Sie den Patienten, sich zur angegebenen Seite zu bewegen. Lateraler Druck auf den Kiefer durch den Untersucher, als Hilfe, um dem Patienten bei der Bewegung in die gewünschte Richtung zu helfen, ist sehr schwer zu kalibrieren und wird daher nicht empfohlen.
 
-**E5_A Rechte laterale Exkursion.** Bitten Sie den Patienten, den Unterkiefer zur rechten Seite des Patienten zu bewegen. Notieren Sie etwaige berichtete Schmerzen.
+**U5_A Rechte laterale Exkursion.** Bitten Sie den Patienten, den Unterkiefer zur rechten Seite des Patienten zu bewegen. Notieren Sie etwaige berichtete Schmerzen.
 
-**E5_B Linke laterale Exkursion.** Bitten Sie den Patienten, den Unterkiefer zur linken Seite des Patienten zu bewegen. Notieren Sie etwaige berichtete Schmerzen.
+**U5_B Linke laterale Exkursion.** Bitten Sie den Patienten, den Unterkiefer zur linken Seite des Patienten zu bewegen. Notieren Sie etwaige berichtete Schmerzen.
 
-**E5_C Protrusion.** Bitten Sie den Patienten, den Unterkiefer nach vorne zu bewegen. Notieren Sie etwaige berichtete Schmerzen. Beachten Sie, dass wenn die Unterkieferschneidezähne nicht über die Oberkieferschneidezähne hinaus protrudiert werden können, der Wert negativ sein wird; das Formular sollte für die negative Zahl markiert werden. Wenn die Schneidezähne eine Klasse-III-Situation im maximalen Schluss aufweisen, wird der horizontale Überbiss als negativer Wert notiert (wie in E2 erklärt), aber die Protrusionsbewegung, immer noch gemessen als Abstand von den Labialflächen der Oberkiefer- zu den Unterkieferschneidezähnen, wird als positive Zahl notiert (konsistent mit der Klasse-I-Situation, wo der Unterkieferschneidezahn anterior zum Oberkieferschneidezahn ist).
+**U5_C Protrusion.** Bitten Sie den Patienten, den Unterkiefer nach vorne zu bewegen. Notieren Sie etwaige berichtete Schmerzen. Beachten Sie, dass wenn die Unterkieferschneidezähne nicht über die Oberkieferschneidezähne hinaus protrudiert werden können, der Wert negativ sein wird; das Formular sollte für die negative Zahl markiert werden. Wenn die Schneidezähne eine Klasse-III-Situation im maximalen Schluss aufweisen, wird der horizontale Überbiss als negativer Wert notiert (wie in U2 erklärt), aber die Protrusionsbewegung, immer noch gemessen als Abstand von den Labialflächen der Oberkiefer- zu den Unterkieferschneidezähnen, wird als positive Zahl notiert (konsistent mit der Klasse-I-Situation, wo der Unterkieferschneidezahn anterior zum Oberkieferschneidezahn ist).
 
 ---
 
-### E6 Kiefergelenkgeräusche während Öffnungs- und Schließbewegungen
+### U6 Kiefergelenkgeräusche während Öffnungs- und Schließbewegungen
 
 **Begründung.** Kiefergelenkgeräusche sind ein klassisches Zeichen, das mit TMD assoziiert ist. Da Kiefergelenkgeräusche jedoch oft nicht über die Zeit stabil sind, ist die klinische Diagnose intrakapsulärer Störungen bestenfalls befriedigend, außer bei Diskusverlagerung ohne Reposition mit limitierter Öffnung. Da Patienten oft über Gelenkgeräusche besorgt sind, bleibt die Beurteilung von Kiefergelenkgeräuschen Teil der klinischen Untersuchung.
 
@@ -148,7 +148,7 @@ c. ***Unkorrigierte Abweichung*** *(spezifizieren Sie rechts oder links).* Dies 
 
 ---
 
-### E7 Kiefergelenkgeräusche während lateraler und protrusiver Bewegungen
+### U7 Kiefergelenkgeräusche während lateraler und protrusiver Bewegungen
 
 **Begründung.** Dieser Test ist eine Erweiterung der Beurteilung von Kiefergelenkgeräuschen während Öffnungs- und Schließbewegungen.
 
@@ -156,7 +156,7 @@ c. ***Unkorrigierte Abweichung*** *(spezifizieren Sie rechts oder links).* Dies 
 
 ---
 
-### E8 Gelenkarretierung
+### U8 Gelenkarretierung
 
 **Begründung.** Gelenkarretierung in der Klinik ist ungewöhnlich, aber sie tritt auf. Die Dokumentation, ob eine Arretierung auftritt oder nicht, ist eine nützliche Funktion innerhalb der Untersuchung, angesichts des assoziierten Schmerzes, der Behinderung und der Behandlungskomplexität, die mit Gelenkarretierung verbunden sein können.
 
@@ -166,7 +166,7 @@ c. ***Unkorrigierte Abweichung*** *(spezifizieren Sie rechts oder links).* Dies 
 
 ---
 
-### E9 Muskel- und Kiefergelenkschmerz bei Palpation
+### U9 Muskel- und Kiefergelenkschmerz bei Palpation
 
 **Begründung.** Durch Palpation induzierter Schmerz in Muskeln ist ein klassischer klinischer Test. Die Absicht ist zu bestimmen, ob der Patient Schmerz bei der Palpation eines Muskels oder Gelenks berichtet und zu bestimmen, ob ein induzierter Schmerz die Schmerzbeschwerde des Patienten dupliziert oder repliziert. Mehrere Ansätze sind verfügbar, abhängig vom Zweck der Untersuchung. Siehe Teil 2.12.e für die Beschreibung des Untersuchungsformulars bezüglich der Temporalis- und Masseter-Palpation.
 
@@ -240,12 +240,12 @@ c. ***Unkorrigierte Abweichung*** *(spezifizieren Sie rechts oder links).* Dies 
 
 ---
 
-### E10 Ergänzende Muskeln
+### U10 Ergänzende Muskeln
 
-**Begründung.** Zusätzliche Stellen können gemäß dem Protokoll in E9 untersucht werden.
+**Begründung.** Zusätzliche Stellen können gemäß dem Protokoll in U9 untersucht werden.
 
 ---
 
-### E11 Untersucherkommentare
+### U11 Untersucherkommentare
 
 **Begründung.** Der Untersucher notiert alle Beobachtungen, die als relevant für das Verständnis etwaiger Befunde erachtet werden. Alle Hindernisse, die irgendeinen Teil der Untersuchung beeinträchtigt haben, werden hier ebenfalls notiert; siehe Abschnitt 2.4(d) für Details. Alle klinischen Beobachtungen, die die Diagnose beeinflussen können, sollten hier ebenfalls notiert werden.

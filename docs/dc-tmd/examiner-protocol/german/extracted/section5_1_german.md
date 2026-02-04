@@ -7,7 +7,7 @@
 
 ---
 
-### E1. Bestätigung der Schmerz- und Kopfschmerz-Lokalisationen durch den Untersucher
+### U1. Bestätigung der Schmerz- und Kopfschmerz-Lokalisationen durch den Untersucher
 
 #### Informationen zur Identifizierung
 
@@ -84,7 +84,7 @@ WENN DER PATIENT SCHMERZEN IN DEN ANGEZEIGTEN BEREICHEN ANGIBT:
 
 ---
 
-#### E1b. Kopfschmerzlokalisation während der letzten 30 Tage
+#### U1b. Kopfschmerzlokalisation während der letzten 30 Tage
 
 **Anweisungen:**
 

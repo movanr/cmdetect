@@ -1,6 +1,6 @@
 # 7 Abbildungen: Protokoll für kalibrierte Untersuchung
 
-## E1 Bestätigung der Schmerz- und Kopfschmerzlokalisation durch den Untersucher
+## U1 Bestätigung der Schmerz- und Kopfschmerzlokalisation durch den Untersucher
 
 ### Anweisungen des Untersuchers zu den Lokalisationen für die Schmerzmeldung
 
@@ -16,7 +16,7 @@
 
 ---
 
-## E2 Schneidekantenverhältnisse
+## U2 Schneidekantenverhältnisse
 
 ### Referenzlinien
 
@@ -36,7 +36,7 @@
 
 ---
 
-## E3 Öffnungsmuster (Ergänzend)
+## U3 Öffnungsmuster (Ergänzend)
 
 **Abbildung 9.** (oben) Das Öffnungsmuster kann mit oder ohne Referenzlinien beurteilt werden. Dargestellt ist ein Lineal, das gegen das Ende des zentralen Oberkiefer-Schneidezahns gelegt wird; beachten Sie, dass die Kante des Lineals etwa 2 mm von der mesialen Schneidekante des rechten zentralen Schneidezahns entfernt ist. Da die Unterlippe nach links des Patienten abwich, scheint es, als ob der Unterkiefer nach links abgewichen wäre; die Inspektion der Unterkiefer-Mittellinie zeigt jedoch, dass diese Mittellinie ebenfalls knapp links des Patienten vom Lineal liegt. Da die Unterkiefer-Mittellinie innerhalb von 2 mm der Oberkiefer-Mittellinie liegt und weil der Unterkiefer entlang des Pfades (nicht gezeigt) geöffnet wurde, der durch das Lineal dargestellt wird, handelt es sich um ein gerades Öffnungsmuster. Siehe Abbildungen in Abbildung 10 für weitere Erläuterungen. Wenn die Referenz-Mittellinie ein offener Schneidezahn-Zwischenraum zwischen zwei Zähnen ist (wie hier gezeigt), ist das Anlegen des Lineals gegen die Schneidekante eine stabilere Landmarke als das Platzieren des Lineals in den Schneidezahn-Zwischenraum.
 
@@ -58,13 +58,13 @@ Siehe Abbildung 10a für die Legende.
 
 ---
 
-## E4 Öffnungsbewegungen
+## U4 Öffnungsbewegungen
 
-### E4_A Schmerzfreie Öffnung
+### U4_A Schmerzfreie Öffnung
 
 **Abbildung 11.** Die Spitze des Lineals wird gegen die Schneidekante des Unterkiefer-Referenz-Schneidezahns gelegt, und der Abstand zur mesial-distalen Mitte der Kante des zentralen Oberkiefer-Schneidezahns wird abgelesen. Der Wert wird auf den nächsten vollen mm abgerundet.
 
-### E4_B Maximale nicht-unterstützte Öffnung
+### U4_B Maximale nicht-unterstützte Öffnung
 
 **Abbildung 12.** Die Linealspitze wird wie zuvor platziert, und der Patient wird gebeten, so weit wie möglich zu öffnen, auch wenn es schmerzhaft ist.
 
@@ -72,31 +72,31 @@ Siehe Abbildung 10a für die Legende.
 
 **Abbildung 14.** (links) Schmerzen, die durch ein Bewegungsverfahren provoziert werden, sind für den Patienten manchmal schwer zu lokalisieren, nachdem der Unterkiefer in die geschlossene Position zurückgekehrt ist. In diesem Fall bat der Untersucher den Patienten, erneut so weit wie möglich zu öffnen, auch wenn es schmerzhaft ist, und der Patient wird dann gebeten, auf alle Schmerzbereiche zu zeigen, während der Unterkiefer noch in der maximal geöffneten Position ist. (rechts) Mit dem Unterkiefer in derselben Position (d.h. maximal geöffnet) berührt der Untersucher den angegebenen Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz „bekannt" ist.
 
-### E4_C Maximale unterstützte Öffnung
+### U4_C Maximale unterstützte Öffnung
 
 **Abbildung 15.** Der Untersucher platziert zuerst das Lineal in Position und nachdem er sichergestellt hat, dass der Patient im gleichen Ausmaß wie bei der vorherigen maximalen nicht-unterstützten Öffnung geöffnet hat, werden die Finger in Scherenposition gebracht und der Untersucher dehnt dann den Mund weiter auf, wenn möglich.
 
-(nicht dargestellt) Wenn der Patient den Untersucher bittet aufzuhören, wird **E4_D Öffnung beendet** als „ja" notiert. Andernfalls wird es als „nein" notiert.
+(nicht dargestellt) Wenn der Patient den Untersucher bittet aufzuhören, wird **U4_D Öffnung beendet** als „ja" notiert. Andernfalls wird es als „nein" notiert.
 
 **Abbildung 16.** (links) Der Patient wird gebeten, auf alle Bereiche zu zeigen, in denen er bei dieser Bewegung Schmerzen verspürt hat. (rechts) Der Untersucher berührt den Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz „bekannt" ist.
 
 ---
 
-## E5 Laterale und protrusive Bewegungen
+## U5 Laterale und protrusive Bewegungen
 
-### E5_A Rechte laterale Exkursion
+### U5_A Rechte laterale Exkursion
 
 **Abbildung 17.** Das Lineal wird in horizontaler Position mit der Spitze an der Unterkiefer-Mittellinien-Referenzposition platziert. Der Patient bewegt den Unterkiefer nach rechts, während der Untersucher die Lippen bei Bedarf mit der anderen Hand zurückzieht. Das Ausmaß der Bewegung beträgt 5 mm, gemessen von der mesialen Schneidekante des rechten zentralen Oberkiefer-Schneidezahns.
 
 **Abbildung 18.** Der Patient wird gebeten, auf alle Schmerzbereiche zu zeigen. Bei Bedarf berührt der Untersucher den Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz „bekannt" ist.
 
-### E5_B Linke laterale Exkursion
+### U5_B Linke laterale Exkursion
 
 **Abbildung 19.** Das Lineal wird in horizontaler Position mit der Spitze an der Oberkiefer-Mittellinien-Referenzposition platziert. In diesem Fall ist die Linealspitze etwa 1 mm davon entfernt, mit der Referenzposition in einer Linie zu sein (d.h. mesiale Schneidekante des rechten zentralen Oberkiefer-Schneidezahns), eine häufige Fehlerquelle bei diesen Messungen. Der Patient bewegt den Unterkiefer nach links, während der Untersucher die Lippen bei Bedarf mit der anderen Hand zurückzieht. Der gemessene Wert an der Unterkiefer-Mittellinie beträgt nicht ganz 6,0 mm, sodass der notierte Wert 5 mm wäre.
 
 Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
-### E5_C Protrusion
+### U5_C Protrusion
 
 **Abbildung 20.** Das Lineal wird in horizontaler Position mit der Spitze auf der bukkalen Fläche des Oberkiefer-Referenzzahns platziert (wie durch die vertikale Linie im mittleren Bereich des Schneidezahns angezeigt, die in diesem Bild teilweise sichtbar ist). Der Patient bewegt den Unterkiefer in protrusiver Richtung, während der Untersucher die Lippen bei Bedarf mit der anderen Hand zurückzieht.
 
@@ -106,7 +106,7 @@ Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
 ### Alternative Messmethode für laterale Exkursionen
 
-#### E5_A & B Rechte und linke laterale Exkursionen
+#### U5_A & B Rechte und linke laterale Exkursionen
 
 **Abbildung 21.** Wenn die alternativen vertikalen Referenzmarkierungen wie in Abbildung 6 gezeigt verwendet werden, werden laterale Exkursionen wie gezeigt gemessen. Um die Linienmarkierungen auf den Unterkiefer-Schneidezähnen zu demonstrieren, wird das Lineal weiter entfernt (inferior) von der Oberkiefer-Schneidekante gehalten, als es in der Praxis getan würde.
 
@@ -116,7 +116,7 @@ Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
 ---
 
-## E6 Kiefergelenkgeräusche bei Öffnungs- und Schließbewegungen
+## U6 Kiefergelenkgeräusche bei Öffnungs- und Schließbewegungen
 
 **Abbildung 22.** Das Kiefergelenk kann auf eine von zwei Arten untersucht werden. In den linken und mittleren Darstellungen steht der Untersucher zur Seite, um die Fotografie zu erleichtern.
 
@@ -126,13 +126,13 @@ Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
 ---
 
-## E7 Kiefergelenkgeräusche bei lateralen und protrusiven Bewegungen
+## U7 Kiefergelenkgeräusche bei lateralen und protrusiven Bewegungen
 
 **Abbildung 23.** Wie dargestellt, wird das rechte Kiefergelenk untersucht, während der Unterkiefer (links) nach rechts, (Mitte) nach links und (rechts) protrusiv bewegt wird. Nicht gezeigt ist die gleiche Untersuchung für das linke Kiefergelenk.
 
 ---
 
-## E8 Gelenkarretierung
+## U8 Gelenkarretierung
 
 **Es gibt keine Abbildungen für diesen Teil des Untersuchungsprotokolls.**
 
@@ -140,7 +140,7 @@ Wenn während irgendeines Teils der Untersuchung keine geöffnete oder geschloss
 
 ---
 
-## E9 Muskel- und Kiefergelenkschmerz bei Palpation
+## U9 Muskel- und Kiefergelenkschmerz bei Palpation
 
 **Abbildung 24.** Extraorale Kaumuskulatur: Temporalis und Masseter. Die Darstellung zeigt Palpationspfade für Temporalis und Masseter mit drei Palpationsbereichen pro Zone. Beachten Sie, dass die anteriore Zone des Temporalis leicht gekrümmt ist, entsprechend dem Umriss des Muskels. Das Ziel ist, jede Zone so vollständig wie möglich zu palpieren, also palpieren Sie mindestens drei Bereiche innerhalb jeder Zone mit 1 kg Druck.
 
@@ -196,7 +196,7 @@ Siehe Legende von Abbildung 24 für die Beschreibung der Untersuchungsformulare.
 
 ---
 
-## E10 Ergänzende Muskelpalpationsbereiche (0,5 kg Palpationsdruck)
+## U10 Ergänzende Muskelpalpationsbereiche (0,5 kg Palpationsdruck)
 
 ### Posteriore und submandibuläre Bereiche
 
@@ -218,6 +218,6 @@ Legende: Ausgefüllter Kreis kennzeichnet eine Fingerspitze.
 
 ---
 
-## E11 Kommentare
+## U11 Kommentare
 
 Der Untersucher notiert relevante Kommentare bezüglich der Untersuchung.
