@@ -31,7 +31,7 @@ export const E2_MODEL = M.group({
     otherTooth: M.question(
       Q.text({
         placeholder: "Zahnnummer",
-        required: false,
+        required: true,
         enableWhen: { sibling: "selection", equals: "other" },
       }),
       "referenceToothOther"
@@ -57,11 +57,11 @@ export const E2_MODEL = M.group({
       }),
       "midlineDirection"
     ),
-    // mm is only shown when direction is not "na"
+    // mm is only shown and required when direction is not "na"
     mm: M.question(
       Q.measurement({
         unit: "mm",
-        required: false, // Validation handled separately based on direction
+        required: true,
         enableWhen: { sibling: "direction", notEquals: "na" },
       }),
       "midlineMm"

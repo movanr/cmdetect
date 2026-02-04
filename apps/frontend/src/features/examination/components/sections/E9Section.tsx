@@ -289,7 +289,7 @@ export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSe
       </CardContent>
       <SectionFooter
         onNext={handleNext}
-        onSkip={onSkip}
+        onSkipConfirm={onSkip}
         onBack={onBack}
         isFirstStep={isFirstSection}
         isLastSection={isLastSection}

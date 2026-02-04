@@ -130,7 +130,19 @@ export interface ValidationResult {
 export function isFieldEnabled(instance: QuestionInstance, getSiblingValue: ValueGetter): boolean {
   if (!instance.enableWhen) return true;
   const siblingPath = instance.path.replace(/\.[^.]+$/, `.${instance.enableWhen.sibling}`);
-  return getSiblingValue(siblingPath) === instance.enableWhen.equals;
+  const siblingValue = getSiblingValue(siblingPath);
+
+  // Handle equals condition
+  if (instance.enableWhen.equals !== undefined) {
+    return siblingValue === instance.enableWhen.equals;
+  }
+
+  // Handle notEquals condition
+  if (instance.enableWhen.notEquals !== undefined) {
+    return siblingValue !== instance.enableWhen.notEquals;
+  }
+
+  return true;
 }
 
 /**

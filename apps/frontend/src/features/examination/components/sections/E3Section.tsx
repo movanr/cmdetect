@@ -61,7 +61,7 @@ export function E3Section({ onComplete, onSkip, onBack, isFirstSection }: E3Sect
       </CardContent>
       <SectionFooter
         onNext={handleNext}
-        onSkip={onSkip}
+        onSkipConfirm={onSkip}
         onBack={onBack}
         isFirstStep={isFirstSection}
         warnOnSkip

@@ -35,7 +35,7 @@ export function EnumField<T extends FieldValues, TOption extends string>({
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <FormItem className={cn("space-y-2", className)}>
           {label && (
             <FormLabel className="text-muted-foreground font-normal">{label}</FormLabel>
@@ -51,6 +51,7 @@ export function EnumField<T extends FieldValues, TOption extends string>({
               labels={labels}
               disabled={disabled}
               direction={direction}
+              hasError={!!fieldState.error}
             />
           </FormControl>
           <FormMessage className="text-xs" />

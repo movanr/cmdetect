@@ -56,11 +56,21 @@ export const E1_MODEL = M.group({
   }),
 });
 
-// Steps - all fields shown together in a single step
+// Steps - separate validation for pain (e1a) and headache (e1b) sub-steps
 export const E1_STEPS = {
   "e1-all": [
     `${E1_FIELDS.painLocation}.right`,
     `${E1_FIELDS.painLocation}.left`,
+    `${E1_FIELDS.headacheLocation}.right`,
+    `${E1_FIELDS.headacheLocation}.left`,
+  ],
+  // E1a: Pain location (both sides)
+  e1a: [
+    `${E1_FIELDS.painLocation}.right`,
+    `${E1_FIELDS.painLocation}.left`,
+  ],
+  // E1b: Headache location (both sides)
+  e1b: [
     `${E1_FIELDS.headacheLocation}.right`,
     `${E1_FIELDS.headacheLocation}.left`,
   ],

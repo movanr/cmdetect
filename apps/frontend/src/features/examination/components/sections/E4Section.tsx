@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CheckCircle, ChevronLeft, SkipForward } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
@@ -345,30 +345,6 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     setExpanded({ [side]: region, [otherSide]: null } as ExpandedState);
   }, []);
 
-  // Check if current step has incomplete data
-  const checkStepIncomplete = useCallback((): boolean => {
-    if (isInterview) {
-      const result = validateInterviewCompletion(stepInstances, (path) =>
-        form.getValues(path as FieldPath<FormValues>)
-      );
-      return !result.valid;
-    }
-    // For measurement steps, check required fields
-    for (const instance of stepInstances) {
-      const config = instance.config as { required?: boolean };
-      if (config.required) {
-        const value = form.getValues(instance.path as FieldPath<FormValues>) as unknown;
-        if (instance.renderType === "measurement") {
-          const terminatedPath = instance.path.replace(/\.[^.]+$/, ".terminated") as FieldPath<FormValues>;
-          const terminatedValue = form.getValues(terminatedPath) as unknown;
-          if (terminatedValue === true) continue;
-        }
-        if (value == null || value === "") return true;
-      }
-    }
-    return false;
-  }, [isInterview, stepInstances, form]);
-
   // Navigation handlers
   const handleBack = () => {
     if (isFirstStep) {
@@ -389,14 +365,6 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
       setCurrentStepIndex(-1); // All steps complete, show collapsed view with section footer
     } else {
       setCurrentStepIndex((i) => i + 1);
-    }
-  };
-
-  const handleSkip = () => {
-    if (checkStepIncomplete()) {
-      setShowSkipDialog(true);
-    } else {
-      performSkip();
     }
   };
 
@@ -429,13 +397,19 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
       );
       if (!result.valid) {
         setIncompleteRegions(result.incompleteRegions);
+        // Show skip dialog when validation fails
+        setShowSkipDialog(true);
         return;
       }
       setIncompleteRegions([]);
     }
 
     const isValid = validateStep(currentStepId);
-    if (!isValid) return;
+    if (!isValid) {
+      // Show skip dialog when validation fails
+      setShowSkipDialog(true);
+      return;
+    }
 
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
     setExpanded({ left: null, right: null });
@@ -630,22 +604,11 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
                     Zurück
                   </Button>
 
-                  {/* Right: Next and Skip buttons */}
-                  <div className="flex gap-2">
-                    <Button type="button" onClick={handleNext}>
-                      {isLastStep ? "Abschließen" : "Weiter"}
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={handleSkip}
-                      className="text-muted-foreground"
-                    >
-                      <SkipForward className="h-4 w-4 mr-1" />
-                      Überspringen
-                    </Button>
-                  </div>
+                  {/* Right: Next button */}
+                  <Button type="button" onClick={handleNext}>
+                    {isLastStep ? "Abschließen" : "Weiter"}
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
               </div>
             );

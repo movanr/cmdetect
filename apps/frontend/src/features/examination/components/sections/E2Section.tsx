@@ -93,7 +93,7 @@ export function E2Section({ onComplete, onSkip, onBack, isFirstSection }: E2Sect
       </CardContent>
       <SectionFooter
         onNext={handleNext}
-        onSkip={onSkip}
+        onSkipConfirm={onSkip}
         onBack={onBack}
         isFirstStep={isFirstSection}
         warnOnSkip
