@@ -436,13 +436,21 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
                 {/* Content */}
                 {stepIsInterview ? (
-                  <InterviewSubsection
-                    instances={stepInstances}
-                    regions={regions}
-                    expanded={expanded}
-                    onExpandChange={handleExpandChange}
-                    incompleteRegions={incompleteRegions}
-                  />
+                  <>
+                    <div className="flex justify-center pt-2">
+                      <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Keine weiteren Schmerzbereiche
+                      </Button>
+                    </div>
+                    <InterviewSubsection
+                      instances={stepInstances}
+                      regions={regions}
+                      expanded={expanded}
+                      onExpandChange={handleExpandChange}
+                      incompleteRegions={incompleteRegions}
+                    />
+                  </>
                 ) : stepId === "e4a" ? (
                   // E4A uses QuestionField directly for the pain-free opening measurement
                   <div className="space-y-2">
@@ -474,16 +482,6 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
                   {/* Right: Action buttons */}
                   <div className="flex gap-2">
-                    {stepIsInterview && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleNoMorePainRegions}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Keine weiteren Schmerzbereiche
-                      </Button>
-                    )}
                     <Button
                       type="button"
                       variant="ghost"
