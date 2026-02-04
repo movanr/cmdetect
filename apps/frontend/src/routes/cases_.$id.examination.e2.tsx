@@ -23,14 +23,6 @@ function ExaminationE2Page() {
     });
   };
 
-  // Skip also navigates to next section
-  const handleSkip = () => {
-    navigate({
-      to: "/cases/$id/examination/e3",
-      params: { id },
-    });
-  };
-
   // Navigate to previous section (E1)
   const handleBack = () => {
     navigate({
@@ -39,5 +31,5 @@ function ExaminationE2Page() {
     });
   };
 
-  return <E2Section onComplete={handleComplete} onSkip={handleSkip} onBack={handleBack} />;
+  return <E2Section onComplete={handleComplete} onBack={handleBack} />;
 }

@@ -54,14 +54,14 @@ export function E3Section({ onComplete, onSkip, onBack, isFirstSection }: E3Sect
           </Link>
         </Button>
       </CardHeader>
-      <CardContent>
-        <div className="max-w-md mx-auto space-y-6">
-          {/* Instruction flow */}
-          <MeasurementFlowBlock instruction={E3_RICH_INSTRUCTIONS.openingPattern} />
+      <CardContent className="space-y-6">
+        {/* Instruction flow */}
+        <MeasurementFlowBlock instruction={E3_RICH_INSTRUCTIONS.openingPattern} />
 
-          {/* Pattern selection */}
-          <div className="space-y-4">
-            <h4 className="font-medium">{SECTION_LABELS.e3.full}</h4>
+        {/* Pattern selection */}
+        <div className="space-y-4">
+          <h4 className="font-medium">{SECTION_LABELS.e3.full}</h4>
+          <div className="max-w-sm">
             {pattern && <QuestionField instance={pattern} />}
           </div>
         </div>

@@ -1,33 +1,121 @@
 /**
  * E2: Incisal Relationships Section
  *
- * Displays:
- * - Reference tooth selection (enum)
- * - Horizontal overjet measurement
- * - Vertical overlap measurement
- * - Midline deviation (direction + conditional mm)
+ * Four-step flow:
+ * - U2-ref: Reference tooth selection
+ * - U2-mid: Midline deviation
+ * - U2-hov: Horizontal overjet measurement
+ * - U2-vov: Vertical overlap measurement
  */
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
+import { useState } from "react";
+import type { FieldPath } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
-import { useExaminationForm } from "../../form/use-examination-form";
+import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { MeasurementFlowBlock, SectionFooter } from "../ui";
+import { MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+
+// Step configuration
+type E2StepId = "e2-ref" | "e2-mid" | "e2-hov" | "e2-vov";
+
+const E2_STEP_ORDER: E2StepId[] = ["e2-ref", "e2-mid", "e2-hov", "e2-vov"];
+
+const E2_STEP_CONFIG: Record<E2StepId, { badge: string; title: string }> = {
+  "e2-ref": { badge: "U2", title: "Referenzzahn" },
+  "e2-mid": { badge: "U2", title: "Mittellinienabweichung" },
+  "e2-hov": { badge: "U2", title: "Horizontaler inzisaler Überbiss" },
+  "e2-vov": { badge: "U2", title: "Vertikaler inzisaler Überbiss" },
+};
 
 interface E2SectionProps {
   onComplete?: () => void;
-  onSkip?: () => void;
   onBack?: () => void;
   isFirstSection?: boolean;
 }
 
-export function E2Section({ onComplete, onSkip, onBack, isFirstSection }: E2SectionProps) {
-  const { getInstancesForStep, validateStep } = useExaminationForm();
+/**
+ * Check if a step has data (for computing initial state).
+ */
+function stepHasData(stepId: E2StepId, getValue: (path: string) => unknown): boolean {
+  switch (stepId) {
+    case "e2-ref": {
+      const selection = getValue("e2.referenceTooth.selection");
+      return selection != null && selection !== "";
+    }
+    case "e2-mid": {
+      const direction = getValue("e2.midlineDeviation.direction");
+      return direction != null && direction !== "";
+    }
+    case "e2-hov": {
+      const value = getValue("e2.horizontalOverjet");
+      return value != null && value !== "";
+    }
+    case "e2-vov": {
+      const value = getValue("e2.verticalOverlap");
+      return value != null && value !== "";
+    }
+    default:
+      return false;
+  }
+}
+
+/**
+ * Get summary for a completed step.
+ */
+function getStepSummary(stepId: E2StepId, getValue: (path: string) => unknown): string {
+  switch (stepId) {
+    case "e2-ref": {
+      const selection = getValue("e2.referenceTooth.selection") as string | undefined;
+      if (selection === "other") {
+        const other = getValue("e2.referenceTooth.otherTooth") as string | undefined;
+        return other || "Anderer";
+      }
+      return selection || "—";
+    }
+    case "e2-mid": {
+      const direction = getValue("e2.midlineDeviation.direction") as string | undefined;
+      if (direction === "na") return "Keine Abweichung";
+      const mm = getValue("e2.midlineDeviation.mm") as number | undefined;
+      if (direction && mm != null) {
+        const dirLabel = direction === "right" ? "rechts" : "links";
+        return `${mm} mm nach ${dirLabel}`;
+      }
+      return direction || "—";
+    }
+    case "e2-hov": {
+      const value = getValue("e2.horizontalOverjet") as number | undefined;
+      return value != null ? `${value} mm` : "—";
+    }
+    case "e2-vov": {
+      const value = getValue("e2.verticalOverlap") as number | undefined;
+      return value != null ? `${value} mm` : "—";
+    }
+    default:
+      return "—";
+  }
+}
+
+export function E2Section({ onComplete, onBack, isFirstSection }: E2SectionProps) {
+  const { getInstancesForStep } = useExaminationForm();
+  const { getValues } = useFormContext<FormValues>();
 
   const instances = getInstancesForStep("e2-all");
 
@@ -39,10 +127,140 @@ export function E2Section({ onComplete, onSkip, onBack, isFirstSection }: E2Sect
   const midlineDirection = instances.find((i) => i.path === "e2.midlineDeviation.direction");
   const midlineMm = instances.find((i) => i.path === "e2.midlineDeviation.mm");
 
+  // Compute initial state from form values
+  const [initialState] = useState(() => {
+    const statuses: Record<string, "completed" | "skipped"> = {};
+    for (const stepId of E2_STEP_ORDER) {
+      if (stepHasData(stepId, (path) => getValues(path as FieldPath<FormValues>))) {
+        statuses[stepId] = "completed";
+      }
+    }
+
+    // Find first incomplete step, or -1 if all complete
+    let firstIncompleteIndex = -1;
+    for (let i = 0; i < E2_STEP_ORDER.length; i++) {
+      if (!statuses[E2_STEP_ORDER[i]]) {
+        firstIncompleteIndex = i;
+        break;
+      }
+    }
+
+    return { statuses, firstIncompleteIndex };
+  });
+
+  const [currentStepIndex, setCurrentStepIndex] = useState(initialState.firstIncompleteIndex);
+  const [stepStatuses, setStepStatuses] = useState(initialState.statuses);
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
+
+  // Derived state
+  const allComplete = currentStepIndex === -1;
+  const currentStepId = allComplete ? E2_STEP_ORDER[0] : E2_STEP_ORDER[currentStepIndex];
+  const isLastStep = currentStepIndex === E2_STEP_ORDER.length - 1;
+  const isFirstStep = currentStepIndex === 0;
+
+  // Navigation handlers
+  const handleBack = () => {
+    if (isFirstStep) {
+      onBack?.();
+    } else {
+      setCurrentStepIndex((i) => i - 1);
+    }
+  };
+
+  const performSkip = () => {
+    setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
+    if (isLastStep) {
+      setCurrentStepIndex(-1);
+    } else {
+      setCurrentStepIndex((i) => i + 1);
+    }
+  };
+
+  const handleConfirmSkip = () => {
+    setShowSkipDialog(false);
+    performSkip();
+  };
+
   const handleNext = () => {
-    const isValid = validateStep("e2-all");
-    if (isValid) {
-      onComplete?.();
+    // Check if current step has data
+    const hasData = stepHasData(currentStepId, (path) => getValues(path as FieldPath<FormValues>));
+
+    if (!hasData) {
+      setShowSkipDialog(true);
+      return;
+    }
+
+    setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
+
+    if (isLastStep) {
+      setCurrentStepIndex(-1);
+    } else {
+      setCurrentStepIndex((i) => i + 1);
+    }
+  };
+
+  const getStatus = (stepId: E2StepId, index: number): StepStatus => {
+    if (allComplete) {
+      return stepStatuses[stepId] || "pending";
+    }
+    if (index === currentStepIndex) return "active";
+    if (stepStatuses[stepId]) return stepStatuses[stepId];
+    return "pending";
+  };
+
+  const getSummary = (stepId: E2StepId): string => {
+    return getStepSummary(stepId, (path) => getValues(path as FieldPath<FormValues>));
+  };
+
+  // Render active step content
+  const renderStepContent = (stepId: E2StepId) => {
+    switch (stepId) {
+      case "e2-ref":
+        return (
+          <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.referenceTooth} />
+            <div className="max-w-sm space-y-4">
+              {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
+              {referenceToothOther && <QuestionField instance={referenceToothOther} />}
+            </div>
+          </div>
+        );
+
+      case "e2-mid":
+        return (
+          <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.midlineDeviation} />
+            <div className="max-w-sm space-y-4">
+              {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
+              {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
+            </div>
+          </div>
+        );
+
+      case "e2-hov":
+        return (
+          <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.horizontalOverjet} />
+            <div className="max-w-sm space-y-4">
+              {horizontalOverjet && <QuestionField instance={horizontalOverjet} />}
+              <p className="text-xs text-muted-foreground">Negativer Wert bei Kreuzbiss</p>
+            </div>
+          </div>
+        );
+
+      case "e2-vov":
+        return (
+          <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.verticalOverlap} />
+            <div className="max-w-sm space-y-4">
+              {verticalOverlap && <QuestionField instance={verticalOverlap} />}
+              <p className="text-xs text-muted-foreground">Negativer Wert bei offenem Biss</p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -57,57 +275,88 @@ export function E2Section({ onComplete, onSkip, onBack, isFirstSection }: E2Sect
           </Link>
         </Button>
       </CardHeader>
-      <CardContent>
-        <div className="max-w-md mx-auto space-y-8">
-          {/* Reference Tooth */}
-          <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.referenceTooth} />
-            <div className="space-y-4 pl-4 border-l-2 border-muted">
-              {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
-              {referenceToothOther && <QuestionField instance={referenceToothOther} />}
-            </div>
-          </div>
+      <CardContent className="space-y-3">
+        {E2_STEP_ORDER.map((stepId, index) => {
+          const config = E2_STEP_CONFIG[stepId];
+          const status = getStatus(stepId, index);
 
-          {/* Midline Deviation */}
-          <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.midlineDeviation} />
-            <div className="space-y-4 pl-4 border-l-2 border-muted">
-              {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
-              {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
-            </div>
-          </div>
+          if (status === "active") {
+            return (
+              <div
+                key={stepId}
+                className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+              >
+                {/* Header */}
+                <div className="flex items-center gap-2">
+                  <Badge>{config.badge}</Badge>
+                  <h3 className="font-semibold">{config.title}</h3>
+                </div>
 
-          {/* Horizontal Overjet */}
-          <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.horizontalOverjet} />
-            <div className="pl-4 border-l-2 border-muted">
-              {horizontalOverjet && (
-                <QuestionField instance={horizontalOverjet} label="Horizontaler Overjet" />
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Negativer Wert bei Kreuzbiss</p>
-            </div>
-          </div>
+                {/* Content */}
+                {renderStepContent(stepId)}
 
-          {/* Vertical Overlap */}
-          <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.verticalOverlap} />
-            <div className="pl-4 border-l-2 border-muted">
-              {verticalOverlap && (
-                <QuestionField instance={verticalOverlap} label="Vertikaler Overlap" />
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Negativer Wert bei offenem Biss</p>
-            </div>
-          </div>
-        </div>
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleBack}
+                    disabled={isFirstStep && (isFirstSection || !onBack)}
+                    className="text-muted-foreground"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Zurück
+                  </Button>
+
+                  <Button type="button" onClick={handleNext}>
+                    {isLastStep ? "Abschließen" : "Weiter"}
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            );
+          }
+
+          // Collapsed step
+          return (
+            <StepBar
+              key={stepId}
+              config={config}
+              status={status}
+              summary={status === "pending" ? "—" : getSummary(stepId)}
+              onClick={() => setCurrentStepIndex(index)}
+            />
+          );
+        })}
+
+        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
+              <AlertDialogDescription>
+                Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
+                fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
+                ergänzen.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmSkip}>
+                Überspringen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
-      <SectionFooter
-        onNext={handleNext}
-        onSkipConfirm={onSkip}
-        onBack={onBack}
-        isFirstStep={isFirstSection}
-        warnOnSkip
-        checkIncomplete={() => !validateStep("e2-all")}
-      />
+
+      {/* Section-level footer when all steps are complete */}
+      {allComplete && (
+        <SectionFooter
+          onNext={onComplete}
+          onBack={onBack}
+          isFirstStep={isFirstSection}
+        />
+      )}
     </Card>
   );
 }
