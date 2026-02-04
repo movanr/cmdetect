@@ -8,8 +8,11 @@
  * - Midline deviation (direction + conditional mm)
  */
 
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SECTIONS } from "@cmdetect/dc-tmd";
+import { Link } from "@tanstack/react-router";
+import { BookOpen } from "lucide-react";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
@@ -42,8 +45,14 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{getSectionCardTitle(SECTIONS.e2)}</CardTitle>
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/protocol/$section" params={{ section: "e2" }}>
+            <BookOpen className="h-4 w-4 mr-1" />
+            Protokoll
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="max-w-sm mx-auto space-y-8">

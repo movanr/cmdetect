@@ -1,6 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
+import { Link } from "@tanstack/react-router";
+import { BookOpen } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useExaminationForm } from "../../form/use-examination-form";
@@ -248,10 +251,18 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>{getSectionCardTitle(SECTIONS.e9)}</CardTitle>
-        <PalpationModeToggle
-          value={palpationMode}
-          onChange={(mode) => setValue("e9.palpationMode", mode)}
-        />
+        <div className="flex items-center gap-4">
+          <PalpationModeToggle
+            value={palpationMode}
+            onChange={(mode) => setValue("e9.palpationMode", mode)}
+          />
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/protocol/$section" params={{ section: "e9" }}>
+              <BookOpen className="h-4 w-4 mr-1" />
+              Protokoll
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex justify-center items-start gap-8 md:gap-16">

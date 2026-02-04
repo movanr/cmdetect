@@ -8,9 +8,12 @@
  * - Unkorrigierte Deviation nach links
  */
 
-import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SECTIONS } from "@cmdetect/dc-tmd";
+import { Link } from "@tanstack/react-router";
+import { BookOpen } from "lucide-react";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle, SECTION_LABELS } from "../../labels";
 import { QuestionField } from "../QuestionField";
@@ -36,11 +39,17 @@ export function E3Section({ onComplete, onSkip }: E3SectionProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <CardTitle>{getSectionCardTitle(SECTIONS.e3)}</CardTitle>
           <Badge variant="secondary">Zusatz</Badge>
         </div>
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/protocol/$section" params={{ section: "e3" }}>
+            <BookOpen className="h-4 w-4 mr-1" />
+            Protokoll
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="max-w-sm mx-auto space-y-4">
