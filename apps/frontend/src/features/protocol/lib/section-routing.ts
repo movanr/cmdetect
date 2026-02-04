@@ -7,7 +7,7 @@ export function getSectionRoute(sectionNum: string): string | null {
   const major = parseInt(parts[0], 10);
   const minor = parts[1] ? parseInt(parts[1], 10) : undefined;
 
-  // Section 5 subsections map to E1-E9
+  // Section 5 subsections map to E1-E9 routes (displayed as U1-U9 in German UI)
   if (major === 5) {
     if (minor === undefined || minor <= 2) return "overview";
     if (minor === 3) return "e1";

@@ -35,8 +35,9 @@ export interface SafetyWarning {
 
 /** Cross-reference to protocol section */
 export interface CrossReference {
-  section: string; // e.g., "6.2.1"
-  label: string;
+  section: string; // Route parameter (e.g., "e4", "section6")
+  anchor?: string; // Optional anchor ID (e.g., "4a-schmerzfreie-offnung")
+  label: string; // Display text
 }
 
 /** A phase in a multi-step procedure */
@@ -85,6 +86,12 @@ export interface RichPainInterviewInstruction {
   title: string;
   prompt: string;
   flow: ProcedureFlowStep[];
+  /** Concise specification - section 4 quick reference table */
+  conciseSpec?: CrossReference[];
+  /** Complete specification - section 5 detailed protocol */
+  completeSpec?: CrossReference[];
+  /** Additional information - general instructions (section 2, 6, etc.) */
+  additionalInfo?: CrossReference[];
 }
 
 /** Measurement instruction with step-based flow */
@@ -95,8 +102,12 @@ export interface RichMeasurementInstruction {
   flow: ProcedureFlowStep[];
   /** Safety warnings */
   warnings?: SafetyWarning[];
-  /** Cross-references to protocol sections */
-  crossReferences?: CrossReference[];
+  /** Concise specification - section 4 quick reference table */
+  conciseSpec?: CrossReference[];
+  /** Complete specification - section 5 detailed protocol */
+  completeSpec?: CrossReference[];
+  /** Additional information - general instructions (section 2, 6, etc.) */
+  additionalInfo?: CrossReference[];
 }
 
 /**

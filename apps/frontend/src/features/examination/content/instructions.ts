@@ -82,8 +82,7 @@ const PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
     id: "done",
     label: "Keine weiteren Schmerzbereiche",
-    description:
-      "Gibt es noch weitere Bereiche? Falls nein, abschließen.",
+    description: "Gibt es noch weitere Bereiche? Falls nein, abschließen.",
     appAction: 'Button „Keine weiteren Schmerzbereiche"',
   },
 ];
@@ -124,8 +123,7 @@ const E4B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
   {
     id: "script",
     label: "Anweisung",
-    description:
-      "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
+    description: "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
   },
   {
     id: "ruler",
@@ -186,34 +184,88 @@ const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
  * Based on DC-TMD Examiner Protocol Section 4
  */
 export const E4_RICH_INSTRUCTIONS = {
-  /** E4A - Pain-free opening (step-based flow) */
+  /** U4A - Pain-free opening (step-based flow) */
   painFreeOpening: {
     stepId: "U4A",
     title: "Schmerzfreie Mundöffnung",
     flow: E4A_MEASUREMENT_FLOW,
-    crossReferences: [{ section: "4.5", label: "Öffnungsbewegung" }],
+    // Section 4: Quick reference table
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "e4-offnungsbewegungen",
+        label: "4.5 Schmerzfreie Öffnung",
+      },
+    ],
+    // Section 5: Detailed protocol
+    completeSpec: [
+      {
+        section: "e4",
+        anchor: "4a-schmerzfreie-offnung",
+        label: "5.4 U4A Schmerzfreie Öffnung",
+      },
+    ],
+    // General instructions
+    additionalInfo: [
+      // 2.5(d): Pain-free opening is the only exception to "move despite pain"
+      { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+    ],
   } satisfies RichMeasurementInstruction,
 
-  /** E4B - Maximum unassisted opening (step-based flow) */
+  /** U4B - Maximum unassisted opening (step-based flow) */
   maxUnassistedOpening: {
     stepId: "U4B",
     title: "Maximale aktive Mundöffnung",
     flow: E4B_MEASUREMENT_FLOW,
-    crossReferences: [
-      { section: "4.5", label: "Aktive Öffnung" },
-      { section: "6.2.1", label: "Schmerzlokalisation" },
+    // Section 4: Quick reference table
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "e4-offnungsbewegungen",
+        label: "4.5 Max. nicht-unterstützte Öffnung",
+      },
+    ],
+    // Section 5: Detailed protocol
+    completeSpec: [
+      {
+        section: "e4",
+        anchor: "4b-maximale-nicht-unterstutzte-offnung",
+        label: "5.4 U4B Max. nicht-unterstützte Öffnung",
+      },
+    ],
+    // General instructions
+    additionalInfo: [
+      // 2.5(d): "move even if painful" applies here
+      { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
-  /** E4C - Maximum assisted opening (step-based flow with safety warning) */
+  /** U4C - Maximum assisted opening (step-based flow with safety warning) */
   maxAssistedOpening: {
     stepId: "U4C",
     title: "Maximale passive Mundöffnung",
     flow: E4C_MEASUREMENT_FLOW,
     warnings: [E4C_SAFETY_WARNING],
-    crossReferences: [
-      { section: "4.5", label: "Passive Öffnung" },
-      { section: "6.2.1", label: "Schmerzlokalisation" },
+    // Section 4: Quick reference table
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "e4-offnungsbewegungen",
+        label: "4.5 Max. unterstützte Öffnung",
+      },
+    ],
+    // Section 5: Detailed protocol
+    completeSpec: [
+      {
+        section: "e4",
+        anchor: "4c-maximale-unterstutzte-offnung",
+        label: "5.4 U4C Max. unterstützte Öffnung",
+      },
+    ],
+    // General instructions
+    additionalInfo: [
+      // 2.5(e): E4C is the only examiner-assisted movement (scissor technique)
+      { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -222,6 +274,31 @@ export const E4_RICH_INSTRUCTIONS = {
     title: "Schmerzbefragung",
     prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
     flow: PAIN_INTERVIEW_FLOW,
+    // Section 4: Quick reference table
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "e4-offnungsbewegungen",
+        label: "4.5 Schmerz nach Öffnungsbewegung",
+      },
+    ],
+    // Section 5: Detailed protocol
+    completeSpec: [
+      {
+        section: "e4",
+        anchor: "e4b--maximale-nicht-unterstutzte-offnung",
+        label: "5.4 Schmerzbefragung nach Bewegung",
+      },
+    ],
+    // General instructions
+    additionalInfo: [
+      // 2.6: How to identify anatomical structures when patient points to pain
+      { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
+      // 2.9: Familiar pain concept - replication of chief complaint
+      { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
+      // 6.2: Movement-induced pain inquiry, familiar pain inquiry
+      { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+    ],
   } satisfies RichPainInterviewInstruction,
 } as const;
 
@@ -248,8 +325,7 @@ export const E4_INSTRUCTIONS = {
   maxUnassistedOpening: {
     stepId: "U4B",
     title: "Maximale aktive Mundöffnung",
-    patientScript:
-      "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
+    patientScript: "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
     examinerAction: "Interinzisale Distanz messen",
   } satisfies StepInstruction,
 

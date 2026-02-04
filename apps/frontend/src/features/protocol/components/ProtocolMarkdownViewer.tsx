@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { getHeadingId } from "@/lib/slugify";
 import type { Components } from "react-markdown";
 
-import { parseFigureReference } from "../lib/figures";
+import { imageMap, parseFigureReference } from "../lib/figures";
 import { FigureEmbed, MultiFigureEmbed } from "./FigureEmbed";
 import { processChildren } from "./SectionLink";
 
@@ -94,6 +94,24 @@ export function ProtocolMarkdownViewer({ content, className }: ProtocolMarkdownV
     // Handle blockquotes with cross-references
     blockquote: ({ children }) => {
       return <blockquote>{children}</blockquote>;
+    },
+    // Handle images - map relative paths to bundled URLs
+    img: ({ src, alt }) => {
+      if (!src) return null;
+      // Extract filename from relative path (e.g., "images/page1_img1.jpeg" -> "page1_img1.jpeg")
+      const filename = src.split("/").pop();
+      const bundledUrl = filename ? imageMap[filename] : undefined;
+      if (bundledUrl) {
+        return (
+          <img
+            src={bundledUrl}
+            alt={alt || ""}
+            className="inline-block max-h-48 object-contain rounded"
+          />
+        );
+      }
+      // Fallback for other images
+      return <img src={src} alt={alt || ""} />;
     },
   };
 
