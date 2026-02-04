@@ -7,15 +7,123 @@
  * - Any numbered step-based clinical workflow
  */
 
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import {
+  imageMap,
+  typedFigureIndex,
+  type FigureData,
+} from "@/features/protocol/lib/figures";
 import { Link } from "@tanstack/react-router";
-import { BookOpen, MousePointerClick, Pause } from "lucide-react";
+import { BookOpen, ExternalLink, Image, MousePointerClick, Pause } from "lucide-react";
 import type {
   CrossReference,
   ProcedureFlowStep,
   RichMeasurementInstruction,
   RichPainInterviewInstruction,
 } from "../../content/types";
+
+/**
+ * Get section anchor for a figure number.
+ * Maps figure IDs to their corresponding section anchors in section7.
+ */
+function getFigureAnchor(figureId: string): string {
+  const id = figureId.toLowerCase();
+  // U1 figures (pain confirmation)
+  if (["1", "2", "3"].includes(id))
+    return "u1-bestatigung-der-schmerz--und-kopfschmerzlokalisation-durch-den-untersucher";
+  // U4 figures (opening movements)
+  if (id === "11") return "u4-a-schmerzfreie-offnung";
+  if (id === "12") return "u4-b-maximale-nicht-unterstutzte-offnung";
+  if (["13", "14"].includes(id)) return "u4-b-maximale-nicht-unterstutzte-offnung";
+  if (id === "15") return "u4-c-maximale-unterstutzte-offnung";
+  if (id === "16") return "u4-c-maximale-unterstutzte-offnung";
+  // Default: link to main section
+  return "u4-offnungsbewegungen";
+}
+
+/**
+ * Get figure data (images and description) for a figure ID.
+ */
+function getFigureData(figureId: string): FigureData | null {
+  const figureKey = `Figure ${figureId}`;
+  const figure = typedFigureIndex[figureKey];
+  if (figure && "images" in figure) {
+    return figure as FigureData;
+  }
+  return null;
+}
+
+/**
+ * Figure reference with popover showing image and description.
+ */
+function FigureRefLink({ figureRef }: { figureRef: string | string[] }) {
+  const refs = Array.isArray(figureRef) ? figureRef : [figureRef];
+  const label = refs.length === 1 ? `Abb. ${refs[0]}` : `Abb. ${refs.join(" & ")}`;
+  const anchor = getFigureAnchor(refs[0]);
+
+  // Collect figure data for all referenced figures
+  const figuresData = refs
+    .map((id) => ({ id, data: getFigureData(id) }))
+    .filter((f) => f.data !== null);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-xs text-primary/70 hover:text-primary hover:underline"
+        >
+          <Image className="h-3 w-3" />
+          <span>{label}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="start">
+        <div className="space-y-3 p-3">
+          {figuresData.map(({ id, data }) => (
+            <div key={id}>
+              {/* Images */}
+              <div className="flex flex-wrap gap-2 justify-center bg-muted/30 rounded-lg p-2">
+                {data!.images.map((img, i) => {
+                  const imageUrl = imageMap[img];
+                  if (!imageUrl) return null;
+                  return (
+                    <img
+                      key={i}
+                      src={imageUrl}
+                      alt={`Abbildung ${id}`}
+                      className="max-h-32 object-contain rounded"
+                    />
+                  );
+                })}
+              </div>
+              {/* Caption (short) */}
+              <p className="mt-2 text-xs font-medium text-foreground">
+                Abb. {id}: {data!.description_de}
+              </p>
+              {/* Full description from section 7 (when available) */}
+              {data!.description_de_full && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {data!.description_de_full}
+                </p>
+              )}
+            </div>
+          ))}
+          {/* Link to full protocol */}
+          <Link
+            to="/protocol/$section"
+            params={{ section: "section7" }}
+            hash={anchor}
+            className="flex items-center gap-1 text-xs text-primary hover:underline pt-2 border-t"
+          >
+            <ExternalLink className="h-3 w-3" />
+            <span>Im Protokoll öffnen</span>
+          </Link>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 interface ProcedureFlowProps {
   /** Flow steps to display */
@@ -52,7 +160,11 @@ function ProcedureStep({
 
       {/* Step content */}
       <div className={cn("pb-4", isLast && "pb-0")}>
-        <div className="font-medium text-sm text-foreground">{step.label}</div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm text-foreground">{step.label}</span>
+          {/* Figure reference - inline with label */}
+          {step.figureRef && <FigureRefLink figureRef={step.figureRef} />}
+        </div>
         {/* Patient script - verbatim text with quotation marks */}
         {step.patientScript && (
           <div className="mt-1 text-sm text-muted-foreground italic">„{step.patientScript}"</div>

@@ -65,18 +65,21 @@ const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     id: "pain",
     label: "Schmerz bei Bewegung?",
     patientScript: "Hatten Sie bei dieser Bewegung Schmerzen?",
+    figureRef: "13",
   },
   {
     id: "locate",
     label: "Lokalisation",
     patientScript:
       "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie bei dieser Bewegung Schmerzen gespürt haben?",
+    figureRef: "2",
   },
   {
     id: "confirm",
     label: "Bestätigung",
     examinerInstruction:
       "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+    figureRef: "3",
     appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
   },
   {
@@ -102,18 +105,21 @@ const E4C_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     label: "Schmerz bei Manipulation?",
     patientScript:
       "Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
+    figureRef: "16",
   },
   {
     id: "locate",
     label: "Lokalisation",
     patientScript:
       "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?",
+    figureRef: "2",
   },
   {
     id: "confirm",
     label: "Bestätigung",
     examinerInstruction:
       "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+    figureRef: "3",
     appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
   },
   {
@@ -149,6 +155,7 @@ const E4A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     id: "measure",
     label: "Messen",
     examinerInstruction: "Interinzisale Distanz ablesen.",
+    figureRef: "11",
     appAction: "Messwert in mm eingeben",
   },
 ];
@@ -174,6 +181,7 @@ const E4B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     id: "measure",
     label: "Messen",
     examinerInstruction: "Interinzisale Distanz ablesen.",
+    figureRef: "12",
     appAction: "Messwert in mm eingeben",
   },
 ];
@@ -229,6 +237,7 @@ const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     label: "Scherentechnik",
     examinerInstruction:
       "Daumen auf obere, Zeigefinger auf untere Schneidezähne. Mäßigen Druck anwenden bis Gewebswiderstand.",
+    figureRef: "15",
   },
   {
     id: "measure",

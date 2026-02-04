@@ -62,16 +62,26 @@ function ProtocolSection() {
 
   // Handle hash navigation on mount and when section changes
   useEffect(() => {
-    if (window.location.hash) {
-      const id = window.location.hash.slice(1);
-      // Small delay to ensure content is rendered
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
-    }
+    const hash = window.location.hash;
+    if (!hash) return;
+
+    const id = hash.slice(1);
+
+    // Try to scroll to element, retrying if not found yet (content may still be rendering)
+    let attempts = 0;
+    const maxAttempts = 10;
+    const tryScroll = () => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        setTimeout(tryScroll, 100);
+      }
+    };
+
+    // Start after a small initial delay
+    setTimeout(tryScroll, 50);
   }, [section]);
 
   if (!content) {

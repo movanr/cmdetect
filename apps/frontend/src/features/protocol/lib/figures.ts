@@ -19,6 +19,8 @@ for (const [path, url] of Object.entries(imageModules)) {
 export interface FigureData {
   description: string;
   description_de: string;
+  /** Full German description from section 7 (when available) */
+  description_de_full?: string;
   page: number;
   images: string[];
 }

@@ -7,18 +7,21 @@
   "Figure 1": {
     "description": "Examiner touches each area: temporalis, TMJ, masseter, posterior/sub-mandibular",
     "description_de": "Untersucher berührt jeden Bereich: M. temporalis, Kiefergelenk, M. masseter, posteriorer/submandibulärer Bereich",
+    "description_de_full": "Der Untersucher berührt nacheinander jeden Bereich (von links nach rechts): Temporalis, Kiefergelenk, Masseter sowie posteriore und submandibuläre Bereiche. Beide Seiten werden gleichzeitig berührt, wie dargestellt. Für den Temporalis und Masseter berühren die ventralen Seiten der Finger den gesamten Muskel.",
     "page": 1,
     "images": ["page1_img1.jpeg", "page1_img2.jpeg", "page1_img3.jpeg", "page1_img4.jpeg"]
   },
   "Figure 2": {
     "description": "Patient pain location reporting - pointing with finger (left) and full hand (right)",
     "description_de": "Schmerzlokalisation durch den Patienten – Zeigen mit dem Finger (links) und mit der ganzen Hand (rechts)",
+    "description_de_full": "(links) Der Patient wird angewiesen, mit einem Finger auf alle schmerzhaften Bereiche zu zeigen. (rechts) Manchmal verwendet der Patient möglicherweise die ganze Hand. Klären Sie, ob der Patient auf den gesamten Bereich zeigen wollte.",
     "page": 1,
     "images": ["page1_img5.jpeg", "page1_img7.jpeg"]
   },
   "Figure 3": {
     "description": "Examiner confirmation of pain/headache locations - TMJ (left), finger placement (center), masseter (right)",
     "description_de": "Bestätigung der Schmerz-/Kopfschmerzlokalisation durch den Untersucher – Kiefergelenk (links), Fingerplatzierung (Mitte), M. masseter (rechts)",
+    "description_de_full": "Der Untersucher berührt den/die Bereich(e), in dem/denen der Patient Schmerzen angegeben hat, um (1) zu bestätigen, dass der berührte Bereich dem entspricht, was der Patient meinte, und (2) gleichzeitig die Struktur zu identifizieren (z.B. Muskel, Gelenk). Das linke Bild zeigt das Kiefergelenk und das rechte Bild zeigt den M. masseter. Das mittlere Bild veranschaulicht die Fingerplatzierung zur Unterscheidung zwischen Muskel und Gelenk. In dieser Position wird der Patient gebeten, die Zähne zusammenzubeißen – um anatomische Landmarken eines Muskels zu bestätigen, sowie den Unterkiefer vorzuschieben – um Landmarken des Kiefergelenks zu bestätigen.",
     "page": 1,
     "images": ["page1_img9.jpeg", "page1_img10.jpeg", "page1_img11.jpeg"]
   },
@@ -79,36 +82,42 @@
   "Figure 11": {
     "description": "Pain free opening measurement",
     "description_de": "Messung der schmerzfreien Öffnung",
+    "description_de_full": "Die Spitze des Lineals wird gegen die Schneidekante des Unterkiefer-Referenz-Schneidezahns gelegt, und der Abstand zur mesial-distalen Mitte der Kante des zentralen Oberkiefer-Schneidezahns wird abgelesen. Der Wert wird auf den nächsten vollen mm abgerundet.",
     "page": 5,
     "images": ["page5_img1.jpeg"]
   },
   "Figure 12": {
     "description": "Maximum unassisted opening measurement",
     "description_de": "Messung der maximalen nicht-unterstützten Öffnung",
+    "description_de_full": "Die Linealspitze wird wie zuvor platziert, und der Patient wird gebeten, so weit wie möglich zu öffnen, auch wenn es schmerzhaft ist.",
     "page": 5,
     "images": ["page5_img2.jpeg"]
   },
   "Figure 13": {
     "description": "Patient points to pain area (left), examiner confirms structure (right)",
     "description_de": "Patient zeigt auf den Schmerzbereich (links), Untersucher bestätigt die Struktur (rechts)",
+    "description_de_full": "(links) Der Patient wird gebeten, auf alle Bereiche zu zeigen, in denen er bei dieser Bewegung Schmerzen verspürt hat. (rechts) Der Untersucher berührt den angegebenen Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz 'bekannt' ist.",
     "page": 5,
     "images": ["page5_img3.jpeg", "page5_img4.jpeg"]
   },
   "Figure 14": {
     "description": "Pain localization during maximum opening - pointing (left), examiner confirming (right)",
     "description_de": "Schmerzlokalisation bei maximaler Öffnung – Zeigen (links), Bestätigung durch Untersucher (rechts)",
+    "description_de_full": "(links) Schmerzen, die durch ein Bewegungsverfahren provoziert werden, sind für den Patienten manchmal schwer zu lokalisieren, nachdem der Unterkiefer in die geschlossene Position zurückgekehrt ist. In diesem Fall bat der Untersucher den Patienten, erneut so weit wie möglich zu öffnen, auch wenn es schmerzhaft ist, und der Patient wird dann gebeten, auf alle Schmerzbereiche zu zeigen, während der Unterkiefer noch in der maximal geöffneten Position ist. (rechts) Mit dem Unterkiefer in derselben Position (d.h. maximal geöffnet) berührt der Untersucher den angegebenen Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz 'bekannt' ist.",
     "page": 6,
     "images": ["page6_img1.jpeg", "page6_img2.jpeg"]
   },
   "Figure 15": {
     "description": "Maximum assisted opening - scissors position",
     "description_de": "Maximale unterstützte Öffnung – Scherenposition",
+    "description_de_full": "Der Untersucher platziert zuerst das Lineal in Position und nachdem er sichergestellt hat, dass der Patient im gleichen Ausmaß wie bei der vorherigen maximalen nicht-unterstützten Öffnung geöffnet hat, werden die Finger in Scherenposition gebracht und der Untersucher dehnt dann den Mund weiter auf, wenn möglich.",
     "page": 6,
     "images": ["page6_img3.jpeg"]
   },
   "Figure 16": {
     "description": "Patient points to pain (left), examiner confirms (right)",
     "description_de": "Patient zeigt auf den Schmerz (links), Untersucher bestätigt (rechts)",
+    "description_de_full": "(links) Der Patient wird gebeten, auf alle Bereiche zu zeigen, in denen er bei dieser Bewegung Schmerzen verspürt hat. (rechts) Der Untersucher berührt den Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz 'bekannt' ist.",
     "page": 6,
     "images": ["page6_img4.jpeg", "page6_img5.jpeg"]
   },
