@@ -386,8 +386,7 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     setExpanded({ left: null, right: null });
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      setCurrentStepIndex(-1); // All steps complete, none active
-      onComplete?.();
+      setCurrentStepIndex(-1); // All steps complete, show collapsed view with section footer
     } else {
       setCurrentStepIndex((i) => i + 1);
     }
@@ -442,8 +441,7 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     setExpanded({ left: null, right: null });
 
     if (isLastStep) {
-      setCurrentStepIndex(-1); // All steps complete, none active
-      onComplete?.();
+      setCurrentStepIndex(-1); // All steps complete, show collapsed view with section footer
     } else {
       setCurrentStepIndex((i) => i + 1);
     }
