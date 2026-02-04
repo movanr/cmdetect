@@ -12,7 +12,7 @@
 
 ### Bestätigung der Schmerz- und Kopfschmerzlokalisationen durch den Untersucher
 
-**Abbildung 3.** Der Untersucher berührt den/die Bereich(e), in dem/denen der Patient Schmerzen angegeben hat, um (1) zu bestätigen, dass der berührte Bereich dem entspricht, was der Patient meinte, und (2) gleichzeitig die Struktur zu identifizieren (z.B. Muskel, Gelenk). Das linke Bild zeigt das Kiefergelenk und das rechte Bild zeigt den M. masseter. Das mittlere Bild veranschaulicht die Fingerplatzierung zur Unterscheidung zwischen Muskel und Gelenk. In dieser Position wird der Patient gebeten, die Zähne zusammenzubeißen – um anatomische Landmarken eines Muskels zu bestätigen, sowie den Unterkiefer vorzuschieben – um Landmarken des Kiefergelenks zu bestätigen.
+**Abbildung 3.** Der Untersucher berührt den/die Bereich(e), in dem/denen der Patient Schmerzen angegeben hat, um (1) zu bestätigen, dass der berührte Bereich dem entspricht, was der Patient meinte, und (2) gleichzeitig die Struktur zu identifizieren (z.B. Muskel, Gelenk). Das linke Bild zeigt das Kiefergelenk und das rechte Bild zeigt den M. masseter. Das mittlere Bild veranschaulicht die Fingerplatzierung zur Unterscheidung zwischen Muskel und Gelenk. In dieser Position wird der Patient gebeten, die Zähne zusammenzubeißen – um anatomische Strukturen eines Muskels zu bestätigen, sowie den Unterkiefer vorzuschieben – um Landmarken des Kiefergelenks zu bestätigen.
 
 ---
 
@@ -182,7 +182,7 @@ Siehe Legende von Abbildung 24 für die Beschreibung der Untersuchungsformulare.
 
 **Abbildung 31.** Zielbereich für die Palpation des lateralen Pols des Kiefergelenks.
 
-**Abbildung 32.** Anatomische Landmarken relativ zum Tragus des Ohrs, mit Zähnen in leicht geschlossener Position.
+**Abbildung 32.** Anatomische Strukturen relativ zum Tragus des Ohrs, mit Zähnen in leicht geschlossener Position.
 
 **Abbildung 33.** Ein Finger wird verwendet, und ein Gelenk wird gleichzeitig palpiert; die andere Hand wird zur Stabilisierung des Kopfes verwendet. Beachten Sie, dass der Mund geschlossen bleibt. Verwenden Sie 0,5 kg.
 

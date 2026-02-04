@@ -21,7 +21,7 @@
   "Figure 3": {
     "description": "Examiner confirmation of pain/headache locations - TMJ (left), finger placement (center), masseter (right)",
     "description_de": "Bestätigung der Schmerz-/Kopfschmerzlokalisation durch den Untersucher – Kiefergelenk (links), Fingerplatzierung (Mitte), M. masseter (rechts)",
-    "description_de_full": "Der Untersucher berührt den/die Bereich(e), in dem/denen der Patient Schmerzen angegeben hat, um (1) zu bestätigen, dass der berührte Bereich dem entspricht, was der Patient meinte, und (2) gleichzeitig die Struktur zu identifizieren (z.B. Muskel, Gelenk). Das linke Bild zeigt das Kiefergelenk und das rechte Bild zeigt den M. masseter. Das mittlere Bild veranschaulicht die Fingerplatzierung zur Unterscheidung zwischen Muskel und Gelenk. In dieser Position wird der Patient gebeten, die Zähne zusammenzubeißen – um anatomische Landmarken eines Muskels zu bestätigen, sowie den Unterkiefer vorzuschieben – um Landmarken des Kiefergelenks zu bestätigen.",
+    "description_de_full": "Der Untersucher berührt den/die Bereich(e), in dem/denen der Patient Schmerzen angegeben hat, um (1) zu bestätigen, dass der berührte Bereich dem entspricht, was der Patient meinte, und (2) gleichzeitig die Struktur zu identifizieren (z.B. Muskel, Gelenk). Das linke Bild zeigt das Kiefergelenk und das rechte Bild zeigt den M. masseter. Das mittlere Bild veranschaulicht die Fingerplatzierung zur Unterscheidung zwischen Muskel und Gelenk. In dieser Position wird der Patient gebeten, die Zähne zusammenzubeißen – um anatomische Strukturen eines Muskels zu bestätigen, sowie den Unterkiefer vorzuschieben – um Landmarken des Kiefergelenks zu bestätigen.",
     "page": 1,
     "images": ["page1_img9.jpeg", "page1_img10.jpeg", "page1_img11.jpeg"]
   },
@@ -213,7 +213,7 @@
   },
   "Figure 32": {
     "description": "Anatomical landmarks relative to tragus",
-    "description_de": "Anatomische Landmarken relativ zum Tragus",
+    "description_de": "Anatomische Strukturen relativ zum Tragus",
     "page": 13,
     "images": ["page13_img2.jpeg"]
   },
