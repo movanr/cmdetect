@@ -68,6 +68,50 @@ interface E4SectionProps {
 type ExpandedState = { left: Region | null; right: Region | null };
 
 /**
+ * Compute step completion status from form values.
+ * Returns "completed" if the step has valid data, null otherwise.
+ */
+function computeStepStatusFromForm(
+  stepId: ExaminationStepId,
+  instances: QuestionInstance[],
+  getValue: (path: string) => unknown
+): "completed" | null {
+  const isInterview = String(stepId).endsWith("-interview");
+
+  if (isInterview) {
+    // Check if all pain questions are answered (validates interview completion)
+    const result = validateInterviewCompletion(instances, getValue);
+    return result.valid ? "completed" : null;
+  }
+
+  // Measurement step - check if measurement field has value or terminated
+  const measurementInst = instances.find((i) => i.renderType === "measurement");
+  if (measurementInst) {
+    const value = getValue(measurementInst.path);
+    const terminatedPath = measurementInst.path.replace(/\.[^.]+$/, ".terminated");
+    const terminated = getValue(terminatedPath);
+    if (terminated === true || (value != null && value !== "")) {
+      return "completed";
+    }
+  }
+
+  // For E4A which uses QuestionField directly (not MeasurementStep)
+  if (stepId === "e4a") {
+    for (const inst of instances) {
+      const config = inst.config as { required?: boolean };
+      if (config.required) {
+        const value = getValue(inst.path);
+        if (value != null && value !== "") {
+          return "completed";
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Compute RegionStatus for a single region/side from form values.
  */
 function computeRegionStatus(
@@ -248,8 +292,32 @@ function InterviewSubsection({
 
 export function E4Section({ onComplete }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>({});
+
+  // Compute initial state from form values (persisted across tab switches)
+  const [initialState] = useState(() => {
+    const statuses: Record<string, "completed" | "skipped"> = {};
+    for (const stepId of E4_STEP_ORDER) {
+      const instances = getInstancesForStep(stepId);
+      const status = computeStepStatusFromForm(stepId, instances, (path) =>
+        form.getValues(path as FieldPath<FormValues>)
+      );
+      if (status) statuses[stepId] = status;
+    }
+
+    // Find first incomplete step, or -1 if all complete
+    let firstIncompleteIndex = -1;
+    for (let i = 0; i < E4_STEP_ORDER.length; i++) {
+      if (!statuses[E4_STEP_ORDER[i]]) {
+        firstIncompleteIndex = i;
+        break;
+      }
+    }
+
+    return { statuses, firstIncompleteIndex };
+  });
+
+  const [currentStepIndex, setCurrentStepIndex] = useState(initialState.firstIncompleteIndex);
+  const [stepStatuses, setStepStatuses] = useState(initialState.statuses);
   const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
@@ -257,11 +325,13 @@ export function E4Section({ onComplete }: E4SectionProps) {
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
   const [showSkipDialog, setShowSkipDialog] = useState(false);
 
-  const currentStepId = E4_STEP_ORDER[currentStepIndex];
+  // -1 means all steps are complete
+  const allComplete = currentStepIndex === -1;
+  const currentStepId = allComplete ? E4_STEP_ORDER[0] : E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
   const isInterview = String(currentStepId).endsWith("-interview");
-  const stepInstances = getInstancesForStep(currentStepId);
+  const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
@@ -310,6 +380,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
     setExpanded({ left: null, right: null });
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
+      setCurrentStepIndex(-1); // All steps complete, none active
       onComplete?.();
     } else {
       setCurrentStepIndex((i) => i + 1);
@@ -365,6 +436,7 @@ export function E4Section({ onComplete }: E4SectionProps) {
     setExpanded({ left: null, right: null });
 
     if (isLastStep) {
+      setCurrentStepIndex(-1); // All steps complete, none active
       onComplete?.();
     } else {
       setCurrentStepIndex((i) => i + 1);
@@ -372,6 +444,10 @@ export function E4Section({ onComplete }: E4SectionProps) {
   };
 
   const getStepStatus = (stepId: ExaminationStepId, index: number): StepStatus => {
+    // -1 means all complete, no active step
+    if (allComplete) {
+      return stepStatuses[stepId] || "pending";
+    }
     if (index === currentStepIndex) return "active";
     if (stepStatuses[stepId]) return stepStatuses[stepId];
     return "pending";
@@ -383,15 +459,38 @@ export function E4Section({ onComplete }: E4SectionProps) {
     const stepIsInterview = String(stepId).endsWith("-interview");
 
     if (stepIsInterview) {
-      // Check if any pain was reported
-      const hasPain = instances.some((inst) => {
-        if (inst.context.painType === "pain") {
-          const value = form.getValues(inst.path as keyof typeof form.getValues);
-          return value === "yes";
+      // Check pain and familiar pain values across all regions
+      let hasPain = false;
+      let hasFamiliarPain = false;
+      let hasFamiliarHeadache = false;
+
+      for (const inst of instances) {
+        const value = form.getValues(inst.path as FieldPath<FormValues>) as unknown as string | null;
+        if (inst.context.painType === "pain" && value === "yes") {
+          hasPain = true;
         }
-        return false;
-      });
-      return hasPain ? "Schmerz" : "Kein Schmerz";
+        if (inst.context.painType === "familiarPain" && value === "yes") {
+          hasFamiliarPain = true;
+        }
+        if (inst.context.painType === "familiarHeadache" && value === "yes") {
+          hasFamiliarHeadache = true;
+        }
+      }
+
+      if (!hasPain) {
+        return "Kein Schmerz";
+      }
+      if (hasFamiliarPain && hasFamiliarHeadache) {
+        return "Bek. Schmerz + Kopfschmerz";
+      }
+      if (hasFamiliarPain) {
+        return "Bekannter Schmerz";
+      }
+      if (hasFamiliarHeadache) {
+        return "Bekannter Kopfschmerz";
+      }
+      // Pain reported but no familiar pain/headache
+      return "Keine Übereinstimmung";
     }
 
     // Measurement step - show value

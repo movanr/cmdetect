@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
-import { StatusIcon, type StepStatus } from "./StatusIcon";
+import type { StepStatus } from "./StatusIcon";
 
 export interface StepBarProps {
   config: { badge: string; title: string };
@@ -23,7 +23,7 @@ export function StepBar({ config, status, summary, onClick }: StepBarProps) {
         "w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors",
         "bg-card",
         status === "completed" && [
-          "border-green-200 hover:border-green-300 hover:bg-green-50/50",
+          "border-border hover:border-muted-foreground/50 hover:bg-accent/50",
           "cursor-pointer",
         ],
         status === "skipped" && [
@@ -66,10 +66,7 @@ export function StepBar({ config, status, summary, onClick }: StepBarProps) {
         {summary}
       </span>
 
-      <div className="flex items-center gap-1 shrink-0">
-        <StatusIcon status={status} />
-        {isClickable && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-      </div>
+      {isClickable && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
     </button>
   );
 }
