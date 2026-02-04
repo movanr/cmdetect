@@ -13,10 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
+import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { SectionFooter } from "../ui";
+import { MeasurementFlowBlock, SectionFooter } from "../ui";
 
 interface E2SectionProps {
   onComplete?: () => void;
@@ -57,36 +58,44 @@ export function E2Section({ onComplete, onSkip, onBack, isFirstSection }: E2Sect
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="max-w-sm mx-auto space-y-8">
+        <div className="max-w-md mx-auto space-y-8">
           {/* Reference Tooth */}
           <div className="space-y-4">
-            <h4 className="font-medium">Referenzzahn</h4>
-            <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.referenceTooth} />
+            <div className="space-y-4 pl-4 border-l-2 border-muted">
               {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
               {referenceToothOther && <QuestionField instance={referenceToothOther} />}
             </div>
           </div>
 
-          {/* Measurements */}
+          {/* Midline Deviation */}
           <div className="space-y-4">
-            <h4 className="font-medium">Messungen</h4>
-            <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.midlineDeviation} />
+            <div className="space-y-4 pl-4 border-l-2 border-muted">
+              {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
+              {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
+            </div>
+          </div>
+
+          {/* Horizontal Overjet */}
+          <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.horizontalOverjet} />
+            <div className="pl-4 border-l-2 border-muted">
               {horizontalOverjet && (
                 <QuestionField instance={horizontalOverjet} label="Horizontaler Overjet" />
               )}
+              <p className="text-xs text-muted-foreground mt-1">Negativer Wert bei Kreuzbiss</p>
+            </div>
+          </div>
+
+          {/* Vertical Overlap */}
+          <div className="space-y-4">
+            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.verticalOverlap} />
+            <div className="pl-4 border-l-2 border-muted">
               {verticalOverlap && (
                 <QuestionField instance={verticalOverlap} label="Vertikaler Overlap" />
               )}
-            </div>
-            <p className="text-xs text-muted-foreground">Negative Werte möglich</p>
-          </div>
-
-          {/* Midline Deviation */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Mittellinienabweichung</h4>
-            <div className="space-y-4">
-              {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
-              {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
+              <p className="text-xs text-muted-foreground mt-1">Negativer Wert bei offenem Biss</p>
             </div>
           </div>
         </div>

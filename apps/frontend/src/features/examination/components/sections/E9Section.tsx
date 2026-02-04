@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronRight } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
+import { E9_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import {
   validatePalpationCompletion,
@@ -26,7 +28,7 @@ import { PalpationModeToggle } from "../inputs/PalpationModeToggle";
 import { RefusalCheckbox } from "../inputs/RefusalCheckbox";
 import { PalpationSiteDropdown } from "../PalpationSiteDropdown";
 import type { IncompletePalpationSite as DropdownIncompleteSite } from "../PalpationSiteDropdown/types";
-import { SectionFooter } from "../ui";
+import { MeasurementFlowBlock, SectionFooter } from "../ui";
 
 interface E9SectionProps {
   onComplete?: () => void;
@@ -227,6 +229,79 @@ function PalpationSubsection({
   );
 }
 
+/**
+ * Collapsible palpation instruction section with all palpation flows.
+ */
+function PalpationInstructionSection() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <Button
+        variant="outline"
+        className="w-full justify-between"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4" />
+          Palpations-Anweisungen
+        </span>
+        {isOpen ? (
+          <ChevronDown className="h-4 w-4" />
+        ) : (
+          <ChevronRight className="h-4 w-4" />
+        )}
+      </Button>
+      <div
+        className={cn(
+          "mt-4 space-y-6 overflow-hidden transition-all",
+          isOpen ? "block" : "hidden"
+        )}
+      >
+        {/* Introduction */}
+        <div>
+          <h4 className="font-medium mb-3">Einführung</h4>
+          <MeasurementFlowBlock instruction={E9_RICH_INSTRUCTIONS.introduction} />
+        </div>
+
+        {/* Temporalis */}
+        <div>
+          <h4 className="font-medium mb-3">M. Temporalis</h4>
+          <MeasurementFlowBlock
+            instruction={{
+              ...E9_RICH_INSTRUCTIONS.temporalisPalpation,
+              stepId: "U9-temp",
+            }}
+          />
+        </div>
+
+        {/* Masseter */}
+        <div>
+          <h4 className="font-medium mb-3">M. Masseter</h4>
+          <MeasurementFlowBlock
+            instruction={{
+              ...E9_RICH_INSTRUCTIONS.masseterPalpation,
+              stepId: "U9-mass",
+            }}
+          />
+        </div>
+
+        {/* TMJ Lateral Pole */}
+        <div>
+          <h4 className="font-medium mb-3">Kiefergelenk - Lateraler Pol</h4>
+          <MeasurementFlowBlock instruction={E9_RICH_INSTRUCTIONS.tmjLateralPole} />
+        </div>
+
+        {/* TMJ Around Pole */}
+        <div>
+          <h4 className="font-medium mb-3">Kiefergelenk - Um den lateralen Pol</h4>
+          <MeasurementFlowBlock instruction={E9_RICH_INSTRUCTIONS.tmjAroundPole} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSection = true }: E9SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, setValue, getValues, clearErrors } = useFormContext<FormValues>();
@@ -317,7 +392,11 @@ export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSe
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {/* Collapsible instruction section */}
+        <PalpationInstructionSection />
+
+        {/* Palpation diagrams and site dropdowns */}
         <div className="flex justify-center items-start gap-8 md:gap-16">
           <PalpationSubsection
             side="right"

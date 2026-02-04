@@ -35,12 +35,13 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { E1_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
-import { SectionFooter, StepBar, type StepStatus } from "../ui";
+import { PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
 
 // Step configuration
 type E1StepId = "e1a" | "e1b";
@@ -338,31 +339,37 @@ export function E1Section({ onComplete, onBack, isFirstSection }: E1SectionProps
   const renderStepContent = (stepId: E1StepId) => {
     if (stepId === "e1a") {
       return (
-        <div className="flex justify-center items-start gap-8 md:gap-16">
-          {/* Right side panel */}
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">Rechte Seite</span>
-            <HeadDiagram
-              side="right"
-              regions={E1_PAIN_SVG_REGIONS}
-              regionStatuses={painRightStatuses}
-              onRegionClick={(region) => handlePainRegionClick(region, "right")}
-            />
-            <div className="w-44">{painRight && <QuestionField instance={painRight} />}</div>
-          </div>
+        <div className="space-y-6">
+          {/* Instruction flow */}
+          <PainInterviewBlock instruction={E1_RICH_INSTRUCTIONS.painLocation} />
 
-          <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+          {/* Diagram and selection */}
+          <div className="flex justify-center items-start gap-8 md:gap-16">
+            {/* Right side panel */}
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Rechte Seite</span>
+              <HeadDiagram
+                side="right"
+                regions={E1_PAIN_SVG_REGIONS}
+                regionStatuses={painRightStatuses}
+                onRegionClick={(region) => handlePainRegionClick(region, "right")}
+              />
+              <div className="w-44">{painRight && <QuestionField instance={painRight} />}</div>
+            </div>
 
-          {/* Left side panel */}
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">Linke Seite</span>
-            <HeadDiagram
-              side="left"
-              regions={E1_PAIN_SVG_REGIONS}
-              regionStatuses={painLeftStatuses}
-              onRegionClick={(region) => handlePainRegionClick(region, "left")}
-            />
-            <div className="w-44">{painLeft && <QuestionField instance={painLeft} />}</div>
+            <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+
+            {/* Left side panel */}
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Linke Seite</span>
+              <HeadDiagram
+                side="left"
+                regions={E1_PAIN_SVG_REGIONS}
+                regionStatuses={painLeftStatuses}
+                onRegionClick={(region) => handlePainRegionClick(region, "left")}
+              />
+              <div className="w-44">{painLeft && <QuestionField instance={painLeft} />}</div>
+            </div>
           </div>
         </div>
       );
@@ -370,34 +377,40 @@ export function E1Section({ onComplete, onBack, isFirstSection }: E1SectionProps
 
     // E1b: Headache location
     return (
-      <div className="flex justify-center items-start gap-8 md:gap-16">
-        {/* Right side panel */}
-        <div className="flex flex-col items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground">Rechts</span>
-          <HeadDiagram
-            side="right"
-            regions={E1_HEADACHE_SVG_REGIONS}
-            regionStatuses={headacheRightStatuses}
-            onRegionClick={(region) => handleHeadacheRegionClick(region, "right")}
-          />
-          <div className="w-44">
-            {headacheRight && <QuestionField instance={headacheRight} />}
+      <div className="space-y-6">
+        {/* Instruction flow */}
+        <PainInterviewBlock instruction={E1_RICH_INSTRUCTIONS.headacheLocation} />
+
+        {/* Diagram and selection */}
+        <div className="flex justify-center items-start gap-8 md:gap-16">
+          {/* Right side panel */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-sm font-medium text-muted-foreground">Rechts</span>
+            <HeadDiagram
+              side="right"
+              regions={E1_HEADACHE_SVG_REGIONS}
+              regionStatuses={headacheRightStatuses}
+              onRegionClick={(region) => handleHeadacheRegionClick(region, "right")}
+            />
+            <div className="w-44">
+              {headacheRight && <QuestionField instance={headacheRight} />}
+            </div>
           </div>
-        </div>
 
-        <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+          <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
 
-        {/* Left side panel */}
-        <div className="flex flex-col items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground">Links</span>
-          <HeadDiagram
-            side="left"
-            regions={E1_HEADACHE_SVG_REGIONS}
-            regionStatuses={headacheLeftStatuses}
-            onRegionClick={(region) => handleHeadacheRegionClick(region, "left")}
-          />
-          <div className="w-44">
-            {headacheLeft && <QuestionField instance={headacheLeft} />}
+          {/* Left side panel */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-sm font-medium text-muted-foreground">Links</span>
+            <HeadDiagram
+              side="left"
+              regions={E1_HEADACHE_SVG_REGIONS}
+              regionStatuses={headacheLeftStatuses}
+              onRegionClick={(region) => handleHeadacheRegionClick(region, "left")}
+            />
+            <div className="w-44">
+              {headacheLeft && <QuestionField instance={headacheLeft} />}
+            </div>
           </div>
         </div>
       </div>

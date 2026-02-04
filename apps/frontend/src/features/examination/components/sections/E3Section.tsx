@@ -14,10 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
+import { E3_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle, SECTION_LABELS } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { SectionFooter } from "../ui";
+import { MeasurementFlowBlock, SectionFooter } from "../ui";
 
 interface E3SectionProps {
   onComplete?: () => void;
@@ -54,9 +55,15 @@ export function E3Section({ onComplete, onSkip, onBack, isFirstSection }: E3Sect
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="max-w-sm mx-auto space-y-4">
-          <h4 className="font-medium">{SECTION_LABELS.e3.full}</h4>
-          {pattern && <QuestionField instance={pattern} />}
+        <div className="max-w-md mx-auto space-y-6">
+          {/* Instruction flow */}
+          <MeasurementFlowBlock instruction={E3_RICH_INSTRUCTIONS.openingPattern} />
+
+          {/* Pattern selection */}
+          <div className="space-y-4">
+            <h4 className="font-medium">{SECTION_LABELS.e3.full}</h4>
+            {pattern && <QuestionField instance={pattern} />}
+          </div>
         </div>
       </CardContent>
       <SectionFooter

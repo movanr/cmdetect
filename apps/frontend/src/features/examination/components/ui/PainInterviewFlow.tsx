@@ -30,15 +30,30 @@ import type {
  */
 function getFigureAnchor(figureId: string): string {
   const id = figureId.toLowerCase();
-  // U1 figures (pain confirmation)
+
+  // U1 figures (pain confirmation) - figures 1-3
   if (["1", "2", "3"].includes(id))
     return "u1-bestatigung-der-schmerz--und-kopfschmerzlokalisation-durch-den-untersucher";
-  // U4 figures (opening movements)
+
+  // U2 figures (incisal relationships) - figures 4-8
+  if (["4", "5a", "5b", "6", "7", "8"].includes(id)) return "u2-schneidekantenverhältnisse";
+
+  // U3 figures (opening pattern) - figures 9, 10a, 10b
+  if (["9", "10a", "10b"].includes(id)) return "u3-offnungsmuster";
+
+  // U4 figures (opening movements) - figures 11-16
   if (id === "11") return "u4-a-schmerzfreie-offnung";
   if (id === "12") return "u4-b-maximale-nicht-unterstutzte-offnung";
   if (["13", "14"].includes(id)) return "u4-b-maximale-nicht-unterstutzte-offnung";
   if (id === "15") return "u4-c-maximale-unterstutzte-offnung";
   if (id === "16") return "u4-c-maximale-unterstutzte-offnung";
+
+  // U9 figures (palpation) - figures 24-36
+  if (["24", "25"].includes(id)) return "u9-allgemeine-instruktionen";
+  if (["26", "27", "28", "29", "30"].includes(id)) return "u9-m-temporalis-und-m-masseter";
+  if (["31", "32", "33"].includes(id)) return "u9-lateraler-kondylenpol";
+  if (["34", "35", "36"].includes(id)) return "u9-um-den-lateralen-kondylenpol";
+
   // Default: link to main section
   return "u4-offnungsbewegungen";
 }

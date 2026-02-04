@@ -463,6 +463,707 @@ export const E4_INSTRUCTIONS = {
 } as const;
 
 // ============================================================================
+// E1 Pain/Headache Location Interview Flows
+// ============================================================================
+
+/**
+ * E1A - Pain location flow (5 steps).
+ * Based on DC-TMD protocol section 5.3 U1a.
+ */
+const E1A_PAIN_LOCATION_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "scope",
+    label: "Bereiche zeigen",
+    examinerInstruction:
+      "Beidseits gleichzeitig berühren: Temporalis, Kiefergelenk, Masseter, retromandibulär/submandibulär",
+    patientScript:
+      "Für die Zwecke dieser Untersuchung interessiere ich mich für Schmerzen, die Sie möglicherweise in diesen Bereichen haben…",
+    figureRef: "1",
+  },
+  {
+    id: "pain-question",
+    label: "Schmerzfrage",
+    patientScript: "Hatten Sie in den letzten 30 Tagen Schmerzen in diesen Bereichen?",
+  },
+  {
+    id: "locate",
+    label: "Lokalisation",
+    patientScript:
+      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?",
+    figureRef: "2",
+    pause: true,
+  },
+  {
+    id: "confirm",
+    label: "Bestätigung",
+    examinerInstruction:
+      'Betroffene Bereiche berühren zur Bestätigung, „hier?" fragen',
+    figureRef: "3",
+    appAction: "Region im Diagramm wählen",
+  },
+  {
+    id: "more",
+    label: "Weitere Bereiche?",
+    patientScript:
+      "Gibt es noch weitere Bereiche, in denen Sie Schmerzen gespürt haben?",
+  },
+];
+
+/**
+ * E1B - Headache location flow (4 steps).
+ * Based on DC-TMD protocol section 5.3 U1b.
+ */
+const E1B_HEADACHE_LOCATION_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "headache-question",
+    label: "Kopfschmerzfrage",
+    patientScript: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen?",
+  },
+  {
+    id: "locate",
+    label: "Lokalisation",
+    patientScript:
+      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Kopfschmerzen gespürt haben?",
+    pause: true,
+  },
+  {
+    id: "confirm",
+    label: "Bestätigung",
+    examinerInstruction:
+      'Betroffene Bereiche berühren zur Bestätigung, „hier?" fragen',
+    appAction: "Temporalis-Region im Diagramm wählen",
+  },
+  {
+    id: "more",
+    label: "Weitere Bereiche?",
+    patientScript:
+      "Gibt es noch weitere Bereiche, in denen Sie Kopfschmerzen gespürt haben?",
+  },
+];
+
+// ============================================================================
+// E1 Rich Instructions
+// ============================================================================
+
+/**
+ * E1 Pain/Headache Location - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.3 (U1)
+ */
+export const E1_RICH_INSTRUCTIONS = {
+  /** U1A - Pain location in the last 30 days */
+  painLocation: {
+    title: "Schmerzlokalisation",
+    prompt: "Hatten Sie in den letzten 30 Tagen Schmerzen in diesen Bereichen?",
+    flow: E1A_PAIN_LOCATION_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u1-untersucherbestatigung-der-schmerz--und-kopfschmerzlokalisationen",
+        label: "4.5 U1a",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e1",
+        anchor: "lokalisation-von-schmerzen-innerhalb-den-letzten-30-tagen",
+        label: "5.3 U1a",
+      },
+    ],
+    additionalInfo: [
+      {
+        section: "section2",
+        anchor: "26",
+        label: "2.6 Klassifikation anatomischer Strukturen",
+      },
+      {
+        section: "section8",
+        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
+        label: "8.3 Wörtliche Anweisungen",
+      },
+    ],
+  } satisfies RichPainInterviewInstruction,
+
+  /** U1B - Headache location in the last 30 days */
+  headacheLocation: {
+    title: "Kopfschmerzlokalisation",
+    prompt: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen?",
+    flow: E1B_HEADACHE_LOCATION_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u1-untersucherbestatigung-der-schmerz--und-kopfschmerzlokalisationen",
+        label: "4.5 U1b",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e1",
+        anchor: "u1b-kopfschmerzlokalisation-wahrend-der-letzten-30-tage",
+        label: "5.3 U1b",
+      },
+    ],
+    additionalInfo: [
+      {
+        section: "section8",
+        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
+        label: "8.3 Wörtliche Anweisungen",
+      },
+    ],
+  } satisfies RichPainInterviewInstruction,
+} as const;
+
+// ============================================================================
+// E2 Incisal Relationships Measurement Flows
+// ============================================================================
+
+/**
+ * E2 - Reference tooth and marking flow (3 steps).
+ * Based on DC-TMD protocol section 5.3 U2.
+ */
+const E2_REFERENCE_TOOTH_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "marking",
+    label: "Markierung",
+    patientScript:
+      "Ich werde einige Bleistiftmarkierungen auf Ihren Zähnen anbringen; ich werde sie am Ende der Untersuchung entfernen.",
+    examinerInstruction: "Referenzzähne im OK und UK auswählen (typisch 11/21)",
+    figureRef: "4",
+  },
+  {
+    id: "close",
+    label: "Zubeißen",
+    patientScript: "Bitte legen Sie Ihre Backenzähne vollständig aufeinander.",
+    pause: true,
+  },
+  {
+    id: "mark-line",
+    label: "Referenzlinie",
+    examinerInstruction:
+      "Horizontale Linie auf UK-Schneidezahn markieren, wo OK-Kante den UK überlappt",
+    appAction: "Referenzzahn dokumentieren",
+  },
+];
+
+/**
+ * E2 - Midline deviation flow (2 steps).
+ * Based on DC-TMD protocol section 5.3 U2.
+ */
+const E2_MIDLINE_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "assess",
+    label: "Mittellinie prüfen",
+    examinerInstruction:
+      "Dentale Mittellinien OK/UK vergleichen. < 1mm = keine Abweichung (0 mm)",
+    figureRef: ["5a", "5b"],
+  },
+  {
+    id: "measure",
+    label: "Abweichung messen",
+    examinerInstruction: "Bei >= 1mm: Richtung und Betrag notieren",
+    figureRef: "6",
+    appAction: "Richtung und mm-Wert eingeben",
+  },
+];
+
+/**
+ * E2 - Horizontal overjet flow (2 steps).
+ * Based on DC-TMD protocol section 5.3 U2.
+ */
+const E2_OVERJET_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "close",
+    label: "Zubeißen",
+    patientScript: "Bitte legen Sie Ihre Backenzähne vollständig aufeinander.",
+    pause: true,
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    examinerInstruction: "Horizontalen Abstand von labial OK zu labial UK messen",
+    figureRef: "7",
+    appAction: "Messwert in mm eingeben (negativ bei Kreuzbiss)",
+  },
+];
+
+/**
+ * E2 - Vertical overlap flow (2 steps).
+ * Based on DC-TMD protocol section 5.3 U2.
+ */
+const E2_OVERLAP_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "open",
+    label: "Öffnen",
+    examinerInstruction: "Patient auffordern, ausreichend zu öffnen für Messung",
+    pause: true,
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    examinerInstruction: "Vertikalen Überbiss an der Markierung messen",
+    figureRef: "8",
+    appAction: "Messwert in mm eingeben (negativ bei offenem Biss)",
+  },
+];
+
+// ============================================================================
+// E2 Rich Instructions
+// ============================================================================
+
+/**
+ * E2 Incisal Relationships - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.3 (U2)
+ */
+export const E2_RICH_INSTRUCTIONS = {
+  /** Reference tooth and marking */
+  referenceTooth: {
+    stepId: "U2-ref",
+    title: "Referenzzahn & Markierungen",
+    flow: E2_REFERENCE_TOOTH_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhältnisse",
+        label: "4.5 Referenzzähne",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e2",
+        anchor: "wahlen-sie-referenzzahne-im-ober--und-unterkiefer-aus",
+        label: "5.3 Referenzzähne",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** Midline deviation */
+  midlineDeviation: {
+    stepId: "U2-mid",
+    title: "Mittellinienabweichung",
+    flow: E2_MIDLINE_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhältnisse",
+        label: "4.5 Mittellinie",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e2",
+        anchor: "referenzlinie--referenz-mittellinie-im-unterkiefer",
+        label: "5.3 Mittellinie",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** Horizontal overjet */
+  horizontalOverjet: {
+    stepId: "U2-hov",
+    title: "Horizontaler Overjet",
+    flow: E2_OVERJET_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhältnisse",
+        label: "4.5 Overjet",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e2",
+        anchor: "horizontaler-inzisaler-uberbiss",
+        label: "5.3 Overjet",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** Vertical overlap */
+  verticalOverlap: {
+    stepId: "U2-vov",
+    title: "Vertikaler Overlap",
+    flow: E2_OVERLAP_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhältnisse",
+        label: "4.5 Überbiss",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e2",
+        anchor: "vertikaler-inzisaler-uberbiss",
+        label: "5.3 Überbiss",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+} as const;
+
+// ============================================================================
+// E3 Opening Pattern Flow
+// ============================================================================
+
+/**
+ * E3 - Opening pattern observation flow (4 steps).
+ * Based on DC-TMD protocol section 5.3 U3.
+ */
+const E3_OPENING_PATTERN_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "start",
+    label: "Ausgangsposition",
+    patientScript: "Bitte legen Sie Ihre Backenzähne vollständig aufeinander.",
+    pause: true,
+  },
+  {
+    id: "instruction",
+    label: "Anweisung",
+    patientScript:
+      "Ich möchte, dass Sie langsam Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist, schließen und Ihre Backenzähne wieder vollständig aufeinander legen.",
+    figureRef: ["9", "10a"],
+  },
+  {
+    id: "observe",
+    label: "Beobachten",
+    examinerInstruction:
+      "Öffnungsbewegung beobachten: Gerade (< 2mm), korrigiert (>= 2mm mit Rückkehr), unkorrigiert (>= 2mm ohne Rückkehr)",
+    figureRef: "10b",
+  },
+  {
+    id: "repeat",
+    label: "Wiederholen",
+    patientScript: "Noch zweimal wiederholen.",
+    examinerInstruction: "Insgesamt 3x beobachten",
+    appAction: "Muster auswählen",
+  },
+];
+
+// ============================================================================
+// E3 Rich Instructions
+// ============================================================================
+
+/**
+ * E3 Opening Pattern - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.3 (U3)
+ */
+export const E3_RICH_INSTRUCTIONS = {
+  /** Opening pattern observation */
+  openingPattern: {
+    stepId: "U3",
+    title: "Öffnungsmuster",
+    flow: E3_OPENING_PATTERN_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u3-offnungsmuster-erganzend",
+        label: "4.5 Öffnungsmuster",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e3",
+        anchor: "offnungsmuster",
+        label: "5.3 Öffnungsmuster",
+      },
+    ],
+    additionalInfo: [
+      {
+        section: "section8",
+        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
+        label: "8.3 Wörtliche Anweisungen",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+} as const;
+
+// ============================================================================
+// E9 Palpation Flows
+// ============================================================================
+
+/**
+ * E9 - Palpation introduction flow (4 steps).
+ * Based on DC-TMD protocol section 5.9.
+ */
+const E9_INTRODUCTION_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "intro",
+    label: "Einführung",
+    patientScript:
+      "Jetzt werde ich Druck auf verschiedene Bereiche Ihres Kopfes, Gesichts und Kiefers ausüben, und ich werde Sie nach Schmerzen, bekanntem Schmerz und bekanntem Kopfschmerz fragen.",
+    figureRef: "24",
+  },
+  {
+    id: "referred",
+    label: "Übertragener Schmerz",
+    patientScript:
+      "Außerdem werde ich fragen, ob der Schmerz nur unter meinem Finger bleibt oder ob Sie ihn auch irgendwo anders außer unter meinem Finger spüren.",
+  },
+  {
+    id: "duration",
+    label: "Dauer",
+    patientScript: "Jedes Mal werde ich Druck ausüben und ihn 5 Sekunden lang halten.",
+  },
+  {
+    id: "calibrate",
+    label: "Kalibrierung",
+    examinerInstruction: "Mit Finger-Algometer auf 1,0 kg kalibrieren",
+    figureRef: "25",
+  },
+];
+
+/**
+ * E9 - Temporalis palpation flow (4 steps).
+ * Based on DC-TMD protocol section 5.9.
+ */
+const E9_TEMPORALIS_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "identify",
+    label: "Muskelgrenzen",
+    patientScript: "Bitte beißen Sie kurz zusammen.",
+    examinerInstruction: "Muskelgrenzen durch Anspannung identifizieren",
+    pause: true,
+  },
+  {
+    id: "relax",
+    label: "Entspannung",
+    patientScript: "Bitte entspannen Sie Ihren Kiefer.",
+    pause: true,
+  },
+  {
+    id: "palpate",
+    label: "Palpieren",
+    examinerInstruction: "3 vertikale Zonen (anterior, Mitte, posterior). 1 kg, 5 Sek/Zone",
+    figureRef: ["26", "27"],
+  },
+  {
+    id: "inquiry",
+    label: "Befragung",
+    examinerInstruction:
+      "Schmerz? → Bekannter Schmerz? → Bekannter Kopfschmerz? → Übertragener Schmerz?",
+    appAction: "Schmerz, bekannter Schmerz, Kopfschmerz eingeben",
+  },
+];
+
+/**
+ * E9 - Masseter palpation flow (2 steps).
+ * Based on DC-TMD protocol section 5.9.
+ */
+const E9_MASSETER_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "palpate",
+    label: "Palpieren",
+    examinerInstruction: "3 horizontale Bänder (Ursprung, Körper, Ansatz). 1 kg, 5 Sek/Band",
+    figureRef: ["28", "29"],
+  },
+  {
+    id: "inquiry",
+    label: "Befragung",
+    examinerInstruction: "Schmerz? → Bekannter Schmerz? → Übertragener Schmerz?",
+    appAction: "Schmerz, bekannter Schmerz eingeben",
+  },
+];
+
+/**
+ * E9 - TMJ lateral pole palpation flow (3 steps).
+ * Based on DC-TMD protocol section 5.9.
+ */
+const E9_TMJ_LATERAL_POLE_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "calibrate",
+    label: "Kalibrierung",
+    examinerInstruction: "Auf 0,5 kg kalibrieren",
+    figureRef: "33",
+  },
+  {
+    id: "protrude",
+    label: "Protrusion",
+    patientScript:
+      "Bitte öffnen Sie leicht, schieben Sie Ihren Unterkiefer nach vorn und bewegen Sie dann Ihren Kiefer wieder zurück in seine normale Position ohne, dass Ihre Zähne sich berühren.",
+    figureRef: ["31", "32"],
+    pause: true,
+  },
+  {
+    id: "palpate",
+    label: "Palpieren",
+    examinerInstruction:
+      "Zeigefinger anterior des Tragus auf lateralem Pol. 0,5 kg, 5 Sek.",
+    figureRef: "33",
+    appAction: "Schmerzbefragung durchführen",
+  },
+];
+
+/**
+ * E9 - TMJ around lateral pole palpation flow (3 steps).
+ * Based on DC-TMD protocol section 5.9.
+ */
+const E9_TMJ_AROUND_POLE_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "calibrate",
+    label: "Kalibrierung",
+    examinerInstruction: "Auf 1,0 kg kalibrieren",
+    figureRef: "36",
+  },
+  {
+    id: "protrude-hold",
+    label: "Protrusion halten",
+    patientScript:
+      "Bitte öffnen Sie den Mund leicht, schieben Sie den Unterkiefer ein wenig nach vorn und halten Sie ihn dort.",
+    figureRef: ["34", "35"],
+    pause: true,
+  },
+  {
+    id: "palpate-around",
+    label: "Um Pol palpieren",
+    examinerInstruction:
+      "Finger um lateralen Kondylenpol rollen. 1 kg, zirkuläre Bewegung, ~5 Sek.",
+    figureRef: "36",
+    appAction: "Schmerzbefragung durchführen",
+  },
+];
+
+// ============================================================================
+// E9 Rich Instructions
+// ============================================================================
+
+/**
+ * E9 Palpation - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.9 (U9)
+ */
+export const E9_RICH_INSTRUCTIONS = {
+  /** Introduction to palpation */
+  introduction: {
+    stepId: "U9-intro",
+    title: "Einführung Palpation",
+    flow: E9_INTRODUCTION_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
+        label: "4.5 Allgemein",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e9",
+        anchor: "allgemeine-instruktionen",
+        label: "5.9 Allgemein",
+      },
+    ],
+    additionalInfo: [
+      {
+        section: "section6",
+        anchor: "622-fur-palpationsinduzierten-schmerz",
+        label: "6.2.2 Palpationsschmerz",
+      },
+      {
+        section: "section8",
+        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
+        label: "8.3 Wörtliche Anweisungen",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** Temporalis palpation */
+  temporalisPalpation: {
+    title: "Temporalis-Palpation",
+    prompt: "Hatten Sie Schmerzen?",
+    flow: E9_TEMPORALIS_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
+        label: "4.5 Temporalis",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e9",
+        anchor: "m-temporalis-und-m-masseter",
+        label: "5.9 Temporalis",
+      },
+    ],
+    additionalInfo: [
+      {
+        section: "section6",
+        anchor: "624-abfrage-bekannter-schmerz",
+        label: "6.2.4 Bekannter Schmerz",
+      },
+      {
+        section: "section6",
+        anchor: "625-abfrage-ubertragener-schmerz",
+        label: "6.2.5 Übertragener Schmerz",
+      },
+    ],
+  } satisfies RichPainInterviewInstruction,
+
+  /** Masseter palpation */
+  masseterPalpation: {
+    title: "Masseter-Palpation",
+    prompt: "Hatten Sie Schmerzen?",
+    flow: E9_MASSETER_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
+        label: "4.5 Masseter",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e9",
+        anchor: "m-temporalis-und-m-masseter",
+        label: "5.9 Masseter",
+      },
+    ],
+  } satisfies RichPainInterviewInstruction,
+
+  /** TMJ lateral pole palpation */
+  tmjLateralPole: {
+    stepId: "U9-lat",
+    title: "Lateraler Kondylenpol",
+    flow: E9_TMJ_LATERAL_POLE_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
+        label: "4.5 Lateraler Pol",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e9",
+        anchor: "lateraler-kondylenpol",
+        label: "5.9 Lateraler Pol",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** TMJ around lateral pole palpation */
+  tmjAroundPole: {
+    stepId: "U9-around",
+    title: "Um den lateralen Kondylenpol",
+    flow: E9_TMJ_AROUND_POLE_FLOW,
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
+        label: "4.5 Um Pol",
+      },
+    ],
+    completeSpec: [
+      {
+        section: "e9",
+        anchor: "um-den-lateralen-kondylenpol",
+        label: "5.9 Um Pol",
+      },
+    ],
+  } satisfies RichMeasurementInstruction,
+} as const;
+
+// ============================================================================
 // Type Guards and Helpers
 // ============================================================================
 
