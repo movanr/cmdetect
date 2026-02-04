@@ -32,5 +32,5 @@ function ExaminationE1Page() {
     });
   };
 
-  return <E1Section onComplete={handleComplete} onSkip={handleSkip} />;
+  return <E1Section onComplete={handleComplete} onSkip={handleSkip} isFirstSection />;
 }

@@ -21,9 +21,11 @@ import { SectionFooter } from "../ui";
 interface E2SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  isFirstSection?: boolean;
 }
 
-export function E2Section({ onComplete, onSkip }: E2SectionProps) {
+export function E2Section({ onComplete, onSkip, onBack, isFirstSection }: E2SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
 
   const instances = getInstancesForStep("e2-all");
@@ -92,6 +94,8 @@ export function E2Section({ onComplete, onSkip }: E2SectionProps) {
       <SectionFooter
         onNext={handleNext}
         onSkip={onSkip}
+        onBack={onBack}
+        isFirstStep={isFirstSection}
         warnOnSkip
         checkIncomplete={() => !validateStep("e2-all")}
       />

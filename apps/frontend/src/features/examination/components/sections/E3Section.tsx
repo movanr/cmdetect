@@ -22,9 +22,11 @@ import { SectionFooter } from "../ui";
 interface E3SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  isFirstSection?: boolean;
 }
 
-export function E3Section({ onComplete, onSkip }: E3SectionProps) {
+export function E3Section({ onComplete, onSkip, onBack, isFirstSection }: E3SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
 
   const instances = getInstancesForStep("e3-all");
@@ -60,6 +62,8 @@ export function E3Section({ onComplete, onSkip }: E3SectionProps) {
       <SectionFooter
         onNext={handleNext}
         onSkip={onSkip}
+        onBack={onBack}
+        isFirstStep={isFirstSection}
         warnOnSkip
         checkIncomplete={() => !validateStep("e3-all")}
       />

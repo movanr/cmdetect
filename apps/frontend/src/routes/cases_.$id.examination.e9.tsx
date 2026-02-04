@@ -32,5 +32,13 @@ function ExaminationE9Page() {
     });
   };
 
-  return <E9Section onComplete={handleComplete} onSkip={handleSkip} isLastSection />;
+  // Navigate to previous section (E4)
+  const handleBack = () => {
+    navigate({
+      to: "/cases/$id/examination/e4",
+      params: { id },
+    });
+  };
+
+  return <E9Section onComplete={handleComplete} onSkip={handleSkip} onBack={handleBack} isLastSection />;
 }

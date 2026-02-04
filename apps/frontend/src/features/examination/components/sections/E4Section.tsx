@@ -38,6 +38,7 @@ import {
   MeasurementFlowBlock,
   MeasurementStep,
   PainInterviewBlock,
+  SectionFooter,
   StepBar,
   type StepStatus,
 } from "../ui";
@@ -62,6 +63,8 @@ const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
 interface E4SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  isFirstSection?: boolean;
 }
 
 /** Expanded region state per side */
@@ -290,7 +293,7 @@ function InterviewSubsection({
   );
 }
 
-export function E4Section({ onComplete }: E4SectionProps) {
+export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
 
   // Compute initial state from form values (persisted across tab switches)
@@ -368,7 +371,10 @@ export function E4Section({ onComplete }: E4SectionProps) {
 
   // Navigation handlers
   const handleBack = () => {
-    if (!isFirstStep) {
+    if (isFirstStep) {
+      // On first internal step, go back to previous section
+      onBack?.();
+    } else {
       setIncompleteRegions([]);
       setExpanded({ left: null, right: null });
       setCurrentStepIndex((i) => i - 1);
@@ -619,15 +625,19 @@ export function E4Section({ onComplete }: E4SectionProps) {
                     type="button"
                     variant="ghost"
                     onClick={handleBack}
-                    disabled={isFirstStep}
+                    disabled={isFirstStep && (isFirstSection || !onBack)}
                     className="text-muted-foreground"
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Zurück
                   </Button>
 
-                  {/* Right: Action buttons */}
+                  {/* Right: Next and Skip buttons */}
                   <div className="flex gap-2">
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
                     <Button
                       type="button"
                       variant="ghost"
@@ -636,10 +646,6 @@ export function E4Section({ onComplete }: E4SectionProps) {
                     >
                       <SkipForward className="h-4 w-4 mr-1" />
                       Überspringen
-                    </Button>
-                    <Button type="button" onClick={handleNext}>
-                      {isLastStep ? "Abschließen" : "Weiter"}
-                      <ArrowRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                 </div>
@@ -678,6 +684,15 @@ export function E4Section({ onComplete }: E4SectionProps) {
           </AlertDialogContent>
         </AlertDialog>
       </CardContent>
+
+      {/* Section-level footer when all steps are complete */}
+      {allComplete && (
+        <SectionFooter
+          onNext={onComplete}
+          onBack={onBack}
+          isFirstStep={isFirstSection}
+        />
+      )}
     </Card>
   );
 }

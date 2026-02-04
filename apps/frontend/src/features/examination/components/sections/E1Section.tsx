@@ -39,6 +39,8 @@ const E1_HEADACHE_SVG_REGIONS: readonly Region[] = ["temporalis"];
 interface E1SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  isFirstSection?: boolean;
 }
 
 /**
@@ -58,7 +60,7 @@ function computeE1RegionStatus(region: Region, values: string[] | undefined): Re
   };
 }
 
-export function E1Section({ onComplete, onSkip }: E1SectionProps) {
+export function E1Section({ onComplete, onSkip, onBack, isFirstSection }: E1SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, getValues, setValue } = useFormContext();
 
@@ -260,6 +262,8 @@ export function E1Section({ onComplete, onSkip }: E1SectionProps) {
       <SectionFooter
         onNext={handleNext}
         onSkip={onSkip}
+        onBack={onBack}
+        isFirstStep={isFirstSection}
         warnOnSkip
         checkIncomplete={() => !validateStep("e1-all")}
       />

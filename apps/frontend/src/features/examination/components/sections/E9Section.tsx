@@ -29,6 +29,8 @@ import { SectionFooter } from "../ui";
 interface E9SectionProps {
   onComplete?: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  isFirstSection?: boolean;
   /** If true, shows "Abschliessen" instead of "Weiter" */
   isLastSection?: boolean;
 }
@@ -192,7 +194,7 @@ function PalpationSubsection({
   );
 }
 
-export function E9Section({ onComplete, onSkip, isLastSection = true }: E9SectionProps) {
+export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSection = true }: E9SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, setValue, getValues } = useFormContext();
 
@@ -288,6 +290,8 @@ export function E9Section({ onComplete, onSkip, isLastSection = true }: E9Sectio
       <SectionFooter
         onNext={handleNext}
         onSkip={onSkip}
+        onBack={onBack}
+        isFirstStep={isFirstSection}
         isLastSection={isLastSection}
         warnOnSkip
         checkIncomplete={() => !validateE9()}

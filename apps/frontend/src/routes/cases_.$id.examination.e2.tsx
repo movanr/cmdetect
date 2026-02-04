@@ -31,5 +31,13 @@ function ExaminationE2Page() {
     });
   };
 
-  return <E2Section onComplete={handleComplete} onSkip={handleSkip} />;
+  // Navigate to previous section (E1)
+  const handleBack = () => {
+    navigate({
+      to: "/cases/$id/examination/e1",
+      params: { id },
+    });
+  };
+
+  return <E2Section onComplete={handleComplete} onSkip={handleSkip} onBack={handleBack} />;
 }

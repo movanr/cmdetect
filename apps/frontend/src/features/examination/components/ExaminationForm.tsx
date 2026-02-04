@@ -14,6 +14,8 @@ import { E9Section } from "./sections/E9Section";
 interface SectionComponentProps {
   onComplete?: () => void;
   onSkip?: () => void;
+  onBack?: () => void;
+  isFirstSection?: boolean;
 }
 
 // Map section IDs to components (only implemented sections)
@@ -58,17 +60,27 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
           {SECTION_REGISTRY.map((section, index) => {
             const SectionComponent = SECTION_COMPONENTS[section.id];
             const nextSection = SECTION_REGISTRY[index + 1]?.id;
+            const prevSection = SECTION_REGISTRY[index - 1]?.id;
             const handleSectionComplete = nextSection
               ? () => setCurrentSection(nextSection)
               : undefined;
             const handleSectionSkip = nextSection
               ? () => setCurrentSection(nextSection)
               : undefined;
+            const handleSectionBack = prevSection
+              ? () => setCurrentSection(prevSection)
+              : undefined;
+            const isFirstSection = index === 0;
 
             return (
               <TabsContent key={section.id} value={section.id} className="mt-4">
                 {SectionComponent ? (
-                  <SectionComponent onComplete={handleSectionComplete} onSkip={handleSectionSkip} />
+                  <SectionComponent
+                    onComplete={handleSectionComplete}
+                    onSkip={handleSectionSkip}
+                    onBack={handleSectionBack}
+                    isFirstSection={isFirstSection}
+                  />
                 ) : (
                   <div className="p-4 text-muted-foreground">
                     Abschnitt {section.label} ist noch nicht implementiert.
