@@ -14,7 +14,11 @@ This is a **pnpm workspace** with **Turbo** for build orchestration:
 - **apps/frontend**: Practitioner frontend - React 19 + TanStack Router + TanStack Query (port 3000)
 - **apps/patient-frontend**: Patient questionnaire frontend - React 19 + TanStack Router (port 3002)
 - **apps/hasura**: Hasura GraphQL Engine v2.46.0 with PostgreSQL, metadata, and migrations
-- **packages/config**: Shared configuration, role constants, and Zod environment validation (TypeScript)
+- **packages/config**: Shared configuration, role constants, and Zod environment validation
+- **packages/questionnaires**: Questionnaire definitions and Zod validation schemas
+- **packages/dc-tmd**: DC/TMD diagnostic criteria evaluation engine
+- **packages/pdf-templates**: Typst templates for PDF report generation
+- **packages/test-utils**: Shared test utilities and helpers
 - **tests/**: Integration tests focusing on Hasura permissions and organization isolation
 
 ## Development Commands
@@ -98,10 +102,10 @@ The system consists of four main services:
 
 ### Database Architecture
 
-**Two PostgreSQL databases:**
+**Single PostgreSQL database with separate table sets:**
 
-1. **Auth Database** (Better Auth): User accounts, sessions, email verification
-2. **Application Database** (Hasura): Patients, patient records, questionnaire responses
+1. **Auth Tables** (Better Auth): User accounts, sessions, email verification
+2. **Application Tables** (Hasura): Patients, patient records, questionnaire responses
 
 **Key Tables:**
 
@@ -109,7 +113,7 @@ The system consists of four main services:
 - `user` (Better Auth users with roles array and `organizationId`)
 - `patient_record` (cases with encrypted PII: `first_name_encrypted`, `last_name_encrypted`, etc.)
 - `patient_consent` (GDPR-compliant consent with version tracking)
-- `questionnaire_response` (FHIR-compatible medical responses with unique constraints)
+- `questionnaire_response` (medical questionnaire responses with unique constraints)
 - `account`, `session`, `verification`, `jwks` (Better Auth tables)
 
 ## GraphQL Integration
@@ -150,7 +154,7 @@ GraphQL types are automatically generated from the Hasura schema using GraphQL C
 - **Role permissions**: Different CRUD access per role (org_admin, physician, receptionist)
 - **Anonymous operations**: Hasura actions for secure patient form submission with encryption
   - `submitPatientConsent`: Anonymous consent capture
-  - `submitQuestionnaireResponse`: FHIR questionnaire submission
+  - `submitQuestionnaireResponse`: Questionnaire submission
   - `submitPatientPersonalData`: Encrypted PII submission (NEW)
   - `validateInviteToken`: Token validation with organization public key (NEW)
 
@@ -179,6 +183,10 @@ pnpm test tests/permissions/specific-test.test.ts
 
 # Tests use maxWorkers: 1 for sequential execution
 # Each test starts with clean database state
+
+# Run dc-tmd unit tests (Vitest)
+pnpm --filter @cmdetect/dc-tmd test
+pnpm --filter @cmdetect/dc-tmd test:watch
 ```
 
 ## Local Development Port Configuration
@@ -384,9 +392,9 @@ The `@cmdetect/questionnaires` package requires special handling because it's co
 
 ### Database Connection Details
 
-- **Auth Database**: Better Auth uses separate PostgreSQL database
-- **Application Database**: Hasura connects to main PostgreSQL instance
-- Both databases can run in same PostgreSQL container but are separate schemas
+- **Single Database**: Better Auth and Hasura share the same PostgreSQL database (cmdetect)
+- **Auth Tables**: `account`, `session`, `verification`, `jwks`, `user` managed by Better Auth
+- **Application Tables**: `organization`, `patient_record`, `questionnaire_response`, etc. managed by Hasura
 
 ### Key File Locations
 
@@ -397,6 +405,9 @@ The `@cmdetect/questionnaires` package requires special handling because it's co
 - **Crypto Module**: `apps/frontend/src/lib/crypto/` (encryption utilities)
 - **Action Handlers**: `apps/auth-server/src/routes/actions/` (Hasura action endpoints)
 - **Shared Config Package**: `packages/config/src/index.ts` (role constants, env schemas, shared types)
+- **DC/TMD Criteria**: `packages/dc-tmd/src/criteria/` (diagnostic evaluation logic)
+- **Questionnaire Definitions**: `packages/questionnaires/src/` (questionnaire schemas)
+- **PDF Templates**: `packages/pdf-templates/templates/` (Typst templates)
 
 ## Best practices
 
