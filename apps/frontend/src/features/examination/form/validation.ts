@@ -240,7 +240,7 @@ export function validateInstances(
         }
         // Choose message based on whether terminated sibling exists
         const message = hasTerminatedSibling
-          ? "Bitte Messwert eingeben oder 'Abgebrochen' anklicken"
+          ? "Bitte Messwert eingeben"
           : "Bitte Messwert eingeben";
         errors.push({ path: instance.path, message });
         continue;

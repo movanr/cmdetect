@@ -555,7 +555,7 @@ describe("validation", () => {
         expect(result.errors).toHaveLength(1);
         expect(result.errors[0]).toEqual({
           path: "e4.maxAssisted.measurement",
-          message: "Bitte Messwert eingeben oder 'Abgebrochen' anklicken",
+          message: "Bitte Messwert eingeben",
         });
       });
 

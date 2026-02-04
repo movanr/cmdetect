@@ -59,7 +59,10 @@ export const COMMON = {
   pain: "Schmerz",
   noPain: "Kein Schmerz",
   noMorePainRegions: "Keine weiteren Schmerzregionen",
-  terminated: "Abgebrochen",
+  /** U4D: Patient raised hand to stop the assisted opening procedure */
+  terminated: "Patient hat Hand gehoben",
+  terminatedShort: "Hand gehoben",
+  terminatedTooltip: "U4D: Patient hat das Verfahren durch Handheben beendet",
   measurement: "Messwert",
   painFreeOpening: "Schmerzfreie Öffnung",
   maxUnassistedOpening: "Maximale Öffnung (unassistiert)",

@@ -697,9 +697,13 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
 
   // Render instruction block based on step type
   const renderInstruction = (stepId: string, stepIsInterview: boolean) => {
-    // Pain interview - use pain interview flow
+    // Pain interview - use appropriate interview flow based on step
     if (stepIsInterview) {
-      const interviewInstruction = E4_RICH_INSTRUCTIONS.painInterview;
+      // E4C uses different pain question (asks about examiner manipulation)
+      const interviewInstruction =
+        stepId === "e4c-interview"
+          ? E4_RICH_INSTRUCTIONS.painInterviewAssistedOpening
+          : E4_RICH_INSTRUCTIONS.painInterview;
       return <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />;
     }
 

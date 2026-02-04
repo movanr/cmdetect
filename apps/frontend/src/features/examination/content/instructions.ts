@@ -50,9 +50,9 @@ const E4C_SAFETY_WARNING: SafetyWarning = {
 // ============================================================================
 
 /**
- * Pain interview for movement-induced pain (E4B/E4C).
+ * Pain interview for movement-induced pain (E4B - unassisted opening).
  *
- * 4-step procedure:
+ * 4-step procedure from DC-TMD protocol section 6:
  * 1. Ask if patient had pain during movement
  * 2. Patient localizes pain by pointing with finger
  * 3. Examiner touches area to confirm location and identify anatomical structure
@@ -60,29 +60,67 @@ const E4C_SAFETY_WARNING: SafetyWarning = {
  *
  * NOTE: Referred pain inquiry is NOT part of movement-induced pain - only for palpation.
  */
-const PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
+const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
     id: "pain",
     label: "Schmerz bei Bewegung?",
-    description: "Hatten Sie bei dieser Bewegung Schmerzen?",
+    patientScript: "Hatten Sie bei dieser Bewegung Schmerzen?",
   },
   {
     id: "locate",
     label: "Lokalisation",
-    description:
-      "Zeigen Sie mit dem Finger auf alle Bereiche, in denen Sie Schmerzen gespürt haben.",
+    patientScript:
+      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie bei dieser Bewegung Schmerzen gespürt haben?",
   },
   {
     id: "confirm",
     label: "Bestätigung",
-    description:
+    examinerInstruction:
       "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
     appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
   },
   {
     id: "done",
-    label: "Keine weiteren Schmerzbereiche",
-    description: "Gibt es noch weitere Bereiche? Falls nein, abschließen.",
+    label: "Weitere Bereiche?",
+    patientScript:
+      "Gibt es noch weitere Bereiche, in denen Sie bei dieser Bewegung Schmerzen gespürt haben?",
+    appAction: 'Button „Keine weiteren Schmerzbereiche"',
+  },
+];
+
+/**
+ * Pain interview for examiner-assisted opening (E4C).
+ *
+ * Uses a different pain question that specifically asks about pain from
+ * the examiner's manipulation, not from the patient's movement.
+ *
+ * This distinction is important for differential diagnosis per DC-TMD protocol.
+ */
+const E4C_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "pain",
+    label: "Schmerz bei Manipulation?",
+    patientScript:
+      "Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
+  },
+  {
+    id: "locate",
+    label: "Lokalisation",
+    patientScript:
+      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?",
+  },
+  {
+    id: "confirm",
+    label: "Bestätigung",
+    examinerInstruction:
+      "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+    appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
+  },
+  {
+    id: "done",
+    label: "Weitere Bereiche?",
+    patientScript:
+      "Gibt es noch weitere Bereiche, in denen Sie Schmerzen gespürt haben, als ich Ihren Mund weiter geöffnet habe?",
     appAction: 'Button „Keine weiteren Schmerzbereiche"',
   },
 ];
@@ -93,24 +131,24 @@ const PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
 
 /**
  * E4A - Pain-free opening measurement flow.
- * Simple 3-step procedure based on DC-TMD protocol section 4.5.
+ * Based on DC-TMD protocol section 5 (detailed) and section 4.5 (quick reference).
  */
 const E4A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
   {
     id: "script",
     label: "Anweisung",
-    description:
-      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
+    patientScript:
+      "Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, ohne Schmerzen zu verspüren oder bestehende Schmerzen zu verstärken. Ich werde Ihnen sagen, wann Sie schließen können.",
   },
   {
     id: "ruler",
     label: "Lineal anlegen",
-    description: "0-Marke an Inzisalkante des unteren Referenzzahns",
+    examinerInstruction: "0-Marke an Inzisalkante des unteren Referenzzahns anlegen.",
   },
   {
     id: "measure",
     label: "Messen",
-    description: "Interinzisale Distanz ablesen",
+    examinerInstruction: "Interinzisale Distanz ablesen.",
     appAction: "Messwert in mm eingeben",
   },
 ];
@@ -118,22 +156,24 @@ const E4A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
 /**
  * E4B - Maximum unassisted opening measurement flow.
  * Same technique as E4A but patient opens maximally despite pain.
+ * Based on DC-TMD protocol section 7.
  */
 const E4B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
   {
     id: "script",
     label: "Anweisung",
-    description: "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
+    patientScript:
+      "Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist. Ich werde Ihnen sagen, wann Sie schließen können.",
   },
   {
     id: "ruler",
     label: "Lineal anlegen",
-    description: "0-Marke an Inzisalkante des unteren Referenzzahns",
+    examinerInstruction: "0-Marke an Inzisalkante des unteren Referenzzahns anlegen.",
   },
   {
     id: "measure",
     label: "Messen",
-    description: "Interinzisale Distanz ablesen",
+    examinerInstruction: "Interinzisale Distanz ablesen.",
     appAction: "Messwert in mm eingeben",
   },
 ];
@@ -141,35 +181,59 @@ const E4B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
 /**
  * E4C - Maximum assisted opening measurement flow.
  * Scissor technique with safety warning.
+ *
+ * Based on DC-TMD protocol section 8 with exact quotations:
+ * 1. Announcement with hand-raise instruction
+ * 2. Ruler placement
+ * 3. Patient opens maximally
+ * 4. Tactile warning before finger contact
+ * 5. Relaxation prompt (critical for scissor technique)
+ * 6. Scissor technique application
+ * 7. Measurement
  */
 const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
   {
     id: "announce",
     label: "Ankündigung",
-    description:
-      "Gleich werde ich versuchen, Ihren Mund mit meinen Fingern noch weiter zu öffnen. Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.",
+    patientScript:
+      "Gleich werde ich versuchen, Ihren Mund mit meinen Fingern weiter zu öffnen. Wenn Sie möchten, dass ich aufhöre, heben Sie Ihre Hand und ich werde sofort aufhören.",
   },
   {
     id: "ruler",
-    label: "Lineal anlegen",
-    description: "0-Marke an Inzisalkante des unteren Referenzzahns",
+    label: "Lineal platzieren",
+    patientScript: "Ich werde mein Lineal platzieren.",
+    examinerInstruction: "0-Marke an Inzisalkante des unteren Referenzzahns anlegen.",
+    pause: true,
   },
   {
     id: "open",
     label: "Patient öffnet",
-    description:
-      "Bitte öffnen Sie jetzt so weit wie möglich, auch wenn es schmerzhaft ist, so wie Sie es eben schon gemacht haben.",
+    patientScript:
+      "Jetzt öffnen Sie Ihren Mund so weit wie möglich, auch wenn schmerzhaft, genau wie zuvor.",
+    pause: true,
+  },
+  {
+    id: "tactile-warning",
+    label: "Berührungsankündigung",
+    patientScript: "Sie werden meine Finger spüren.",
+  },
+  {
+    id: "relax",
+    label: "Entspannung",
+    patientScript:
+      "Bitte entspannen Sie Ihren Kiefer, damit ich Ihnen helfen kann, weiter zu öffnen, wenn möglich.",
+    pause: true,
   },
   {
     id: "technique",
     label: "Scherentechnik",
-    description:
+    examinerInstruction:
       "Daumen auf obere, Zeigefinger auf untere Schneidezähne. Mäßigen Druck anwenden bis Gewebswiderstand.",
   },
   {
     id: "measure",
     label: "Messen",
-    description: "Interinzisale Distanz ablesen",
+    examinerInstruction: "Interinzisale Distanz ablesen.",
     appAction: "Messwert in mm eingeben",
   },
 ];
@@ -269,11 +333,11 @@ export const E4_RICH_INSTRUCTIONS = {
     ],
   } satisfies RichMeasurementInstruction,
 
-  /** Pain interview after movement */
+  /** Pain interview after E4B (unassisted opening) */
   painInterview: {
     title: "Schmerzbefragung",
     prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
-    flow: PAIN_INTERVIEW_FLOW,
+    flow: E4B_PAIN_INTERVIEW_FLOW,
     // Section 4: Quick reference table
     conciseSpec: [
       {
@@ -288,6 +352,39 @@ export const E4_RICH_INSTRUCTIONS = {
         section: "e4",
         anchor: "u4b-schmerz-nach-maximaler-nicht-unterstutzter-offnung",
         label: "5.4 Schmerzbefragung nach Bewegung",
+      },
+    ],
+    // General instructions
+    additionalInfo: [
+      // 2.6: How to identify anatomical structures when patient points to pain
+      { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
+      // 2.9: Familiar pain concept - replication of chief complaint
+      { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
+      // 6.2: Movement-induced pain inquiry, familiar pain inquiry
+      { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+    ],
+  } satisfies RichPainInterviewInstruction,
+
+  /** Pain interview after E4C (assisted opening) - uses examiner manipulation wording */
+  painInterviewAssistedOpening: {
+    title: "Schmerzbefragung",
+    prompt:
+      "Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
+    flow: E4C_PAIN_INTERVIEW_FLOW,
+    // Section 4: Quick reference table
+    conciseSpec: [
+      {
+        section: "section4",
+        anchor: "u4-offnungsbewegungen",
+        label: "4.5 Schmerz nach unterstützter Öffnung",
+      },
+    ],
+    // Section 5: Detailed protocol
+    completeSpec: [
+      {
+        section: "e4",
+        anchor: "u4c-schmerz-nach-maximaler-unterstutzter-offnung",
+        label: "5.4 Schmerzbefragung nach unterstützter Öffnung",
       },
     ],
     // General instructions

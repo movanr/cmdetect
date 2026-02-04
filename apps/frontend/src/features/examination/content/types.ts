@@ -66,14 +66,23 @@ export interface RichStepInstruction {
 
 /**
  * Generic procedure flow step - used for pain interviews, measurements, etc.
- * Displays as numbered steps with optional descriptions and app hints.
+ * Displays as numbered steps with optional patient scripts and examiner instructions.
+ *
+ * Following DC-TMD protocol conventions:
+ * - patientScript: Exact verbatim text to say to the patient (displayed in quotes)
+ * - examinerInstruction: What the examiner does (not spoken to patient)
+ * - pause: Indicates examiner should wait for patient to comply before proceeding
  */
 export interface ProcedureFlowStep {
   id: string;
   /** Short label for the step (e.g., "Anweisung", "Messen") */
   label: string;
-  /** Full text - patient script or examiner instruction */
-  description?: string;
+  /** Verbatim patient script - exact words to say (displayed with quotation marks) */
+  patientScript?: string;
+  /** Examiner instruction - what to do (not spoken to patient, no quotes) */
+  examinerInstruction?: string;
+  /** Pause indicator - wait for patient to comply before proceeding */
+  pause?: boolean;
   /** Optional hint about app interaction for this step */
   appAction?: string;
 }

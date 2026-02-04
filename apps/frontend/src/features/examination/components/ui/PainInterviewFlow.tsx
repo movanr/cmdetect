@@ -7,9 +7,9 @@
  * - Any numbered step-based clinical workflow
  */
 
-import { Link } from "@tanstack/react-router";
-import { BookOpen, MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
+import { BookOpen, MousePointerClick, Pause } from "lucide-react";
 import type {
   CrossReference,
   ProcedureFlowStep,
@@ -25,7 +25,10 @@ interface ProcedureFlowProps {
 }
 
 /**
- * Single procedure step with number, label and description.
+ * Single procedure step with number, label, and content.
+ *
+ * Renders patient scripts with quotation marks (italic) and
+ * examiner instructions without quotes (normal text).
  */
 function ProcedureStep({
   step,
@@ -50,9 +53,19 @@ function ProcedureStep({
       {/* Step content */}
       <div className={cn("pb-4", isLast && "pb-0")}>
         <div className="font-medium text-sm text-foreground">{step.label}</div>
-        {step.description && (
-          <div className="mt-1 text-sm text-muted-foreground italic">
-            „{step.description}"
+        {/* Patient script - verbatim text with quotation marks */}
+        {step.patientScript && (
+          <div className="mt-1 text-sm text-muted-foreground italic">„{step.patientScript}"</div>
+        )}
+        {/* Examiner instruction - action without quotes */}
+        {step.examinerInstruction && (
+          <div className="mt-1 text-sm text-muted-foreground">{step.examinerInstruction}</div>
+        )}
+        {/* Pause indicator - wait for patient */}
+        {step.pause && (
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+            <Pause className="h-3 w-3 shrink-0" />
+            <span>Pause — Warten bis Patient bereit ist</span>
           </div>
         )}
         {step.appAction && (
@@ -142,15 +155,9 @@ function ProtocolReferences({
 
   return (
     <div className="space-y-1 mt-2">
-      {hasConcise && (
-        <CrossReferenceLinks references={conciseSpec} label="Kurzspezifikation" />
-      )}
-      {hasComplete && (
-        <CrossReferenceLinks references={completeSpec} label="Vollständig" />
-      )}
-      {hasAdditional && (
-        <CrossReferenceLinks references={additionalInfo} label="Zusatzinfo" />
-      )}
+      {hasConcise && <CrossReferenceLinks references={conciseSpec} label="Kurzspezifikation" />}
+      {hasComplete && <CrossReferenceLinks references={completeSpec} label="Vollständig" />}
+      {hasAdditional && <CrossReferenceLinks references={additionalInfo} label="Zusatzinfo" />}
     </div>
   );
 }
