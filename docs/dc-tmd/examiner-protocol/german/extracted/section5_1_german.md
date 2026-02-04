@@ -13,7 +13,7 @@
 
 | KONSTRUKT                         | ANWEISUNGEN AN DEN PATIENTEN | UNTERSUCHUNGSVERFAHREN                                                                               |
 | --------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Informationen zur Identifizierung | _\<keine\>_                  | Der Untersucher trägt den Patientennamen, Untersuchernamen und Untersuchungstag in das Formular ein. |
+| Informationen zur Identifizierung | _\<keine\>_                  | Der Untersucher trägt den Patientennamen, Untersuchernamen und Untersuchungstag in das Formular ein. *[Entfällt in CMDetect]* |
 
 #### Anweisungen an den Patienten
 

@@ -193,7 +193,7 @@ export const E4_RICH_INSTRUCTIONS = {
     conciseSpec: [
       {
         section: "section4",
-        anchor: "e4-offnungsbewegungen",
+        anchor: "u4-offnungsbewegungen",
         label: "4.5 Schmerzfreie Öffnung",
       },
     ],
@@ -221,7 +221,7 @@ export const E4_RICH_INSTRUCTIONS = {
     conciseSpec: [
       {
         section: "section4",
-        anchor: "e4-offnungsbewegungen",
+        anchor: "u4-offnungsbewegungen",
         label: "4.5 Max. nicht-unterstützte Öffnung",
       },
     ],
@@ -250,7 +250,7 @@ export const E4_RICH_INSTRUCTIONS = {
     conciseSpec: [
       {
         section: "section4",
-        anchor: "e4-offnungsbewegungen",
+        anchor: "u4-offnungsbewegungen",
         label: "4.5 Max. unterstützte Öffnung",
       },
     ],
@@ -278,7 +278,7 @@ export const E4_RICH_INSTRUCTIONS = {
     conciseSpec: [
       {
         section: "section4",
-        anchor: "e4-offnungsbewegungen",
+        anchor: "u4-offnungsbewegungen",
         label: "4.5 Schmerz nach Öffnungsbewegung",
       },
     ],
@@ -286,7 +286,7 @@ export const E4_RICH_INSTRUCTIONS = {
     completeSpec: [
       {
         section: "e4",
-        anchor: "e4b--maximale-nicht-unterstutzte-offnung",
+        anchor: "u4b-schmerz-nach-maximaler-nicht-unterstutzter-offnung",
         label: "5.4 Schmerzbefragung nach Bewegung",
       },
     ],
