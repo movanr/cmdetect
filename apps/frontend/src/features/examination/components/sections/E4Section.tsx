@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { ArrowRight, CheckCircle, ChevronLeft } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import { E4_RICH_INSTRUCTIONS } from "../../content/instructions";
@@ -61,8 +61,9 @@ const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
 };
 
 interface E4SectionProps {
+  step?: number; // 1-indexed from URL, undefined = auto-detect
+  onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
   onComplete?: () => void;
-  onSkip?: () => void;
   onBack?: () => void;
   isFirstSection?: boolean;
 }
@@ -457,11 +458,11 @@ function E4AMeasurementContent({ stepInstances }: E4AMeasurementContentProps) {
   );
 }
 
-export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps) {
+export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
 
-  // Compute initial state from form values (persisted across tab switches)
-  const [initialState] = useState(() => {
+  // Keep stepStatuses in state (computed from form on mount)
+  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped" | "refused">>(() => {
     const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E4_STEP_ORDER) {
       const instances = getInstancesForStep(stepId);
@@ -470,27 +471,29 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
       );
       if (status) statuses[stepId] = status;
     }
-
-    // Find first incomplete step, or -1 if all complete
-    let firstIncompleteIndex = -1;
-    for (let i = 0; i < E4_STEP_ORDER.length; i++) {
-      if (!statuses[E4_STEP_ORDER[i]]) {
-        firstIncompleteIndex = i;
-        break;
-      }
-    }
-
-    return { statuses, firstIncompleteIndex };
+    return statuses;
   });
-
-  const [currentStepIndex, setCurrentStepIndex] = useState(initialState.firstIncompleteIndex);
-  const [stepStatuses, setStepStatuses] = useState(initialState.statuses);
   const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
   // Track expanded dropdowns for interview steps
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+
+  // Derive currentStepIndex from URL prop
+  const currentStepIndex = useMemo(() => {
+    if (step !== undefined) {
+      const index = step - 1; // Convert 1-indexed to 0-indexed
+      if (index >= 0 && index < E4_STEP_ORDER.length) {
+        return index;
+      }
+    }
+    // Auto-detect: find first incomplete step
+    for (let i = 0; i < E4_STEP_ORDER.length; i++) {
+      if (!stepStatuses[E4_STEP_ORDER[i]]) return i;
+    }
+    return -1; // All complete
+  }, [step, stepStatuses]);
 
   // -1 means all steps are complete
   const allComplete = currentStepIndex === -1;
@@ -517,7 +520,7 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     } else {
       setIncompleteRegions([]);
       setExpanded({ left: null, right: null });
-      setCurrentStepIndex((i) => i - 1);
+      onStepChange?.(currentStepIndex - 1);
     }
   };
 
@@ -526,9 +529,9 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     setExpanded({ left: null, right: null });
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      setCurrentStepIndex(-1); // All steps complete, show collapsed view with section footer
+      onStepChange?.(null); // Go to summary
     } else {
-      setCurrentStepIndex((i) => i + 1);
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
@@ -568,9 +571,9 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
       setIncompleteRegions([]);
 
       if (isLastStep) {
-        setCurrentStepIndex(-1);
+        onStepChange?.(null); // Go to summary
       } else {
-        setCurrentStepIndex((i) => i + 1);
+        onStepChange?.(currentStepIndex + 1);
       }
       return;
     }
@@ -600,9 +603,9 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     setExpanded({ left: null, right: null });
 
     if (isLastStep) {
-      setCurrentStepIndex(-1); // All steps complete, show collapsed view with section footer
+      onStepChange?.(null); // Go to summary
     } else {
-      setCurrentStepIndex((i) => i + 1);
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
@@ -816,7 +819,7 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
               config={config}
               status={status}
               summary={status === "pending" ? "—" : getStepSummary(stepId)}
-              onClick={() => setCurrentStepIndex(index)}
+              onClick={() => onStepChange?.(index)}
             />
           );
         })}

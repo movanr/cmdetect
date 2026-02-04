@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
@@ -46,6 +46,8 @@ const E2_STEP_CONFIG: Record<E2StepId, { badge: string; title: string }> = {
 };
 
 interface E2SectionProps {
+  step?: number; // 1-indexed from URL, undefined = auto-detect
+  onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
   onComplete?: () => void;
   onBack?: () => void;
   isFirstSection?: boolean;
@@ -113,7 +115,7 @@ function getStepSummary(stepId: E2StepId, getValue: (path: string) => unknown): 
   }
 }
 
-export function E2Section({ onComplete, onBack, isFirstSection }: E2SectionProps) {
+export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E2SectionProps) {
   const { getInstancesForStep } = useExaminationForm();
   const { getValues } = useFormContext<FormValues>();
 
@@ -127,30 +129,32 @@ export function E2Section({ onComplete, onBack, isFirstSection }: E2SectionProps
   const midlineDirection = instances.find((i) => i.path === "e2.midlineDeviation.direction");
   const midlineMm = instances.find((i) => i.path === "e2.midlineDeviation.mm");
 
-  // Compute initial state from form values
-  const [initialState] = useState(() => {
+  // Keep stepStatuses in state (computed from form on mount)
+  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>(() => {
     const statuses: Record<string, "completed" | "skipped"> = {};
     for (const stepId of E2_STEP_ORDER) {
       if (stepHasData(stepId, (path) => getValues(path as FieldPath<FormValues>))) {
         statuses[stepId] = "completed";
       }
     }
+    return statuses;
+  });
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
 
-    // Find first incomplete step, or -1 if all complete
-    let firstIncompleteIndex = -1;
-    for (let i = 0; i < E2_STEP_ORDER.length; i++) {
-      if (!statuses[E2_STEP_ORDER[i]]) {
-        firstIncompleteIndex = i;
-        break;
+  // Derive currentStepIndex from URL prop
+  const currentStepIndex = useMemo(() => {
+    if (step !== undefined) {
+      const index = step - 1; // Convert 1-indexed to 0-indexed
+      if (index >= 0 && index < E2_STEP_ORDER.length) {
+        return index;
       }
     }
-
-    return { statuses, firstIncompleteIndex };
-  });
-
-  const [currentStepIndex, setCurrentStepIndex] = useState(initialState.firstIncompleteIndex);
-  const [stepStatuses, setStepStatuses] = useState(initialState.statuses);
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
+    // Auto-detect: find first incomplete step
+    for (let i = 0; i < E2_STEP_ORDER.length; i++) {
+      if (!stepStatuses[E2_STEP_ORDER[i]]) return i;
+    }
+    return -1; // All complete
+  }, [step, stepStatuses]);
 
   // Derived state
   const allComplete = currentStepIndex === -1;
@@ -163,16 +167,16 @@ export function E2Section({ onComplete, onBack, isFirstSection }: E2SectionProps
     if (isFirstStep) {
       onBack?.();
     } else {
-      setCurrentStepIndex((i) => i - 1);
+      onStepChange?.(currentStepIndex - 1);
     }
   };
 
   const performSkip = () => {
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      setCurrentStepIndex(-1);
+      onStepChange?.(null); // Go to summary
     } else {
-      setCurrentStepIndex((i) => i + 1);
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
@@ -193,9 +197,9 @@ export function E2Section({ onComplete, onBack, isFirstSection }: E2SectionProps
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
 
     if (isLastStep) {
-      setCurrentStepIndex(-1);
+      onStepChange?.(null); // Go to summary
     } else {
-      setCurrentStepIndex((i) => i + 1);
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
@@ -324,7 +328,7 @@ export function E2Section({ onComplete, onBack, isFirstSection }: E2SectionProps
               config={config}
               status={status}
               summary={status === "pending" ? "—" : getSummary(stepId)}
-              onClick={() => setCurrentStepIndex(index)}
+              onClick={() => onStepChange?.(index)}
             />
           );
         })}

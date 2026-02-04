@@ -64,8 +64,9 @@ const E1_PAIN_SVG_REGIONS: readonly Region[] = SVG_REGIONS;
 const E1_HEADACHE_SVG_REGIONS: readonly Region[] = ["temporalis"];
 
 interface E1SectionProps {
+  step?: number; // 1-indexed from URL, undefined = auto-detect
+  onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
   onComplete?: () => void;
-  onSkip?: () => void;
   onBack?: () => void;
   isFirstSection?: boolean;
 }
@@ -142,34 +143,36 @@ function stepHasData(
   }
 }
 
-export function E1Section({ onComplete, onBack, isFirstSection }: E1SectionProps) {
+export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E1SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, getValues, setValue } = useFormContext();
 
-  // Compute initial state from form values
-  const [initialState] = useState(() => {
+  // Keep stepStatuses in state (computed from form on mount)
+  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>(() => {
     const statuses: Record<string, "completed" | "skipped"> = {};
     for (const stepId of E1_STEP_ORDER) {
       if (stepHasData(stepId, getValues)) {
         statuses[stepId] = "completed";
       }
     }
+    return statuses;
+  });
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
 
-    // Find first incomplete step, or -1 if all complete
-    let firstIncompleteIndex = -1;
-    for (let i = 0; i < E1_STEP_ORDER.length; i++) {
-      if (!statuses[E1_STEP_ORDER[i]]) {
-        firstIncompleteIndex = i;
-        break;
+  // Derive currentStepIndex from URL prop
+  const currentStepIndex = useMemo(() => {
+    if (step !== undefined) {
+      const index = step - 1; // Convert 1-indexed to 0-indexed
+      if (index >= 0 && index < E1_STEP_ORDER.length) {
+        return index;
       }
     }
-
-    return { statuses, firstIncompleteIndex };
-  });
-
-  const [currentStepIndex, setCurrentStepIndex] = useState(initialState.firstIncompleteIndex);
-  const [stepStatuses, setStepStatuses] = useState(initialState.statuses);
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
+    // Auto-detect: find first incomplete step
+    for (let i = 0; i < E1_STEP_ORDER.length; i++) {
+      if (!stepStatuses[E1_STEP_ORDER[i]]) return i;
+    }
+    return -1; // All complete
+  }, [step, stepStatuses]);
 
   const allInstances = getInstancesForStep("e1-all");
 
@@ -270,16 +273,16 @@ export function E1Section({ onComplete, onBack, isFirstSection }: E1SectionProps
     if (isFirstStep) {
       onBack?.();
     } else {
-      setCurrentStepIndex((i) => i - 1);
+      onStepChange?.(currentStepIndex - 1);
     }
   };
 
   const performSkip = () => {
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      setCurrentStepIndex(-1);
+      onStepChange?.(null); // Go to summary
     } else {
-      setCurrentStepIndex((i) => i + 1);
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
@@ -302,9 +305,9 @@ export function E1Section({ onComplete, onBack, isFirstSection }: E1SectionProps
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
 
     if (isLastStep) {
-      setCurrentStepIndex(-1);
+      onStepChange?.(null); // Go to summary
     } else {
-      setCurrentStepIndex((i) => i + 1);
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
@@ -479,7 +482,7 @@ export function E1Section({ onComplete, onBack, isFirstSection }: E1SectionProps
               config={config}
               status={status}
               summary={status === "pending" ? "—" : getStepSummary(stepId)}
-              onClick={() => setCurrentStepIndex(index)}
+              onClick={() => onStepChange?.(index)}
             />
           );
         })}
