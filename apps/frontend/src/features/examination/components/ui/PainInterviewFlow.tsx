@@ -8,6 +8,7 @@
  * 4. Ask if pain is familiar (+ headache question if temporalis)
  */
 
+import { MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type {
   PainInterviewFlowStep,
@@ -50,6 +51,12 @@ function InterviewStep({
         {step.description && (
           <div className="mt-1 text-sm text-muted-foreground italic">
             „{step.description}"
+          </div>
+        )}
+        {step.appAction && (
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground/80 bg-muted/50 px-2 py-1 rounded w-fit">
+            <MousePointerClick className="h-3 w-3 shrink-0" />
+            <span>{step.appAction}</span>
           </div>
         )}
       </div>

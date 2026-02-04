@@ -77,12 +77,14 @@ const PAIN_INTERVIEW_FLOW: PainInterviewFlowStep[] = [
     question: "Bestätigung",
     description:
       "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+    appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
   },
   {
     id: "done",
     question: "Keine weiteren Schmerzbereiche",
     description:
       "Gibt es noch weitere Bereiche? Falls nein, abschließen.",
+    appAction: 'Button „Keine weiteren Schmerzbereiche"',
   },
 ];
 

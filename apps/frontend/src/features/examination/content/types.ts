@@ -68,6 +68,8 @@ export interface PainInterviewFlowStep {
   question: string;
   /** Full German text for the examiner to say/ask */
   description?: string;
+  /** Optional hint about app interaction for this step */
+  appAction?: string;
 }
 
 /** Pain interview instruction with flow */
