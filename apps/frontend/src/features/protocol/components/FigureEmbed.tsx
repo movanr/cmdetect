@@ -35,7 +35,7 @@ export function FigureEmbed({ figureId }: FigureEmbedProps) {
         })}
       </div>
       <figcaption className="text-center text-sm text-muted-foreground mt-2">
-        Abbildung {figureId}: {figure.description}
+        Abbildung {figureId}: {figure.description_de}
       </figcaption>
     </figure>
   );
@@ -60,7 +60,7 @@ export function MultiFigureEmbed({ figureIds }: MultiFigureEmbedProps) {
           allImages.push({ url: imageUrl, figureId, index: i });
         }
       });
-      descriptions.push(`${figureId}: ${figure.description}`);
+      descriptions.push(`${figureId}: ${figure.description_de}`);
     }
   }
 

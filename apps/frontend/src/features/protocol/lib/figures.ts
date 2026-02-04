@@ -18,6 +18,7 @@ for (const [path, url] of Object.entries(imageModules)) {
 
 export interface FigureData {
   description: string;
+  description_de: string;
   page: number;
   images: string[];
 }

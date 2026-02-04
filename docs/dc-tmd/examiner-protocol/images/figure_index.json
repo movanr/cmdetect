@@ -6,216 +6,259 @@
   },
   "Figure 1": {
     "description": "Examiner touches each area: temporalis, TMJ, masseter, posterior/sub-mandibular",
+    "description_de": "Untersucher berührt jeden Bereich: M. temporalis, Kiefergelenk, M. masseter, posteriorer/submandibulärer Bereich",
     "page": 1,
     "images": ["page1_img1.jpeg", "page1_img2.jpeg", "page1_img3.jpeg", "page1_img4.jpeg"]
   },
   "Figure 2": {
     "description": "Patient pain location reporting - pointing with finger (left) and full hand (right)",
+    "description_de": "Schmerzlokalisation durch den Patienten – Zeigen mit dem Finger (links) und mit der ganzen Hand (rechts)",
     "page": 1,
     "images": ["page1_img5.jpeg", "page1_img7.jpeg"]
   },
   "Figure 3": {
     "description": "Examiner confirmation of pain/headache locations - TMJ (left), finger placement (center), masseter (right)",
+    "description_de": "Bestätigung der Schmerz-/Kopfschmerzlokalisation durch den Untersucher – Kiefergelenk (links), Fingerplatzierung (Mitte), M. masseter (rechts)",
     "page": 1,
     "images": ["page1_img9.jpeg", "page1_img10.jpeg", "page1_img11.jpeg"]
   },
   "Figure 4": {
     "description": "Reference lines - horizontal line on mandibular incisor",
+    "description_de": "Referenzlinien – horizontale Linie am Unterkieferschneidezahn",
     "page": 2,
     "images": ["page2_img1.jpeg"]
   },
   "Figure 5a": {
     "description": "Mesial-incisal edge within 1.0mm of mandibular midline",
+    "description_de": "Mesial-Inzisalkante innerhalb von 1,0 mm zur Unterkiefer-Mittellinie",
     "page": 2,
     "images": ["page2_img3.jpeg", "page2_img4.png"]
   },
   "Figure 5b": {
     "description": "Mesial-incisal edge more than 1.0mm from mandibular midline",
+    "description_de": "Mesial-Inzisalkante mehr als 1,0 mm von der Unterkiefer-Mittellinie entfernt",
     "page": 2,
     "images": ["page2_img5.png", "page2_img6.png"]
   },
   "Figure 6": {
     "description": "Alternative method for midline reference lines",
+    "description_de": "Alternative Methode für Mittellinien-Referenzlinien",
     "page": 2,
     "images": ["page2_img2.jpeg", "page2_img7.png"]
   },
   "Figure 7": {
     "description": "Horizontal overlap measurement",
+    "description_de": "Messung des horizontalen Überbisses",
     "page": 3,
     "images": ["page3_img1.jpeg"]
   },
   "Figure 8": {
     "description": "Vertical overlap measurement",
+    "description_de": "Messung des vertikalen Überbisses",
     "page": 3,
     "images": ["page3_img2.jpeg"]
   },
   "Figure 9": {
     "description": "Opening pattern assessment - ruler placement (top) and deviation example (bottom)",
+    "description_de": "Beurteilung des Öffnungsmusters – Linealplatzierung (oben) und Deviationsbeispiel (unten)",
     "page": 3,
     "images": ["page3_img3.jpeg", "page3_img4.jpeg"]
   },
   "Figure 10a": {
     "description": "Opening patterns - straight (left) and slight deviation within 2mm (right)",
+    "description_de": "Öffnungsmuster – gerade (links) und leichte Abweichung innerhalb von 2 mm (rechts)",
     "page": 4,
     "images": ["page4_img1.png", "page4_img2.png"]
   },
   "Figure 10b": {
     "description": "Opening patterns - corrected deviation (left) and uncorrected deviation (right)",
+    "description_de": "Öffnungsmuster – korrigierte Abweichung (links) und unkorrigierte Abweichung (rechts)",
     "page": 4,
     "images": ["page4_img3.png", "page4_img4.png"]
   },
   "Figure 11": {
     "description": "Pain free opening measurement",
+    "description_de": "Messung der schmerzfreien Öffnung",
     "page": 5,
     "images": ["page5_img1.jpeg"]
   },
   "Figure 12": {
     "description": "Maximum unassisted opening measurement",
+    "description_de": "Messung der maximalen nicht-unterstützten Öffnung",
     "page": 5,
     "images": ["page5_img2.jpeg"]
   },
   "Figure 13": {
     "description": "Patient points to pain area (left), examiner confirms structure (right)",
+    "description_de": "Patient zeigt auf den Schmerzbereich (links), Untersucher bestätigt die Struktur (rechts)",
     "page": 5,
     "images": ["page5_img3.jpeg", "page5_img4.jpeg"]
   },
   "Figure 14": {
     "description": "Pain localization during maximum opening - pointing (left), examiner confirming (right)",
+    "description_de": "Schmerzlokalisation bei maximaler Öffnung – Zeigen (links), Bestätigung durch Untersucher (rechts)",
     "page": 6,
     "images": ["page6_img1.jpeg", "page6_img2.jpeg"]
   },
   "Figure 15": {
     "description": "Maximum assisted opening - scissors position",
+    "description_de": "Maximale unterstützte Öffnung – Scherenposition",
     "page": 6,
     "images": ["page6_img3.jpeg"]
   },
   "Figure 16": {
     "description": "Patient points to pain (left), examiner confirms (right)",
+    "description_de": "Patient zeigt auf den Schmerz (links), Untersucher bestätigt (rechts)",
     "page": 6,
     "images": ["page6_img4.jpeg", "page6_img5.jpeg"]
   },
   "Figure 17": {
     "description": "Right lateral excursion measurement",
+    "description_de": "Messung der Laterotrusion nach rechts",
     "page": 7,
     "images": ["page7_img4.jpeg"]
   },
   "Figure 18": {
     "description": "Patient points to pain areas during lateral movement",
+    "description_de": "Patient zeigt auf Schmerzbereiche während der Lateralbewegung",
     "page": 7,
     "images": ["page7_img1.jpeg", "page7_img2.jpeg"]
   },
   "Figure 19": {
     "description": "Left lateral excursion measurement",
+    "description_de": "Messung der Laterotrusion nach links",
     "page": 7,
     "images": ["page7_img3.jpeg"]
   },
   "Figure 20": {
     "description": "Protrusion measurement - ruler face up (left) and to side (right)",
+    "description_de": "Messung der Protrusion – Lineal nach oben (links) und zur Seite (rechts)",
     "page": 8,
     "images": ["page8_img4.jpeg", "page8_img3.jpeg"]
   },
   "Figure 21": {
     "description": "Alternative lateral excursion measurement method",
+    "description_de": "Alternative Methode zur Messung der Laterotrusion",
     "page": 8,
     "images": ["page8_img1.jpeg", "page8_img2.jpeg"]
   },
   "Figure 22": {
     "description": "TMJ examination during open/close - separate (left), simultaneous (center), palpating (right)",
+    "description_de": "Kiefergelenk-Untersuchung bei Öffnen/Schließen – getrennt (links), gleichzeitig (Mitte), Palpation (rechts)",
     "page": 9,
     "images": ["page9_img5.jpeg", "page9_img1.jpeg", "page9_img1.jpeg"]
   },
   "Figure 23": {
     "description": "TMJ examination during lateral/protrusive - right (left), left (center), protrusive (right)",
+    "description_de": "Kiefergelenk-Untersuchung bei Lateral-/Protrusionsbewegung – rechts (links), links (Mitte), Protrusion (rechts)",
     "page": 9,
     "images": ["page9_img6.jpeg", "page9_img3.jpeg", "page9_img4.jpeg"]
   },
   "Figure 24": {
     "description": "Palpation pathways for temporalis and masseter (diagram)",
+    "description_de": "Palpationsbahnen für M. temporalis und M. masseter (Schema)",
     "page": 10,
     "images": ["page10_img2.jpeg"]
   },
   "Figure 25": {
     "description": "Finger pressure calibration using algometer",
+    "description_de": "Kalibrierung des Fingerdrucks mit Algometer",
     "page": 10,
     "images": ["page10_img1.jpeg"]
   },
   "Figure 26": {
     "description": "Temporalis palpation zones (orange areas diagram)",
+    "description_de": "Palpationszonen des M. temporalis (orangefarbene Bereiche im Schema)",
     "page": 11,
     "images": ["page11_img3.jpeg"]
   },
   "Figure 27": {
     "description": "Temporalis palpation sequence - anterior (left), middle (center), posterior (right)",
+    "description_de": "Palpationssequenz des M. temporalis – anterior (links), Mitte (Mitte), posterior (rechts)",
     "page": 11,
     "images": ["page11_img4.jpeg", "page11_img1.jpeg", "page11_img2.jpeg"]
   },
   "Figure 28": {
     "description": "Masseter palpation zones (orange areas diagram)",
+    "description_de": "Palpationszonen des M. masseter (orangefarbene Bereiche im Schema)",
     "page": 12,
     "images": ["page12_img1.jpeg"]
   },
   "Figure 29": {
     "description": "Masseter palpation sequence - origin (left), body (center), insertion (right)",
+    "description_de": "Palpationssequenz des M. masseter – Ursprung (links), Muskelbauch (Mitte), Ansatz (rechts)",
     "page": 12,
     "images": ["page12_img5.jpeg", "page12_img4.jpeg", "page12_img3.jpeg"]
   },
   "Figure 30": {
     "description": "Alternative masseter insertion palpation",
+    "description_de": "Alternative Palpation des M.-masseter-Ansatzes",
     "page": 12,
     "images": ["page12_img2.jpeg"]
   },
   "Figure 31": {
     "description": "TMJ lateral pole target area (diagram)",
+    "description_de": "Zielbereich des lateralen Kiefergelenkpols (Schema)",
     "page": 13,
     "images": ["page13_img1.jpeg"]
   },
   "Figure 32": {
     "description": "Anatomical landmarks relative to tragus",
+    "description_de": "Anatomische Landmarken relativ zum Tragus",
     "page": 13,
     "images": ["page13_img2.jpeg"]
   },
   "Figure 33": {
     "description": "TMJ lateral pole palpation - calibration (left), technique (right)",
+    "description_de": "Palpation des lateralen Kiefergelenkpols – Kalibrierung (links), Technik (rechts)",
     "page": 13,
     "images": ["page13_img4.jpeg", "page13_img3.jpeg"]
   },
   "Figure 34": {
     "description": "Condyle protruded to forward position (diagram)",
+    "description_de": "Kondylus in vorgeschobener Position (Schema)",
     "page": 14,
     "images": ["page14_img1.jpeg"]
   },
   "Figure 35": {
     "description": "Lateral pole identification with finger position",
+    "description_de": "Identifikation des lateralen Pols mit Fingerposition",
     "page": 14,
     "images": ["page14_img3.jpeg"]
   },
   "Figure 36": {
     "description": "Dynamic TMJ lateral pole palpation - calibration (left), technique (right)",
+    "description_de": "Dynamische Palpation des lateralen Kiefergelenkpols – Kalibrierung (links), Technik (rechts)",
     "page": 14,
     "images": ["page14_img4.jpeg", "page14_img2.jpeg"]
   },
   "Figure 37": {
     "description": "Posterior and submandibular muscle areas (diagram)",
+    "description_de": "Posteriore und submandibuläre Muskelbereiche (Schema)",
     "page": 15,
     "images": ["page15_img4.jpeg"]
   },
   "Figure 38": {
     "description": "0.5 kg pressure calibration",
+    "description_de": "Kalibrierung auf 0,5 kg Druck",
     "page": 15,
     "images": ["page15_img3.jpeg"]
   },
   "Figure 39": {
     "description": "Posterior area palpation (left), submandibular palpation (right)",
+    "description_de": "Palpation des posterioren Bereichs (links), submandibuläre Palpation (rechts)",
     "page": 15,
     "images": ["page15_img1.jpeg", "page15_img2.jpeg"]
   },
   "Figure 40": {
     "description": "Lateral pterygoid area palpation",
+    "description_de": "Palpation des lateralen Pterygoidbereichs",
     "page": 16,
     "images": ["page16_img1.jpeg"]
   },
   "Figure 41": {
     "description": "Temporalis tendon palpation",
+    "description_de": "Palpation der Temporalissehne",
     "page": 16,
     "images": ["page16_img2.jpeg"]
   }

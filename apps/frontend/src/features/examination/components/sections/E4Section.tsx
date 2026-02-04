@@ -15,8 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
+import { ArrowRight, CheckCircle, ChevronLeft } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
@@ -727,26 +726,18 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>{getSectionCardTitle(SECTIONS.e4)}</CardTitle>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="alle-regionen-header"
-                checked={includeAllRegions}
-                onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
-              />
-              <Label
-                htmlFor="alle-regionen-header"
-                className="text-xs text-muted-foreground cursor-pointer"
-              >
-                Alle Regionen
-              </Label>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/protocol/$section" params={{ section: "e4" }}>
-                <BookOpen className="h-4 w-4 mr-1" />
-                Protokoll
-              </Link>
-            </Button>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="alle-regionen-header"
+              checked={includeAllRegions}
+              onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
+            />
+            <Label
+              htmlFor="alle-regionen-header"
+              className="text-xs text-muted-foreground cursor-pointer"
+            >
+              Alle Regionen
+            </Label>
           </div>
         </div>
       </CardHeader>
