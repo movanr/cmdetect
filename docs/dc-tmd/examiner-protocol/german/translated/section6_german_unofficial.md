@@ -10,7 +10,7 @@ Die untersuchungsbezogene Schmerzbefragung ist ein strukturiertes Format zur wie
 |---|---|---|
 | **6.2.1** | **Für bewegungsinduzierten Schmerz** | |
 | | **Hatten Sie bei dieser Bewegung Schmerzen?** | _Die Absicht von „bei dieser Bewegung" ist, ob das Verfahren Schmerzen verursacht oder bestehende Schmerzen verändert hat._ |
-| | FALLS JA zu Schmerz: | _Siehe STRUKTURELLE LOKALISATION VON SCHMERZEN, Abschnitt 2._ |
+| | FALLS JA zu Schmerz: | _Siehe Abschnitt 2.6: Klassifikation anatomischer Strukturen._ |
 | | **Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?** | |
 | | **Gibt es noch weitere Bereiche, in denen Sie bei dieser Bewegung Schmerzen gespürt haben? Zeigen Sie [mit Ihrem Finger] auf diese Bereiche.** | |
 | | Weiter zu ABFRAGE BEKANNTER SCHMERZ. | |

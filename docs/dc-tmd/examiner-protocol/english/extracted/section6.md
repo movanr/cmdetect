@@ -10,7 +10,7 @@ Examination-related Pain Interview is a structured format for repeatedly eliciti
 |---|---|---|
 | **6.2.1** | **For range of motion maneuver-induced pain** | |
 | | **Did you feel pain with that movement?** | _The intent of "with that movement" is whether the procedure caused pain or caused existing pain to change._ |
-| | IF YES to pain: | _Refer to STRUCTURAL LOCALIZATION OF PAIN, Section 2._ |
+| | IF YES to pain: | _Refer to Section 2.6: Classification of Anatomic Structures._ |
 | | **Could you point with your finger to each of the areas where you felt pain?** | |
 | | **Are there any other areas where you felt pain with that movement? Point [with your finger] to those areas.** | |
 | | Go to FAMILIAR PAIN INQUIRY. | |

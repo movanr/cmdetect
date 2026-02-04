@@ -53,6 +53,7 @@ export function ProtocolMarkdownViewer({ content, className }: ProtocolMarkdownV
       );
     },
     // Handle emphasis (italics) for _Abbildung X_ or _Abbildungen X & Y_
+    // Also process cross-references like _Siehe Abschnitt 2.6..._
     em: ({ children }) => {
       const text = children?.toString() || "";
       const figureIds = parseFigureReference(text);
@@ -63,7 +64,8 @@ export function ProtocolMarkdownViewer({ content, className }: ProtocolMarkdownV
           return <MultiFigureEmbed figureIds={figureIds} />;
         }
       }
-      return <em>{children}</em>;
+      // Process cross-references in italic text
+      return <em>{processChildren(children)}</em>;
     },
     // Handle strong (bold) for **Abbildung X:** patterns in translated sections
     strong: ({ children }) => {
@@ -90,6 +92,10 @@ export function ProtocolMarkdownViewer({ content, className }: ProtocolMarkdownV
     // Handle list items with cross-references (e.g., "6.2.1: Description")
     li: ({ children }) => {
       return <li>{processChildren(children)}</li>;
+    },
+    // Handle table cells with cross-references (e.g., "Abschnitt 2.6" in tables)
+    td: ({ children }) => {
+      return <td>{processChildren(children)}</td>;
     },
     // Handle blockquotes with cross-references
     blockquote: ({ children }) => {

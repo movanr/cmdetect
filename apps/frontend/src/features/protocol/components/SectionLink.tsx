@@ -65,11 +65,11 @@ export function processTextWithCrossRefs(text: string): ReactNode[] {
     }
   }
 
-  // Pattern for "Abschnitt X" references
-  const abschnittPattern = /Abschnitt\s+(\d+(?:\.\d+)*)/g;
+  // Pattern for "Abschnitt X" (German) and "Section X" (English) references
+  const sectionPattern = /(?:Abschnitt|Section)\s+(\d+(?:\.\d+)*)/g;
   let match;
 
-  while ((match = abschnittPattern.exec(text)) !== null) {
+  while ((match = sectionPattern.exec(text)) !== null) {
     // Add text before the match
     if (match.index > lastIndex) {
       result.push(text.slice(lastIndex, match.index));
