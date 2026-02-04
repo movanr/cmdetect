@@ -39,8 +39,9 @@ export function parseFigureReference(text: string): string[] | null {
     return [singleMatch[1]];
   }
 
-  // Multiple figures: "Abbildungen 2 & 3" or "Abbildungen 9 & 10"
-  const multiMatch = text.match(/^Abbildungen?\s+([\d\w]+(?:\s*[&,]\s*[\d\w]+)+)$/i);
+  // Multiple figures: "Abbildungen 2 & 3" or "Abbildungen 9 & 10" or "Abbildung 2 & 3"
+  // Note: Abbildung(?:en)? matches both "Abbildung" (singular) and "Abbildungen" (plural)
+  const multiMatch = text.match(/^Abbildung(?:en)?\s+([\d\w]+(?:\s*[&,]\s*[\d\w]+)+)$/i);
   if (multiMatch) {
     const ids = multiMatch[1].split(/\s*[&,]\s*/).map(id => id.trim());
     return ids;

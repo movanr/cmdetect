@@ -67,11 +67,12 @@ export function ProtocolMarkdownViewer({ content, className }: ProtocolMarkdownV
       // Process cross-references in italic text
       return <em>{processChildren(children)}</em>;
     },
-    // Handle strong (bold) for **Abbildung X:** patterns in translated sections
+    // Handle strong (bold) for **Abbildung X:** or **Abbildung X.** patterns in translated sections
     strong: ({ children }) => {
       const text = children?.toString() || "";
-      // Match "Abbildung X:" or "Abbildungen X & Y:" at the start
-      const figureWithColonMatch = text.match(/^(Abbildungen?\s+[\d\w]+(?:\s*[&,]\s*[\d\w]+)*):/i);
+      // Match "Abbildung X:" or "Abbildung X." or "Abbildungen X & Y:" at the start
+      // Note: Abbildung(?:en)? matches both "Abbildung" (singular) and "Abbildungen" (plural)
+      const figureWithColonMatch = text.match(/^(Abbildung(?:en)?\s+[\d\w]+(?:\s*[&,]\s*[\d\w]+)*)[:.]/i);
       if (figureWithColonMatch) {
         const figureText = figureWithColonMatch[1];
         const figureIds = parseFigureReference(figureText);
