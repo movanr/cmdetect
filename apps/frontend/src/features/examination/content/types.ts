@@ -64,19 +64,17 @@ export interface RichStepInstruction {
 /** Pain interview flow step */
 export interface PainInterviewFlowStep {
   id: string;
+  /** Short label for the step (e.g., "Schmerz?") */
   question: string;
-  nextOnYes?: string;
-  nextOnNo?: string;
-  regionSpecific?: { region: string; question: string }[];
+  /** Full German text for the examiner to say/ask */
+  description?: string;
 }
 
 /** Pain interview instruction with flow */
 export interface RichPainInterviewInstruction {
   title: string;
   prompt: string;
-  guidance: string;
   flow: PainInterviewFlowStep[];
-  crossReferences?: CrossReference[];
 }
 
 /**

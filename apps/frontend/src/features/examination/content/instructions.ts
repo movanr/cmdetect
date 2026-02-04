@@ -8,7 +8,6 @@
 
 import type {
   PainInterviewFlowStep,
-  ProcedurePhase,
   RichPainInterviewInstruction,
   RichStepInstruction,
   SafetyWarning,
@@ -37,7 +36,7 @@ export interface PainInterviewInstruction {
 }
 
 // ============================================================================
-// E4C Multi-Phase Procedure Definition
+// E4C Safety Warning
 // ============================================================================
 
 /** Safety warning for assisted opening */
@@ -46,89 +45,44 @@ const E4C_SAFETY_WARNING: SafetyWarning = {
   level: "caution",
 };
 
-/** E4C Procedure Phases */
-const E4C_PHASES: ProcedurePhase[] = [
-  {
-    id: "prep",
-    name: "Vorbereitung",
-    patientScript: [
-      { text: "Gleich werde ich versuchen, ", style: "verbatim" },
-      { text: "wenn möglich", style: "optional" },
-      {
-        text: " Ihren Mund mit meinen Fingern noch weiter zu öffnen. ",
-        style: "verbatim",
-      },
-      {
-        text: "Wenn Sie möchten, dass ich aufhöre, heben Sie bitte Ihre Hand. Dann werde ich sofort aufhören.",
-        style: "verbatim",
-      },
-    ],
-    examinerSteps: [
-      "Lineal bereithalten",
-      "Position für Scherentechnik vorbereiten",
-      "Patienten auf Signal hinweisen",
-    ],
-  },
-  {
-    id: "execute",
-    name: "Durchführung",
-    patientScript: [
-      {
-        text: "Bitte öffnen Sie jetzt so weit wie möglich, auch wenn es schmerzhaft ist, so wie Sie es eben schon gemacht haben.",
-        style: "verbatim",
-      },
-      { text: " Pause ", style: "optional" },
-      { text: "Sie spüren jetzt gleich meine Finger.", style: "flexible" },
-      {
-        text: " Bitte entspannen Sie Ihren Kiefer, so dass ich Ihnen helfen kann, noch weiter zu öffnen, wenn möglich.",
-        style: "verbatim",
-      },
-    ],
-    examinerSteps: [
-      "Lineal wie bei E4A positionieren",
-      "Sicherstellen dass Patient maximal geöffnet hat",
-      "Daumen auf obere Schneidezähne, Zeigefinger gekreuzt auf untere",
-      "Kiefer abstützen BEVOR 'Entspannen' gesagt wird",
-      "Mäßigen Druck anwenden bis Gewebswiderstand oder Patient stoppt",
-    ],
-    tips: ["Klinisches Urteil anwenden - nicht überdehnen"],
-  },
-  {
-    id: "measure",
-    name: "Messung",
-    examinerSteps: [
-      "Interinzisale Distanz ablesen während Druck aufrechterhalten wird",
-      "Bei Abbruch durch Patient: 'Abgebrochen' markieren",
-    ],
-  },
-];
-
 // ============================================================================
 // Pain Interview Flow Definition
 // ============================================================================
 
-/** Pain interview decision flow */
+/**
+ * Pain interview for movement-induced pain (E4B/E4C).
+ *
+ * 4-step procedure:
+ * 1. Ask if patient had pain during movement
+ * 2. Patient localizes pain by pointing with finger
+ * 3. Examiner touches area to confirm location and identify anatomical structure
+ * 4. Ask if pain is familiar (+ headache question if temporalis)
+ *
+ * NOTE: Referred pain inquiry is NOT part of movement-induced pain - only for palpation.
+ */
 const PAIN_INTERVIEW_FLOW: PainInterviewFlowStep[] = [
   {
     id: "pain",
-    question: "Schmerz?",
-    nextOnYes: "locate",
-    nextOnNo: "end",
+    question: "Schmerz bei Bewegung?",
+    description: "Hatten Sie bei dieser Bewegung Schmerzen?",
   },
   {
     id: "locate",
-    question: "Zeigen",
-    nextOnYes: "familiar",
+    question: "Lokalisation",
+    description:
+      "Zeigen Sie mit dem Finger auf alle Bereiche, in denen Sie Schmerzen gespürt haben.",
   },
   {
-    id: "familiar",
-    question: "Bekannt?",
-    nextOnYes: "end",
-    nextOnNo: "end",
-    regionSpecific: [
-      { region: "Temporalis", question: "Bekannter Kopfschmerz?" },
-      { region: "Alle", question: "Zieht es woanders hin?" },
-    ],
+    id: "confirm",
+    question: "Bestätigung",
+    description:
+      "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+  },
+  {
+    id: "done",
+    question: "Keine weiteren Schmerzbereiche",
+    description:
+      "Gibt es noch weitere Bereiche? Falls nein, abschließen.",
   },
 ];
 
@@ -175,41 +129,39 @@ export const E4_RICH_INSTRUCTIONS = {
     ],
   } satisfies RichStepInstruction,
 
-  /** E4C - Maximum assisted opening (complex, multi-phase) */
+  /** E4C - Maximum assisted opening */
   maxAssistedOpening: {
     stepId: "U4C",
     title: "Maximale passive Mundöffnung",
     patientScript: [
-      { text: "Gleich werde ich versuchen, ", style: "verbatim" },
+      { text: "Ich werde jetzt versuchen, ", style: "verbatim" },
       { text: "wenn möglich", style: "optional" },
-      {
-        text: " Ihren Mund mit meinen Fingern noch weiter zu öffnen.",
-        style: "verbatim",
-      },
+      { text: ", Ihren Mund mit meinen Fingern noch weiter zu öffnen.", style: "verbatim" },
+      { text: " Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.", style: "verbatim" },
     ],
     examinerAction: "Scherentechnik anwenden, Distanz messen",
-    phases: E4C_PHASES,
+    examinerSteps: [
+      "Patient maximal öffnen lassen",
+      "Daumen auf obere, Zeigefinger auf untere Schneidezähne",
+      "Mäßigen Druck anwenden bis Gewebswiderstand",
+      "Interinzisale Distanz ablesen",
+    ],
     warnings: [E4C_SAFETY_WARNING],
+    tips: [
+      "Klinisches Urteil anwenden - nicht überdehnen",
+      "Messung muss mindestens so groß sein wie bei E4B",
+    ],
     crossReferences: [
       { section: "4.5", label: "Passive Öffnung" },
       { section: "6.2.1", label: "Schmerzlokalisation" },
-    ],
-    tips: [
-      "Bei sehr eingeschränkter Öffnung kann passive Dehnung entfallen",
-      "Nicht über Schmerztoleranz des Patienten hinaus dehnen",
     ],
   } satisfies RichStepInstruction,
 
   /** Pain interview after movement */
   painInterview: {
     title: "Schmerzbefragung",
-    prompt: "Zeigen Sie mit dem Finger auf alle Stellen, wo Sie Schmerzen gespürt haben.",
-    guidance: "Schmerz? → Bekannter Schmerz? → Bei Temporalis: Bekannter Kopfschmerz?",
+    prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
     flow: PAIN_INTERVIEW_FLOW,
-    crossReferences: [
-      { section: "6.2.1", label: "Schmerzlokalisation" },
-      { section: "6.2.4", label: "Bekannter Schmerz" },
-    ],
   } satisfies RichPainInterviewInstruction,
 } as const;
 
@@ -253,23 +205,14 @@ export const E4_INSTRUCTIONS = {
   /** Pain interview after movement */
   painInterview: {
     title: "Schmerzbefragung",
-    prompt: "Zeigen Sie mit dem Finger auf alle Stellen, wo Sie Schmerzen gespürt haben.",
-    guidance: "Schmerz? → Bekannter Schmerz? → Bei Temporalis: Bekannter Kopfschmerz?",
+    prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
+    guidance: "Schmerz → Lokalisation → Bestätigung → Keine weiteren Schmerzbereiche",
   } satisfies PainInterviewInstruction,
 } as const;
 
 // ============================================================================
 // Type Guards and Helpers
 // ============================================================================
-
-/**
- * Check if an instruction is a rich step instruction with phases
- */
-export function isMultiPhaseInstruction(
-  instruction: RichStepInstruction
-): instruction is RichStepInstruction & { phases: ProcedurePhase[] } {
-  return instruction.phases != null && instruction.phases.length > 0;
-}
 
 /**
  * Check if an instruction is a pain interview instruction
