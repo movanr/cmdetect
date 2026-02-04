@@ -5,13 +5,14 @@ import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
 import { useCallback, useState } from "react";
+import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import { useExaminationForm } from "../../form/use-examination-form";
+import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import {
   validatePalpationCompletion,
   type IncompletePalpationSite,
 } from "../../form/validation";
-import { getSectionCardTitle } from "../../labels";
+import { COMMON, getSectionCardTitle } from "../../labels";
 import {
   PALPATION_SITE_KEYS,
   type PalpationMode,
@@ -22,6 +23,7 @@ import type { QuestionInstance } from "../../projections/to-instances";
 import { HeadDiagramPalpation } from "../HeadDiagram";
 import type { SiteStatus } from "../HeadDiagram/types";
 import { PalpationModeToggle } from "../inputs/PalpationModeToggle";
+import { RefusalCheckbox } from "../inputs/RefusalCheckbox";
 import { PalpationSiteDropdown } from "../PalpationSiteDropdown";
 import type { IncompletePalpationSite as DropdownIncompleteSite } from "../PalpationSiteDropdown/types";
 import { SectionFooter } from "../ui";
@@ -89,6 +91,7 @@ interface PalpationSubsectionProps {
   onExpandChange: (site: PalpationSite | null) => void;
   incompleteSites: IncompletePalpationSite[];
   palpationMode: PalpationMode;
+  onRefuseChange: (refused: boolean) => void;
 }
 
 function PalpationSubsection({
@@ -98,10 +101,16 @@ function PalpationSubsection({
   onExpandChange,
   incompleteSites,
   palpationMode,
+  onRefuseChange,
 }: PalpationSubsectionProps) {
-  const { watch } = useFormContext();
+  const { watch } = useFormContext<FormValues>();
   const sideLabel = side === "right" ? "Rechte Seite" : "Linke Seite";
   const prefix = `e9.${side}`;
+  const refusedPath = `${prefix}.refused` as FieldPath<FormValues>;
+
+  // Watch refused state for this side
+  const watchedRefused = watch(refusedPath);
+  const isRefused = (watchedRefused as unknown as boolean) === true;
 
   // Watch all instance paths to trigger re-renders
   const watchPaths = instances.map((i) => i.path);
@@ -162,6 +171,22 @@ function PalpationSubsection({
     [onExpandChange]
   );
 
+  if (isRefused) {
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground">{sideLabel}</span>
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground w-80">
+          <p className="text-lg font-medium">{COMMON.refusedFull}</p>
+          <p className="text-sm text-center">{COMMON.refusedTooltip}</p>
+        </div>
+        <RefusalCheckbox<FormValues>
+          name={refusedPath}
+          onRefuseChange={onRefuseChange}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-3">
       <span className="text-sm font-medium text-muted-foreground">{sideLabel}</span>
@@ -190,13 +215,21 @@ function PalpationSubsection({
           />
         ))}
       </div>
+
+      {/* Refusal checkbox */}
+      <div className="pt-2 border-t w-80">
+        <RefusalCheckbox<FormValues>
+          name={refusedPath}
+          onRefuseChange={onRefuseChange}
+        />
+      </div>
     </div>
   );
 }
 
 export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSection = true }: E9SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
-  const { watch, setValue, getValues } = useFormContext();
+  const { watch, setValue, getValues, clearErrors } = useFormContext<FormValues>();
 
   const rightInstances = getInstancesForStep("e9-right");
   const leftInstances = getInstancesForStep("e9-left");
@@ -232,6 +265,24 @@ export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSe
     const otherSide = side === "left" ? "right" : "left";
     setExpanded({ [side]: site, [otherSide]: null } as ExpandedState);
   }, []);
+
+  // Handle side refusal - clear all palpation data for that side
+  const handleSideRefuseChange = useCallback(
+    (side: Side) => (refused: boolean) => {
+      if (refused) {
+        const instances = side === "right" ? rightInstances : leftInstances;
+        // Clear all yesNo values for this side
+        for (const inst of instances) {
+          if (inst.renderType === "yesNo") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setValue(inst.path as FieldPath<FormValues>, null as any);
+            clearErrors(inst.path as FieldPath<FormValues>);
+          }
+        }
+      }
+    },
+    [rightInstances, leftInstances, setValue, clearErrors]
+  );
 
   // Extract validation logic to avoid duplication between handleNext and checkIncomplete
   const validateE9 = () => {
@@ -275,6 +326,7 @@ export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSe
             onExpandChange={(site) => handleExpandChange("right", site)}
             incompleteSites={hasValidated ? rightIncomplete : []}
             palpationMode={palpationMode}
+            onRefuseChange={handleSideRefuseChange("right")}
           />
           <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
           <PalpationSubsection
@@ -284,6 +336,7 @@ export function E9Section({ onComplete, onSkip, onBack, isFirstSection, isLastSe
             onExpandChange={(site) => handleExpandChange("left", site)}
             incompleteSites={hasValidated ? leftIncomplete : []}
             palpationMode={palpationMode}
+            onRefuseChange={handleSideRefuseChange("left")}
           />
         </div>
       </CardContent>

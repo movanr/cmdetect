@@ -63,6 +63,16 @@ export function validateInterviewCompletion(
 ): InterviewValidationResult {
   const incompleteRegions: IncompleteRegion[] = [];
 
+  // Check for interview-level refusal
+  const firstInstance = instances[0];
+  if (firstInstance) {
+    const interviewRefusedPath = getInterviewRefusedPath(firstInstance.path);
+    if (getValue(interviewRefusedPath) === true) {
+      // Interview refused, skip validation
+      return { valid: true, incompleteRegions: [] };
+    }
+  }
+
   // Determine which regions to validate
   const regionsToValidate = context?.includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
 
@@ -154,6 +164,42 @@ function getTerminatedSiblingPath(path: string): string {
 }
 
 /**
+ * Helper to get sibling refused path from a measurement path.
+ * e.g., "e4.maxAssisted.measurement" → "e4.maxAssisted.refused"
+ */
+function getRefusedSiblingPath(path: string): string {
+  return path.replace(/\.[^.]+$/, ".refused");
+}
+
+/**
+ * Helper to get interview refused path from any interview field path.
+ * e.g., "e4.maxUnassisted.left.temporalis.pain" → "e4.maxUnassisted.interviewRefused"
+ */
+function getInterviewRefusedPath(path: string): string {
+  const parts = path.split(".");
+  // Path structure: e4.{openingType}.{side}.{region}.{painType}
+  // We want: e4.{openingType}.interviewRefused
+  if (parts.length >= 2) {
+    return `${parts[0]}.${parts[1]}.interviewRefused`;
+  }
+  return path.replace(/\.[^.]+$/, ".interviewRefused");
+}
+
+/**
+ * Helper to get side-level refused path for palpation.
+ * e.g., "e9.left.temporalisAnterior.pain" → "e9.left.refused"
+ */
+function getPalpationRefusedPath(path: string): string {
+  const parts = path.split(".");
+  // Path structure: e9.{side}.{site}.{painType}
+  // We want: e9.{side}.refused
+  if (parts.length >= 2) {
+    return `${parts[0]}.${parts[1]}.refused`;
+  }
+  return path;
+}
+
+/**
  * Single source of truth for all form validation rules.
  * Returns a list of errors for the given instances.
  */
@@ -174,10 +220,18 @@ export function validateInstances(
     if (instance.renderType === "measurement" && config.required) {
       const terminatedPath = getTerminatedSiblingPath(instance.path);
       const terminatedValue = getValue(terminatedPath);
+      const refusedPath = getRefusedSiblingPath(instance.path);
+      const refusedValue = getValue(refusedPath);
 
-      // Check if terminated sibling exists (not undefined) and is checked
+      // Check if terminated/refused siblings exist (not undefined) and are checked
       const hasTerminatedSibling = terminatedValue !== undefined;
       const isTerminated = terminatedValue === true;
+      const isRefused = refusedValue === true;
+
+      // Skip validation if refused
+      if (isRefused) {
+        continue;
+      }
 
       if (value == null || value === "") {
         if (isTerminated) {
@@ -332,6 +386,16 @@ export function validatePalpationCompletion(
   const incompleteSites: IncompletePalpationSite[] = [];
   const palpationMode = context?.palpationMode ?? "basic";
   const isGrouped = context?.siteDetailMode === "grouped";
+
+  // Check for side-level refusal
+  const firstInstance = instances[0];
+  if (firstInstance) {
+    const refusedPath = getPalpationRefusedPath(firstInstance.path);
+    if (getValue(refusedPath) === true) {
+      // Side refused, skip validation
+      return { valid: true, incompleteSites: [] };
+    }
+  }
 
   // Group instances by site/region and side
   const siteGroups = new Map<string, QuestionInstance[]>();

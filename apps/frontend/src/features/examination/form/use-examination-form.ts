@@ -75,14 +75,33 @@ function getStepInstancesForExamination(
   const stepDef = EXAMINATION_STEPS[stepId];
 
   if (typeof stepDef === "string" && stepDef.endsWith(".*")) {
-    // Wildcard: e.g., "e4.maxUnassisted.*" or "e9.left.*"
+    // Single wildcard string: e.g., "e4.maxUnassisted.*" or "e9.left.*"
     const prefix = stepDef.slice(0, -2); // Remove ".*"
     return instances.filter((i) => i.path.startsWith(`${prefix}.`) && i.context.side);
   }
 
-  // Explicit path array
-  const pathSet = new Set(stepDef as readonly string[]);
-  return instances.filter((i) => pathSet.has(i.path));
+  // Array of paths - may contain explicit paths and/or wildcards
+  const paths = stepDef as readonly string[];
+  const explicitPaths = new Set<string>();
+  const wildcardPrefixes: string[] = [];
+
+  for (const p of paths) {
+    if (p.endsWith(".*")) {
+      wildcardPrefixes.push(p.slice(0, -2)); // Remove ".*"
+    } else {
+      explicitPaths.add(p);
+    }
+  }
+
+  return instances.filter((i) => {
+    // Match explicit paths
+    if (explicitPaths.has(i.path)) return true;
+    // Match wildcard prefixes (requires side context for interview/palpation steps)
+    for (const prefix of wildcardPrefixes) {
+      if (i.path.startsWith(`${prefix}.`) && i.context.side) return true;
+    }
+    return false;
+  });
 }
 
 /**

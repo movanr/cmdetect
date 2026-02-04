@@ -7,6 +7,9 @@ import {
 import { M, type GroupNode, type ModelNode } from "../model/nodes";
 import { Q } from "../model/primitives";
 
+/** Field name for patient refusal (RF) per side */
+export const REFUSED_FIELD = "refused" as const;
+
 // Build pain questions for one palpation site
 const palpationQuestionsForSite = (site: PalpationSite) => {
   const questions = getPalpationPainQuestions(site);
@@ -28,9 +31,16 @@ const sitesForSide = () =>
     Object.fromEntries(PALPATION_SITE_KEYS.map((site) => [site, palpationQuestionsForSite(site)]))
   ) as GroupNode & { __children: Record<string, ModelNode> };
 
+// Build sites for one side with refused field
+const sitesForSideWithRefused = () =>
+  M.group({
+    [REFUSED_FIELD]: M.question(Q.boolean(), REFUSED_FIELD),
+    ...sitesForSide().__children,
+  }) as GroupNode & { __children: Record<string, ModelNode> };
+
 // Build bilateral (left + right)
 const bilateral = () =>
-  M.group(Object.fromEntries(SIDE_KEYS.map((s) => [s, sitesForSide()]))) as GroupNode & {
+  M.group(Object.fromEntries(SIDE_KEYS.map((s) => [s, sitesForSideWithRefused()]))) as GroupNode & {
     __children: Record<string, ModelNode>;
   };
 
@@ -43,6 +53,6 @@ export const E9_MODEL = M.group({
 
 // Steps - split by side for cleaner UX
 export const E9_STEPS = {
-  "e9-left": "left.*",
-  "e9-right": "right.*",
+  "e9-left": [`left.${REFUSED_FIELD}`, "left.*"],
+  "e9-right": [`right.${REFUSED_FIELD}`, "right.*"],
 } as const;

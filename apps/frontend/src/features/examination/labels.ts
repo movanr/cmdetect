@@ -64,6 +64,9 @@ export const COMMON = {
   painFreeOpening: "Schmerzfreie Öffnung",
   maxUnassistedOpening: "Maximale Öffnung (unassistiert)",
   maxAssistedOpening: "Maximale Öffnung (assistiert)",
+  refused: "RF",
+  refusedFull: "Patient verweigert (RF)",
+  refusedTooltip: "Patient verweigert oder kann nicht teilnehmen",
 } as const;
 
 // === LABEL LOOKUP FUNCTIONS ===

@@ -27,11 +27,12 @@ import {
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
-import { getLabel, getSectionCardTitle } from "../../labels";
+import { COMMON, getLabel, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import { type RegionStatus } from "../HeadDiagram/types";
+import { RefusalCheckbox } from "../inputs/RefusalCheckbox";
 import { QuestionField } from "../QuestionField";
 import { RegionDropdown } from "../RegionDropdown";
 import {
@@ -72,22 +73,33 @@ type ExpandedState = { left: Region | null; right: Region | null };
 
 /**
  * Compute step completion status from form values.
- * Returns "completed" if the step has valid data, null otherwise.
+ * Returns "completed" if the step has valid data, "refused" if refused, null otherwise.
  */
 function computeStepStatusFromForm(
   stepId: ExaminationStepId,
   instances: QuestionInstance[],
   getValue: (path: string) => unknown
-): "completed" | null {
+): "completed" | "refused" | null {
   const isInterview = String(stepId).endsWith("-interview");
 
   if (isInterview) {
+    // Check for interview refusal first
+    const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
+    if (interviewRefusedInst && getValue(interviewRefusedInst.path) === true) {
+      return "refused";
+    }
     // Check if all pain questions are answered (validates interview completion)
     const result = validateInterviewCompletion(instances, getValue);
     return result.valid ? "completed" : null;
   }
 
-  // Measurement step - check if measurement field has value or terminated
+  // Measurement step - check for refusal first
+  const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
+  if (refusedInst && getValue(refusedInst.path) === true) {
+    return "refused";
+  }
+
+  // Check if measurement field has value or terminated
   const measurementInst = instances.find((i) => i.renderType === "measurement");
   if (measurementInst) {
     const value = getValue(measurementInst.path);
@@ -293,12 +305,165 @@ function InterviewSubsection({
   );
 }
 
+/**
+ * InterviewContent - Wrapper for interview step with refusal checkbox.
+ */
+interface InterviewContentProps {
+  stepInstances: QuestionInstance[];
+  regions: readonly Region[];
+  expanded: ExpandedState;
+  onExpandChange: (side: Side, region: Region | null) => void;
+  incompleteRegions: IncompleteRegion[];
+  onNoMorePainRegions: () => void;
+  onClearIncompleteRegions: () => void;
+}
+
+function InterviewContent({
+  stepInstances,
+  regions,
+  expanded,
+  onExpandChange,
+  incompleteRegions,
+  onNoMorePainRegions,
+  onClearIncompleteRegions,
+}: InterviewContentProps) {
+  const { setValue, watch, clearErrors } = useFormContext<FormValues>();
+
+  // Find the interviewRefused instance
+  const interviewRefusedInst = stepInstances.find((i) => i.path.endsWith(".interviewRefused"));
+  const interviewRefusedPath = interviewRefusedInst?.path as FieldPath<FormValues> | undefined;
+
+  // Watch the refused state - watch returns the value at that path
+  const watchedRefused = interviewRefusedPath ? watch(interviewRefusedPath) : undefined;
+  const isInterviewRefused = (watchedRefused as unknown as boolean) === true;
+
+  // Filter out the interviewRefused instance from stepInstances for InterviewSubsection
+  const painInstances = stepInstances.filter((i) => !i.path.endsWith(".interviewRefused"));
+
+  // Handle interview refusal change - clear all pain data when refusing
+  const handleInterviewRefusalChange = useCallback(
+    (refused: boolean) => {
+      if (refused) {
+        // Clear all pain interview data for this step
+        for (const inst of painInstances) {
+          if (inst.renderType === "yesNo") {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setValue(inst.path as FieldPath<FormValues>, null as any);
+            clearErrors(inst.path as FieldPath<FormValues>);
+          }
+        }
+        // Clear any validation errors
+        onClearIncompleteRegions();
+      }
+    },
+    [painInstances, setValue, clearErrors, onClearIncompleteRegions]
+  );
+
+  if (isInterviewRefused) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <p className="text-lg font-medium">{COMMON.refusedFull}</p>
+          <p className="text-sm">{COMMON.refusedTooltip}</p>
+        </div>
+        {interviewRefusedPath && (
+          <RefusalCheckbox<FormValues>
+            name={interviewRefusedPath}
+            onRefuseChange={handleInterviewRefusalChange}
+          />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex justify-center pt-2">
+        <Button type="button" variant="outline" onClick={onNoMorePainRegions}>
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Keine weiteren Schmerzbereiche
+        </Button>
+      </div>
+      <InterviewSubsection
+        instances={painInstances}
+        regions={regions}
+        expanded={expanded}
+        onExpandChange={onExpandChange}
+        incompleteRegions={incompleteRegions}
+      />
+      {interviewRefusedPath && (
+        <div className="pt-4 border-t">
+          <RefusalCheckbox<FormValues>
+            name={interviewRefusedPath}
+            onRefuseChange={handleInterviewRefusalChange}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * E4AMeasurementContent - E4A step content with refusal checkbox.
+ */
+interface E4AMeasurementContentProps {
+  stepInstances: QuestionInstance[];
+}
+
+function E4AMeasurementContent({ stepInstances }: E4AMeasurementContentProps) {
+  const { setValue, watch, clearErrors } = useFormContext<FormValues>();
+
+  // Find measurement and refused instances
+  const measurementInstance = stepInstances.find((i) => i.renderType === "measurement");
+  const refusedInstance = stepInstances.find((i) => i.path.endsWith(".refused"));
+
+  const watchedRefused = refusedInstance ? watch(refusedInstance.path as FieldPath<FormValues>) : undefined;
+  const isRefused = (watchedRefused as unknown as boolean) === true;
+
+  // Handle refused toggle - clear measurement value when refusing
+  const handleRefuseChange = useCallback(
+    (refused: boolean) => {
+      if (refused && measurementInstance) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setValue(measurementInstance.path as FieldPath<FormValues>, null as any);
+        clearErrors(measurementInstance.path as FieldPath<FormValues>);
+      }
+    },
+    [measurementInstance, setValue, clearErrors]
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Measurement input - disabled when refused */}
+      {measurementInstance && (
+        <div className={isRefused ? "opacity-50 pointer-events-none" : ""}>
+          <QuestionField
+            instance={measurementInstance}
+            label={getLabel(measurementInstance.labelKey)}
+          />
+          {isRefused && (
+            <p className="text-sm text-muted-foreground mt-1">{COMMON.refused}</p>
+          )}
+        </div>
+      )}
+
+      {/* Refusal checkbox */}
+      {refusedInstance && (
+        <RefusalCheckbox<FormValues>
+          name={refusedInstance.path as FieldPath<FormValues>}
+          onRefuseChange={handleRefuseChange}
+        />
+      )}
+    </div>
+  );
+}
+
 export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
 
   // Compute initial state from form values (persisted across tab switches)
   const [initialState] = useState(() => {
-    const statuses: Record<string, "completed" | "skipped"> = {};
+    const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E4_STEP_ORDER) {
       const instances = getInstancesForStep(stepId);
       const status = computeStepStatusFromForm(stepId, instances, (path) =>
@@ -390,6 +555,27 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
   };
 
   const handleNext = () => {
+    // Check for refusal first - if refused, mark as refused and proceed
+    const refusedInst = stepInstances.find((i) =>
+      isInterview ? i.path.endsWith(".interviewRefused") : i.path.endsWith(".refused")
+    );
+    const isStepRefused = refusedInst
+      ? (form.getValues(refusedInst.path as FieldPath<FormValues>) as unknown as boolean) === true
+      : false;
+
+    if (isStepRefused) {
+      setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
+      setExpanded({ left: null, right: null });
+      setIncompleteRegions([]);
+
+      if (isLastStep) {
+        setCurrentStepIndex(-1);
+      } else {
+        setCurrentStepIndex((i) => i + 1);
+      }
+      return;
+    }
+
     // For interview steps, validate completeness first
     if (isInterview) {
       const result = validateInterviewCompletion(stepInstances, (path) =>
@@ -424,10 +610,15 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
   const getStepStatus = (stepId: ExaminationStepId, index: number): StepStatus => {
     // -1 means all complete, no active step
     if (allComplete) {
-      return stepStatuses[stepId] || "pending";
+      const status = stepStatuses[stepId];
+      // Map "refused" to "completed" for StepBar display (will show RF badge via summary)
+      if (status === "refused") return "completed";
+      return status || "pending";
     }
     if (index === currentStepIndex) return "active";
-    if (stepStatuses[stepId]) return stepStatuses[stepId];
+    const status = stepStatuses[stepId];
+    if (status === "refused") return "completed";
+    if (status) return status;
     return "pending";
   };
 
@@ -436,7 +627,21 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
     const instances = getInstancesForStep(stepId);
     const stepIsInterview = String(stepId).endsWith("-interview");
 
+    // Check for refused status first
+    if (stepStatuses[stepId] === "refused") {
+      return COMMON.refused;
+    }
+
     if (stepIsInterview) {
+      // Check for interview refusal
+      const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
+      if (interviewRefusedInst) {
+        const isRefused = form.getValues(interviewRefusedInst.path as FieldPath<FormValues>) as unknown as boolean;
+        if (isRefused === true) {
+          return COMMON.refused;
+        }
+      }
+
       // Check pain and familiar pain values across all regions
       let hasPain = false;
       let hasFamiliarPain = false;
@@ -469,6 +674,15 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
       }
       // Pain reported but no familiar pain/headache
       return "Keine Übereinstimmung";
+    }
+
+    // Check for measurement refusal
+    const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
+    if (refusedInst) {
+      const isRefused = form.getValues(refusedInst.path as FieldPath<FormValues>) as unknown as boolean;
+      if (isRefused === true) {
+        return COMMON.refused;
+      }
     }
 
     // Measurement step - show value
@@ -560,32 +774,18 @@ export function E4Section({ onComplete, onBack, isFirstSection }: E4SectionProps
 
                 {/* Content */}
                 {stepIsInterview ? (
-                  <>
-                    <div className="flex justify-center pt-2">
-                      <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Keine weiteren Schmerzbereiche
-                      </Button>
-                    </div>
-                    <InterviewSubsection
-                      instances={stepInstances}
-                      regions={regions}
-                      expanded={expanded}
-                      onExpandChange={handleExpandChange}
-                      incompleteRegions={incompleteRegions}
-                    />
-                  </>
+                  <InterviewContent
+                    stepInstances={stepInstances}
+                    regions={regions}
+                    expanded={expanded}
+                    onExpandChange={handleExpandChange}
+                    incompleteRegions={incompleteRegions}
+                    onNoMorePainRegions={handleNoMorePainRegions}
+                    onClearIncompleteRegions={() => setIncompleteRegions([])}
+                  />
                 ) : stepId === "e4a" ? (
                   // E4A uses QuestionField directly for the pain-free opening measurement
-                  <div className="space-y-2">
-                    {stepInstances.map((instance) => (
-                      <QuestionField
-                        key={instance.path}
-                        instance={instance}
-                        label={getLabel(instance.labelKey)}
-                      />
-                    ))}
-                  </div>
+                  <E4AMeasurementContent stepInstances={stepInstances} />
                 ) : (
                   <MeasurementStep instances={stepInstances} />
                 )}
