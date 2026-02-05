@@ -66,14 +66,14 @@ const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
     id: "pain",
     label: "Schmerz bei Bewegung?",
-    patientScript: "Hatten Sie bei dieser Bewegung Schmerzen?",
+    patientScript: "Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?",
     figureRef: "13",
   },
   {
     id: "locate",
     label: "Lokalisation",
     patientScript:
-      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie bei dieser Bewegung Schmerzen gespürt haben?",
+      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?",
     figureRef: "2",
   },
   {
@@ -97,7 +97,7 @@ const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     id: "done",
     label: "Weitere Bereiche?",
     patientScript:
-      "Gibt es noch weitere Bereiche, in denen Sie bei dieser Bewegung Schmerzen gespürt haben?",
+      "Gibt es noch weitere Bereiche, in denen Sie bei dieser Bewegung Schmerzen gespürt haben? Zeigen Sie auf diese Bereiche.",
     appAction: 'Button „Keine weiteren Schmerzbereiche"',
   },
 ];
@@ -115,7 +115,7 @@ const E4C_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     id: "pain",
     label: "Schmerz bei Manipulation?",
     patientScript:
-      "Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
+      "Hatten Sie irgendwelche Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
     figureRef: "16",
   },
   {
@@ -164,7 +164,7 @@ const E4A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     id: "script",
     label: "Anweisung",
     patientScript:
-      "Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, ohne Schmerzen zu verspüren oder bestehende Schmerzen zu verstärken. Ich werde Ihnen sagen, wann Sie schließen können.",
+      "Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
   },
   {
     id: "ruler",
@@ -190,7 +190,7 @@ const E4B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     id: "script",
     label: "Anweisung",
     patientScript:
-      "Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist. Ich werde Ihnen sagen, wann Sie schließen können.",
+      "Ich möchte, dass Sie den Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist.",
   },
   {
     id: "ruler",
@@ -224,7 +224,7 @@ const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     id: "announce",
     label: "Ankündigung",
     patientScript:
-      "Gleich werde ich versuchen, Ihren Mund mit meinen Fingern weiter zu öffnen. Wenn Sie möchten, dass ich aufhöre, heben Sie Ihre Hand und ich werde sofort aufhören.",
+      "Gleich werde ich versuchen, Ihren Mund mit meinen Fingern noch weiter zu öffnen. Wenn Sie möchten, dass ich aufhöre, heben Sie bitte Ihre Hand. Dann werde ich sofort aufhören.",
   },
   {
     id: "ruler",
@@ -237,19 +237,19 @@ const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     id: "open",
     label: "Patient öffnet",
     patientScript:
-      "Jetzt öffnen Sie Ihren Mund so weit wie möglich, auch wenn schmerzhaft, genau wie zuvor.",
+      "Bitte öffnen Sie jetzt so weit wie möglich, auch wenn es schmerzhaft ist, so wie Sie es eben schon gemacht haben.",
     pause: true,
   },
   {
     id: "tactile-warning",
     label: "Berührungsankündigung",
-    patientScript: "Sie werden meine Finger spüren.",
+    patientScript: "Sie spüren jetzt gleich meine Finger.",
   },
   {
     id: "relax",
     label: "Entspannung",
     patientScript:
-      "Bitte entspannen Sie Ihren Kiefer, damit ich Ihnen helfen kann, weiter zu öffnen, wenn möglich.",
+      "Bitte entspannen Sie Ihren Kiefer, so dass ich Ihnen helfen kann, noch weiter zu öffnen, wenn möglich.",
     pause: true,
   },
   {
@@ -268,6 +268,44 @@ const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
 ];
 
 // ============================================================================
+// E4 Introduction Flow
+// ============================================================================
+
+/**
+ * E4 Introduction - Movement pain interview overview (4 steps).
+ * E4 contains the first movement-induced pain questioning. The structured
+ * pain interview flow (section 6.2.1) is complex and benefits from an
+ * introduction that previews the tests and explains the interview procedure.
+ */
+const E4_INTRODUCTION_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "overview",
+    label: "Übersicht",
+    examinerInstruction:
+      "Drei Öffnungstests: (A) schmerzfrei, (B) maximal aktiv, (C) maximal passiv. Nach U4B und U4C folgt die strukturierte Schmerzbefragung.",
+  },
+  {
+    id: "interview-flow",
+    label: "Schmerzbefragung",
+    examinerInstruction:
+      "Befragungsablauf bei Bewegungsschmerz: Schmerz? \u2192 Lokalisation zeigen \u2192 Anatomische Struktur bestätigen \u2192 Bekannter Schmerz? \u2192 [Bekannter Kopfschmerz?] \u2192 Weitere Bereiche?",
+  },
+  {
+    id: "anatomy",
+    label: "Strukturidentifikation",
+    examinerInstruction:
+      "Patient zeigt Schmerzbereich, Untersucher berührt zur Bestätigung und identifiziert anatomische Struktur (Muskel, Gelenk, andere). Bei unklarer Zuordnung im Präauriculärbereich: Kondylus durch Protrusion lokalisieren, Masseter-Grenze durch Zubeißen identifizieren.",
+    figureRef: ["2", "3"],
+  },
+  {
+    id: "efficient",
+    label: "Effiziente Durchführung",
+    examinerInstruction:
+      "Nach mehreren positiven Befunden: Abgekürzte Antworten \u201Eja, bekannt\u201C / \u201Eja, nicht bekannt\u201C.",
+  },
+];
+
+// ============================================================================
 // E4 Rich Instructions
 // ============================================================================
 
@@ -277,6 +315,20 @@ const E4C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
  * Based on DC-TMD Examiner Protocol Section 4
  */
 export const E4_RICH_INSTRUCTIONS = {
+  /** U4 Introduction - Opening movements overview */
+  introduction: {
+    stepId: "U4-intro",
+    title: "Einführung Öffnungsbewegungen",
+    flow: E4_INTRODUCTION_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
+      { section: "section2", anchor: "211", label: "2.11 Schmerzbefragung" },
+      { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
+      { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+      { section: "section6", anchor: "63", label: "6.3 Effiziente Durchführung" },
+    ],
+  } satisfies RichMeasurementInstruction,
+
   /** U4A - Pain-free opening (step-based flow) */
   painFreeOpening: {
     stepId: "U4A",
@@ -320,7 +372,7 @@ export const E4_RICH_INSTRUCTIONS = {
   /** Pain interview after E4B (unassisted opening) */
   painInterview: {
     title: "Schmerzbefragung",
-    prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
+    prompt: "Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?",
     flow: E4B_PAIN_INTERVIEW_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
@@ -336,7 +388,7 @@ export const E4_RICH_INSTRUCTIONS = {
   painInterviewAssistedOpening: {
     title: "Schmerzbefragung",
     prompt:
-      "Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
+      "Hatten Sie irgendwelche Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
     flow: E4C_PAIN_INTERVIEW_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
@@ -388,39 +440,84 @@ export const E4_INSTRUCTIONS = {
   /** Pain interview after movement */
   painInterview: {
     title: "Schmerzbefragung",
-    prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
+    prompt: "Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?",
     guidance: "Schmerz → Lokalisation → Bestätigung → Keine weiteren Schmerzbereiche",
   } satisfies PainInterviewInstruction,
 } as const;
+
+// ============================================================================
+// E1 Introduction Flow (Examination Preamble)
+// ============================================================================
+
+/**
+ * E1 Introduction - Full examination preamble (6 steps).
+ * E1 is the first examination section; the protocol requires a verbal
+ * preamble (section 5.1 / section 8.3 table "Anweisungen an den Patienten")
+ * before any examination begins.
+ */
+const E1_INTRODUCTION_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "preamble",
+    label: "Einleitung",
+    patientScript:
+      "Bevor ich mit der Untersuchung beginne, möchte ich noch einige Punkte mit Ihnen besprechen.",
+  },
+  {
+    id: "pain-format",
+    label: "Schmerzformat",
+    patientScript:
+      "Ich werde Sie zu Schmerzen befragen, wobei nur Sie selbst wissen ob Sie Schmerzen haben. Wenn ich Sie nach Schmerzen frage, möchte ich, dass Sie mit \u201EJa\u201C oder \u201ENein\u201C antworten. Falls Sie unsicher sind, geben Sie bitte Ihre bestmögliche Antwort.",
+  },
+  {
+    id: "familiar-pain",
+    label: "Bekannter Schmerz",
+    patientScript:
+      "Falls Sie Schmerzen fühlen, werde ich Sie auch fragen, ob Ihnen der Schmerz bekannt ist. Die Bezeichnung \u201Ebekannter Schmerz\u201C bezieht sich auf Schmerzen, die sich ähnlich oder genauso anfühlen wie die Schmerzen, die Sie in den letzten 30 Tagen in dem gleichen Bereich ihres Körpers gespürt haben.",
+  },
+  {
+    id: "familiar-headache",
+    label: "Bekannter Kopfschmerz",
+    patientScript:
+      "Falls Sie Schmerzen im Bereich der Schläfen fühlen, werde ich Sie fragen, ob diese Schmerzen sich wie irgendwelche Kopfschmerzen anfühlen, die Sie während der letzten 30 Tage im Schläfenbereich gehabt haben.",
+  },
+  {
+    id: "scope",
+    label: "Untersuchungsbereiche",
+    patientScript:
+      "Zum Zweck dieser Untersuchung interessieren mich Schmerzen, die Sie in den folgenden Bereichen\u2026 und auch innerhalb des Mundes haben könnten.",
+    examinerInstruction:
+      "Beidseits gleichzeitig berühren: Temporalis, Präauriculärbereich, Masseter, retro-/submandibulärer Bereich",
+    figureRef: "1",
+  },
+  {
+    id: "efficient",
+    label: "Effiziente Durchführung",
+    examinerInstruction:
+      "Nach mehreren positiven Schmerzantworten kann der Patient zu abgekürzten Antworten angeleitet werden: \u201Eja, bekannt\u201C oder \u201Eja, nicht bekannt\u201C.",
+  },
+];
 
 // ============================================================================
 // E1 Pain/Headache Location Interview Flows
 // ============================================================================
 
 /**
- * E1A - Pain location flow (5 steps).
+ * E1A - Pain location flow (4 steps).
  * Based on DC-TMD protocol section 5.3 U1a.
+ * Note: The "scope" step (touching anatomical areas) moved to E1_INTRODUCTION_FLOW
+ * since it is conceptually part of the examination preamble, not the pain location flow.
  */
 const E1A_PAIN_LOCATION_FLOW: ProcedureFlowStep[] = [
   {
-    id: "scope",
-    label: "Bereiche zeigen",
-    examinerInstruction:
-      "Beidseits gleichzeitig berühren: Temporalis, Kiefergelenk, Masseter, retromandibulär/submandibulär",
-    patientScript:
-      "Für die Zwecke dieser Untersuchung interessiere ich mich für Schmerzen, die Sie möglicherweise in diesen Bereichen haben…",
-    figureRef: "1",
-  },
-  {
     id: "pain-question",
     label: "Schmerzfrage",
-    patientScript: "Hatten Sie in den letzten 30 Tagen Schmerzen in diesen Bereichen?",
+    patientScript: "Hatten Sie während der letzten 30 Tage in diesen Bereichen Schmerzen?",
   },
   {
     id: "locate",
     label: "Lokalisation",
     patientScript:
-      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?",
+      "Bitte zeigen Sie mit Ihrem Finger auf die jeweiligen Bereiche, in denen Sie Schmerzen hatten.",
     figureRef: "2",
     pause: true,
   },
@@ -436,7 +533,7 @@ const E1A_PAIN_LOCATION_FLOW: ProcedureFlowStep[] = [
     id: "more",
     label: "Weitere Bereiche?",
     patientScript:
-      "Gibt es noch weitere Bereiche, in denen Sie Schmerzen gespürt haben?",
+      "Gibt es noch weitere Bereiche, in denen Sie Schmerzen hatten?",
   },
 ];
 
@@ -448,13 +545,13 @@ const E1B_HEADACHE_LOCATION_FLOW: ProcedureFlowStep[] = [
   {
     id: "headache-question",
     label: "Kopfschmerzfrage",
-    patientScript: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen?",
+    patientScript: "Hatten Sie während der letzten 30 Tage Kopfschmerzen?",
   },
   {
     id: "locate",
     label: "Lokalisation",
     patientScript:
-      "Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Kopfschmerzen gespürt haben?",
+      "Bitte zeigen Sie mit Ihrem Finger auf die jeweiligen Bereiche, in denen Sie Kopfschmerzen gefühlt haben.",
     pause: true,
   },
   {
@@ -468,7 +565,7 @@ const E1B_HEADACHE_LOCATION_FLOW: ProcedureFlowStep[] = [
     id: "more",
     label: "Weitere Bereiche?",
     patientScript:
-      "Gibt es noch weitere Bereiche, in denen Sie Kopfschmerzen gespürt haben?",
+      "Gibt es noch weitere Bereiche, in denen Sie Kopfschmerzen hatten?",
   },
 ];
 
@@ -482,10 +579,24 @@ const E1B_HEADACHE_LOCATION_FLOW: ProcedureFlowStep[] = [
  * Based on DC-TMD Examiner Protocol Section 5.3 (U1)
  */
 export const E1_RICH_INSTRUCTIONS = {
+  /** U1 Introduction - Examination preamble */
+  introduction: {
+    stepId: "U1-intro",
+    title: "Einführung Untersuchung",
+    flow: E1_INTRODUCTION_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
+      { section: "section2", anchor: "211", label: "2.11 Schmerzbefragung" },
+      { section: "e1", anchor: "anweisungen-an-den-patienten", label: "5.3 Anweisungen" },
+      { section: "section6", anchor: "63", label: "6.3 Effiziente Durchführung" },
+      { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
+    ],
+  } satisfies RichMeasurementInstruction,
+
   /** U1A - Pain location in the last 30 days */
   painLocation: {
     title: "Schmerzlokalisation",
-    prompt: "Hatten Sie in den letzten 30 Tagen Schmerzen in diesen Bereichen?",
+    prompt: "Hatten Sie während der letzten 30 Tage in diesen Bereichen Schmerzen?",
     flow: E1A_PAIN_LOCATION_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
@@ -498,7 +609,7 @@ export const E1_RICH_INSTRUCTIONS = {
   /** U1B - Headache location in the last 30 days */
   headacheLocation: {
     title: "Kopfschmerzlokalisation",
-    prompt: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen?",
+    prompt: "Hatten Sie während der letzten 30 Tage Kopfschmerzen?",
     flow: E1B_HEADACHE_LOCATION_FLOW,
     protocolRefs: [
       { section: "section4", anchor: "u1-untersucherbestatigung-der-schmerz-und-kopfschmerzlokalisationen", label: "4.5 U1 Schmerzlokalisation" },
@@ -675,7 +786,7 @@ const E3_OPENING_PATTERN_FLOW: ProcedureFlowStep[] = [
     id: "instruction",
     label: "Anweisung",
     patientScript:
-      "Ich möchte, dass Sie langsam Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist, schließen und Ihre Backenzähne wieder vollständig aufeinander legen.",
+      "Ich möchte, dass Sie Ihren Mund langsam so weit wie möglich öffnen, auch wenn es schmerzhaft ist, und dann schließen, bis Ihre Backenzähne wieder vollständig aufeinander liegen.",
     figureRef: ["9", "10a"],
   },
   {
@@ -779,7 +890,7 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
       id: "intro",
       label: "Einführung",
       patientScript:
-        "Jetzt werde ich Druck auf verschiedene Bereiche Ihres Kopfes, Gesichts und Kiefers ausüben, und ich werde Sie nach Schmerzen, bekanntem Schmerz und bekanntem Kopfschmerz fragen.",
+        "Nun werde ich in verschiedenen Bereichen Ihres Kopfes, Ihres Gesichtes und Ihres Kiefers Druck ausüben und Sie nach Schmerzen fragen. Ich werde Sie nach Schmerzen, bekannten Schmerzen und bekannten Kopfschmerzen fragen.",
       figureRef: "24",
     },
   ];
@@ -789,7 +900,7 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
       id: "referred",
       label: "Übertragener Schmerz",
       patientScript:
-        "Außerdem werde ich fragen, ob der Schmerz nur unter meinem Finger bleibt oder ob Sie ihn auch irgendwo anders außer unter meinem Finger spüren.",
+        "Zusätzlich werde ich Sie fragen, ob der Schmerz nur unter meinem Finger bleibt oder Sie ihn auch noch in anderen Bereichen als unter meinem Finger spüren.",
     });
   }
   // Abbreviated prompts — establishes the shorthand vocabulary with the patient (5.9/8.2)
@@ -797,14 +908,14 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
     id: "prompts",
     label: "Kurzabfrage",
     patientScript: mode === "basic"
-      ? `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz" und „bekannter Kopfschmerz" auffordern.`
-      : `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" auffordern.`,
+      ? `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz" und „bekannter Kopfschmerz" abfragen.`
+      : `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" abfragen.`,
   });
   steps.push(
     {
       id: "duration",
       label: "Dauer",
-      patientScript: `Jedes Mal werde ich Druck ausüben und ihn ${durationLabel(mode)} lang halten.`,
+      patientScript: `Ich werde den Druck jedes Mal für ${durationLabel(mode)} aufrechterhalten.`,
     },
     {
       id: "calibrate",
