@@ -402,6 +402,199 @@ export const E4_RICH_INSTRUCTIONS = {
 } as const;
 
 // ============================================================================
+// E5 Introduction Flow
+// ============================================================================
+
+/**
+ * E5 Introduction - Lateral and protrusive movement overview (3 steps).
+ * E5 contains 3 movement tests, each followed by the same structured
+ * pain interview as E4B.
+ */
+const E5_INTRODUCTION_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "overview",
+    label: "Übersicht",
+    examinerInstruction:
+      "Drei Bewegungstests: (A) Laterotrusion rechts, (B) Laterotrusion links, (C) Protrusion. Nach jeder Bewegung folgt die strukturierte Schmerzbefragung.",
+  },
+  {
+    id: "interview-flow",
+    label: "Schmerzbefragung",
+    examinerInstruction:
+      "Befragungsablauf bei Bewegungsschmerz: Schmerz? \u2192 Lokalisation zeigen \u2192 Anatomische Struktur bestätigen \u2192 Bekannter Schmerz? \u2192 [Bekannter Kopfschmerz?] \u2192 Weitere Bereiche?",
+  },
+  {
+    id: "anatomy",
+    label: "Strukturidentifikation",
+    examinerInstruction:
+      "Patient zeigt Schmerzbereich, Untersucher berührt zur Bestätigung und identifiziert anatomische Struktur (Muskel, Gelenk, andere). Bei unklarer Zuordnung im Präauriculärbereich: Kondylus durch Protrusion lokalisieren, Masseter-Grenze durch Zubeißen identifizieren.",
+    figureRef: ["2", "3"],
+  },
+];
+
+// ============================================================================
+// E5 Measurement Flows
+// ============================================================================
+
+/**
+ * E5A - Right laterotrusion measurement flow.
+ * Based on DC-TMD protocol section 5.5 / section 8.3.
+ */
+const E5A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "script",
+    label: "Anweisung",
+    patientScript:
+      "Bitte öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist.",
+  },
+  {
+    id: "hold",
+    label: "Halten",
+    patientScript:
+      "Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe.",
+    examinerInstruction:
+      "Lineal an UK-Mittellinie anlegen und Distanz zur OK-Mittellinie messen.",
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    figureRef: ["17", "21"],
+    appAction: "Messwert in mm eingeben",
+  },
+];
+
+/**
+ * E5B - Left laterotrusion measurement flow.
+ * Based on DC-TMD protocol section 5.5 / section 8.3.
+ */
+const E5B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "script",
+    label: "Anweisung",
+    patientScript:
+      "Bitte öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist.",
+  },
+  {
+    id: "hold",
+    label: "Halten",
+    patientScript:
+      "Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe.",
+    examinerInstruction:
+      "Lineal an UK-Mittellinie anlegen und Distanz zur OK-Mittellinie messen.",
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    figureRef: ["19", "21"],
+    appAction: "Messwert in mm eingeben",
+  },
+];
+
+/**
+ * E5C - Protrusive movement measurement flow.
+ * Based on DC-TMD protocol section 5.5 / section 8.3.
+ */
+const E5C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "script",
+    label: "Anweisung",
+    patientScript:
+      "Bitte öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft ist.",
+  },
+  {
+    id: "hold",
+    label: "Halten",
+    patientScript:
+      "Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe.",
+    examinerInstruction:
+      "Labialfläche OK-Referenzzahn zu Labialfläche UK-Referenzzahn messen.",
+  },
+  {
+    id: "measure",
+    label: "Messen",
+    figureRef: "20",
+    appAction: "Messwert in mm eingeben",
+  },
+];
+
+// ============================================================================
+// E5 Rich Instructions
+// ============================================================================
+
+/**
+ * E5 Lateral & Protrusive Movements - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5 (U5)
+ */
+export const E5_RICH_INSTRUCTIONS = {
+  /** U5 Introduction - Lateral and protrusive movements overview */
+  introduction: {
+    stepId: "U5-intro",
+    title: "Einführung Lateralbewegungen",
+    flow: E5_INTRODUCTION_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
+      { section: "section2", anchor: "211", label: "2.11 Schmerzbefragung" },
+      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** U5A - Right laterotrusion measurement */
+  lateralRightMeasurement: {
+    stepId: "U5A",
+    title: "Laterotrusion rechts",
+    flow: E5A_MEASUREMENT_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      { section: "e5", anchor: "5a-laterotrusion-rechts", label: "5.5 U5A Laterotrusion rechts" },
+      { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** U5B - Left laterotrusion measurement */
+  lateralLeftMeasurement: {
+    stepId: "U5B",
+    title: "Laterotrusion links",
+    flow: E5B_MEASUREMENT_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      { section: "e5", anchor: "5b-laterotrusion-links", label: "5.5 U5B Laterotrusion links" },
+      { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** U5C - Protrusive movement measurement */
+  protrusiveMeasurement: {
+    stepId: "U5C",
+    title: "Protrusion",
+    flow: E5C_MEASUREMENT_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
+      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      { section: "e5", anchor: "5c-protrusion", label: "5.5 U5C Protrusion" },
+      { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
+    ],
+  } satisfies RichMeasurementInstruction,
+
+  /** Pain interview after each E5 movement (same as E4B) */
+  painInterview: {
+    title: "Schmerzbefragung",
+    prompt: "Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?",
+    flow: E4B_PAIN_INTERVIEW_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
+      { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
+      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
+      { section: "section8", anchor: "82", label: "8.2 Untersuchungsbezogene Schmerzbefragung" },
+    ],
+  } satisfies RichPainInterviewInstruction,
+} as const;
+
+// ============================================================================
 // Legacy E4 Instructions (for backwards compatibility)
 // ============================================================================
 

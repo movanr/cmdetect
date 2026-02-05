@@ -44,10 +44,10 @@ function ExaminationE9Page() {
     });
   };
 
-  // Navigate to previous section (E4)
+  // Navigate to previous section (E5)
   const handleBack = () => {
     navigate({
-      to: "/cases/$id/examination/e4",
+      to: "/cases/$id/examination/e5",
       params: { id },
     });
   };

@@ -41,6 +41,7 @@ export { E1_MODEL, E1_STEPS } from "./sections/e1.model";
 export { E2_MODEL, E2_STEPS } from "./sections/e2.model";
 export { E3_MODEL, E3_STEPS } from "./sections/e3.model";
 export { E4_MODEL, E4_STEPS } from "./sections/e4.model";
+export { E5_MODEL, E5_STEPS } from "./sections/e5.model";
 export { E9_MODEL, E9_STEPS } from "./sections/e9.model";
 export {
   getSection,
@@ -99,6 +100,7 @@ export { E1Section } from "./components/sections/E1Section";
 export { E2Section } from "./components/sections/E2Section";
 export { E3Section } from "./components/sections/E3Section";
 export { E4Section } from "./components/sections/E4Section";
+export { E5Section } from "./components/sections/E5Section";
 export { E9Section } from "./components/sections/E9Section";
 export { SectionFooter, type SectionFooterProps } from "./components/ui/SectionFooter";
 

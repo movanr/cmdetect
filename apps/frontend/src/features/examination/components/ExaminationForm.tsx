@@ -8,6 +8,7 @@ import { E1Section } from "./sections/E1Section";
 import { E2Section } from "./sections/E2Section";
 import { E3Section } from "./sections/E3Section";
 import { E4Section } from "./sections/E4Section";
+import { E5Section } from "./sections/E5Section";
 import { E9Section } from "./sections/E9Section";
 import type { SectionProps } from "./sections/types";
 
@@ -17,6 +18,7 @@ const SECTION_COMPONENTS: Partial<Record<SectionId, React.ComponentType<SectionP
   e2: E2Section,
   e3: E3Section,
   e4: E4Section,
+  e5: E5Section,
   e9: E9Section,
 };
 
