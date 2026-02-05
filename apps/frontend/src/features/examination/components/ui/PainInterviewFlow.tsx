@@ -230,60 +230,13 @@ export function ProcedureFlow({ flow, className }: ProcedureFlowProps) {
 }
 
 /**
- * Cross-reference links to protocol documentation.
+ * Protocol references as a collapsible dropdown with flat list.
+ * Each item shows "X.Y Title" as a link to the protocol section.
  */
-function CrossReferenceLinks({
-  references,
-  label,
-}: {
-  references: CrossReference[];
-  label?: string;
-}) {
-  if (references.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-      <BookOpen className="h-3 w-3 shrink-0" />
-      {label && <span className="font-medium">{label}:</span>}
-      {references.map((ref, index) => (
-        <span key={`${ref.section}-${ref.anchor ?? index}`}>
-          {index > 0 && <span className="mr-3">·</span>}
-          <Link
-            to="/protocol/$section"
-            params={{ section: ref.section }}
-            hash={ref.anchor}
-            className="hover:text-primary hover:underline"
-          >
-            {ref.label}
-          </Link>
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/**
- * Protocol references section with three categories (collapsible):
- * - Concise specification (section 4 quick reference)
- * - Complete specification (section 5 detailed protocol)
- * - Additional information (section 2, 6 general instructions)
- */
-function ProtocolReferences({
-  conciseSpec,
-  completeSpec,
-  additionalInfo,
-}: {
-  conciseSpec?: CrossReference[];
-  completeSpec?: CrossReference[];
-  additionalInfo?: CrossReference[];
-}) {
+function ProtocolReferences({ protocolRefs }: { protocolRefs?: CrossReference[] }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const hasConcise = conciseSpec && conciseSpec.length > 0;
-  const hasComplete = completeSpec && completeSpec.length > 0;
-  const hasAdditional = additionalInfo && additionalInfo.length > 0;
-
-  if (!hasConcise && !hasComplete && !hasAdditional) return null;
+  if (!protocolRefs || protocolRefs.length === 0) return null;
 
   return (
     <div className="mt-2">
@@ -297,13 +250,20 @@ function ProtocolReferences({
         <span>Protokoll-Referenzen</span>
       </button>
       {isOpen && (
-        <div className="space-y-1 mt-2 ml-4 pl-2 border-l border-muted">
-          {hasConcise && <CrossReferenceLinks references={conciseSpec} label="Kurzspezifikation" />}
-          {hasComplete && (
-            <CrossReferenceLinks references={completeSpec} label="Vollständige Spezifikation" />
-          )}
-          {hasAdditional && <CrossReferenceLinks references={additionalInfo} label="Zusatzinfo" />}
-        </div>
+        <ul className="mt-1.5 ml-4 pl-2 border-l border-muted space-y-1">
+          {protocolRefs.map((ref, i) => (
+            <li key={`${ref.section}-${ref.anchor ?? i}`}>
+              <Link
+                to="/protocol/$section"
+                params={{ section: ref.section }}
+                hash={ref.anchor}
+                className="text-xs text-muted-foreground hover:text-primary hover:underline"
+              >
+                {ref.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
@@ -353,11 +313,7 @@ export function PainInterviewBlock({
   return (
     <div className={cn("space-y-3", className)}>
       <ProcedureFlow flow={instruction.flow} />
-      <ProtocolReferences
-        conciseSpec={instruction.conciseSpec}
-        completeSpec={instruction.completeSpec}
-        additionalInfo={instruction.additionalInfo}
-      />
+      <ProtocolReferences protocolRefs={instruction.protocolRefs} />
     </div>
   );
 }
@@ -390,11 +346,7 @@ export function MeasurementFlowBlock({
       <ProcedureFlow flow={instruction.flow} />
 
       {/* Protocol references */}
-      <ProtocolReferences
-        conciseSpec={instruction.conciseSpec}
-        completeSpec={instruction.completeSpec}
-        additionalInfo={instruction.additionalInfo}
-      />
+      <ProtocolReferences protocolRefs={instruction.protocolRefs} />
     </div>
   );
 }

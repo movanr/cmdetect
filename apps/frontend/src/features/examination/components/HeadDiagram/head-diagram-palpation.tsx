@@ -153,25 +153,42 @@ export function HeadDiagramPalpation({
       if (region) {
         if (show) {
           region.style.display = "";
-          region.style.fill = "rgba(200, 200, 200, 0.15)";
-          region.style.stroke = "rgba(136, 136, 136, 0.4)";
+          region.style.fill = "none";
+          region.style.stroke = "#a3a3a3";
           region.style.strokeWidth = "10";
           region.style.pointerEvents = "none";
+          region.style.opacity = "";
         } else {
-          region.style.display = "none";
+          // Inactive muscle group: show with uniform light gray
+          region.style.display = "";
+          region.style.fill = "#d4d4d4";
+          region.style.stroke = "#d4d4d4";
+          region.style.strokeWidth = "10";
+          region.style.pointerEvents = "none";
+          region.style.opacity = "";
         }
       }
       // Show/hide background image for this muscle group
       if (backgroundId) {
         const bg = svg.querySelector(`#${backgroundId}`) as SVGElement | null;
         if (bg) {
-          bg.style.display = show ? "" : "none";
+          if (show) {
+            bg.style.display = "";
+            bg.style.opacity = "";
+            bg.style.filter = "";
+          } else {
+            // Inactive: show desaturated muscle image at full opacity
+            bg.style.display = "";
+            bg.style.opacity = "";
+            bg.style.filter = "grayscale(100%)";
+          }
         }
       }
       // Show/hide palpation group (arrows, dividers, circles, text labels)
       if (palpationGroupId) {
         const group = svg.querySelector(`#${palpationGroupId}`) as SVGElement | null;
         if (group) {
+          // Always hide interactive elements for inactive muscle group
           group.style.display = show ? "" : "none";
         }
       }

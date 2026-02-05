@@ -98,12 +98,8 @@ export interface RichPainInterviewInstruction {
   title: string;
   prompt: string;
   flow: ProcedureFlowStep[];
-  /** Concise specification - section 4 quick reference table */
-  conciseSpec?: CrossReference[];
-  /** Complete specification - section 5 detailed protocol */
-  completeSpec?: CrossReference[];
-  /** Additional information - general instructions (section 2, 6, etc.) */
-  additionalInfo?: CrossReference[];
+  /** Protocol references - flat list of cross-references to protocol sections */
+  protocolRefs?: CrossReference[];
 }
 
 /** Measurement instruction with step-based flow */
@@ -114,12 +110,8 @@ export interface RichMeasurementInstruction {
   flow: ProcedureFlowStep[];
   /** Safety warnings */
   warnings?: SafetyWarning[];
-  /** Concise specification - section 4 quick reference table */
-  conciseSpec?: CrossReference[];
-  /** Complete specification - section 5 detailed protocol */
-  completeSpec?: CrossReference[];
-  /** Additional information - general instructions (section 2, 6, etc.) */
-  additionalInfo?: CrossReference[];
+  /** Protocol references - flat list of cross-references to protocol sections */
+  protocolRefs?: CrossReference[];
 }
 
 /**

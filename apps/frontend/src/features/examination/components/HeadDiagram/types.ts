@@ -109,7 +109,7 @@ export const REGION_STATE_COLORS = {
     bg: "bg-muted",
     border: "border-border",
     fill: "rgba(212, 212, 216, 0.4)", // zinc-300 @ 40%
-    stroke: "rgba(161, 161, 170, 0.6)", // zinc-400 @ 60%
+    stroke: "#a1a1aa", // zinc-400
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
     // Light gray = pain=yes but familiar not yet answered
@@ -117,7 +117,7 @@ export const REGION_STATE_COLORS = {
     bg: "bg-muted",
     border: "border-border",
     fill: "rgba(212, 212, 216, 0.4)", // zinc-300 @ 40%
-    stroke: "rgba(161, 161, 170, 0.6)", // zinc-400 @ 60%
+    stroke: "#a1a1aa", // zinc-400
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
     // Dark gray = complete, no significant findings
@@ -125,7 +125,7 @@ export const REGION_STATE_COLORS = {
     bg: "bg-zinc-200",
     border: "border-zinc-400",
     fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40%
-    stroke: "rgba(113, 113, 122, 0.6)", // zinc-500 @ 60%
+    stroke: "#71717a", // zinc-500
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
     // Blue = significant finding (familiar pain positive)
@@ -133,7 +133,7 @@ export const REGION_STATE_COLORS = {
     bg: "bg-blue-100",
     border: "border-blue-500",
     fill: "rgba(147, 197, 253, 0.5)", // blue-300 @ 50%
-    stroke: "rgba(59, 130, 246, 0.8)", // blue-500 @ 80%
+    stroke: "#3b82f6", // blue-500
   },
 } as const;
 

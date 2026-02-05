@@ -262,28 +262,11 @@ export const E4_RICH_INSTRUCTIONS = {
     stepId: "U4A",
     title: "Schmerzfreie Mundöffnung",
     flow: E4A_MEASUREMENT_FLOW,
-    // Section 4: Quick reference table
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u4-offnungsbewegungen",
-        label: "4.5 Schmerzfreie Öffnung",
-      },
-    ],
-    // Section 5: Detailed protocol
-    completeSpec: [
-      {
-        section: "e4",
-        anchor: "4a-schmerzfreie-offnung",
-        label: "5.4 U4A Schmerzfreie Öffnung",
-      },
-    ],
-    // General instructions
-    additionalInfo: [
-      // 2.5(d): Pain-free opening is the only exception to "move despite pain"
+    protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
-      // 8.3: Verbatim verbal instructions
-      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Wörtliche Anweisungen" },
+      { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
+      { section: "e4", anchor: "4a-schmerzfreie-offnung", label: "5.4 U4A Schmerzfreie Öffnung" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -292,28 +275,11 @@ export const E4_RICH_INSTRUCTIONS = {
     stepId: "U4B",
     title: "Maximale aktive Mundöffnung",
     flow: E4B_MEASUREMENT_FLOW,
-    // Section 4: Quick reference table
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u4-offnungsbewegungen",
-        label: "4.5 Max. nicht-unterstützte Öffnung",
-      },
-    ],
-    // Section 5: Detailed protocol
-    completeSpec: [
-      {
-        section: "e4",
-        anchor: "4b-maximale-nicht-unterstutzte-offnung",
-        label: "5.4 U4B Max. nicht-unterstützte Öffnung",
-      },
-    ],
-    // General instructions
-    additionalInfo: [
-      // 2.5(d): "move even if painful" applies here
+    protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
-      // 8.3: Verbatim verbal instructions
-      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Wörtliche Anweisungen" },
+      { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
+      { section: "e4", anchor: "4b-maximale-nicht-unterstutzte-offnung", label: "5.4 U4B Max. nicht-unterstützte Öffnung" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -323,28 +289,11 @@ export const E4_RICH_INSTRUCTIONS = {
     title: "Maximale passive Mundöffnung",
     flow: E4C_MEASUREMENT_FLOW,
     warnings: [E4C_SAFETY_WARNING],
-    // Section 4: Quick reference table
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u4-offnungsbewegungen",
-        label: "4.5 Max. unterstützte Öffnung",
-      },
-    ],
-    // Section 5: Detailed protocol
-    completeSpec: [
-      {
-        section: "e4",
-        anchor: "4c-maximale-unterstutzte-offnung",
-        label: "5.4 U4C Max. unterstützte Öffnung",
-      },
-    ],
-    // General instructions
-    additionalInfo: [
-      // 2.5(e): E4C is the only examiner-assisted movement (scissor technique)
+    protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
-      // 8.3: Verbatim verbal instructions for assisted opening
-      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Wörtliche Anweisungen" },
+      { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
+      { section: "e4", anchor: "4c-maximale-unterstutzte-offnung", label: "5.4 U4C Max. unterstützte Öffnung" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -353,32 +302,13 @@ export const E4_RICH_INSTRUCTIONS = {
     title: "Schmerzbefragung",
     prompt: "Hatten Sie bei dieser Bewegung Schmerzen?",
     flow: E4B_PAIN_INTERVIEW_FLOW,
-    // Section 4: Quick reference table
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u4-offnungsbewegungen",
-        label: "4.5 Schmerz nach Öffnungsbewegung",
-      },
-    ],
-    // Section 5: Detailed protocol
-    completeSpec: [
-      {
-        section: "e4",
-        anchor: "u4b-schmerz-nach-maximaler-nicht-unterstutzter-offnung",
-        label: "5.4 Schmerzbefragung nach Bewegung",
-      },
-    ],
-    // General instructions
-    additionalInfo: [
-      // 2.6: How to identify anatomical structures when patient points to pain
+    protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
-      // 2.9: Familiar pain concept - replication of chief complaint
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
-      // 6.2: Movement-induced pain inquiry, familiar pain inquiry
+      { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
+      { section: "e4", anchor: "u4b-schmerz-nach-maximaler-nicht-unterstutzter-offnung", label: "5.4 Schmerzbefragung U4B" },
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
-      // 8.2: Verbatim pain inquiry instructions
-      { section: "section8", anchor: "82-untersuchungsbezogene-schmerzbefragung", label: "8.2 Wörtliche Schmerzbefragung" },
+      { section: "section8", anchor: "82-untersuchungsbezogene-schmerzbefragung", label: "8.2 Schmerzbefragungsanweisungen" },
     ],
   } satisfies RichPainInterviewInstruction,
 
@@ -388,32 +318,13 @@ export const E4_RICH_INSTRUCTIONS = {
     prompt:
       "Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?",
     flow: E4C_PAIN_INTERVIEW_FLOW,
-    // Section 4: Quick reference table
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u4-offnungsbewegungen",
-        label: "4.5 Schmerz nach unterstützter Öffnung",
-      },
-    ],
-    // Section 5: Detailed protocol
-    completeSpec: [
-      {
-        section: "e4",
-        anchor: "u4c-schmerz-nach-maximaler-unterstutzter-offnung",
-        label: "5.4 Schmerzbefragung nach unterstützter Öffnung",
-      },
-    ],
-    // General instructions
-    additionalInfo: [
-      // 2.6: How to identify anatomical structures when patient points to pain
+    protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
-      // 2.9: Familiar pain concept - replication of chief complaint
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
-      // 6.2: Movement-induced pain inquiry, familiar pain inquiry
+      { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
+      { section: "e4", anchor: "u4c-schmerz-nach-maximaler-unterstutzter-offnung", label: "5.4 Schmerzbefragung U4C" },
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
-      // 8.2: Verbatim pain inquiry instructions
-      { section: "section8", anchor: "82-untersuchungsbezogene-schmerzbefragung", label: "8.2 Wörtliche Schmerzbefragung" },
+      { section: "section8", anchor: "82-untersuchungsbezogene-schmerzbefragung", label: "8.2 Schmerzbefragungsanweisungen" },
     ],
   } satisfies RichPainInterviewInstruction,
 } as const;
@@ -556,31 +467,11 @@ export const E1_RICH_INSTRUCTIONS = {
     title: "Schmerzlokalisation",
     prompt: "Hatten Sie in den letzten 30 Tagen Schmerzen in diesen Bereichen?",
     flow: E1A_PAIN_LOCATION_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u1-untersucherbestatigung-der-schmerz--und-kopfschmerzlokalisationen",
-        label: "4.5 U1a",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e1",
-        anchor: "lokalisation-von-schmerzen-innerhalb-den-letzten-30-tagen",
-        label: "5.3 U1a",
-      },
-    ],
-    additionalInfo: [
-      {
-        section: "section2",
-        anchor: "26",
-        label: "2.6 Klassifikation anatomischer Strukturen",
-      },
-      {
-        section: "section8",
-        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
-        label: "8.3 Wörtliche Anweisungen",
-      },
+    protocolRefs: [
+      { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
+      { section: "section4", anchor: "u1-untersucherbestatigung-der-schmerz--und-kopfschmerzlokalisationen", label: "4.5 U1 Schmerzlokalisation" },
+      { section: "e1", anchor: "lokalisation-von-schmerzen-innerhalb-den-letzten-30-tagen", label: "5.3 U1A Schmerzlokalisation" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichPainInterviewInstruction,
 
@@ -589,26 +480,10 @@ export const E1_RICH_INSTRUCTIONS = {
     title: "Kopfschmerzlokalisation",
     prompt: "Hatten Sie in den letzten 30 Tagen Kopfschmerzen?",
     flow: E1B_HEADACHE_LOCATION_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u1-untersucherbestatigung-der-schmerz--und-kopfschmerzlokalisationen",
-        label: "4.5 U1b",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e1",
-        anchor: "u1b-kopfschmerzlokalisation-wahrend-der-letzten-30-tage",
-        label: "5.3 U1b",
-      },
-    ],
-    additionalInfo: [
-      {
-        section: "section8",
-        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
-        label: "8.3 Wörtliche Anweisungen",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u1-untersucherbestatigung-der-schmerz--und-kopfschmerzlokalisationen", label: "4.5 U1 Schmerzlokalisation" },
+      { section: "e1", anchor: "u1b-kopfschmerzlokalisation-wahrend-der-letzten-30-tage", label: "5.3 U1B Kopfschmerzlokalisation" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichPainInterviewInstruction,
 } as const;
@@ -721,19 +596,9 @@ export const E2_RICH_INSTRUCTIONS = {
     stepId: "U2-ref",
     title: "Referenzzahn & Markierungen",
     flow: E2_REFERENCE_TOOTH_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u2-schneidekantenverhältnisse",
-        label: "4.5 Referenzzähne",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e2",
-        anchor: "wahlen-sie-referenzzahne-im-ober--und-unterkiefer-aus",
-        label: "5.3 Referenzzähne",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u2-schneidekantenverhältnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
+      { section: "e2", anchor: "wahlen-sie-referenzzahne-im-ober--und-unterkiefer-aus", label: "5.3 U2 Referenzzähne" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -742,19 +607,9 @@ export const E2_RICH_INSTRUCTIONS = {
     stepId: "U2-mid",
     title: "Mittellinienabweichung",
     flow: E2_MIDLINE_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u2-schneidekantenverhältnisse",
-        label: "4.5 Mittellinie",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e2",
-        anchor: "referenzlinie--referenz-mittellinie-im-unterkiefer",
-        label: "5.3 Mittellinie",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u2-schneidekantenverhältnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
+      { section: "e2", anchor: "referenzlinie--referenz-mittellinie-im-unterkiefer", label: "5.3 U2 Mittellinie" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -763,19 +618,9 @@ export const E2_RICH_INSTRUCTIONS = {
     stepId: "U2-hov",
     title: "Horizontaler Overjet",
     flow: E2_OVERJET_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u2-schneidekantenverhältnisse",
-        label: "4.5 Overjet",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e2",
-        anchor: "horizontaler-inzisaler-uberbiss",
-        label: "5.3 Overjet",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u2-schneidekantenverhältnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
+      { section: "e2", anchor: "horizontaler-inzisaler-uberbiss", label: "5.3 U2 Horizontaler Overjet" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -784,19 +629,9 @@ export const E2_RICH_INSTRUCTIONS = {
     stepId: "U2-vov",
     title: "Vertikaler Overlap",
     flow: E2_OVERLAP_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u2-schneidekantenverhältnisse",
-        label: "4.5 Überbiss",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e2",
-        anchor: "vertikaler-inzisaler-uberbiss",
-        label: "5.3 Überbiss",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u2-schneidekantenverhältnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
+      { section: "e2", anchor: "vertikaler-inzisaler-uberbiss", label: "5.3 U2 Vertikaler Überbiss" },
     ],
   } satisfies RichMeasurementInstruction,
 } as const;
@@ -854,26 +689,10 @@ export const E3_RICH_INSTRUCTIONS = {
     stepId: "U3",
     title: "Öffnungsmuster",
     flow: E3_OPENING_PATTERN_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u3-offnungsmuster-erganzend",
-        label: "4.5 Öffnungsmuster",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e3",
-        anchor: "offnungsmuster",
-        label: "5.3 Öffnungsmuster",
-      },
-    ],
-    additionalInfo: [
-      {
-        section: "section8",
-        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
-        label: "8.3 Wörtliche Anweisungen",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u3-offnungsmuster-erganzend", label: "4.5 U3 Öffnungsmuster" },
+      { section: "e3", anchor: "offnungsmuster", label: "5.3 U3 Öffnungsmuster" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 } as const;
@@ -1038,31 +857,11 @@ export const E9_RICH_INSTRUCTIONS = {
     stepId: "U9-intro",
     title: "Einführung Palpation",
     flow: E9_INTRODUCTION_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
-        label: "4.5 Allgemein",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e9",
-        anchor: "allgemeine-instruktionen",
-        label: "5.9 Allgemein",
-      },
-    ],
-    additionalInfo: [
-      {
-        section: "section6",
-        anchor: "622-fur-palpationsinduzierten-schmerz",
-        label: "6.2.2 Palpationsschmerz",
-      },
-      {
-        section: "section8",
-        anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers",
-        label: "8.3 Wörtliche Anweisungen",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+      { section: "e9", anchor: "allgemeine-instruktionen", label: "5.9 Allgemeine Instruktionen" },
+      { section: "section6", anchor: "622-fur-palpationsinduzierten-schmerz", label: "6.2.2 Palpationsschmerz" },
+      { section: "section8", anchor: "83-erforderliche-komponenten-aus-abschnitt-5-vollstandige-anweisungen-des-untersuchers", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -1071,31 +870,11 @@ export const E9_RICH_INSTRUCTIONS = {
     title: "Temporalis-Palpation",
     prompt: "Hatten Sie Schmerzen?",
     flow: E9_TEMPORALIS_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
-        label: "4.5 Temporalis",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e9",
-        anchor: "m-temporalis-und-m-masseter",
-        label: "5.9 Temporalis",
-      },
-    ],
-    additionalInfo: [
-      {
-        section: "section6",
-        anchor: "624-abfrage-bekannter-schmerz",
-        label: "6.2.4 Bekannter Schmerz",
-      },
-      {
-        section: "section6",
-        anchor: "625-abfrage-ubertragener-schmerz",
-        label: "6.2.5 Übertragener Schmerz",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+      { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
+      { section: "section6", anchor: "624-abfrage-bekannter-schmerz", label: "6.2.4 Bekannter Schmerz" },
+      { section: "section6", anchor: "625-abfrage-ubertragener-schmerz", label: "6.2.5 Übertragener Schmerz" },
     ],
   } satisfies RichPainInterviewInstruction,
 
@@ -1104,19 +883,9 @@ export const E9_RICH_INSTRUCTIONS = {
     title: "Masseter-Palpation",
     prompt: "Hatten Sie Schmerzen?",
     flow: E9_MASSETER_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
-        label: "4.5 Masseter",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e9",
-        anchor: "m-temporalis-und-m-masseter",
-        label: "5.9 Masseter",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+      { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
     ],
   } satisfies RichPainInterviewInstruction,
 
@@ -1125,19 +894,9 @@ export const E9_RICH_INSTRUCTIONS = {
     stepId: "U9-lat",
     title: "Lateraler Kondylenpol",
     flow: E9_TMJ_LATERAL_POLE_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
-        label: "4.5 Lateraler Pol",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e9",
-        anchor: "lateraler-kondylenpol",
-        label: "5.9 Lateraler Pol",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+      { section: "e9", anchor: "lateraler-kondylenpol", label: "5.9 Lateraler Kondylenpol" },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -1146,19 +905,9 @@ export const E9_RICH_INSTRUCTIONS = {
     stepId: "U9-around",
     title: "Um den lateralen Kondylenpol",
     flow: E9_TMJ_AROUND_POLE_FLOW,
-    conciseSpec: [
-      {
-        section: "section4",
-        anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation",
-        label: "4.5 Um Pol",
-      },
-    ],
-    completeSpec: [
-      {
-        section: "e9",
-        anchor: "um-den-lateralen-kondylenpol",
-        label: "5.9 Um Pol",
-      },
+    protocolRefs: [
+      { section: "section4", anchor: "u9-muskel--und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+      { section: "e9", anchor: "um-den-lateralen-kondylenpol", label: "5.9 Um den lateralen Kondylenpol" },
     ],
   } satisfies RichMeasurementInstruction,
 } as const;
