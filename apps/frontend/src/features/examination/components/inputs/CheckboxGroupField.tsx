@@ -35,7 +35,7 @@ export function CheckboxGroupField<T extends FieldValues, TOption extends string
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <FormItem className={cn("space-y-2", className)}>
           {label && (
             <FormLabel className="text-muted-foreground font-normal">{label}</FormLabel>
@@ -52,6 +52,7 @@ export function CheckboxGroupField<T extends FieldValues, TOption extends string
               disabled={disabled}
               direction={direction}
               name={name}
+              hasError={!!fieldState.error}
             />
           </FormControl>
           <FormMessage className="text-xs" />

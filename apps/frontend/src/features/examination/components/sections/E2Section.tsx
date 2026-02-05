@@ -116,7 +116,7 @@ function getStepSummary(stepId: E2StepId, getValue: (path: string) => unknown): 
 }
 
 export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E2SectionProps) {
-  const { getInstancesForStep } = useExaminationForm();
+  const { getInstancesForStep, validateStep } = useExaminationForm();
   const { getValues } = useFormContext<FormValues>();
 
   const instances = getInstancesForStep("e2-all");
@@ -186,10 +186,11 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   };
 
   const handleNext = () => {
-    // Check if current step has data
-    const hasData = stepHasData(currentStepId, (path) => getValues(path as FieldPath<FormValues>));
+    // Validate current step (triggers form errors)
+    const isValid = validateStep(currentStepId);
 
-    if (!hasData) {
+    if (!isValid) {
+      // Invalid data - show skip confirmation dialog
       setShowSkipDialog(true);
       return;
     }
@@ -224,6 +225,7 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           <div className="space-y-4">
             <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.referenceTooth} />
             <div className="max-w-sm space-y-4">
+              <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-ref"].title}</h4>
               {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
               {referenceToothOther && <QuestionField instance={referenceToothOther} />}
             </div>
@@ -235,6 +237,7 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           <div className="space-y-4">
             <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.midlineDeviation} />
             <div className="max-w-sm space-y-4">
+              <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-mid"].title}</h4>
               {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
               {midlineMm && <QuestionField instance={midlineMm} label="Abweichung" />}
             </div>
@@ -246,6 +249,7 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           <div className="space-y-4">
             <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.horizontalOverjet} />
             <div className="max-w-sm space-y-4">
+              <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-hov"].title}</h4>
               {horizontalOverjet && <QuestionField instance={horizontalOverjet} />}
               <p className="text-xs text-muted-foreground">Negativer Wert bei Kreuzbiss</p>
             </div>
@@ -257,6 +261,7 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           <div className="space-y-4">
             <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.verticalOverlap} />
             <div className="max-w-sm space-y-4">
+              <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-vov"].title}</h4>
               {verticalOverlap && <QuestionField instance={verticalOverlap} />}
               <p className="text-xs text-muted-foreground">Negativer Wert bei offenem Biss</p>
             </div>

@@ -69,7 +69,7 @@ export const E2_MODEL = M.group({
   }),
 });
 
-// Steps - all fields shown together
+// Steps - all fields and per-sub-step definitions for validation
 export const E2_STEPS = {
   "e2-all": [
     `${E2_FIELDS.referenceTooth}.selection`,
@@ -79,4 +79,14 @@ export const E2_STEPS = {
     `${E2_FIELDS.midlineDeviation}.direction`,
     `${E2_FIELDS.midlineDeviation}.mm`,
   ],
+  "e2-ref": [
+    `${E2_FIELDS.referenceTooth}.selection`,
+    `${E2_FIELDS.referenceTooth}.otherTooth`,
+  ],
+  "e2-mid": [
+    `${E2_FIELDS.midlineDeviation}.direction`,
+    `${E2_FIELDS.midlineDeviation}.mm`,
+  ],
+  "e2-hov": [E2_FIELDS.horizontalOverjet],
+  "e2-vov": [E2_FIELDS.verticalOverlap],
 } as const;

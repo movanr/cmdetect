@@ -12,6 +12,8 @@ export interface CheckboxGroupInputProps<T extends string> {
   direction?: "horizontal" | "vertical";
   /** Unique name/id prefix to distinguish multiple instances with same options */
   name?: string;
+  /** Show error state (red border) */
+  hasError?: boolean;
 }
 
 /**
@@ -26,6 +28,7 @@ export function CheckboxGroupInput<T extends string>({
   className,
   direction = "vertical",
   name,
+  hasError,
 }: CheckboxGroupInputProps<T>) {
   const getLabel = (option: T): string => labels?.[option] ?? option;
   const getId = (option: T): string => (name ? `${name}-${option}` : option);
@@ -64,7 +67,9 @@ export function CheckboxGroupInput<T extends string>({
               "flex items-center gap-3 px-3 py-2 rounded-md border cursor-pointer transition-colors",
               isSelected
                 ? "border-blue-500 bg-blue-500/5"
-                : "border-input hover:bg-accent hover:border-accent-foreground/20",
+                : hasError
+                  ? "border-destructive bg-destructive/5"
+                  : "border-input hover:bg-accent hover:border-accent-foreground/20",
               disabled && "opacity-50 cursor-not-allowed"
             )}
           >
