@@ -8,16 +8,6 @@
  * - U2-vov: Vertical overlap measurement
  */
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +21,8 @@ import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { IncompleteDataDialog, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import type { SectionProps } from "./types";
 
 // Step configuration
 type E2StepId = "e2-ref" | "e2-mid" | "e2-hov" | "e2-vov";
@@ -45,12 +36,9 @@ const E2_STEP_CONFIG: Record<E2StepId, { badge: string; title: string }> = {
   "e2-vov": { badge: "U2", title: "Vertikaler inzisaler Überbiss" },
 };
 
-interface E2SectionProps {
+interface E2SectionProps extends SectionProps {
   step?: number; // 1-indexed from URL, undefined = auto-detect
   onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
-  onComplete?: () => void;
-  onBack?: () => void;
-  isFirstSection?: boolean;
 }
 
 /**
@@ -338,24 +326,11 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           );
         })}
 
-        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
-              <AlertDialogDescription>
-                Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
-                fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
-                ergänzen.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmSkip}>
-                Überspringen
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <IncompleteDataDialog
+          open={showSkipDialog}
+          onOpenChange={setShowSkipDialog}
+          onConfirm={handleConfirmSkip}
+        />
       </CardContent>
 
       {/* Section-level footer when all steps are complete */}

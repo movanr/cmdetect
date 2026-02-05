@@ -19,15 +19,9 @@ import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle, SECTION_LABELS } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { MeasurementFlowBlock, SectionFooter } from "../ui";
+import type { SectionProps } from "./types";
 
-interface E3SectionProps {
-  onComplete?: () => void;
-  onSkip?: () => void;
-  onBack?: () => void;
-  isFirstSection?: boolean;
-}
-
-export function E3Section({ onComplete, onSkip, onBack, isFirstSection }: E3SectionProps) {
+export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
 
   const instances = getInstancesForStep("e3-all");
@@ -68,7 +62,7 @@ export function E3Section({ onComplete, onSkip, onBack, isFirstSection }: E3Sect
       </CardContent>
       <SectionFooter
         onNext={handleNext}
-        onSkipConfirm={onSkip}
+        onSkipConfirm={onComplete}
         onBack={onBack}
         isFirstStep={isFirstSection}
         warnOnSkip

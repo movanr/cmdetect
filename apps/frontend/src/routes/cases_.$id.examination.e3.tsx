@@ -15,16 +15,8 @@ function ExaminationE3Page() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
 
-  // Navigate to next section (E4) on completion
+  // Navigate to next section (E4) on completion or skip
   const handleComplete = () => {
-    navigate({
-      to: "/cases/$id/examination/e4",
-      params: { id },
-    });
-  };
-
-  // Skip also navigates to next section
-  const handleSkip = () => {
     navigate({
       to: "/cases/$id/examination/e4",
       params: { id },
@@ -39,5 +31,5 @@ function ExaminationE3Page() {
     });
   };
 
-  return <E3Section onComplete={handleComplete} onSkip={handleSkip} onBack={handleBack} />;
+  return <E3Section onComplete={handleComplete} onBack={handleBack} />;
 }

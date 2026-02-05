@@ -1,13 +1,3 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +15,10 @@ import {
 } from "../../content/instructions";
 import type { E9RichInstructions } from "../../content/instructions";
 import type { RichMeasurementInstruction } from "../../content/types";
+import {
+  clearInstanceErrors,
+  setInstanceValue,
+} from "../../form/form-helpers";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import {
   validatePalpationCompletion,
@@ -43,12 +37,14 @@ import { PalpationModeToggle } from "../inputs/PalpationModeToggle";
 import { PalpationSiteDropdown } from "../PalpationSiteDropdown";
 import type { IncompletePalpationSite as DropdownIncompleteSite } from "../PalpationSiteDropdown/types";
 import {
+  IncompleteDataDialog,
   MeasurementFlowBlock,
   PainInterviewBlock,
   SectionFooter,
   StepBar,
   type StepStatus,
 } from "../ui";
+import type { SectionProps } from "./types";
 
 // =============================================================================
 // Step Configuration
@@ -90,12 +86,9 @@ const E9_STEP_SITES: Record<E9StepId, readonly PalpationSite[]> = {
 // Props
 // =============================================================================
 
-interface E9SectionProps {
+interface E9SectionProps extends SectionProps {
   step?: number; // 1-indexed from URL, undefined = auto-detect
   onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
-  onComplete?: () => void;
-  onBack?: () => void;
-  isFirstSection?: boolean;
   isLastSection?: boolean;
 }
 
@@ -360,9 +353,8 @@ export function E9Section({
           );
           for (const inst of filtered) {
             if (inst.renderType === "yesNo") {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              setValue(inst.path as FieldPath<FormValues>, null as any);
-              clearErrors(inst.path as FieldPath<FormValues>);
+              setInstanceValue(setValue, inst.path, null);
+              clearInstanceErrors(clearErrors, inst.path);
             }
           }
         }
@@ -767,24 +759,11 @@ export function E9Section({
           );
         })}
 
-        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
-              <AlertDialogDescription>
-                Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
-                fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
-                ergänzen.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmSkip}>
-                Überspringen
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <IncompleteDataDialog
+          open={showSkipDialog}
+          onOpenChange={setShowSkipDialog}
+          onConfirm={handleConfirmSkip}
+        />
       </CardContent>
 
       {/* Section-level footer when all steps are complete */}

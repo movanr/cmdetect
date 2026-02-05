@@ -9,17 +9,10 @@ import { E2Section } from "./sections/E2Section";
 import { E3Section } from "./sections/E3Section";
 import { E4Section } from "./sections/E4Section";
 import { E9Section } from "./sections/E9Section";
-
-// Section component props
-interface SectionComponentProps {
-  onComplete?: () => void;
-  onSkip?: () => void;
-  onBack?: () => void;
-  isFirstSection?: boolean;
-}
+import type { SectionProps } from "./sections/types";
 
 // Map section IDs to components (only implemented sections)
-const SECTION_COMPONENTS: Partial<Record<SectionId, React.ComponentType<SectionComponentProps>>> = {
+const SECTION_COMPONENTS: Partial<Record<SectionId, React.ComponentType<SectionProps>>> = {
   e1: E1Section,
   e2: E2Section,
   e3: E3Section,
@@ -64,9 +57,6 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
             const handleSectionComplete = nextSection
               ? () => setCurrentSection(nextSection)
               : undefined;
-            const handleSectionSkip = nextSection
-              ? () => setCurrentSection(nextSection)
-              : undefined;
             const handleSectionBack = prevSection
               ? () => setCurrentSection(prevSection)
               : undefined;
@@ -77,7 +67,6 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
                 {SectionComponent ? (
                   <SectionComponent
                     onComplete={handleSectionComplete}
-                    onSkip={handleSectionSkip}
                     onBack={handleSectionBack}
                     isFirstSection={isFirstSection}
                   />

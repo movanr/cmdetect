@@ -1,17 +1,8 @@
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
 import { ArrowRight, ChevronLeft } from "lucide-react";
+import { IncompleteDataDialog } from "./IncompleteDataDialog";
 
 export interface SectionFooterProps {
   /** Called when Next is clicked and validation passes */
@@ -94,24 +85,11 @@ export function SectionFooter({
         </Button>
       </CardFooter>
 
-      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
-            <AlertDialogDescription>
-              Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
-              fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
-              ergänzen.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmSkip}>
-              Überspringen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <IncompleteDataDialog
+        open={showSkipDialog}
+        onOpenChange={setShowSkipDialog}
+        onConfirm={handleConfirmSkip}
+      />
     </>
   );
 }

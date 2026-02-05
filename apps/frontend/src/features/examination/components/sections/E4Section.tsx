@@ -1,41 +1,26 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
 import { E4_RICH_INSTRUCTIONS } from "../../content/instructions";
+import { setInstanceValue } from "../../form/form-helpers";
 import {
   useExaminationForm,
   type ExaminationStepId,
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
-import { COMMON, getLabel, getSectionCardTitle } from "../../labels";
+import { COMMON, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
-import { HeadDiagram } from "../HeadDiagram/head-diagram";
-import { type RegionStatus } from "../HeadDiagram/types";
-import { RefusalCheckbox } from "../inputs/RefusalCheckbox";
-import { QuestionField } from "../QuestionField";
-import { RegionDropdown } from "../RegionDropdown";
 import {
+  IncompleteDataDialog,
   MeasurementFlowBlock,
   MeasurementStep,
   PainInterviewBlock,
@@ -43,6 +28,10 @@ import {
   StepBar,
   type StepStatus,
 } from "../ui";
+import { E4AMeasurementContent } from "./e4/E4AMeasurementContent";
+import { InterviewContent } from "./e4/InterviewContent";
+import type { ExpandedState } from "./e4/types";
+import type { SectionProps } from "./types";
 
 // Step configuration
 const E4_STEP_ORDER: ExaminationStepId[] = [
@@ -61,16 +50,12 @@ const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
   "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
 };
 
-interface E4SectionProps {
+const isInterviewStep = (id: string) => id.endsWith("-interview");
+
+interface E4SectionProps extends SectionProps {
   step?: number; // 1-indexed from URL, undefined = auto-detect
   onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
-  onComplete?: () => void;
-  onBack?: () => void;
-  isFirstSection?: boolean;
 }
-
-/** Expanded region state per side */
-type ExpandedState = { left: Region | null; right: Region | null };
 
 /**
  * Compute step completion status from form values.
@@ -81,7 +66,7 @@ function computeStepStatusFromForm(
   instances: QuestionInstance[],
   getValue: (path: string) => unknown
 ): "completed" | "refused" | null {
-  const isInterview = String(stepId).endsWith("-interview");
+  const isInterview = isInterviewStep(String(stepId));
 
   if (isInterview) {
     // Check for interview refusal first
@@ -127,338 +112,6 @@ function computeStepStatusFromForm(
   return null;
 }
 
-/**
- * Compute RegionStatus for a single region/side from form values.
- */
-function computeRegionStatus(
-  region: Region,
-  side: Side,
-  instances: QuestionInstance[],
-  getValue: (path: string) => unknown
-): RegionStatus {
-  const regionInstances = instances.filter(
-    (i) => i.context.region === region && i.context.side === side
-  );
-
-  const painInst = regionInstances.find((i) => i.context.painType === "pain");
-  const familiarPainInst = regionInstances.find((i) => i.context.painType === "familiarPain");
-  const familiarHeadacheInst = regionInstances.find(
-    (i) => i.context.painType === "familiarHeadache"
-  );
-
-  const painValue = painInst ? (getValue(painInst.path) as string | null) : null;
-  const familiarPainValue = familiarPainInst
-    ? (getValue(familiarPainInst.path) as string | null)
-    : null;
-  const familiarHeadacheValue = familiarHeadacheInst
-    ? (getValue(familiarHeadacheInst.path) as string | null)
-    : null;
-
-  const hasData = painValue != null;
-  const isPainPositive = painValue === "yes";
-  const hasFamiliarPainData = familiarPainValue != null;
-  const hasFamiliarPain = familiarPainValue === "yes";
-  const hasFamiliarHeadacheData = familiarHeadacheValue != null;
-  const hasFamiliarHeadache = familiarHeadacheValue === "yes";
-
-  // Complete if:
-  // - pain = no, OR
-  // - pain = yes AND familiarPain answered AND (no familiarHeadache question OR familiarHeadache answered)
-  let isComplete = false;
-  if (hasData) {
-    if (!isPainPositive) {
-      isComplete = true;
-    } else {
-      const hasFamiliarHeadacheQuestion = familiarHeadacheInst != null;
-      isComplete = hasFamiliarPainData && (!hasFamiliarHeadacheQuestion || hasFamiliarHeadacheData);
-    }
-  }
-
-  return {
-    hasData,
-    isPainPositive,
-    hasFamiliarPainData,
-    hasFamiliarPain,
-    hasFamiliarHeadacheData,
-    hasFamiliarHeadache,
-    isComplete,
-  };
-}
-
-/**
- * InterviewSubsection - HeadDiagram + RegionDropdowns for one subsection (E4B or E4C).
- */
-interface InterviewSubsectionProps {
-  instances: QuestionInstance[];
-  regions: readonly Region[];
-  expanded: ExpandedState;
-  onExpandChange: (side: Side, region: Region | null) => void;
-  incompleteRegions: IncompleteRegion[];
-}
-
-function InterviewSubsection({
-  instances,
-  regions,
-  expanded,
-  onExpandChange,
-  incompleteRegions,
-}: InterviewSubsectionProps) {
-  const { getValues, watch } = useFormContext();
-
-  // Watch all instance paths to trigger re-renders
-  const watchPaths = instances.map((i) => i.path);
-  watch(watchPaths);
-
-  // Compute region statuses for the diagram
-  const computeStatuses = useCallback(
-    (side: Side): Partial<Record<Region, RegionStatus>> => {
-      const statuses: Partial<Record<Region, RegionStatus>> = {};
-      for (const region of regions) {
-        statuses[region] = computeRegionStatus(region, side, instances, getValues);
-      }
-      return statuses;
-    },
-    [regions, instances, getValues]
-  );
-
-  // Get instances for a specific region/side
-  const getRegionInstances = useCallback(
-    (region: Region, side: Side) =>
-      instances.filter((i) => i.context.region === region && i.context.side === side),
-    [instances]
-  );
-
-  // Get incomplete region for a specific region/side
-  const getIncompleteRegion = useCallback(
-    (region: Region, side: Side) =>
-      incompleteRegions.find((r) => r.region === region && r.side === side),
-    [incompleteRegions]
-  );
-
-  // Handle diagram region click - toggle dropdown
-  const handleRegionClick = useCallback(
-    (side: Side) => (region: Region) => {
-      const currentExpanded = expanded[side];
-      // Toggle: if same region, close; otherwise open clicked region
-      onExpandChange(side, currentExpanded === region ? null : region);
-    },
-    [expanded, onExpandChange]
-  );
-
-  // Handle dropdown expansion change
-  const handleDropdownExpand = useCallback(
-    (side: Side, region: Region) => (isExpanded: boolean) => {
-      onExpandChange(side, isExpanded ? region : null);
-    },
-    [onExpandChange]
-  );
-
-  // Filter incomplete regions by side
-  const getIncompleteRegionsForSide = useCallback(
-    (side: Side) => incompleteRegions.filter((r) => r.side === side),
-    [incompleteRegions]
-  );
-
-  // Render a single side panel
-  const renderSidePanel = (side: Side) => {
-    const sideLabel = side === "right" ? "Rechte Seite" : "Linke Seite";
-    const statuses = computeStatuses(side);
-    const sideIncompleteRegions = getIncompleteRegionsForSide(side);
-
-    return (
-      <div className="flex flex-col items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">{sideLabel}</span>
-
-        {/* HeadDiagram */}
-        <HeadDiagram
-          side={side}
-          regions={regions}
-          regionStatuses={statuses}
-          selectedRegion={expanded[side]}
-          onRegionClick={handleRegionClick(side)}
-          incompleteRegions={sideIncompleteRegions}
-        />
-
-        {/* RegionDropdowns */}
-        <div className="w-80 space-y-2">
-          {regions.map((region) => (
-            <RegionDropdown
-              key={region}
-              region={region}
-              side={side}
-              instances={getRegionInstances(region, side)}
-              isExpanded={expanded[side] === region}
-              onExpandChange={handleDropdownExpand(side, region)}
-              incompleteRegion={getIncompleteRegion(region, side)}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="flex justify-center items-start gap-8 md:gap-16">
-      {renderSidePanel("right")}
-      <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
-      {renderSidePanel("left")}
-    </div>
-  );
-}
-
-/**
- * InterviewContent - Wrapper for interview step with refusal checkbox.
- */
-interface InterviewContentProps {
-  stepInstances: QuestionInstance[];
-  regions: readonly Region[];
-  expanded: ExpandedState;
-  onExpandChange: (side: Side, region: Region | null) => void;
-  incompleteRegions: IncompleteRegion[];
-  onNoMorePainRegions: () => void;
-  onClearIncompleteRegions: () => void;
-}
-
-function InterviewContent({
-  stepInstances,
-  regions,
-  expanded,
-  onExpandChange,
-  incompleteRegions,
-  onNoMorePainRegions,
-  onClearIncompleteRegions,
-}: InterviewContentProps) {
-  const { setValue, watch, clearErrors } = useFormContext<FormValues>();
-
-  // Find the interviewRefused instance
-  const interviewRefusedInst = stepInstances.find((i) => i.path.endsWith(".interviewRefused"));
-  const interviewRefusedPath = interviewRefusedInst?.path as FieldPath<FormValues> | undefined;
-
-  // Watch the refused state - watch returns the value at that path
-  const watchedRefused = interviewRefusedPath ? watch(interviewRefusedPath) : undefined;
-  const isInterviewRefused = (watchedRefused as unknown as boolean) === true;
-
-  // Filter out the interviewRefused instance from stepInstances for InterviewSubsection
-  const painInstances = stepInstances.filter((i) => !i.path.endsWith(".interviewRefused"));
-
-  // Handle interview refusal change - clear all pain data when refusing
-  const handleInterviewRefusalChange = useCallback(
-    (refused: boolean) => {
-      if (refused) {
-        // Clear all pain interview data for this step
-        for (const inst of painInstances) {
-          if (inst.renderType === "yesNo") {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setValue(inst.path as FieldPath<FormValues>, null as any);
-            clearErrors(inst.path as FieldPath<FormValues>);
-          }
-        }
-        // Clear any validation errors
-        onClearIncompleteRegions();
-      }
-    },
-    [painInstances, setValue, clearErrors, onClearIncompleteRegions]
-  );
-
-  if (isInterviewRefused) {
-    return (
-      <div className="space-y-4">
-        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-          <p className="text-lg font-medium">{COMMON.refusedFull}</p>
-          <p className="text-sm">{COMMON.refusedTooltip}</p>
-        </div>
-        {interviewRefusedPath && (
-          <RefusalCheckbox<FormValues>
-            name={interviewRefusedPath}
-            onRefuseChange={handleInterviewRefusalChange}
-          />
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="flex justify-center pt-2">
-        <Button type="button" variant="outline" onClick={onNoMorePainRegions}>
-          <CheckCircle className="h-4 w-4 mr-2" />
-          Keine weiteren Schmerzbereiche
-        </Button>
-      </div>
-      <InterviewSubsection
-        instances={painInstances}
-        regions={regions}
-        expanded={expanded}
-        onExpandChange={onExpandChange}
-        incompleteRegions={incompleteRegions}
-      />
-      {interviewRefusedPath && (
-        <div className="pt-4 border-t">
-          <RefusalCheckbox<FormValues>
-            name={interviewRefusedPath}
-            onRefuseChange={handleInterviewRefusalChange}
-          />
-        </div>
-      )}
-    </>
-  );
-}
-
-/**
- * E4AMeasurementContent - E4A step content with refusal checkbox.
- */
-interface E4AMeasurementContentProps {
-  stepInstances: QuestionInstance[];
-}
-
-function E4AMeasurementContent({ stepInstances }: E4AMeasurementContentProps) {
-  const { setValue, watch, clearErrors } = useFormContext<FormValues>();
-
-  // Find measurement and refused instances
-  const measurementInstance = stepInstances.find((i) => i.renderType === "measurement");
-  const refusedInstance = stepInstances.find((i) => i.path.endsWith(".refused"));
-
-  const watchedRefused = refusedInstance ? watch(refusedInstance.path as FieldPath<FormValues>) : undefined;
-  const isRefused = (watchedRefused as unknown as boolean) === true;
-
-  // Handle refused toggle - clear measurement value when refusing
-  const handleRefuseChange = useCallback(
-    (refused: boolean) => {
-      if (refused && measurementInstance) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setValue(measurementInstance.path as FieldPath<FormValues>, null as any);
-        clearErrors(measurementInstance.path as FieldPath<FormValues>);
-      }
-    },
-    [measurementInstance, setValue, clearErrors]
-  );
-
-  return (
-    <div className="space-y-4">
-      {/* Measurement input - disabled when refused */}
-      {measurementInstance && (
-        <div className={isRefused ? "opacity-50 pointer-events-none" : ""}>
-          <QuestionField
-            instance={measurementInstance}
-            label={getLabel(measurementInstance.labelKey)}
-          />
-          {isRefused && (
-            <p className="text-sm text-muted-foreground mt-1">{COMMON.refused}</p>
-          )}
-        </div>
-      )}
-
-      {/* Refusal checkbox */}
-      {refusedInstance && (
-        <RefusalCheckbox<FormValues>
-          name={refusedInstance.path as FieldPath<FormValues>}
-          onRefuseChange={handleRefuseChange}
-        />
-      )}
-    </div>
-  );
-}
-
 export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
 
@@ -501,7 +154,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const currentStepId = allComplete ? E4_STEP_ORDER[0] : E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
-  const isInterview = String(currentStepId).endsWith("-interview");
+  const isInterview = isInterviewStep(String(currentStepId));
   const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
 
   // Determine which regions to show
@@ -547,8 +200,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     for (const inst of painInstances) {
       const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
       if (currentValue == null) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        form.setValue(inst.path as FieldPath<FormValues>, "no" as any);
+        setInstanceValue(form.setValue, inst.path, "no");
       }
     }
     // Clear any validation errors since we've filled in the missing values
@@ -628,7 +280,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   // Get summary for a step (for collapsed display)
   const getStepSummary = (stepId: ExaminationStepId): string => {
     const instances = getInstancesForStep(stepId);
-    const stepIsInterview = String(stepId).endsWith("-interview");
+    const stepIsInterview = isInterviewStep(String(stepId));
 
     // Check for refused status first
     if (stepStatuses[stepId] === "refused") {
@@ -763,7 +415,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           const status = getStepStatus(stepId, index);
 
           if (status === "active") {
-            const stepIsInterview = String(stepId).endsWith("-interview");
+            const stepIsInterview = isInterviewStep(String(stepId));
 
             return (
               <div
@@ -833,24 +485,11 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           );
         })}
 
-        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
-              <AlertDialogDescription>
-                Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
-                fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
-                ergänzen.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmSkip}>
-                Überspringen
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <IncompleteDataDialog
+          open={showSkipDialog}
+          onOpenChange={setShowSkipDialog}
+          onConfirm={handleConfirmSkip}
+        />
       </CardContent>
 
       {/* Section-level footer when all steps are complete */}

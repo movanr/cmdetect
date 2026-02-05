@@ -27,6 +27,7 @@ export {
 } from "./RegionStatusList";
 export { InstructionBlock } from "./InstructionBlock";
 export { SectionFooter, type SectionFooterProps } from "./SectionFooter";
+export { IncompleteDataDialog, type IncompleteDataDialogProps } from "./IncompleteDataDialog";
 
 // Rich instruction components
 export { TextSegmentRenderer } from "./TextSegmentRenderer";

@@ -9,16 +9,6 @@
  * bidirectionally linked to the checkbox groups.
  */
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +31,8 @@ import { getSectionCardTitle } from "../../labels";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
-import { PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { IncompleteDataDialog, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import type { SectionProps } from "./types";
 
 // Step configuration
 type E1StepId = "e1a" | "e1b";
@@ -63,12 +54,9 @@ const E1_PAIN_SVG_REGIONS: readonly Region[] = SVG_REGIONS;
  */
 const E1_HEADACHE_SVG_REGIONS: readonly Region[] = ["temporalis"];
 
-interface E1SectionProps {
+interface E1SectionProps extends SectionProps {
   step?: number; // 1-indexed from URL, undefined = auto-detect
   onStepChange?: (stepIndex: number | null) => void; // 0-indexed, null = summary
-  onComplete?: () => void;
-  onBack?: () => void;
-  isFirstSection?: boolean;
 }
 
 /**
@@ -228,30 +216,11 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     return statuses;
   }, [headacheLeftValues]);
 
-  // Handle diagram region click for pain location
-  const handlePainRegionClick = useCallback(
-    (region: Region, side: Side) => {
-      const fieldPath = `e1.painLocation.${side}` as const;
-      const currentValues = (getValues(fieldPath) as string[]) ?? [];
-
-      if (currentValues.includes(region)) {
-        setValue(
-          fieldPath,
-          currentValues.filter((v) => v !== region),
-          { shouldValidate: true }
-        );
-      } else {
-        const newValues = currentValues.filter((v) => v !== "none");
-        setValue(fieldPath, [...newValues, region], { shouldValidate: true });
-      }
-    },
-    [getValues, setValue]
-  );
-
-  // Handle diagram region click for headache location
-  const handleHeadacheRegionClick = useCallback(
-    (region: Region, side: Side) => {
-      const fieldPath = `e1.headacheLocation.${side}` as const;
+  // Handle diagram region click — shared toggle for pain and headache
+  const handleRegionClick = useCallback(
+    (step: E1StepId, region: Region, side: Side) => {
+      const field = step === "e1a" ? "painLocation" : "headacheLocation";
+      const fieldPath = `e1.${field}.${side}` as const;
       const currentValues = (getValues(fieldPath) as string[]) ?? [];
 
       if (currentValues.includes(region)) {
@@ -355,7 +324,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 side="right"
                 regions={E1_PAIN_SVG_REGIONS}
                 regionStatuses={painRightStatuses}
-                onRegionClick={(region) => handlePainRegionClick(region, "right")}
+                onRegionClick={(region) => handleRegionClick("e1a", region, "right")}
               />
               <div className="w-44">{painRight && <QuestionField instance={painRight} />}</div>
             </div>
@@ -369,7 +338,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 side="left"
                 regions={E1_PAIN_SVG_REGIONS}
                 regionStatuses={painLeftStatuses}
-                onRegionClick={(region) => handlePainRegionClick(region, "left")}
+                onRegionClick={(region) => handleRegionClick("e1a", region, "left")}
               />
               <div className="w-44">{painLeft && <QuestionField instance={painLeft} />}</div>
             </div>
@@ -393,7 +362,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               side="right"
               regions={E1_HEADACHE_SVG_REGIONS}
               regionStatuses={headacheRightStatuses}
-              onRegionClick={(region) => handleHeadacheRegionClick(region, "right")}
+              onRegionClick={(region) => handleRegionClick("e1b", region, "right")}
             />
             <div className="w-44">
               {headacheRight && <QuestionField instance={headacheRight} />}
@@ -409,7 +378,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               side="left"
               regions={E1_HEADACHE_SVG_REGIONS}
               regionStatuses={headacheLeftStatuses}
-              onRegionClick={(region) => handleHeadacheRegionClick(region, "left")}
+              onRegionClick={(region) => handleRegionClick("e1b", region, "left")}
             />
             <div className="w-44">
               {headacheLeft && <QuestionField instance={headacheLeft} />}
@@ -487,24 +456,11 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
           );
         })}
 
-        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Unvollständige Daten</AlertDialogTitle>
-              <AlertDialogDescription>
-                Dieser Abschnitt enthält unvollständige Daten. Möchten Sie trotzdem
-                fortfahren? Sie können später zurückkehren um die fehlenden Daten zu
-                ergänzen.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmSkip}>
-                Überspringen
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <IncompleteDataDialog
+          open={showSkipDialog}
+          onOpenChange={setShowSkipDialog}
+          onConfirm={handleConfirmSkip}
+        />
       </CardContent>
 
       {/* Section-level footer when all steps are complete */}
