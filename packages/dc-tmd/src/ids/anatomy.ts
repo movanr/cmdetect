@@ -151,11 +151,12 @@ export const PALPATION_PAIN_QUESTIONS = [
 export type PalpationPainQuestion = (typeof PALPATION_PAIN_QUESTIONS)[number];
 
 // === PALPATION MODES (E9) ===
-// Per DC/TMD protocol, different palpation durations reveal different diagnostic depths
+// Per DC/TMD protocol: basic (2 sec) for screening, standard (5 sec) for full diagnosis.
+// The 5-second stimulus elicits both referred and spreading pain from the same patient
+// response ("nur unter meinem Finger?"), so there is no separate "extended" mode.
 export const PALPATION_MODES = {
   basic: "Basis (2 Sek.)",
   standard: "Standard (5 Sek.)",
-  extended: "Erweitert",
 } as const;
 export type PalpationMode = keyof typeof PALPATION_MODES;
 export const PALPATION_MODE_KEYS = Object.keys(PALPATION_MODES) as PalpationMode[];
@@ -163,8 +164,7 @@ export const PALPATION_MODE_KEYS = Object.keys(PALPATION_MODES) as PalpationMode
 // Questions shown per palpation mode (cumulative depth)
 export const PALPATION_MODE_QUESTIONS: Record<PalpationMode, readonly PalpationPainQuestion[]> = {
   basic: ["pain", "familiarPain", "familiarHeadache"],
-  standard: ["pain", "familiarPain", "familiarHeadache", "referredPain"],
-  extended: ["pain", "familiarPain", "familiarHeadache", "referredPain", "spreadingPain"],
+  standard: ["pain", "familiarPain", "familiarHeadache", "referredPain", "spreadingPain"],
 };
 
 // === SITE DETAIL MODES (E9) ===

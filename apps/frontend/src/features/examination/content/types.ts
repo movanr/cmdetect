@@ -88,6 +88,8 @@ export interface ProcedureFlowStep {
   figureRef?: string | string[];
   /** Optional hint about app interaction for this step */
   appAction?: string;
+  /** Condition under which this step applies (e.g., "Falls nicht nur unter dem Finger") */
+  condition?: string;
 }
 
 /** @deprecated Use ProcedureFlowStep instead */

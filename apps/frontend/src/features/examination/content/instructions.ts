@@ -53,13 +53,14 @@ const E4C_SAFETY_WARNING: SafetyWarning = {
 /**
  * Pain interview for movement-induced pain (E4B - unassisted opening).
  *
- * 4-step procedure from DC-TMD protocol section 6:
- * 1. Ask if patient had pain during movement
- * 2. Patient localizes pain by pointing with finger
+ * 5-step procedure from DC-TMD protocol sections 6.2.1 + 6.2.4 (section 8.2):
+ * 1. Ask if patient had pain during movement (6.2.1)
+ * 2. Patient localizes pain by pointing with finger (6.2.1)
  * 3. Examiner touches area to confirm location and identify anatomical structure
- * 4. Ask if pain is familiar (+ headache question if temporalis)
+ * 4. Familiar pain inquiry — verbatim scripts from 6.2.4
+ * 5. Ask if there are other pain areas (6.2.1)
  *
- * NOTE: Referred pain inquiry is NOT part of movement-induced pain - only for palpation.
+ * NOTE: Referred pain inquiry (6.2.5) is NOT part of movement-induced pain — only for palpation.
  */
 const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
@@ -79,9 +80,18 @@ const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     id: "confirm",
     label: "Bestätigung",
     examinerInstruction:
-      "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+      "Bereich berühren und anatomische Struktur identifizieren",
     figureRef: "3",
-    appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
+    appAction: "Region im Diagramm wählen",
+  },
+  {
+    id: "familiar",
+    label: "Bekannter Schmerz",
+    patientScript:
+      "Ist dieser Schmerz Ihnen bekannt von Schmerzen, die Sie in diesem Bereich in den letzten 30 Tagen erfahren haben?",
+    examinerInstruction:
+      `Bei Temporalis-Lokalisation zusätzlich: „Ist dieser Schmerz Ihnen bekannt von Kopfschmerzen, die Sie in diesem Bereich in den letzten 30 Tagen hatten?"`,
+    appAction: "Schmerztypen eingeben",
   },
   {
     id: "done",
@@ -119,9 +129,18 @@ const E4C_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     id: "confirm",
     label: "Bestätigung",
     examinerInstruction:
-      "Untersucher berührt den Bereich, identifiziert die Struktur und fragt nach bekanntem Schmerz (bei Temporalis zusätzlich: Kopfschmerz).",
+      "Bereich berühren und anatomische Struktur identifizieren",
     figureRef: "3",
-    appAction: "Region im Diagramm wählen, Schmerztypen eingeben",
+    appAction: "Region im Diagramm wählen",
+  },
+  {
+    id: "familiar",
+    label: "Bekannter Schmerz",
+    patientScript:
+      "Ist dieser Schmerz Ihnen bekannt von Schmerzen, die Sie in diesem Bereich in den letzten 30 Tagen erfahren haben?",
+    examinerInstruction:
+      `Bei Temporalis-Lokalisation zusätzlich: „Ist dieser Schmerz Ihnen bekannt von Kopfschmerzen, die Sie in diesem Bereich in den letzten 30 Tagen hatten?"`,
+    appAction: "Schmerztypen eingeben",
   },
   {
     id: "done",
@@ -712,28 +731,47 @@ function durationLabel(mode: PalpationMode): string {
   return mode === "basic" ? "2 Sekunden" : "5 Sekunden";
 }
 
-/** Build the examiner inquiry chain for a palpation step */
-function buildInquiryChain(mode: PalpationMode, hasHeadache: boolean, hasSpreading: boolean): string {
+/** Build the examiner inquiry chain for a palpation step (abbreviated prompts per 5.9/8.2) */
+function buildInquiryChain(mode: PalpationMode, hasHeadache: boolean): string {
   const parts = ["Schmerz?", "Bekannter Schmerz?"];
   if (hasHeadache) parts.push("Bekannter Kopfschmerz?");
-  if (mode !== "basic") parts.push("Übertragener Schmerz?");
-  if (mode === "extended" && hasSpreading) parts.push("Ausbreitender Schmerz?");
+  if (mode !== "basic") parts.push("Nur unter meinem Finger?");
   return parts.join(" → ");
 }
 
-/** Build the appAction hint matching the inquiry chain */
-function buildAppActionHint(mode: PalpationMode, hasHeadache: boolean, hasSpreading: boolean): string {
+/** Build the appAction hint for the basic inquiry (pain/familiar only) */
+function buildInquiryAppAction(hasHeadache: boolean): string {
   const parts = ["Schmerz", "bekannter Schmerz"];
   if (hasHeadache) parts.push("Kopfschmerz");
-  if (mode !== "basic") parts.push("übertragener Schmerz");
-  if (mode === "extended" && hasSpreading) parts.push("ausbreitender Schmerz");
   return parts.join(", ") + " eingeben";
 }
 
 /**
- * E9 - Palpation introduction flow (3-4 steps depending on mode).
- * Based on DC-TMD protocol section 5.9.
- * In basic mode, the "referred pain" explanation step is omitted.
+ * Build the referred/spreading pain classification step (6.2.5).
+ * Only included in standard mode. After the abbreviated prompt "Nur unter meinem Finger?",
+ * a negative answer triggers localization and examiner classification.
+ */
+function buildReferredPainStep(hasSpreading: boolean): ProcedureFlowStep {
+  return {
+    id: "referred",
+    label: "Schmerzausbreitung",
+    condition: "Falls nicht nur unter dem Finger",
+    patientScript:
+      "Zeigen Sie mit Ihrem Finger auf alle Bereiche, in denen Sie gerade Schmerzen gespürt haben.",
+    examinerInstruction: hasSpreading
+      ? "Jenseits der Muskelgrenze = übertragener Schmerz. Innerhalb des Muskels = ausbreitender Schmerz."
+      : "Jenseits des Gelenks = übertragener Schmerz.",
+    appAction: hasSpreading
+      ? "übertragener/ausbreitender Schmerz eingeben"
+      : "übertragener Schmerz eingeben",
+  };
+}
+
+/**
+ * E9 - Palpation introduction flow (4-5 steps depending on mode).
+ * Based on DC-TMD protocol section 5.9 / 8.2.
+ * In basic mode, the "referred pain" explanation step is omitted
+ * and the abbreviated prompts step omits "nur unter meinem Finger?".
  */
 function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
   const steps: ProcedureFlowStep[] = [
@@ -745,7 +783,7 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
       figureRef: "24",
     },
   ];
-  // Only include referred pain explanation for standard/extended
+  // Only include referred pain explanation for standard mode
   if (mode !== "basic") {
     steps.push({
       id: "referred",
@@ -754,6 +792,14 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
         "Außerdem werde ich fragen, ob der Schmerz nur unter meinem Finger bleibt oder ob Sie ihn auch irgendwo anders außer unter meinem Finger spüren.",
     });
   }
+  // Abbreviated prompts — establishes the shorthand vocabulary with the patient (5.9/8.2)
+  steps.push({
+    id: "prompts",
+    label: "Kurzabfrage",
+    patientScript: mode === "basic"
+      ? `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz" und „bekannter Kopfschmerz" auffordern.`
+      : `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" auffordern.`,
+  });
   steps.push(
     {
       id: "duration",
@@ -771,12 +817,13 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
 }
 
 /**
- * E9 - Temporalis palpation flow (4 steps).
+ * E9 - Temporalis palpation flow (4-5 steps depending on mode).
  * Based on DC-TMD protocol section 5.9.
+ * Standard mode adds a referred/spreading pain classification step (6.2.5).
  * Temporalis: hasHeadache=true, hasSpreading=true
  */
 function createE9TemporalisFlow(mode: PalpationMode): ProcedureFlowStep[] {
-  return [
+  const steps: ProcedureFlowStep[] = [
     {
       id: "identify",
       label: "Muskelgrenzen",
@@ -799,19 +846,22 @@ function createE9TemporalisFlow(mode: PalpationMode): ProcedureFlowStep[] {
     {
       id: "inquiry",
       label: "Befragung",
-      examinerInstruction: buildInquiryChain(mode, true, true),
-      appAction: buildAppActionHint(mode, true, true),
+      examinerInstruction: buildInquiryChain(mode, true),
+      appAction: buildInquiryAppAction(true),
     },
   ];
+  if (mode !== "basic") steps.push(buildReferredPainStep(true));
+  return steps;
 }
 
 /**
- * E9 - Masseter palpation flow (2 steps).
+ * E9 - Masseter palpation flow (2-3 steps depending on mode).
  * Based on DC-TMD protocol section 5.9.
+ * Standard mode adds a referred/spreading pain classification step (6.2.5).
  * Masseter: hasHeadache=false, hasSpreading=true
  */
 function createE9MasseterFlow(mode: PalpationMode): ProcedureFlowStep[] {
-  return [
+  const steps: ProcedureFlowStep[] = [
     {
       id: "palpate",
       label: "Palpieren",
@@ -821,19 +871,23 @@ function createE9MasseterFlow(mode: PalpationMode): ProcedureFlowStep[] {
     {
       id: "inquiry",
       label: "Befragung",
-      examinerInstruction: buildInquiryChain(mode, false, true),
-      appAction: buildAppActionHint(mode, false, true),
+      examinerInstruction: buildInquiryChain(mode, false),
+      appAction: buildInquiryAppAction(false),
     },
   ];
+  if (mode !== "basic") steps.push(buildReferredPainStep(true));
+  return steps;
 }
 
 /**
- * E9 - TMJ lateral pole palpation flow (3 steps).
+ * E9 - TMJ lateral pole palpation flow (4-5 steps depending on mode).
  * Based on DC-TMD protocol section 5.9.
+ * Pain interview per 6.2.2 → 6.2.4 [→ 6.2.5] (section 8.2).
+ * Standard mode adds a referred pain classification step (6.2.5).
  * TMJ: hasHeadache=false, hasSpreading=false
  */
 function createE9TmjLateralPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
-  return [
+  const steps: ProcedureFlowStep[] = [
     {
       id: "calibrate",
       label: "Kalibrierung",
@@ -853,17 +907,27 @@ function createE9TmjLateralPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
       label: "Palpieren",
       examinerInstruction: `Zeigefinger anterior des Tragus auf lateralem Pol. 0,5 kg, ${durationSek(mode)} Sek.`,
       figureRef: "33",
-      appAction: "Schmerzbefragung durchführen",
+    },
+    {
+      id: "inquiry",
+      label: "Befragung",
+      examinerInstruction: buildInquiryChain(mode, false),
+      appAction: buildInquiryAppAction(false),
     },
   ];
+  if (mode !== "basic") steps.push(buildReferredPainStep(false));
+  return steps;
 }
 
 /**
- * E9 - TMJ around lateral pole palpation flow (3 steps).
+ * E9 - TMJ around lateral pole palpation flow (4-5 steps depending on mode).
  * Based on DC-TMD protocol section 5.9.
+ * Pain interview per 6.2.2 → 6.2.4 [→ 6.2.5] (section 8.2).
+ * Standard mode adds a referred pain classification step (6.2.5).
+ * TMJ: hasHeadache=false, hasSpreading=false
  */
 function createE9TmjAroundPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
-  return [
+  const steps: ProcedureFlowStep[] = [
     {
       id: "calibrate",
       label: "Kalibrierung",
@@ -883,9 +947,16 @@ function createE9TmjAroundPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
       label: "Um Pol palpieren",
       examinerInstruction: `Finger um lateralen Kondylenpol rollen. 1 kg, zirkuläre Bewegung, ~${durationSek(mode)} Sek.`,
       figureRef: "36",
-      appAction: "Schmerzbefragung durchführen",
+    },
+    {
+      id: "inquiry",
+      label: "Befragung",
+      examinerInstruction: buildInquiryChain(mode, false),
+      appAction: buildInquiryAppAction(false),
     },
   ];
+  if (mode !== "basic") steps.push(buildReferredPainStep(false));
+  return steps;
 }
 
 // ============================================================================
@@ -907,8 +978,7 @@ export interface E9RichInstructions {
  * Based on DC-TMD Examiner Protocol Section 5.9 (U9)
  * Instructions adapt to the selected palpation mode:
  * - basic: 2 Sek. duration, no referred/spreading pain
- * - standard: 5 Sek. duration, includes referred pain
- * - extended: 5 Sek. duration, includes referred + spreading pain
+ * - standard: 5 Sek. duration, includes referred + spreading pain
  */
 export function createE9RichInstructions(mode: PalpationMode): E9RichInstructions {
   return {

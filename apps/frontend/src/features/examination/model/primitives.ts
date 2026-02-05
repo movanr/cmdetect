@@ -49,7 +49,7 @@ export const Q = {
 
   palpationMode: (): Primitive<PalpationMode, "palpationMode", Record<string, never>> => ({
     renderType: "palpationMode",
-    schema: z.enum(["basic", "standard", "extended"]),
+    schema: z.enum(["basic", "standard"]),
     defaultValue: "standard",
     config: {},
   }),

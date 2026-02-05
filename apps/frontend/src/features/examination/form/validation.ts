@@ -324,8 +324,8 @@ export interface PalpationValidationResult {
  * Rules:
  * - pain and familiarPain are always required
  * - familiarHeadache only for temporalis sites (hasHeadache: true)
- * - referredPain only in standard/extended modes
- * - spreadingPain only in extended mode AND for non-TMJ sites (hasSpreading: true)
+ * - referredPain only in standard mode
+ * - spreadingPain only in standard mode AND for non-TMJ sites (hasSpreading: true)
  */
 function getApplicableQuestions(
   siteOrRegion: PalpationSite | Region,
@@ -372,8 +372,8 @@ function getApplicableQuestions(
  * - pain is always required for each site
  * - familiarPain is only required when pain=yes
  * - familiarHeadache is only required for temporalis sites when pain=yes
- * - referredPain is only required in standard/extended mode
- * - spreadingPain is only required in extended mode for non-TMJ sites
+ * - referredPain is only required in standard mode (5 sec stimulus)
+ * - spreadingPain is only required in standard mode for non-TMJ sites
  *
  * @param context.palpationMode - Determines which questions are validated
  * @param context.siteDetailMode - Detailed (8 sites) or grouped (3 regions)

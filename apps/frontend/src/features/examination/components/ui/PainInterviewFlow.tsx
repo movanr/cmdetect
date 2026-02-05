@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ExternalLink,
   Image,
+  CornerDownRight,
   MousePointerClick,
   Pause,
 } from "lucide-react";
@@ -183,6 +184,13 @@ function ProcedureStep({
           {/* Figure reference - inline with label */}
           {step.figureRef && <FigureRefLink figureRef={step.figureRef} />}
         </div>
+        {/* Condition indicator - when step only applies under certain conditions */}
+        {step.condition && (
+          <div className="mt-1 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+            <CornerDownRight className="h-3 w-3 shrink-0" />
+            <span>{step.condition}</span>
+          </div>
+        )}
         {/* Patient script - verbatim text with quotation marks */}
         {step.patientScript && (
           <div className="mt-1 text-sm text-muted-foreground italic">„{step.patientScript}"</div>
