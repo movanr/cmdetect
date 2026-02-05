@@ -8,14 +8,18 @@
  */
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { imageMap, typedFigureIndex, type FigureData } from "@/features/protocol/lib/figures";
 import { cn } from "@/lib/utils";
-import {
-  imageMap,
-  typedFigureIndex,
-  type FigureData,
-} from "@/features/protocol/lib/figures";
 import { Link } from "@tanstack/react-router";
-import { BookOpen, ChevronDown, ChevronRight, ExternalLink, Image, MousePointerClick, Pause } from "lucide-react";
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Image,
+  MousePointerClick,
+  Pause,
+} from "lucide-react";
 import { useState } from "react";
 import type {
   CrossReference,
@@ -119,9 +123,7 @@ function FigureRefLink({ figureRef }: { figureRef: string | string[] }) {
               </p>
               {/* Full description from section 7 (when available) */}
               {data!.description_de_full && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {data!.description_de_full}
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{data!.description_de_full}</p>
               )}
             </div>
           ))}
@@ -290,18 +292,16 @@ function ProtocolReferences({
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
       >
-        {isOpen ? (
-          <ChevronDown className="h-3 w-3" />
-        ) : (
-          <ChevronRight className="h-3 w-3" />
-        )}
+        {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         <BookOpen className="h-3 w-3" />
         <span>Protokoll-Referenzen</span>
       </button>
       {isOpen && (
         <div className="space-y-1 mt-2 ml-4 pl-2 border-l border-muted">
           {hasConcise && <CrossReferenceLinks references={conciseSpec} label="Kurzspezifikation" />}
-          {hasComplete && <CrossReferenceLinks references={completeSpec} label="Vollständig" />}
+          {hasComplete && (
+            <CrossReferenceLinks references={completeSpec} label="Vollständige Spezifikation" />
+          )}
           {hasAdditional && <CrossReferenceLinks references={additionalInfo} label="Zusatzinfo" />}
         </div>
       )}
