@@ -51,8 +51,8 @@ Ein Überblick über die Änderungen der diagnostischen Kriterien von RDC/TMD zu
 | Beurteilung von bekannten Kopfschmerzen im Temporalis bei Kieferbeweglichkeitstests | | ✓ |
 | **Kiefergelenk-Beurteilung** | | |
 | Beurteilung von Kiefergelenkknacken | ✓ | ✓ |
-| Beurteilung von feiner und grober Krepitation | ✓ | |
-| Beurteilung von Krepitation | | ✓ |
+| Beurteilung von feinem und grobem Reiben | ✓ | |
+| Beurteilung von Reiben | | ✓ |
 | Messung (mm) von Öffnungs- und Schließknacken | ✓ | |
 | Beurteilung der Eliminierung des reziproken Knackens bei protrusiver Öffnung | ✓ | |
 | Patientenbericht über Kiefergelenkgeräusche während der Bewegung | | ✓ |

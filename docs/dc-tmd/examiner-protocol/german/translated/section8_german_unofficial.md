@@ -49,107 +49,110 @@ Die Nummerierung der Unterabschnitte folgt der der untersuchungsbezogenen Schmer
 |-----------|-------------------|
 | **U1. Bestätigung der Schmerz- und Kopfschmerzlokalisationen durch den Untersucher** | |
 | *Identifizierende Informationen* | \<keine\> |
-| *Anweisungen an den Patienten* | **Bevor ich mit der Untersuchung beginne, möchte ich einige Dinge mit Ihnen besprechen.** |
-| | **Ich werde Sie nach Schmerzen fragen, und nur Sie wissen, ob Sie Schmerzen haben. Wenn ich nach Schmerzen frage, möchte ich, dass Sie entweder ja oder nein sagen; wenn Sie sich nicht sicher sind, geben Sie mir Ihre beste Antwort.** |
-| | **Wenn Sie Schmerzen verspüren, werde ich auch fragen, ob dieser Schmerz Ihnen bekannt ist. Bekannter Schmerz bezieht sich auf Schmerz, der ähnlich oder genauso wie der Schmerz ist, den Sie möglicherweise in demselben Körperteil in den letzten 30 Tagen hatten.** |
-| | **Wenn Sie Schmerzen im Schläfenbereich verspüren, werde ich fragen, ob dieser Schmerz wie ein Kopfschmerz ist, den Sie möglicherweise im Schläfenbereich in den letzten 30 Tagen hatten.** |
-| *Umfang der Untersuchung: anatomische Bereiche von Interesse* | **Für die Zwecke dieser Untersuchung interessiere ich mich für Schmerzen, die Sie möglicherweise in diesen Bereichen haben….** |
-| | **…. und auch im Mund.** |
-| *U1a - Schmerzlokalisation: letzte 30 Tage* | **Hatten Sie in den letzten 30 Tagen Schmerzen in diesen Bereichen** [die ich berührt habe]? |
+| *Anweisungen an den Patienten* | **Bevor ich mit der Untersuchung beginne, möchte ich noch einige Punkte mit Ihnen besprechen.** |
+| | **Ich werde Sie zu Schmerzen befragen, wobei nur Sie selbst wissen ob Sie Schmerzen haben. Wenn ich Sie nach Schmerzen frage, möchte ich, dass Sie mit „Ja" oder „Nein" antworten. Falls Sie unsicher sind, geben Sie bitte Ihre bestmögliche Antwort.** |
+| | **Falls Sie Schmerzen fühlen, werde ich Sie auch fragen, ob Ihnen der Schmerz bekannt ist. Die Bezeichnung „bekannter Schmerz" bezieht sich auf Schmerzen, die sich ähnlich oder genauso anfühlen wie die Schmerzen, die Sie in den letzten 30 Tagen in dem gleichen Bereich ihres Körpers gespürt haben.** |
+| | **Falls Sie Schmerzen im Bereich der Schläfen fühlen, werde ich Sie fragen, ob diese Schmerzen sich wie irgendwelche Kopfschmerzen anfühlen, die Sie während der letzten 30 Tage im Schläfenbereich gehabt haben.** |
+| *Umfang der Untersuchung: anatomische Bereiche von Interesse* | **Zum Zweck dieser Untersuchung interessieren mich Schmerzen, die Sie in den folgenden Bereichen …** |
+| | **… und auch innerhalb des Mundes haben könnten.** |
+| *U1a - Schmerzlokalisation: letzte 30 Tage* | **Hatten Sie während der letzten 30 Tage in diesen Bereichen** [die ich berührt habe] **Schmerzen?** |
 | | FALLS „JA": |
-| | **Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben** [in den letzten 30 Tagen]? |
-| | **Gibt es noch weitere Bereiche, in denen Sie Schmerzen gespürt haben** [in den letzten 30 Tagen]? |
-| *U1b - Kopfschmerzlokalisation in den letzten 30 Tagen* | **Hatten Sie in den letzten 30 Tagen Kopfschmerzen?** |
+| | **Bitte zeigen Sie mit Ihrem Finger auf die jeweiligen Bereiche, in denen Sie** [in den letzten 30 Tagen] **Schmerzen hatten.** |
+| | **Gibt es noch weitere Bereiche, in denen Sie** [innerhalb den letzten 30 Tagen] **Schmerzen hatten?** |
+| *U1b - Kopfschmerzlokalisation in den letzten 30 Tagen* | **Hatten Sie während der letzten 30 Tage Kopfschmerzen?** |
 | | FALLS „JA": |
-| | **Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Kopfschmerzen gespürt haben** [in den letzten 30 Tagen]? |
-| | **Gibt es noch weitere Bereiche, in denen Sie Kopfschmerzen gespürt haben** [in den letzten 30 Tagen]? |
+| | **Bitte zeigen Sie mit Ihrem Finger auf die jeweiligen Bereiche, in denen Sie** [während der letzten 30 Tage] **Kopfschmerzen gefühlt haben.** |
+| | **Gibt es noch weitere Bereiche, in denen Sie** [während der letzten 30 Tage] **Kopfschmerzen hatten?** |
 | **U2. Schneidekantenverhältnisse** | |
-| *Auswahl der Oberkiefer- und Unterkiefer-Referenzzähne* | Ich werde einige Bleistiftmarkierungen auf Ihren Zähnen anbringen; ich werde sie am Ende der Untersuchung entfernen. |
+| *Auswahl der Oberkiefer- und Unterkiefer-Referenzzähne* | Ich werde mit dem Stift einige Markierungen auf Ihren Zähnen anbringen, die am Ende der Untersuchung wieder entfernt werden. |
 | *Referenzlinie – vertikaler Überbiss* | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
 | *Referenzlinie – Unterkiefer-Referenz-Mittellinie* | [Bitte legen Sie Ihre Backenzähne vollständig aufeinander.] |
 | *Horizontaler inzisaler Overjet* | [Bitte legen Sie Ihre Backenzähne vollständig aufeinander.] |
 | *Vertikaler inzisaler Überbiss* | \<Bitten Sie den Patienten, ausreichend zu öffnen, um den vertikalen Überbiss zu messen.\> |
 | **U3. Öffnungsmuster (Ergänzend)** | |
 | *Ausgangsposition* | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
-| *Öffnungsmuster* | **Ich möchte, dass Sie langsam Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist, schließen und Ihre Backenzähne wieder vollständig aufeinander legen.** |
-| | 2 weitere Male wiederholen. |
+| *Öffnungsmuster* | **Ich möchte, dass Sie Ihren Mund langsam so weit wie möglich öffnen, auch wenn es schmerzhaft ist, und dann schließen, bis Ihre Backenzähne wieder vollständig aufeinander liegen.** |
+| | Noch zweimal wiederholen. |
 | **U4. Öffnungsbewegungen** | |
 | **4A. SCHMERZFREIE ÖFFNUNG** | |
 | *Ausgangsposition* | [Bringen Sie Ihren Mund in eine entspannte Position.] |
 | *Linealposition für vertikale Bewegungsmessungen* | \<keine\> |
-| *U4A - Schmerzfreie Öffnung* | **Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, ohne Schmerzen zu verspüren oder ohne eventuell vorhandene Schmerzen zu verstärken.** |
+| *U4A - Schmerzfreie Öffnung* | **Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.** |
 | **4B. MAXIMALE NICHT-UNTERSTÜTZTE ÖFFNUNG** | |
 | *Ausgangsposition* | [Bringen Sie Ihren Mund in eine entspannte Position.] |
-| *U4B - Maximale nicht-unterstützte Öffnung* | **Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist.** |
+| *U4B - Maximale nicht-unterstützte Öffnung* | **Ich möchte, dass Sie den Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist.** |
 | *U4B - Schmerz nach MNÖ* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **4C. MAXIMALE UNTERSTÜTZTE ÖFFNUNG** | |
 | *Ausgangsposition* | [Bringen Sie Ihren Mund in eine entspannte Position.] |
-| *Anweisungen* | **Gleich werde ich versuchen,** [wenn möglich], **Ihren Mund mit meinen Fingern weiter zu öffnen. Wenn Sie möchten, dass ich aufhöre, heben Sie Ihre Hand und ich werde sofort aufhören.** |
-| *U4C - Maximale unterstützte Öffnung* | Ich werde mein Lineal platzieren. [Pause] |
-| | **Jetzt öffnen Sie** [Ihren Mund] **so weit wie möglich, auch wenn schmerzhaft, genau wie zuvor.** [Pause] |
-| | Sie werden meine Finger spüren. |
-| | **Bitte entspannen Sie Ihren Kiefer, damit ich Ihnen helfen kann, weiter zu öffnen, wenn möglich.** [Pause] |
-| *U4C - Schmerz nach MUÖ* | **Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?** |
+| *Anweisungen* | **Gleich werde ich versuchen,** [wenn möglich] **Ihren Mund mit meinen Fingern noch weiter zu öffnen. Wenn Sie möchten, dass ich aufhöre, heben Sie bitte Ihre Hand. Dann werde ich sofort aufhören.** |
+| *U4C - Maximale unterstützte Öffnung* | Ich platziere jetzt mein Lineal. [Pause] |
+| | **Bitte öffnen Sie jetzt** [Ihren Mund] **so weit wie möglich, auch wenn es schmerzhaft ist, so wie Sie es eben schon gemacht haben.** [Pause] |
+| | Sie spüren jetzt gleich meine Finger. |
+| | **Bitte entspannen Sie Ihren Kiefer, so dass ich Ihnen helfen kann, noch weiter zu öffnen, wenn möglich.** [Pause] |
+| *U4C - Schmerz nach MUÖ* | **Hatten Sie irgendwelche Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?** |
 | **4D. MAXIMALE UNTERSTÜTZTE ÖFFNUNG BEENDET** | |
 | *U4D - Öffnung beendet* | \<keine\> |
 | **U5. Laterotrusions- und Protrusionsbewegungen** | |
 | **5A. RECHTE LATERALE EXKURSION** | |
-| *Laterotrusion nach rechts* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist.** |
+| *Laterotrusion nach rechts* | **Bitte öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist.** |
 | | Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe. |
 | *U5A - Messung* | \<keine\> |
 | *Kiefer zurückführen* | |
 | *U5A - Schmerz nach Bewegung* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **5B. LINKE LATERALE EXKURSION** | |
-| *Laterotrusion nach links* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist.** |
+| *Laterotrusion nach links* | **Bitte öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist.** |
 | | Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe. |
 | *U5B - Messung* | \<keine\> |
 | *Kiefer zurückführen* | |
 | *U5B - Schmerz nach Bewegung* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **5C. PROTRUSION** | |
-| *Protrusion* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach vorne, auch wenn es schmerzhaft ist.** |
+| *Protrusion* | **Bitte öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich** [gerade] **nach vorn, auch wenn es schmerzhaft ist.** |
 | | Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe. |
 | *U5C - Messung* | \<keine\> |
 | *Kiefer zurückführen* | |
 | *U5C - Schmerz nach Bewegung* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **U6. Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung** | |
 | *Handposition für Palpation von Gelenkgeräuschen* | \<keine\> |
-| *Anweisungen bezüglich Gelenkgeräusche* | **Ich werde die Kiefergelenke daraufhin untersuchen, ob sie Geräusche machen. Ich möchte, dass Sie ebenfalls aufmerksam sind, da ich Sie am Ende fragen werde, ob Sie irgendwelche Geräusche gehört oder bemerkt haben.** |
+| *Anweisungen bezüglich Gelenkgeräusche* | **Ich werde die Kiefergelenke nun daraufhin untersuchen, ob sie irgendwelche Geräusche machen. Ich möchte, dass sie auch aufpassen, denn ich werde Sie am Ende fragen, ob Sie irgendwelche Geräusche gehört oder bemerkt haben.** |
 | | [Konzentrieren Sie sich auf beide Gelenke.] |
 | *Vollständiger Schluss des Unterkiefers* | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
-| *Erkennung von Öffnungs- und Schließgeräuschen durch den Untersucher* | **Öffnen Sie langsam so weit wie möglich, auch wenn es schmerzhaft ist, und schließen Sie dann langsam, bis Ihre Backenzähne wieder vollständig aufeinander liegen.** |
-| | 2 weitere Male wiederholen. |
-| *Patientenbefragung zu Gelenkgeräuschen* | **Haben Sie beim Öffnen oder Schließen Geräusche in einem der Kiefergelenke gehört oder bemerkt?** |
-| | Welche Art von Geräusch? |
-| *Schmerzabfrage* | FALLS DER PATIENT EIN KNACKEN BERICHTET: |
-| | **Hatten Sie Schmerzen, als dieses Knacken auftrat?** |
+| *Erkennung von Öffnungs- und Schließgeräuschen durch den Untersucher* | **Bitte öffnen Sie langsam so weit wie möglich, auch wenn es schmerzhaft ist, und schließen Sie dann langsam, bis Ihre Backenzähne erneut vollständig aufeinander liegen.** |
+| | Wiederholen Sie dies noch zwei Mal. |
+| *Patientenbefragung zu Gelenkgeräuschen* | **Haben Sie Geräusche in einem der Kiefergelenke gehört oder bemerkt als Sie geöffnet oder geschlossen haben?** |
+| | Was für ein Geräusch? |
+| *Schmerzabfrage* | FALLS DER PATIENT EIN KNACKEN ANGIBT: |
+| | **Hatten Sie irgendwelche Schmerzen, als das Knacken auftrat?** |
 | **U7. Kiefergelenkgeräusche bei Laterotrusion und Protrusion** | |
 | *Allgemein* | \<keine\> |
 | *Gelenkgeräusche: Laterotrusions- und Protrusionsbewegung* | [Führen Sie die folgende Reihe von Verfahren zur Untersuchung jedes der rechten Gelenke und dann des linken Gelenks durch. Informieren Sie den Patienten, auf welches Gelenk er sich konzentrieren soll.] |
-| | **Legen Sie Ihre Backenzähne vollständig aufeinander, öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn schmerzhaft; bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne vollständig aufeinander.** |
-| | 2 weitere Male wiederholen. |
-| | **Legen Sie Ihre Backenzähne vollständig aufeinander, öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn schmerzhaft; bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne vollständig aufeinander.** |
-| | 2 weitere Male wiederholen. |
-| | **Legen Sie Ihre Backenzähne vollständig aufeinander, öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach vorne, auch wenn schmerzhaft; bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne vollständig aufeinander.** |
-| | 2 weitere Male wiederholen. |
-| *Abfrage bezüglich Gelenkgeräusche* | **Haben Sie Geräusche in diesem** [rechten, linken] **Gelenk gehört oder bemerkt, als Sie Ihren Kiefer nach vorne oder zur Seite bewegt haben?** |
-| | Welche Art von Geräusch? |
-| *Schmerzabfrage* | FALLS DER PATIENT EIN KNACKEN BERICHTET: |
-| | **Hatten Sie Schmerzen, als dieses Knacken auftrat?** |
+| | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
+| | **Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück** [in seine entspannte Position] **und legen Sie Ihre Backenzähne wieder vollständig aufeinander.** |
+| | Zweimal wiederholen. |
+| | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
+| | **Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück** [in seine entspannte Position] **und legen Sie Ihre Backenzähne wieder vollständig aufeinander.** |
+| | Zweimal wiederholen. |
+| | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
+| | **Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück** [in seine entspannte Position] **und legen Sie Ihre Backenzähne wieder vollständig aufeinander.** |
+| | Zweimal wiederholen. |
+| *Abfrage bezüglich Gelenkgeräusche* | **Haben Sie Geräusche in diesem** [rechtes, linkes] **Gelenk gehört oder bemerkt als Sie den Kiefer vorwärts oder seitwärts bewegt haben?** |
+| | Was für ein Geräusch? |
+| *Schmerzabfrage* | FALLS DER PATIENT KNACKEN BERICHTET: |
+| | **Hatten Sie irgendwelche Schmerzen, als das Knacken auftrat?** |
 | **U8. Gelenkarretierung** | |
 | *Arretierung im geschlossenen Zustand* | **Können Sie Ihre Kieferblockade lösen?** |
 | *Arretierung im geöffneten Zustand* | **Können Sie Ihre Kieferblockade lösen?** |
 | **U9. Muskel- und Kiefergelenkschmerz bei Palpation** | |
-| *Einführung* | **Jetzt werde ich Druck auf verschiedene Bereiche Ihres Kopfes, Gesichts und Kiefers ausüben, und ich werde Sie nach Schmerzen, bekanntem Schmerz und bekanntem Kopfschmerz fragen.** |
-| | **Außerdem werde ich fragen, ob der Schmerz nur unter meinem Finger bleibt oder ob Sie ihn auch irgendwo anders außer unter meinem Finger spüren.** |
-| | Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" auffordern. |
-| | [Die Abfrage „zieht auch woanders hin?" kann anstelle von „nur unter meinem Finger" verwendet werden, wenn der Untersucher dies bevorzugt.] |
-| | **Jedes Mal werde ich Druck ausüben und ihn 5 Sekunden lang halten.** |
+| *Einführung* | **Nun werde ich in verschiedenen Bereichen Ihres Kopfes, Ihres Gesichtes und Ihres Kiefers Druck ausüben und Sie nach Schmerzen fragen. Ich werde Sie nach Schmerzen, bekannten Schmerzen und bekannten Kopfschmerzen fragen.** |
+| | **Zusätzlich werde ich Sie fragen, ob der Schmerz nur unter meinem Finger bleibt oder Sie ihn auch noch in anderen Bereichen als unter meinem Finger spüren.** |
+| | Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" abfragen. |
+| | [Die Abfrage „zieht auch woanders hin?" kann statt „nur unter meinem Finger" verwendet werden, wenn der Untersucher dies bevorzugt.] |
+| | **Ich werde den Druck jedes Mal für 5 Sekunden aufrechterhalten.** |
 | *Kalibrierung* | \<keine\> |
 | *Temporalis und Masseter* | \<keine\> |
 | *Kalibrierung* | \<keine\> |
-| *Kiefergelenk: lateraler Pol* | **Öffnen Sie leicht und bewegen Sie Ihren Unterkiefer nach vorne und dann wieder zurück in seine normale Position mit leicht auseinander stehenden Zähnen.** |
+| *Kiefergelenk: lateraler Pol* | **Bitte öffnen Sie leicht, schieben Sie Ihren Unterkiefer nach vorn und bewegen Sie dann Ihren Kiefer wieder zurück in seine normale Position ohne, dass Ihre Zähne sich berühren.** |
 | *Kalibrierung* | \<keine\> |
-| *Kiefergelenk: um den lateralen Pol* | **Öffnen Sie leicht und bewegen Sie Ihren Unterkiefer ein wenig nach vorne und halten Sie ihn dort.** |
+| *Kiefergelenk: um den lateralen Pol* | **Bitte öffnen Sie den Mund leicht, schieben Sie den Unterkiefer ein wenig nach vorn und halten Sie ihn dort.** |
 | **U10. Ergänzende Palpationsstellen** | |
 | *Kalibrierung* | \<keine\> |
 | *Posteriorer Unterkieferbereich* | **Bitte entspannen Sie Ihren Kiefer.** |
