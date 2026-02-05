@@ -20,9 +20,10 @@ import { useCallback, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import {
-  E9_RICH_INSTRUCTIONS,
+  createE9RichInstructions,
   isPainInterviewInstruction,
 } from "../../content/instructions";
+import type { E9RichInstructions } from "../../content/instructions";
 import type { RichMeasurementInstruction } from "../../content/types";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import {
@@ -83,15 +84,6 @@ const E9_STEP_SITES: Record<E9StepId, readonly PalpationSite[]> = {
   "e9-masseter": ["masseterOrigin", "masseterBody", "masseterInsertion"],
   "e9-tmj-lateral": ["tmjLateralPole"],
   "e9-tmj-around": ["tmjAroundLateralPole"],
-};
-
-/** Rich instruction content per step */
-const E9_STEP_INSTRUCTIONS: Record<E9StepId, typeof E9_RICH_INSTRUCTIONS[keyof typeof E9_RICH_INSTRUCTIONS]> = {
-  "e9-intro": E9_RICH_INSTRUCTIONS.introduction,
-  "e9-temporalis": E9_RICH_INSTRUCTIONS.temporalisPalpation,
-  "e9-masseter": E9_RICH_INSTRUCTIONS.masseterPalpation,
-  "e9-tmj-lateral": E9_RICH_INSTRUCTIONS.tmjLateralPole,
-  "e9-tmj-around": E9_RICH_INSTRUCTIONS.tmjAroundPole,
 };
 
 // =============================================================================
@@ -335,6 +327,16 @@ export function E9Section({
   const rightInstances = getInstancesForStep("e9-right");
   const leftInstances = getInstancesForStep("e9-left");
   const palpationMode = watch("e9.palpationMode") as PalpationMode;
+
+  // Build mode-aware instruction content (re-computed when mode changes)
+  const e9Instructions = useMemo(() => createE9RichInstructions(palpationMode), [palpationMode]);
+  const e9StepInstructions = useMemo((): Record<E9StepId, E9RichInstructions[keyof E9RichInstructions]> => ({
+    "e9-intro": e9Instructions.introduction,
+    "e9-temporalis": e9Instructions.temporalisPalpation,
+    "e9-masseter": e9Instructions.masseterPalpation,
+    "e9-tmj-lateral": e9Instructions.tmjLateralPole,
+    "e9-tmj-around": e9Instructions.tmjAroundPole,
+  }), [e9Instructions]);
 
   // Track expanded dropdown for each side
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
@@ -609,7 +611,7 @@ export function E9Section({
 
   // Render the instruction block for the current step
   const renderInstruction = (stepId: E9StepId) => {
-    const instruction = E9_STEP_INSTRUCTIONS[stepId];
+    const instruction = e9StepInstructions[stepId];
     if (isPainInterviewInstruction(instruction)) {
       return <PainInterviewBlock instruction={instruction} />;
     }

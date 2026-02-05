@@ -6,6 +6,7 @@
  * Patient scripts are quotable prompts for communication.
  */
 
+import type { PalpationMode } from "@cmdetect/dc-tmd";
 import type {
   ProcedureFlowStep,
   RichMeasurementInstruction,
@@ -698,219 +699,273 @@ export const E3_RICH_INSTRUCTIONS = {
 } as const;
 
 // ============================================================================
-// E9 Palpation Flows
+// E9 Palpation Flows (mode-aware)
 // ============================================================================
 
+/** Duration in seconds for palpation, by mode */
+function durationSek(mode: PalpationMode): string {
+  return mode === "basic" ? "2" : "5";
+}
+
+/** Duration label for patient script, by mode */
+function durationLabel(mode: PalpationMode): string {
+  return mode === "basic" ? "2 Sekunden" : "5 Sekunden";
+}
+
+/** Build the examiner inquiry chain for a palpation step */
+function buildInquiryChain(mode: PalpationMode, hasHeadache: boolean, hasSpreading: boolean): string {
+  const parts = ["Schmerz?", "Bekannter Schmerz?"];
+  if (hasHeadache) parts.push("Bekannter Kopfschmerz?");
+  if (mode !== "basic") parts.push("Übertragener Schmerz?");
+  if (mode === "extended" && hasSpreading) parts.push("Ausbreitender Schmerz?");
+  return parts.join(" → ");
+}
+
+/** Build the appAction hint matching the inquiry chain */
+function buildAppActionHint(mode: PalpationMode, hasHeadache: boolean, hasSpreading: boolean): string {
+  const parts = ["Schmerz", "bekannter Schmerz"];
+  if (hasHeadache) parts.push("Kopfschmerz");
+  if (mode !== "basic") parts.push("übertragener Schmerz");
+  if (mode === "extended" && hasSpreading) parts.push("ausbreitender Schmerz");
+  return parts.join(", ") + " eingeben";
+}
+
 /**
- * E9 - Palpation introduction flow (4 steps).
+ * E9 - Palpation introduction flow (3-4 steps depending on mode).
  * Based on DC-TMD protocol section 5.9.
+ * In basic mode, the "referred pain" explanation step is omitted.
  */
-const E9_INTRODUCTION_FLOW: ProcedureFlowStep[] = [
-  {
-    id: "intro",
-    label: "Einführung",
-    patientScript:
-      "Jetzt werde ich Druck auf verschiedene Bereiche Ihres Kopfes, Gesichts und Kiefers ausüben, und ich werde Sie nach Schmerzen, bekanntem Schmerz und bekanntem Kopfschmerz fragen.",
-    figureRef: "24",
-  },
-  {
-    id: "referred",
-    label: "Übertragener Schmerz",
-    patientScript:
-      "Außerdem werde ich fragen, ob der Schmerz nur unter meinem Finger bleibt oder ob Sie ihn auch irgendwo anders außer unter meinem Finger spüren.",
-  },
-  {
-    id: "duration",
-    label: "Dauer",
-    patientScript: "Jedes Mal werde ich Druck ausüben und ihn 5 Sekunden lang halten.",
-  },
-  {
-    id: "calibrate",
-    label: "Kalibrierung",
-    examinerInstruction: "Mit Finger-Algometer auf 1,0 kg kalibrieren",
-    figureRef: "25",
-  },
-];
+function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
+  const steps: ProcedureFlowStep[] = [
+    {
+      id: "intro",
+      label: "Einführung",
+      patientScript:
+        "Jetzt werde ich Druck auf verschiedene Bereiche Ihres Kopfes, Gesichts und Kiefers ausüben, und ich werde Sie nach Schmerzen, bekanntem Schmerz und bekanntem Kopfschmerz fragen.",
+      figureRef: "24",
+    },
+  ];
+  // Only include referred pain explanation for standard/extended
+  if (mode !== "basic") {
+    steps.push({
+      id: "referred",
+      label: "Übertragener Schmerz",
+      patientScript:
+        "Außerdem werde ich fragen, ob der Schmerz nur unter meinem Finger bleibt oder ob Sie ihn auch irgendwo anders außer unter meinem Finger spüren.",
+    });
+  }
+  steps.push(
+    {
+      id: "duration",
+      label: "Dauer",
+      patientScript: `Jedes Mal werde ich Druck ausüben und ihn ${durationLabel(mode)} lang halten.`,
+    },
+    {
+      id: "calibrate",
+      label: "Kalibrierung",
+      examinerInstruction: "Mit Finger-Algometer auf 1,0 kg kalibrieren",
+      figureRef: "25",
+    },
+  );
+  return steps;
+}
 
 /**
  * E9 - Temporalis palpation flow (4 steps).
  * Based on DC-TMD protocol section 5.9.
+ * Temporalis: hasHeadache=true, hasSpreading=true
  */
-const E9_TEMPORALIS_FLOW: ProcedureFlowStep[] = [
-  {
-    id: "identify",
-    label: "Muskelgrenzen",
-    patientScript: "Bitte beißen Sie kurz zusammen.",
-    examinerInstruction: "Muskelgrenzen durch Anspannung identifizieren",
-    pause: true,
-  },
-  {
-    id: "relax",
-    label: "Entspannung",
-    patientScript: "Bitte entspannen Sie Ihren Kiefer.",
-    pause: true,
-  },
-  {
-    id: "palpate",
-    label: "Palpieren",
-    examinerInstruction: "3 vertikale Zonen (anterior, Mitte, posterior). 1 kg, 5 Sek/Zone",
-    figureRef: ["26", "27"],
-  },
-  {
-    id: "inquiry",
-    label: "Befragung",
-    examinerInstruction:
-      "Schmerz? → Bekannter Schmerz? → Bekannter Kopfschmerz? → Übertragener Schmerz?",
-    appAction: "Schmerz, bekannter Schmerz, Kopfschmerz eingeben",
-  },
-];
+function createE9TemporalisFlow(mode: PalpationMode): ProcedureFlowStep[] {
+  return [
+    {
+      id: "identify",
+      label: "Muskelgrenzen",
+      patientScript: "Bitte beißen Sie kurz zusammen.",
+      examinerInstruction: "Muskelgrenzen durch Anspannung identifizieren",
+      pause: true,
+    },
+    {
+      id: "relax",
+      label: "Entspannung",
+      patientScript: "Bitte entspannen Sie Ihren Kiefer.",
+      pause: true,
+    },
+    {
+      id: "palpate",
+      label: "Palpieren",
+      examinerInstruction: `3 vertikale Zonen (anterior, Mitte, posterior). 1 kg, ${durationSek(mode)} Sek/Zone`,
+      figureRef: ["26", "27"],
+    },
+    {
+      id: "inquiry",
+      label: "Befragung",
+      examinerInstruction: buildInquiryChain(mode, true, true),
+      appAction: buildAppActionHint(mode, true, true),
+    },
+  ];
+}
 
 /**
  * E9 - Masseter palpation flow (2 steps).
  * Based on DC-TMD protocol section 5.9.
+ * Masseter: hasHeadache=false, hasSpreading=true
  */
-const E9_MASSETER_FLOW: ProcedureFlowStep[] = [
-  {
-    id: "palpate",
-    label: "Palpieren",
-    examinerInstruction: "3 horizontale Bänder (Ursprung, Körper, Ansatz). 1 kg, 5 Sek/Band",
-    figureRef: ["28", "29"],
-  },
-  {
-    id: "inquiry",
-    label: "Befragung",
-    examinerInstruction: "Schmerz? → Bekannter Schmerz? → Übertragener Schmerz?",
-    appAction: "Schmerz, bekannter Schmerz eingeben",
-  },
-];
+function createE9MasseterFlow(mode: PalpationMode): ProcedureFlowStep[] {
+  return [
+    {
+      id: "palpate",
+      label: "Palpieren",
+      examinerInstruction: `3 horizontale Bänder (Ursprung, Körper, Ansatz). 1 kg, ${durationSek(mode)} Sek/Band`,
+      figureRef: ["28", "29"],
+    },
+    {
+      id: "inquiry",
+      label: "Befragung",
+      examinerInstruction: buildInquiryChain(mode, false, true),
+      appAction: buildAppActionHint(mode, false, true),
+    },
+  ];
+}
 
 /**
  * E9 - TMJ lateral pole palpation flow (3 steps).
  * Based on DC-TMD protocol section 5.9.
+ * TMJ: hasHeadache=false, hasSpreading=false
  */
-const E9_TMJ_LATERAL_POLE_FLOW: ProcedureFlowStep[] = [
-  {
-    id: "calibrate",
-    label: "Kalibrierung",
-    examinerInstruction: "Auf 0,5 kg kalibrieren",
-    figureRef: "33",
-  },
-  {
-    id: "protrude",
-    label: "Protrusion",
-    patientScript:
-      "Bitte öffnen Sie leicht, schieben Sie Ihren Unterkiefer nach vorn und bewegen Sie dann Ihren Kiefer wieder zurück in seine normale Position ohne, dass Ihre Zähne sich berühren.",
-    figureRef: ["31", "32"],
-    pause: true,
-  },
-  {
-    id: "palpate",
-    label: "Palpieren",
-    examinerInstruction:
-      "Zeigefinger anterior des Tragus auf lateralem Pol. 0,5 kg, 5 Sek.",
-    figureRef: "33",
-    appAction: "Schmerzbefragung durchführen",
-  },
-];
+function createE9TmjLateralPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
+  return [
+    {
+      id: "calibrate",
+      label: "Kalibrierung",
+      examinerInstruction: "Auf 0,5 kg kalibrieren",
+      figureRef: "33",
+    },
+    {
+      id: "protrude",
+      label: "Protrusion",
+      patientScript:
+        "Bitte öffnen Sie leicht, schieben Sie Ihren Unterkiefer nach vorn und bewegen Sie dann Ihren Kiefer wieder zurück in seine normale Position ohne, dass Ihre Zähne sich berühren.",
+      figureRef: ["31", "32"],
+      pause: true,
+    },
+    {
+      id: "palpate",
+      label: "Palpieren",
+      examinerInstruction: `Zeigefinger anterior des Tragus auf lateralem Pol. 0,5 kg, ${durationSek(mode)} Sek.`,
+      figureRef: "33",
+      appAction: "Schmerzbefragung durchführen",
+    },
+  ];
+}
 
 /**
  * E9 - TMJ around lateral pole palpation flow (3 steps).
  * Based on DC-TMD protocol section 5.9.
  */
-const E9_TMJ_AROUND_POLE_FLOW: ProcedureFlowStep[] = [
-  {
-    id: "calibrate",
-    label: "Kalibrierung",
-    examinerInstruction: "Auf 1,0 kg kalibrieren",
-    figureRef: "36",
-  },
-  {
-    id: "protrude-hold",
-    label: "Protrusion halten",
-    patientScript:
-      "Bitte öffnen Sie den Mund leicht, schieben Sie den Unterkiefer ein wenig nach vorn und halten Sie ihn dort.",
-    figureRef: ["34", "35"],
-    pause: true,
-  },
-  {
-    id: "palpate-around",
-    label: "Um Pol palpieren",
-    examinerInstruction:
-      "Finger um lateralen Kondylenpol rollen. 1 kg, zirkuläre Bewegung, ~5 Sek.",
-    figureRef: "36",
-    appAction: "Schmerzbefragung durchführen",
-  },
-];
+function createE9TmjAroundPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
+  return [
+    {
+      id: "calibrate",
+      label: "Kalibrierung",
+      examinerInstruction: "Auf 1,0 kg kalibrieren",
+      figureRef: "36",
+    },
+    {
+      id: "protrude-hold",
+      label: "Protrusion halten",
+      patientScript:
+        "Bitte öffnen Sie den Mund leicht, schieben Sie den Unterkiefer ein wenig nach vorn und halten Sie ihn dort.",
+      figureRef: ["34", "35"],
+      pause: true,
+    },
+    {
+      id: "palpate-around",
+      label: "Um Pol palpieren",
+      examinerInstruction: `Finger um lateralen Kondylenpol rollen. 1 kg, zirkuläre Bewegung, ~${durationSek(mode)} Sek.`,
+      figureRef: "36",
+      appAction: "Schmerzbefragung durchführen",
+    },
+  ];
+}
 
 // ============================================================================
 // E9 Rich Instructions
 // ============================================================================
 
+/** Return type for createE9RichInstructions */
+export interface E9RichInstructions {
+  introduction: RichMeasurementInstruction;
+  temporalisPalpation: RichPainInterviewInstruction;
+  masseterPalpation: RichPainInterviewInstruction;
+  tmjLateralPole: RichMeasurementInstruction;
+  tmjAroundPole: RichMeasurementInstruction;
+}
+
 /**
- * E9 Palpation - Rich Clinical Instructions
+ * E9 Palpation - Rich Clinical Instructions (mode-aware)
  *
  * Based on DC-TMD Examiner Protocol Section 5.9 (U9)
+ * Instructions adapt to the selected palpation mode:
+ * - basic: 2 Sek. duration, no referred/spreading pain
+ * - standard: 5 Sek. duration, includes referred pain
+ * - extended: 5 Sek. duration, includes referred + spreading pain
  */
-export const E9_RICH_INSTRUCTIONS = {
-  /** Introduction to palpation */
-  introduction: {
-    stepId: "U9-intro",
-    title: "Einführung Palpation",
-    flow: E9_INTRODUCTION_FLOW,
-    protocolRefs: [
-      { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-      { section: "e9", anchor: "allgemeine-instruktionen", label: "5.9 Allgemeine Instruktionen" },
-      { section: "section8", anchor: "622", label: "6.2.2 Palpationsschmerz" },
-      { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
-    ],
-  } satisfies RichMeasurementInstruction,
+export function createE9RichInstructions(mode: PalpationMode): E9RichInstructions {
+  return {
+    introduction: {
+      stepId: "U9-intro",
+      title: "Einführung Palpation",
+      flow: createE9IntroductionFlow(mode),
+      protocolRefs: [
+        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+        { section: "e9", anchor: "allgemeine-instruktionen", label: "5.9 Allgemeine Instruktionen" },
+        { section: "section8", anchor: "622", label: "6.2.2 Palpationsschmerz" },
+        { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
+      ],
+    },
+    temporalisPalpation: {
+      title: "Temporalis-Palpation",
+      prompt: "Hatten Sie Schmerzen?",
+      flow: createE9TemporalisFlow(mode),
+      protocolRefs: [
+        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+        { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
+        { section: "section8", anchor: "624", label: "6.2.4 Bekannter Schmerz" },
+        { section: "section8", anchor: "625", label: "6.2.5 Übertragener Schmerz" },
+      ],
+    },
+    masseterPalpation: {
+      title: "Masseter-Palpation",
+      prompt: "Hatten Sie Schmerzen?",
+      flow: createE9MasseterFlow(mode),
+      protocolRefs: [
+        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+        { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
+      ],
+    },
+    tmjLateralPole: {
+      stepId: "U9-lat",
+      title: "Lateraler Kondylenpol",
+      flow: createE9TmjLateralPoleFlow(mode),
+      protocolRefs: [
+        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+        { section: "e9", anchor: "lateraler-kondylenpol", label: "5.9 Lateraler Kondylenpol" },
+      ],
+    },
+    tmjAroundPole: {
+      stepId: "U9-around",
+      title: "Um den lateralen Kondylenpol",
+      flow: createE9TmjAroundPoleFlow(mode),
+      protocolRefs: [
+        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+        { section: "e9", anchor: "um-den-lateralen-kondylenpol", label: "5.9 Um den lateralen Kondylenpol" },
+      ],
+    },
+  };
+}
 
-  /** Temporalis palpation */
-  temporalisPalpation: {
-    title: "Temporalis-Palpation",
-    prompt: "Hatten Sie Schmerzen?",
-    flow: E9_TEMPORALIS_FLOW,
-    protocolRefs: [
-      { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-      { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
-      { section: "section8", anchor: "624", label: "6.2.4 Bekannter Schmerz" },
-      { section: "section8", anchor: "625", label: "6.2.5 Übertragener Schmerz" },
-    ],
-  } satisfies RichPainInterviewInstruction,
-
-  /** Masseter palpation */
-  masseterPalpation: {
-    title: "Masseter-Palpation",
-    prompt: "Hatten Sie Schmerzen?",
-    flow: E9_MASSETER_FLOW,
-    protocolRefs: [
-      { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-      { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
-    ],
-  } satisfies RichPainInterviewInstruction,
-
-  /** TMJ lateral pole palpation */
-  tmjLateralPole: {
-    stepId: "U9-lat",
-    title: "Lateraler Kondylenpol",
-    flow: E9_TMJ_LATERAL_POLE_FLOW,
-    protocolRefs: [
-      { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-      { section: "e9", anchor: "lateraler-kondylenpol", label: "5.9 Lateraler Kondylenpol" },
-    ],
-  } satisfies RichMeasurementInstruction,
-
-  /** TMJ around lateral pole palpation */
-  tmjAroundPole: {
-    stepId: "U9-around",
-    title: "Um den lateralen Kondylenpol",
-    flow: E9_TMJ_AROUND_POLE_FLOW,
-    protocolRefs: [
-      { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-      { section: "e9", anchor: "um-den-lateralen-kondylenpol", label: "5.9 Um den lateralen Kondylenpol" },
-    ],
-  } satisfies RichMeasurementInstruction,
-} as const;
+/** Backward-compatible default (standard mode = current hardcoded "5 Sek" behavior) */
+export const E9_RICH_INSTRUCTIONS = createE9RichInstructions("standard");
 
 // ============================================================================
 // Type Guards and Helpers
