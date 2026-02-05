@@ -34,9 +34,10 @@ router.subscribe('onResolved', ({ toLocation, fromLocation }) => {
   const toPath = toLocation.pathname;
   const fromPath = fromLocation?.pathname;
 
-  // When entering protocol from outside, store the return URL
+  // When entering protocol from outside, store the return URL (including search params)
   if (toPath.startsWith('/protocol') && fromPath && !fromPath.startsWith('/protocol')) {
-    sessionStorage.setItem('protocol-return-url', fromPath);
+    const searchStr = fromLocation?.searchStr ? `?${fromLocation.searchStr}` : '';
+    sessionStorage.setItem('protocol-return-url', fromPath + searchStr);
   }
 });
 
