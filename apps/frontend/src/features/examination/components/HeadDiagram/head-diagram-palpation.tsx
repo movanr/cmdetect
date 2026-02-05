@@ -49,6 +49,8 @@ interface HeadDiagramPalpationProps {
   disabled?: boolean;
   /** Sites with validation errors */
   incompleteSites?: IncompleteSite[];
+  /** If provided, only these sites are styled/interactive; others stay hidden */
+  visibleSites?: readonly PalpationSite[];
 }
 
 /** Stripe pattern ID for incomplete sites */
@@ -62,6 +64,7 @@ export function HeadDiagramPalpation({
   className,
   disabled = false,
   incompleteSites = [],
+  visibleSites,
 }: HeadDiagramPalpationProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -106,7 +109,15 @@ export function HeadDiagramPalpation({
     defs.appendChild(pattern);
   }, []);
 
-  // Hide E4-specific region paths and clip paths (not needed for palpation)
+  // Determine which muscle groups are visible based on visibleSites
+  const showTemporalis =
+    !visibleSites ||
+    visibleSites.some((s) => s.startsWith("temporalis"));
+  const showMasseter =
+    !visibleSites ||
+    visibleSites.some((s) => s.startsWith("masseter"));
+
+  // Hide E4-specific region paths and manage muscle group visibility
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -130,19 +141,42 @@ export function HeadDiagramPalpation({
       }
     }
 
-    // Style base temporalis/masseter paths (keep original thick strokes)
-    // Set pointer-events: none so clicks pass through to clickable regions underneath
-    const baseRegions = ["temporalis", "masseter"];
-    for (const regionId of baseRegions) {
-      const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
+    // Style or hide base temporalis/masseter paths based on visibleSites
+    // Each entry controls: base outline path, background image, and palpation group (arrows/dividers/circles/labels)
+    const baseRegionConfig: { id: string; show: boolean; backgroundId?: string; palpationGroupId?: string }[] = [
+      { id: "temporalis", show: showTemporalis, backgroundId: "background-temporalis", palpationGroupId: "temporalis-palpation" },
+      { id: "masseter", show: showMasseter, backgroundId: "background-masseter", palpationGroupId: "masseter-palpation" },
+    ];
+
+    for (const { id, show, backgroundId, palpationGroupId } of baseRegionConfig) {
+      const region = svg.querySelector(`#${id}`) as SVGElement | null;
       if (region) {
-        region.style.fill = "rgba(200, 200, 200, 0.15)";
-        region.style.stroke = "rgba(136, 136, 136, 0.4)";
-        region.style.strokeWidth = "10";
-        region.style.pointerEvents = "none";
+        if (show) {
+          region.style.display = "";
+          region.style.fill = "rgba(200, 200, 200, 0.15)";
+          region.style.stroke = "rgba(136, 136, 136, 0.4)";
+          region.style.strokeWidth = "10";
+          region.style.pointerEvents = "none";
+        } else {
+          region.style.display = "none";
+        }
+      }
+      // Show/hide background image for this muscle group
+      if (backgroundId) {
+        const bg = svg.querySelector(`#${backgroundId}`) as SVGElement | null;
+        if (bg) {
+          bg.style.display = show ? "" : "none";
+        }
+      }
+      // Show/hide palpation group (arrows, dividers, circles, text labels)
+      if (palpationGroupId) {
+        const group = svg.querySelector(`#${palpationGroupId}`) as SVGElement | null;
+        if (group) {
+          group.style.display = show ? "" : "none";
+        }
       }
     }
-  }, []);
+  }, [showTemporalis, showMasseter]);
 
   // Apply styles to clickable region paths (only for diagram sites, excludes TMJ)
   useEffect(() => {
@@ -154,6 +188,18 @@ export function HeadDiagramPalpation({
       if (!regionId) continue;
       const region = svg.querySelector(`#${regionId}`) as SVGElement | null;
       if (!region) continue;
+
+      // If visibleSites is provided, hide non-visible sites
+      const isSiteVisible = !visibleSites || visibleSites.includes(site);
+      if (!isSiteVisible) {
+        region.style.fill = "transparent";
+        region.style.stroke = "none";
+        region.style.cursor = "default";
+        region.style.pointerEvents = "none";
+        continue;
+      }
+
+      region.style.pointerEvents = "auto";
 
       const status = getStatus(site);
       const isSelected = selectedSite === site;
@@ -192,7 +238,7 @@ export function HeadDiagramPalpation({
       }
       titleEl.textContent = getPalpationSiteLabel(site);
     }
-  }, [siteStatuses, selectedSite, disabled, getStatus, incompleteSites]);
+  }, [siteStatuses, selectedSite, disabled, getStatus, incompleteSites, visibleSites]);
 
   // Apply styles to palpation site circles (only for diagram sites, excludes TMJ)
   useEffect(() => {
@@ -202,6 +248,21 @@ export function HeadDiagramPalpation({
     for (const site of DIAGRAM_PALPATION_SITES) {
       const circleIds = PALPATION_CIRCLE_GROUPS[site];
       if (!circleIds) continue;
+
+      // If visibleSites is provided, hide non-visible site circles
+      const isSiteVisible = !visibleSites || visibleSites.includes(site);
+      if (!isSiteVisible) {
+        for (const circleId of circleIds) {
+          const circle = svg.querySelector(`#${circleId}`) as SVGElement | null;
+          if (!circle) continue;
+          circle.style.fill = "transparent";
+          circle.style.stroke = "none";
+          circle.style.cursor = "default";
+          circle.style.pointerEvents = "none";
+        }
+        continue;
+      }
+
       const status = getStatus(site);
       const isSelected = selectedSite === site;
       const visualState = getRegionVisualState(status);
@@ -244,6 +305,7 @@ export function HeadDiagramPalpation({
 
         circle.style.fill = fill;
         circle.style.stroke = stroke;
+        circle.style.pointerEvents = "auto";
         // Stroke width for circles (SVG is flattened, no scale transform)
         circle.style.strokeWidth = isSelected ? "2.5" : "1.5";
         circle.style.strokeDasharray = strokeDasharray;
@@ -261,7 +323,7 @@ export function HeadDiagramPalpation({
         titleEl.textContent = getPalpationSiteLabel(site);
       }
     }
-  }, [siteStatuses, selectedSite, disabled, getStatus, incompleteSites]);
+  }, [siteStatuses, selectedSite, disabled, getStatus, incompleteSites, visibleSites]);
 
   // Handle click events via delegation
   const handleClick = useCallback(
@@ -273,7 +335,7 @@ export function HeadDiagramPalpation({
       // First check if this is a clickable region path
       if (ALL_CLICKABLE_REGION_IDS.includes(elementId)) {
         const site = getRegionPalpationSite(elementId);
-        if (site) {
+        if (site && (!visibleSites || visibleSites.includes(site))) {
           onSiteClick(site);
           return;
         }
@@ -282,12 +344,12 @@ export function HeadDiagramPalpation({
       // Then check if this is a palpation circle
       if (ALL_PALPATION_CIRCLE_IDS.includes(elementId)) {
         const site = getCirclePalpationSite(elementId);
-        if (site) {
+        if (site && (!visibleSites || visibleSites.includes(site))) {
           onSiteClick(site);
         }
       }
     },
-    [disabled, onSiteClick]
+    [disabled, onSiteClick, visibleSites]
   );
 
   // Mirror transform for left side (patient's left displayed on right of screen)
