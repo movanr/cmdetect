@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U7. Kiefergelenkgeräusche bei Laterotrusion und Protrusion
 
@@ -10,7 +10,7 @@
 
 > Bitte legen Sie Ihre Backenzähne vollständig aufeinander.
 >
-> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft sein sollte. Bewegen Sie Ihren Kiefer zurück [in seine gewohnte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
+> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück [in seine entspannte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
 >
 > Zweimal wiederholen.
 >
@@ -18,7 +18,7 @@
 >
 > Bitte legen Sie Ihre Backenzähne vollständig aufeinander.
 >
-> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft sein sollte. Bewegen Sie Ihren Kiefer zurück [in seine gewohnte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
+> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück [in seine entspannte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
 >
 > Zweimal wiederholen.
 >
@@ -26,7 +26,7 @@
 >
 > Bitte legen Sie Ihre Backenzähne vollständig aufeinander.
 >
-> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft sein sollte. Bewegen Sie Ihren Kiefer zurück [in seine gewohnte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
+> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück [in seine entspannte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
 >
 > Zweimal wiederholen.
 
@@ -34,8 +34,8 @@
 
 - Die Finger werden an der gleichen Position wie für die Kiefergelenkgeräusche beim Öffnen und Schließen platziert.
 - Die Geräusche bei exkursiven Bewegungen können unter gleichzeitiger Palpation beider Kiefergelenke oder nacheinander beurteilt werden.
-- Die folgenden Instruktionen sind für die Untersuchung der Kiefergelenke nacheinander verfasst, bilaterale Palpation und Bewertung ist jedoch erlaubt.
-- Die Instruktionen sind für das andere Gelenk zu wiederholen, falls die Gelenke einzeln untersucht werden.
+- Die folgenden Anweisungen sind für die Untersuchung der Kiefergelenke nacheinander verfasst, bilaterale Palpation und Bewertung ist jedoch erlaubt.
+- Die Anweisungen sind für das andere Gelenk zu wiederholen, falls die Gelenke einzeln untersucht werden.
 
 ---
 
@@ -45,7 +45,7 @@
 
 > Bitte legen Sie Ihre Backenzähne vollständig aufeinander.
 >
-> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft sein sollte. Bewegen Sie Ihren Kiefer zurück [in seine gewohnte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
+> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück [in seine entspannte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
 >
 > Zweimal wiederholen.
 >
@@ -53,7 +53,7 @@
 >
 > Bitte legen Sie Ihre Backenzähne vollständig aufeinander.
 >
-> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft sein sollte. Bewegen Sie Ihren Kiefer zurück [in seine gewohnte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
+> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück [in seine entspannte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
 >
 > Zweimal wiederholen.
 >
@@ -61,7 +61,7 @@
 >
 > Bitte legen Sie Ihre Backenzähne vollständig aufeinander.
 >
-> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft sein sollte. Bewegen Sie Ihren Kiefer zurück [in seine gewohnte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
+> Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück [in seine entspannte Position] und legen Sie Ihre Backenzähne wieder vollständig aufeinander.
 >
 > Zweimal wiederholen.
 
@@ -75,7 +75,7 @@
 
 ---
 
-### Abfrage bzgl. Gelenkgeräusche
+### Abfrage bezüglich Gelenkgeräusche
 
 **Anweisungen:**
 

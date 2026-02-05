@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U2. Schneidekantenverhältnisse
 
@@ -20,7 +20,7 @@
 - Wählen Sie den Unterkiefer-Referenzzahn aus, der dem mesio-distalen Mittelpunkt des Oberkiefer-Referenzzahnes gegenübersteht.
 - Der Punkt auf der Inzisalkante des Unterkiefer-Referenzzahnes, die der mesio-distalen Mitte des Oberkiefer-Referenzzahnes gegenüberliegt, ist die Unterkieferreferenzposition für alle Messungen des vertikalen Bewegungsspielraums.
 - Die Labialfläche des Unterkiefer-Referenzzahns, die gegenüber der mesio-distalen Mitte des Oberkiefer-Referenzzahns liegt, ist die Unterkieferreferenzposition für alle protrusiven Bewegungsmessungen.
-- Falls ein anteriorer Kreuzbiss oder offener Biss vorliegt, beinhalten die konkreten Maßnahmen auch die Markierung des Felds "negativ" auf dem Untersuchungsbogen.
+- Falls ein anteriorer Kreuzbiss oder offener Biss vorliegt, beinhalten die konkreten Maßnahmen auch die Markierung des Felds "negativ" auf dem Untersuchungsformular.
 
 ---
 
@@ -53,9 +53,9 @@
 
 - Bewerten Sie die dentalen Mittellinien des Oberkiefers und Unterkiefers; wenn die Diskrepanz weniger als 1 mm beträgt, notieren Sie '0' mm.
 - Wenn die Diskrepanz der Mittellinie >= 1 mm beträgt, wählen Sie bitte aus den folgenden Methoden:
-- **Methode 1:** Messen Sie die Distanz jeder Diskrepanz zwischen den dentalen Mittellinien des Oberkiefers und Unterkiefers in der Frontalebene und notieren Sie die Richtung der Abweichung der mandibulären Mittellinie im Bezug zur maxillären Mittellinie. Die dentale Unterkiefer-Mittellinie bildet nun die Referenz für die Messung lateraler Unterkieferbewegungen.
+- **Methode 1:** Messen Sie die Distanz jeder Diskrepanz zwischen den dentalen Mittellinien des Oberkiefers und Unterkiefers in der Frontalebene und notieren Sie die Richtung der Abweichung der Unterkiefer-Mittellinie im Bezug zur Oberkiefer-Mittellinie. Die dentale Unterkiefer-Mittellinie bildet nun die Referenz für die Messung lateraler Unterkieferbewegungen.
 - **Methode 2:** Zeichnen Sie eine vertikale Linie auf die Oberfläche des zentralen oberen Schneidezahns und verlängern Sie die Linie bis auf den korrespondierenden Unterkiefer-Schneidezahn. Die vertikalen Markierungen auf den beiden Schneidezähnen sind nun die Referenz-Mittellinien.
-- **Methode 3:** Übertragen Sie mit einer vertikalen Stiftmarkierung die maxilläre dentale Mittellinie auf den korrespondierenden Unterkiefer-Schneidezahn. Die vertikale Markierung auf dem Unterkiefer-Schneidezahn dient jetzt als Referenzmittellinie für den Unterkiefer.
+- **Methode 3:** Übertragen Sie mit einer vertikalen Stiftmarkierung die Oberkiefer-Mittellinie auf den korrespondierenden Unterkiefer-Schneidezahn. Die vertikale Markierung auf dem Unterkiefer-Schneidezahn dient jetzt als Referenzmittellinie für den Unterkiefer.
 - Bei anteriorem Kreuzbiss verkehren Sie bitte o.g. Anweisungen in Bezug auf Oberkiefer und Unterkiefer.
 - Bei Methode 1 notieren Sie den Messwert und die Richtung.
 - Bei Methode 2 oder 3 notieren Sie den Wert '0'.

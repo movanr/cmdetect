@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U4. Öffnungs- und Schließbewegungen
 
@@ -12,7 +12,7 @@
 
 **Untersuchungsverfahren:**
 
-- Platzieren der „0"-Kante eines vorbereiteten Millimeterlineals (siehe Abschnitt 1) auf der Inzisalkante des mandibulären Referenzzahns
+- Platzieren der „0"-Kante eines vorbereiteten Millimeterlineals (siehe Abschnitt 1) auf der Inzisalkante des Unterkiefer-Referenzzahns
 
 ---
 
@@ -29,7 +29,7 @@
 
 **Untersuchungsverfahren:**
 
-- Messen Sie den Interinzisalabstand zwischen maxillärem und mandibulärem Referenzzahn.
+- Messen Sie den Interinzisalabstand zwischen Oberkiefer- und Unterkiefer-Referenzzahn.
 - Notieren Sie den Messwert.
 
 ---
@@ -59,7 +59,7 @@
 **Untersuchungsverfahren:**
 
 - Positionieren Sie das Lineal wie unter 4A.
-- Messen Sie den Interinzisalabstand zwischen maxillärem und mandibulärem Referenzzahn.
+- Messen Sie den Interinzisalabstand zwischen Oberkiefer- und Unterkiefer-Referenzzahn.
 - Notieren Sie den Messwert.
 
 ---
@@ -119,7 +119,7 @@
 - Platzieren Sie den Daumen auf den zentralen Oberkiefer-Schneidezähnen und kreuzen Sie mit dem Zeigefinger zu den zentralen Unterkieferschneidezähnen. (Die Orientierung der Finger ist relativ zum Prüfer, der vor dem Patienten steht.)
 - Unterstützen Sie den Unterkiefer mit den Fingern, bevor Sie sagen "Bitte entspannen Sie…"
 - Drücken Sie den Mund unter mäßigem Druck weiter auf, bis entweder (1) Gewebswiderstand fühlbar ist, oder (2) der Patient die Hand hebt. ANMERKUNG: Wenden Sie klinisches Urteilsvermögen an, um Überdehnung zu vermeiden.
-- Messen Sie den Interinzisalabstand zwischen maxillärem und mandibulärem Referenzzahn.
+- Messen Sie den Interinzisalabstand zwischen Oberkiefer- und Unterkiefer-Referenzzahn.
 - Notieren Sie den Messwert.
 
 ---
@@ -143,9 +143,9 @@
 
 ---
 
-### 4D. Maximale unterstützte Öffnung → Abgebrochen
+### 4D. Maximale unterstützte Öffnung → Beendet
 
-#### U4D – Öffnung abgebrochen
+#### U4D – Öffnung beendet
 
 **Anweisungen:**
 

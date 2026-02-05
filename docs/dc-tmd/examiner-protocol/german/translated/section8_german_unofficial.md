@@ -2,7 +2,7 @@
 
 ## 8.1 Überblick
 
-Die Anweisungen des Untersuchers, die wörtlich verwendet werden müssen, wie in der vollständigen Untersuchungssequenz (Abschnitt 4) gezeigt, werden hier wiedergegeben, um das Lernen und die Wiederholung zu erleichtern.
+Die Anweisungen des Untersuchers, die wörtlich verwendet werden müssen, wie in den vollständigen Spezifikationen (Abschnitte 5 und 6) aufgeführt, werden hier wiedergegeben, um das Lernen und die Wiederholung zu erleichtern.
 
 ## 8.2 Untersuchungsbezogene Schmerzbefragung
 
@@ -10,7 +10,7 @@ Die Nummerierung der Unterabschnitte folgt der der untersuchungsbezogenen Schmer
 
 ### 6.2.1 Für durch Bewegungsverfahren induzierten Schmerz
 
-- **Hatten Sie bei dieser Bewegung Schmerzen?**
+- **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?**
 - FALLS JA zu Schmerz:
   - **Können Sie mit Ihrem Finger auf alle Bereiche zeigen, in denen Sie Schmerzen gespürt haben?**
   - **Gibt es noch weitere Bereiche, in denen Sie bei dieser Bewegung Schmerzen gespürt haben? Zeigen Sie [mit Ihrem Finger] auf diese Bereiche.**
@@ -81,7 +81,7 @@ Die Nummerierung der Unterabschnitte folgt der der untersuchungsbezogenen Schmer
 | **4B. MAXIMALE NICHT-UNTERSTÜTZTE ÖFFNUNG** | |
 | *Ausgangsposition* | [Bringen Sie Ihren Mund in eine entspannte Position.] |
 | *U4B - Maximale nicht-unterstützte Öffnung* | **Ich möchte, dass Sie Ihren Mund so weit wie möglich öffnen, auch wenn es schmerzhaft ist.** |
-| *U4B - Schmerz nach MNÖ* | **Hatten Sie bei dieser Bewegung Schmerzen?** |
+| *U4B - Schmerz nach MNÖ* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **4C. MAXIMALE UNTERSTÜTZTE ÖFFNUNG** | |
 | *Ausgangsposition* | [Bringen Sie Ihren Mund in eine entspannte Position.] |
 | *Anweisungen* | **Gleich werde ich versuchen,** [wenn möglich], **Ihren Mund mit meinen Fingern weiter zu öffnen. Wenn Sie möchten, dass ich aufhöre, heben Sie Ihre Hand und ich werde sofort aufhören.** |
@@ -92,46 +92,46 @@ Die Nummerierung der Unterabschnitte folgt der der untersuchungsbezogenen Schmer
 | *U4C - Schmerz nach MUÖ* | **Hatten Sie Schmerzen, als ich versucht habe, Ihren Mund mit meinen Fingern weiter zu öffnen?** |
 | **4D. MAXIMALE UNTERSTÜTZTE ÖFFNUNG BEENDET** | |
 | *U4D - Öffnung beendet* | \<keine\> |
-| **U5. Laterale und protrusive Bewegungen** | |
+| **U5. Laterotrusions- und Protrusionsbewegungen** | |
 | **5A. RECHTE LATERALE EXKURSION** | |
-| *Rechte laterale Exkursion* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist.** |
+| *Laterotrusion nach rechts* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist.** |
 | | Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe. |
 | *U5A - Messung* | \<keine\> |
 | *Kiefer zurückführen* | |
-| *U5A - Schmerz nach Exkursion* | **Hatten Sie bei dieser Bewegung Schmerzen?** |
+| *U5A - Schmerz nach Bewegung* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **5B. LINKE LATERALE EXKURSION** | |
-| *Linke laterale Exkursion* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist.** |
+| *Laterotrusion nach links* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist.** |
 | | Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe. |
 | *U5B - Messung* | \<keine\> |
 | *Kiefer zurückführen* | |
-| *U5B - Schmerz nach Exkursion* | **Hatten Sie bei dieser Bewegung Schmerzen?** |
+| *U5B - Schmerz nach Bewegung* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
 | **5C. PROTRUSION** | |
-| *Protrusive Exkursion* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach vorne, auch wenn es schmerzhaft ist.** |
+| *Protrusion* | **Öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach vorne, auch wenn es schmerzhaft ist.** |
 | | Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe. |
 | *U5C - Messung* | \<keine\> |
 | *Kiefer zurückführen* | |
-| *U5C - Schmerz nach Protrusion* | **Hatten Sie bei dieser Bewegung Schmerzen?** |
-| **U6. Kiefergelenkgeräusche bei Öffnungs- und Schließbewegungen** | |
+| *U5C - Schmerz nach Bewegung* | **Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?** |
+| **U6. Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung** | |
 | *Handposition für Palpation von Gelenkgeräuschen* | \<keine\> |
-| *Anweisungen bezüglich Gelenkgeräusche* | **Ich werde die Kiefergelenke daraufhin untersuchen, ob sie Geräusche machen. Ich möchte, dass Sie ebenfalls aufmerksam sind, da ich Sie am Ende fragen werde, ob Sie Geräusche gehört oder gespürt haben.** |
+| *Anweisungen bezüglich Gelenkgeräusche* | **Ich werde die Kiefergelenke daraufhin untersuchen, ob sie Geräusche machen. Ich möchte, dass Sie ebenfalls aufmerksam sind, da ich Sie am Ende fragen werde, ob Sie irgendwelche Geräusche gehört oder bemerkt haben.** |
 | | [Konzentrieren Sie sich auf beide Gelenke.] |
 | *Vollständiger Schluss des Unterkiefers* | **Bitte legen Sie Ihre Backenzähne vollständig aufeinander.** |
 | *Erkennung von Öffnungs- und Schließgeräuschen durch den Untersucher* | **Öffnen Sie langsam so weit wie möglich, auch wenn es schmerzhaft ist, und schließen Sie dann langsam, bis Ihre Backenzähne wieder vollständig aufeinander liegen.** |
 | | 2 weitere Male wiederholen. |
-| *Patientenbefragung bezüglich Gelenkgeräusche* | **Haben Sie beim Öffnen oder Schließen Geräusche in einem der Kiefergelenke gehört oder gespürt?** |
+| *Patientenbefragung zu Gelenkgeräuschen* | **Haben Sie beim Öffnen oder Schließen Geräusche in einem der Kiefergelenke gehört oder bemerkt?** |
 | | Welche Art von Geräusch? |
 | *Schmerzabfrage* | FALLS DER PATIENT EIN KNACKEN BERICHTET: |
 | | **Hatten Sie Schmerzen, als dieses Knacken auftrat?** |
-| **U7. Kiefergelenkgeräusche bei lateralen und protrusiven Bewegungen** | |
+| **U7. Kiefergelenkgeräusche bei Laterotrusion und Protrusion** | |
 | *Allgemein* | \<keine\> |
-| *Gelenkgeräusche: laterale und protrusive Bewegungen* | [Führen Sie die folgende Reihe von Verfahren zur Untersuchung jedes der rechten Gelenke und dann des linken Gelenks durch. Informieren Sie den Patienten, auf welches Gelenk er sich konzentrieren soll.] |
+| *Gelenkgeräusche: Laterotrusions- und Protrusionsbewegung* | [Führen Sie die folgende Reihe von Verfahren zur Untersuchung jedes der rechten Gelenke und dann des linken Gelenks durch. Informieren Sie den Patienten, auf welches Gelenk er sich konzentrieren soll.] |
 | | **Legen Sie Ihre Backenzähne vollständig aufeinander, öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach rechts, auch wenn schmerzhaft; bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne vollständig aufeinander.** |
 | | 2 weitere Male wiederholen. |
 | | **Legen Sie Ihre Backenzähne vollständig aufeinander, öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach links, auch wenn schmerzhaft; bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne vollständig aufeinander.** |
 | | 2 weitere Male wiederholen. |
 | | **Legen Sie Ihre Backenzähne vollständig aufeinander, öffnen Sie leicht und bewegen Sie Ihren Kiefer so weit wie möglich nach vorne, auch wenn schmerzhaft; bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne vollständig aufeinander.** |
 | | 2 weitere Male wiederholen. |
-| *Befragung bezüglich Gelenkgeräusche* | **Haben Sie Geräusche in diesem** [rechten, linken] **Gelenk gehört oder gespürt, als Sie Ihren Kiefer nach vorne oder zur Seite bewegt haben?** |
+| *Abfrage bezüglich Gelenkgeräusche* | **Haben Sie Geräusche in diesem** [rechten, linken] **Gelenk gehört oder bemerkt, als Sie Ihren Kiefer nach vorne oder zur Seite bewegt haben?** |
 | | Welche Art von Geräusch? |
 | *Schmerzabfrage* | FALLS DER PATIENT EIN KNACKEN BERICHTET: |
 | | **Hatten Sie Schmerzen, als dieses Knacken auftrat?** |

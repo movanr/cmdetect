@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U5. Laterotrusions- und Protrusionsbewegungen
 
@@ -19,7 +19,7 @@
 
 - Falls der Patient verwirrt ist, in welche Richtung er den Kiefer bewegen soll, sagen Sie „Schieben Sie Ihren Kiefer zu dieser Hand", und berühren Sie den Kiefer oder die Schulter des Patienten auf der Seite der gewünschten Bewegung.
 - Legen Sie das Lineal je nach Art des Lineals mit dem '0'-Ende an die Oberkiefer-Referenzmittellinie oder die Unterkiefer-Referenzmittellinie an.
-- Messen Sie von der maxillären zur mandibulären Referenzmittellinie.
+- Messen Sie von der Oberkiefer- zur Unterkiefer-Referenzmittellinie.
 - Wenn das Lineal den gegenüberliegenden Referenzpunkt verdeckt, bewegen Sie das Lineal nach oben oder unten, um die Zahlen zu lesen.
 - Notieren Sie den Messwert.
 
@@ -73,7 +73,7 @@
 
 - Falls der Patient verwirrt ist, in welche Richtung er den Kiefer bewegen soll, sagen Sie „Schieben Sie Ihren Kiefer zu dieser Hand", und berühren Sie den Kiefer oder die Schulter des Patienten auf der Seite der gewünschten Bewegung.
 - Benutzen Sie das Lineal wie unter 5A.
-- Messen Sie von der maxillären zur mandibulären Referenzmittellinie.
+- Messen Sie von der Oberkiefer- zur Unterkiefer-Referenzmittellinie.
 - Wenn das Lineal den gegenüberliegenden Referenzpunkt verdeckt, bewegen Sie das Lineal nach oben oder unten, um die Zahlen zu lesen.
 - Notieren Sie den Messwert.
 
@@ -125,7 +125,7 @@
 **Untersuchungsverfahren:**
 
 - Legen Sie das Lineal mit dem '0'-Ende an das mesio-distale Zentrum des Oberkieferreferenzzahns an, so dass die labio-inzisale Kante des gegenüberliegenden Unterkiefer-Schneidezahns die mm-Markierungen des Lineals berührt.
-- Messen Sie von der labialen Oberfläche des maxillären Referenzzahns zur labialen Oberfläche des mandibulären Referenzzahns.
+- Messen Sie von der labialen Oberfläche des Oberkiefer-Referenzzahns zur labialen Oberfläche des Unterkiefer-Referenzzahns.
 - Notieren Sie den Messwert.
 
 ---

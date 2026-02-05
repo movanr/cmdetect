@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U3. Öffnungsmuster (ergänzend)
 

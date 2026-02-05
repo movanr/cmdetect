@@ -22,7 +22,7 @@ Abschnitt 6 beschreibt die strukturierte Schmerzbefragung, die nach jedem durch 
 
 Abschnitt 7 enthält Abbildungen zu diesen Verfahren. Ein Video der Untersuchungsverfahren wird in naher Zukunft auf der Konsortiums-Website verfügbar sein.
 
-Abschnitt 8 listet nur die obligatorischen Untersuchungsanweisungen auf, wie sie aus den Abschnitten 5 und 6 extrahiert wurden, um das Lernen zu erleichtern. Wenn diese Anweisungen auswendig gelernt werden, läuft die operationalisierte Untersuchung schnell ab.
+Abschnitt 8 listet nur die erforderlichen Untersuchungsanweisungen auf, wie sie aus den Abschnitten 5 und 6 extrahiert wurden, um das Lernen zu erleichtern. Wenn diese Anweisungen auswendig gelernt werden, läuft die operationalisierte Untersuchung schnell ab.
 
 Abschnitt 9 enthält Untersuchungsformulare, die die Verfahren und Datenerfassungsoptionen auflisten, die mit diesem Protokoll übereinstimmen. Das Untersuchungsformular umfasst die Tests, die spezifisch mit den DC/TMD-Diagnosekriterien verknüpft sind. Das Formular enthält auch Erfassungsfelder für ergänzende Tests (beschrieben in den Abschnitten 3-5), die manchmal zur Klärung der obligatorischen klinischen Befunde erforderlich sind. Kliniker können andere Verfahren identifizieren, die für die Beurteilung orofazialer Schmerzen im weiteren Sinne benötigt werden und die nicht in diesem Formular enthalten sind. Abhängig von der Umgebung können ergänzende Untersuchungsformulare erforderlich sein. Siehe Abschnitt 2.2(b), Umfang der Untersuchung, für das, was die DC/TMD zu erreichen beansprucht, im Vergleich zu dem, was außerhalb des Anwendungsbereichs der DC/TMD liegt.
 

@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U6. Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung
 
@@ -10,8 +10,8 @@
 
 **Untersuchungsverfahren:**
 
-- Patienten können eine Vielzahl an Begriffen für das einmalige Auftreten von Gelenkgeräuschen verwenden (z.B. "Knacken", "Knallen", "Schnappen"). Jeder dieser Begriffe wird im Rahmen dieser Untersuchung als „Knacken" gedeutet, und die folgenden Instruktionen beziehen sich auf den Begriff „Knacken" auf dem Untersuchungsformular.
-- Patienten können eine Vielzahl an Begriffen für feine, mehrfach auftretende Gelenkgeräusche verwenden (z.B. "Knirschen", "Mahlen", "Reiben"). Jeder dieser Begriffe wird im Rahmen dieser Untersuchung als „Reiben" gedeutet, und die untenstehenden Instruktionen beziehen sich auf den Ausdruck „Reiben" auf dem Untersuchungsformular.
+- Patienten können eine Vielzahl an Begriffen für das einmalige Auftreten von Gelenkgeräuschen verwenden (z.B. "Knacken", "Knallen", "Schnappen"). Jeder dieser Begriffe wird im Rahmen dieser Untersuchung als „Knacken" gedeutet, und die folgenden Anweisungen beziehen sich auf den Begriff „Knacken" auf dem Untersuchungsformular.
+- Patienten können eine Vielzahl an Begriffen für feine, mehrfach auftretende Gelenkgeräusche verwenden (z.B. "Knirschen", "Mahlen", "Reiben"). Jeder dieser Begriffe wird im Rahmen dieser Untersuchung als „Reiben" gedeutet, und die untenstehenden Anweisungen beziehen sich auf den Ausdruck „Reiben" auf dem Untersuchungsformular.
 
 ---
 
@@ -28,7 +28,7 @@
 - Die Verwendung der bilateralen oder unilateralen Palpation hängt von den Präferenzen des Untersuchers und den Umständen ab.
 - **Bilaterale Palpation:** Platzieren Sie einen Finger jeder Hand über dem dazugehörigen Kiefergelenk. Diese Methode erfordert, dass der Patient Geräusche in beiden Kiefergelenken gleichzeitig beobachtet, was schwierig sein kann.
 - **Unilaterale Palpation:** Platzieren Sie den Finger auf die gleiche Weise wie für die bilaterale Palpation beschrieben für ein einzelnes Gelenk und beurteilen Sie zuerst das rechte, dann das linke Kiefergelenk.
-- Wiederholen Sie die folgenden Instruktionen für jedes Kiefergelenk getrennt.
+- Wiederholen Sie die folgenden Anweisungen für jedes Kiefergelenk getrennt.
 
 ---
 

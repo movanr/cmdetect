@@ -22,7 +22,7 @@
 
 **Abbildung 4.** Wählen Sie den Oberkiefer-Referenzzahn aus. Zeichnen Sie eine horizontale Linie auf die Labialfläche des gegenüberliegenden Unterkiefer-Schneidezahns, wobei Sie die Schneidekante des Oberkiefer-Schneidezahns als Führung verwenden. Stellen Sie sicher, dass die Bleistiftmarkierung auf Höhe der Oberkiefer-Schneidekante liegt; wenn der Bleistift in einem Winkel zur Horizontalebene des Patienten gehalten wird, wird die Überbiss-Linie verschoben.
 
-**Abbildung 5a.** (links) Die mesiale Schneidekante des zentralen Oberkiefer-Schneidezahns (US #8, FDI #11) liegt innerhalb von 1,0 mm zur Unterkiefer-Mittellinie; diese Mittellinien sind akzeptable Landmarken für Messungen der lateralen Exkursion. (rechts) Darstellung kongruenter Mittellinien; horizontale Linie aus Abbildung 4 ebenfalls gezeigt.
+**Abbildung 5a.** (links) Die mesiale Schneidekante des zentralen Oberkiefer-Schneidezahns (US #8, FDI #11) liegt innerhalb von 1,0 mm zur Unterkiefer-Mittellinie; diese Mittellinien sind akzeptable Landmarken für Laterotrusionsmessungen. (rechts) Darstellung kongruenter Mittellinien; horizontale Linie aus Abbildung 4 ebenfalls gezeigt.
 
 **Abbildung 5b.** (links) Die mesiale Schneidekante des zentralen Oberkiefer-Schneidezahns liegt mehr als 1,0 mm von der Unterkiefer-Mittellinie entfernt. Horizontale Linie aus Abbildung 4 ebenfalls gezeigt. (rechts) Eine entsprechende vertikale Linie wird von der Oberkiefer-Mittellinie nach unten auf den gegenüberliegenden Unterkiefer-Schneidezahn gezeichnet. Horizontale Linie aus Abbildung 4 ebenfalls gezeigt.
 
@@ -82,15 +82,15 @@ Siehe Abbildung 10a für die Legende.
 
 ---
 
-## U5 Laterale und protrusive Bewegungen
+## U5 Laterotrusions- und Protrusionsbewegungen
 
-### U5_A Rechte laterale Exkursion
+### U5_A Laterotrusion nach rechts
 
 **Abbildung 17.** Das Lineal wird in horizontaler Position mit der Spitze an der Unterkiefer-Mittellinien-Referenzposition platziert. Der Patient bewegt den Unterkiefer nach rechts, während der Untersucher die Lippen bei Bedarf mit der anderen Hand zurückzieht. Das Ausmaß der Bewegung beträgt 5 mm, gemessen von der mesialen Schneidekante des rechten zentralen Oberkiefer-Schneidezahns.
 
 **Abbildung 18.** Der Patient wird gebeten, auf alle Schmerzbereiche zu zeigen. Bei Bedarf berührt der Untersucher den Bereich, um die darunter liegende Struktur zu bestätigen, und fragt dann, ob dieser Schmerz „bekannt" ist.
 
-### U5_B Linke laterale Exkursion
+### U5_B Laterotrusion nach links
 
 **Abbildung 19.** Das Lineal wird in horizontaler Position mit der Spitze an der Oberkiefer-Mittellinien-Referenzposition platziert. In diesem Fall ist die Linealspitze etwa 1 mm davon entfernt, mit der Referenzposition in einer Linie zu sein (d.h. mesiale Schneidekante des rechten zentralen Oberkiefer-Schneidezahns), eine häufige Fehlerquelle bei diesen Messungen. Der Patient bewegt den Unterkiefer nach links, während der Untersucher die Lippen bei Bedarf mit der anderen Hand zurückzieht. Der gemessene Wert an der Unterkiefer-Mittellinie beträgt nicht ganz 6,0 mm, sodass der notierte Wert 5 mm wäre.
 
@@ -104,11 +104,11 @@ Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
 (links) Das Lineal wird mit der Fläche des Lineals nach oben gerichtet gehalten; (rechts) das Lineal wird mit der Fläche des Lineals zur Seite gerichtet gehalten. In dieser Situation ist das Halten des Lineals wie im linken Bild gezeigt im Allgemeinen besser als die im rechten Bild gezeigte Position, da der Untersucher vom Lineal zur Unterkiefer-Schneidekante nach unten ablesen kann.
 
-### Alternative Messmethode für laterale Exkursionen
+### Alternative Messmethode für Laterotrusionsbewegungen
 
-#### U5_A & B Rechte und linke laterale Exkursionen
+#### U5_A & B Laterotrusion nach rechts und links
 
-**Abbildung 21.** Wenn die alternativen vertikalen Referenzmarkierungen wie in Abbildung 6 gezeigt verwendet werden, werden laterale Exkursionen wie gezeigt gemessen. Um die Linienmarkierungen auf den Unterkiefer-Schneidezähnen zu demonstrieren, wird das Lineal weiter entfernt (inferior) von der Oberkiefer-Schneidekante gehalten, als es in der Praxis getan würde.
+**Abbildung 21.** Wenn die alternativen vertikalen Referenzmarkierungen wie in Abbildung 6 gezeigt verwendet werden, werden Laterotrusionsbewegungen wie gezeigt gemessen. Um die Linienmarkierungen auf den Unterkiefer-Schneidezähnen zu demonstrieren, wird das Lineal weiter entfernt (inferior) von der Oberkiefer-Schneidekante gehalten, als es in der Praxis getan würde.
 
 (oben) Das Lineal wird in horizontaler Position mit der Spitze an der Unterkiefer-Mittellinien-Referenzposition platziert, wie durch die vertikale Linie auf dem Unterkiefer-Schneidezahn angezeigt. Der Patient bewegt den Unterkiefer nach rechts, während der Untersucher die Lippen bei Bedarf mit der anderen Hand zurückzieht. Der abgelesene Wert auf dem Lineal, entsprechend der vertikalen Referenzlinie auf dem Oberkiefer-Referenz-Schneidezahn, beträgt 7 mm.
 
@@ -116,7 +116,7 @@ Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
 ---
 
-## U6 Kiefergelenkgeräusche bei Öffnungs- und Schließbewegungen
+## U6 Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung
 
 **Abbildung 22.** Das Kiefergelenk kann auf eine von zwei Arten untersucht werden. In den linken und mittleren Darstellungen steht der Untersucher zur Seite, um die Fotografie zu erleichtern.
 
@@ -126,7 +126,7 @@ Die Schmerzlokalisation wird wie in Abbildung 18 beschrieben untersucht.
 
 ---
 
-## U7 Kiefergelenkgeräusche bei lateralen und protrusiven Bewegungen
+## U7 Kiefergelenkgeräusche bei Laterotrusion und Protrusion
 
 **Abbildung 23.** Wie dargestellt, wird das rechte Kiefergelenk untersucht, während der Unterkiefer (links) nach rechts, (Mitte) nach links und (rechts) protrusiv bewegt wird. Nicht gezeigt ist die gleiche Untersuchung für das linke Kiefergelenk.
 

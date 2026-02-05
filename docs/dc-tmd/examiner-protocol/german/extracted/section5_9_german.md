@@ -1,8 +1,8 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## U9. Muskel- und Kiefergelenkschmerzen bei Palpation
 
-### Allgemeine Instruktionen
+### Allgemeine Anweisungen
 
 *Abbildung 24*
 
@@ -25,9 +25,9 @@
 >
 > Zusätzlich werde ich Sie fragen, ob der Schmerz nur unter meinem Finger bleibt oder Sie ihn auch noch in anderen Bereichen als unter meinem Finger spüren.
 >
-> Ich werde Sie mit den Worten "Schmerz", "bekannter Schmerz", "bekannter Kopfschmerz" und "bleibt nur unter meinem Finger?" abfragen.
+> Ich werde Sie mit den Worten "Schmerz", "bekannter Schmerz", "bekannter Kopfschmerz" und "nur unter meinem Finger?" abfragen.
 >
-> [Die Abfrage "zieht auch woanders hin?" kann statt "bleibt nur unter meinem Finger" verwendet werden, wenn der Untersucher dies bevorzugt.]
+> [Die Abfrage "zieht auch woanders hin?" kann statt "nur unter meinem Finger" verwendet werden, wenn der Untersucher dies bevorzugt.]
 >
 > Ich werde den Druck jedes Mal für 5 Sekunden aufrechterhalten.
 
@@ -89,7 +89,7 @@
 
 ---
 
-### Lateraler Kondylenpol
+### Lateraler Pol
 
 *Abbildungen 31-33*
 
@@ -125,7 +125,7 @@
 
 ---
 
-### Um den lateralen Kondylenpol
+### Um den Lateralen Pol
 
 *Abbildungen 34-36*
 

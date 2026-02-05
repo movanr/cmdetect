@@ -45,13 +45,13 @@ const navItems: NavItem[] = [
   },
   {
     section: "section2",
-    label: "2. Allgemeine Prinzipien",
+    label: "2. Allgemeine Anweisungen",
     icon: FileText,
     description: "Untersuchungsprinzipien",
   },
   {
     section: "section3",
-    label: "3. Detaillierte Verfahren",
+    label: "3. Verfahrensbeschreibung",
     icon: ListChecks,
     description: "Erläuterungen der Verfahren",
   },
@@ -143,9 +143,9 @@ const navItems: NavItem[] = [
   },
   {
     section: "section8",
-    label: "8. Untersuchungsbefehle",
+    label: "8. Untersuchungsanweisungen",
     icon: Terminal,
-    description: "Obligatorische Anweisungen",
+    description: "Erforderliche Anweisungen",
   },
 ];
 

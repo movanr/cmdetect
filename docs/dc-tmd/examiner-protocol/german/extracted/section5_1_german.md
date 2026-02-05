@@ -1,4 +1,4 @@
-# DC/TMD Protocol 5: Complete Specifications
+# DC/TMD Protokoll 5: Vollständige Spezifikationen
 
 ## 5.3 Specifications
 
@@ -74,13 +74,13 @@ _Abbildungen 2 & 3_
 
 WENN DER PATIENT KEINE SCHMERZEN IN DEN ANGEZEIGTEN BEREICHEN ANGIBT:
 
-- Notieren Sie "keine" für jeweils die rechte und linke Seite unter Q1a.
+- Notieren Sie "keine" für jeweils die rechte und linke Seite unter U1a.
 
 WENN DER PATIENT SCHMERZEN IN DEN ANGEZEIGTEN BEREICHEN ANGIBT:
 
 - Der Untersucher erkundigt sich nach allen Lokalisationen.
 - Der Untersucher berührt betroffene Bereiche um die Lokalisation durch den Patienten bestätigen zu lassen, und fragt "hier?".
-- Notieren Sie die Schmerzlokalisationen unter Q1a
+- Notieren Sie die Schmerzlokalisationen unter U1a
 
 ---
 
@@ -104,10 +104,10 @@ WENN DER PATIENT SCHMERZEN IN DEN ANGEZEIGTEN BEREICHEN ANGIBT:
 
 WENN DER PATIENT KEINE KOPFSCHMERZEN IN DEN ANGEZEIGTEN BEREICHEN ANGIBT:
 
-- Notieren Sie "keine" für rechte und linke Seite unter Q1b.
+- Notieren Sie "keine" für rechte und linke Seite unter U1b.
 
 WENN DER PATIENT KOPFSCHMERZEN ANGIBT:
 
 - Der Untersucher erkundigt sich nach allen Lokalisationen.
 - Der Untersucher berührt betroffene Bereiche um die Lokalisation durch den Patienten bestätigen zu lassen, und fragt "hier?".
-- Notieren Sie die Kopfschmerzlokalisationen unter Q1b
+- Notieren Sie die Kopfschmerzlokalisationen unter U1b
