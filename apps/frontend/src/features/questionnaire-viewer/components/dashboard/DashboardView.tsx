@@ -9,9 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
 import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
-import { ExportButton, type DecryptedPatientData } from "@/features/pdf-export";
 import { QUESTIONNAIRE_ID, isQuestionnaireEnabled, type SQAnswers } from "@cmdetect/questionnaires";
-import { ArrowRight, CheckCircle2, ClipboardList } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import { SQStatusCard } from "./SQStatusCard";
@@ -21,20 +20,14 @@ interface DashboardViewProps {
   responses: QuestionnaireResponse[];
   /** Callback when starting patient review */
   onStartReview: () => void;
-  /** Patient record / case ID (for PDF export) */
+  /** Patient record / case ID (for print export) */
   caseId?: string;
-  /** Decrypted patient data (for PDF export) */
-  patientData?: DecryptedPatientData | null;
-  /** Organization name (for PDF export) */
-  organizationName?: string;
 }
 
 export function DashboardView({
   responses,
   onStartReview,
   caseId,
-  patientData,
-  organizationName,
 }: DashboardViewProps) {
   // Find specific questionnaire responses
   const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
@@ -87,14 +80,16 @@ export function DashboardView({
         <CardTitle>Fragebögen-Übersicht</CardTitle>
         {/* Action buttons */}
         <div className="flex items-center gap-2">
-          {/* PDF Export button */}
+          {/* Print / PDF export button */}
           {caseId && (
-            <ExportButton
-              caseId={caseId}
-              patientData={patientData ?? null}
-              responses={responses}
-              organizationName={organizationName}
-            />
+            <Button
+              variant="outline"
+              onClick={() => window.open(`/cases/${caseId}/print-anamnesis`, "_blank")}
+              disabled={responses.length === 0}
+            >
+              <Printer className="mr-2 h-4 w-4" />
+              Drucken / PDF
+            </Button>
           )}
           {/* Top navigation button */}
           {showNextStepButton && (

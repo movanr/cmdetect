@@ -38,10 +38,10 @@ import { OBCSummary } from "../OBCSummary";
 import { PHQ4Summary } from "../PHQ4Summary";
 
 // Clinical cutoff threshold per Löwe et al. (2010)
-const PHQ4_CLINICAL_CUTOFF = 6;
+export const PHQ4_CLINICAL_CUTOFF = 6;
 
 // PHQ-4 Severity scale segments
-const PHQ4_SEVERITY_SEGMENTS = [
+export const PHQ4_SEVERITY_SEGMENTS = [
   { label: "Normal", range: "0-2", min: 0, max: 2, color: "bg-green-500" },
   { label: "Mild", range: "3-5", min: 3, max: 5, color: "bg-yellow-500" },
   { label: "Moderat", range: "6-8", min: 6, max: 8, color: "bg-orange-500" },
@@ -49,7 +49,7 @@ const PHQ4_SEVERITY_SEGMENTS = [
 ] as const;
 
 // GCPS Grade scale segments (0-IV) - German labels per DC/TMD manual
-const GCPS_GRADE_SEGMENTS: Array<{
+export const GCPS_GRADE_SEGMENTS: Array<{
   grade: GCPSGrade;
   label: string;
   sublabel: string;
@@ -63,7 +63,7 @@ const GCPS_GRADE_SEGMENTS: Array<{
 ];
 
 // OBC Risk level segments based on TMD prevalence comparison
-const OBC_RISK_SEGMENTS: Array<{
+export const OBC_RISK_SEGMENTS: Array<{
   level: OBCRiskLevel;
   label: string;
   sublabel: string;
@@ -103,7 +103,7 @@ const OBC_RISK_SEGMENTS: Array<{
 
 // JFLS-8 Limitation level segments based on reference values
 // Healthy: 0.16, Chronic TMD: 1.74
-const JFLS8_LIMITATION_SEGMENTS: Array<{
+export const JFLS8_LIMITATION_SEGMENTS: Array<{
   level: JFLS8LimitationLevel;
   label: string;
   sublabel: string;
@@ -142,7 +142,7 @@ const JFLS8_LIMITATION_SEGMENTS: Array<{
 ];
 
 // JFLS-20 Limitation level segments (same reference values as JFLS-8)
-const JFLS20_LIMITATION_SEGMENTS: Array<{
+export const JFLS20_LIMITATION_SEGMENTS: Array<{
   level: JFLS20LimitationLevel;
   label: string;
   sublabel: string;
@@ -192,7 +192,7 @@ interface Axis2ScoreCardProps {
 /**
  * Gets the active segment index for a given PHQ-4 score
  */
-function getActiveSegment(score: number): number {
+export function getActiveSegment(score: number): number {
   if (score <= 2) return 0;
   if (score <= 5) return 1;
   if (score <= 8) return 2;
@@ -332,7 +332,7 @@ function HorizontalScoreLayout({
 /**
  * Reusable scale bar component for segment-based severity scales
  */
-function ScaleBar({
+export function ScaleBar({
   segments,
   activeIndex,
   cutoffPosition,
@@ -378,7 +378,7 @@ function ScaleBar({
 /**
  * Labels rendered below a scale bar
  */
-function ScaleLabels({
+export function ScaleLabels({
   labels,
   activeIndex,
 }: {
