@@ -162,7 +162,7 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const performSkip = () => {
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      onStepChange?.(null); // Go to summary
+      onComplete?.();
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -186,7 +186,7 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
 
     if (isLastStep) {
-      onStepChange?.(null); // Go to summary
+      onComplete?.();
     } else {
       onStepChange?.(currentStepIndex + 1);
     }

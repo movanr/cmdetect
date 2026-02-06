@@ -189,7 +189,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     setExpanded({ left: null, right: null });
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      onStepChange?.(null); // Go to summary
+      onComplete?.();
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -237,7 +237,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       setIncompleteRegions([]);
 
       if (isLastStep) {
-        onStepChange?.(null); // Go to summary
+        onComplete?.();
       } else {
         onStepChange?.(currentStepIndex + 1);
       }
@@ -269,7 +269,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     setExpanded({ left: null, right: null });
 
     if (isLastStep) {
-      onStepChange?.(null); // Go to summary
+      onComplete?.();
     } else {
       onStepChange?.(currentStepIndex + 1);
     }

@@ -456,7 +456,7 @@ export function E9Section({
     setHasValidated(false);
     setExpanded({ left: null, right: null });
     if (isLastStep) {
-      onStepChange?.(null); // Go to summary
+      onComplete?.();
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -499,7 +499,7 @@ export function E9Section({
       setHasValidated(false);
       setExpanded({ left: null, right: null });
       if (isLastStep) {
-        onStepChange?.(null); // Go to summary
+        onComplete?.();
       } else {
         onStepChange?.(currentStepIndex + 1);
       }
@@ -516,7 +516,7 @@ export function E9Section({
     setHasValidated(false);
     setExpanded({ left: null, right: null });
     if (isLastStep) {
-      onStepChange?.(null); // Go to summary
+      onComplete?.();
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
