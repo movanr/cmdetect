@@ -32,6 +32,7 @@ import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
 import { IncompleteDataDialog, MeasurementFlowBlock, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { buildRegionSummary } from "../summary/summary-helpers";
 import type { SectionProps } from "./types";
 
 // Step configuration
@@ -74,44 +75,6 @@ function computeE1RegionStatus(region: Region, values: string[] | undefined): Re
     hasFamiliarHeadache: false,
     isComplete: true,
   };
-}
-
-/**
- * Build summary string from selected regions.
- * Shows laterality: (rechts), (links), or (beidseitig)
- */
-function buildRegionSummary(
-  rightValues: string[] | undefined,
-  leftValues: string[] | undefined,
-  regionLabels: Record<string, string>,
-  noneLabel: string
-): string {
-  const right = (rightValues ?? []).filter((v) => v !== "none");
-  const left = (leftValues ?? []).filter((v) => v !== "none");
-
-  if (right.length === 0 && left.length === 0) {
-    return noneLabel;
-  }
-
-  // Collect all unique regions
-  const allRegions = new Set([...right, ...left]);
-  const parts: string[] = [];
-
-  for (const region of allRegions) {
-    const label = regionLabels[region] || region;
-    const inRight = right.includes(region);
-    const inLeft = left.includes(region);
-
-    if (inRight && inLeft) {
-      parts.push(`${label} (beidseitig)`);
-    } else if (inRight) {
-      parts.push(`${label} (rechts)`);
-    } else {
-      parts.push(`${label} (links)`);
-    }
-  }
-
-  return parts.join(", ");
 }
 
 /**

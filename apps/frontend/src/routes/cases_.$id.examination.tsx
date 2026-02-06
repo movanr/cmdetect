@@ -24,7 +24,7 @@ import {
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
-import { ExaminationPersistenceProvider, useExaminationPersistenceContext } from "../features/examination";
+import { ExaminationPersistenceProvider, ExaminationSummary, useExaminationPersistenceContext } from "../features/examination";
 
 // GraphQL query for patient record
 const GET_PATIENT_RECORD = graphql(`
@@ -185,7 +185,7 @@ function ExaminationContent({
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
 }) {
-  const { isHydrated } = useExaminationPersistenceContext();
+  const { isHydrated, status } = useExaminationPersistenceContext();
 
   // Show loading while hydrating form data from backend/localStorage
   if (!isHydrated) {
@@ -194,6 +194,11 @@ function ExaminationContent({
         <div className="text-muted-foreground">Untersuchungsdaten werden geladen...</div>
       </div>
     );
+  }
+
+  // Show readonly summary for completed examinations
+  if (status === "completed") {
+    return <ExaminationSummary />;
   }
 
   return (
