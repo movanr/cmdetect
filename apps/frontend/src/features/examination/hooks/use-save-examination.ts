@@ -1,0 +1,159 @@
+/**
+ * Mutation hooks for saving examination responses
+ */
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { execute } from "@/graphql/execute";
+import { toast } from "sonner";
+import {
+  UPSERT_EXAMINATION_RESPONSE,
+  COMPLETE_EXAMINATION,
+} from "../queries";
+import type { ExaminationResponse, ExaminationStatus } from "./use-examination-response";
+import type { SectionId } from "../sections/registry";
+
+interface UpsertParams {
+  patientRecordId: string;
+  responseData: Record<string, unknown>;
+  status: ExaminationStatus;
+  completedSections: SectionId[];
+}
+
+interface CompleteParams {
+  id: string;
+  completedSections: SectionId[];
+}
+
+/**
+ * Mutation hook for upserting examination response.
+ * Creates new record or updates existing one.
+ */
+export function useUpsertExamination(patientRecordId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["examination-response", patientRecordId];
+
+  return useMutation({
+    mutationFn: async ({
+      patientRecordId,
+      responseData,
+      status,
+      completedSections,
+    }: UpsertParams) => {
+      return execute(UPSERT_EXAMINATION_RESPONSE, {
+        patient_record_id: patientRecordId,
+        response_data: responseData,
+        status,
+        completed_sections: completedSections,
+      });
+    },
+
+    // Optimistic update
+    onMutate: async ({ responseData, status, completedSections }) => {
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousResponse =
+        queryClient.getQueryData<ExaminationResponse | null>(queryKey);
+
+      // Optimistically update the cache
+      queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
+        if (old) {
+          return {
+            ...old,
+            responseData,
+            status,
+            completedSections,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        // If no existing record, create optimistic one (id will be replaced on success)
+        return {
+          id: "optimistic",
+          patientRecordId,
+          examinedBy: "",
+          responseData,
+          status,
+          completedSections,
+          startedAt: new Date().toISOString(),
+          completedAt: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return { previousResponse };
+    },
+
+    onError: (error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousResponse !== undefined) {
+        queryClient.setQueryData(queryKey, context.previousResponse);
+      }
+      toast.error("Fehler beim Speichern: " + error.message);
+    },
+
+    onSuccess: (data) => {
+      // Update cache with server response (gets correct id)
+      const response = data.insert_examination_response_one;
+      if (response) {
+        queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => ({
+          ...old!,
+          id: response.id,
+          responseData: response.response_data as Record<string, unknown>,
+          status: response.status as ExaminationStatus,
+          completedSections: (response.completed_sections ?? []) as SectionId[],
+          updatedAt: response.updated_at,
+        }));
+      }
+    },
+  });
+}
+
+/**
+ * Mutation hook for completing an examination.
+ * Sets status to 'completed' and completed_at timestamp.
+ */
+export function useCompleteExamination(patientRecordId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["examination-response", patientRecordId];
+
+  return useMutation({
+    mutationFn: async ({ id, completedSections }: CompleteParams) => {
+      return execute(COMPLETE_EXAMINATION, {
+        id,
+        completed_sections: completedSections,
+      });
+    },
+
+    onMutate: async ({ completedSections }) => {
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousResponse =
+        queryClient.getQueryData<ExaminationResponse | null>(queryKey);
+
+      // Optimistically update status to completed
+      queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
+        if (!old) return null;
+        return {
+          ...old,
+          status: "completed" as ExaminationStatus,
+          completedSections,
+          completedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return { previousResponse };
+    },
+
+    onError: (error, _variables, context) => {
+      if (context?.previousResponse !== undefined) {
+        queryClient.setQueryData(queryKey, context.previousResponse);
+      }
+      toast.error("Fehler beim Abschließen: " + error.message);
+    },
+
+    onSuccess: () => {
+      toast.success("Untersuchung abgeschlossen");
+    },
+  });
+}

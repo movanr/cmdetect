@@ -1,3 +1,4 @@
+- "!include public_examination_response.yaml"
 - "!include public_organization.yaml"
 - "!include public_patient_consent.yaml"
 - "!include public_patient_record.yaml"

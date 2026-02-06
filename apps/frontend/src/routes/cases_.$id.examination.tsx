@@ -24,6 +24,7 @@ import {
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
+import { ExaminationPersistenceProvider, useExaminationPersistenceContext } from "../features/examination";
 
 // GraphQL query for patient record
 const GET_PATIENT_RECORD = graphql(`
@@ -165,19 +166,48 @@ function ExaminationLayout() {
       isDecrypting={isDecrypting}
     >
       <FormProvider {...form}>
-        <div className="space-y-4">
-          {/* Sub-step navigation tabs */}
-          <SubStepTabs
-            caseId={id}
-            parentStep="examination"
-            subSteps={subSteps}
-            className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
-          />
-
-          {/* Child route content */}
-          <Outlet />
-        </div>
+        <ExaminationPersistenceProvider patientRecordId={id}>
+          <ExaminationContent caseId={id} subSteps={subSteps} />
+        </ExaminationPersistenceProvider>
       </FormProvider>
     </CaseLayout>
+  );
+}
+
+/**
+ * Inner component that handles hydration loading state.
+ * Separated to access persistence context after provider is mounted.
+ */
+function ExaminationContent({
+  caseId,
+  subSteps,
+}: {
+  caseId: string;
+  subSteps: { id: string; label: string; order: number; route: string }[];
+}) {
+  const { isHydrated } = useExaminationPersistenceContext();
+
+  // Show loading while hydrating form data from backend/localStorage
+  if (!isHydrated) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">Untersuchungsdaten werden geladen...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Sub-step navigation tabs */}
+      <SubStepTabs
+        caseId={caseId}
+        parentStep="examination"
+        subSteps={subSteps}
+        className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
+      />
+
+      {/* Child route content */}
+      <Outlet />
+    </div>
   );
 }

@@ -8,7 +8,7 @@
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { E5Section } from "../features/examination";
+import { E5Section, useExaminationPersistenceContext } from "../features/examination";
 
 const e5SearchSchema = z.object({
   step: z.coerce.number().min(1).optional(),
@@ -23,6 +23,7 @@ function ExaminationE5Page() {
   const { id } = Route.useParams();
   const { step } = Route.useSearch();
   const navigate = useNavigate();
+  const { saveSection } = useExaminationPersistenceContext();
 
   // Navigate to a specific step (0-indexed), or null for summary view
   const navigateToStep = (stepIndex: number | null) => {
@@ -35,8 +36,9 @@ function ExaminationE5Page() {
     }
   };
 
-  // Navigate to next section (E9) on completion
-  const handleComplete = () => {
+  // Save section and navigate to next section (E9) on completion
+  const handleComplete = async () => {
+    await saveSection("e5");
     navigate({
       to: "/cases/$id/examination/e9",
       params: { id },

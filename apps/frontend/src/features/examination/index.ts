@@ -72,6 +72,25 @@ export {
 } from "./form/use-examination-form";
 export { createStepValidator, getStepPaths } from "./form/use-step-validation";
 
+// Persistence hooks and context
+export {
+  useExaminationResponse,
+  type ExaminationResponse,
+  type ExaminationStatus,
+} from "./hooks/use-examination-response";
+export {
+  useUpsertExamination,
+  useCompleteExamination,
+} from "./hooks/use-save-examination";
+export {
+  useExaminationPersistence,
+  type UseExaminationPersistenceResult,
+} from "./hooks/use-examination-persistence";
+export {
+  ExaminationPersistenceProvider,
+  useExaminationPersistenceContext,
+} from "./contexts/ExaminationPersistenceContext";
+
 // Components
 export { ExaminationForm } from "./components/ExaminationForm";
 export { HeadDiagram } from "./components/HeadDiagram/head-diagram";

@@ -1,0 +1,117 @@
+table:
+  name: examination_response
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organization_id
+  - name: patient_record
+    using:
+      foreign_key_constraint_on: patient_record_id
+  - name: examiner
+    using:
+      foreign_key_constraint_on: examined_by
+insert_permissions:
+  - role: org_admin
+    permission:
+      check: {}
+      set:
+        organization_id: x-hasura-Organization-Id
+        examined_by: x-hasura-User-Id
+      columns:
+        - patient_record_id
+        - response_data
+        - status
+        - completed_sections
+    comment: ""
+  - role: physician
+    permission:
+      check: {}
+      set:
+        organization_id: x-hasura-Organization-Id
+        examined_by: x-hasura-User-Id
+      columns:
+        - patient_record_id
+        - response_data
+        - status
+        - completed_sections
+    comment: ""
+select_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - id
+        - patient_record_id
+        - organization_id
+        - examined_by
+        - response_data
+        - status
+        - completed_sections
+        - started_at
+        - completed_at
+        - created_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - id
+        - patient_record_id
+        - organization_id
+        - examined_by
+        - response_data
+        - status
+        - completed_sections
+        - started_at
+        - completed_at
+        - created_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+update_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - response_data
+        - status
+        - completed_sections
+        - completed_at
+        - deleted_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: {}
+      set:
+        updated_at: now()
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - response_data
+        - status
+        - completed_sections
+        - completed_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+      set:
+        updated_at: now()
+    comment: ""

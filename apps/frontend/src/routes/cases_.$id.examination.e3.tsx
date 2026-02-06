@@ -5,7 +5,7 @@
  */
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { E3Section } from "../features/examination";
+import { E3Section, useExaminationPersistenceContext } from "../features/examination";
 
 export const Route = createFileRoute("/cases_/$id/examination/e3")({
   component: ExaminationE3Page,
@@ -14,9 +14,11 @@ export const Route = createFileRoute("/cases_/$id/examination/e3")({
 function ExaminationE3Page() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { saveSection } = useExaminationPersistenceContext();
 
-  // Navigate to next section (E4) on completion or skip
-  const handleComplete = () => {
+  // Save section and navigate to next section (E4) on completion or skip
+  const handleComplete = async () => {
+    await saveSection("e3");
     navigate({
       to: "/cases/$id/examination/e4",
       params: { id },
