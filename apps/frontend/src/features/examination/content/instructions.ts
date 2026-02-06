@@ -14,28 +14,6 @@ import type {
   SafetyWarning,
 } from "./types";
 
-/** Instruction content for a single examination step (legacy) */
-export interface StepInstruction {
-  /** Step identifier (e.g., "E4A", "E4B") */
-  stepId: string;
-  /** Step title */
-  title: string;
-  /** Patient communication script (quotable) */
-  patientScript: string;
-  /** Key examiner action */
-  examinerAction: string;
-}
-
-/** Pain interview guidance content (legacy) */
-export interface PainInterviewInstruction {
-  /** Title for the pain interview step */
-  title: string;
-  /** Patient prompt for pointing to pain areas */
-  prompt: string;
-  /** Abbreviated flow guidance */
-  guidance: string;
-}
-
 // ============================================================================
 // E4C Safety Warning
 // ============================================================================
@@ -592,50 +570,6 @@ export const E5_RICH_INSTRUCTIONS = {
       { section: "section8", anchor: "82", label: "8.2 Untersuchungsbezogene Schmerzbefragung" },
     ],
   } satisfies RichPainInterviewInstruction,
-} as const;
-
-// ============================================================================
-// Legacy E4 Instructions (for backwards compatibility)
-// ============================================================================
-
-/**
- * E4 Opening Movements - Clinical Instructions (Legacy format)
- *
- * Based on DC-TMD Examiner Protocol Section 4
- */
-export const E4_INSTRUCTIONS = {
-  /** E4A - Pain-free opening */
-  painFreeOpening: {
-    stepId: "U4A",
-    title: "Schmerzfreie Mundöffnung",
-    patientScript:
-      "Öffnen Sie Ihren Mund so weit wie möglich, ohne dadurch Schmerzen auszulösen oder bestehende Schmerzen zu verstärken.",
-    examinerAction: "Interinzisale Distanz messen",
-  } satisfies StepInstruction,
-
-  /** E4B - Maximum unassisted opening */
-  maxUnassistedOpening: {
-    stepId: "U4B",
-    title: "Maximale aktive Mundöffnung",
-    patientScript: "Öffnen Sie Ihren Mund so weit wie möglich, auch wenn es schmerzhaft ist.",
-    examinerAction: "Interinzisale Distanz messen",
-  } satisfies StepInstruction,
-
-  /** E4C - Maximum assisted opening */
-  maxAssistedOpening: {
-    stepId: "U4C",
-    title: "Maximale passive Mundöffnung",
-    patientScript:
-      "Ich werde jetzt versuchen, Ihren Mund weiter zu öffnen. Heben Sie die Hand, wenn Sie möchten, dass ich aufhöre.",
-    examinerAction: "Scherentechnik anwenden, Distanz messen",
-  } satisfies StepInstruction,
-
-  /** Pain interview after movement */
-  painInterview: {
-    title: "Schmerzbefragung",
-    prompt: "Hatten Sie bei dieser Bewegung irgendwelche Schmerzen?",
-    guidance: "Schmerz → Lokalisation → Bestätigung → Keine weiteren Schmerzbereiche",
-  } satisfies PainInterviewInstruction,
 } as const;
 
 // ============================================================================
@@ -1337,9 +1271,6 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
     },
   };
 }
-
-/** Backward-compatible default (standard mode = current hardcoded "5 Sek" behavior) */
-export const E9_RICH_INSTRUCTIONS = createE9RichInstructions("standard");
 
 // ============================================================================
 // Type Guards and Helpers

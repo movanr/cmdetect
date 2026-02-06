@@ -25,16 +25,9 @@ export {
   RegionStatusList,
   type RegionStatusListProps,
 } from "./RegionStatusList";
-export { InstructionBlock } from "./InstructionBlock";
 export { SectionFooter, type SectionFooterProps } from "./SectionFooter";
 export { IncompleteDataDialog, type IncompleteDataDialogProps } from "./IncompleteDataDialog";
 
-// Rich instruction components
-export { TextSegmentRenderer } from "./TextSegmentRenderer";
-export { SafetyWarningBanner, SafetyWarnings } from "./SafetyWarningBanner";
-export { ExpandableDetails } from "./ExpandableDetails";
-export { RichInstructionBlock, richInstructionToProps } from "./RichInstructionBlock";
-export { PhaseInstructionBlock } from "./PhaseInstructionBlock";
 export {
   ProcedureFlow,
   ProcedureFlowCompact,

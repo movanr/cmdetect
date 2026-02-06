@@ -3,26 +3,8 @@
  *
  * These types support the DC-TMD protocol's formatting conventions:
  * - Verbatim text (must be stated exactly)
- * - Flexible text (intent matters, wording can vary)
- * - Optional text (may be included based on context)
  * - Examiner-only instructions (not spoken to patient)
  */
-
-/** Text formatting following DC/TMD protocol conventions */
-export type TextStyle =
-  | "verbatim" // Bold - must be stated exactly
-  | "flexible" // Normal - intent matters
-  | "optional" // [optional text]
-  | "examiner-only"; // <instruction to examiner>
-
-/** A segment of instructional text with styling */
-export interface TextSegment {
-  text: string;
-  style: TextStyle;
-}
-
-/** Patient script - simple string or array of styled segments */
-export type PatientScript = string | TextSegment[];
 
 /** Safety warning levels */
 export type WarningLevel = "caution" | "critical";
@@ -38,30 +20,6 @@ export interface CrossReference {
   section: string; // Route parameter (e.g., "e4", "section6")
   anchor?: string; // Optional anchor ID (e.g., "4a-schmerzfreie-offnung")
   label: string; // Display text
-}
-
-/** A phase in a multi-step procedure */
-export interface ProcedurePhase {
-  id: string;
-  name: string;
-  patientScript?: PatientScript;
-  examinerSteps: string[];
-  tips?: string[];
-}
-
-/** Extended instruction for examination steps */
-export interface RichStepInstruction {
-  stepId: string;
-  title: string;
-  patientScript: PatientScript;
-  examinerAction: string;
-  examinerSteps?: string[]; // Detailed steps (expandable)
-  phases?: ProcedurePhase[]; // Multi-phase procedures
-  warnings?: SafetyWarning[]; // Safety warnings
-  crossReferences?: CrossReference[];
-  tips?: string[];
-  /** Optional hint about app interaction for this step */
-  appAction?: string;
 }
 
 /**
@@ -92,9 +50,6 @@ export interface ProcedureFlowStep {
   condition?: string;
 }
 
-/** @deprecated Use ProcedureFlowStep instead */
-export type PainInterviewFlowStep = ProcedureFlowStep;
-
 /** Pain interview instruction with flow */
 export interface RichPainInterviewInstruction {
   title: string;
@@ -114,20 +69,4 @@ export interface RichMeasurementInstruction {
   warnings?: SafetyWarning[];
   /** Protocol references - flat list of cross-references to protocol sections */
   protocolRefs?: CrossReference[];
-}
-
-/**
- * Type guard to check if a PatientScript is an array of TextSegments
- */
-export function isSegmentedScript(script: PatientScript): script is TextSegment[] {
-  return Array.isArray(script);
-}
-
-/**
- * Type guard to check if an instruction has phases (multi-phase procedure)
- */
-export function hasPhases(
-  instruction: RichStepInstruction
-): instruction is RichStepInstruction & { phases: ProcedurePhase[] } {
-  return instruction.phases != null && instruction.phases.length > 0;
 }
