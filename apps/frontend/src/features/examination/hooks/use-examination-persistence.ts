@@ -13,7 +13,7 @@ import { useFormContext } from "react-hook-form";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
 import { useUpsertExamination, useCompleteExamination } from "./use-save-examination";
-import type { SectionId } from "../sections/registry";
+import { SECTION_IDS, type SectionId } from "../sections/registry";
 import type { FormValues } from "../form/use-examination-form";
 import {
   parseExaminationData,
@@ -261,11 +261,11 @@ export function useExaminationPersistence({
 
   // Complete examination
   const completeExaminationFn = useCallback(async () => {
-    // First save the last section (e9)
     const formValues = form.getValues();
-    const finalCompletedSections = completedSections.includes("e9")
+    const lastSectionId = SECTION_IDS.at(-1)!;
+    const finalCompletedSections = completedSections.includes(lastSectionId)
       ? completedSections
-      : [...completedSections, "e9" as SectionId];
+      : [...completedSections, lastSectionId];
 
     // Upsert with all data first
     const upsertResult = await upsertMutation.mutateAsync({

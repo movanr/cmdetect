@@ -1,4 +1,4 @@
-# Examination-v2 Architecture
+# Examination Architecture
 
 ## Design Pattern Cheatsheet
 
