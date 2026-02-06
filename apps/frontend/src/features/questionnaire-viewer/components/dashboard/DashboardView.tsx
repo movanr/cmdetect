@@ -133,7 +133,7 @@ export function DashboardView({
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Achse 2 - Psychosoziale Bewertung
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 items-start">
+          <div className="space-y-3">
             {/* Pain Drawing Card */}
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
               <PainDrawingScoreCard data={painDrawingData ?? null} />

@@ -1,10 +1,10 @@
 /**
- * Axis 2 Score Card - Displays PHQ-4 score with visual severity scale
+ * Axis 2 Score Card - Displays questionnaire scores with horizontal severity scale
  * Used in the dashboard for quick severity assessment before patient review
  */
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import type {
   GCPS1MAnswers,
   GCPSGrade,
@@ -29,6 +29,7 @@ import {
   QUESTIONNAIRE_ID,
 } from "@cmdetect/questionnaires";
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { GCPS1MSummary } from "../GCPS1MSummary";
 import { JFLS20Summary } from "../JFLS20Summary";
@@ -60,21 +61,6 @@ const GCPS_GRADE_SEGMENTS: Array<{
   { grade: 3, label: "III", sublabel: "Mäßige Einschr.", color: "bg-orange-500" },
   { grade: 4, label: "IV", sublabel: "Hochgradige Einschr.", color: "bg-red-500" },
 ];
-
-// Charakteristische Schmerzintensität scale segments
-const CPI_SEGMENTS = [
-  { label: "Keine", range: "0", min: 0, max: 0, color: "bg-green-500" },
-  { label: "Gering", range: "1-49", min: 1, max: 49, color: "bg-yellow-500" },
-  { label: "Hoch", range: "50-100", min: 50, max: 100, color: "bg-red-500" },
-] as const;
-
-// Beeinträchtigungswert scale segments with Beeinträchtigungspunkte (BP)
-const INTERFERENCE_SEGMENTS = [
-  { bp: 0, range: "0-29", min: 0, max: 29, color: "bg-green-500" },
-  { bp: 1, range: "30-49", min: 30, max: 49, color: "bg-yellow-500" },
-  { bp: 2, range: "50-69", min: 50, max: 69, color: "bg-orange-500" },
-  { bp: 3, range: "70+", min: 70, max: 100, color: "bg-red-500" },
-] as const;
 
 // OBC Risk level segments based on TMD prevalence comparison
 const OBC_RISK_SEGMENTS: Array<{
@@ -250,6 +236,171 @@ function JFLS20SubscaleDisplay({
   );
 }
 
+/**
+ * Horizontal 3-column layout for score cards:
+ * LEFT: title/subtitle/warning | CENTER: scale bar | RIGHT: score + interpretation
+ */
+interface HorizontalScoreLayoutProps {
+  title: string;
+  subtitle?: string;
+  scaleLabel: string;
+  scaleBar: ReactNode;
+  scoreDisplay: ReactNode;
+  warning?: ReactNode;
+  subscales?: ReactNode;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  expandedContent?: ReactNode;
+}
+
+function HorizontalScoreLayout({
+  title,
+  subtitle,
+  scaleLabel,
+  scaleBar,
+  scoreDisplay,
+  warning,
+  subscales,
+  isExpanded,
+  onToggleExpand,
+  expandedContent,
+}: HorizontalScoreLayoutProps) {
+  return (
+    <Card className="overflow-hidden py-0 gap-0">
+      <div className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
+          {/* LEFT: Title + warning */}
+          <div className="min-w-0">
+            <h4 className="font-medium text-sm leading-tight">{title}</h4>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+            )}
+            {warning && <div className="mt-1.5">{warning}</div>}
+          </div>
+
+          {/* CENTER: Scale bar */}
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground mb-1">{scaleLabel}</p>
+            {scaleBar}
+          </div>
+
+          {/* RIGHT: Score + expand */}
+          <div className="flex items-start justify-between gap-2 min-w-0">
+            <div className="flex flex-col gap-1">
+              {scoreDisplay}
+              {subscales && <div className="mt-1">{subscales}</div>}
+            </div>
+            {expandedContent && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleExpand}
+                className="text-muted-foreground h-7 px-2 text-xs shrink-0"
+              >
+                {isExpanded ? (
+                  <>
+                    Ausblenden <ChevronUp className="ml-1 h-3 w-3" />
+                  </>
+                ) : (
+                  <>
+                    Details <ChevronDown className="ml-1 h-3 w-3" />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Expandable details */}
+      {expandedContent && (
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out"
+          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <CardContent className="border-t bg-muted/20 p-4">
+              {expandedContent}
+            </CardContent>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/**
+ * Reusable scale bar component for segment-based severity scales
+ */
+function ScaleBar({
+  segments,
+  activeIndex,
+  cutoffPosition,
+}: {
+  segments: ReadonlyArray<{ label?: string; range?: string; color: string }>;
+  activeIndex: number;
+  cutoffPosition?: string;
+}) {
+  return (
+    <div className="relative">
+      <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
+        {segments.map((segment, index) => {
+          const isActive = index === activeIndex;
+          return (
+            <div
+              key={index}
+              className={`flex-1 ${
+                isActive
+                  ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                  : "bg-gray-200"
+              } flex items-center justify-center transition-all`}
+            >
+              <span
+                className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+              >
+                {segment.range ?? segment.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {cutoffPosition && (
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-black/60"
+          style={{ left: cutoffPosition }}
+          title="Klinischer Cutoff"
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Labels rendered below a scale bar
+ */
+function ScaleLabels({
+  labels,
+  activeIndex,
+}: {
+  labels: ReadonlyArray<{ label: string; key: string | number }>;
+  activeIndex: number;
+}) {
+  return (
+    <div className="flex mt-1 text-[9px]">
+      {labels.map((item, index) => (
+        <div
+          key={item.key}
+          className={`flex-1 text-center ${
+            index === activeIndex ? "font-medium text-foreground" : "text-muted-foreground"
+          }`}
+        >
+          {item.label}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Axis2ScoreCard({
   questionnaireId,
   title,
@@ -266,15 +417,20 @@ export function Axis2ScoreCard({
   if (isPlaceholder || !hasData) {
     return (
       <Card className="bg-muted/30">
-        <CardHeader className="p-4">
-          <div>
-            <h4 className="font-medium text-muted-foreground">{title}</h4>
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-            <p className="text-sm text-muted-foreground mt-2">
-              {isPlaceholder ? "Demnächst verfügbar" : "Keine Daten"}
-            </p>
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
+            <div>
+              <h4 className="font-medium text-sm text-muted-foreground">{title}</h4>
+              {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+            </div>
+            <div />
+            <div className="text-left">
+              <p className="text-sm text-muted-foreground">
+                {isPlaceholder ? "Demnächst verfügbar" : "Keine Daten"}
+              </p>
+            </div>
           </div>
-        </CardHeader>
+        </div>
       </Card>
     );
   }
@@ -284,235 +440,109 @@ export function Axis2ScoreCard({
     const gcpsScore = calculateGCPS1MScore(answers as GCPS1MAnswers);
     const activeGradeIndex = gcpsScore.grade;
 
-    // Get active segment index for CPI
-    const activeCPISegment = gcpsScore.cpi === 0 ? 0 : gcpsScore.cpi < 50 ? 1 : 2;
-
-    // Get active segment index for Interference
-    const activeInterferenceSegment =
-      gcpsScore.interferenceScore < 30
-        ? 0
-        : gcpsScore.interferenceScore < 50
-          ? 1
-          : gcpsScore.interferenceScore < 70
-            ? 2
-            : 3;
+    const gradeRoman =
+      gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1];
 
     return (
-      <Card className="overflow-hidden py-0 gap-0">
-        <CardHeader className="p-4">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h4 className="font-medium">{title}</h4>
-              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-muted-foreground"
-            >
-              {isExpanded ? (
-                <>
-                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Details <ChevronDown className="ml-1 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Grade label */}
-          <p className="text-sm text-muted-foreground mb-2">Chronifizierungsgrad</p>
-
-          {/* Grade scale */}
-          <div className="relative">
-            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {GCPS_GRADE_SEGMENTS.map((segment, index) => {
-                const isActive = index === activeGradeIndex;
-                return (
-                  <div
-                    key={segment.grade}
-                    className={`flex-1 ${
-                      isActive
-                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                        : "bg-gray-200"
-                    } flex flex-col items-center justify-center transition-all`}
-                  >
-                    <span
-                      className={`text-xs font-bold ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                    >
-                      {segment.label}
-                    </span>
-                  </div>
-                );
-              })}
+      <HorizontalScoreLayout
+        title={title}
+        subtitle={subtitle}
+        scaleLabel="Chronifizierungsgrad"
+        scaleBar={
+          <>
+            <ScaleBar
+              segments={GCPS_GRADE_SEGMENTS.map((s) => ({
+                label: s.label,
+                color: s.color,
+              }))}
+              activeIndex={activeGradeIndex}
+            />
+            <ScaleLabels
+              labels={GCPS_GRADE_SEGMENTS.map((s) => ({ label: s.sublabel, key: s.grade }))}
+              activeIndex={activeGradeIndex}
+            />
+          </>
+        }
+        scoreDisplay={
+          <div className="text-left">
+            <div className="text-xl font-bold leading-tight">Grad {gradeRoman}</div>
+            <div className="text-xs text-muted-foreground">
+              {gcpsScore.gradeInterpretation.label}
             </div>
           </div>
-
-          {/* Labels under scale */}
-          <div className="flex mt-1 text-[9px]">
-            {GCPS_GRADE_SEGMENTS.map((segment, index) => (
-              <div
-                key={segment.grade}
-                className={`flex-1 text-center ${
-                  index === activeGradeIndex
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {segment.sublabel}
-              </div>
-            ))}
-          </div>
-
-          {/* Grade display */}
-          <div className="flex items-center justify-center mt-3">
-            <span className="text-xl font-bold">
-              Grad {gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1]}
-            </span>
-            <span className="ml-2 text-sm font-medium">
-              - {gcpsScore.gradeInterpretation.label}
-            </span>
-          </div>
-
-          {/* Clinical interpretation warning */}
-          {gcpsScore.grade >= 3 && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
-              <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Dysfunktionaler chronischer Schmerz</span>
+        }
+        warning={
+          gcpsScore.grade >= 3 ? (
+            <div className="flex items-center gap-1.5 text-red-600">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              <span className="text-xs font-medium">Dysfunktionaler chronischer Schmerz</span>
             </div>
-          )}
-          {gcpsScore.grade >= 1 && gcpsScore.grade <= 2 && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-yellow-600">
-              <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Funktional persistierender Schmerz</span>
+          ) : gcpsScore.grade >= 1 ? (
+            <div className="flex items-center gap-1.5 text-yellow-600">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              <span className="text-xs font-medium">Funktional persistierender Schmerz</span>
             </div>
-          )}
-        </CardHeader>
-
-        {/* Expandable details with scoring scales */}
-        <div
-          className="grid transition-[grid-template-rows] duration-300 ease-out"
-          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-        >
-          <div className="overflow-hidden">
-            <CardContent className="border-t bg-muted/20 p-4 space-y-4">
-              {/* Charakteristische Schmerzintensität */}
-              <div>
-                <p className="text-sm font-medium mb-2">
-                  Charakteristische Schmerzintensität: {gcpsScore.cpi}
-                </p>
-                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                  {CPI_SEGMENTS.map((segment, index) => {
-                    const isActive = index === activeCPISegment;
-                    return (
-                      <div
-                        key={segment.label}
-                        className={`${index === 0 ? "flex-[0.5]" : "flex-1"} ${
-                          isActive
-                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                            : "bg-gray-200"
-                        } flex items-center justify-center transition-all`}
-                      >
-                        <span
-                          className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                        >
-                          {segment.range}
-                        </span>
-                      </div>
-                    );
-                  })}
+          ) : undefined
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={
+          <div className="space-y-3">
+            {/* Scoring breakdown — stat cells */}
+            <div className="grid grid-cols-4 divide-x rounded-md border text-center">
+              {/* CPI */}
+              <div className="px-3 py-2">
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  Schmerzintensität
                 </div>
-                <div className="flex mt-1 text-[9px]">
-                  <div
-                    className={`flex-[0.5] text-center ${activeCPISegment === 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                  >
-                    Keine
-                  </div>
-                  <div
-                    className={`flex-1 text-center ${activeCPISegment === 1 ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                  >
-                    Gering
-                  </div>
-                  <div
-                    className={`flex-1 text-center ${activeCPISegment === 2 ? "font-medium text-foreground" : "text-muted-foreground"}`}
-                  >
-                    Hoch
-                  </div>
+                <div className="text-lg font-semibold leading-tight mt-0.5">
+                  {gcpsScore.cpi}
+                </div>
+                <div className="text-[10px] text-muted-foreground">CPI</div>
+              </div>
+              {/* Interference score → BP */}
+              <div className="px-3 py-2">
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  Beeinträchtigung
+                </div>
+                <div className="text-lg font-semibold leading-tight mt-0.5">
+                  {gcpsScore.interferenceScore}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  → {gcpsScore.interferencePoints} BP
                 </div>
               </div>
-
-              {/* Beeinträchtigungswert */}
-              <div>
-                <p className="text-sm font-medium mb-2">
-                  Beeinträchtigungswert: {gcpsScore.interferenceScore} →{" "}
-                  {gcpsScore.interferencePoints} BP
-                </p>
-                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                  {INTERFERENCE_SEGMENTS.map((segment, index) => {
-                    const isActive = index === activeInterferenceSegment;
-                    return (
-                      <div
-                        key={segment.bp}
-                        className={`flex-1 ${
-                          isActive
-                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                            : "bg-gray-200"
-                        } flex items-center justify-center transition-all`}
-                      >
-                        <span
-                          className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                        >
-                          {segment.range}
-                        </span>
-                      </div>
-                    );
-                  })}
+              {/* Disability days → BP */}
+              <div className="px-3 py-2">
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  Beeintr.-Tage
                 </div>
-                <div className="flex mt-1 text-[9px]">
-                  {INTERFERENCE_SEGMENTS.map((segment, index) => (
-                    <div
-                      key={segment.bp}
-                      className={`flex-1 text-center ${
-                        index === activeInterferenceSegment
-                          ? "font-medium text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {segment.bp} BP
-                    </div>
-                  ))}
+                <div className="text-lg font-semibold leading-tight mt-0.5">
+                  {gcpsScore.disabilityDays}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  → {gcpsScore.disabilityDaysPoints} BP
                 </div>
               </div>
-
-              {/* Beeinträchtigungstage und Gesamt-BP */}
-              <div className="flex gap-4 text-sm pt-2 border-t">
-                <div>
-                  <span className="text-muted-foreground">Beeinträchtigungstage:</span>{" "}
-                  <span className="font-medium">
-                    {gcpsScore.disabilityDays} {gcpsScore.disabilityDays === 1 ? "Tag" : "Tage"}
-                  </span>{" "}
-                  <span className="text-muted-foreground">
-                    → {gcpsScore.disabilityDaysPoints} BP
-                  </span>
+              {/* Total BP */}
+              <div className="px-3 py-2 bg-muted/40">
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  Gesamt
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Gesamt-BP:</span>{" "}
-                  <span className="font-medium">{gcpsScore.totalDisabilityPoints}</span>
+                <div className="text-lg font-semibold leading-tight mt-0.5">
+                  {gcpsScore.totalDisabilityPoints}
                 </div>
+                <div className="text-[10px] text-muted-foreground">BP</div>
               </div>
+            </div>
 
-              {/* Original answers */}
-              <div className="pt-2 border-t">
-                <GCPS1MSummary answers={answers as GCPS1MAnswers} />
-              </div>
-            </CardContent>
+            {/* Original answers */}
+            <div className="pt-2 border-t">
+              <GCPS1MSummary answers={answers as GCPS1MAnswers} />
+            </div>
           </div>
-        </div>
-      </Card>
+        }
+      />
     );
   }
 
@@ -527,118 +557,59 @@ export function Axis2ScoreCard({
     const isSignificant = jflsScore.limitationLevel === "significant";
 
     return (
-      <Card className="overflow-hidden py-0 gap-0">
-        <CardHeader className="p-4">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h4 className="font-medium">{title}</h4>
-              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-muted-foreground"
-            >
-              {isExpanded ? (
-                <>
-                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Details <ChevronDown className="ml-1 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Limitation level label */}
-          <p className="text-sm text-muted-foreground mb-2">Kieferfunktions-Einschränkung</p>
-
-          {/* Limitation scale */}
-          <div className="relative">
-            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {JFLS8_LIMITATION_SEGMENTS.map((segment, index) => {
-                const isActive = index === activeLimitationIndex;
-                return (
-                  <div
-                    key={segment.level}
-                    className={`flex-1 ${
-                      isActive
-                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                        : "bg-gray-200"
-                    } flex flex-col items-center justify-center transition-all`}
-                  >
-                    <span
-                      className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                    >
-                      {segment.range}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Labels under scale */}
-          <div className="flex mt-1 text-[10px]">
-            {JFLS8_LIMITATION_SEGMENTS.map((segment, index) => (
-              <div
-                key={segment.level}
-                className={`flex-1 text-center ${
-                  index === activeLimitationIndex
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {segment.label}
-              </div>
-            ))}
-          </div>
-
-          {/* Score display */}
-          <div className="flex items-center justify-center mt-3">
+      <HorizontalScoreLayout
+        title={title}
+        subtitle={subtitle}
+        scaleLabel="Kieferfunktions-Einschränkung"
+        scaleBar={
+          <>
+            <ScaleBar
+              segments={JFLS8_LIMITATION_SEGMENTS}
+              activeIndex={activeLimitationIndex}
+            />
+            <ScaleLabels
+              labels={JFLS8_LIMITATION_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
+              activeIndex={activeLimitationIndex}
+            />
+          </>
+        }
+        scoreDisplay={
+          <div className="text-left">
             {jflsScore.isValid && jflsScore.globalScore !== null ? (
               <>
-                <span className="text-2xl font-bold">{jflsScore.globalScore.toFixed(2)}</span>
-                <span className="text-lg text-muted-foreground ml-1">/ {jflsScore.maxScore}</span>
-                <span className="ml-3 text-sm font-medium">
+                <div className="text-xl font-bold leading-tight">
+                  {jflsScore.globalScore.toFixed(2)}
+                  <span className="text-sm text-muted-foreground font-normal">
+                    /{jflsScore.maxScore}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
                   {jflsScore.limitationInterpretation?.label}
-                </span>
+                </div>
               </>
             ) : (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 Zu viele fehlende Antworten ({jflsScore.missingCount}/8)
               </span>
             )}
           </div>
-
-          {/* Significant limitation warning */}
-          {isSignificant && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
-              <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Deutliche Funktionseinschränkung</span>
+        }
+        warning={
+          isSignificant ? (
+            <div className="flex items-center gap-1.5 text-red-600">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              <span className="text-xs font-medium">Deutliche Funktionseinschränkung</span>
             </div>
-          )}
-        </CardHeader>
-
-        {/* Expandable details */}
-        <div
-          className="grid transition-[grid-template-rows] duration-300 ease-out"
-          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-        >
-          <div className="overflow-hidden">
-            <CardContent className="border-t bg-muted/20 p-4">
-              <JFLS8Summary answers={answers as JFLS8Answers} />
-            </CardContent>
-          </div>
-        </div>
-      </Card>
+          ) : undefined
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={<JFLS8Summary answers={answers as JFLS8Answers} />}
+      />
     );
   }
 
-  // JFLS-20 Scoring (same methodology as JFLS-8)
+  // JFLS-20 Scoring
   if (questionnaireId === QUESTIONNAIRE_ID.JFLS20) {
     const jflsScore = calculateJFLS20Score(answers as JFLS20Answers);
     const activeLimitationIndex = jflsScore.limitationLevel
@@ -649,135 +620,76 @@ export function Axis2ScoreCard({
     const isSignificant = jflsScore.limitationLevel === "significant";
 
     return (
-      <Card className="overflow-hidden py-0 gap-0">
-        <CardHeader className="p-4">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h4 className="font-medium">{title}</h4>
-              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-muted-foreground"
-            >
-              {isExpanded ? (
-                <>
-                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Details <ChevronDown className="ml-1 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Limitation level label */}
-          <p className="text-sm text-muted-foreground mb-2">
-            Kieferfunktions-Einschränkung (erweitert)
-          </p>
-
-          {/* Limitation scale */}
-          <div className="relative">
-            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {JFLS20_LIMITATION_SEGMENTS.map((segment, index) => {
-                const isActive = index === activeLimitationIndex;
-                return (
-                  <div
-                    key={segment.level}
-                    className={`flex-1 ${
-                      isActive
-                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                        : "bg-gray-200"
-                    } flex flex-col items-center justify-center transition-all`}
-                  >
-                    <span
-                      className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                    >
-                      {segment.range}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Labels under scale */}
-          <div className="flex mt-1 text-[10px]">
-            {JFLS20_LIMITATION_SEGMENTS.map((segment, index) => (
-              <div
-                key={segment.level}
-                className={`flex-1 text-center ${
-                  index === activeLimitationIndex
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {segment.label}
-              </div>
-            ))}
-          </div>
-
-          {/* Score display */}
-          <div className="flex items-center justify-center mt-3">
+      <HorizontalScoreLayout
+        title={title}
+        subtitle={subtitle}
+        scaleLabel="Kieferfunktions-Einschränkung (erweitert)"
+        scaleBar={
+          <>
+            <ScaleBar
+              segments={JFLS20_LIMITATION_SEGMENTS}
+              activeIndex={activeLimitationIndex}
+            />
+            <ScaleLabels
+              labels={JFLS20_LIMITATION_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
+              activeIndex={activeLimitationIndex}
+            />
+          </>
+        }
+        scoreDisplay={
+          <div className="text-left">
             {jflsScore.isValid && jflsScore.globalScore !== null ? (
               <>
-                <span className="text-2xl font-bold">{jflsScore.globalScore.toFixed(2)}</span>
-                <span className="text-lg text-muted-foreground ml-1">/ {jflsScore.maxScore}</span>
-                <span className="ml-3 text-sm font-medium">
+                <div className="text-xl font-bold leading-tight">
+                  {jflsScore.globalScore.toFixed(2)}
+                  <span className="text-sm text-muted-foreground font-normal">
+                    /{jflsScore.maxScore}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
                   {jflsScore.limitationInterpretation?.label}
-                </span>
+                </div>
               </>
             ) : (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 Zu viele fehlende Antworten ({jflsScore.missingCount}/20)
               </span>
             )}
           </div>
-
-          {/* Significant limitation warning */}
-          {isSignificant && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
-              <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Deutliche Funktionseinschränkung</span>
+        }
+        warning={
+          isSignificant ? (
+            <div className="flex items-center gap-1.5 text-red-600">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              <span className="text-xs font-medium">Deutliche Funktionseinschränkung</span>
             </div>
-          )}
-
-          {/* Subscales */}
-          <div className="flex flex-wrap justify-center gap-4 mt-4 pt-3 border-t text-sm">
-            <JFLS20SubscaleDisplay
-              label={JFLS20_SUBSCALE_LABELS.mastication.label}
-              subscale={jflsScore.subscales.mastication}
-              refValues={JFLS20_REFERENCE_VALUES.mastication}
-            />
-            <JFLS20SubscaleDisplay
-              label={JFLS20_SUBSCALE_LABELS.mobility.label}
-              subscale={jflsScore.subscales.mobility}
-              refValues={JFLS20_REFERENCE_VALUES.mobility}
-            />
-            <JFLS20SubscaleDisplay
-              label={JFLS20_SUBSCALE_LABELS.communication.label}
-              subscale={jflsScore.subscales.communication}
-              refValues={JFLS20_REFERENCE_VALUES.communication}
-            />
-          </div>
-        </CardHeader>
-
-        {/* Expandable details */}
-        <div
-          className="grid transition-[grid-template-rows] duration-300 ease-out"
-          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-        >
-          <div className="overflow-hidden">
-            <CardContent className="border-t bg-muted/20 p-4">
-              <JFLS20Summary answers={answers as JFLS20Answers} />
-            </CardContent>
-          </div>
-        </div>
-      </Card>
+          ) : undefined
+        }
+        subscales={
+          jflsScore.isValid ? (
+            <div className="text-xs space-y-0.5">
+              <JFLS20SubscaleDisplay
+                label={JFLS20_SUBSCALE_LABELS.mastication.label}
+                subscale={jflsScore.subscales.mastication}
+                refValues={JFLS20_REFERENCE_VALUES.mastication}
+              />
+              <JFLS20SubscaleDisplay
+                label={JFLS20_SUBSCALE_LABELS.mobility.label}
+                subscale={jflsScore.subscales.mobility}
+                refValues={JFLS20_REFERENCE_VALUES.mobility}
+              />
+              <JFLS20SubscaleDisplay
+                label={JFLS20_SUBSCALE_LABELS.communication.label}
+                subscale={jflsScore.subscales.communication}
+                refValues={JFLS20_REFERENCE_VALUES.communication}
+              />
+            </div>
+          ) : undefined
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={<JFLS20Summary answers={answers as JFLS20Answers} />}
+      />
     );
   }
 
@@ -790,115 +702,58 @@ export function Axis2ScoreCard({
     const isHighRisk = obcScore.riskLevel === "high";
 
     return (
-      <Card className="overflow-hidden py-0 gap-0">
-        <CardHeader className="p-4">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h4 className="font-medium">{title}</h4>
-              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+      <HorizontalScoreLayout
+        title={title}
+        subtitle={subtitle}
+        scaleLabel="Orale Verhaltensweisen - TMD-Risiko"
+        scaleBar={
+          <>
+            <ScaleBar
+              segments={OBC_RISK_SEGMENTS}
+              activeIndex={activeRiskIndex}
+            />
+            <ScaleLabels
+              labels={OBC_RISK_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
+              activeIndex={activeRiskIndex}
+            />
+          </>
+        }
+        scoreDisplay={
+          <div className="text-left">
+            <div className="text-xl font-bold leading-tight">
+              {obcScore.totalScore}
+              <span className="text-sm text-muted-foreground font-normal">
+                /{obcScore.maxScore}
+              </span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-muted-foreground"
-            >
-              {isExpanded ? (
-                <>
-                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Details <ChevronDown className="ml-1 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Risk level label */}
-          <p className="text-sm text-muted-foreground mb-2">Orale Verhaltensweisen - TMD-Risiko</p>
-
-          {/* Risk scale */}
-          <div className="relative">
-            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {OBC_RISK_SEGMENTS.map((segment, index) => {
-                const isActive = index === activeRiskIndex;
-                return (
-                  <div
-                    key={segment.level}
-                    className={`flex-1 ${
-                      isActive
-                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                        : "bg-gray-200"
-                    } flex flex-col items-center justify-center transition-all`}
-                  >
-                    <span
-                      className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                    >
-                      {segment.range}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="text-xs text-muted-foreground">
+              {obcScore.riskInterpretation.label}
             </div>
           </div>
-
-          {/* Labels under scale */}
-          <div className="flex mt-1 text-[10px]">
-            {OBC_RISK_SEGMENTS.map((segment, index) => (
-              <div
-                key={segment.level}
-                className={`flex-1 text-center ${
-                  index === activeRiskIndex
-                    ? "font-medium text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {segment.label}
-              </div>
-            ))}
-          </div>
-
-          {/* Score display */}
-          <div className="flex items-center justify-center mt-3">
-            <span className="text-2xl font-bold">{obcScore.totalScore}</span>
-            <span className="text-lg text-muted-foreground ml-1">/ {obcScore.maxScore}</span>
-            <span className="ml-3 text-sm font-medium">{obcScore.riskInterpretation.label}</span>
-          </div>
-
-          {/* High risk warning */}
-          {isHighRisk && (
-            <div className="flex items-center justify-center gap-1.5 mt-2 text-red-600">
-              <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Risikofaktor zur Entstehung von CMD</span>
+        }
+        warning={
+          isHighRisk ? (
+            <div className="flex items-center gap-1.5 text-red-600">
+              <AlertTriangle className="size-3.5 shrink-0" />
+              <span className="text-xs font-medium">Risikofaktor zur Entstehung von CMD</span>
             </div>
-          )}
-        </CardHeader>
-
-        {/* Expandable details */}
-        <div
-          className="grid transition-[grid-template-rows] duration-300 ease-out"
-          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-        >
-          <div className="overflow-hidden">
-            <CardContent className="border-t bg-muted/20 p-4">
-              <OBCSummary answers={answers as OBCAnswers} />
-            </CardContent>
-          </div>
-        </div>
-      </Card>
+          ) : undefined
+        }
+        isExpanded={isExpanded}
+        onToggleExpand={() => setIsExpanded(!isExpanded)}
+        expandedContent={<OBCSummary answers={answers as OBCAnswers} />}
+      />
     );
   }
 
-  // Only PHQ-4 scoring is implemented
+  // PHQ-4 Scoring (default / fallback for known questionnaire)
   if (questionnaireId !== QUESTIONNAIRE_ID.PHQ4) {
     return (
       <Card>
-        <CardHeader className="p-4">
-          <h4 className="font-medium">{title}</h4>
+        <div className="p-4">
+          <h4 className="font-medium text-sm">{title}</h4>
           <p className="text-sm text-muted-foreground mt-1">Bewertung nicht verfügbar</p>
-        </CardHeader>
+        </div>
       </Card>
     );
   }
@@ -911,127 +766,63 @@ export function Axis2ScoreCard({
   const isClinicallyRelevant = score.total >= PHQ4_CLINICAL_CUTOFF;
 
   return (
-    <Card className="overflow-hidden py-0 gap-0">
-      <CardHeader className="p-4">
-        {/* Header with title, subtitle and expand button */}
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h4 className="font-medium">{title}</h4>
-            {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-muted-foreground"
-          >
-            {isExpanded ? (
-              <>
-                Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
-              </>
-            ) : (
-              <>
-                Details <ChevronDown className="ml-1 h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Severity label */}
-        <p className="text-sm text-muted-foreground mb-2">Schweregrad </p>
-
-        {/* Severity scale */}
-        <div className="relative">
-          {/* Scale bar with segments */}
-          <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-            {PHQ4_SEVERITY_SEGMENTS.map((segment, index) => {
-              const isActive = index === activeSegment;
-              return (
-                <div
-                  key={segment.label}
-                  className={`flex-1 ${
-                    isActive
-                      ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                      : "bg-gray-200"
-                  } flex flex-col items-center justify-center transition-all`}
-                >
-                  <span
-                    className={`text-[10px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
-                  >
-                    {segment.range}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Cutoff line at 6 (50% position) */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-black/60"
-            style={{ left: "50%" }}
-            title="Klinischer Cutoff (≥6)"
+    <HorizontalScoreLayout
+      title={title}
+      subtitle={subtitle}
+      scaleLabel="Schweregrad"
+      scaleBar={
+        <>
+          <ScaleBar
+            segments={PHQ4_SEVERITY_SEGMENTS}
+            activeIndex={activeSegment}
+            cutoffPosition="50%"
           />
-        </div>
-
-        {/* Labels under scale */}
-        <div className="flex mt-1 text-[10px]">
-          {PHQ4_SEVERITY_SEGMENTS.map((segment, index) => (
-            <div
-              key={segment.label}
-              className={`flex-1 text-center ${
-                index === activeSegment ? "font-medium text-foreground" : "text-muted-foreground"
-              }`}
-            >
-              {segment.label}
-            </div>
-          ))}
-        </div>
-
-        {/* Score display */}
-        <div className="flex items-center justify-center mt-3">
-          <span className="text-2xl font-bold">{score.total}</span>
-          <span className="text-lg text-muted-foreground ml-1">/ {score.maxTotal}</span>
-          <span className="ml-3 text-sm font-medium">{interpretation.label}</span>
-        </div>
-
-        {/* Clinical relevance alert */}
-        {isClinicallyRelevant && (
-          <div className="flex items-center justify-center gap-1.5 mt-2 text-orange-600">
-            <AlertTriangle className="size-4" />
-            <span className="text-sm font-medium">Klinisch auffällig (≥6 Punkte)</span>
+          <ScaleLabels
+            labels={PHQ4_SEVERITY_SEGMENTS.map((s) => ({ label: s.label, key: s.label }))}
+            activeIndex={activeSegment}
+          />
+        </>
+      }
+      scoreDisplay={
+        <div className="text-left">
+          <div className="text-xl font-bold leading-tight">
+            {score.total}
+            <span className="text-sm text-muted-foreground font-normal">/{score.maxTotal}</span>
           </div>
-        )}
-
-        {/* Subscales */}
-        <div className="flex justify-center gap-6 mt-4 pt-3 border-t text-sm">
-          <div className="flex items-center gap-1.5">
+          <div className="text-xs text-muted-foreground">{interpretation.label}</div>
+        </div>
+      }
+      warning={
+        isClinicallyRelevant ? (
+          <div className="flex items-center gap-1.5 text-orange-600">
+            <AlertTriangle className="size-3.5 shrink-0" />
+            <span className="text-xs font-medium">Klinisch auffällig (≥6 Punkte)</span>
+          </div>
+        ) : undefined
+      }
+      subscales={
+        <div className="flex gap-3 text-xs">
+          <div className="flex items-center gap-1">
             <span className="text-muted-foreground">Angst:</span>
             <span className={anxietyResult.positive ? "text-orange-600 font-medium" : ""}>
               {score.anxiety}/{score.maxAnxiety}
             </span>
             {anxietyResult.positive && <span className="text-[10px] text-orange-600">(≥3)</span>}
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <span className="text-muted-foreground">Depression:</span>
             <span className={depressionResult.positive ? "text-orange-600 font-medium" : ""}>
               {score.depression}/{score.maxDepression}
             </span>
-            {depressionResult.positive && <span className="text-[10px] text-orange-600">(≥3)</span>}
+            {depressionResult.positive && (
+              <span className="text-[10px] text-orange-600">(≥3)</span>
+            )}
           </div>
         </div>
-      </CardHeader>
-
-      {/* Expandable details */}
-      <div
-        className="grid transition-[grid-template-rows] duration-300 ease-out"
-        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-      >
-        <div className="overflow-hidden">
-          <CardContent className="border-t bg-muted/20 p-4">
-            <PHQ4Summary answers={answers as Record<string, string>} />
-          </CardContent>
-        </div>
-      </div>
-    </Card>
+      }
+      isExpanded={isExpanded}
+      onToggleExpand={() => setIsExpanded(!isExpanded)}
+      expandedContent={<PHQ4Summary answers={answers as Record<string, string>} />}
+    />
   );
 }

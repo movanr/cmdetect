@@ -1,11 +1,11 @@
 /**
  * Pain Drawing Score Card - Displays pain region count with visual severity scale
  * Used in the dashboard for quick pain assessment before patient review
- * Follows the Axis2ScoreCard pattern for consistent UI
+ * Follows the horizontal 3-column layout for consistent UI
  */
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -40,13 +40,18 @@ export function PainDrawingScoreCard({
   if (!hasData) {
     return (
       <Card className="bg-muted/30">
-        <CardHeader className="p-4">
-          <div>
-            <h4 className="font-medium text-muted-foreground">{title}</h4>
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-            <p className="text-sm text-muted-foreground mt-2">Keine Daten</p>
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
+            <div>
+              <h4 className="font-medium text-sm text-muted-foreground">{title}</h4>
+              {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+            </div>
+            <div />
+            <div className="text-left">
+              <p className="text-sm text-muted-foreground">Keine Daten</p>
+            </div>
           </div>
-        </CardHeader>
+        </div>
       </Card>
     );
   }
@@ -58,77 +63,90 @@ export function PainDrawingScoreCard({
   return (
     <>
       <Card className="overflow-hidden py-0 gap-0">
-        <CardHeader className="p-4">
-          {/* Header with title and expand button */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h4 className="font-medium">{title}</h4>
-              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-muted-foreground"
-            >
-              {isExpanded ? (
-                <>
-                  Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Details <ChevronDown className="ml-1 h-4 w-4" />
-                </>
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
+            {/* LEFT: Title + warning */}
+            <div className="min-w-0">
+              <h4 className="font-medium text-sm leading-tight">{title}</h4>
+              {subtitle && (
+                <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
               )}
-            </Button>
-          </div>
+              {isWidespread && (
+                <div className="flex items-center gap-1.5 text-red-600 mt-1.5">
+                  <AlertTriangle className="size-3.5 shrink-0" />
+                  <span className="text-xs font-medium">Schmerz in mehreren Körperbereichen</span>
+                </div>
+              )}
+            </div>
 
-          {/* Severity label */}
-          <p className="text-sm text-muted-foreground mb-2">Anzahl schmerzhafter Körperstellen</p>
+            {/* CENTER: Severity scale */}
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground mb-1">
+                Anzahl schmerzhafter Körperstellen
+              </p>
+              <div className="relative">
+                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
+                  {SEVERITY_SEGMENTS.map((segment, index) => {
+                    const isActive = index === activeSegmentIndex;
+                    return (
+                      <div
+                        key={segment.label}
+                        className={`flex-1 ${
+                          isActive
+                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                            : "bg-gray-200"
+                        } flex items-center justify-center transition-all`}
+                      >
+                        <span
+                          className={`text-[9px] font-bold ${
+                            isActive ? "text-white drop-shadow-sm" : "text-gray-400"
+                          }`}
+                        >
+                          {segment.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* Risk interpretation - only shown when pain is marked */}
+              {score.regionCount >= 1 && (
+                <p className="text-[9px] text-muted-foreground mt-1">
+                  Jede markierte Körperstelle erhöht das Risiko für weitere Schmerzerkrankungen.
+                </p>
+              )}
+            </div>
 
-          {/* Severity scale */}
-          <div className="relative">
-            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {SEVERITY_SEGMENTS.map((segment, index) => {
-                const isActive = index === activeSegmentIndex;
-                return (
-                  <div
-                    key={segment.label}
-                    className={`flex-1 ${
-                      isActive
-                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                        : "bg-gray-200"
-                    } flex items-center justify-center transition-all`}
-                  >
-                    <span
-                      className={`text-sm font-bold ${
-                        isActive ? "text-white drop-shadow-sm" : "text-gray-400"
-                      }`}
-                    >
-                      {segment.label}
-                    </span>
-                  </div>
-                );
-              })}
+            {/* RIGHT: Region count + expand */}
+            <div className="flex items-start justify-between gap-2 min-w-0">
+              <div>
+                <div className="text-xl font-bold leading-tight">
+                  {score.regionCount}
+                  <span className="text-sm text-muted-foreground font-normal"> {score.regionCount === 1 ? "Areal" : "Areale"}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {score.totalElements} Markierung{score.totalElements !== 1 ? "en" : ""}
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-muted-foreground h-7 px-2 text-xs shrink-0"
+              >
+                {isExpanded ? (
+                  <>
+                    Ausblenden <ChevronUp className="ml-1 h-3 w-3" />
+                  </>
+                ) : (
+                  <>
+                    Details <ChevronDown className="ml-1 h-3 w-3" />
+                  </>
+                )}
+              </Button>
             </div>
           </div>
-
-          {/* Risk interpretation - only shown when pain is marked */}
-          {score.regionCount >= 1 && (
-            <p className="text-center text-sm text-muted-foreground mt-2">
-              Jede mit Schmerzen markierte Körperstelle erhöht das Risiko, eine weitere
-              Schmerzerkrankung sowie chronische Schmerzen zu entwickeln.
-            </p>
-          )}
-
-          {/* Widespread pain warning */}
-          {isWidespread && (
-            <div className="flex items-center justify-center gap-1.5 mt-3 text-red-600">
-              <AlertTriangle className="size-4" />
-              <span className="text-sm font-medium">Schmerz in mehreren Körperbereichen</span>
-            </div>
-          )}
-        </CardHeader>
+        </div>
 
         {/* Expandable details with thumbnail grid */}
         <div
@@ -137,12 +155,6 @@ export function PainDrawingScoreCard({
         >
           <div className="overflow-hidden">
             <CardContent className="border-t bg-muted/20 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted-foreground">
-                  Gesamt: {score.totalElements} Markierung
-                  {score.totalElements !== 1 ? "en" : ""}
-                </span>
-              </div>
               <div className="grid grid-cols-5 gap-2">
                 {REGION_ORDER.map((regionId) => (
                   <RegionThumbnail
