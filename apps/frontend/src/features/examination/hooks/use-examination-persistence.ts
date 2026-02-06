@@ -15,12 +15,16 @@ import { useExaminationResponse, type ExaminationStatus } from "./use-examinatio
 import { useUpsertExamination, useCompleteExamination } from "./use-save-examination";
 import type { SectionId } from "../sections/registry";
 import type { FormValues } from "../form/use-examination-form";
+import {
+  parseExaminationData,
+  parseCompletedSections,
+} from "./validate-persistence";
 
 const STORAGE_KEY_PREFIX = "cmdetect_exam_draft_";
 const AUTO_SAVE_DEBOUNCE_MS = 2000;
 
 interface DraftData {
-  formValues: Record<string, unknown>;
+  formValues: FormValues;
   completedSections: SectionId[];
   savedAt: string;
 }
@@ -80,21 +84,30 @@ export function useExaminationPersistence({
 
     // Determine which data source to use
     let dataSource: "backend" | "draft" | "none" = "none";
-    let formData: Record<string, unknown> | null = null;
+    let formData: FormValues | null = null;
     let sections: SectionId[] = [];
 
     if (backendData && Object.keys(backendData).length > 0) {
-      // Backend has data
+      // Backend has data (already validated by useExaminationResponse)
       if (draftSavedAt && backendUpdatedAt) {
         // Both exist - compare timestamps
         const backendTime = new Date(backendUpdatedAt).getTime();
         const draftTime = new Date(draftSavedAt).getTime();
 
         if (draftTime > backendTime) {
-          // Draft is newer - use it
-          dataSource = "draft";
-          formData = draft?.formValues ?? null;
-          sections = draft?.completedSections ?? [];
+          // Draft is newer — validate before using (may be stale after model changes)
+          const validatedDraft = parseExaminationData(draft?.formValues);
+          if (validatedDraft) {
+            dataSource = "draft";
+            formData = validatedDraft;
+            sections = parseCompletedSections(draft?.completedSections);
+          } else {
+            // Draft is invalid — discard it and use backend
+            dataSource = "backend";
+            formData = backendData;
+            sections = backendResponse?.completedSections ?? [];
+            removeDraft();
+          }
         } else {
           // Backend is newer or same - use it, clear draft
           dataSource = "backend";
@@ -109,15 +122,21 @@ export function useExaminationPersistence({
         sections = backendResponse?.completedSections ?? [];
       }
     } else if (draft?.formValues) {
-      // Only draft exists
-      dataSource = "draft";
-      formData = draft.formValues;
-      sections = draft.completedSections ?? [];
+      // Only draft exists — validate before using
+      const validatedDraft = parseExaminationData(draft.formValues);
+      if (validatedDraft) {
+        dataSource = "draft";
+        formData = validatedDraft;
+        sections = parseCompletedSections(draft.completedSections);
+      } else {
+        // Draft is invalid — discard it
+        removeDraft();
+      }
     }
 
     // Apply data to form
     if (formData && dataSource !== "none") {
-      form.reset(formData as FormValues);
+      form.reset(formData);
       setCompletedSections(sections);
     }
 
@@ -132,7 +151,9 @@ export function useExaminationPersistence({
   ]);
 
   // Track latest form values for save-on-unmount
-  const latestValuesRef = useRef<Record<string, unknown> | null>(null);
+  // RHF watch returns DeepPartial<FormValues> but since all fields have defaults
+  // from the model, values are always fully populated at runtime.
+  const latestValuesRef = useRef<FormValues | null>(null);
 
   // Auto-save to localStorage on form changes (debounced)
   useEffect(() => {
@@ -140,7 +161,7 @@ export function useExaminationPersistence({
 
     const subscription = form.watch((values) => {
       // Track latest values for save-on-unmount
-      latestValuesRef.current = values as Record<string, unknown>;
+      latestValuesRef.current = values as FormValues;
 
       // Clear existing timer
       if (autoSaveTimerRef.current) {
@@ -150,7 +171,7 @@ export function useExaminationPersistence({
       // Set new debounced save
       autoSaveTimerRef.current = setTimeout(() => {
         setDraft({
-          formValues: values as Record<string, unknown>,
+          formValues: values as FormValues,
           completedSections,
           savedAt: new Date().toISOString(),
         });
@@ -174,7 +195,7 @@ export function useExaminationPersistence({
               formValues: latestValuesRef.current,
               completedSections,
               savedAt: new Date().toISOString(),
-            })
+            } satisfies DraftData)
           );
         } catch (e) {
           console.error("Failed to save draft on unmount:", e);
@@ -207,7 +228,7 @@ export function useExaminationPersistence({
       try {
         await upsertMutation.mutateAsync({
           patientRecordId,
-          responseData: formValues as Record<string, unknown>,
+          responseData: formValues,
           status,
           completedSections: newCompletedSections,
         });
@@ -220,7 +241,7 @@ export function useExaminationPersistence({
       } catch (error) {
         // On error, ensure draft is saved to localStorage as safety net
         setDraft({
-          formValues: formValues as Record<string, unknown>,
+          formValues,
           completedSections: newCompletedSections,
           savedAt: new Date().toISOString(),
         });
@@ -249,7 +270,7 @@ export function useExaminationPersistence({
     // Upsert with all data first
     const upsertResult = await upsertMutation.mutateAsync({
       patientRecordId,
-      responseData: formValues as Record<string, unknown>,
+      responseData: formValues,
       status: "in_progress",
       completedSections: finalCompletedSections,
     });

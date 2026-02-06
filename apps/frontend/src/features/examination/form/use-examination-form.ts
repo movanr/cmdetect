@@ -61,6 +61,13 @@ const pathHelpers = createPathHelpers(allInstances);
 const schema = schemaFromModel(EXAMINATION_MODEL);
 type FormValues = z.infer<typeof schema>;
 
+/**
+ * Module-level exports for persistence validation.
+ * The schema and defaults are computed once at import time from the model.
+ */
+export { schema as examinationSchema };
+export { defaults as examinationDefaults };
+
 /** Form configuration for ExaminationForm to use with useForm() */
 export const examinationFormConfig = {
   resolver: zodResolver(schema as z.ZodTypeAny),

@@ -9,12 +9,17 @@ import {
   UPSERT_EXAMINATION_RESPONSE,
   COMPLETE_EXAMINATION,
 } from "../queries";
+import type { FormValues } from "../form/use-examination-form";
 import type { ExaminationResponse, ExaminationStatus } from "./use-examination-response";
 import type { SectionId } from "../sections/registry";
+import {
+  parseExaminationData,
+  parseCompletedSections,
+} from "./validate-persistence";
 
 interface UpsertParams {
   patientRecordId: string;
-  responseData: Record<string, unknown>;
+  responseData: FormValues;
   status: ExaminationStatus;
   completedSections: SectionId[];
 }
@@ -95,14 +100,17 @@ export function useUpsertExamination(patientRecordId: string) {
       // Update cache with server response (gets correct id)
       const response = data.insert_examination_response_one;
       if (response) {
-        queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => ({
-          ...old!,
-          id: response.id,
-          responseData: response.response_data as Record<string, unknown>,
-          status: response.status as ExaminationStatus,
-          completedSections: (response.completed_sections ?? []) as SectionId[],
-          updatedAt: response.updated_at,
-        }));
+        const validatedData = parseExaminationData(response.response_data);
+        if (validatedData) {
+          queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => ({
+            ...old!,
+            id: response.id,
+            responseData: validatedData,
+            status: response.status as ExaminationStatus,
+            completedSections: parseCompletedSections(response.completed_sections),
+            updatedAt: response.updated_at,
+          }));
+        }
       }
     },
   });

@@ -5,7 +5,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
 import { GET_EXAMINATION_RESPONSE } from "../queries";
+import type { FormValues } from "../form/use-examination-form";
 import type { SectionId } from "../sections/registry";
+import {
+  parseExaminationData,
+  parseCompletedSections,
+} from "./validate-persistence";
 
 export type ExaminationStatus = "draft" | "in_progress" | "completed";
 
@@ -13,7 +18,7 @@ export interface ExaminationResponse {
   id: string;
   patientRecordId: string;
   examinedBy: string;
-  responseData: Record<string, unknown>;
+  responseData: FormValues;
   status: ExaminationStatus;
   completedSections: SectionId[];
   startedAt: string;
@@ -39,13 +44,23 @@ export function useExaminationResponse(patientRecordId: string) {
         return null;
       }
 
+      const validatedData = parseExaminationData(response.response_data);
+      if (!validatedData) {
+        // Backend data doesn't match current schema — treat as no response
+        console.warn(
+          "[examination] Backend response_data failed schema validation for record:",
+          patientRecordId
+        );
+        return null;
+      }
+
       return {
         id: response.id,
         patientRecordId: response.patient_record_id,
         examinedBy: response.examined_by,
-        responseData: response.response_data as Record<string, unknown>,
+        responseData: validatedData,
         status: response.status as ExaminationStatus,
-        completedSections: (response.completed_sections ?? []) as SectionId[],
+        completedSections: parseCompletedSections(response.completed_sections),
         startedAt: response.started_at,
         completedAt: response.completed_at ?? null,
         createdAt: response.created_at,
