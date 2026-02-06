@@ -198,7 +198,7 @@ function ExaminationContent({
 
   // Show readonly summary for completed examinations
   if (status === "completed") {
-    return <ExaminationSummary />;
+    return <ExaminationSummary caseId={caseId} />;
   }
 
   return (
