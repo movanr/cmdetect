@@ -75,15 +75,17 @@ export function DurationFormField({
                 </Label>
               </div>
               <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min={0}
-                  max={11}
-                  value={value.months ?? 0}
-                  onChange={handleMonthsChange}
-                  disabled={disabled}
-                  className="w-20"
-                />
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={11}
+                    value={value.months ?? 0}
+                    onChange={handleMonthsChange}
+                    disabled={disabled}
+                    className="w-20"
+                  />
+                </FormControl>
                 <Label className="text-sm text-muted-foreground font-normal">
                   {SQ_DURATION_LABELS.months}
                 </Label>
