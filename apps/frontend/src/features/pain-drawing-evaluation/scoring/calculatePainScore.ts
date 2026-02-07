@@ -11,10 +11,7 @@ import type {
 /**
  * Counts drawing elements by type for a given region
  */
-function countElements(
-  data: PainDrawingData,
-  imageId: ImageId
-): ElementCounts {
+function countElements(data: PainDrawingData, imageId: ImageId): ElementCounts {
   const elements = data.drawings[imageId]?.elements ?? [];
 
   const shadings = elements.filter((e) => e.type === "shade").length;
@@ -48,15 +45,9 @@ function getRiskLevel(regionCount: number): RiskLevel {
  * Detects pain patterns based on affected regions
  */
 function detectPatterns(affectedRegions: ImageId[]): PainPatterns {
-  const hasHeadPain = affectedRegions.some((r) =>
-    REGION_CATEGORIES.head.includes(r)
-  );
-  const hasOralPain = affectedRegions.some((r) =>
-    REGION_CATEGORIES.oral.includes(r)
-  );
-  const hasBodyPain = affectedRegions.some((r) =>
-    REGION_CATEGORIES.body.includes(r)
-  );
+  const hasHeadPain = affectedRegions.some((r) => REGION_CATEGORIES.head.includes(r));
+  const hasOralPain = affectedRegions.some((r) => REGION_CATEGORIES.oral.includes(r));
+  const hasBodyPain = affectedRegions.some((r) => REGION_CATEGORIES.body.includes(r));
   const hasWidespreadPain = affectedRegions.length >= 3;
 
   return {
@@ -74,14 +65,9 @@ function detectPatterns(affectedRegions: ImageId[]): PainPatterns {
  * @param data - Pain drawing data from patient submission
  * @returns Comprehensive pain drawing score with region counts, patterns, and interpretation
  */
-export function calculatePainDrawingScore(
-  data: PainDrawingData
-): PainDrawingScore {
+export function calculatePainDrawingScore(data: PainDrawingData): PainDrawingScore {
   // Count elements for each region
-  const elementCounts: Record<ImageId, ElementCounts> = {} as Record<
-    ImageId,
-    ElementCounts
-  >;
+  const elementCounts: Record<ImageId, ElementCounts> = {} as Record<ImageId, ElementCounts>;
   let totalElements = 0;
 
   for (const imageId of REGION_ORDER) {
@@ -91,9 +77,7 @@ export function calculatePainDrawingScore(
   }
 
   // Determine affected regions (regions with at least one element)
-  const affectedRegions = REGION_ORDER.filter(
-    (imageId) => elementCounts[imageId].total > 0
-  );
+  const affectedRegions = REGION_ORDER.filter((imageId) => elementCounts[imageId].total > 0);
 
   const regionCount = affectedRegions.length;
   const riskLevel = getRiskLevel(regionCount);
@@ -123,7 +107,7 @@ export function hasDrawings(data: PainDrawingData, imageId: ImageId): boolean {
  */
 export function getScoreSummary(score: PainDrawingScore): string {
   if (score.regionCount === 0) {
-    return "Keine Schmerzareale markiert";
+    return "Keine Schmerzgebiete markiert";
   }
 
   const regions = score.affectedRegions.length;

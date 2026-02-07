@@ -138,7 +138,7 @@ export const SEVERITY_SEGMENTS: SeveritySegment[] = [
 export const RISK_INTERPRETATIONS = {
   none: {
     label: "Keine Schmerzangabe",
-    description: "Patient hat keine Schmerzareale markiert.",
+    description: "Patient hat keine Schmerzgebiete markiert.",
   },
   localized: {
     label: "Lokalisierter Schmerz",
@@ -150,8 +150,7 @@ export const RISK_INTERPRETATIONS = {
   },
   widespread: {
     label: "Weitverbreiteter Schmerz",
-    description:
-      "Schmerz in vielen Körperbereichen. Erhöhtes Risiko für chronische Schmerzen.",
+    description: "Schmerz in vielen Körperbereichen. Erhöhtes Risiko für chronische Schmerzen.",
   },
 } as const;
 

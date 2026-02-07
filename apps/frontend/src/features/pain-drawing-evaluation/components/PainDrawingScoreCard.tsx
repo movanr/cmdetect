@@ -28,7 +28,7 @@ interface PainDrawingScoreCardProps {
 export function PainDrawingScoreCard({
   data,
   title = "Schmerzzeichnung",
-  subtitle = "DC/TMD Schmerzareale",
+  subtitle = "DC/TMD Schmerzgebiete",
 }: PainDrawingScoreCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
@@ -68,9 +68,7 @@ export function PainDrawingScoreCard({
             {/* LEFT: Title + warning */}
             <div className="min-w-0">
               <h4 className="font-medium text-sm leading-tight">{title}</h4>
-              {subtitle && (
-                <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
-              )}
+              {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
               {isWidespread && (
                 <div className="flex items-center gap-1.5 text-red-600 mt-1.5">
                   <AlertTriangle className="size-3.5 shrink-0" />
@@ -81,9 +79,7 @@ export function PainDrawingScoreCard({
 
             {/* CENTER: Severity scale */}
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground mb-1">
-                Anzahl schmerzhafter Körperstellen
-              </p>
+              <p className="text-xs text-muted-foreground mb-1">Anzahl Schmerzgebiete</p>
               <div className="relative">
                 <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
                   {SEVERITY_SEGMENTS.map((segment, index) => {
@@ -112,7 +108,7 @@ export function PainDrawingScoreCard({
               {/* Risk interpretation - only shown when pain is marked */}
               {score.regionCount >= 1 && (
                 <p className="text-[9px] text-muted-foreground mt-1">
-                  Jede markierte Körperstelle erhöht das Risiko für weitere Schmerzerkrankungen.
+                  Jedes Schmerzgebiet erhöht das Risiko für weitere Schmerzerkrankungen.
                 </p>
               )}
             </div>
@@ -122,7 +118,10 @@ export function PainDrawingScoreCard({
               <div>
                 <div className="text-xl font-bold leading-tight">
                   {score.regionCount}
-                  <span className="text-sm text-muted-foreground font-normal"> {score.regionCount === 1 ? "Areal" : "Areale"}</span>
+                  <span className="text-sm text-muted-foreground font-normal">
+                    {" "}
+                    {score.regionCount === 1 ? "Schmerzgebiet" : "Schmerzgebiete"}
+                  </span>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {score.totalElements} Markierung{score.totalElements !== 1 ? "en" : ""}

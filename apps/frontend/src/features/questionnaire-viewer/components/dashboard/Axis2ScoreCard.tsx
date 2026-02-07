@@ -33,8 +33,8 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import {
   GCPSAnswersTable,
-  JFLS8AnswersTable,
   JFLS20AnswersTable,
+  JFLS8AnswersTable,
   OBCAnswersTable,
   PHQ4AnswersTable,
 } from "./questionnaire-tables";
@@ -274,9 +274,7 @@ function HorizontalScoreLayout({
           {/* LEFT: Title + warning */}
           <div className="min-w-0">
             <h4 className="font-medium text-sm leading-tight">{title}</h4>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
             {warning && <div className="mt-1.5">{warning}</div>}
           </div>
 
@@ -321,9 +319,7 @@ function HorizontalScoreLayout({
           style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
         >
           <div className="overflow-hidden">
-            <CardContent className="border-t bg-muted/20 p-4">
-              {expandedContent}
-            </CardContent>
+            <CardContent className="border-t bg-muted/20 p-4">{expandedContent}</CardContent>
           </div>
         </div>
       )}
@@ -442,8 +438,7 @@ export function Axis2ScoreCard({
     const gcpsScore = calculateGCPS1MScore(answers as GCPS1MAnswers);
     const activeGradeIndex = gcpsScore.grade;
 
-    const gradeRoman =
-      gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1];
+    const gradeRoman = gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1];
 
     return (
       <HorizontalScoreLayout
@@ -497,9 +492,7 @@ export function Axis2ScoreCard({
                 <div className="text-[10px] text-muted-foreground leading-tight">
                   Schmerzintensität
                 </div>
-                <div className="text-lg font-semibold leading-tight mt-0.5">
-                  {gcpsScore.cpi}
-                </div>
+                <div className="text-lg font-semibold leading-tight mt-0.5">{gcpsScore.cpi}</div>
                 <div className="text-[10px] text-muted-foreground">CPI</div>
               </div>
               {/* Interference score → BP */}
@@ -516,9 +509,7 @@ export function Axis2ScoreCard({
               </div>
               {/* Disability days → BP */}
               <div className="px-3 py-2">
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  Beeintr.-Tage
-                </div>
+                <div className="text-[10px] text-muted-foreground leading-tight">Beeintr.-Tage</div>
                 <div className="text-lg font-semibold leading-tight mt-0.5">
                   {gcpsScore.disabilityDays}
                 </div>
@@ -528,9 +519,7 @@ export function Axis2ScoreCard({
               </div>
               {/* Total BP */}
               <div className="px-3 py-2 bg-muted/40">
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  Gesamt
-                </div>
+                <div className="text-[10px] text-muted-foreground leading-tight">Gesamt</div>
                 <div className="text-lg font-semibold leading-tight mt-0.5">
                   {gcpsScore.totalDisabilityPoints}
                 </div>
@@ -565,10 +554,7 @@ export function Axis2ScoreCard({
         scaleLabel="Kieferfunktions-Einschränkung"
         scaleBar={
           <>
-            <ScaleBar
-              segments={JFLS8_LIMITATION_SEGMENTS}
-              activeIndex={activeLimitationIndex}
-            />
+            <ScaleBar segments={JFLS8_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
             <ScaleLabels
               labels={JFLS8_LIMITATION_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
               activeIndex={activeLimitationIndex}
@@ -628,10 +614,7 @@ export function Axis2ScoreCard({
         scaleLabel="Kieferfunktions-Einschränkung (erweitert)"
         scaleBar={
           <>
-            <ScaleBar
-              segments={JFLS20_LIMITATION_SEGMENTS}
-              activeIndex={activeLimitationIndex}
-            />
+            <ScaleBar segments={JFLS20_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
             <ScaleLabels
               labels={JFLS20_LIMITATION_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
               activeIndex={activeLimitationIndex}
@@ -707,13 +690,10 @@ export function Axis2ScoreCard({
       <HorizontalScoreLayout
         title={title}
         subtitle={subtitle}
-        scaleLabel="Orale Verhaltensweisen - TMD-Risiko"
+        scaleLabel="Orale Verhaltensweisen - CMD-Risiko"
         scaleBar={
           <>
-            <ScaleBar
-              segments={OBC_RISK_SEGMENTS}
-              activeIndex={activeRiskIndex}
-            />
+            <ScaleBar segments={OBC_RISK_SEGMENTS} activeIndex={activeRiskIndex} />
             <ScaleLabels
               labels={OBC_RISK_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
               activeIndex={activeRiskIndex}
@@ -728,9 +708,7 @@ export function Axis2ScoreCard({
                 /{obcScore.maxScore}
               </span>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {obcScore.riskInterpretation.label}
-            </div>
+            <div className="text-xs text-muted-foreground">{obcScore.riskInterpretation.label}</div>
           </div>
         }
         warning={
@@ -816,9 +794,7 @@ export function Axis2ScoreCard({
             <span className={depressionResult.positive ? "text-orange-600 font-medium" : ""}>
               {score.depression}/{score.maxDepression}
             </span>
-            {depressionResult.positive && (
-              <span className="text-[10px] text-orange-600">(≥3)</span>
-            )}
+            {depressionResult.positive && <span className="text-[10px] text-orange-600">(≥3)</span>}
           </div>
         </div>
       }
