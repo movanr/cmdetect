@@ -12,9 +12,6 @@ export { QuestionnaireViewer } from "./components/QuestionnaireViewer";
 
 // Dashboard components
 export { DashboardView } from "./components/dashboard";
-export { Axis2ScoreCard } from "./components/dashboard";
-export { SQStatusCard } from "./components/dashboard";
-export { SQReadOnlyView } from "./components/dashboard";
 
 // Wizard components
 export { SQWizardView } from "./components/wizard";
