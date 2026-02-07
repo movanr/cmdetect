@@ -12,6 +12,7 @@ import {
   examinationDefaults,
   type FormValues,
 } from "../form/use-examination-form";
+import { migrateExaminationData } from "./model-versioning";
 
 /** Schema for validating completedSections arrays from untrusted sources */
 const sectionIdSchema = z.enum(SECTION_KEYS as [SectionId, ...SectionId[]]);
@@ -54,6 +55,32 @@ export function parseCompletedSections(data: unknown): SectionId[] {
       typeof item === "string" && sectionIdSchema.safeParse(item).success
   );
 }
+
+/**
+ * Migrate persisted data to the current model version, then validate.
+ *
+ * Extracts `_modelVersion` from the data itself (embedded alongside form fields).
+ * Use this on the **load path** (backend responses, localStorage drafts)
+ * to ensure old data is transformed before zod validation.
+ *
+ * Returns validated FormValues on success, or null if the data is invalid
+ * even after migration.
+ */
+export function migrateAndParseExaminationData(
+  data: unknown
+): FormValues | null {
+  if (data == null || typeof data !== "object" || Array.isArray(data)) {
+    return parseExaminationData(data); // delegates to existing null-handling
+  }
+
+  const raw = data as Record<string, unknown>;
+  const version = typeof raw._modelVersion === "number" ? raw._modelVersion : null;
+
+  const migrated = migrateExaminationData(raw, version);
+  return parseExaminationData(migrated);
+}
+
+export { CURRENT_MODEL_VERSION } from "./model-versioning";
 
 /**
  * Get the default form values from the model.

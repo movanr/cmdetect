@@ -16,15 +16,16 @@ import { useUpsertExamination, useCompleteExamination } from "./use-save-examina
 import { SECTION_IDS, type SectionId } from "../sections/registry";
 import type { FormValues } from "../form/use-examination-form";
 import {
-  parseExaminationData,
+  migrateAndParseExaminationData,
   parseCompletedSections,
 } from "./validate-persistence";
+import { CURRENT_MODEL_VERSION } from "./model-versioning";
 
 const STORAGE_KEY_PREFIX = "cmdetect_exam_draft_";
 const AUTO_SAVE_DEBOUNCE_MS = 2000;
 
 interface DraftData {
-  formValues: FormValues;
+  formValues: Record<string, unknown>;
   completedSections: SectionId[];
   savedAt: string;
 }
@@ -96,7 +97,7 @@ export function useExaminationPersistence({
 
         if (draftTime > backendTime) {
           // Draft is newer — validate before using (may be stale after model changes)
-          const validatedDraft = parseExaminationData(draft?.formValues);
+          const validatedDraft = migrateAndParseExaminationData(draft?.formValues);
           if (validatedDraft) {
             dataSource = "draft";
             formData = validatedDraft;
@@ -123,7 +124,7 @@ export function useExaminationPersistence({
       }
     } else if (draft?.formValues) {
       // Only draft exists — validate before using
-      const validatedDraft = parseExaminationData(draft.formValues);
+      const validatedDraft = migrateAndParseExaminationData(draft.formValues);
       if (validatedDraft) {
         dataSource = "draft";
         formData = validatedDraft;
@@ -171,7 +172,7 @@ export function useExaminationPersistence({
       // Set new debounced save
       autoSaveTimerRef.current = setTimeout(() => {
         setDraft({
-          formValues: values as FormValues,
+          formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...values as FormValues },
           completedSections,
           savedAt: new Date().toISOString(),
         });
@@ -192,7 +193,7 @@ export function useExaminationPersistence({
           localStorage.setItem(
             storageKey,
             JSON.stringify({
-              formValues: latestValuesRef.current,
+              formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...latestValuesRef.current },
               completedSections,
               savedAt: new Date().toISOString(),
             } satisfies DraftData)
@@ -241,7 +242,7 @@ export function useExaminationPersistence({
       } catch (error) {
         // On error, ensure draft is saved to localStorage as safety net
         setDraft({
-          formValues,
+          formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...formValues },
           completedSections: newCompletedSections,
           savedAt: new Date().toISOString(),
         });

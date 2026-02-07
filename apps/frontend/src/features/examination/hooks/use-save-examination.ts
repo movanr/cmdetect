@@ -16,6 +16,7 @@ import {
   parseExaminationData,
   parseCompletedSections,
 } from "./validate-persistence";
+import { CURRENT_MODEL_VERSION } from "./model-versioning";
 
 interface UpsertParams {
   patientRecordId: string;
@@ -46,7 +47,7 @@ export function useUpsertExamination(patientRecordId: string) {
     }: UpsertParams) => {
       return execute(UPSERT_EXAMINATION_RESPONSE, {
         patient_record_id: patientRecordId,
-        response_data: responseData,
+        response_data: { _modelVersion: CURRENT_MODEL_VERSION, ...responseData },
         status,
         completed_sections: completedSections,
       });

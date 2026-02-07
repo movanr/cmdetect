@@ -1,8 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   parseExaminationData,
+  migrateAndParseExaminationData,
   parseCompletedSections,
   getExaminationDefaults,
+  CURRENT_MODEL_VERSION,
 } from "./validate-persistence";
 import { examinationDefaults } from "../form/use-examination-form";
 import type { SectionId } from "../sections/registry";
@@ -124,6 +126,51 @@ describe("validate-persistence", () => {
     it("returns data that passes parseExaminationData", () => {
       const defaults = getExaminationDefaults();
       expect(parseExaminationData(defaults)).not.toBeNull();
+    });
+  });
+
+  describe("migrateAndParseExaminationData", () => {
+    it("accepts valid data with embedded _modelVersion", () => {
+      const data = { _modelVersion: CURRENT_MODEL_VERSION, ...(structuredClone(examinationDefaults) as Record<string, unknown>) };
+      const result = migrateAndParseExaminationData(data);
+      expect(result).not.toBeNull();
+      expect(result).toEqual(examinationDefaults); // _modelVersion stripped by zod
+    });
+
+    it("accepts valid data without _modelVersion (treated as v1)", () => {
+      const result = migrateAndParseExaminationData(
+        structuredClone(examinationDefaults)
+      );
+      expect(result).not.toBeNull();
+      expect(result).toEqual(examinationDefaults);
+    });
+
+    it("returns null for invalid data regardless of version", () => {
+      expect(migrateAndParseExaminationData({})).toBeNull();
+      expect(migrateAndParseExaminationData({ _modelVersion: CURRENT_MODEL_VERSION })).toBeNull();
+      expect(migrateAndParseExaminationData({ _modelVersion: 999 })).toBeNull();
+    });
+
+    it("returns null for null input", () => {
+      expect(migrateAndParseExaminationData(null)).toBeNull();
+    });
+
+    it("returns null for undefined input", () => {
+      expect(migrateAndParseExaminationData(undefined)).toBeNull();
+    });
+
+    it("returns null for non-object input", () => {
+      expect(migrateAndParseExaminationData("string")).toBeNull();
+      expect(migrateAndParseExaminationData(42)).toBeNull();
+    });
+
+    it("returns null for array input", () => {
+      expect(migrateAndParseExaminationData([1, 2])).toBeNull();
+    });
+
+    it("re-exports CURRENT_MODEL_VERSION", () => {
+      expect(typeof CURRENT_MODEL_VERSION).toBe("number");
+      expect(CURRENT_MODEL_VERSION).toBeGreaterThanOrEqual(1);
     });
   });
 });

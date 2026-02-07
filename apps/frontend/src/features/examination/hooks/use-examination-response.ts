@@ -8,7 +8,7 @@ import { GET_EXAMINATION_RESPONSE } from "../queries";
 import type { FormValues } from "../form/use-examination-form";
 import type { SectionId } from "../sections/registry";
 import {
-  parseExaminationData,
+  migrateAndParseExaminationData,
   parseCompletedSections,
 } from "./validate-persistence";
 
@@ -44,7 +44,9 @@ export function useExaminationResponse(patientRecordId: string) {
         return null;
       }
 
-      const validatedData = parseExaminationData(response.response_data);
+      const validatedData = migrateAndParseExaminationData(
+        response.response_data
+      );
       if (!validatedData) {
         // Backend data doesn't match current schema — treat as no response
         console.warn(

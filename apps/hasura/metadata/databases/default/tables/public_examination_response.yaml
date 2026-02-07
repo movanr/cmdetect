@@ -2,22 +2,22 @@ table:
   name: examination_response
   schema: public
 object_relationships:
+  - name: examiner
+    using:
+      foreign_key_constraint_on: examined_by
   - name: organization
     using:
       foreign_key_constraint_on: organization_id
   - name: patient_record
     using:
       foreign_key_constraint_on: patient_record_id
-  - name: examiner
-    using:
-      foreign_key_constraint_on: examined_by
 insert_permissions:
   - role: org_admin
     permission:
       check: {}
       set:
-        organization_id: x-hasura-Organization-Id
         examined_by: x-hasura-User-Id
+        organization_id: x-hasura-Organization-Id
       columns:
         - patient_record_id
         - response_data
@@ -28,8 +28,8 @@ insert_permissions:
     permission:
       check: {}
       set:
-        organization_id: x-hasura-Organization-Id
         examined_by: x-hasura-User-Id
+        organization_id: x-hasura-Organization-Id
       columns:
         - patient_record_id
         - response_data
