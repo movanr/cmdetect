@@ -36,13 +36,12 @@ function ExaminationE5Page() {
     }
   };
 
-  // Save section and navigate to next section (E9) on completion
+  // Save section and navigate to next section (E6) on completion
   const handleComplete = async () => {
     await saveSection("e5");
     navigate({
-      to: "/cases/$id/examination/e9",
+      to: "/cases/$id/examination/e6",
       params: { id },
-      search: {},
     });
   };
 

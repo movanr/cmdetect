@@ -52,6 +52,7 @@ export function EnumField<T extends FieldValues, TOption extends string>({
               disabled={disabled}
               direction={direction}
               hasError={!!fieldState.error}
+              name={name}
             />
           </FormControl>
           <FormMessage className="text-xs" />

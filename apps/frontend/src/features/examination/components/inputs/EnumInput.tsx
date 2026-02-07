@@ -13,6 +13,8 @@ export interface EnumInputProps<T extends string> {
   direction?: "horizontal" | "vertical";
   /** Show error state (red border) */
   hasError?: boolean;
+  /** Unique name to scope radio button ids (prevents collisions when multiple EnumInputs share option values) */
+  name?: string;
 }
 
 /**
@@ -27,8 +29,10 @@ export function EnumInput<T extends string>({
   className,
   direction = "vertical",
   hasError,
+  name,
 }: EnumInputProps<T>) {
   const getLabel = (option: T): string => labels?.[option] ?? option;
+  const getOptionId = (option: T): string => name ? `${name}-${option}` : option;
 
   return (
     <RadioGroup
@@ -47,7 +51,7 @@ export function EnumInput<T extends string>({
         return (
           <Label
             key={option}
-            htmlFor={option}
+            htmlFor={getOptionId(option)}
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-md border cursor-pointer transition-colors",
               isSelected
@@ -60,7 +64,7 @@ export function EnumInput<T extends string>({
           >
             <RadioGroupItem
               value={option}
-              id={option}
+              id={getOptionId(option)}
               className="text-blue-500 [&_svg]:fill-blue-500"
             />
             <span className="text-sm font-normal">{getLabel(option)}</span>

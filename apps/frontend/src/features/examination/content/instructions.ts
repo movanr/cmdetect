@@ -1273,6 +1273,238 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
 }
 
 // ============================================================================
+// E6 Joint Sounds Flows
+// ============================================================================
+
+/**
+ * E6 - TMJ sounds during opening/closing movements (6 steps).
+ * Based on DC-TMD protocol section 5.6 (U6).
+ */
+const E6_JOINT_SOUNDS_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "position",
+    label: "Handpositionierung",
+    examinerInstruction:
+      "Finger über dem Kiefergelenk platzieren. Bilaterale oder unilaterale Palpation nach Präferenz.",
+    figureRef: "22",
+  },
+  {
+    id: "instruction",
+    label: "Anweisung",
+    patientScript:
+      "Ich werde die Kiefergelenke nun daraufhin untersuchen, ob sie irgendwelche Geräusche machen. Ich möchte, dass Sie auch aufpassen, denn ich werde Sie am Ende fragen, ob Sie irgendwelche Geräusche gehört oder bemerkt haben.",
+  },
+  {
+    id: "close",
+    label: "Kieferschluss",
+    patientScript: "Bitte legen Sie Ihre Backenzähne vollständig aufeinander.",
+    pause: true,
+  },
+  {
+    id: "observe",
+    label: "Öffnen/Schließen",
+    patientScript:
+      "Bitte öffnen Sie langsam so weit wie möglich, auch wenn es schmerzhaft ist, und schließen Sie dann langsam, bis Ihre Backenzähne erneut vollständig aufeinander liegen. Wiederholen Sie dies noch zwei Mal.",
+    examinerInstruction:
+      "3x beobachten (je ca. 2 Sek. Öffnen/Schließen). Geräusch positiv, wenn bei mindestens einer Bewegung vorhanden.",
+    appAction: "Knacken/Reiben in Tabelle eintragen",
+  },
+  {
+    id: "patient",
+    label: "Patientenbefragung",
+    patientScript:
+      "Haben Sie Geräusche in einem der Kiefergelenke gehört oder bemerkt als Sie geöffnet oder geschlossen haben?",
+    examinerInstruction:
+      "Bei Ja: Art des Geräusches erfragen. Falls Patient nicht klassifizieren kann, Bewegung wiederholen lassen.",
+    appAction: "Knacken/Reiben Patient eintragen",
+  },
+  {
+    id: "pain",
+    label: "Schmerzabfrage",
+    condition: "Falls Patient Knacken angibt",
+    patientScript: "Hatten Sie irgendwelche Schmerzen, als das Knacken auftrat?",
+    examinerInstruction: "Siehe Schmerzbefragung 6.2.3 und 6.2.4.",
+    appAction: "Schmerz und Bekannter Schmerz eintragen",
+  },
+];
+
+// ============================================================================
+// E6 Rich Instructions
+// ============================================================================
+
+/**
+ * E6 TMJ Sounds - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.6 (U6)
+ */
+export const E6_RICH_INSTRUCTIONS = {
+  /** U6 - Joint sounds during opening/closing */
+  jointSounds: {
+    stepId: "U6",
+    title: "Kiefergelenkgeräusche bei Öffnungs- und Schließbewegung",
+    flow: E6_JOINT_SOUNDS_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "210", label: "2.10 Kiefergelenkgeräusche" },
+      { section: "section4", anchor: "u6-kiefergelenkgerausche-bei-offnungs-und-schliessbewegung", label: "4.5 U6 Gelenkgeräusche" },
+      { section: "e6", anchor: "u6-kiefergelenkgerausche-bei-offnungs-und-schliessbewegung", label: "5.6 U6 Gelenkgeräusche" },
+      { section: "section6", anchor: "623", label: "6.2.3 Knackbezogener Schmerz" },
+    ],
+  } satisfies RichMeasurementInstruction,
+} as const;
+
+// ============================================================================
+// E7 Joint Sounds Flows (Lateral/Protrusive)
+// ============================================================================
+
+/**
+ * E7 - TMJ sounds during lateral and protrusive movements (7 steps).
+ * Based on DC-TMD protocol section 5.7 (U7).
+ *
+ * Three movements (lateral right, lateral left, protrusion), each 3x.
+ * Finger placement same as E6. Single examiner observation per sound type.
+ */
+const E7_JOINT_SOUNDS_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "position",
+    label: "Handpositionierung",
+    examinerInstruction:
+      "Finger über dem Kiefergelenk platzieren (gleiche Position wie U6). Bilaterale oder unilaterale Palpation.",
+    figureRef: "23",
+  },
+  {
+    id: "lateral-right",
+    label: "Laterotrusion rechts",
+    patientScript:
+      "Bitte legen Sie Ihre Backenzähne vollständig aufeinander. Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne wieder vollständig aufeinander.",
+    examinerInstruction: "3x wiederholen.",
+    appAction: "Knacken/Reiben in Tabelle eintragen",
+  },
+  {
+    id: "lateral-left",
+    label: "Laterotrusion links",
+    patientScript:
+      "Bitte legen Sie Ihre Backenzähne vollständig aufeinander. Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne wieder vollständig aufeinander.",
+    examinerInstruction: "3x wiederholen.",
+    appAction: "Knacken/Reiben in Tabelle eintragen",
+  },
+  {
+    id: "protrusion",
+    label: "Protrusion",
+    patientScript:
+      "Bitte legen Sie Ihre Backenzähne vollständig aufeinander. Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne wieder vollständig aufeinander.",
+    examinerInstruction: "3x wiederholen.",
+    appAction: "Knacken/Reiben in Tabelle eintragen",
+  },
+  {
+    id: "patient",
+    label: "Patientenbefragung",
+    patientScript:
+      "Haben Sie Geräusche in diesem Gelenk gehört oder bemerkt als Sie den Kiefer vorwärts oder seitwärts bewegt haben?",
+    examinerInstruction:
+      "Bei Ja: Art des Geräusches erfragen. Falls Patient nicht klassifizieren kann, Bewegung wiederholen lassen.",
+    appAction: "Knacken/Reiben Patient eintragen",
+  },
+  {
+    id: "pain",
+    label: "Schmerzabfrage",
+    condition: "Falls Patient Knacken angibt",
+    patientScript: "Hatten Sie irgendwelche Schmerzen, als das Knacken auftrat?",
+    examinerInstruction: "Siehe Schmerzbefragung 6.2.3 und 6.2.4.",
+    appAction: "Schmerz und Bekannter Schmerz eintragen",
+  },
+  {
+    id: "repeat",
+    label: "Linkes Gelenk",
+    condition: "Falls unilaterale Palpation",
+    examinerInstruction: "Gesamtes Verfahren für das linke Gelenk wiederholen.",
+  },
+];
+
+// ============================================================================
+// E7 Rich Instructions
+// ============================================================================
+
+/**
+ * E7 TMJ Sounds (Lateral/Protrusive) - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.7 (U7)
+ */
+export const E7_RICH_INSTRUCTIONS = {
+  /** U7 - Joint sounds during lateral/protrusive movements */
+  jointSounds: {
+    stepId: "U7",
+    title: "Kiefergelenkgeräusche bei Laterotrusion und Protrusion",
+    flow: E7_JOINT_SOUNDS_FLOW,
+    protocolRefs: [
+      { section: "section2", anchor: "210", label: "2.10 Kiefergelenkgeräusche" },
+      { section: "section4", anchor: "u7-kiefergelenkgerausche-bei-laterotrusions-und-protrusionsbewegungen", label: "4.5 U7 Gelenkgeräusche Lateral" },
+      { section: "e7", anchor: "u7-kiefergelenkgerausche-bei-laterotrusion-und-protrusion", label: "5.7 U7 Gelenkgeräusche Lateral" },
+      { section: "section6", anchor: "623", label: "6.2.3 Knackbezogener Schmerz" },
+    ],
+  } satisfies RichMeasurementInstruction,
+} as const;
+
+// ============================================================================
+// E8 Joint Locking Flows
+// ============================================================================
+
+/**
+ * E8 - Joint locking observations (3 steps).
+ * Based on DC-TMD protocol section 5.8 (U8).
+ *
+ * Locking is documented only if observed during the examination.
+ * Two types: closed locking (can't open) and open locking (can't close).
+ */
+const E8_JOINT_LOCKING_FLOW: ProcedureFlowStep[] = [
+  {
+    id: "observe",
+    label: "Beobachtung",
+    examinerInstruction:
+      "Gelenkblockierungen werden dokumentiert, falls sie während der Untersuchung auftreten. Zwei Typen: geschlossene Arretierung (kann nicht weiter öffnen) und geöffnete Arretierung (kann nicht schließen).",
+  },
+  {
+    id: "closed",
+    label: "Geschlossene Arretierung",
+    condition: "Falls bei Öffnung beobachtet",
+    patientScript: "Können Sie Ihre Kieferblockade lösen?",
+    examinerInstruction:
+      "Unfähigkeit, den Mund aus teilweise geöffneter Position weiter zu öffnen, auch nur vorübergehend, ist positiv.",
+    appAction: "Arretierung und Reposition eintragen",
+  },
+  {
+    id: "open",
+    label: "Geöffnete Arretierung",
+    condition: "Falls bei weit geöffnetem Mund beobachtet",
+    patientScript: "Können Sie Ihre Kieferblockade lösen?",
+    examinerInstruction:
+      "Unfähigkeit, den Mund aus weit geöffneter Position zu schließen, auch nur vorübergehend, ist positiv.",
+    appAction: "Arretierung und Reposition eintragen",
+  },
+];
+
+// ============================================================================
+// E8 Rich Instructions
+// ============================================================================
+
+/**
+ * E8 Joint Locking - Rich Clinical Instructions
+ *
+ * Based on DC-TMD Examiner Protocol Section 5.8 (U8)
+ */
+export const E8_RICH_INSTRUCTIONS = {
+  /** U8 - Joint locking observations */
+  jointLocking: {
+    stepId: "U8",
+    title: "Gelenkblockierung",
+    flow: E8_JOINT_LOCKING_FLOW,
+    protocolRefs: [
+      { section: "section4", anchor: "u8-gelenkarretierung", label: "4.5 U8 Gelenkarretierung" },
+      { section: "e8", anchor: "u8-gelenkarretierung", label: "5.8 U8 Gelenkarretierung" },
+    ],
+  } satisfies RichMeasurementInstruction,
+} as const;
+
+// ============================================================================
 // Type Guards and Helpers
 // ============================================================================
 
