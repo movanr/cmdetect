@@ -15,7 +15,7 @@ import {
 import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
-import { SQReadOnlyView } from "./SQReadOnlyView";
+import { SQAnswersTable } from "./questionnaire-tables";
 
 interface SQStatusCardProps {
   response: QuestionnaireResponse | undefined;
@@ -143,7 +143,7 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
       >
         <div className="overflow-hidden">
           <CardContent className="border-t bg-muted/20 p-4">
-            <SQReadOnlyView answers={answers} />
+            <SQAnswersTable answers={answers} />
           </CardContent>
         </div>
       </div>

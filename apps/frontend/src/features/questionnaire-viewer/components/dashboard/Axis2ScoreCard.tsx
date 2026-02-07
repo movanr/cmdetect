@@ -31,11 +31,13 @@ import {
 import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { GCPS1MSummary } from "../GCPS1MSummary";
-import { JFLS20Summary } from "../JFLS20Summary";
-import { JFLS8Summary } from "../JFLS8Summary";
-import { OBCSummary } from "../OBCSummary";
-import { PHQ4Summary } from "../PHQ4Summary";
+import {
+  GCPSAnswersTable,
+  JFLS8AnswersTable,
+  JFLS20AnswersTable,
+  OBCAnswersTable,
+  PHQ4AnswersTable,
+} from "./questionnaire-tables";
 
 // Clinical cutoff threshold per Löwe et al. (2010)
 export const PHQ4_CLINICAL_CUTOFF = 6;
@@ -538,7 +540,7 @@ export function Axis2ScoreCard({
 
             {/* Original answers */}
             <div className="pt-2 border-t">
-              <GCPS1MSummary answers={answers as GCPS1MAnswers} />
+              <GCPSAnswersTable answers={answers as GCPS1MAnswers} showPips />
             </div>
           </div>
         }
@@ -604,7 +606,7 @@ export function Axis2ScoreCard({
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
-        expandedContent={<JFLS8Summary answers={answers as JFLS8Answers} />}
+        expandedContent={<JFLS8AnswersTable answers={answers as JFLS8Answers} showPips />}
       />
     );
   }
@@ -688,7 +690,7 @@ export function Axis2ScoreCard({
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
-        expandedContent={<JFLS20Summary answers={answers as JFLS20Answers} />}
+        expandedContent={<JFLS20AnswersTable answers={answers as JFLS20Answers} showPips />}
       />
     );
   }
@@ -741,7 +743,7 @@ export function Axis2ScoreCard({
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
-        expandedContent={<OBCSummary answers={answers as OBCAnswers} />}
+        expandedContent={<OBCAnswersTable answers={answers as OBCAnswers} showPips />}
       />
     );
   }
@@ -822,7 +824,7 @@ export function Axis2ScoreCard({
       }
       isExpanded={isExpanded}
       onToggleExpand={() => setIsExpanded(!isExpanded)}
-      expandedContent={<PHQ4Summary answers={answers as Record<string, string>} />}
+      expandedContent={<PHQ4AnswersTable answers={answers as Record<string, string>} showPips />}
     />
   );
 }

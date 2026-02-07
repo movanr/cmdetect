@@ -1,6 +1,7 @@
 /**
- * Dashboard View - Clean table-based overview of all questionnaires
- * Shows scores overview, full question text tables, and pain drawing thumbnails
+ * Dashboard View - Overview of all questionnaires with scores
+ * Supports two layouts: "tables" (clean tables) and "cards" (compact score cards)
+ * Layout preference is persisted in localStorage.
  */
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -12,6 +13,7 @@ import type { PainDrawingData, ImageId } from "@/features/pain-drawing-evaluatio
 import {
   calculatePainDrawingScore,
   IMAGE_CONFIGS,
+  PainDrawingScoreCard,
   ReadOnlyCanvas,
   REGION_ORDER,
 } from "@/features/pain-drawing-evaluation";
@@ -29,20 +31,50 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  LayoutList,
   Printer,
+  Rows3,
 } from "lucide-react";
 import { useState } from "react";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
+import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import {
-  ScoresOverviewTable,
-  SQAnswersTable,
   GCPSAnswersTable,
-  PHQ4AnswersTable,
-  JFLS8AnswersTable,
   JFLS20AnswersTable,
+  JFLS8AnswersTable,
   OBCAnswersTable,
   PainDrawingDetail,
+  PHQ4AnswersTable,
+  ScoresOverviewTable,
+  SQAnswersTable,
 } from "./questionnaire-tables";
+import { SQStatusCard } from "./SQStatusCard";
+
+// ─── Layout toggle ─────────────────────────────────────────────────────
+
+type DashboardLayout = "tables" | "cards";
+
+const LAYOUT_STORAGE_KEY = "cmdetect:dashboard-layout";
+
+function getStoredLayout(): DashboardLayout {
+  try {
+    const stored = localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (stored === "tables" || stored === "cards") return stored;
+  } catch {
+    /* ignore */
+  }
+  return "tables";
+}
+
+function storeLayout(layout: DashboardLayout) {
+  try {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, layout);
+  } catch {
+    /* ignore */
+  }
+}
+
+// ─── Main component ────────────────────────────────────────────────────
 
 interface DashboardViewProps {
   /** Questionnaire responses */
@@ -58,7 +90,14 @@ export function DashboardView({
   onStartReview,
   caseId,
 }: DashboardViewProps) {
+  const [layout, setLayout] = useState<DashboardLayout>(getStoredLayout);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
+
+  const toggleLayout = () => {
+    const next = layout === "tables" ? "cards" : "tables";
+    setLayout(next);
+    storeLayout(next);
+  };
 
   // Find specific questionnaire responses
   const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
@@ -125,6 +164,28 @@ export function DashboardView({
     });
   };
 
+  // Shared screening banner
+  const screeningBanner = isScreeningNegative && (
+    <Alert className="border-green-200 bg-green-50">
+      <CheckCircle2 className="h-5 w-5 text-green-600" />
+      <AlertTitle className="text-green-800">Screening negativ</AlertTitle>
+      <AlertDescription className="text-green-700">
+        Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine Hinweise
+        auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
+      </AlertDescription>
+    </Alert>
+  );
+
+  // Shared bottom navigation
+  const bottomNav = showNextStepButton && (
+    <div className="flex justify-end pt-2 border-t">
+      <Button onClick={onStartReview}>
+        {nextStepLabel}
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   return (
     <>
       <Card>
@@ -132,6 +193,20 @@ export function DashboardView({
           <CardTitle>Fragebögen-Übersicht</CardTitle>
           {/* Action buttons */}
           <div className="flex items-center gap-2">
+            {/* Layout toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleLayout}
+              className="text-muted-foreground h-8 px-2"
+              title={layout === "tables" ? "Kompakte Ansicht" : "Tabellenansicht"}
+            >
+              {layout === "tables" ? (
+                <Rows3 className="h-4 w-4" />
+              ) : (
+                <LayoutList className="h-4 w-4" />
+              )}
+            </Button>
             {/* Print / PDF export button */}
             {caseId && (
               <Button
@@ -152,127 +227,182 @@ export function DashboardView({
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-8">
-          {/* Negative Screening Banner */}
-          {isScreeningNegative && (
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <AlertTitle className="text-green-800">Screening negativ</AlertTitle>
-              <AlertDescription className="text-green-700">
-                Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine Hinweise
-                auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
-              </AlertDescription>
-            </Alert>
-          )}
 
-          {/* ── Scores Overview ── */}
-          <section>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-              Ergebnisübersicht
-            </h3>
-            <ScoresOverviewTable responses={responses} showSeverityColors />
-          </section>
+        {/* ── Table layout ── */}
+        {layout === "tables" && (
+          <CardContent className="space-y-8">
+            {screeningBanner}
 
-          {/* ── SQ Detail ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.SQ) && sqResponse && (
             <section>
               <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                Symptomfragebogen (SF)
-                {isScreeningNegative && " — Screening negativ"}
-                {!isScreeningNegative && sqResponse.reviewedAt && " — Überprüft"}
+                Ergebnisübersicht
               </h3>
-              {/* Status note */}
-              <p className="text-xs text-gray-400 mb-2">
-                {sqResponse.submittedAt && (
-                  <span>Eingereicht: {formatTimestamp(sqResponse.submittedAt)}</span>
-                )}
-                {sqResponse.reviewedAt && (
-                  <span className="ml-3">Überprüft: {formatTimestamp(sqResponse.reviewedAt)}</span>
-                )}
-              </p>
-              <SQAnswersTable answers={sqResponse.answers} />
+              <ScoresOverviewTable responses={responses} showSeverityColors />
             </section>
-          )}
 
-          {/* ── Pain Drawing ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) &&
-            hasPainDrawing &&
-            painDrawingData && (
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.SQ) && sqResponse && (
               <section>
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                  Schmerzzeichnung
+                  Symptomfragebogen (SF)
+                  {isScreeningNegative && " — Screening negativ"}
+                  {!isScreeningNegative && sqResponse.reviewedAt && " — Überprüft"}
                 </h3>
-                <PainDrawingDetail
-                  data={painDrawingData}
-                  onRegionClick={(regionId) => setSelectedRegion(regionId as ImageId)}
-                />
+                <p className="text-xs text-gray-400 mb-2">
+                  {sqResponse.submittedAt && (
+                    <span>Eingereicht: {formatTimestamp(sqResponse.submittedAt)}</span>
+                  )}
+                  {sqResponse.reviewedAt && (
+                    <span className="ml-3">Überprüft: {formatTimestamp(sqResponse.reviewedAt)}</span>
+                  )}
+                </p>
+                <SQAnswersTable answers={sqResponse.answers} />
               </section>
             )}
 
-          {/* ── GCPS-1M ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && hasAnswers(gcps1mResponse) && (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                GCPS-1M — Graduierung chronischer Schmerzen
-              </h3>
-              <GCPSAnswersTable answers={gcps1mResponse!.answers as GCPS1MAnswers} showPips />
-            </section>
-          )}
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) &&
+              hasPainDrawing &&
+              painDrawingData && (
+                <section>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                    Schmerzzeichnung
+                  </h3>
+                  <PainDrawingDetail
+                    data={painDrawingData}
+                    onRegionClick={(regionId) => setSelectedRegion(regionId as ImageId)}
+                  />
+                </section>
+              )}
 
-          {/* ── PHQ-4 ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && hasAnswers(phq4Response) && (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                PHQ-4 — Depression &amp; Angst
-              </h3>
-              <PHQ4AnswersTable answers={phq4Response!.answers as Record<string, string>} showPips />
-            </section>
-          )}
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && hasAnswers(gcps1mResponse) && (
+              <section>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  GCPS-1M — Graduierung chronischer Schmerzen
+                </h3>
+                <GCPSAnswersTable answers={gcps1mResponse!.answers as GCPS1MAnswers} showPips />
+              </section>
+            )}
 
-          {/* ── JFLS-8 ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && hasAnswers(jfls8Response) && (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                JFLS-8 — Kieferfunktions-Einschränkungsskala
-              </h3>
-              <JFLS8AnswersTable answers={jfls8Response!.answers as JFLS8Answers} showPips />
-            </section>
-          )}
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && hasAnswers(phq4Response) && (
+              <section>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  PHQ-4 — Depression &amp; Angst
+                </h3>
+                <PHQ4AnswersTable answers={phq4Response!.answers as Record<string, string>} showPips />
+              </section>
+            )}
 
-          {/* ── OBC ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && hasAnswers(obcResponse) && (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                OBC — Oral Behaviors Checklist
-              </h3>
-              <OBCAnswersTable answers={obcResponse!.answers as OBCAnswers} showPips />
-            </section>
-          )}
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && hasAnswers(jfls8Response) && (
+              <section>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  JFLS-8 — Kieferfunktions-Einschränkungsskala
+                </h3>
+                <JFLS8AnswersTable answers={jfls8Response!.answers as JFLS8Answers} showPips />
+              </section>
+            )}
 
-          {/* ── JFLS-20 ── */}
-          {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && hasAnswers(jfls20Response) && (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                JFLS-20 — Kieferfunktions-Einschränkungsskala (erweitert)
-              </h3>
-              <JFLS20AnswersTable answers={jfls20Response!.answers as JFLS20Answers} showPips />
-            </section>
-          )}
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && hasAnswers(obcResponse) && (
+              <section>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  OBC — Oral Behaviors Checklist
+                </h3>
+                <OBCAnswersTable answers={obcResponse!.answers as OBCAnswers} showPips />
+              </section>
+            )}
 
-          {/* Bottom navigation */}
-          {showNextStepButton && (
-            <div className="flex justify-end pt-2 border-t">
-              <Button onClick={onStartReview}>
-                {nextStepLabel}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </CardContent>
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && hasAnswers(jfls20Response) && (
+              <section>
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                  JFLS-20 — Kieferfunktions-Einschränkungsskala (erweitert)
+                </h3>
+                <JFLS20AnswersTable answers={jfls20Response!.answers as JFLS20Answers} showPips />
+              </section>
+            )}
+
+            {bottomNav}
+          </CardContent>
+        )}
+
+        {/* ── Card layout (compact score cards) ── */}
+        {layout === "cards" && (
+          <CardContent className="space-y-6">
+            {screeningBanner}
+
+            {/* SQ Section */}
+            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.SQ) && (
+              <section>
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                  Achse 1 - Symptomfragebogen
+                </h3>
+                <SQStatusCard response={sqResponse} isScreeningNegative={isScreeningNegative} />
+              </section>
+            )}
+
+            {/* Axis 2 Section */}
+            <section>
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                Achse 2 - Psychosoziale Bewertung
+              </h3>
+              <div className="space-y-3">
+                {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
+                  <PainDrawingScoreCard data={painDrawingData ?? null} />
+                )}
+
+                {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && (
+                  <Axis2ScoreCard
+                    questionnaireId={QUESTIONNAIRE_ID.GCPS_1M}
+                    title="GCPS - Graduierung chronischer Schmerzen"
+                    subtitle="1-Monats-Version"
+                    answers={
+                      gcps1mResponse
+                        ? (gcps1mResponse.answers as Record<string, string | number>)
+                        : null
+                    }
+                  />
+                )}
+
+                {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && (
+                  <Axis2ScoreCard
+                    questionnaireId={QUESTIONNAIRE_ID.JFLS8}
+                    title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
+                    answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
+                  />
+                )}
+
+                {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && (
+                  <Axis2ScoreCard
+                    questionnaireId={QUESTIONNAIRE_ID.PHQ4}
+                    title="PHQ-4 - Gesundheitsfragebogen für Patienten"
+                    subtitle="Depression & Angst"
+                    answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
+                  />
+                )}
+
+                {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && (
+                  <Axis2ScoreCard
+                    questionnaireId={QUESTIONNAIRE_ID.OBC}
+                    title="OBC - Oral Behaviors Checklist"
+                    subtitle="Orale Parafunktionen"
+                    answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
+                  />
+                )}
+
+                {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && (
+                  <Axis2ScoreCard
+                    questionnaireId={QUESTIONNAIRE_ID.JFLS20}
+                    title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
+                    answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
+                  />
+                )}
+              </div>
+            </section>
+
+            {bottomNav}
+          </CardContent>
+        )}
       </Card>
 
-      {/* Pain Drawing Region Modal */}
-      {hasPainDrawing && painDrawingData && painDrawingScore && (
+      {/* Pain Drawing Region Modal (tables layout only) */}
+      {layout === "tables" && hasPainDrawing && painDrawingData && painDrawingScore && (
         <Dialog open={!!selectedRegion} onOpenChange={(open) => !open && setSelectedRegion(null)}>
           <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl">
             <DialogHeader>
