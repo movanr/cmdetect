@@ -85,12 +85,6 @@ export function InterviewContent({
 
   return (
     <>
-      <div className="flex justify-center pt-2">
-        <Button type="button" variant="outline" onClick={onNoMorePainRegions}>
-          <CheckCircle className="h-4 w-4 mr-2" />
-          Keine weiteren Schmerzbereiche
-        </Button>
-      </div>
       <InterviewSubsection
         instances={painInstances}
         regions={regions}
@@ -98,6 +92,12 @@ export function InterviewContent({
         onExpandChange={onExpandChange}
         incompleteRegions={incompleteRegions}
       />
+      <div className="flex justify-center pt-2">
+        <Button type="button" variant="outline" onClick={onNoMorePainRegions}>
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Keine weiteren Schmerzbereiche
+        </Button>
+      </div>
       {interviewRefusedPath && (
         <div className="pt-4 border-t">
           <RefusalCheckbox<FormValues>
