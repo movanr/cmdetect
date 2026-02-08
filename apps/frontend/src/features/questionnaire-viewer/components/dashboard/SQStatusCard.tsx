@@ -84,7 +84,7 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-amber-600 border-amber-300">
-                  Bestätigung mit Patienten Ausstehend
+                  Überprüfung mit Patient ausstehend
                 </Badge>
               )}
             </div>

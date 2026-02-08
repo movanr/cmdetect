@@ -48,10 +48,19 @@ function AnamnesisReviewPage() {
     });
   };
 
+  // Navigate to examination
+  const handleContinueToExamination = () => {
+    navigate({
+      to: "/cases/$id/examination",
+      params: { id },
+    });
+  };
+
   return (
     <DashboardView
       responses={responses ?? []}
       onStartReview={handleStartReview}
+      onContinueToExamination={handleContinueToExamination}
       caseId={id}
     />
   );

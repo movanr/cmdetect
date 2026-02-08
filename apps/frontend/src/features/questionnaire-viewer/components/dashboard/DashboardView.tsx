@@ -82,11 +82,18 @@ interface DashboardViewProps {
   responses: QuestionnaireResponse[];
   /** Callback when starting patient review */
   onStartReview: () => void;
+  /** Callback to continue to the examination (shown after review is complete) */
+  onContinueToExamination?: () => void;
   /** Patient record / case ID (for print export) */
   caseId?: string;
 }
 
-export function DashboardView({ responses, onStartReview, caseId }: DashboardViewProps) {
+export function DashboardView({
+  responses,
+  onStartReview,
+  onContinueToExamination,
+  caseId,
+}: DashboardViewProps) {
   const [layout, setLayout] = useState<DashboardLayout>(getStoredLayout);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
   const { print, isPrinting } = useBackgroundPrint();
@@ -148,9 +155,6 @@ export function DashboardView({ responses, onStartReview, caseId }: DashboardVie
   // Determine if we should show the next step button
   const showNextStepButton = sqResponse && !isScreeningNegative;
   const isReviewed = !!sqResponse?.reviewedAt;
-  const nextStepLabel = isReviewed
-    ? "SF erneut mit Patient bestätigen"
-    : "SF mit Patient bestätigen";
 
   // Format timestamp for display
   const formatTimestamp = (ts: string | null | undefined) => {
@@ -178,11 +182,25 @@ export function DashboardView({ responses, onStartReview, caseId }: DashboardVie
 
   // Shared bottom navigation
   const bottomNav = showNextStepButton && (
-    <div className="flex justify-end pt-2 border-t">
-      <Button onClick={onStartReview}>
-        {nextStepLabel}
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
+    <div className="flex justify-end gap-2 pt-2 border-t">
+      {isReviewed ? (
+        <>
+          <Button variant="outline" onClick={onStartReview}>
+            Erneut überprüfen
+          </Button>
+          {onContinueToExamination && (
+            <Button onClick={onContinueToExamination}>
+              Weiter zur Untersuchung
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </>
+      ) : (
+        <Button onClick={onStartReview}>
+          SF mit Patient überprüfen
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 
@@ -218,13 +236,26 @@ export function DashboardView({ responses, onStartReview, caseId }: DashboardVie
                 {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
               </Button>
             )}
-            {/* Top navigation button */}
-            {showNextStepButton && (
-              <Button onClick={onStartReview}>
-                {nextStepLabel}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
+            {/* Top navigation button(s) */}
+            {showNextStepButton &&
+              (isReviewed ? (
+                <>
+                  <Button variant="outline" onClick={onStartReview}>
+                    Erneut überprüfen
+                  </Button>
+                  {onContinueToExamination && (
+                    <Button onClick={onContinueToExamination}>
+                      Weiter zur Untersuchung
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <Button onClick={onStartReview}>
+                  SF mit Patient überprüfen
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              ))}
           </div>
         </CardHeader>
 
