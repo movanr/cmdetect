@@ -89,6 +89,7 @@ export {
 
 // Evaluator
 export { evaluate } from "./evaluate";
+export { evaluateDiagnosis, evaluateAllDiagnoses } from "./evaluate-diagnosis";
 
 // Diagnoses
 export { MYALGIA, MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION } from "./diagnoses/myalgia";
