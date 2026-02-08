@@ -16,6 +16,7 @@ import {
   type SQQuestionId,
 } from "@cmdetect/questionnaires";
 import { useFormContext } from "react-hook-form";
+import { SQ_SECTION_INSTRUCTIONS } from "../../content/sq-instructions";
 import type { SQFormValues, SQOfficeUseKey, SQQuestionKey } from "../../schema/sqZodSchemas";
 import {
   YesNoFormField,
@@ -23,6 +24,7 @@ import {
   PainFrequencyFormField,
   OfficeUseFormField,
 } from "../form-fields";
+import { SQInstructionBlock } from "./SQInstructionBlock";
 
 interface SQSectionStepProps {
   section: SQSection;
@@ -45,6 +47,8 @@ export function SQSectionStep({ section }: SQSectionStepProps) {
     );
   }
 
+  const instruction = SQ_SECTION_INSTRUCTIONS[section.id];
+
   return (
     <div>
       {/* Section header */}
@@ -56,6 +60,9 @@ export function SQSectionStep({ section }: SQSectionStepProps) {
           Abschnitt
         </p>
       </div>
+
+      {/* Interview instructions */}
+      {instruction && <SQInstructionBlock instruction={instruction} className="mb-4" />}
 
       {/* Questions */}
       <div className="border rounded-lg px-4">
