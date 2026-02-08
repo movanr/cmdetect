@@ -46,8 +46,8 @@ export function SubStepTabs({
             )}
             activeProps={{
               className: cn(
-                "text-foreground bg-background",
-                "border-b-2 border-primary"
+                "!text-primary bg-background font-semibold",
+                "border-b-2 !border-primary"
               ),
             }}
           >

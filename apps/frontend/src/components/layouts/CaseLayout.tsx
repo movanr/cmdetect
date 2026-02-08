@@ -215,7 +215,7 @@ export function CaseLayout({
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-auto">
+        <main id="main-scroll-container" className="flex-1 overflow-auto">
           {/* Sidebar toggle button - visible below xl breakpoint (< 1280px) */}
           <div className="sticky top-0 z-10 bg-background border-b px-4 py-2 xl:hidden">
             <Button

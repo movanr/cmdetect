@@ -9,6 +9,7 @@ import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { E4_RICH_INSTRUCTIONS } from "../../content/instructions";
+import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { setInstanceValue } from "../../form/form-helpers";
 import {
   useExaminationForm,
@@ -119,6 +120,7 @@ function computeStepStatusFromForm(
 
 export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
+  const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   // Keep stepStatuses in state (computed from form on mount)
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped" | "refused">>(() => {
@@ -439,7 +441,8 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
             return (
               <div
                 key={stepId}
-                className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+                ref={activeStepRef}
+                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card p-4 space-y-4"
               >
                 {/* Header */}
                 <div className="flex items-center gap-2">

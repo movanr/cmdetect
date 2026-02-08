@@ -19,6 +19,7 @@ import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
+import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { IncompleteDataDialog, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
@@ -106,6 +107,7 @@ function getStepSummary(stepId: E2StepId, getValue: (path: string) => unknown): 
 export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E2SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { getValues } = useFormContext<FormValues>();
+  const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   const instances = getInstancesForStep("e2-all");
 
@@ -281,7 +283,8 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
             return (
               <div
                 key={stepId}
-                className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+                ref={activeStepRef}
+                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card p-4 space-y-4"
               >
                 {/* Header */}
                 <div className="flex items-center gap-2">

@@ -6,8 +6,8 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useEffect, useState } from "react";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { FormProvider, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
@@ -186,6 +186,15 @@ function ExaminationContent({
   subSteps: { id: string; label: string; order: number; route: string }[];
 }) {
   const { isHydrated, status } = useExaminationPersistenceContext();
+  const { pathname } = useLocation();
+
+  // Scroll main container to top when navigating between examination sections
+  useLayoutEffect(() => {
+    const container = document.getElementById("main-scroll-container");
+    if (container) {
+      container.scrollTop = 0;
+    }
+  }, [pathname]);
 
   // Show loading while hydrating form data from backend/localStorage
   if (!isHydrated) {

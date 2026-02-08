@@ -9,6 +9,7 @@ import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
+import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import {
   createE9RichInstructions,
   isPainInterviewInstruction,
@@ -316,6 +317,7 @@ export function E9Section({
 }: E9SectionProps) {
   const { getInstancesForStep } = useExaminationForm();
   const { watch, setValue, getValues, clearErrors } = useFormContext<FormValues>();
+  const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   const rightInstances = getInstancesForStep("e9-right");
   const leftInstances = getInstancesForStep("e9-left");
@@ -638,7 +640,8 @@ export function E9Section({
             return (
               <div
                 key={stepId}
-                className="rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+                ref={activeStepRef}
+                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card p-4 space-y-4"
               >
                 {/* Header */}
                 <div className="flex items-center gap-2">
