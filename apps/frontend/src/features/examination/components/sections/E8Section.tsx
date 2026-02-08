@@ -27,8 +27,8 @@ const SIDES = [
 ] as const;
 
 const LOCKING_TYPES = [
-  { key: "closedLocking", label: "Geschlossene Arretierung" },
-  { key: "openLocking", label: "Geöffnete Arretierung" },
+  { key: "closedLocking", label: "Geschlossene Arretierung", reductionLabel: "Reposition (geschl.)" },
+  { key: "openLocking", label: "Geöffnete Arretierung", reductionLabel: "Reposition (geöffnet)" },
 ] as const;
 
 export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) {
@@ -64,25 +64,39 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
         {/* Bilateral locking observations — side by side */}
         <div className="grid grid-cols-2 gap-6">
         {SIDES.map(({ key: side, label: sideLabel }) => (
-          <div key={side} className="rounded-lg border p-4 space-y-4">
-            <h4 className="font-medium">{sideLabel}</h4>
+          <div key={side} className="space-y-4">
+            {/* Locking observation table */}
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted/50">
+                    <th className="text-left text-sm font-medium p-3" colSpan={2}>{sideLabel}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {LOCKING_TYPES.map(({ key: lockingType, label: lockingLabel }) => (
+                    <tr key={lockingType} className="border-t">
+                      <td className="p-3 text-sm font-medium">{lockingLabel}</td>
+                      <td className="p-3 text-center">
+                        <div className="flex justify-center">
+                          <YesNoField name={`e8.${side}.${lockingType}.locking`} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-            {LOCKING_TYPES.map(({ key: lockingType, label: lockingLabel }) => {
-              const reduction = getInstance(`e8.${side}.${lockingType}.reduction`);
-              return (
-                <div key={lockingType} className="space-y-3">
-                  <YesNoField
-                    name={`e8.${side}.${lockingType}.locking`}
-                    label={lockingLabel}
-                  />
-                  {reduction && (
-                    <div className="pl-4">
-                      <QuestionField instance={reduction} label="Reposition" />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {/* Conditional reduction fields (below table) */}
+            <div className="pl-4 space-y-3">
+              {LOCKING_TYPES.map(({ key: lockingType, reductionLabel }) => {
+                const reduction = getInstance(`e8.${side}.${lockingType}.reduction`);
+                return reduction && (
+                  <QuestionField key={lockingType} instance={reduction} label={reductionLabel} />
+                );
+              })}
+            </div>
           </div>
         ))}
         </div>

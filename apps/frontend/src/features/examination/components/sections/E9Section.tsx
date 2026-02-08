@@ -1,13 +1,14 @@
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { PALPATION_MODES, SECTIONS } from "@cmdetect/dc-tmd";
+import { PALPATION_MODE_QUESTIONS, PALPATION_MODES, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import type { FieldPath } from "react-hook-form";
+import type { FieldPath, FieldValues } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import {
@@ -25,9 +26,11 @@ import {
   validatePalpationCompletion,
   type IncompletePalpationSite,
 } from "../../form/validation";
-import { COMMON, getSectionCardTitle } from "../../labels";
+import { COMMON, getPainTypeLabel, getSectionCardTitle } from "../../labels";
 import {
+  type PainType,
   type PalpationMode,
+  type PalpationPainQuestion,
   type PalpationSite,
   type Side,
 } from "../../model/regions";
@@ -35,6 +38,7 @@ import type { QuestionInstance } from "../../projections/to-instances";
 import { HeadDiagramPalpation } from "../HeadDiagram";
 import type { SiteStatus } from "../HeadDiagram/types";
 import { PalpationModeToggle } from "../inputs/PalpationModeToggle";
+import { YesNoField } from "../inputs/YesNoField";
 import { PalpationSiteDropdown } from "../PalpationSiteDropdown";
 import type { IncompletePalpationSite as DropdownIncompleteSite } from "../PalpationSiteDropdown/types";
 import {
@@ -70,7 +74,7 @@ const E9_STEP_CONFIG: Record<E9StepId, { badge: string; title: string }> = {
   "e9-intro": { badge: "U9", title: "Einführung Palpation" },
   "e9-temporalis": { badge: "U9", title: "Temporalis-Palpation" },
   "e9-masseter": { badge: "U9", title: "Masseter-Palpation" },
-  "e9-tmj-lateral": { badge: "U9", title: "Lateraler Kondylenpol" },
+  "e9-tmj-lateral": { badge: "U9", title: "Lateraler Pol" },
   "e9-tmj-around": { badge: "U9", title: "Um den lateralen Pol" },
 };
 
@@ -82,6 +86,15 @@ const E9_STEP_SITES: Record<E9StepId, readonly PalpationSite[]> = {
   "e9-tmj-lateral": ["tmjLateralPole"],
   "e9-tmj-around": ["tmjAroundLateralPole"],
 };
+
+/** Pain type display order (matches PalpationSiteDropdown) */
+const PAIN_TYPE_ORDER: readonly PalpationPainQuestion[] = [
+  "pain",
+  "familiarPain",
+  "familiarHeadache",
+  "spreadingPain",
+  "referredPain",
+];
 
 // =============================================================================
 // Props
@@ -267,6 +280,82 @@ function PalpationSubsection({
     },
     [onExpandChange]
   );
+
+  // Table layout for single-site TMJ steps (no diagram, matching E7/E8 styling)
+  if (!showDiagram && sites.length === 1) {
+    const site = sites[0];
+    const siteInstances = getSiteInstances(site);
+    const siteConfig = SITE_CONFIG[site];
+    const modeQuestions = PALPATION_MODE_QUESTIONS[palpationMode];
+    const tmjSideLabel = side === "right" ? "Rechtes Kiefergelenk" : "Linkes Kiefergelenk";
+
+    const applicablePainTypes = modeQuestions.filter((q) => {
+      if (q === "familiarHeadache") return siteConfig.hasHeadache;
+      if (q === "spreadingPain") return siteConfig.hasSpreading;
+      return true;
+    });
+
+    const instanceMap = new Map<string, QuestionInstance>();
+    for (const inst of siteInstances) {
+      if (inst.context.painType) {
+        instanceMap.set(inst.context.painType, inst);
+      }
+    }
+
+    const painInstance = instanceMap.get("pain");
+    const painValue = painInstance ? (watch(painInstance.path) as unknown as string | null) : null;
+    const isQuestionEnabled = (painType: string) => painType === "pain" || painValue === "yes";
+    const incomplete = getIncompleteSite(site);
+
+    return (
+      <div>
+        <div className="border rounded-lg overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-muted/50">
+                <th className="text-left text-sm font-medium p-3" colSpan={2}>{tmjSideLabel}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PAIN_TYPE_ORDER.map((painType) => {
+                if (!applicablePainTypes.includes(painType)) return null;
+                const instance = instanceMap.get(painType);
+                if (!instance) return null;
+
+                const enabled = isQuestionEnabled(painType);
+                const hasFieldError = incomplete?.missingQuestions.includes(painType);
+
+                return (
+                  <tr
+                    key={painType}
+                    className={cn("border-t", hasFieldError && "bg-destructive/10")}
+                  >
+                    <td
+                      className={cn(
+                        "p-3 text-sm font-medium",
+                        !enabled && "text-muted-foreground",
+                        hasFieldError && "text-destructive"
+                      )}
+                    >
+                      {getPainTypeLabel(painType as PainType)}
+                    </td>
+                    <td className="p-3 text-center">
+                      <div className="flex justify-center">
+                        <YesNoField
+                          name={instance.path as FieldPath<FieldValues>}
+                          disabled={!enabled}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -685,29 +774,54 @@ export function E9Section({
                 ) : (
                   // Palpation steps: bilateral subsections + refusal checkbox
                   <>
-                    <div className="flex justify-center items-start gap-8 md:gap-16">
-                      <PalpationSubsection
-                        side="right"
-                        sites={currentSites}
-                        instances={filteredRight}
-                        expanded={expanded.right}
-                        onExpandChange={(site) => handleExpandChange("right", site)}
-                        incompleteSites={hasValidated ? rightIncomplete : []}
-                        palpationMode={palpationMode}
-                        showDiagram={showDiagram}
-                      />
-                      <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
-                      <PalpationSubsection
-                        side="left"
-                        sites={currentSites}
-                        instances={filteredLeft}
-                        expanded={expanded.left}
-                        onExpandChange={(site) => handleExpandChange("left", site)}
-                        incompleteSites={hasValidated ? leftIncomplete : []}
-                        palpationMode={palpationMode}
-                        showDiagram={showDiagram}
-                      />
-                    </div>
+                    {showDiagram ? (
+                      <div className="flex justify-center items-start gap-8 md:gap-16">
+                        <PalpationSubsection
+                          side="right"
+                          sites={currentSites}
+                          instances={filteredRight}
+                          expanded={expanded.right}
+                          onExpandChange={(site) => handleExpandChange("right", site)}
+                          incompleteSites={hasValidated ? rightIncomplete : []}
+                          palpationMode={palpationMode}
+                          showDiagram
+                        />
+                        <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+                        <PalpationSubsection
+                          side="left"
+                          sites={currentSites}
+                          instances={filteredLeft}
+                          expanded={expanded.left}
+                          onExpandChange={(site) => handleExpandChange("left", site)}
+                          incompleteSites={hasValidated ? leftIncomplete : []}
+                          palpationMode={palpationMode}
+                          showDiagram
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-6">
+                        <PalpationSubsection
+                          side="right"
+                          sites={currentSites}
+                          instances={filteredRight}
+                          expanded={expanded.right}
+                          onExpandChange={(site) => handleExpandChange("right", site)}
+                          incompleteSites={hasValidated ? rightIncomplete : []}
+                          palpationMode={palpationMode}
+                          showDiagram={false}
+                        />
+                        <PalpationSubsection
+                          side="left"
+                          sites={currentSites}
+                          instances={filteredLeft}
+                          expanded={expanded.left}
+                          onExpandChange={(site) => handleExpandChange("left", site)}
+                          incompleteSites={hasValidated ? leftIncomplete : []}
+                          palpationMode={palpationMode}
+                          showDiagram={false}
+                        />
+                      </div>
+                    )}
                     <div className="pt-4 border-t">
                       <div className="flex items-center gap-2">
                         <Checkbox
