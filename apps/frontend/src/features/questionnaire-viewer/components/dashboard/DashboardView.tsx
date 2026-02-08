@@ -36,6 +36,7 @@ import {
   Rows3,
 } from "lucide-react";
 import { useState } from "react";
+import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import {
@@ -92,6 +93,7 @@ export function DashboardView({
 }: DashboardViewProps) {
   const [layout, setLayout] = useState<DashboardLayout>(getStoredLayout);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
+  const { print, isPrinting } = useBackgroundPrint();
 
   const toggleLayout = () => {
     const next = layout === "tables" ? "cards" : "tables";
@@ -211,11 +213,11 @@ export function DashboardView({
             {caseId && (
               <Button
                 variant="outline"
-                onClick={() => window.open(`/cases/${caseId}/print-anamnesis`, "_blank")}
-                disabled={responses.length === 0}
+                onClick={() => print(`/cases/${caseId}/print-anamnesis`)}
+                disabled={responses.length === 0 || isPrinting}
               >
                 <Printer className="mr-2 h-4 w-4" />
-                Drucken / PDF
+                {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
               </Button>
             )}
             {/* Top navigation button */}

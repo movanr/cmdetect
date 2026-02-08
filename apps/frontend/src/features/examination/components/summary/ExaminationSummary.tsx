@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useBackgroundPrint } from "@/hooks/use-background-print";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Printer } from "lucide-react";
 import { E1Summary } from "./E1Summary";
 import { E2Summary } from "./E2Summary";
 import { E3Summary } from "./E3Summary";
@@ -18,6 +19,7 @@ interface ExaminationSummaryProps {
 
 export function ExaminationSummary({ caseId }: ExaminationSummaryProps) {
   const navigate = useNavigate();
+  const { print, isPrinting } = useBackgroundPrint();
 
   const handleNextStep = () => {
     navigate({ to: `/cases/${caseId}/evaluation` as string });
@@ -28,9 +30,13 @@ export function ExaminationSummary({ caseId }: ExaminationSummaryProps) {
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Untersuchungsergebnisse</CardTitle>
         <div className="flex items-center gap-2">
-          <Button variant="outline" disabled>
-            <Download className="mr-2 h-4 w-4" />
-            Als PDF exportieren
+          <Button
+            variant="outline"
+            onClick={() => print(`/cases/${caseId}/print-examination`)}
+            disabled={isPrinting}
+          >
+            <Printer className="mr-2 h-4 w-4" />
+            {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
           </Button>
           <Button onClick={handleNextStep}>
             Weiter zur Auswertung

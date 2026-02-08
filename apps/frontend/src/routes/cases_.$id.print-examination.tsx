@@ -1,24 +1,27 @@
 /**
- * Print Anamnesis Route
+ * Print Examination Route
  *
- * Dedicated print-optimized page that renders anamnesis data without app chrome.
- * Opens in a new window, auto-triggers window.print() after render.
+ * Dedicated print-optimized page that renders examination data without app chrome.
+ * Auto-triggers window.print() after render and signals completion to parent iframe.
  *
- * Route: /cases/:id/print-anamnesis
+ * Route: /cases/:id/print-examination
  * Parent: cases_.$id.tsx (gets KeySetupGuard + CaseWorkflowProvider)
- * Does NOT nest under anamnesis.tsx (no CaseLayout sidebar)
+ * Does NOT nest under examination.tsx (no CaseLayout sidebar)
  */
 
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { FormProvider, useForm } from "react-hook-form";
 import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
 import { formatDate } from "@/lib/date-utils";
-import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { PrintableAnamnesis } from "../features/questionnaire-viewer/components/dashboard/PrintableAnamnesis";
+import { GET_EXAMINATION_RESPONSE } from "../features/examination/queries";
+import { examinationFormConfig } from "../features/examination/form/use-examination-form";
+import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
+import { PrintableExamination } from "../features/examination/components/summary/PrintableExamination";
 
 const GET_PATIENT_RECORD = graphql(`
   query GetPatientRecord($id: String!) {
@@ -42,17 +45,20 @@ const GET_PATIENT_RECORD = graphql(`
   }
 `);
 
-export const Route = createFileRoute("/cases_/$id/print-anamnesis")({
-  component: PrintAnamnesisPage,
+export const Route = createFileRoute("/cases_/$id/print-examination")({
+  component: PrintExaminationPage,
 });
 
-function PrintAnamnesisPage() {
+function PrintExaminationPage() {
   const { id } = Route.useParams();
   const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(true);
   const [hasPrinted, setHasPrinted] = useState(false);
 
-  // Fetch patient record (shares TanStack Query cache with other routes)
+  // Create examination form (provides FormContext to E*Summary components)
+  const form = useForm(examinationFormConfig);
+
+  // Fetch patient record
   const { data: recordData, isLoading: isRecordLoading } = useQuery({
     queryKey: ["patient-record", id],
     queryFn: () => execute(GET_PATIENT_RECORD, { id }),
@@ -60,8 +66,27 @@ function PrintAnamnesisPage() {
 
   const record = recordData?.patient_record_by_pk;
 
-  // Fetch questionnaire responses (shares cache)
-  const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
+  // Fetch examination response
+  const { data: examData, isLoading: isExamLoading } = useQuery({
+    queryKey: ["examination-response-raw", id],
+    queryFn: () => execute(GET_EXAMINATION_RESPONSE, { patient_record_id: id }),
+  });
+
+  // Hydrate form with examination data
+  const [isFormReady, setIsFormReady] = useState(false);
+  useEffect(() => {
+    if (isExamLoading || isFormReady) return;
+
+    const response = examData?.examination_response?.[0];
+    if (response?.response_data) {
+      const validatedData = migrateAndParseExaminationData(response.response_data);
+      if (validatedData) {
+        form.reset(validatedData);
+      }
+    }
+
+    setIsFormReady(true);
+  }, [isExamLoading, examData, form, isFormReady]);
 
   // Decrypt patient data
   useEffect(() => {
@@ -92,12 +117,11 @@ function PrintAnamnesisPage() {
   }, [record?.first_name_encrypted]);
 
   // Auto-trigger print after everything is ready
-  const isReady = !isRecordLoading && !isResponsesLoading && !isDecrypting && responses;
+  const isReady = !isRecordLoading && !isExamLoading && !isDecrypting && isFormReady;
 
   useEffect(() => {
     if (!isReady || hasPrinted) return;
 
-    // Small delay for paint to complete
     const timer = setTimeout(() => {
       setHasPrinted(true);
       window.addEventListener(
@@ -136,7 +160,7 @@ function PrintAnamnesisPage() {
   }
 
   return (
-    <>
+    <FormProvider {...form}>
       {/* On-screen helper — hidden in print */}
       <div className="print:hidden bg-muted/50 border-b px-4 py-2 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
@@ -160,12 +184,11 @@ function PrintAnamnesisPage() {
         </div>
       </div>
 
-      <PrintableAnamnesis
-        responses={responses}
+      <PrintableExamination
         patientName={patientName}
         patientDob={patientDob}
         clinicInternalId={record?.clinic_internal_id ?? undefined}
       />
-    </>
+    </FormProvider>
   );
 }
