@@ -29,6 +29,7 @@ export {
   type FieldCriterion,
   type ThresholdCriterion,
   type ComputedCriterion,
+  type MatchCriterion,
   type AndCriterion,
   type OrCriterion,
   type NotCriterion,
@@ -68,6 +69,8 @@ export {
   field,
   threshold,
   computed,
+  // Context builders
+  match,
   // Composite builders
   and,
   or,
@@ -89,25 +92,40 @@ export { evaluate } from "./evaluate";
 
 // Diagnoses
 export { MYALGIA, MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION } from "./diagnoses/myalgia";
+export {
+  LOCAL_MYALGIA,
+  LOCAL_MYALGIA_EXAMINATION,
+  MYOFASCIAL_PAIN_WITH_SPREADING,
+  MYOFASCIAL_SPREADING_EXAMINATION,
+  MYOFASCIAL_PAIN_WITH_REFERRAL,
+  MYOFASCIAL_REFERRAL_EXAMINATION,
+} from "./diagnoses/myalgia-subtypes";
 
 // All diagnoses (for iteration)
 import { MYALGIA } from "./diagnoses/myalgia";
+import {
+  LOCAL_MYALGIA,
+  MYOFASCIAL_PAIN_WITH_SPREADING,
+  MYOFASCIAL_PAIN_WITH_REFERRAL,
+} from "./diagnoses/myalgia-subtypes";
 import type { DiagnosisDefinition } from "./location";
 
 /**
  * All defined diagnoses
  *
- * Currently only Myalgia is defined. Future diagnoses will be added here:
- * - Local Myalgia (subtype)
- * - Myofascial Pain with Spreading (subtype)
- * - Myofascial Pain with Referral (subtype)
+ * Future diagnoses will be added here:
  * - Arthralgia
  * - Headache Attributed to TMD
  * - Disc Displacement variants
  * - Degenerative Joint Disease
  * - Subluxation
  */
-export const ALL_DIAGNOSES: readonly DiagnosisDefinition[] = [MYALGIA];
+export const ALL_DIAGNOSES: readonly DiagnosisDefinition[] = [
+  MYALGIA,
+  LOCAL_MYALGIA,
+  MYOFASCIAL_PAIN_WITH_SPREADING,
+  MYOFASCIAL_PAIN_WITH_REFERRAL,
+];
 
 /**
  * Get a diagnosis definition by ID

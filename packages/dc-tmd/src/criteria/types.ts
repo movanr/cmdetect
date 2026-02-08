@@ -149,6 +149,28 @@ export interface AllCriterion extends CriterionMetadata {
 }
 
 // ============================================================================
+// CONTEXT CRITERIA (check evaluation context, not data)
+// ============================================================================
+
+/**
+ * Match criterion - checks if a resolved template variable matches an expected value
+ *
+ * Used for region-gating: ensures criterion branches only activate
+ * when the evaluation context matches the target region.
+ *
+ * @example
+ * // Only activates when evaluating for temporalis
+ * match("${region}", "temporalis")
+ */
+export interface MatchCriterion extends CriterionMetadata {
+  type: "match";
+  /** Template expression to resolve (e.g., "${region}") */
+  ref: string;
+  /** Expected resolved value */
+  value: string;
+}
+
+// ============================================================================
 // UNION TYPE
 // ============================================================================
 
@@ -166,7 +188,9 @@ export type Criterion =
   | NotCriterion
   // Quantifier criteria
   | AnyCriterion
-  | AllCriterion;
+  | AllCriterion
+  // Context criteria
+  | MatchCriterion;
 
 // ============================================================================
 // RESULT TYPES (mirror criterion tree structure)
@@ -235,7 +259,11 @@ export type CriterionResult =
  * Type guard: checks if result is a leaf criterion result
  */
 export function isLeafResult(result: CriterionResult): result is LeafCriterionResult {
-  return result.criterion.type === "field" || result.criterion.type === "threshold";
+  return (
+    result.criterion.type === "field" ||
+    result.criterion.type === "threshold" ||
+    result.criterion.type === "match"
+  );
 }
 
 /**

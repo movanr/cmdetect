@@ -12,6 +12,7 @@ import type {
   FieldCriterion,
   ThresholdCriterion,
   ComputedCriterion,
+  MatchCriterion,
   AndCriterion,
   OrCriterion,
   NotCriterion,
@@ -79,6 +80,28 @@ export function computed(
     compute,
     operator,
     value,
+  };
+}
+
+/**
+ * Creates a match criterion that checks if a resolved template variable equals an expected value
+ *
+ * Used for region-gating: ensures criterion branches only activate
+ * when the evaluation context matches the target region.
+ *
+ * @example
+ * // Only activates when evaluating for temporalis
+ * match("${region}", "temporalis")
+ *
+ * // Only activates for the left side
+ * match("${side}", "left")
+ */
+export function match(ref: string, value: string, metadata?: CriterionMetadata): MatchCriterion {
+  return {
+    type: "match",
+    ref,
+    value,
+    ...metadata,
   };
 }
 

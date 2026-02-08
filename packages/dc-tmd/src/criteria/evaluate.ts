@@ -18,6 +18,7 @@ import type {
   FieldCriterion,
   ThresholdCriterion,
   ComputedCriterion,
+  MatchCriterion,
   AndCriterion,
   OrCriterion,
   NotCriterion,
@@ -29,7 +30,7 @@ import type {
   CompositeCriterionResult,
   QuantifierCriterionResult,
 } from "./types";
-import { resolveFieldRef, type TemplateContext } from "./field-refs";
+import { resolveFieldRef, hasTemplateVars, type TemplateContext } from "./field-refs";
 
 /**
  * Get value at dot-separated path from data object
@@ -68,6 +69,8 @@ export function evaluate(
       return evaluateThreshold(criterion, data, context);
     case "computed":
       return evaluateComputed(criterion, data, context);
+    case "match":
+      return evaluateMatch(criterion, context);
     case "and":
       return evaluateAnd(criterion, data, context);
     case "or":
@@ -137,6 +140,38 @@ function evaluateField(
     criterion,
     ref: resolvedRef,
     value,
+  };
+}
+
+/**
+ * Evaluate a match criterion
+ *
+ * Resolves the template expression and compares against expected value.
+ * Returns pending if the template variable wasn't resolved.
+ */
+function evaluateMatch(
+  criterion: MatchCriterion,
+  context: TemplateContext
+): LeafCriterionResult {
+  const resolvedRef = resolveFieldRef(criterion.ref, context);
+
+  // If template wasn't resolved, treat as pending
+  if (hasTemplateVars(resolvedRef)) {
+    return {
+      status: "pending",
+      criterion,
+      ref: resolvedRef,
+      value: resolvedRef,
+    };
+  }
+
+  const isPositive = resolvedRef === criterion.value;
+
+  return {
+    status: isPositive ? "positive" : "negative",
+    criterion,
+    ref: resolvedRef,
+    value: resolvedRef,
   };
 }
 
