@@ -77,8 +77,11 @@ function computeStepStatusFromForm(
   if (isInterview) {
     // Check for interview refusal first
     const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
-    if (interviewRefusedInst && getValue(interviewRefusedInst.path) === true) {
-      return "refused";
+    if (interviewRefusedInst) {
+      // Also check if parent measurement was refused (auto-skip on remount)
+      const measurementRefusedPath = interviewRefusedInst.path.replace(".interviewRefused", ".refused");
+      if (getValue(measurementRefusedPath) === true) return "refused";
+      if (getValue(interviewRefusedInst.path) === true) return "refused";
     }
     // Check if all pain questions are answered (validates interview completion)
     const result = validateInterviewCompletion(instances, getValue);
@@ -234,16 +237,62 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       : false;
 
     if (isStepRefused) {
-      setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
       setExpanded({ left: null, right: null });
       setIncompleteRegions([]);
 
-      if (isLastStep) {
-        onComplete?.();
+      // If a measurement step is refused, auto-refuse the following interview step
+      const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
+      const isMeasureWithInterview = !isInterview && nextStepId && isInterviewStep(String(nextStepId));
+
+      if (isMeasureWithInterview && refusedInst) {
+        // Set interviewRefused = true in form data
+        const interviewRefusedPath = refusedInst.path.replace(".refused", ".interviewRefused");
+        form.setValue(interviewRefusedPath as FieldPath<FormValues>, true as never);
+        // Clear all interview pain data
+        const interviewInstances = getInstancesForStep(nextStepId as ExaminationStepId);
+        for (const inst of interviewInstances) {
+          if (!inst.path.endsWith(".interviewRefused")) {
+            setInstanceValue(form.setValue, inst.path, null);
+          }
+        }
+        // Mark both current and next step as refused, skip over interview
+        setStepStatuses((prev) => ({
+          ...prev,
+          [currentStepId]: "refused",
+          [nextStepId]: "refused",
+        }));
+        const skipToIndex = currentStepIndex + 2;
+        if (skipToIndex >= E4_STEP_ORDER.length) {
+          onComplete?.();
+        } else {
+          onStepChange?.(skipToIndex);
+        }
       } else {
-        onStepChange?.(currentStepIndex + 1);
+        setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
+        if (isLastStep) {
+          onComplete?.();
+        } else {
+          onStepChange?.(currentStepIndex + 1);
+        }
       }
       return;
+    }
+
+    // If measurement step proceeds normally, clear any previously auto-refused interview
+    if (!isInterview) {
+      const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
+      if (nextStepId && isInterviewStep(String(nextStepId)) && stepStatuses[nextStepId] === "refused") {
+        const measRefusedInst = stepInstances.find((i) => i.path.endsWith(".refused"));
+        if (measRefusedInst) {
+          const interviewRefusedPath = measRefusedInst.path.replace(".refused", ".interviewRefused");
+          form.setValue(interviewRefusedPath as FieldPath<FormValues>, false as never);
+        }
+        setStepStatuses((prev) => {
+          const next = { ...prev };
+          delete next[nextStepId];
+          return next;
+        });
+      }
     }
 
     // For interview steps, validate completeness first
