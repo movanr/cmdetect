@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import type { PainDrawingData, ImageId } from "@/features/pain-drawing-evaluation";
+import type { ImageId, PainDrawingData } from "@/features/pain-drawing-evaluation";
 import {
   calculatePainDrawingScore,
   IMAGE_CONFIGS,
@@ -17,6 +17,7 @@ import {
   ReadOnlyCanvas,
   REGION_ORDER,
 } from "@/features/pain-drawing-evaluation";
+import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type {
   GCPS1MAnswers,
   JFLS20Answers,
@@ -36,7 +37,6 @@ import {
   Rows3,
 } from "lucide-react";
 import { useState } from "react";
-import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import {
@@ -86,11 +86,7 @@ interface DashboardViewProps {
   caseId?: string;
 }
 
-export function DashboardView({
-  responses,
-  onStartReview,
-  caseId,
-}: DashboardViewProps) {
+export function DashboardView({ responses, onStartReview, caseId }: DashboardViewProps) {
   const [layout, setLayout] = useState<DashboardLayout>(getStoredLayout);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
   const { print, isPrinting } = useBackgroundPrint();
@@ -152,7 +148,9 @@ export function DashboardView({
   // Determine if we should show the next step button
   const showNextStepButton = sqResponse && !isScreeningNegative;
   const isReviewed = !!sqResponse?.reviewedAt;
-  const nextStepLabel = isReviewed ? "Erneut mit Patient bestätigen" : "Mit Patient bestätigen";
+  const nextStepLabel = isReviewed
+    ? "SF erneut mit Patient bestätigen"
+    : "SF mit Patient bestätigen";
 
   // Format timestamp for display
   const formatTimestamp = (ts: string | null | undefined) => {
@@ -172,8 +170,8 @@ export function DashboardView({
       <CheckCircle2 className="h-5 w-5 text-green-600" />
       <AlertTitle className="text-green-800">Screening negativ</AlertTitle>
       <AlertDescription className="text-green-700">
-        Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine Hinweise
-        auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
+        Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine Hinweise auf
+        eine CMD vor. Weitere Fragebögen wurden übersprungen.
       </AlertDescription>
     </Alert>
   );
@@ -254,7 +252,9 @@ export function DashboardView({
                     <span>Eingereicht: {formatTimestamp(sqResponse.submittedAt)}</span>
                   )}
                   {sqResponse.reviewedAt && (
-                    <span className="ml-3">Überprüft: {formatTimestamp(sqResponse.reviewedAt)}</span>
+                    <span className="ml-3">
+                      Überprüft: {formatTimestamp(sqResponse.reviewedAt)}
+                    </span>
                   )}
                 </p>
                 <SQAnswersTable answers={sqResponse.answers} />
@@ -289,7 +289,10 @@ export function DashboardView({
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
                   PHQ-4 — Depression &amp; Angst
                 </h3>
-                <PHQ4AnswersTable answers={phq4Response!.answers as Record<string, string>} showPips />
+                <PHQ4AnswersTable
+                  answers={phq4Response!.answers as Record<string, string>}
+                  showPips
+                />
               </section>
             )}
 
@@ -366,7 +369,9 @@ export function DashboardView({
                   <Axis2ScoreCard
                     questionnaireId={QUESTIONNAIRE_ID.JFLS8}
                     title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
-                    answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
+                    answers={
+                      jfls8Response ? (jfls8Response.answers as Record<string, string>) : null
+                    }
                   />
                 )}
 
@@ -392,7 +397,9 @@ export function DashboardView({
                   <Axis2ScoreCard
                     questionnaireId={QUESTIONNAIRE_ID.JFLS20}
                     title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
-                    answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
+                    answers={
+                      jfls20Response ? (jfls20Response.answers as Record<string, string>) : null
+                    }
                   />
                 )}
               </div>

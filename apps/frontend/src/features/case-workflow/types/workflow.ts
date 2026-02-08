@@ -74,7 +74,7 @@ export const MAIN_STEPS: StepDefinition[] = [
     order: 1,
     subSteps: [
       { id: "review", label: "Übersicht", order: 1, route: "review" },
-      { id: "wizard", label: "SF mit Patient", order: 2, route: "wizard" },
+      { id: "wizard", label: "SF mit Patient bestätigen", order: 2, route: "wizard" },
     ],
   },
   {
