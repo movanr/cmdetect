@@ -7,9 +7,12 @@
  *
  * Myalgia subtypes are flattened: if a subtype is positive it replaces
  * the parent myalgia diagnosis to avoid confusion.
+ *
+ * The right column shows an interactive decision tree corresponding
+ * to the selected diagnosis, side, and region.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   ALL_DIAGNOSES,
   DIAGNOSIS_PARENT,
@@ -18,10 +21,17 @@ import {
   evaluateAllDiagnoses,
   type DiagnosisEvaluationResult,
   type DiagnosisId,
+  type Side,
+  type Region,
 } from "@cmdetect/dc-tmd";
 import type { FormValues } from "../../examination";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
-import { DecisionTreePlaceholder } from "./DecisionTreePlaceholder";
+import {
+  DecisionTreeView,
+  createMyalgiaTree,
+  createMyalgiaSubtypesTree,
+} from "../../decision-tree";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DiagnosisBlock } from "./DiagnosisBlock";
 
 interface EvaluationViewProps {
@@ -71,11 +81,23 @@ function flattenResults(results: DiagnosisEvaluationResult[]): DiagnosisEvaluati
   return flat;
 }
 
+/** Myalgia-related diagnosis IDs for tree selection */
+const MYALGIA_SUBTYPE_IDS: DiagnosisId[] = [
+  "localMyalgia",
+  "myofascialPainWithSpreading",
+  "myofascialPainWithReferral",
+];
+
 export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewProps) {
-  const results = useMemo(() => {
-    const data = mapToCriteriaData(sqAnswers, examinationData);
-    return evaluateAllDiagnoses(ALL_DIAGNOSES, data);
-  }, [sqAnswers, examinationData]);
+  const criteriaData = useMemo(
+    () => mapToCriteriaData(sqAnswers, examinationData),
+    [sqAnswers, examinationData]
+  );
+
+  const results = useMemo(
+    () => evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData),
+    [criteriaData]
+  );
 
   const painResults = useMemo(
     () =>
@@ -96,6 +118,26 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
       ),
     [results]
   );
+
+  const [selectedSide, setSelectedSide] = useState<Side>("right");
+  const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
+
+  // Determine which tree type to show
+  const treeType = useMemo(() => {
+    if (painResults.length === 0) return null;
+    const firstResult = painResults[0];
+    const isSubtype = MYALGIA_SUBTYPE_IDS.includes(firstResult.diagnosisId as DiagnosisId);
+    const isMyalgia = firstResult.diagnosisId === "myalgia" || isSubtype;
+    if (!isMyalgia) return null;
+    return isSubtype ? "subtypes" : "myalgia";
+  }, [painResults]);
+
+  const treeData = useMemo(() => {
+    if (!treeType) return null;
+    return treeType === "subtypes"
+      ? createMyalgiaSubtypesTree(selectedSide, selectedRegion)
+      : createMyalgiaTree(selectedSide, selectedRegion);
+  }, [treeType, selectedSide, selectedRegion]);
 
   return (
     <div className="flex flex-col xl:flex-row gap-8">
@@ -126,11 +168,44 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
         )}
       </div>
 
-      {/* Right: Decision tree (placeholder for now) */}
+      {/* Right: Decision tree */}
       <div className="xl:flex-1 min-w-0">
         <section>
           <h2 className="text-lg font-semibold mb-4">Entscheidungsbaum</h2>
-          <DecisionTreePlaceholder />
+          {treeData ? (
+            <div className="space-y-4">
+              {/* Side & Region toggles */}
+              <div className="flex flex-wrap gap-3">
+                <ToggleGroup
+                  type="single"
+                  variant="outline"
+                  size="sm"
+                  value={selectedSide}
+                  onValueChange={(v) => { if (v) setSelectedSide(v as Side); }}
+                >
+                  <ToggleGroupItem value="right">Rechts</ToggleGroupItem>
+                  <ToggleGroupItem value="left">Links</ToggleGroupItem>
+                </ToggleGroup>
+
+                <ToggleGroup
+                  type="single"
+                  variant="outline"
+                  size="sm"
+                  value={selectedRegion}
+                  onValueChange={(v) => { if (v) setSelectedRegion(v as Region); }}
+                >
+                  <ToggleGroupItem value="temporalis">Temporalis</ToggleGroupItem>
+                  <ToggleGroupItem value="masseter">Masseter</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              <DecisionTreeView tree={treeData} data={criteriaData} />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Kein Entscheidungsbaum für die aktuelle Diagnose verfügbar.
+            </p>
+          )}
         </section>
       </div>
     </div>

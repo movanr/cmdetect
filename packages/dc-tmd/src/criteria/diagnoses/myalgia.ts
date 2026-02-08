@@ -28,7 +28,7 @@ import type { Criterion } from "../types";
  * Criterion A: Pain in jaw, temple, in ear, or in front of ear (masticatory structure)
  * SQ1 = "yes" AND SQ3 ∈ ["intermittent", "continuous"]
  */
-const painInMasticatoryStructure: Criterion = and(
+export const painInMasticatoryStructure: Criterion = and(
   [
     field(sq("SQ1"), { equals: "yes" }),
     or([field(sq("SQ3"), { equals: "intermittent" }), field(sq("SQ3"), { equals: "continuous" })]),
@@ -43,7 +43,7 @@ const painInMasticatoryStructure: Criterion = and(
  * Criterion B: Pain modified by jaw movement, function, or parafunction
  * Any of SQ4_A, SQ4_B, SQ4_C, SQ4_D = "yes"
  */
-const painModifiedByFunction: Criterion = any(
+export const painModifiedByFunction: Criterion = any(
   [sq("SQ4_A"), sq("SQ4_B"), sq("SQ4_C"), sq("SQ4_D")],
   { equals: "yes" },
   {
@@ -105,7 +105,7 @@ function createSiteFamiliarPainCriterion(): Criterion {
  * Criterion C: Confirmation of pain location in temporalis or masseter muscle
  * E1 pain location on ${side} includes ${region}
  */
-const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
+export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
   includes: "${region}",
 });
 
@@ -114,7 +114,7 @@ const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
  * - Palpation of temporalis or masseter muscle (E9)
  * - Maximum unassisted or assisted opening (E4b, E4c)
  */
-const familiarPainProvoked: Criterion = or(
+export const familiarPainProvoked: Criterion = or(
   [
     // E4: Familiar pain during opening movements
     familiarPainDuringOpening("${side}", "${region}", {

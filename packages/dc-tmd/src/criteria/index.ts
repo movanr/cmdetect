@@ -92,7 +92,15 @@ export { evaluate } from "./evaluate";
 export { evaluateDiagnosis, evaluateAllDiagnoses } from "./evaluate-diagnosis";
 
 // Diagnoses
-export { MYALGIA, MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION } from "./diagnoses/myalgia";
+export {
+  MYALGIA,
+  MYALGIA_ANAMNESIS,
+  MYALGIA_EXAMINATION,
+  painInMasticatoryStructure,
+  painModifiedByFunction,
+  painLocationConfirmed,
+  familiarPainProvoked,
+} from "./diagnoses/myalgia";
 export {
   LOCAL_MYALGIA,
   LOCAL_MYALGIA_EXAMINATION,
