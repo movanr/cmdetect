@@ -81,6 +81,12 @@ declare module "@docs/dc-tmd/examiner-protocol/german/translated/section8_german
   export default content;
 }
 
+// Self-report scoring manual
+declare module "@docs/dc-tmd/self-report-scoring-manual/self-report-scoring-manual.md?raw" {
+  const content: string;
+  export default content;
+}
+
 // Figure index JSON
 declare module "@docs/dc-tmd/examiner-protocol/images/figure_index.json" {
   interface FigureEntry {

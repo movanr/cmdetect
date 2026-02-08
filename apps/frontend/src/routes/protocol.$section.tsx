@@ -1,6 +1,6 @@
+import { ProtocolMarkdownViewer, useProtocolContext } from "@/features/protocol";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { ProtocolMarkdownViewer, useProtocolContext } from "@/features/protocol";
 
 // Import Section 5 subsections (existing German official translations)
 import section5_0 from "@docs/dc-tmd/examiner-protocol/german/extracted/section5_0_german.md?raw";
@@ -87,8 +87,8 @@ function ProtocolSection() {
   if (!content) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-semibold mb-2">Sektion nicht gefunden</h1>
-        <p className="text-muted-foreground">Die angeforderte Sektion existiert nicht.</p>
+        <h1 className="text-2xl font-semibold mb-2">Abschnitt nicht gefunden</h1>
+        <p className="text-muted-foreground">Der angeforderte Abschnitt existiert nicht.</p>
       </div>
     );
   }

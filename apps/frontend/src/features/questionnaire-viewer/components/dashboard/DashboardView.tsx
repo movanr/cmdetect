@@ -37,8 +37,10 @@ import {
   Rows3,
 } from "lucide-react";
 import { useState } from "react";
+import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
+import { DashboardInfoBlock } from "./DashboardInfoBlock";
 import {
   GCPSAnswersTable,
   JFLS20AnswersTable,
@@ -278,6 +280,7 @@ export function DashboardView({
                   {isScreeningNegative && " — Screening negativ"}
                   {!isScreeningNegative && sqResponse.reviewedAt && " — Überprüft"}
                 </h3>
+                <DashboardInfoBlock info={AXIS1_INFO} className="mb-3" />
                 <p className="text-xs text-gray-400 mb-2">
                   {sqResponse.submittedAt && (
                     <span>Eingereicht: {formatTimestamp(sqResponse.submittedAt)}</span>
@@ -290,6 +293,16 @@ export function DashboardView({
                 </p>
                 <SQAnswersTable answers={sqResponse.answers} />
               </section>
+            )}
+
+            {/* Axis 2 info block — shown if any Axis 2 instrument has data */}
+            {(hasPainDrawing ||
+              hasAnswers(gcps1mResponse) ||
+              hasAnswers(phq4Response) ||
+              hasAnswers(jfls8Response) ||
+              hasAnswers(obcResponse) ||
+              hasAnswers(jfls20Response)) && (
+              <DashboardInfoBlock info={AXIS2_INFO} className="mt-2" />
             )}
 
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) &&
@@ -369,6 +382,7 @@ export function DashboardView({
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
                   Achse 1 - Symptomfragebogen
                 </h3>
+                <DashboardInfoBlock info={AXIS1_INFO} className="mb-3" />
                 <SQStatusCard response={sqResponse} isScreeningNegative={isScreeningNegative} />
               </section>
             )}
@@ -378,6 +392,7 @@ export function DashboardView({
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
                 Achse 2 - Psychosoziale Bewertung
               </h3>
+              <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
               <div className="space-y-3">
                 {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
                   <PainDrawingScoreCard data={painDrawingData ?? null} />
@@ -387,7 +402,7 @@ export function DashboardView({
                   <Axis2ScoreCard
                     questionnaireId={QUESTIONNAIRE_ID.GCPS_1M}
                     title="GCPS - Graduierung chronischer Schmerzen"
-                    subtitle="1-Monats-Version"
+                    subtitle="30-Tage-Version"
                     answers={
                       gcps1mResponse
                         ? (gcps1mResponse.answers as Record<string, string | number>)

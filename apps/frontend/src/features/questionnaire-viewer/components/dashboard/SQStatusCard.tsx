@@ -7,13 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
+import { Link } from "@tanstack/react-router";
 import {
   SQ_ENABLE_WHEN,
   SQ_OFFICE_USE_QUESTIONS,
   isQuestionIdEnabled,
 } from "@cmdetect/questionnaires";
-import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { SQAnswersTable } from "./questionnaire-tables";
 
@@ -89,12 +91,23 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground mt-1">
-              Eingereicht {formatDistanceToNow(new Date(submittedAt), { addSuffix: true })}
-              {isReviewed && reviewedAt && (
-                <> · Überprüft {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}</>
-              )}
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-sm text-muted-foreground">
+                Eingereicht {formatDistanceToNow(new Date(submittedAt), { addSuffix: true })}
+                {isReviewed && reviewedAt && (
+                  <> · Überprüft {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}</>
+                )}
+              </p>
+              <Link
+                to="/docs/scoring-manual"
+                hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
+                onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline shrink-0"
+              >
+                <BookOpen className="h-3 w-3" />
+                Scoring-Anleitung
+              </Link>
+            </div>
 
             {/* Negative screening message */}
             {isScreeningNegative && (

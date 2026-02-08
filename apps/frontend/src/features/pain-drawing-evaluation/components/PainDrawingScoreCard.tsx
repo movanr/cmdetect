@@ -7,7 +7,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { AlertTriangle, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { IMAGE_CONFIGS, REGION_ORDER, SEVERITY_SEGMENTS } from "../constants";
 import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
@@ -69,6 +70,15 @@ export function PainDrawingScoreCard({
             <div className="min-w-0">
               <h4 className="font-medium text-sm leading-tight">{title}</h4>
               {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+              <Link
+                to="/docs/scoring-manual"
+                hash="pain-drawing"
+                onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
+              >
+                <BookOpen className="h-3 w-3" />
+                Scoring-Anleitung
+              </Link>
               {isWidespread && (
                 <div className="flex items-center gap-1.5 text-red-600 mt-1.5">
                   <AlertTriangle className="size-3.5 shrink-0" />

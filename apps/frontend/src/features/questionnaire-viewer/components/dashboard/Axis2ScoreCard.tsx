@@ -5,6 +5,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@tanstack/react-router";
 import type {
   GCPS1MAnswers,
   GCPSGrade,
@@ -28,9 +29,10 @@ import {
   JFLS20_SUBSCALE_LABELS,
   QUESTIONNAIRE_ID,
 } from "@cmdetect/questionnaires";
-import { AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import {
   GCPSAnswersTable,
   JFLS20AnswersTable,
@@ -245,6 +247,8 @@ function JFLS20SubscaleDisplay({
 interface HorizontalScoreLayoutProps {
   title: string;
   subtitle?: string;
+  /** Scoring manual heading anchor — renders a link when provided */
+  manualAnchor?: string;
   scaleLabel: string;
   scaleBar: ReactNode;
   scoreDisplay: ReactNode;
@@ -258,6 +262,7 @@ interface HorizontalScoreLayoutProps {
 function HorizontalScoreLayout({
   title,
   subtitle,
+  manualAnchor,
   scaleLabel,
   scaleBar,
   scoreDisplay,
@@ -275,6 +280,17 @@ function HorizontalScoreLayout({
           <div className="min-w-0">
             <h4 className="font-medium text-sm leading-tight">{title}</h4>
             {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+            {manualAnchor && (
+              <Link
+                to="/docs/scoring-manual"
+                hash={manualAnchor}
+                onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
+              >
+                <BookOpen className="h-3 w-3" />
+                Scoring-Anleitung
+              </Link>
+            )}
             {warning && <div className="mt-1.5">{warning}</div>}
           </div>
 
@@ -407,6 +423,7 @@ export function Axis2ScoreCard({
   isPlaceholder = false,
 }: Axis2ScoreCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const manualAnchor = SCORING_MANUAL_ANCHORS[questionnaireId];
 
   // Check if answers is empty (null, undefined, or empty object)
   const hasData = answers && Object.keys(answers).length > 0;
@@ -444,6 +461,7 @@ export function Axis2ScoreCard({
       <HorizontalScoreLayout
         title={title}
         subtitle={subtitle}
+        manualAnchor={manualAnchor}
         scaleLabel="Chronifizierungsgrad"
         scaleBar={
           <>
@@ -551,6 +569,7 @@ export function Axis2ScoreCard({
       <HorizontalScoreLayout
         title={title}
         subtitle={subtitle}
+        manualAnchor={manualAnchor}
         scaleLabel="Kieferfunktions-Einschränkung"
         scaleBar={
           <>
@@ -611,6 +630,7 @@ export function Axis2ScoreCard({
       <HorizontalScoreLayout
         title={title}
         subtitle={subtitle}
+        manualAnchor={manualAnchor}
         scaleLabel="Kieferfunktions-Einschränkung (erweitert)"
         scaleBar={
           <>
@@ -690,6 +710,7 @@ export function Axis2ScoreCard({
       <HorizontalScoreLayout
         title={title}
         subtitle={subtitle}
+        manualAnchor={manualAnchor}
         scaleLabel="Orale Verhaltensweisen - CMD-Risiko"
         scaleBar={
           <>
@@ -749,6 +770,7 @@ export function Axis2ScoreCard({
     <HorizontalScoreLayout
       title={title}
       subtitle={subtitle}
+      manualAnchor={manualAnchor}
       scaleLabel="Schweregrad"
       scaleBar={
         <>
