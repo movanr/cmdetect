@@ -97,6 +97,13 @@ export {
 export { evaluate } from "./evaluate";
 export { evaluateDiagnosis, evaluateAllDiagnoses } from "./evaluate-diagnosis";
 
+// Clinical context
+export {
+  type DiagnosticValidity,
+  type DiagnosisClinicalContext,
+  getDiagnosisClinicalContext,
+} from "./clinical-context";
+
 // Relevance analysis
 export {
   type AnamnesisRelevanceResult,

@@ -35,6 +35,7 @@ import {
 import type { FormValues } from "../../examination";
 import { EMPTY_REGION_STATUS, type RegionStatus } from "../../examination/components/HeadDiagram";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
+import { DiagnosisDetailPanel } from "./DiagnosisDetailPanel";
 import { PositiveDiagnosesList, type PositiveGroup } from "./PositiveDiagnosesList";
 import { RegionDiagnosisList } from "./RegionDiagnosisList";
 import { SummaryDiagrams } from "./SummaryDiagrams";
@@ -199,6 +200,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
   const [selectedSide, setSelectedSide] = useState<Side>("right");
   const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
   const [userSelectedTree, setUserSelectedTree] = useState<TreeTypeId | null>(null);
+  const [selectedDiagnosisId, setSelectedDiagnosisId] = useState<DiagnosisId | null>(null);
 
   // ── Memos (dependency order) ───────────────────────────────────────
 
@@ -325,6 +327,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
       setSelectedSide(side);
       setSelectedRegion(region);
       setUserSelectedTree(diagnosisToTreeType(diagnosisId));
+      setSelectedDiagnosisId(diagnosisId);
     },
     []
   );
@@ -366,6 +369,12 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
               />
             </div>
           </div>
+
+          {/* Clinical context for selected positive diagnosis */}
+          {selectedDiagnosisId &&
+            positiveGroups.some((g) =>
+              g.diagnoses.some((d) => d.diagnosisId === selectedDiagnosisId)
+            ) && <DiagnosisDetailPanel diagnosisId={selectedDiagnosisId} />}
         </CardContent>
       </Card>
 
