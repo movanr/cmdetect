@@ -1,59 +1,24 @@
 /**
- * SummaryDiagrams — Read-only HeadDiagram pair with aggregated diagnosis results.
+ * SummaryDiagrams — Interactive HeadDiagram pair with aggregated region statuses.
  *
- * Renders a left + right HeadDiagram in read-only mode, with region colors
- * derived from aggregated CriteriaLocationResult across all diagnoses in a section.
+ * Renders a left + right HeadDiagram with region colors derived from
+ * pre-computed aggregate statuses. Clicking a region fires onRegionClick
+ * with the side context included.
  */
 
 import { useCallback } from "react";
-import {
-  SIDE_KEYS,
-  type CriteriaLocationResult,
-  type DiagnosisEvaluationResult,
-  type Region,
-  type Side,
-} from "@cmdetect/dc-tmd";
+import { SIDE_KEYS, type Region, type Side } from "@cmdetect/dc-tmd";
 import {
   HeadDiagram,
-  EMPTY_REGION_STATUS,
   type RegionStatus,
 } from "../../examination/components/HeadDiagram";
 
 interface SummaryDiagramsProps {
-  results: DiagnosisEvaluationResult[];
+  regionStatuses: Record<Side, Partial<Record<Region, RegionStatus>>>;
   regions: readonly Region[];
-}
-
-/**
- * Map aggregated CriteriaLocationResults to a HeadDiagram RegionStatus.
- *
- * - positive location → blue (familiar pain positive)
- * - negative location → dark gray (complete, no findings)
- * - pending location → light gray (no data)
- */
-function toRegionStatus(
-  allLocationResults: CriteriaLocationResult[],
-  side: Side,
-  region: Region
-): RegionStatus {
-  const matches = allLocationResults.filter(
-    (r) => r.side === side && r.region === region
-  );
-  if (matches.length === 0) return EMPTY_REGION_STATUS;
-
-  const hasPositive = matches.some((r) => r.status === "positive");
-  const hasPending = matches.some((r) => r.status === "pending");
-  const hasData = matches.some((r) => r.status !== "pending");
-
-  return {
-    hasData,
-    isPainPositive: hasPositive,
-    hasFamiliarPainData: hasData,
-    hasFamiliarPain: hasPositive,
-    hasFamiliarHeadacheData: false,
-    hasFamiliarHeadache: false,
-    isComplete: !hasPending,
-  };
+  selectedSide?: Side;
+  selectedRegion?: Region | null;
+  onRegionClick?: (side: Side, region: Region) => void;
 }
 
 const LEGEND_ITEMS = [
@@ -62,23 +27,18 @@ const LEGEND_ITEMS = [
   { label: "Ausstehend", className: "bg-zinc-300" },
 ];
 
-// No-op for disabled diagrams
-const noop = () => {};
-
-export function SummaryDiagrams({ results, regions }: SummaryDiagramsProps) {
-  // Collect all location results from all diagnoses
-  const allLocationResults = results.flatMap((r) => r.locationResults);
-
-  // Build region statuses per side
-  const buildStatuses = useCallback(
-    (side: Side): Partial<Record<Region, RegionStatus>> => {
-      const statuses: Partial<Record<Region, RegionStatus>> = {};
-      for (const region of regions) {
-        statuses[region] = toRegionStatus(allLocationResults, side, region);
-      }
-      return statuses;
+export function SummaryDiagrams({
+  regionStatuses,
+  regions,
+  selectedSide,
+  selectedRegion,
+  onRegionClick,
+}: SummaryDiagramsProps) {
+  const handleRegionClick = useCallback(
+    (side: Side) => (region: Region) => {
+      onRegionClick?.(side, region);
     },
-    [allLocationResults, regions]
+    [onRegionClick]
   );
 
   return (
@@ -92,9 +52,9 @@ export function SummaryDiagrams({ results, regions }: SummaryDiagramsProps) {
             <HeadDiagram
               side={side}
               regions={regions}
-              regionStatuses={buildStatuses(side)}
-              onRegionClick={noop}
-              disabled
+              regionStatuses={regionStatuses[side]}
+              selectedRegion={selectedSide === side ? selectedRegion : null}
+              onRegionClick={handleRegionClick(side)}
               className="w-[160px] sm:w-[180px]"
             />
           </div>

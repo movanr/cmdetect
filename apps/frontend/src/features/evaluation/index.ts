@@ -5,6 +5,7 @@
  */
 
 export { EvaluationView } from "./components/EvaluationView";
-export { DiagnosisBlock } from "./components/DiagnosisBlock";
 export { SummaryDiagrams } from "./components/SummaryDiagrams";
+export { PositiveDiagnosesList } from "./components/PositiveDiagnosesList";
+export { RegionDiagnosisList } from "./components/RegionDiagnosisList";
 export { mapToCriteriaData } from "./utils/map-to-criteria-data";
