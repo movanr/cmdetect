@@ -28,7 +28,9 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import {
   DecisionTreeView,
+  createArthalgiaTree,
   createDiscDisplacementTree,
+  createHeadacheTree,
   createMyalgiaSubtypesTree,
   createMyalgiaTree,
 } from "../../decision-tree";
@@ -308,6 +310,10 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
         return createMyalgiaTree(selectedSide, selectedRegion);
       case "myalgiaSubtypes":
         return createMyalgiaSubtypesTree(selectedSide, selectedRegion);
+      case "arthralgia":
+        return createArthalgiaTree(selectedSide);
+      case "headache":
+        return createHeadacheTree(selectedSide);
       case "discDisplacement":
         return createDiscDisplacementTree(selectedSide);
       default:

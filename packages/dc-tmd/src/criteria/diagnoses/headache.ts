@@ -67,7 +67,7 @@ export const HEADACHE_ANAMNESIS: Criterion = and(
  * Criterion C: Confirmation of headache location in temporalis
  * E1b headache location on ${side} includes "temporalis"
  */
-const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.${side}", {
+export const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.${side}", {
   includes: "temporalis",
 });
 
@@ -77,7 +77,7 @@ const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.${side}"
  * - E5 lateral/protrusive movements (familiar headache)
  * - E9 temporalis palpation (familiar headache)
  */
-const familiarHeadacheProvoked: Criterion = or(
+export const familiarHeadacheProvoked: Criterion = or(
   [
     familiarHeadacheDuringOpening("${side}", "temporalis", {
       id: "openingFamiliarHeadache",

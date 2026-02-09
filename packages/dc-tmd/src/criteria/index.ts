@@ -133,6 +133,8 @@ export {
   ARTHRALGIA,
   ARTHRALGIA_ANAMNESIS,
   ARTHRALGIA_EXAMINATION,
+  painLocationConfirmedTmj,
+  familiarPainProvokedTmj,
 } from "./diagnoses/arthralgia";
 export {
   HEADACHE_ATTRIBUTED_TO_TMD,
@@ -140,6 +142,8 @@ export {
   HEADACHE_EXAMINATION,
   headacheInTemporalRegion,
   headacheModifiedByFunction,
+  headacheLocationConfirmed,
+  familiarHeadacheProvoked,
 } from "./diagnoses/headache";
 
 // Diagnoses — Joint disorders

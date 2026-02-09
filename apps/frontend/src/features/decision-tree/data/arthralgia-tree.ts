@@ -1,26 +1,25 @@
 import {
   and,
-  familiarPainProvoked,
-  MYALGIA_ANAMNESIS,
-  MYALGIA_EXAMINATION,
-  painLocationConfirmed,
-  type Region,
+  ARTHRALGIA_ANAMNESIS,
+  ARTHRALGIA_EXAMINATION,
+  familiarPainProvokedTmj,
+  painLocationConfirmedTmj,
   type Side,
 } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
 /**
- * Generate the myalgia decision tree for a specific side and region.
+ * Generate the arthralgia decision tree for a specific side.
  *
- * Nodes map to DC/TMD myalgia criteria:
- * 1. Myalgia anamnesis (SQ history A+B)
- * 2. Pain location confirmed (E1 criterion C)
- * 3. Familiar pain from opening or palpation (E4/E9 criterion D)
- * 4. Myalgia — positive diagnosis end node
+ * Nodes map to DC/TMD arthralgia criteria:
+ * 1. Arthralgia anamnesis (SQ history A+B) — same as myalgia
+ * 2. Pain location confirmed in TMJ (E1 criterion C)
+ * 3. Familiar pain from opening, movement, or palpation (E4/E5/E9 criterion D)
+ * 4. Arthralgia — positive diagnosis end node
  * 5. Investigate other — negative end node
  */
-export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
-  const ctx = { side, region };
+export function createArthalgiaTree(side: Side): DecisionTreeDef {
+  const ctx = { side, region: "tmj" as const };
 
   // Layout constants
   const colCenter = 150;
@@ -31,7 +30,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
   const nodes: TreeNodeDef[] = [
     {
       id: "anamnesis",
-      label: "Myalgie-Anamnese",
+      label: "Arthralgie-Anamnese",
       subItems: {
         labels: [
           "Schmerz in einer mastikatorischen Struktur",
@@ -39,7 +38,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
         ],
         connector: "UND",
       },
-      criterion: MYALGIA_ANAMNESIS,
+      criterion: ARTHRALGIA_ANAMNESIS,
       center: { x: colCenter, y: 65 },
       width: nodeW,
       height: 130,
@@ -47,33 +46,38 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
     {
       id: "painLocation",
       label: "Schmerzlokalisation bestätigt",
-      criterion: painLocationConfirmed,
+      subLabel: "KG-Schmerz im Bereich des Kiefergelenks",
+      criterion: painLocationConfirmedTmj,
       context: ctx,
-      center: { x: colCenter, y: 220 },
+      center: { x: colCenter, y: 225 },
       width: nodeW,
-      height: 100,
+      height: 120,
     },
     {
       id: "familiarPain",
       label: "Bekannter Schmerz",
       subItems: {
-        labels: ["Bekannter Schmerz bei maximaler Mundöffnung", "Bekannter Schmerz bei Palpation"],
+        labels: [
+          "Bekannter Schmerz bei Mundöffnung",
+          "Bekannter Schmerz bei Lateral-/Protrusionsbewegung",
+          "Bekannter Schmerz bei Palpation",
+        ],
         connector: "ODER",
       },
-      criterion: familiarPainProvoked,
+      criterion: familiarPainProvokedTmj,
       context: ctx,
-      center: { x: colCenter, y: 385 },
+      center: { x: colCenter, y: 410 },
       width: nodeW,
-      height: 150,
+      height: 190,
     },
     {
-      id: "myalgia",
-      label: "Myalgie",
+      id: "arthralgia",
+      label: "Arthralgie",
       color: "blue",
       isEndNode: true,
-      criterion: and([MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION.criterion]),
+      criterion: and([ARTHRALGIA_ANAMNESIS, ARTHRALGIA_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter, y: 535 },
+      center: { x: colCenter, y: 580 },
       width: endW,
       height: endH,
     },
@@ -123,7 +127,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
     },
     {
       from: "familiarPain",
-      to: "myalgia",
+      to: "arthralgia",
       startDirection: "down",
       endDirection: "down",
       type: "positive",
@@ -140,13 +144,12 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
   ];
 
   const sideLabel = side === "right" ? "Rechts" : "Links";
-  const regionLabel = region === "temporalis" ? "Temporalis" : "Masseter";
 
   return {
-    id: `myalgia-${side}-${region}`,
-    title: `Myalgie (${regionLabel}, ${sideLabel})`,
+    id: `arthralgia-${side}-tmj`,
+    title: `Arthralgie (KG, ${sideLabel})`,
     side,
-    region,
+    region: "tmj",
     nodes,
     transitions,
   };

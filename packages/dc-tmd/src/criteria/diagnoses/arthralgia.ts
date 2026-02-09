@@ -45,7 +45,7 @@ export const ARTHRALGIA_ANAMNESIS: Criterion = and(
  * Criterion C: Confirmation of pain location in TMJ
  * E1 pain location on ${side} includes "tmj"
  */
-const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side}", {
+export const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side}", {
   includes: "tmj",
 });
 
@@ -55,7 +55,7 @@ const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side}", {
  * - E5 lateral/protrusive movements
  * - E9 TMJ palpation (lateral pole or around lateral pole)
  */
-const familiarPainProvokedTmj: Criterion = or(
+export const familiarPainProvokedTmj: Criterion = or(
   [
     familiarPainDuringOpening("${side}", "tmj", {
       id: "openingFamiliarPainTmj",

@@ -4,13 +4,13 @@ import {
   MYALGIA_EXAMINATION,
   MYOFASCIAL_REFERRAL_EXAMINATION,
   MYOFASCIAL_SPREADING_EXAMINATION,
-  getSiteRefs,
-  any,
   and,
-  type Side,
+  any,
+  getSiteRefs,
   type Region,
+  type Side,
 } from "@cmdetect/dc-tmd";
-import type { DecisionTreeDef, TreeNodeDef, TransitionFromIds } from "../types";
+import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
 /**
  * Generate the myalgia subtypes decision tree for a specific side and region.
@@ -30,26 +30,38 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
   const referredPainRefs = getSiteRefs(region, side, "referredPain");
   const spreadingPainRefs = getSiteRefs(region, side, "spreadingPain");
 
-  const familiarPainPalpation = any(familiarPainRefs, { equals: "yes" }, {
-    id: "familiarPainPalpation",
-    label: "Bekannter Schmerz bei Palpation",
-  });
+  const familiarPainPalpation = any(
+    familiarPainRefs,
+    { equals: "yes" },
+    {
+      id: "familiarPainPalpation",
+      label: "Bekannter Schmerz bei Palpation",
+    }
+  );
 
-  const referredPainPalpation = any(referredPainRefs, { equals: "yes" }, {
-    id: "referredPainPalpation",
-    label: "Übertragener Schmerz bei Palpation",
-  });
+  const referredPainPalpation = any(
+    referredPainRefs,
+    { equals: "yes" },
+    {
+      id: "referredPainPalpation",
+      label: "Übertragener Schmerz bei Palpation",
+    }
+  );
 
-  const spreadingPainPalpation = any(spreadingPainRefs, { equals: "yes" }, {
-    id: "spreadingPainPalpation",
-    label: "Ausbreitender Schmerz bei Palpation",
-  });
+  const spreadingPainPalpation = any(
+    spreadingPainRefs,
+    { equals: "yes" },
+    {
+      id: "spreadingPainPalpation",
+      label: "Ausbreitender Schmerz bei Palpation",
+    }
+  );
 
   // Full myalgia criterion: anamnesis + examination (region-specific via context)
-  const myalgiaCriterion = and(
-    [MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION.criterion],
-    { id: "myalgiaFull", label: "Myalgie (Anamnese + Untersuchung)" }
-  );
+  const myalgiaCriterion = and([MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION.criterion], {
+    id: "myalgiaFull",
+    label: "Myalgie (Anamnese + Untersuchung)",
+  });
 
   const regionTitle = region === "temporalis" ? "Temporalis" : "Masseter";
   const sideTitle = side === "right" ? "Rechts" : "Links";
@@ -134,7 +146,7 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     },
     {
       id: "investigateOther",
-      label: "Andere Schmerzdiagnosen untersuchen",
+      label: "Weitere Schmerzdiagnosen untersuchen",
       color: "red",
       isEndNode: true,
       center: { x: colCenter + 310, y: 175 },
