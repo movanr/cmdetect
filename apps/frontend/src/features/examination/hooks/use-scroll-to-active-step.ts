@@ -4,20 +4,24 @@ import { useLayoutEffect, useRef } from "react";
  * Scrolls the active step div into view when the step index changes.
  *
  * Returns a ref to attach to the currently active step's container element.
- * Skips the initial mount to avoid conflicting with the layout's scroll-to-top
- * on section entry.
+ * Only scrolls when stepIndex actually changes (not on initial mount),
+ * so the layout's scroll-to-top on section entry takes effect instead.
  */
 export function useScrollToActiveStep(stepIndex: number) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInitialMount = useRef(true);
+  const prevStepRef = useRef(stepIndex);
 
   useLayoutEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    if (prevStepRef.current === stepIndex) {
       return;
     }
+    prevStepRef.current = stepIndex;
 
-    ref.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    // Scroll to absolute top of the main container, then scroll the step into view
+    const container = document.getElementById("main-scroll-container");
+    if (container) {
+      container.scrollTop = 0;
+    }
   }, [stepIndex]);
 
   return ref;
