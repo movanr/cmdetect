@@ -43,7 +43,7 @@ export function SummaryDiagrams({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-6 sm:gap-10">
         {([...SIDE_KEYS].reverse() as typeof SIDE_KEYS).map((side) => (
           <div key={side} className="flex flex-col items-center">
             <span className="text-xs text-muted-foreground mb-1">

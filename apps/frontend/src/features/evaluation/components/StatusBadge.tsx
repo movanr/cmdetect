@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { CriterionStatus } from "@cmdetect/dc-tmd";
 
 export const STATUS_CONFIG: Record<
@@ -22,10 +23,10 @@ export const STATUS_CONFIG: Record<
   },
 };
 
-export function StatusBadge({ status }: { status: CriterionStatus }) {
+export function StatusBadge({ status, className }: { status: CriterionStatus; className?: string }) {
   const config = STATUS_CONFIG[status];
   return (
-    <Badge variant="outline" className={config.badgeClass}>
+    <Badge variant="outline" className={cn(config.badgeClass, className)}>
       {config.label}
     </Badge>
   );

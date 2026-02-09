@@ -10,6 +10,8 @@
  * the parent myalgia diagnosis.
  */
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ALL_DIAGNOSES,
@@ -30,13 +32,10 @@ import {
   createMyalgiaTree,
 } from "../../decision-tree";
 import type { FormValues } from "../../examination";
-import {
-  EMPTY_REGION_STATUS,
-  type RegionStatus,
-} from "../../examination/components/HeadDiagram";
+import { EMPTY_REGION_STATUS, type RegionStatus } from "../../examination/components/HeadDiagram";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
 import { PositiveDiagnosesList, type PositiveGroup } from "./PositiveDiagnosesList";
-import { RegionDiagnosisList, type RegionDiagnosis } from "./RegionDiagnosisList";
+import { RegionDiagnosisList } from "./RegionDiagnosisList";
 import { SummaryDiagrams } from "./SummaryDiagrams";
 
 interface EvaluationViewProps {
@@ -46,6 +45,52 @@ interface EvaluationViewProps {
 
 /** Regions shown in the head diagrams and used for filtering */
 const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
+
+// ── Tree types — each entry maps 1:1 to a decision tree ────────────
+type TreeTypeId =
+  | "myalgia"
+  | "myalgiaSubtypes"
+  | "arthralgia"
+  | "headache"
+  | "discDisplacement"
+  | "degenerativeJointDisease";
+
+interface TreeTypeEntry {
+  id: TreeTypeId;
+  label: string;
+  regions: readonly Region[];
+}
+
+const TREE_TYPES: readonly TreeTypeEntry[] = [
+  { id: "myalgia", label: "Myalgie", regions: ["temporalis", "masseter"] },
+  { id: "myalgiaSubtypes", label: "Myalgie-Subtypen", regions: ["temporalis", "masseter"] },
+  { id: "arthralgia", label: "Arthralgie", regions: ["tmj"] },
+  { id: "headache", label: "Auf CMD zurückgeführte Kopfschmerzen", regions: ["temporalis"] },
+  { id: "discDisplacement", label: "Diskusverlagerung", regions: ["tmj"] },
+  { id: "degenerativeJointDisease", label: "Degenerative Gelenkerkrankung", regions: ["tmj"] },
+];
+
+/** Map a DiagnosisId (from positive diagnoses list) to its tree type. */
+function diagnosisToTreeType(id: DiagnosisId): TreeTypeId {
+  if (MYALGIA_SUBTYPE_IDS.includes(id)) return "myalgiaSubtypes";
+  switch (id) {
+    case "myalgia":
+      return "myalgia";
+    case "arthralgia":
+      return "arthralgia";
+    case "headacheAttributedToTmd":
+      return "headache";
+    case "discDisplacementWithReduction":
+    case "discDisplacementWithReductionIntermittentLocking":
+    case "discDisplacementWithoutReductionLimitedOpening":
+    case "discDisplacementWithoutReductionWithoutLimitedOpening":
+      return "discDisplacement";
+    case "degenerativeJointDisease":
+      return "degenerativeJointDisease";
+    default:
+      return "myalgia";
+  }
+}
 
 /**
  * Flatten parent/subtype hierarchy:
@@ -152,7 +197,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
   // ── State ──────────────────────────────────────────────────────────
   const [selectedSide, setSelectedSide] = useState<Side>("right");
   const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
-  const [userSelectedDiagnosis, setUserSelectedDiagnosis] = useState<DiagnosisId | null>(null);
+  const [userSelectedTree, setUserSelectedTree] = useState<TreeTypeId | null>(null);
 
   // ── Memos (dependency order) ───────────────────────────────────────
 
@@ -186,13 +231,9 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
           const def = ALL_DIAGNOSES.find((d) => d.id === result.diagnosisId);
           if (!def?.examination.regions.includes(region)) continue;
 
-          const loc = result.locationResults.find(
-            (l) => l.side === side && l.region === region
-          );
+          const loc = result.locationResults.find((l) => l.side === side && l.region === region);
           if (loc) {
-            locationStatuses.push(
-              computeEffectiveStatus(result.anamnesisStatus, loc.status)
-            );
+            locationStatuses.push(computeEffectiveStatus(result.anamnesisStatus, loc.status));
           }
         }
         const combined = aggregateStatus(locationStatuses);
@@ -243,56 +284,31 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
     return groups;
   }, [flatResults]);
 
-  // 6. All diagnoses applicable to the selected (side, region)
-  const currentRegionDiagnoses = useMemo((): RegionDiagnosis[] => {
-    const diagnoses: RegionDiagnosis[] = [];
+  // 6. Tree types applicable to the selected region
+  const currentTreeTypes = useMemo(
+    () => TREE_TYPES.filter((t) => t.regions.includes(selectedRegion)),
+    [selectedRegion]
+  );
 
-    for (const result of flatResults) {
-      const def = ALL_DIAGNOSES.find((d) => d.id === result.diagnosisId);
-      if (!def?.examination.regions.includes(selectedRegion)) continue;
+  // 7. Derive effective selectedTree — auto-select first if user pick is invalid
+  const selectedTree = useMemo((): TreeTypeId | null => {
+    if (currentTreeTypes.length === 0) return null;
+    const isInList = currentTreeTypes.some((t) => t.id === userSelectedTree);
+    return isInList ? userSelectedTree : currentTreeTypes[0].id;
+  }, [currentTreeTypes, userSelectedTree]);
 
-      const loc = result.locationResults.find(
-        (l) => l.side === selectedSide && l.region === selectedRegion
-      );
-
-      const effectiveStatus = computeEffectiveStatus(
-        result.anamnesisStatus,
-        loc?.status
-      );
-
-      diagnoses.push({
-        diagnosisId: result.diagnosisId as DiagnosisId,
-        nameDE: def.nameDE,
-        effectiveStatus,
-      });
-    }
-
-    return diagnoses;
-  }, [flatResults, selectedSide, selectedRegion]);
-
-  // 7. Derive effective selectedDiagnosis — auto-select first if user pick is invalid
-  const selectedDiagnosis = useMemo((): DiagnosisId | null => {
-    if (currentRegionDiagnoses.length === 0) return null;
-    const isInList = currentRegionDiagnoses.some(
-      (d) => d.diagnosisId === userSelectedDiagnosis
-    );
-    return isInList ? userSelectedDiagnosis : currentRegionDiagnoses[0].diagnosisId;
-  }, [currentRegionDiagnoses, userSelectedDiagnosis]);
-
-  // 8. Decision tree data for selected diagnosis
+  // 8. Decision tree data for selected tree type
   const treeData = useMemo(() => {
-    if (!selectedDiagnosis) return null;
-
-    if (selectedDiagnosis === "myalgia") {
-      return createMyalgiaTree(selectedSide, selectedRegion);
+    if (!selectedTree) return null;
+    switch (selectedTree) {
+      case "myalgia":
+        return createMyalgiaTree(selectedSide, selectedRegion);
+      case "myalgiaSubtypes":
+        return createMyalgiaSubtypesTree(selectedSide, selectedRegion);
+      default:
+        return null; // Not yet implemented
     }
-
-    if (MYALGIA_SUBTYPE_IDS.includes(selectedDiagnosis)) {
-      return createMyalgiaSubtypesTree(selectedSide, selectedRegion);
-    }
-
-    return null;
-  }, [selectedDiagnosis, selectedSide, selectedRegion]);
+  }, [selectedTree, selectedSide, selectedRegion]);
 
   // ── Handlers ───────────────────────────────────────────────────────
 
@@ -305,104 +321,116 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
     (side: Side, region: Region, diagnosisId: DiagnosisId) => {
       setSelectedSide(side);
       setSelectedRegion(region);
-      setUserSelectedDiagnosis(diagnosisId);
+      setUserSelectedTree(diagnosisToTreeType(diagnosisId));
     },
     []
   );
 
-  const handleDiagnosisSelect = useCallback((id: DiagnosisId) => {
-    setUserSelectedDiagnosis(id);
+  const handleTreeSelect = useCallback((id: string) => {
+    setUserSelectedTree(id as TreeTypeId);
   }, []);
 
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col xl:flex-row gap-8">
-      {/* Left Panel: Head diagrams + positive diagnoses */}
-      <div className="xl:w-[400px] xl:shrink-0 space-y-6">
-        {/* Head diagrams */}
-        <div className="flex justify-center">
-          <SummaryDiagrams
-            regionStatuses={aggregateRegionStatuses}
-            regions={DIAGRAM_REGIONS}
-            selectedSide={selectedSide}
-            selectedRegion={selectedRegion}
-            onRegionClick={handleRegionClick}
-          />
-        </div>
+    <div className="space-y-6">
+      {/* Positive diagnoses + head diagrams */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Positive Diagnosen</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
+            {/* Positive diagnoses list */}
+            <div>
+              <PositiveDiagnosesList
+                groups={positiveGroups}
+                selectedSide={selectedSide}
+                selectedRegion={selectedRegion}
+                selectedTree={selectedTree}
+                diagnosisToTree={diagnosisToTreeType}
+                onDiagnosisClick={handlePositiveDiagnosisClick}
+              />
+            </div>
+            {/* Head diagrams — visual region+side selector */}
+            <div className="flex items-center justify-center">
+              <SummaryDiagrams
+                regionStatuses={aggregateRegionStatuses}
+                regions={DIAGRAM_REGIONS}
+                selectedSide={selectedSide}
+                selectedRegion={selectedRegion}
+                onRegionClick={handleRegionClick}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Positive diagnoses */}
-        <section>
-          <h2 className="text-lg font-semibold mb-3">Positive Diagnosen</h2>
-          <PositiveDiagnosesList
-            groups={positiveGroups}
-            selectedSide={selectedSide}
-            selectedRegion={selectedRegion}
-            selectedDiagnosis={selectedDiagnosis}
-            onDiagnosisClick={handlePositiveDiagnosisClick}
-          />
-        </section>
-      </div>
+      {/* Decision tree explorer */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Entscheidungsbaum</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Region & Side toggles */}
+          <div className="flex flex-col gap-2">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={selectedRegion}
+              onValueChange={(v) => {
+                if (v) setSelectedRegion(v as Region);
+              }}
+            >
+              <ToggleGroupItem value="temporalis">Temporalis</ToggleGroupItem>
+              <ToggleGroupItem value="masseter">Masseter</ToggleGroupItem>
+              <ToggleGroupItem value="tmj">{REGIONS.tmj}</ToggleGroupItem>
+            </ToggleGroup>
 
-      {/* Right Panel: Toggles + region diagnoses + decision tree */}
-      <div className="flex-1 min-w-0 space-y-6">
-        {/* Side & Region toggles */}
-        <div className="flex flex-wrap gap-3">
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={selectedSide}
-            onValueChange={(v) => {
-              if (v) setSelectedSide(v as Side);
-            }}
-          >
-            <ToggleGroupItem value="right">Rechts</ToggleGroupItem>
-            <ToggleGroupItem value="left">Links</ToggleGroupItem>
-          </ToggleGroup>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={selectedSide}
+              onValueChange={(v) => {
+                if (v) setSelectedSide(v as Side);
+              }}
+            >
+              <ToggleGroupItem value="right">Rechts</ToggleGroupItem>
+              <ToggleGroupItem value="left">Links</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
 
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={selectedRegion}
-            onValueChange={(v) => {
-              if (v) setSelectedRegion(v as Region);
-            }}
-          >
-            <ToggleGroupItem value="temporalis">Temporalis</ToggleGroupItem>
-            <ToggleGroupItem value="masseter">Masseter</ToggleGroupItem>
-            <ToggleGroupItem value="tmj">
-              {REGIONS.tmj}
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
+          {/* Two-panel: diagnosis sidebar + decision tree */}
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Left sidebar: diagnosis list */}
+            <div className="lg:w-80 xl:w-96 shrink-0 lg:border-r lg:pr-4">
+              <RegionDiagnosisList
+                treeTypes={currentTreeTypes}
+                selectedTree={selectedTree}
+                onTreeSelect={handleTreeSelect}
+              />
+            </div>
 
-        {/* All diagnoses for selected region */}
-        <section>
-          <h2 className="text-base font-semibold mb-2">
-            Diagnosen — {REGIONS[selectedRegion]},{" "}
-            {selectedSide === "right" ? "Rechts" : "Links"}
-          </h2>
-          <RegionDiagnosisList
-            diagnoses={currentRegionDiagnoses}
-            selectedDiagnosis={selectedDiagnosis}
-            onDiagnosisSelect={handleDiagnosisSelect}
-          />
-        </section>
-
-        {/* Decision tree */}
-        <section>
-          <h2 className="text-base font-semibold mb-2">Entscheidungsbaum</h2>
-          {treeData ? (
-            <DecisionTreeView tree={treeData} data={criteriaData} />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Kein Entscheidungsbaum für die aktuelle Diagnose verfügbar.
-            </p>
-          )}
-        </section>
-      </div>
+            {/* Right panel: decision tree */}
+            <div className="flex-1 min-w-0">
+              {treeData ? (
+                <ScrollArea className="w-full">
+                  <div className="min-w-fit pb-4">
+                    <DecisionTreeView tree={treeData} data={criteriaData} />
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Kein Entscheidungsbaum für die aktuelle Diagnose verfügbar.
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

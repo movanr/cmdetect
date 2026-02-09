@@ -18,7 +18,10 @@ interface PositiveDiagnosesListProps {
   groups: PositiveGroup[];
   selectedSide: Side;
   selectedRegion: Region;
-  selectedDiagnosis: DiagnosisId | null;
+  /** Currently selected tree type (used for highlighting). */
+  selectedTree: string | null;
+  /** Maps a DiagnosisId to its tree type for highlight comparison. */
+  diagnosisToTree: (id: DiagnosisId) => string;
   onDiagnosisClick: (side: Side, region: Region, diagnosisId: DiagnosisId) => void;
 }
 
@@ -26,7 +29,8 @@ export function PositiveDiagnosesList({
   groups,
   selectedSide,
   selectedRegion,
-  selectedDiagnosis,
+  selectedTree,
+  diagnosisToTree,
   onDiagnosisClick,
 }: PositiveDiagnosesListProps) {
   if (groups.length === 0) {
@@ -45,7 +49,7 @@ export function PositiveDiagnosesList({
             <ul className="space-y-0.5 ml-1">
               {group.diagnoses.map((d) => {
                 const isSelected =
-                  selectedDiagnosis === d.diagnosisId &&
+                  selectedTree === diagnosisToTree(d.diagnosisId) &&
                   selectedSide === group.side &&
                   selectedRegion === group.region;
                 return (
@@ -58,11 +62,10 @@ export function PositiveDiagnosesList({
                       className={cn(
                         "flex items-center gap-2 text-sm px-2 py-0.5 rounded w-full text-left transition-colors",
                         isSelected
-                          ? "bg-blue-50 text-blue-800 font-medium"
+                          ? "bg-accent font-medium"
                           : "hover:bg-muted text-foreground"
                       )}
                     >
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
                       {d.nameDE}
                     </button>
                   </li>

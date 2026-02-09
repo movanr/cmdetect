@@ -1,64 +1,53 @@
 /**
- * RegionDiagnosisList — All diagnoses applicable to the selected region.
+ * RegionDiagnosisList — Decision tree types applicable to the selected region.
  *
- * Shows a list of clickable rows with a status dot, diagnosis name,
- * and StatusBadge for each diagnosis in the currently selected (side, region).
+ * Shows a list of clickable rows, one per tree type (e.g. "Myalgie",
+ * "Myalgie-Subtypen", "Arthralgie").
  */
 
-import type { CriterionStatus, DiagnosisId } from "@cmdetect/dc-tmd";
 import { cn } from "@/lib/utils";
-import { StatusBadge, STATUS_CONFIG } from "./StatusBadge";
 
-export interface RegionDiagnosis {
-  diagnosisId: DiagnosisId;
-  nameDE: string;
-  effectiveStatus: CriterionStatus;
+interface TreeTypeEntry {
+  id: string;
+  label: string;
 }
 
 interface RegionDiagnosisListProps {
-  diagnoses: RegionDiagnosis[];
-  selectedDiagnosis: DiagnosisId | null;
-  onDiagnosisSelect: (id: DiagnosisId) => void;
+  treeTypes: readonly TreeTypeEntry[];
+  selectedTree: string | null;
+  onTreeSelect: (id: string) => void;
 }
 
 export function RegionDiagnosisList({
-  diagnoses,
-  selectedDiagnosis,
-  onDiagnosisSelect,
+  treeTypes,
+  selectedTree,
+  onTreeSelect,
 }: RegionDiagnosisListProps) {
-  if (diagnoses.length === 0) {
+  if (treeTypes.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Keine Diagnosen für diese Region
+        Keine Entscheidungsbäume für diese Region
       </p>
     );
   }
 
   return (
     <div className="space-y-1">
-      {diagnoses.map((d) => {
-        const isSelected = selectedDiagnosis === d.diagnosisId;
-        const config = STATUS_CONFIG[d.effectiveStatus];
+      {treeTypes.map((t) => {
+        const isSelected = selectedTree === t.id;
         return (
           <button
-            key={d.diagnosisId}
+            key={t.id}
             type="button"
-            onClick={() => onDiagnosisSelect(d.diagnosisId)}
+            onClick={() => onTreeSelect(t.id)}
             className={cn(
               "flex items-center gap-2 w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
               isSelected
-                ? "ring-2 ring-blue-500 bg-blue-50"
+                ? "bg-accent"
                 : "hover:bg-muted"
             )}
           >
-            <span
-              className={cn(
-                "inline-block w-2.5 h-2.5 rounded-full shrink-0",
-                config.dotClass
-              )}
-            />
-            <span className="flex-1 truncate">{d.nameDE}</span>
-            <StatusBadge status={d.effectiveStatus} />
+            <span className="min-w-0">{t.label}</span>
           </button>
         );
       })}
