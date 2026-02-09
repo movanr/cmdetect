@@ -115,7 +115,7 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     },
     {
       id: "myofascialSpreading",
-      label: "Myofaszialer Schmerz mit Ausbreitung",
+      label: "Myofaszialer Schmerz",
       color: "blue",
       isEndNode: true,
       criterion: and([MYALGIA_ANAMNESIS, MYOFASCIAL_SPREADING_EXAMINATION.criterion]),

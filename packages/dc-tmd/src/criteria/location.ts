@@ -64,6 +64,15 @@ export interface DiagnosisDefinition {
    * during evaluation.
    */
   examination: LocationCriterion;
+
+  /**
+   * Cross-diagnosis dependency: this diagnosis requires at least one
+   * of these other diagnoses to also be positive. If none are positive,
+   * this diagnosis is overridden to negative in evaluateAllDiagnoses.
+   *
+   * Used for headache attributed to TMD (requires myalgia or arthralgia).
+   */
+  requires?: { anyOf: DiagnosisId[] };
 }
 
 // ============================================================================

@@ -195,7 +195,7 @@ const spreadingMyalgiaExamCriterion: Criterion = and(
   ],
   {
     id: "spreadingMyalgiaExam",
-    label: "Myofaszialer Schmerz mit Ausbreitung-Untersuchungsbefund",
+    label: "Myofaszialer Schmerz-Untersuchungsbefund",
   }
 );
 
@@ -207,7 +207,7 @@ export const MYOFASCIAL_SPREADING_EXAMINATION: LocationCriterion = {
 export const MYOFASCIAL_PAIN_WITH_SPREADING: DiagnosisDefinition = {
   id: "myofascialPainWithSpreading",
   name: "Myofascial Pain with Spreading",
-  nameDE: "Myofaszialer Schmerz mit Ausbreitung",
+  nameDE: "Myofaszialer Schmerz",
   category: "pain",
   anamnesis: MYALGIA_ANAMNESIS,
   examination: MYOFASCIAL_SPREADING_EXAMINATION,

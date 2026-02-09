@@ -108,43 +108,54 @@ describe("getRelevantExaminationItems", () => {
   };
 
   describe("with all current diagnoses", () => {
-    it("returns relevant sections when anamnesis is positive", () => {
+    it("returns relevant sections when myalgia anamnesis is positive", () => {
       const result = getRelevantExaminationItems(positiveAnamnesis);
 
-      // All myalgia diagnoses share the same anamnesis → all possible
+      // All myalgia/arthralgia diagnoses share the same anamnesis → all possible
       expect(result.possibleDiagnoses).toContain("myalgia");
       expect(result.possibleDiagnoses).toContain("localMyalgia");
       expect(result.possibleDiagnoses).toContain("myofascialPainWithSpreading");
       expect(result.possibleDiagnoses).toContain("myofascialPainWithReferral");
-      expect(result.ruledOutDiagnoses).toEqual([]);
+      expect(result.possibleDiagnoses).toContain("arthralgia");
+
+      // Joint disorders + headache have different anamnesis criteria (SQ5/SQ7/SQ8/SQ9/SQ13/SQ14)
+      // which are pending with only pain anamnesis data → still possible
+      expect(result.possibleDiagnoses).toContain("discDisplacementWithReduction");
+      expect(result.possibleDiagnoses).toContain("subluxation");
 
       // Myalgia diagnoses reference e1, e4, e9
       expect(result.relevantSections).toContain("e1");
       expect(result.relevantSections).toContain("e4");
       expect(result.relevantSections).toContain("e9");
 
-      // Sections not referenced by any current diagnosis
-      expect(result.relevantSections).not.toContain("e2");
+      // Joint disorders reference e2, e5, e6, e7
+      expect(result.relevantSections).toContain("e2");
+      expect(result.relevantSections).toContain("e5");
+      expect(result.relevantSections).toContain("e6");
+      expect(result.relevantSections).toContain("e7");
+
+      // E3 and E8 not referenced by any diagnosis
       expect(result.relevantSections).not.toContain("e3");
-      expect(result.relevantSections).not.toContain("e5");
-      expect(result.relevantSections).not.toContain("e6");
-      expect(result.relevantSections).not.toContain("e7");
       expect(result.relevantSections).not.toContain("e8");
     });
 
-    it("rules out all diagnoses when anamnesis is negative", () => {
+    it("rules out pain diagnoses when pain anamnesis is negative, joint diagnoses remain possible", () => {
       const result = getRelevantExaminationItems(negativeAnamnesis);
 
-      // All myalgia diagnoses ruled out
+      // All myalgia/arthralgia diagnoses ruled out
       expect(result.ruledOutDiagnoses).toContain("myalgia");
       expect(result.ruledOutDiagnoses).toContain("localMyalgia");
       expect(result.ruledOutDiagnoses).toContain("myofascialPainWithSpreading");
       expect(result.ruledOutDiagnoses).toContain("myofascialPainWithReferral");
-      expect(result.possibleDiagnoses).toEqual([]);
+      expect(result.ruledOutDiagnoses).toContain("arthralgia");
 
-      // No relevant sections
-      expect(result.relevantSections).toEqual([]);
-      expect(result.relevantFieldRefs).toEqual([]);
+      // Joint disorders and headache have different anamnesis → pending (SQ8, SQ9, etc. not provided)
+      expect(result.possibleDiagnoses).toContain("discDisplacementWithReduction");
+      expect(result.possibleDiagnoses).toContain("degenerativeJointDisease");
+      expect(result.possibleDiagnoses).toContain("subluxation");
+
+      // Headache has its own anamnesis (SQ5/SQ7) — also pending
+      expect(result.possibleDiagnoses).toContain("headacheAttributedToTmd");
     });
 
     it("keeps diagnoses possible when anamnesis is pending", () => {
@@ -166,19 +177,23 @@ describe("getRelevantExaminationItems", () => {
   });
 
   describe("with partial anamnesis failure", () => {
-    it("rules out diagnoses when criterion A fails (SQ1=no)", () => {
+    it("rules out pain diagnoses when criterion A fails (SQ1=no), joint diagnoses remain", () => {
       const result = getRelevantExaminationItems({
         SQ1: "no",
         SQ3: "intermittent",
         SQ4_A: "yes",
       });
 
-      // SQ1=no → painInMasticatoryStructure=negative → AND=negative
-      expect(result.ruledOutDiagnoses.length).toBe(ALL_DIAGNOSES.length);
-      expect(result.possibleDiagnoses).toEqual([]);
+      // Myalgia/arthralgia ruled out (SQ1=no → painInMasticatory=negative)
+      expect(result.ruledOutDiagnoses).toContain("myalgia");
+      expect(result.ruledOutDiagnoses).toContain("arthralgia");
+
+      // Joint disorders still possible (their anamnesis uses SQ8/SQ9/SQ13, all pending)
+      expect(result.possibleDiagnoses).toContain("discDisplacementWithReduction");
+      expect(result.possibleDiagnoses).toContain("subluxation");
     });
 
-    it("rules out diagnoses when criterion B fails (all SQ4=no)", () => {
+    it("rules out pain diagnoses when criterion B fails (all SQ4=no), joint diagnoses remain", () => {
       const result = getRelevantExaminationItems({
         SQ1: "yes",
         SQ3: "intermittent",
@@ -188,20 +203,56 @@ describe("getRelevantExaminationItems", () => {
         SQ4_D: "no",
       });
 
-      // All SQ4 answered "no" → painModifiedByFunction=negative → AND=negative
-      expect(result.ruledOutDiagnoses.length).toBe(ALL_DIAGNOSES.length);
-      expect(result.possibleDiagnoses).toEqual([]);
+      // Pain diagnoses ruled out (painModifiedByFunction=negative)
+      expect(result.ruledOutDiagnoses).toContain("myalgia");
+      expect(result.ruledOutDiagnoses).toContain("arthralgia");
+      expect(result.possibleDiagnoses).not.toContain("myalgia");
+
+      // Joint disorders still possible
+      expect(result.possibleDiagnoses).toContain("subluxation");
     });
 
-    it("rules out diagnoses when SQ3 is never", () => {
+    it("rules out pain diagnoses when SQ3 is never, joint diagnoses remain", () => {
       const result = getRelevantExaminationItems({
         SQ1: "yes",
         SQ3: "never",
         SQ4_A: "yes",
       });
 
-      // SQ3 = "never" → neither "intermittent" nor "continuous" → negative
-      expect(result.ruledOutDiagnoses.length).toBe(ALL_DIAGNOSES.length);
+      // SQ3 = "never" → neither "intermittent" nor "continuous" → negative for pain diagnoses
+      expect(result.ruledOutDiagnoses).toContain("myalgia");
+      // Joint disorders still possible
+      expect(result.possibleDiagnoses).toContain("subluxation");
+    });
+
+    it("rules out all diagnoses when all SQ answers are negative (DD/DJD remain pending due to E6/E7 patient noise)", () => {
+      const result = getRelevantExaminationItems({
+        SQ1: "no",
+        SQ3: "never",
+        SQ4_A: "no",
+        SQ4_B: "no",
+        SQ4_C: "no",
+        SQ4_D: "no",
+        SQ5: "no",
+        SQ7_A: "no",
+        SQ7_B: "no",
+        SQ7_C: "no",
+        SQ7_D: "no",
+        SQ8: "no",
+        SQ9: "no",
+        SQ10: "no",
+        SQ11: "no",
+        SQ13: "no",
+        SQ14: "no",
+      });
+
+      // DD with Reduction and Degenerative Joint Disease have TMJ_NOISE_ANAMNESIS
+      // which includes OR(SQ8, e6/e7 patient noise). With SQ8=no but E6/E7 patient
+      // fields absent, the OR is pending (not negative). This is correct — the examiner
+      // might discover patient-reported noise during the exam.
+      expect(result.ruledOutDiagnoses.length).toBe(ALL_DIAGNOSES.length - 2);
+      expect(result.possibleDiagnoses).toContain("discDisplacementWithReduction");
+      expect(result.possibleDiagnoses).toContain("degenerativeJointDisease");
     });
   });
 

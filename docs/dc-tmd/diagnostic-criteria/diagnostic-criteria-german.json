@@ -1,0 +1,373 @@
+{
+  "title": "Diagnostische Kriterien für die häufigsten craniomandibulären Dysfunktionen",
+  "subtitle": "Symptomfragebogen und Klinische Untersuchung",
+  "description": "Alle Kriterien, die in der Anamnese (DC/TMD Symptomfragebogen) und Untersuchung (DC/TMD Untersuchungsformular) aufgelistet werden sind, wenn nicht anders angegeben, für die jeweilige Diagnose erforderlich; wenn nicht anders angegeben, ist jedes Kriterium positiv. Der exakte Zeitraum für zeitlich relevante Anamnese oder Untersuchungspositionen ist untenstehend nicht spezifiziert, weil diese davon abhängig sind, zu welchem Zweck die Items konstruiert sind und die Logik sich nicht mit dem Zeitraum verändert.",
+  "source": {
+    "authors": "Schiffman E, Ohrbach R, Truelove E, Look J, Anderson G, Goulet J-P, List T, Svensson P, Gonzalez Y, Lobbezoo F, Michelotti A, Brooks S, Ceusters W, Drangsholt M, Ettlin D, Gaul C, Goldberg LJ, Haythornthwaite J, Hollender L, Jensen R, John MT, deLaat A, deLeeuw R, Maixner W, van der Meulen M, Murray GM, Nixdorf DR, Palla S, Petersson A, Pionchon P, Smith B, Visscher C, Zakrzewska J, and Dworkin SF",
+    "year": 2014,
+    "title": "Diagnostic Criteria for Temporomandibular Disorders (DC/TMD) for Clinical and Research Applications: Recommendations of the International RDC/TMD Consortium Network and Orofacial Pain Special Interest Group",
+    "journal": "Journal of Oral & Facial Pain and Headache",
+    "volume": 28,
+    "pages": "6-27",
+    "version": "10/23/2015"
+  },
+  "categories": [
+    {
+      "category": "Schmerzerkrankung",
+      "disorders": [
+        {
+          "name": "Myalgie",
+          "icd9": "729.1",
+          "sensitivity": 0.9,
+          "specificity": 0.99,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Schmerz in einer mastikatorischen Struktur",
+                "sf_referenz": "SF 3"
+              },
+              {
+                "beschreibung": "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
+                "sf_referenz": "SF 4"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Bestätigung von Schmerzen in Kaumuskel(n)",
+                "referenz": "U1a"
+              },
+              {
+                "beschreibung": "Bekannter Schmerz in Kaumuskel(n) bei Muskelpalpation oder maximaler Öffnung",
+                "referenz": "U4b, U4c, oder U9",
+                "details": "Bekannter Schmerz in M. temporalis oder M. masseter, oder in anderen Kaumuskeln falls relevant; oder U10: bekannter Schmerz in zusätzlichen Muskeln, wenn U10 eingeschlossen"
+              }
+            ]
+          },
+          "subtypen": [
+            {
+              "name": "Lokale Myalgie",
+              "icd9": "729.1",
+              "sensitivity": null,
+              "specificity": null,
+              "sensitivity_note": "Sens. und Spez. nicht etabliert",
+              "anamnese": {
+                "kriterien_referenz": "dasselbe wie für Myalgie (SF3 & SF4)"
+              },
+              "untersuchung": {
+                "kriterien": [
+                  {
+                    "beschreibung": "Bestätigung der Schmerzen in den Kaumuskel(n)",
+                    "referenz": "U1a"
+                  },
+                  {
+                    "beschreibung": "Bekannter Schmerz bei Muskelpalpation",
+                    "referenz": "U9 oder U10",
+                    "details": "U9: bekannter Schmerz im M. masseter oder M. temporalis; oder U10: bekannter Schmerz in zusätzlichen Muskeln, wenn U10 eingeschlossen wird"
+                  },
+                  {
+                    "beschreibung": "Schmerz bleibt auf den Bereich der Stimulation lokalisiert",
+                    "referenz": "U9 und U10",
+                    "details": "U9: kein übertragener und sich ausbreitender Schmerz; und U10: kein übertragener und sich ausbreitender Schmerz, falls U10"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Myofaszialer Schmerz",
+              "icd9": "729.1",
+              "sensitivity": null,
+              "specificity": null,
+              "sensitivity_note": "Sens. und Spez. nicht etabliert",
+              "anamnese": {
+                "kriterien_referenz": "dasselbe wie für Myalgie (SF3 & SF4)"
+              },
+              "untersuchung": {
+                "kriterien": [
+                  {
+                    "beschreibung": "Bestätigung von Schmerzen in den Kaumuskel(n)",
+                    "referenz": "U1a"
+                  },
+                  {
+                    "beschreibung": "Bekannter Schmerz bei Muskelpalpation",
+                    "referenz": "U9 oder U10",
+                    "details": "U9: bekannter Schmerz im Temporalis oder Masseter; oder U10: bekannter Schmerz in Hilfsmuskeln, falls U10 eingeschlossen"
+                  },
+                  {
+                    "beschreibung": "Ausbreitender (aber nicht übertragener) Schmerz bei Muskelpalpation",
+                    "referenz": "U9 und U10",
+                    "details": "U9: sich ausbreitender Schmerz; oder U10: sich ausbreitender Schmerz, falls U10 eingeschlossen; UND U9: kein übertragener Schmerz; und U10: kein übertragener Schmerz, falls U10 eingeschlossen"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Myofaszialer Schmerz mit Übertragung",
+              "icd9": "729.1",
+              "sensitivity": 0.86,
+              "specificity": 0.98,
+              "anamnese": {
+                "kriterien_referenz": "dasselbe wie für Myalgie (SF3 & SF4)"
+              },
+              "untersuchung": {
+                "kriterien": [
+                  {
+                    "beschreibung": "Bestätigung von Schmerzen in Kaumuskel(n)",
+                    "referenz": "U1a"
+                  },
+                  {
+                    "beschreibung": "Bekannter Schmerz bei Muskelpalpation",
+                    "referenz": "U9 oder U10",
+                    "details": "U9: bekannter Schmerz im M. temporalis oder M. masseter; oder U10: bekannter Schmerz in zusätzlichen Muskeln, wenn U10 eingeschlossen"
+                  },
+                  {
+                    "beschreibung": "Übertragener Schmerz bei Muskelpalpation",
+                    "referenz": "U9 oder U10",
+                    "details": "U9: übertragener Schmerz positiv; oder U10: übertragener Schmerz positiv, falls U10 eingeschlossen"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Arthralgie",
+          "icd9": "524.62",
+          "sensitivity": 0.89,
+          "specificity": 0.98,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Schmerz in einer mastikatorischen Struktur",
+                "sf_referenz": "SF 3"
+              },
+              {
+                "beschreibung": "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
+                "sf_referenz": "SF 4"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Bestätigung von Schmerzen in Kiefergelenk(en)",
+                "referenz": "U1a"
+              },
+              {
+                "beschreibung": "Bekannter Schmerzen des Kiefergelenks bei Palpation oder Kieferbewegungen",
+                "referenz": "U4b, U4c, U5a-c, oder U9",
+                "details": "Bekannte Schmerzen im Kiefergelenk"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Auf CMD zurückgeführte Kopfschmerzen",
+          "icd9": ["339.89", "784.0"],
+          "icd9_beschreibung": ["andere spezifizierte Kopfschmerzsyndrome", "Kopfschmerz"],
+          "sensitivity": 0.89,
+          "specificity": 0.87,
+          "hinweis": "Für eine sekundäre Kopfschmerzdiagnose ist entweder eine primäre Myalgie oder Arthralgie Diagnose erforderlich",
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Kopfschmerzen jeglicher Art in der Temporalregion",
+                "sf_referenz": "SF 5"
+              },
+              {
+                "beschreibung": "Kopfschmerzen, die durch Kieferbewegungen, Funktion oder Parafunktion beeinflusst werden",
+                "sf_referenz": "SF 7"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Bestätigung von Kopfschmerzen im M. temporalis",
+                "referenz": "U1b"
+              },
+              {
+                "beschreibung": "Angabe von bekanntem Kopfschmerz in der Temporalisregion durch entweder: a) Palpation des M. temporalis oder b) Kieferbewegungen",
+                "referenz": "U4b, U4c, U5a-c, oder U9",
+                "details": "Bekannter Kopfschmerz im M. temporalis"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "category": "Gelenkerkrankungen",
+      "disorders": [
+        {
+          "name": "Diskusverlagerung mit Reposition",
+          "icd9": "524.63",
+          "sensitivity": 0.34,
+          "specificity": 0.92,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Anamnestisch aktuell vorhandenes Kiefergelenk (KG) - Geräusch, ODER Patient gibt während der Untersuchung Geräusche an",
+                "sf_referenz": "SF 8",
+                "untersuchung_referenz": "U6 oder U7: Geräusch vom Patienten angegeben"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Knacken beim Öffnen und Schließen",
+                "referenz": "U6",
+                "details": "Öffnen & Schließen: Knacken"
+              },
+              {
+                "beschreibung": "Sowohl a) Knacken beim Öffnen oder Schließen UND b) Knacken bei Laterotrusion oder Protrusion",
+                "referenz": "U6 und U7",
+                "details": "U6: Knacken (beim Öffnen oder Schließen) UND U7: Knacken"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Diskusverlagerung mit Reposition, mit intermittierender Kieferklemme",
+          "icd9": "524.63",
+          "sensitivity": 0.38,
+          "specificity": 0.98,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "dasselbe wie für Diskusverlagerung mit Reposition",
+                "sf_referenz": "dasselbe wie DV mit Rep"
+              },
+              {
+                "beschreibung": "Aktuell intermittierende Blockade mit eingeschränkter Mundöffnung",
+                "sf_referenz": "SF11=ja, SF12=nein"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "dasselbe wie für Diskusverlagerung mit Reposition"
+              },
+              {
+                "beschreibung": "Wenn die Störung klinisch auftritt: Umlenken zur Mundöffnung erforderlich",
+                "referenz": "U8 (optional)"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Diskusverlagerung ohne Reposition, mit Mundöffnungseinschränkung",
+          "icd9": "524.63",
+          "sensitivity": 0.8,
+          "specificity": 0.97,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Aktuell KG-Blockade mit eingeschränkter Mundöffnung",
+                "sf_referenz": "SF 9",
+                "hinweis": "'Aktuell' wird basierend auf SF9 interpretiert"
+              },
+              {
+                "beschreibung": "Einschränkung schwer genug, um die Fähigkeit zu Essen zu beeinträchtigen",
+                "sf_referenz": "SF 10"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Passive Dehnung (maximale passive Mundöffnung) < 40mm",
+                "referenz": "U4c",
+                "details": "< 40mm inklusiv vertikalem Überbiss"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Diskusverlagerung ohne Reposition, ohne Mundöffnungseinschränkung",
+          "icd9": "524.63",
+          "sensitivity": 0.54,
+          "specificity": 0.79,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Frühere KG-Blockade mit eingeschränkter Mundöffnung",
+                "sf_referenz": "SF 9",
+                "hinweis": "'Früher' wird basierend auf SF9 interpretiert"
+              },
+              {
+                "beschreibung": "Einschränkung schwer genug, um die Fähigkeit zu Essen zu beeinträchtigen",
+                "sf_referenz": "SF 10"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Passive Dehnung (maximale passive Mundöffnung) ≥ 40mm",
+                "referenz": "U4c",
+                "details": "≥ 40mm inclusive vertikaler inzisaler Überbiss"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Degenerative Gelenkerkrankung",
+          "icd9": "715.18",
+          "sensitivity": 0.55,
+          "specificity": 0.61,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "Anamnestisch aktuell vorhandene KG-Geräusche, ODER Patient gibt während der Untersuchung Geräusch an",
+                "sf_referenz": "SF 8",
+                "untersuchung_referenz": "U6 oder U7: Geräusch vom Patienten angegeben"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Reiben bei Kieferbewegungen",
+                "referenz": "U6 oder U7",
+                "details": "Reiben vom Untersucher festgestellt"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Subluxation",
+          "icd9": "830.0",
+          "sensitivity": 0.98,
+          "specificity": 1.0,
+          "anamnese": {
+            "kriterien": [
+              {
+                "beschreibung": "KG-Arretierung oder Hängen bleiben bei weit geöffneter Kieferposition",
+                "sf_referenz": "SF 13"
+              },
+              {
+                "beschreibung": "Unfähigkeit den Mund ohne spezielles Umlenken zu schließen",
+                "sf_referenz": "SF 14"
+              }
+            ]
+          },
+          "untersuchung": {
+            "kriterien": [
+              {
+                "beschreibung": "Wenn die Störung klinisch auftritt: Umlenken zum Mundschluss erforderlich",
+                "referenz": "U8 (optional)"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "fußnoten": [
+    "'Aktuell' und 'Früher' werden (basierend auf SF9), in Hinblick auf die Varianten 'mit Einschränkung' bzw. 'ohne Einschränkung' der Diskusverlagerung ohne Reposition zu differenzieren, auf der Grundlage einer Veränderung über die Zeit interpretiert, die durch die Anamnese festgestellt und durch die klinische Untersuchung des Bewegungsspielraums des Kiefers bestätigt wird."
+  ]
+}

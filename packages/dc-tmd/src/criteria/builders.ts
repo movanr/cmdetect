@@ -334,3 +334,81 @@ export function familiarPainDuringOpening(
     metadata
   );
 }
+
+// ============================================================================
+// E5 LATERAL/PROTRUSIVE MOVEMENT HELPERS
+// ============================================================================
+
+/**
+ * Creates a field ref for E5 movement pain question
+ *
+ * @example
+ * e5PainRef("lateralRight", "left", "tmj", "familiarPain")
+ * // "e5.lateralRight.left.tmj.familiarPain"
+ */
+export function e5PainRef(
+  movementType: "lateralLeft" | "lateralRight" | "protrusive",
+  side: string,
+  region: string,
+  painQuestion: PainType
+): string {
+  return `e5.${movementType}.${side}.${region}.${painQuestion}`;
+}
+
+/**
+ * Creates OR criterion for familiar pain during any E5 movement
+ * (lateralRight, lateralLeft, protrusive)
+ */
+export function familiarPainDuringMovement(
+  side: string,
+  region: string,
+  metadata?: CriterionMetadata
+): OrCriterion {
+  return or(
+    [
+      field(e5PainRef("lateralRight", side, region, "familiarPain"), { equals: "yes" }),
+      field(e5PainRef("lateralLeft", side, region, "familiarPain"), { equals: "yes" }),
+      field(e5PainRef("protrusive", side, region, "familiarPain"), { equals: "yes" }),
+    ],
+    metadata
+  );
+}
+
+// ============================================================================
+// HEADACHE HELPERS (E4 + E5 familiarHeadache)
+// ============================================================================
+
+/**
+ * Creates OR criterion for familiar headache during any E4 opening movement
+ */
+export function familiarHeadacheDuringOpening(
+  side: string,
+  region: string,
+  metadata?: CriterionMetadata
+): OrCriterion {
+  return or(
+    [
+      field(e4PainRef("maxUnassisted", side, region, "familiarHeadache"), { equals: "yes" }),
+      field(e4PainRef("maxAssisted", side, region, "familiarHeadache"), { equals: "yes" }),
+    ],
+    metadata
+  );
+}
+
+/**
+ * Creates OR criterion for familiar headache during any E5 movement
+ */
+export function familiarHeadacheDuringMovement(
+  side: string,
+  region: string,
+  metadata?: CriterionMetadata
+): OrCriterion {
+  return or(
+    [
+      field(e5PainRef("lateralRight", side, region, "familiarHeadache"), { equals: "yes" }),
+      field(e5PainRef("lateralLeft", side, region, "familiarHeadache"), { equals: "yes" }),
+      field(e5PainRef("protrusive", side, region, "familiarHeadache"), { equals: "yes" }),
+    ],
+    metadata
+  );
+}

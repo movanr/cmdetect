@@ -106,11 +106,33 @@ function deriveOverallStatus(
 /**
  * Evaluate all defined diagnoses against patient data.
  *
- * Imports ALL_DIAGNOSES lazily to avoid circular dependency.
+ * After individual evaluation, enforces cross-diagnosis `requires` constraints:
+ * if a diagnosis requires another positive diagnosis (e.g. headache requires
+ * myalgia or arthralgia) and none are positive, it is overridden to negative.
  */
 export function evaluateAllDiagnoses(
   diagnoses: readonly DiagnosisDefinition[],
   data: unknown
 ): DiagnosisEvaluationResult[] {
-  return diagnoses.map((diagnosis) => evaluateDiagnosis(diagnosis, data));
+  const results = diagnoses.map((diagnosis) => evaluateDiagnosis(diagnosis, data));
+
+  // Enforce cross-diagnosis requires constraints
+  const positiveIds = new Set(results.filter((r) => r.isPositive).map((r) => r.diagnosisId));
+
+  for (let i = 0; i < diagnoses.length; i++) {
+    const def = diagnoses[i];
+    const result = results[i];
+    if (!def.requires || !result.isPositive) continue;
+
+    const requirementMet = def.requires.anyOf.some((id) => positiveIds.has(id));
+    if (!requirementMet) {
+      results[i] = {
+        ...result,
+        isPositive: false,
+        status: "negative",
+      };
+    }
+  }
+
+  return results;
 }

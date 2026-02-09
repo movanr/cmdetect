@@ -610,7 +610,7 @@ describe("Myofascial Pain with Spreading diagnosis", () => {
     it("has correct metadata", () => {
       expect(MYOFASCIAL_PAIN_WITH_SPREADING.id).toBe("myofascialPainWithSpreading");
       expect(MYOFASCIAL_PAIN_WITH_SPREADING.name).toBe("Myofascial Pain with Spreading");
-      expect(MYOFASCIAL_PAIN_WITH_SPREADING.nameDE).toBe("Myofaszialer Schmerz mit Ausbreitung");
+      expect(MYOFASCIAL_PAIN_WITH_SPREADING.nameDE).toBe("Myofaszialer Schmerz");
       expect(MYOFASCIAL_PAIN_WITH_SPREADING.category).toBe("pain");
     });
 

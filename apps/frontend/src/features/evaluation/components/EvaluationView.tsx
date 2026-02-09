@@ -12,7 +12,7 @@
  * to the selected diagnosis, side, and region.
  */
 
-import { useMemo, useState } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ALL_DIAGNOSES,
   DIAGNOSIS_PARENT,
@@ -21,17 +21,17 @@ import {
   evaluateAllDiagnoses,
   type DiagnosisEvaluationResult,
   type DiagnosisId,
-  type Side,
   type Region,
+  type Side,
 } from "@cmdetect/dc-tmd";
-import type { FormValues } from "../../examination";
-import { mapToCriteriaData } from "../utils/map-to-criteria-data";
+import { useMemo, useState } from "react";
 import {
   DecisionTreeView,
-  createMyalgiaTree,
   createMyalgiaSubtypesTree,
+  createMyalgiaTree,
 } from "../../decision-tree";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { FormValues } from "../../examination";
+import { mapToCriteriaData } from "../utils/map-to-criteria-data";
 import { DiagnosisBlock } from "./DiagnosisBlock";
 
 interface EvaluationViewProps {
@@ -63,8 +63,7 @@ function flattenResults(results: DiagnosisEvaluationResult[]): DiagnosisEvaluati
       // This parent has subtypes — check for positive ones
       const subtypes = results.filter(
         (r) =>
-          DIAGNOSIS_PARENT[r.diagnosisId as keyof typeof DIAGNOSIS_PARENT] ===
-          result.diagnosisId
+          DIAGNOSIS_PARENT[r.diagnosisId as keyof typeof DIAGNOSIS_PARENT] === result.diagnosisId
       );
       const positiveSubtypes = subtypes.filter((r) => r.status === "positive");
 
@@ -94,17 +93,12 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
     [sqAnswers, examinationData]
   );
 
-  const results = useMemo(
-    () => evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData),
-    [criteriaData]
-  );
+  const results = useMemo(() => evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData), [criteriaData]);
 
   const painResults = useMemo(
     () =>
       flattenResults(
-        results.filter((r) =>
-          PAIN_DISORDER_IDS.includes(r.diagnosisId as DiagnosisId)
-        )
+        results.filter((r) => PAIN_DISORDER_IDS.includes(r.diagnosisId as DiagnosisId))
       ),
     [results]
   );
@@ -112,9 +106,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
   const jointResults = useMemo(
     () =>
       flattenResults(
-        results.filter((r) =>
-          JOINT_DISORDER_IDS.includes(r.diagnosisId as DiagnosisId)
-        )
+        results.filter((r) => JOINT_DISORDER_IDS.includes(r.diagnosisId as DiagnosisId))
       ),
     [results]
   );
@@ -146,7 +138,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
         {/* Pain Disorders */}
         {painResults.length > 0 && (
           <section>
-            <h2 className="text-lg font-semibold mb-4">Schmerzstörungen</h2>
+            <h2 className="text-lg font-semibold mb-4">Schmerzerkrankungen</h2>
             <div className="space-y-8">
               {painResults.map((result) => (
                 <DiagnosisBlock key={result.diagnosisId} result={result} />
@@ -181,7 +173,9 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
                   variant="outline"
                   size="sm"
                   value={selectedSide}
-                  onValueChange={(v) => { if (v) setSelectedSide(v as Side); }}
+                  onValueChange={(v) => {
+                    if (v) setSelectedSide(v as Side);
+                  }}
                 >
                   <ToggleGroupItem value="right">Rechts</ToggleGroupItem>
                   <ToggleGroupItem value="left">Links</ToggleGroupItem>
@@ -192,7 +186,9 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
                   variant="outline"
                   size="sm"
                   value={selectedRegion}
-                  onValueChange={(v) => { if (v) setSelectedRegion(v as Region); }}
+                  onValueChange={(v) => {
+                    if (v) setSelectedRegion(v as Region);
+                  }}
                 >
                   <ToggleGroupItem value="temporalis">Temporalis</ToggleGroupItem>
                   <ToggleGroupItem value="masseter">Masseter</ToggleGroupItem>

@@ -85,6 +85,12 @@ export {
   // E4 helpers
   e4PainRef,
   familiarPainDuringOpening,
+  // E5 helpers
+  e5PainRef,
+  familiarPainDuringMovement,
+  // Headache helpers
+  familiarHeadacheDuringOpening,
+  familiarHeadacheDuringMovement,
 } from "./builders";
 
 // Evaluator
@@ -98,7 +104,7 @@ export {
   getRelevantExaminationItems,
 } from "./relevance";
 
-// Diagnoses
+// Diagnoses — Pain disorders
 export {
   MYALGIA,
   MYALGIA_ANAMNESIS,
@@ -116,6 +122,29 @@ export {
   MYOFASCIAL_PAIN_WITH_REFERRAL,
   MYOFASCIAL_REFERRAL_EXAMINATION,
 } from "./diagnoses/myalgia-subtypes";
+export {
+  ARTHRALGIA,
+  ARTHRALGIA_ANAMNESIS,
+  ARTHRALGIA_EXAMINATION,
+} from "./diagnoses/arthralgia";
+export {
+  HEADACHE_ATTRIBUTED_TO_TMD,
+  HEADACHE_ANAMNESIS,
+  HEADACHE_EXAMINATION,
+  headacheInTemporalRegion,
+  headacheModifiedByFunction,
+} from "./diagnoses/headache";
+
+// Diagnoses — Joint disorders
+export {
+  TMJ_NOISE_ANAMNESIS,
+  DISC_DISPLACEMENT_WITH_REDUCTION,
+  DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
+  DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING,
+  DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING,
+} from "./diagnoses/disc-displacement";
+export { DEGENERATIVE_JOINT_DISEASE } from "./diagnoses/degenerative-joint-disease";
+export { SUBLUXATION, SUBLUXATION_ANAMNESIS } from "./diagnoses/subluxation";
 
 // All diagnoses (for iteration)
 import { MYALGIA } from "./diagnoses/myalgia";
@@ -124,23 +153,36 @@ import {
   MYOFASCIAL_PAIN_WITH_SPREADING,
   MYOFASCIAL_PAIN_WITH_REFERRAL,
 } from "./diagnoses/myalgia-subtypes";
+import { ARTHRALGIA } from "./diagnoses/arthralgia";
+import { HEADACHE_ATTRIBUTED_TO_TMD } from "./diagnoses/headache";
+import {
+  DISC_DISPLACEMENT_WITH_REDUCTION,
+  DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
+  DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING,
+  DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING,
+} from "./diagnoses/disc-displacement";
+import { DEGENERATIVE_JOINT_DISEASE } from "./diagnoses/degenerative-joint-disease";
+import { SUBLUXATION } from "./diagnoses/subluxation";
 import type { DiagnosisDefinition } from "./location";
 
 /**
- * All defined diagnoses
- *
- * Future diagnoses will be added here:
- * - Arthralgia
- * - Headache Attributed to TMD
- * - Disc Displacement variants
- * - Degenerative Joint Disease
- * - Subluxation
+ * All 12 DC/TMD diagnoses, ordered: pain disorders first, then joint disorders
  */
 export const ALL_DIAGNOSES: readonly DiagnosisDefinition[] = [
+  // Pain disorders
   MYALGIA,
   LOCAL_MYALGIA,
   MYOFASCIAL_PAIN_WITH_SPREADING,
   MYOFASCIAL_PAIN_WITH_REFERRAL,
+  ARTHRALGIA,
+  HEADACHE_ATTRIBUTED_TO_TMD,
+  // Joint disorders
+  DISC_DISPLACEMENT_WITH_REDUCTION,
+  DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
+  DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING,
+  DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING,
+  DEGENERATIVE_JOINT_DISEASE,
+  SUBLUXATION,
 ];
 
 /**

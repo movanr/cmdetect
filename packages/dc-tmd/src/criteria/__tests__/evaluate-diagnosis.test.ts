@@ -214,15 +214,23 @@ describe("evaluateDiagnosis", () => {
 });
 
 describe("evaluateAllDiagnoses", () => {
-  it("evaluates all 4 diagnosis definitions", () => {
+  it("evaluates all 12 diagnosis definitions", () => {
     const results = evaluateAllDiagnoses(ALL_DIAGNOSES, positivePatient);
 
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(12);
     expect(results.map((r) => r.diagnosisId)).toEqual([
       "myalgia",
       "localMyalgia",
       "myofascialPainWithSpreading",
       "myofascialPainWithReferral",
+      "arthralgia",
+      "headacheAttributedToTmd",
+      "discDisplacementWithReduction",
+      "discDisplacementWithReductionIntermittentLocking",
+      "discDisplacementWithoutReductionLimitedOpening",
+      "discDisplacementWithoutReductionWithoutLimitedOpening",
+      "degenerativeJointDisease",
+      "subluxation",
     ]);
   });
 
@@ -236,7 +244,7 @@ describe("evaluateAllDiagnoses", () => {
   it("works with empty data", () => {
     const results = evaluateAllDiagnoses(ALL_DIAGNOSES, {});
 
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(12);
     results.forEach((result) => {
       expect(result.isPositive).toBe(false);
       expect(result.status).toBe("pending");
@@ -250,5 +258,57 @@ describe("evaluateAllDiagnoses", () => {
     expect(results).toHaveLength(2);
     expect(results[0].diagnosisId).toBe("myalgia");
     expect(results[1].diagnosisId).toBe("localMyalgia");
+  });
+
+  describe("cross-diagnosis requires", () => {
+    it("headache negative when myalgia and arthralgia both negative", () => {
+      // Headache criteria met but no myalgia/arthralgia
+      const data = {
+        sq: {
+          SQ5: "yes",
+          SQ7_A: "yes",
+        },
+        e1: {
+          headacheLocation: { left: ["temporalis"] },
+        },
+        e9: {
+          left: {
+            temporalisPosterior: { familiarHeadache: "yes" },
+          },
+        },
+      };
+
+      const results = evaluateAllDiagnoses(ALL_DIAGNOSES, data);
+      const headache = results.find((r) => r.diagnosisId === "headacheAttributedToTmd");
+      expect(headache?.isPositive).toBe(false);
+      expect(headache?.status).toBe("negative");
+    });
+
+    it("headache positive when myalgia is also positive", () => {
+      const data = {
+        sq: {
+          SQ1: "yes",
+          SQ3: "intermittent",
+          SQ4_A: "yes",
+          SQ5: "yes",
+          SQ7_A: "yes",
+        },
+        e1: {
+          painLocation: { left: ["temporalis"] },
+          headacheLocation: { left: ["temporalis"] },
+        },
+        e9: {
+          left: {
+            temporalisPosterior: { familiarPain: "yes", familiarHeadache: "yes" },
+          },
+        },
+      };
+
+      const results = evaluateAllDiagnoses(ALL_DIAGNOSES, data);
+      const headache = results.find((r) => r.diagnosisId === "headacheAttributedToTmd");
+      const myalgia = results.find((r) => r.diagnosisId === "myalgia");
+      expect(myalgia?.isPositive).toBe(true);
+      expect(headache?.isPositive).toBe(true);
+    });
   });
 });
