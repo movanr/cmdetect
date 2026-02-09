@@ -6,6 +6,8 @@ interface TreeNodeProps {
   id: string;
   label: string;
   subLabel?: string;
+  /** Auto-generated location badge from node context (e.g. "M. temporalis · rechts") */
+  contextLabel?: string;
   subItems?: {
     labels: string[];
     connector: "UND" | "ODER";
@@ -43,6 +45,7 @@ const nodeColors: Record<
 const TreeNode: React.FC<TreeNodeProps> = ({
   label,
   subLabel,
+  contextLabel,
   subItems,
   color,
   isEndNode,
@@ -78,6 +81,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       <div className="p-3 rounded-lg flex flex-col items-center justify-center h-full">
         <div className={`text-center ${textClass}`}>
           <div className="text-sm font-medium mb-1">{label}</div>
+          {contextLabel && (
+            <div className="mb-1">
+              <span className="inline-block text-[10px] font-medium text-gray-500 bg-gray-200/60 rounded-full px-2 py-0.5">
+                {contextLabel}
+              </span>
+            </div>
+          )}
           {subLabel && (
             <div className="text-xs text-gray-600 mb-1">{subLabel}</div>
           )}

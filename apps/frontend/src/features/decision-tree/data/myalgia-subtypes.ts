@@ -51,8 +51,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     { id: "myalgiaFull", label: "Myalgie (Anamnese + Untersuchung)" }
   );
 
-  const regionDE = region === "temporalis" ? "temporalis" : "masseter";
-  const sideDE = side === "right" ? "rechts" : "links";
   const regionTitle = region === "temporalis" ? "Temporalis" : "Masseter";
   const sideTitle = side === "right" ? "Rechts" : "Links";
 
@@ -67,7 +65,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "myalgia",
       label: "Myalgie",
-      subLabel: `M. ${regionDE} (${sideDE})`,
       color: "blue",
       criterion: myalgiaCriterion,
       context: ctx,
@@ -78,8 +75,8 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "familiarPain",
       label: "Bekannter Schmerz bei Palpation",
-      subLabel: `M. ${regionDE} (${sideDE})`,
       criterion: familiarPainPalpation,
+      context: ctx,
       center: { x: colCenter, y: 175 },
       width: nodeW,
       height: nodeH,
@@ -87,8 +84,8 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "referredPain",
       label: "Übertragener Schmerz bei Palpation",
-      subLabel: `M. ${regionDE} (${sideDE})`,
       criterion: referredPainPalpation,
+      context: ctx,
       center: { x: colCenter, y: 310 },
       width: nodeW,
       height: nodeH,
@@ -96,8 +93,8 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "spreadingPain",
       label: "Ausbreitender Schmerz bei Palpation",
-      subLabel: `M. ${regionDE} (${sideDE})`,
       criterion: spreadingPainPalpation,
+      context: ctx,
       center: { x: colCenter, y: 450 },
       width: nodeW,
       height: nodeH,

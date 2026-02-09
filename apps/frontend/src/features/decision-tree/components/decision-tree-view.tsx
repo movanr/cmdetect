@@ -10,8 +10,28 @@ import type {
   TransitionType,
   TreeNodeDef,
 } from "../types";
+import type { TemplateContext } from "@cmdetect/dc-tmd";
 import TreeNode from "./tree-node";
 import Transition from "./transition";
+
+const REGION_LABELS: Record<string, string> = {
+  temporalis: "M. temporalis",
+  masseter: "M. masseter",
+  tmj: "Kiefergelenk",
+};
+
+const SIDE_LABELS: Record<string, string> = {
+  right: "rechts",
+  left: "links",
+};
+
+function formatContextLabel(context?: TemplateContext): string | undefined {
+  if (!context?.side && !context?.region) return undefined;
+  const parts: string[] = [];
+  if (context.region) parts.push(REGION_LABELS[context.region] ?? context.region);
+  if (context.side) parts.push(SIDE_LABELS[context.side] ?? context.side);
+  return parts.join(" · ");
+}
 
 interface DecisionTreeViewProps {
   tree: DecisionTreeDef;
@@ -163,6 +183,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
             id={node.id}
             label={node.label}
             subLabel={node.subLabel}
+            contextLabel={formatContextLabel(node.context)}
             subItems={node.subItems}
             color={node.color}
             isEndNode={node.isEndNode}

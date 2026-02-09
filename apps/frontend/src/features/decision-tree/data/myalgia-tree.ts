@@ -47,7 +47,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
     {
       id: "painLocation",
       label: "Schmerzlokalisation bestätigt",
-      subLabel: `Bestätigung von Schmerzen in M. ${region === "temporalis" ? "temporalis" : "masseter"} (${side === "right" ? "rechts" : "links"})`,
       criterion: painLocationConfirmed,
       context: ctx,
       center: { x: colCenter, y: 220 },
