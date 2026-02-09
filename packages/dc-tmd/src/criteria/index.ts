@@ -91,6 +91,13 @@ export {
 export { evaluate } from "./evaluate";
 export { evaluateDiagnosis, evaluateAllDiagnoses } from "./evaluate-diagnosis";
 
+// Relevance analysis
+export {
+  type AnamnesisRelevanceResult,
+  collectFieldRefs,
+  getRelevantExaminationItems,
+} from "./relevance";
+
 // Diagnoses
 export {
   MYALGIA,
