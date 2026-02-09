@@ -28,6 +28,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import {
   DecisionTreeView,
+  createDiscDisplacementTree,
   createMyalgiaSubtypesTree,
   createMyalgiaTree,
 } from "../../decision-tree";
@@ -305,6 +306,8 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
         return createMyalgiaTree(selectedSide, selectedRegion);
       case "myalgiaSubtypes":
         return createMyalgiaSubtypesTree(selectedSide, selectedRegion);
+      case "discDisplacement":
+        return createDiscDisplacementTree(selectedSide);
       default:
         return null; // Not yet implemented
     }
@@ -337,12 +340,12 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
       {/* Positive diagnoses + head diagrams */}
       <Card>
         <CardHeader>
-          <CardTitle>Positive Diagnosen</CardTitle>
+          <CardTitle>Positive Diagnoseabgleiche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             {/* Positive diagnoses list */}
-            <div>
+            <div className="lg:w-80 xl:w-96 shrink-0">
               <PositiveDiagnosesList
                 groups={positiveGroups}
                 selectedSide={selectedSide}
@@ -353,7 +356,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
               />
             </div>
             {/* Head diagrams — visual region+side selector */}
-            <div className="flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center">
               <SummaryDiagrams
                 regionStatuses={aggregateRegionStatuses}
                 regions={DIAGRAM_REGIONS}
@@ -369,7 +372,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
       {/* Decision tree explorer */}
       <Card>
         <CardHeader>
-          <CardTitle>Entscheidungsbaum</CardTitle>
+          <CardTitle>DC/TMD-Kriterien im diagnostischen Flussdiagramm</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Region & Side toggles */}

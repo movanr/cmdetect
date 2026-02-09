@@ -281,18 +281,15 @@ export const translations: Record<Language, I18nStrings> = {
     emptyStates: {
       cases: {
         title: "No cases found",
-        description:
-          "Patient cases will appear here when patients submit their questionnaires.",
+        description: "Patient cases will appear here when patients submit their questionnaires.",
       },
       invites: {
         title: "No invites found",
-        description:
-          "Patient invites will appear here. Create a new invite to get started.",
+        description: "Patient invites will appear here. Create a new invite to get started.",
       },
       team: {
         title: "No team members found",
-        description:
-          "Team members will appear here. Add a new team member to get started.",
+        description: "Team members will appear here. Add a new team member to get started.",
       },
     },
 
@@ -315,8 +312,7 @@ export const translations: Record<Language, I18nStrings> = {
       },
       accountVerificationRequired: {
         title: "Account Verification Required",
-        description:
-          "Please verify your email address to access the application.",
+        description: "Please verify your email address to access the application.",
       },
       roleSwitched: "Switched to {role}",
       roleSwitchFailed: "Failed to switch role",
@@ -384,8 +380,7 @@ export const translations: Record<Language, I18nStrings> = {
 
     accessControl: {
       accessDenied: "Access Denied",
-      adminPrivilegesRequired:
-        "You need administrator privileges to access team management.",
+      adminPrivilegesRequired: "You need administrator privileges to access team management.",
     },
 
     caseSteps: {
@@ -469,8 +464,7 @@ export const translations: Record<Language, I18nStrings> = {
     emptyStates: {
       cases: {
         title: "Keine Fälle gefunden",
-        description:
-          "Patientenfälle erscheinen hier, wenn Patienten ihre Fragebögen einreichen.",
+        description: "Patientenfälle erscheinen hier, wenn Patienten ihre Fragebögen einreichen.",
       },
       invites: {
         title: "Keine Einladungen gefunden",
@@ -499,13 +493,11 @@ export const translations: Record<Language, I18nStrings> = {
     messages: {
       noRolesAssigned: {
         title: "Keine Rollen zugewiesen",
-        description:
-          "Wenden Sie sich an Ihren Administrator, um Rollenzugriff zu erhalten.",
+        description: "Wenden Sie sich an Ihren Administrator, um Rollenzugriff zu erhalten.",
       },
       accountVerificationRequired: {
         title: "Kontobestätigung erforderlich",
-        description:
-          "Bitte bestätigen Sie Ihre E-Mail-Adresse, um auf die Anwendung zuzugreifen.",
+        description: "Bitte bestätigen Sie Ihre E-Mail-Adresse, um auf die Anwendung zuzugreifen.",
       },
       roleSwitched: "Zu {role} gewechselt",
       roleSwitchFailed: "Rollenwechsel fehlgeschlagen",
@@ -547,8 +539,7 @@ export const translations: Record<Language, I18nStrings> = {
 
     passwordConfirmation: {
       title: "Passwort bestätigen",
-      description:
-        'Bitte geben Sie Ihr Passwort ein, um zur Rolle "{role}" zu wechseln.',
+      description: 'Bitte geben Sie Ihr Passwort ein, um zur Rolle "{role}" zu wechseln.',
       passwordLabel: "Passwort",
       passwordPlaceholder: "Passwort eingeben",
       cancel: "Abbrechen",
@@ -584,7 +575,7 @@ export const translations: Record<Language, I18nStrings> = {
       closeCase: "Fall schließen",
       anamnesis: "Anamnese",
       examination: "Untersuchung",
-      evaluation: "Bewertung",
+      evaluation: "Auswertung",
       documentation: "Dokumentation",
       export: "Export",
     },
