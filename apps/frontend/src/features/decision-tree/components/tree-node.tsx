@@ -73,11 +73,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   };
   const showNegativeLabel = negativeLabel && status === "negative";
   const active =
-    color === "red"
-      ? showNegativeLabel
-        ? nodeColors.negative // grey when gateway criterion is not met
-        : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
-      : nodeColors[status];
+    isEndNode && color === "blue"
+      ? nodeColors.positive
+      : color === "red"
+        ? showNegativeLabel
+          ? nodeColors.negative // grey when gateway criterion is not met
+          : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
+        : nodeColors[status];
   const {
     borderColor: borderClass,
     bgColor: bgClass,

@@ -1,4 +1,4 @@
-import { DEGENERATIVE_JOINT_DISEASE, field, sq, TMJ_NOISE_ANAMNESIS, TMJ_NOISE_SIDED_ANAMNESIS, type Side } from "@cmdetect/dc-tmd";
+import { and, DEGENERATIVE_JOINT_DISEASE, field, sq, TMJ_NOISE_ANAMNESIS, TMJ_NOISE_SIDED_ANAMNESIS, type Side } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
 /**
@@ -59,6 +59,8 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       color: "blue",
       isEndNode: true,
       imagingNote: "CT",
+      criterion: and([DEGENERATIVE_JOINT_DISEASE.anamnesis, DEGENERATIVE_JOINT_DISEASE.examination.criterion]),
+      context: ctx,
       center: { x: colCenter, y: 520 },
       width: endW,
       height: endH,

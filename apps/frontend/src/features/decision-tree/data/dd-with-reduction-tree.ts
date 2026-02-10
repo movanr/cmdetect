@@ -64,7 +64,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
   // Intermittent locking criterion: SQ11=yes AND SQ12=no
   const intermittentLocking = and(
     [field(sq("SQ11"), { equals: "yes" }), field(sq("SQ12"), { equals: "no" })],
-    { id: "intermittentLockingCheck", label: "Intermittierende Kieferklemme" }
+    { id: "intermittentLockingCheck", label: "Intermittierende Kieferklemme", pendingAs: "negative" }
   );
 
   const nodes: TreeNodeDef[] = [
