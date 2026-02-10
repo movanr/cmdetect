@@ -46,6 +46,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       label: "Degenerative Gelenkerkrankung",
       color: "blue",
       isEndNode: true,
+      imagingNote: "CT",
       center: { x: colCenter, y: 370 },
       width: endW,
       height: endH,

@@ -1,4 +1,4 @@
-import type { Criterion, CriterionStatus, Side, Region, TemplateContext } from "@cmdetect/dc-tmd";
+import type { Criterion, CriterionStatus, Region, Side, TemplateContext } from "@cmdetect/dc-tmd";
 
 // ============================================================================
 // GEOMETRY
@@ -39,6 +39,8 @@ export interface TreeNodeDef {
   isEndNode?: boolean;
   /** Links to another tree (makes node clickable) */
   linkedTreeId?: string;
+  /** Imaging recommendation shown on diagnosis end nodes (e.g. "MRT", "CT") */
+  imagingNote?: string;
   /** Center position (converted to top-left during rendering) */
   center: Position;
   width: number;
@@ -107,4 +109,4 @@ export interface ArrowProps {
 }
 
 /** Status of a node as evaluated by dc-tmd */
-export { type CriterionStatus, type Side, type Region };
+export { type CriterionStatus, type Region, type Side };

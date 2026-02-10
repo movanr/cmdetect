@@ -217,6 +217,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
             isEndNode={node.isEndNode}
             linkedTreeId={node.linkedTreeId}
             onLinkedNodeClick={onLinkedNodeClick}
+            imagingNote={node.imagingNote}
             position={node.position}
             width={node.width}
             height={node.height}

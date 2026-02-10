@@ -21,16 +21,10 @@ interface DiagnosisDetailPanelProps {
 
 const LEVEL_CONFIG: Record<
   DiagnosticValidity["level"],
-  { label: string; className: string }
+  { label: string; className: string } | null
 > = {
-  definitive: {
-    label: "Definitive klinische Diagnose",
-    className: "text-green-700 bg-green-50 border-green-200",
-  },
-  provisional: {
-    label: "Vorläufige Diagnose (Bildgebung empfohlen)",
-    className: "text-amber-700 bg-amber-50 border-amber-200",
-  },
+  definitive: null,
+  provisional: null,
   contentValidityOnly: {
     label: "Inhaltsvalidität \u2014 Kriterienvalidität nicht bestimmt",
     className: "text-gray-600 bg-gray-50 border-gray-200",
@@ -62,12 +56,14 @@ export function DiagnosisDetailPanel({ diagnosisId }: DiagnosisDetailPanelProps)
       {/* Validity */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-muted-foreground">{context.validityDE}</span>
-        <Badge
-          variant="outline"
-          className={cn("text-xs", levelConfig.className)}
-        >
-          {levelConfig.label}
-        </Badge>
+        {levelConfig && (
+          <Badge
+            variant="outline"
+            className={cn("text-xs", levelConfig.className)}
+          >
+            {levelConfig.label}
+          </Badge>
+        )}
       </div>
 
       {/* Imaging recommendation */}

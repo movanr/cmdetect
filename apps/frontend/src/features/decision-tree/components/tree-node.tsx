@@ -1,6 +1,6 @@
 import React from "react";
-import type { CriterionStatus, Position } from "../types";
 import { StatusBadge } from "../../evaluation/components/StatusBadge";
+import type { CriterionStatus, Position } from "../types";
 
 interface TreeNodeProps {
   id: string;
@@ -18,6 +18,8 @@ interface TreeNodeProps {
   /** Links to another tree (makes node clickable) */
   linkedTreeId?: string;
   onLinkedNodeClick?: (treeId: string) => void;
+  /** Imaging recommendation (e.g. "MRT", "CT") */
+  imagingNote?: string;
   position: Position;
   width: number;
   height: number;
@@ -56,6 +58,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   isEndNode,
   linkedTreeId,
   onLinkedNodeClick,
+  imagingNote,
   position,
   width,
   height,
@@ -63,14 +66,23 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   isActive,
 }) => {
   // Inactive nodes get a uniform disabled style; active nodes show status/color
-  const disabled = { borderColor: "border-gray-200", bgColor: "bg-gray-50", textColor: "text-gray-400" };
+  const disabled = {
+    borderColor: "border-gray-200",
+    bgColor: "bg-gray-50",
+    textColor: "text-gray-400",
+  };
   const showNegativeLabel = negativeLabel && status === "negative";
-  const active = color === "red"
-    ? showNegativeLabel
-      ? nodeColors.negative // grey when gateway criterion is not met
-      : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
-    : nodeColors[status];
-  const { borderColor: borderClass, bgColor: bgClass, textColor: textClass } = isActive ? active : disabled;
+  const active =
+    color === "red"
+      ? showNegativeLabel
+        ? nodeColors.negative // grey when gateway criterion is not met
+        : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
+      : nodeColors[status];
+  const {
+    borderColor: borderClass,
+    bgColor: bgClass,
+    textColor: textClass,
+  } = isActive ? active : disabled;
 
   const isLinked = !!linkedTreeId;
 
@@ -99,9 +111,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
               </span>
             </div>
           )}
-          {subLabel && (
-            <div className="text-xs text-gray-600 mb-1">{subLabel}</div>
-          )}
+          {subLabel && <div className="text-xs text-gray-600 mb-1">{subLabel}</div>}
           {subItems && (
             <div className="space-y-0.5">
               {subItems.labels.map((item, idx) => (
@@ -117,6 +127,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             </div>
           )}
         </div>
+
+        {imagingNote && isActive && (
+          <div className="mt-1">
+            <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">
+              {`Durch ${imagingNote} bestätigen`}
+            </span>
+          </div>
+        )}
 
         {/* Status Badge — same component as evaluation table */}
         {!isEndNode && isActive && (
