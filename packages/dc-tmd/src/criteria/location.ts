@@ -57,6 +57,18 @@ export interface DiagnosisDefinition {
   anamnesis: Criterion;
 
   /**
+   * Optional per-side anamnesis criterion.
+   *
+   * Evaluated per-location with ${side} template context.
+   * When present, a location requires BOTH global anamnesis
+   * AND sided anamnesis to be positive.
+   *
+   * Used for joint diagnoses where SQ office-use side marking
+   * gates which side(s) the diagnosis can be positive on.
+   */
+  sidedAnamnesis?: Criterion;
+
+  /**
    * Examination criteria
    *
    * Evaluated per-location (side × region).
@@ -94,6 +106,9 @@ export interface CriteriaLocationResult {
 
   /** Evaluation status */
   status: CriterionStatus;
+
+  /** Detailed sided anamnesis result tree (if sidedAnamnesis defined) */
+  sidedAnamnesisResult?: CriterionResult;
 
   /** Detailed examination result tree */
   examinationResult: CriterionResult;

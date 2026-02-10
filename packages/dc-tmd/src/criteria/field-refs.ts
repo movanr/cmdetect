@@ -37,6 +37,21 @@ export function sq<T extends SQQuestionId>(questionId: T): `sq.${T}` {
 }
 
 /**
+ * SQ office-use side field references (with ${side} template)
+ * Format: sq.{questionId}_side.${side}
+ *
+ * Used for sided anamnesis criteria that gate joint diagnoses
+ * to only the side(s) marked by the examiner.
+ *
+ * @example
+ * sqSide("SQ8") // => "sq.SQ8_side.${side}"
+ * field(sqSide("SQ8"), { equals: true })
+ */
+export function sqSide(questionId: SQQuestionId): string {
+  return `sq.${questionId}_side.\${side}`;
+}
+
+/**
  * E1 Pain Location field references
  * Format: e1.painLocation.{side}
  * Value: Region[] - array of regions where pain is reported

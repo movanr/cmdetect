@@ -79,7 +79,7 @@ describe("Degenerative Joint Disease diagnosis", () => {
   describe("full diagnosis", () => {
     it("positive: SQ8 + crepitus on E6", () => {
       const data = {
-        sq: { SQ8: "yes" },
+        sq: { SQ8: "yes", SQ8_side: { left: true, right: true } },
         e6: { right: { crepitus: { examinerOpen: "yes" } } },
       };
       const result = evaluateDiagnosis(DEGENERATIVE_JOINT_DISEASE, data);
@@ -89,7 +89,7 @@ describe("Degenerative Joint Disease diagnosis", () => {
 
     it("negative: SQ8=yes but no crepitus found", () => {
       const data = {
-        sq: { SQ8: "yes" },
+        sq: { SQ8: "yes", SQ8_side: { left: true, right: true } },
         e6: {
           left: { crepitus: { examinerOpen: "no", examinerClose: "no" } },
           right: { crepitus: { examinerOpen: "no", examinerClose: "no" } },

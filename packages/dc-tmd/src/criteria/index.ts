@@ -17,7 +17,7 @@
  */
 
 // Field references (simplified - all refs are strings with template resolution)
-export { type TemplateContext, sq, resolveFieldRef, hasTemplateVars } from "./field-refs";
+export { type TemplateContext, sq, sqSide, resolveFieldRef, hasTemplateVars } from "./field-refs";
 
 // Criterion types
 export {
@@ -149,6 +149,8 @@ export {
 // Diagnoses — Joint disorders
 export {
   TMJ_NOISE_ANAMNESIS,
+  TMJ_NOISE_SIDED_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   DD_WITHOUT_REDUCTION_ANAMNESIS,
   DISC_DISPLACEMENT_WITH_REDUCTION,
   DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
@@ -156,7 +158,7 @@ export {
   DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING,
 } from "./diagnoses/disc-displacement";
 export { DEGENERATIVE_JOINT_DISEASE } from "./diagnoses/degenerative-joint-disease";
-export { SUBLUXATION, SUBLUXATION_ANAMNESIS } from "./diagnoses/subluxation";
+export { SUBLUXATION, SUBLUXATION_ANAMNESIS, SUBLUXATION_SIDED_ANAMNESIS } from "./diagnoses/subluxation";
 
 // All diagnoses (for iteration)
 import { MYALGIA } from "./diagnoses/myalgia";

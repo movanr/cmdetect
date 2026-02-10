@@ -9,7 +9,7 @@
 import { SIDE_KEYS } from "../ids/anatomy";
 import type { DiagnosisDefinition, DiagnosisEvaluationResult, CriteriaLocationResult } from "./location";
 import { evaluate } from "./evaluate";
-import type { CriterionStatus } from "./types";
+import type { CriterionResult, CriterionStatus } from "./types";
 
 /**
  * Evaluate a complete diagnosis definition against patient data.
@@ -32,16 +32,30 @@ export function evaluateDiagnosis(
 
   for (const side of SIDE_KEYS) {
     for (const region of diagnosis.examination.regions) {
+      // Evaluate sided anamnesis if defined (per-location with ${side} context)
+      const sidedAnamnesisResult = diagnosis.sidedAnamnesis
+        ? evaluate(diagnosis.sidedAnamnesis, data, { side, region })
+        : null;
+
       const examinationResult = evaluate(diagnosis.examination.criterion, data, {
         side,
         region,
       });
 
+      // Location is positive only if sided anamnesis (when present) AND examination are both positive
+      const sidedAnamnesisMet = !sidedAnamnesisResult || sidedAnamnesisResult.status === "positive";
+      const examinationMet = examinationResult.status === "positive";
+      const isPositive = sidedAnamnesisMet && examinationMet;
+
+      // Derive location status considering both sided anamnesis and examination
+      const status = deriveLocationStatus(sidedAnamnesisResult, examinationResult);
+
       locationResults.push({
         side,
         region,
-        isPositive: examinationResult.status === "positive",
-        status: examinationResult.status,
+        isPositive,
+        status,
+        ...(sidedAnamnesisResult ? { sidedAnamnesisResult } : {}),
         examinationResult,
       });
     }
@@ -68,6 +82,29 @@ export function evaluateDiagnosis(
     locationResults,
     positiveLocations,
   };
+}
+
+/**
+ * Derive location status from sided anamnesis and examination results.
+ *
+ * When sided anamnesis is present, both must agree for the location to be positive.
+ * Either being negative makes the location negative; pending propagates.
+ */
+function deriveLocationStatus(
+  sidedAnamnesisResult: CriterionResult | null,
+  examinationResult: CriterionResult
+): CriterionStatus {
+  if (!sidedAnamnesisResult) return examinationResult.status;
+
+  const sa = sidedAnamnesisResult.status;
+  const ex = examinationResult.status;
+
+  // Either negative → location negative
+  if (sa === "negative" || ex === "negative") return "negative";
+  // Both positive → location positive
+  if (sa === "positive" && ex === "positive") return "positive";
+  // Otherwise pending
+  return "pending";
 }
 
 /**

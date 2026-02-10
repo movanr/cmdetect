@@ -47,10 +47,15 @@ describe("Subluxation diagnosis", () => {
 
   describe("full diagnosis evaluation", () => {
     it("positive when anamnesis met (exam always positive for TMJ)", () => {
-      const data = { sq: { SQ13: "yes", SQ14: "yes" } };
+      const data = {
+        sq: {
+          SQ13: "yes", SQ13_side: { left: true, right: true },
+          SQ14: "yes", SQ14_side: { left: true, right: true },
+        },
+      };
       const result = evaluateDiagnosis(SUBLUXATION, data);
       expect(result.isPositive).toBe(true);
-      // Both sides should be positive since exam is trivially true
+      // Both sides should be positive since exam is trivially true and sides match
       expect(result.positiveLocations).toHaveLength(2);
       expect(result.positiveLocations).toContainEqual({ side: "left", region: "tmj" });
       expect(result.positiveLocations).toContainEqual({ side: "right", region: "tmj" });
@@ -63,7 +68,12 @@ describe("Subluxation diagnosis", () => {
     });
 
     it("evaluates 2 locations (left + right TMJ)", () => {
-      const data = { sq: { SQ13: "yes", SQ14: "yes" } };
+      const data = {
+        sq: {
+          SQ13: "yes", SQ13_side: { left: true, right: true },
+          SQ14: "yes", SQ14_side: { left: true, right: true },
+        },
+      };
       const result = evaluateDiagnosis(SUBLUXATION, data);
       expect(result.locationResults).toHaveLength(2);
     });

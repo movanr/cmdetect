@@ -12,7 +12,7 @@
 
 import { any, or } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import { TMJ_NOISE_ANAMNESIS } from "./disc-displacement";
+import { TMJ_NOISE_ANAMNESIS, TMJ_NOISE_SIDED_ANAMNESIS } from "./disc-displacement";
 
 // ============================================================================
 // EXAMINATION CRITERIA
@@ -61,5 +61,6 @@ export const DEGENERATIVE_JOINT_DISEASE: DiagnosisDefinition = {
   nameDE: "Degenerative Gelenkerkrankung",
   category: "joint",
   anamnesis: TMJ_NOISE_ANAMNESIS,
+  sidedAnamnesis: TMJ_NOISE_SIDED_ANAMNESIS,
   examination: DJD_EXAMINATION,
 };

@@ -15,7 +15,7 @@
  */
 
 import { and, field, match } from "../builders";
-import { sq } from "../field-refs";
+import { sq, sqSide } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion } from "../types";
 
@@ -31,6 +31,24 @@ export const SUBLUXATION_ANAMNESIS: Criterion = and(
   {
     id: "subluxationHistory",
     label: "Subluxation-Anamnese",
+  }
+);
+
+// ============================================================================
+// SIDED ANAMNESIS (per-side gate)
+// ============================================================================
+
+/**
+ * Per-side gate for Subluxation: both SQ13 and SQ14 office-use must match this side.
+ */
+export const SUBLUXATION_SIDED_ANAMNESIS: Criterion = and(
+  [
+    field(sqSide("SQ13"), { equals: true }),
+    field(sqSide("SQ14"), { equals: true }),
+  ],
+  {
+    id: "subluxationSidedAnamnesis",
+    label: "Subluxation auf dieser Seite",
   }
 );
 
@@ -61,5 +79,6 @@ export const SUBLUXATION: DiagnosisDefinition = {
   nameDE: "Subluxation",
   category: "joint",
   anamnesis: SUBLUXATION_ANAMNESIS,
+  sidedAnamnesis: SUBLUXATION_SIDED_ANAMNESIS,
   examination: SUBLUXATION_EXAMINATION,
 };

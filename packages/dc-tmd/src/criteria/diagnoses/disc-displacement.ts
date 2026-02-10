@@ -9,7 +9,7 @@
  */
 
 import { and, any, computed, field, or } from "../builders";
-import { sq } from "../field-refs";
+import { sq, sqSide } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion } from "../types";
 
@@ -54,6 +54,63 @@ export const TMJ_NOISE_ANAMNESIS: Criterion = or(
   {
     id: "tmjNoiseAnamnesis",
     label: "KG-Geräusch anamnestisch oder vom Patienten angegeben",
+  }
+);
+
+// ============================================================================
+// SHARED: TMJ NOISE SIDED ANAMNESIS (per-side gate)
+// ============================================================================
+
+/**
+ * Per-side gate for TMJ noise diagnoses (DD with Reduction, DJD).
+ *
+ * Evaluated per-location with ${side} template context.
+ * Positive if:
+ * - SQ8 office-use marks this side (or DNK = both), OR
+ * - Patient reported noise on this side during E6/E7
+ *
+ * This ensures the diagnosis is only positive on sides where
+ * the patient history supports it.
+ */
+export const TMJ_NOISE_SIDED_ANAMNESIS: Criterion = or(
+  [
+    // Path 1: SQ8 office-use side matches this side
+    field(sqSide("SQ8"), { equals: true }),
+    // Path 2: Patient reported noise on this side during E6/E7
+    any(
+      [
+        "e6.${side}.click.patient",
+        "e6.${side}.crepitus.patient",
+        "e7.${side}.click.patient",
+        "e7.${side}.crepitus.patient",
+      ],
+      { equals: "yes" },
+      { id: "patientNoiseSided" }
+    ),
+  ],
+  {
+    id: "tmjNoiseSidedAnamnesis",
+    label: "KG-Geräusch auf dieser Seite",
+  }
+);
+
+// ============================================================================
+// SHARED: DD WITHOUT REDUCTION SIDED ANAMNESIS (per-side gate)
+// ============================================================================
+
+/**
+ * Per-side gate for DD without Reduction (both variants).
+ *
+ * Both SQ9 and SQ10 office-use must match the side.
+ */
+export const DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS: Criterion = and(
+  [
+    field(sqSide("SQ9"), { equals: true }),
+    field(sqSide("SQ10"), { equals: true }),
+  ],
+  {
+    id: "ddWithoutReductionSidedAnamnesis",
+    label: "Kieferklemme auf dieser Seite",
   }
 );
 
@@ -103,6 +160,7 @@ export const DISC_DISPLACEMENT_WITH_REDUCTION: DiagnosisDefinition = {
   nameDE: "Diskusverlagerung mit Reposition",
   category: "joint",
   anamnesis: TMJ_NOISE_ANAMNESIS,
+  sidedAnamnesis: TMJ_NOISE_SIDED_ANAMNESIS,
   examination: DD_WITH_REDUCTION_EXAMINATION,
 };
 
@@ -132,12 +190,28 @@ const DD_WITH_REDUCTION_INTERMITTENT_LOCKING_EXAMINATION: LocationCriterion = {
   criterion: ddWithReductionExamCriterion(),
 };
 
+/**
+ * Sided anamnesis for DD with Reduction + Intermittent Locking:
+ * TMJ noise side gate AND SQ11 office-use side must match.
+ */
+const DD_WITH_REDUCTION_IL_SIDED_ANAMNESIS: Criterion = and(
+  [
+    TMJ_NOISE_SIDED_ANAMNESIS,
+    field(sqSide("SQ11"), { equals: true }),
+  ],
+  {
+    id: "ddWithReductionILSidedAnamnesis",
+    label: "KG-Geräusch und intermittierende Kieferklemme auf dieser Seite",
+  }
+);
+
 export const DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING: DiagnosisDefinition = {
   id: "discDisplacementWithReductionIntermittentLocking",
   name: "Disc Displacement with Reduction, with Intermittent Locking",
   nameDE: "Diskusverlagerung mit Reposition, mit intermittierender Kieferklemme",
   category: "joint",
   anamnesis: DD_WITH_REDUCTION_INTERMITTENT_LOCKING_ANAMNESIS,
+  sidedAnamnesis: DD_WITH_REDUCTION_IL_SIDED_ANAMNESIS,
   examination: DD_WITH_REDUCTION_INTERMITTENT_LOCKING_EXAMINATION,
 };
 
@@ -188,6 +262,7 @@ export const DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING: DiagnosisDefin
   nameDE: "Diskusverlagerung ohne Reposition, mit Mundöffnungseinschränkung",
   category: "joint",
   anamnesis: DD_WITHOUT_REDUCTION_ANAMNESIS,
+  sidedAnamnesis: DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   examination: DD_WITHOUT_REDUCTION_LIMITED_EXAMINATION,
 };
 
@@ -216,5 +291,6 @@ export const DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING: DiagnosisDe
   nameDE: "Diskusverlagerung ohne Reposition, ohne Mundöffnungseinschränkung",
   category: "joint",
   anamnesis: DD_WITHOUT_REDUCTION_ANAMNESIS,
+  sidedAnamnesis: DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   examination: DD_WITHOUT_REDUCTION_NO_LIMITED_EXAMINATION,
 };

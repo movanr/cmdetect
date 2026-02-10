@@ -120,7 +120,7 @@ describe("DD with Reduction", () => {
   describe("full diagnosis", () => {
     it("positive: SQ8 + opening/closing click", () => {
       const data = {
-        sq: { SQ8: "yes" },
+        sq: { SQ8: "yes", SQ8_side: { left: true, right: true } },
         e6: { left: { click: { examinerOpen: "yes", examinerClose: "yes" } } },
       };
       const result = evaluateDiagnosis(DISC_DISPLACEMENT_WITH_REDUCTION, data);
@@ -179,7 +179,11 @@ describe("DD with Reduction + Intermittent Locking", () => {
   describe("full diagnosis", () => {
     it("positive: complete criteria met", () => {
       const data = {
-        sq: { SQ8: "yes", SQ11: "yes", SQ12: "no" },
+        sq: {
+          SQ8: "yes", SQ8_side: { left: true, right: true },
+          SQ11: "yes", SQ11_side: { left: true, right: true },
+          SQ12: "no",
+        },
         e6: { right: { click: { examinerOpen: "yes", examinerClose: "yes" } } },
       };
       const result = evaluateDiagnosis(
@@ -346,7 +350,10 @@ describe("DD without Reduction, No Limited Opening", () => {
   describe("full diagnosis", () => {
     it("positive: SQ9+SQ10 + opening >= 40mm", () => {
       const data = {
-        sq: { SQ9: "yes", SQ10: "yes" },
+        sq: {
+          SQ9: "yes", SQ9_side: { left: true, right: true },
+          SQ10: "yes", SQ10_side: { left: true, right: true },
+        },
         e4: { maxAssisted: { measurement: 45 } },
         e2: { verticalOverlap: 3 },
       };
@@ -372,7 +379,10 @@ describe("DD without Reduction, No Limited Opening", () => {
 describe("DD without Reduction: Limited vs No Limited are mutually exclusive", () => {
   it("limited positive when < 40mm, no-limited negative", () => {
     const data = {
-      sq: { SQ9: "yes", SQ10: "yes" },
+      sq: {
+        SQ9: "yes", SQ9_side: { left: true, right: true },
+        SQ10: "yes", SQ10_side: { left: true, right: true },
+      },
       e4: { maxAssisted: { measurement: 30 } },
       e2: { verticalOverlap: 5 },
     };
@@ -384,7 +394,10 @@ describe("DD without Reduction: Limited vs No Limited are mutually exclusive", (
 
   it("no-limited positive when >= 40mm, limited negative", () => {
     const data = {
-      sq: { SQ9: "yes", SQ10: "yes" },
+      sq: {
+        SQ9: "yes", SQ9_side: { left: true, right: true },
+        SQ10: "yes", SQ10_side: { left: true, right: true },
+      },
       e4: { maxAssisted: { measurement: 42 } },
       e2: { verticalOverlap: 3 },
     };
