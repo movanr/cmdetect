@@ -18,17 +18,20 @@ export async function execute<TResult, TVariables>(
     headers["Authorization"] = `Bearer ${jwtToken}`;
   }
 
-  const response = await fetch(
-    import.meta.env.VITE_HASURA_GRAPHQL_URL || "http://localhost:8080/v1/graphql",
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-    }
-  );
+  // Extract operation name for network tab visibility
+  const operationName = String(query).match(/(?:query|mutation|subscription)\s+(\w+)/)?.[1];
+
+  const baseUrl = import.meta.env.VITE_HASURA_GRAPHQL_URL || "http://localhost:8080/v1/graphql";
+  const url = operationName ? `${baseUrl}?op=${operationName}` : baseUrl;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      query,
+      variables,
+    }),
+  });
 
   if (!response.ok) {
     // If the JWT is expired, refresh it and try again

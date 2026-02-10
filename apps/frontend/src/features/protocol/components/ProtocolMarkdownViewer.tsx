@@ -86,9 +86,26 @@ export function ProtocolMarkdownViewer({ content, className }: ProtocolMarkdownV
       }
       return <strong>{children}</strong>;
     },
-    // Handle paragraphs with cross-references
+    // Handle paragraphs with cross-references.
+    // Use <div> when the paragraph contains a figure reference (em/strong child
+    // whose text expands to a block-level <figure>) to avoid invalid nesting.
     p: ({ children }) => {
-      return <p>{processChildren(children)}</p>;
+      const processed = processChildren(children);
+      const childArray = Array.isArray(children) ? children : [children];
+      const hasFigure = childArray.some((child) => {
+        if (child != null && typeof child === "object" && "props" in child) {
+          const text = String(child.props?.children ?? "");
+          if (parseFigureReference(text)) return true;
+          // Also check "Abbildung X:" / "Abbildung X." patterns (strong handler)
+          const colonMatch = text.match(/^Abbildung(?:en)?\s+[\d\w]+(?:\s*[&,]\s*[\d\w]+)*[:.]/i);
+          if (colonMatch) return true;
+        }
+        return false;
+      });
+      if (hasFigure) {
+        return <div className="my-5">{processed}</div>;
+      }
+      return <p>{processed}</p>;
     },
     // Handle list items with cross-references (e.g., "6.2.1: Description")
     li: ({ children }) => {

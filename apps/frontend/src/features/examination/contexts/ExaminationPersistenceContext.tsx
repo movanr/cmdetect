@@ -23,6 +23,8 @@ import type { SectionId as DcTmdSectionId, DiagnosisId } from "@cmdetect/dc-tmd"
 interface ExaminationPersistenceContextValue {
   /** Save a section to backend and mark it completed */
   saveSection: (sectionId: SectionId) => Promise<void>;
+  /** Save current form data to backend as draft (no section completion) */
+  saveDraft: () => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
   /** Whether a save operation is in progress */

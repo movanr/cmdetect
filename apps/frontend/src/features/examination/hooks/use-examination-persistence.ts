@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { execute } from "@/graphql/execute";
 import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
 import { useUpsertExamination, useCompleteExamination } from "./use-save-examination";
 import { SECTION_IDS, type SectionId } from "../sections/registry";
@@ -20,9 +21,11 @@ import {
   parseCompletedSections,
 } from "./validate-persistence";
 import { CURRENT_MODEL_VERSION } from "./model-versioning";
+import { UPSERT_EXAMINATION_RESPONSE } from "../queries";
 
 const STORAGE_KEY_PREFIX = "cmdetect_exam_draft_";
 const AUTO_SAVE_DEBOUNCE_MS = 2000;
+const BACKEND_PERIODIC_SAVE_MS = 30_000;
 
 interface DraftData {
   formValues: Record<string, unknown>;
@@ -37,6 +40,8 @@ interface UseExaminationPersistenceOptions {
 export interface UseExaminationPersistenceResult {
   /** Save a section to backend and mark it completed */
   saveSection: (sectionId: SectionId) => Promise<void>;
+  /** Save current form data to backend as draft (no section completion) */
+  saveDraft: () => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
   /** Whether a save operation is in progress */
@@ -56,6 +61,10 @@ export function useExaminationPersistence({
   const [isHydrated, setIsHydrated] = useState(false);
   const [completedSections, setCompletedSections] = useState<SectionId[]>([]);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasUnsavedBackendChangesRef = useRef(false);
+  const backendPeriodicTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isAutoSavingRef = useRef(false);
+  const saveDraftRef = useRef<() => Promise<void>>(async () => {});
 
   // LocalStorage for draft
   const storageKey = `${STORAGE_KEY_PREFIX}${patientRecordId}`;
@@ -156,7 +165,7 @@ export function useExaminationPersistence({
   // from the model, values are always fully populated at runtime.
   const latestValuesRef = useRef<FormValues | null>(null);
 
-  // Auto-save to localStorage on form changes (debounced)
+  // Auto-save to localStorage on form changes (debounced) + periodic backend save
   useEffect(() => {
     if (!isHydrated) return;
 
@@ -164,27 +173,42 @@ export function useExaminationPersistence({
       // Track latest values for save-on-unmount
       latestValuesRef.current = values as FormValues;
 
-      // Clear existing timer
+      // Mark as having unsaved backend changes
+      hasUnsavedBackendChangesRef.current = true;
+
+      // Clear existing localStorage debounce timer
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current);
       }
 
-      // Set new debounced save
+      // Set new debounced localStorage save
       autoSaveTimerRef.current = setTimeout(() => {
         setDraft({
           formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...values as FormValues },
           completedSections,
           savedAt: new Date().toISOString(),
         });
-        latestValuesRef.current = null; // Mark as saved
+        latestValuesRef.current = null; // Mark as saved to localStorage
       }, AUTO_SAVE_DEBOUNCE_MS);
+
+      // Reset periodic backend save timer (fires after 30s of inactivity)
+      if (backendPeriodicTimerRef.current) {
+        clearTimeout(backendPeriodicTimerRef.current);
+      }
+      backendPeriodicTimerRef.current = setTimeout(() => {
+        saveDraftRef.current();
+      }, BACKEND_PERIODIC_SAVE_MS);
     });
 
     return () => {
       subscription.unsubscribe();
-      // Cancel pending timer
+      // Cancel pending localStorage timer
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current);
+      }
+      // Cancel pending backend periodic timer
+      if (backendPeriodicTimerRef.current) {
+        clearTimeout(backendPeriodicTimerRef.current);
       }
       // Save immediately if there are unsaved changes
       if (latestValuesRef.current) {
@@ -205,6 +229,15 @@ export function useExaminationPersistence({
     };
   }, [isHydrated, form, setDraft, completedSections, storageKey]);
 
+  // Fire-and-forget backend save on unmount only.
+  // Separate effect with [] deps so it doesn't fire when form.watch effect
+  // re-runs due to unstable setDraft identity from useLocalStorage.
+  useEffect(() => {
+    return () => {
+      saveDraftRef.current();
+    };
+  }, []);
+
   // Compute status based on completed sections
   const computeStatus = useCallback(
     (sections: SectionId[]): ExaminationStatus => {
@@ -213,6 +246,42 @@ export function useExaminationPersistence({
     },
     []
   );
+
+  // Save current form data to backend as draft (no section completion).
+  // Used for auto-save on navigation, unmount, and periodic inactivity.
+  const saveDraft = useCallback(async () => {
+    if (
+      !hasUnsavedBackendChangesRef.current ||
+      upsertMutation.isPending ||
+      isAutoSavingRef.current
+    ) {
+      return;
+    }
+
+    isAutoSavingRef.current = true;
+    try {
+      const formValues = form.getValues();
+      const status = computeStatus(completedSections);
+
+      await execute(UPSERT_EXAMINATION_RESPONSE, {
+        patient_record_id: patientRecordId,
+        response_data: { _modelVersion: CURRENT_MODEL_VERSION, ...formValues },
+        status,
+        completed_sections: completedSections,
+      });
+
+      removeDraft();
+      hasUnsavedBackendChangesRef.current = false;
+      latestValuesRef.current = null;
+    } catch (error) {
+      console.warn("Auto-save to backend failed:", error);
+    } finally {
+      isAutoSavingRef.current = false;
+    }
+  }, [form, completedSections, computeStatus, patientRecordId, removeDraft, upsertMutation.isPending]);
+
+  // Keep ref in sync so timers/cleanup always call the latest version
+  saveDraftRef.current = saveDraft;
 
   // Save section to backend
   const saveSection = useCallback(
@@ -239,6 +308,13 @@ export function useExaminationPersistence({
 
         // Clear localStorage draft after successful backend save
         removeDraft();
+
+        // Clear backend auto-save tracking
+        hasUnsavedBackendChangesRef.current = false;
+        if (backendPeriodicTimerRef.current) {
+          clearTimeout(backendPeriodicTimerRef.current);
+          backendPeriodicTimerRef.current = null;
+        }
       } catch (error) {
         // On error, ensure draft is saved to localStorage as safety net
         setDraft({
@@ -296,6 +372,13 @@ export function useExaminationPersistence({
 
     // Clear localStorage draft
     removeDraft();
+
+    // Clear backend auto-save tracking
+    hasUnsavedBackendChangesRef.current = false;
+    if (backendPeriodicTimerRef.current) {
+      clearTimeout(backendPeriodicTimerRef.current);
+      backendPeriodicTimerRef.current = null;
+    }
   }, [
     form,
     completedSections,
@@ -308,6 +391,7 @@ export function useExaminationPersistence({
 
   return {
     saveSection,
+    saveDraft,
     completeExamination: completeExaminationFn,
     isSaving,
     completedSections,

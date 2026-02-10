@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface UseLocalStorageOptions<T> {
   /** Custom serializer (default: JSON.stringify) */
@@ -55,13 +55,18 @@ export function useLocalStorage<T>(
   // State to track current value
   const [storedValue, setStoredValue] = useState<T>(readValue);
 
+  // Ref to access current value without adding it as a useCallback dependency,
+  // keeping setValue identity stable across renders.
+  const storedValueRef = useRef(storedValue);
+  storedValueRef.current = storedValue;
+
   // Set value to localStorage and state
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
       try {
         // Handle function updater pattern
         const valueToStore =
-          value instanceof Function ? value(storedValue) : value;
+          value instanceof Function ? value(storedValueRef.current) : value;
 
         setStoredValue(valueToStore);
 
@@ -83,7 +88,7 @@ export function useLocalStorage<T>(
         );
       }
     },
-    [key, serializer, storedValue, onError]
+    [key, serializer, onError]
   );
 
   // Remove value from localStorage

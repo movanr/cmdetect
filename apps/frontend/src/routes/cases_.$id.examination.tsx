@@ -6,7 +6,7 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { FormProvider, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
@@ -189,8 +189,17 @@ function ExaminationContent({
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
 }) {
-  const { isHydrated, status, relevantSections } = useExaminationPersistenceContext();
+  const { isHydrated, status, relevantSections, saveDraft } = useExaminationPersistenceContext();
   const { pathname } = useLocation();
+
+  // Save draft to backend when navigating between examination sections
+  const prevPathRef = useRef(pathname);
+  useEffect(() => {
+    if (prevPathRef.current !== pathname) {
+      prevPathRef.current = pathname;
+      saveDraft();
+    }
+  }, [pathname, saveDraft]);
 
   // Convert relevantSections array to Set for SubStepTabs
   const relevantSteps = useMemo(
