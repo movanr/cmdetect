@@ -10,7 +10,7 @@ const Label: React.FC<{
       x={position.x}
       y={position.y}
       fontSize="14"
-      fill={isActive ? "black" : "gray"}
+      fill={isActive ? "black" : "#d1d5db"}
     >
       {text}
     </text>

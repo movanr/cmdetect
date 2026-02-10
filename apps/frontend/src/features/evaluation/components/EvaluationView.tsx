@@ -34,6 +34,7 @@ import {
   createHeadacheTree,
   createMyalgiaSubtypesTree,
   createMyalgiaTree,
+  createSubluxationTree,
 } from "../../decision-tree";
 import type { FormValues } from "../../examination";
 import { EMPTY_REGION_STATUS, type RegionStatus } from "../../examination/components/HeadDiagram";
@@ -58,7 +59,8 @@ type TreeTypeId =
   | "arthralgia"
   | "headache"
   | "ddWithReduction"
-  | "degenerativeJointDisease";
+  | "degenerativeJointDisease"
+  | "subluxation";
 
 interface TreeTypeEntry {
   id: TreeTypeId;
@@ -73,6 +75,7 @@ const TREE_TYPES: readonly TreeTypeEntry[] = [
   { id: "headache", label: "Auf CMD zurückgeführte Kopfschmerzen", regions: ["temporalis"] },
   { id: "ddWithReduction", label: "Diskusverlagerung", regions: ["tmj"] },
   { id: "degenerativeJointDisease", label: "Degenerative Gelenkerkrankung", regions: ["tmj"] },
+  { id: "subluxation", label: "Subluxation", regions: ["tmj"] },
 ];
 
 /** Map a DiagnosisId (from positive diagnoses list) to its tree type. */
@@ -92,6 +95,8 @@ function diagnosisToTreeType(id: DiagnosisId): TreeTypeId {
       return "ddWithReduction";
     case "degenerativeJointDisease":
       return "degenerativeJointDisease";
+    case "subluxation":
+      return "subluxation";
     default:
       return "myalgia";
   }
@@ -319,6 +324,8 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
         return createDdWithReductionTree(selectedSide);
       case "degenerativeJointDisease":
         return createDjdTree(selectedSide);
+      case "subluxation":
+        return createSubluxationTree(selectedSide);
       default:
         return null;
     }
@@ -352,7 +359,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
       {/* Positive diagnoses + head diagrams */}
       <Card>
         <CardHeader>
-          <CardTitle>Positive Diagnoseabgleiche</CardTitle>
+          <CardTitle>Positive DC/TMD-Kriterien</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col lg:flex-row gap-6">
@@ -439,7 +446,11 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
               {treeData ? (
                 <ScrollArea className="w-full">
                   <div className="min-w-fit pb-4">
-                    <DecisionTreeView tree={treeData} data={criteriaData} onLinkedNodeClick={handleTreeSelect} />
+                    <DecisionTreeView
+                      tree={treeData}
+                      data={criteriaData}
+                      onLinkedNodeClick={handleTreeSelect}
+                    />
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>

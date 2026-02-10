@@ -72,15 +72,21 @@ function getNodeStateMap(
   return result;
 }
 
+interface PathResult {
+  nodes: string[];
+  edges: Set<string>;
+}
+
 /**
  * Walk the tree from root following transitions based on node states.
  * Uses BFS to support unconditional transitions that always flow regardless of state.
+ * Returns both active nodes and active edges (transitions actually followed).
  */
 function getCurrentPath(
   startNodeId: string,
   transitions: TransitionFromIds[],
   state: NodeStateMap
-): string[] {
+): PathResult {
   // Build separate maps: conditional (positive/negative) vs unconditional
   const conditionalMap: Record<string, Record<string, string>> = {};
   const unconditionalMap: Record<string, string[]> = {};
@@ -96,6 +102,7 @@ function getCurrentPath(
   }
 
   const visited = new Set<string>();
+  const edges = new Set<string>();
   const queue: string[] = [startNodeId];
 
   while (queue.length > 0) {
@@ -106,6 +113,7 @@ function getCurrentPath(
     // Unconditional targets are always reachable (even from pending nodes)
     const unconditionalTargets = unconditionalMap[nodeId] ?? [];
     for (const target of unconditionalTargets) {
+      edges.add(`${nodeId}->${target}`);
       queue.push(target);
     }
 
@@ -114,12 +122,13 @@ function getCurrentPath(
     if (nodeState) {
       const conditionalTarget = conditionalMap[nodeId]?.[nodeState];
       if (conditionalTarget) {
+        edges.add(`${nodeId}->${conditionalTarget}`);
         queue.push(conditionalTarget);
       }
     }
   }
 
-  return Array.from(visited);
+  return { nodes: Array.from(visited), edges };
 }
 
 /** Calculate tree bounding box dimensions */
@@ -152,7 +161,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
   const { nodes, transitions } = tree;
 
   const nodeStateMap = useMemo(() => getNodeStateMap(nodes, data), [nodes, data]);
-  const currentPath = useMemo(
+  const { nodes: activeNodes, edges: activeEdges } = useMemo(
     () => getCurrentPath(nodes[0].id, transitions, nodeStateMap),
     [nodes, transitions, nodeStateMap]
   );
@@ -200,6 +209,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
             key={node.id}
             id={node.id}
             label={node.label}
+            negativeLabel={node.negativeLabel}
             subLabel={node.subLabel}
             contextLabel={formatContextLabel(node.context)}
             subItems={node.subItems}
@@ -211,14 +221,14 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
             width={node.width}
             height={node.height}
             status={nodeStatuses[node.id]}
-            isActive={currentPath.includes(node.id)}
+            isActive={activeNodes.includes(node.id)}
           />
         ))}
 
         {transitions.map((transition, idx) => (
           <Transition
             key={idx}
-            {...resolveTransition(transition, resolvedNodes, currentPath)}
+            {...resolveTransition(transition, resolvedNodes, activeEdges)}
           />
         ))}
       </div>
@@ -229,7 +239,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
 function resolveTransition(
   transition: TransitionFromIds,
   resolvedNodes: Array<TreeNodeDef & { position: Position }>,
-  path: string[]
+  edges: Set<string>
 ): TransitionProps {
   const fromNode = resolvedNodes.find((n) => n.id === transition.from);
   const toNode = resolvedNodes.find((n) => n.id === transition.to);
@@ -240,6 +250,6 @@ function resolveTransition(
     ...transition,
     from: { position: fromNode.position, width: fromNode.width, height: fromNode.height },
     to: { position: toNode.position, width: toNode.width, height: toNode.height },
-    isActive: path.includes(transition.from) && path.includes(transition.to),
+    isActive: edges.has(`${transition.from}->${transition.to}`),
   };
 }

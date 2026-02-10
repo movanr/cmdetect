@@ -11,6 +11,6 @@ const Polyline: React.FC<{ path: Position[], isActive: boolean }> = ({ path, isA
     idx === 0 ? `M ${pos.x} ${pos.y}` : `L ${pos.x} ${pos.y}`
   );
 
-  return <path d={data.join(" ")} fill="none" stroke={isActive ? "black" : "gray"} strokeWidth="2" />;};
+  return <path d={data.join(" ")} fill="none" stroke={isActive ? "black" : "#d1d5db"} strokeWidth="2" />;};
 
 export default Polyline;

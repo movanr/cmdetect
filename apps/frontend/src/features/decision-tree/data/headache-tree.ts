@@ -1,9 +1,11 @@
 import {
   and,
   familiarHeadacheProvoked,
+  field,
   HEADACHE_ANAMNESIS,
   HEADACHE_EXAMINATION,
   headacheLocationConfirmed,
+  sq,
   type Side,
 } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
@@ -23,6 +25,8 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
  */
 export function createHeadacheTree(side: Side): DecisionTreeDef {
   const ctx = { side, region: "temporalis" as const };
+
+  const sideLabel = side === "right" ? "Rechts" : "Links";
 
   // Layout constants
   const colCenter = 150;
@@ -87,8 +91,13 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
+      negativeLabel: `Keine Hinweise auf Kopfschmerzen in (Temporalis, ${sideLabel}) gefunden`,
       color: "red",
       isEndNode: true,
+      criterion: and([
+        field(sq("SQ5"), { equals: "yes" }),
+        field(`e1.headacheLocation.${side}`, { includes: "temporalis" }),
+      ]),
       center: { x: 430, y: 65 },
       width: 180,
       height: 80,
@@ -145,8 +154,6 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
       label: "Nein",
     },
   ];
-
-  const sideLabel = side === "right" ? "Rechts" : "Links";
 
   return {
     id: `headache-${side}-temporalis`,

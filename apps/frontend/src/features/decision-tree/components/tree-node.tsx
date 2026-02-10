@@ -5,6 +5,7 @@ import { StatusBadge } from "../../evaluation/components/StatusBadge";
 interface TreeNodeProps {
   id: string;
   label: string;
+  negativeLabel?: string;
   subLabel?: string;
   /** Auto-generated location badge from node context (e.g. "M. temporalis · rechts") */
   contextLabel?: string;
@@ -34,9 +35,9 @@ const nodeColors: Record<
     textColor: "text-blue-900",
   },
   negative: {
-    borderColor: "border-gray-300",
-    bgColor: "bg-gray-50",
-    textColor: "text-gray-600",
+    borderColor: "border-gray-400",
+    bgColor: "bg-gray-100",
+    textColor: "text-gray-700",
   },
   pending: {
     borderColor: "border-yellow-400",
@@ -47,6 +48,7 @@ const nodeColors: Record<
 
 const TreeNode: React.FC<TreeNodeProps> = ({
   label,
+  negativeLabel,
   subLabel,
   contextLabel,
   subItems,
@@ -60,24 +62,23 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   status,
   isActive,
 }) => {
-  const colors = nodeColors[status];
-
-  // "red" end nodes (e.g. "Keine DV mit Reposition") get fixed red styling,
-  // all other nodes follow status colors
-  const borderClass =
-    color === "red" ? "border-red-400" : colors.borderColor;
-  const bgClass =
-    color === "red" ? "bg-red-50" : colors.bgColor;
-  const textClass =
-    color === "red" ? "text-red-900" : colors.textColor;
+  // Inactive nodes get a uniform disabled style; active nodes show status/color
+  const disabled = { borderColor: "border-gray-200", bgColor: "bg-gray-50", textColor: "text-gray-400" };
+  const showNegativeLabel = negativeLabel && status === "negative";
+  const active = color === "red"
+    ? showNegativeLabel
+      ? nodeColors.negative // grey when gateway criterion is not met
+      : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
+    : nodeColors[status];
+  const { borderColor: borderClass, bgColor: bgClass, textColor: textClass } = isActive ? active : disabled;
 
   const isLinked = !!linkedTreeId;
 
   return (
     <div
       className={`absolute z-20 shadow-sm border-2 rounded-lg ${borderClass} ${bgClass} ${
-        isActive ? "" : "opacity-50"
-      } ${isLinked ? "cursor-pointer hover:ring-2 hover:ring-blue-300 transition-shadow" : ""}`}
+        isLinked ? "cursor-pointer hover:ring-2 hover:ring-blue-300 transition-shadow" : ""
+      }`}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -88,7 +89,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     >
       <div className="p-3 rounded-lg flex flex-col items-center justify-center h-full">
         <div className={`text-center ${textClass}`}>
-          <div className="text-sm font-medium mb-1">{label}</div>
+          <div className="text-sm font-medium mb-1">
+            {negativeLabel && status === "negative" ? negativeLabel : label}
+          </div>
           {contextLabel && (
             <div className="mb-1">
               <span className="inline-block text-[10px] font-medium text-gray-500 bg-gray-200/60 rounded-full px-2 py-0.5">
@@ -116,7 +119,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         </div>
 
         {/* Status Badge — same component as evaluation table */}
-        {!isEndNode && (
+        {!isEndNode && isActive && (
           <div className="flex justify-center mt-1">
             <StatusBadge status={status} />
           </div>

@@ -26,6 +26,7 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
  */
 export function createDdWithReductionTree(side: Side): DecisionTreeDef {
   const ctx = { side, region: "tmj" as const };
+  const sideLabel = side === "right" ? "Rechts" : "Links";
 
   // Layout constants
   const colCenter = 200;
@@ -83,9 +84,11 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
     // ── Main DV mit Reposition flow (center) ──
     {
       id: "noDdWithReduction",
-      label: "Keine DV mit Reposition",
+      label: "Weitere Diagnosen untersuchen",
+      negativeLabel: `Kein KG-Geräusch angegeben (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
+      criterion: field(sq("SQ8"), { equals: "yes" }),
       center: { x: colCenter - 300, y: 310 },
       width: 180,
       height: 80,
@@ -104,7 +107,8 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
     {
       id: "openingMeasurement",
       label: "Untersuchung — Mundöffnung eingeschränkt?",
-      subLabel: "Passive Dehnung (max. assistierte Mundöffnung + vertikaler Überbiss) < 40 mm (U4c)",
+      subLabel:
+        "Passive Dehnung (max. assistierte Mundöffnung + vertikaler Überbiss) < 40 mm (U4c)",
       criterion: openingLimited,
       context: ctx,
       center: { x: colCenter + 400, y: 470 },
@@ -307,11 +311,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
     },
   ];
 
-  const sideLabel = side === "right" ? "Rechts" : "Links";
-
   return {
     id: `dd-with-reduction-${side}-tmj`,
-    title: `Diskusverlagerung (KG, ${sideLabel})`,
+    title: `Diskusverlagerung (${sideLabel})`,
     side,
     region: "tmj",
     nodes,

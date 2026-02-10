@@ -3,7 +3,9 @@ import {
   ARTHRALGIA_ANAMNESIS,
   ARTHRALGIA_EXAMINATION,
   familiarPainProvokedTmj,
+  field,
   painLocationConfirmedTmj,
+  sq,
   type Side,
 } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
@@ -20,6 +22,8 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
  */
 export function createArthalgiaTree(side: Side): DecisionTreeDef {
   const ctx = { side, region: "tmj" as const };
+
+  const sideLabel = side === "right" ? "Rechts" : "Links";
 
   // Layout constants
   const colCenter = 150;
@@ -84,8 +88,13 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
+      negativeLabel: `Keine Hinweise auf Schmerzen in (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
+      criterion: and([
+        field(sq("SQ1"), { equals: "yes" }),
+        field(`e1.painLocation.${side}`, { includes: "tmj" }),
+      ]),
       center: { x: 430, y: 65 },
       width: 180,
       height: 80,
@@ -142,8 +151,6 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
       label: "Nein",
     },
   ];
-
-  const sideLabel = side === "right" ? "Rechts" : "Links";
 
   return {
     id: `arthralgia-${side}-tmj`,

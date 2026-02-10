@@ -20,6 +20,8 @@ export interface TreeNodeDef {
   id: string;
   /** Display title (German) */
   label: string;
+  /** Alternative label shown when the node's criterion evaluates to negative */
+  negativeLabel?: string;
   /** Optional subtitle */
   subLabel?: string;
   /** Sub-criteria labels displayed with a connector (UND/ODER) */

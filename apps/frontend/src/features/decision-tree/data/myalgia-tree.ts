@@ -1,9 +1,11 @@
 import {
   and,
   familiarPainProvoked,
+  field,
   MYALGIA_ANAMNESIS,
   MYALGIA_EXAMINATION,
   painLocationConfirmed,
+  sq,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
@@ -21,6 +23,9 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
  */
 export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
   const ctx = { side, region };
+
+  const sideLabel = side === "right" ? "Rechts" : "Links";
+  const regionLabel = region === "temporalis" ? "Temporalis" : "Masseter";
 
   // Layout constants
   const colCenter = 150;
@@ -80,8 +85,13 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
+      negativeLabel: `Keine Hinweise auf Schmerzen in (${regionLabel}, ${sideLabel})`,
       color: "red",
       isEndNode: true,
+      criterion: and([
+        field(sq("SQ1"), { equals: "yes" }),
+        field(`e1.painLocation.${side}`, { includes: region }),
+      ]),
       center: { x: 430, y: 65 },
       width: 180,
       height: 80,
@@ -138,9 +148,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
       label: "Nein",
     },
   ];
-
-  const sideLabel = side === "right" ? "Rechts" : "Links";
-  const regionLabel = region === "temporalis" ? "Temporalis" : "Masseter";
 
   return {
     id: `myalgia-${side}-${region}`,

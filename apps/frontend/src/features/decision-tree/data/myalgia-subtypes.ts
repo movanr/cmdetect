@@ -6,7 +6,9 @@ import {
   MYOFASCIAL_SPREADING_EXAMINATION,
   and,
   any,
+  field,
   getSiteRefs,
+  sq,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
@@ -147,8 +149,13 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
+      negativeLabel: `Keine Hinweise auf Schmerzen in (${regionTitle}, ${sideTitle})`,
       color: "red",
       isEndNode: true,
+      criterion: and([
+        field(sq("SQ1"), { equals: "yes" }),
+        field(`e1.painLocation.${side}`, { includes: region }),
+      ]),
       center: { x: colCenter + 310, y: 175 },
       width: 180,
       height: 80,

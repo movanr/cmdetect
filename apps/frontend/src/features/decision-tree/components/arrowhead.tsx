@@ -15,7 +15,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - width},${end.y - length} ${end.x + width},${
             end.y - length
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "gray"}
+          fill={isActive ? "black" : "#d1d5db"}
         />
       );
     case "up":
@@ -24,7 +24,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - width},${end.y + length} ${end.x + width},${
             end.y + length
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "gray"}
+          fill={isActive ? "black" : "#d1d5db"}
         />
       );
     case "right":
@@ -33,7 +33,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - length},${end.y - width} ${end.x - length},${
             end.y + width
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "gray"}
+          fill={isActive ? "black" : "#d1d5db"}
         />
       );
     case "left":
@@ -42,7 +42,7 @@ const Arrowhead: React.FC<{
           points={`${end.x + length},${end.y - width} ${end.x + length},${
             end.y + width
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "gray"}
+          fill={isActive ? "black" : "#d1d5db"}
         />
       );
   }

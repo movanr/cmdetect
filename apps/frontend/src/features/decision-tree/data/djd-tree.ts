@@ -1,8 +1,4 @@
-import {
-  TMJ_NOISE_ANAMNESIS,
-  DEGENERATIVE_JOINT_DISEASE,
-  type Side,
-} from "@cmdetect/dc-tmd";
+import { DEGENERATIVE_JOINT_DISEASE, field, sq, TMJ_NOISE_ANAMNESIS, type Side } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
 /**
@@ -16,6 +12,8 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 export function createDjdTree(side: Side): DecisionTreeDef {
   const ctx = { side, region: "tmj" as const };
 
+  const sideLabel = side === "right" ? "Rechts" : "Links";
+
   // Layout constants
   const colCenter = 200;
   const nodeW = 320;
@@ -26,7 +24,8 @@ export function createDjdTree(side: Side): DecisionTreeDef {
     {
       id: "noise",
       label: "Anamnese",
-      subLabel: "Anamnestisch aktuell vorhandenes KG-Geräusch, ODER Patient gibt während der Untersuchung Geräusche an (SF 8, U6/U7)",
+      subLabel:
+        "Anamnestisch aktuell vorhandenes KG-Geräusch, ODER Patient gibt während der Untersuchung Geräusche an (SF 8, U6/U7)",
       criterion: TMJ_NOISE_ANAMNESIS,
       center: { x: colCenter, y: 60 },
       width: nodeW,
@@ -53,9 +52,11 @@ export function createDjdTree(side: Side): DecisionTreeDef {
     },
     {
       id: "noDjd",
-      label: "Keine Degenerative Gelenkerkrankung",
+      label: "Weitere Diagnosen untersuchen",
+      negativeLabel: `Kein KG-Geräusch angegeben (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
+      criterion: field(sq("SQ8"), { equals: "yes" }),
       center: { x: colCenter + 350, y: 60 },
       width: 220,
       height: 80,
@@ -96,8 +97,6 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       label: "Nein",
     },
   ];
-
-  const sideLabel = side === "right" ? "Rechts" : "Links";
 
   return {
     id: `djd-${side}-tmj`,
