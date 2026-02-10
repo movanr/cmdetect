@@ -18,7 +18,7 @@ import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { YesNoField } from "../inputs/YesNoField";
-import { MeasurementFlowBlock, SectionFooter } from "../ui";
+import { IntroPanel, MeasurementFlowBlock, SectionFooter } from "../ui";
 import type { SectionProps } from "./types";
 
 const SIDES = [
@@ -59,7 +59,9 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
       </CardHeader>
       <CardContent className="space-y-8">
         {/* Instruction flow */}
-        <MeasurementFlowBlock instruction={E8_RICH_INSTRUCTIONS.jointLocking} />
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E8_RICH_INSTRUCTIONS.jointLocking} />
+        </IntroPanel>
 
         {/* Bilateral locking observations — side by side */}
         <div className="grid grid-cols-2 gap-6">

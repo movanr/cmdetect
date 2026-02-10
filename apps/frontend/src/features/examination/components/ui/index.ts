@@ -35,4 +35,5 @@ export {
   PainInterviewFlowCompact,
   PainInterviewBlock,
   MeasurementFlowBlock,
+  IntroPanel,
 } from "./PainInterviewFlow";

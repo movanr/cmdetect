@@ -32,17 +32,16 @@ import { getSectionCardTitle } from "../../labels";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { QuestionField } from "../QuestionField";
-import { IncompleteDataDialog, MeasurementFlowBlock, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { IncompleteDataDialog, IntroPanel, MeasurementFlowBlock, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
 import { buildRegionSummary } from "../summary/summary-helpers";
 import type { SectionProps } from "./types";
 
 // Step configuration
-type E1StepId = "e1-intro" | "e1a" | "e1b";
+type E1StepId = "e1a" | "e1b";
 
-const E1_STEP_ORDER: E1StepId[] = ["e1-intro", "e1a", "e1b"];
+const E1_STEP_ORDER: E1StepId[] = ["e1a", "e1b"];
 
 const E1_STEP_CONFIG: Record<E1StepId, { badge: string; title: string }> = {
-  "e1-intro": { badge: "U1", title: "Einführung Untersuchung" },
   e1a: { badge: "U1A", title: "Schmerzlokalisation (letzte 30 Tage)" },
   e1b: { badge: "U1B", title: "Kopfschmerzlokalisation (letzte 30 Tage)" },
 };
@@ -85,7 +84,6 @@ function stepHasData(
   stepId: E1StepId,
   getValue: (path: string) => unknown
 ): boolean {
-  if (stepId === "e1-intro") return false;
   if (stepId === "e1a") {
     const right = getValue("e1.painLocation.right") as string[] | undefined;
     const left = getValue("e1.painLocation.left") as string[] | undefined;
@@ -228,13 +226,6 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   };
 
   const handleNext = () => {
-    // Intro step has no form data - just complete and advance
-    if (currentStepId === "e1-intro") {
-      setStepStatuses((prev) => ({ ...prev, "e1-intro": "completed" }));
-      onStepChange?.(currentStepIndex + 1);
-      return;
-    }
-
     // Validate current step (triggers form errors)
     const stepIdForValidation = currentStepId === "e1a" ? "e1a" : "e1b";
     const isValid = validateStep(stepIdForValidation);
@@ -264,7 +255,6 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   };
 
   const getStepSummary = (stepId: E1StepId): string => {
-    if (stepId === "e1-intro") return "";
     if (stepId === "e1a") {
       return buildRegionSummary(
         painRightValues,
@@ -284,15 +274,13 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   // Render active step content
   const renderStepContent = (stepId: E1StepId) => {
-    if (stepId === "e1-intro") {
-      return <MeasurementFlowBlock instruction={E1_RICH_INSTRUCTIONS.introduction} />;
-    }
-
     if (stepId === "e1a") {
       return (
         <div className="space-y-6">
           {/* Instruction flow */}
-          <PainInterviewBlock instruction={E1_RICH_INSTRUCTIONS.painLocation} />
+          <IntroPanel title="Anweisungen">
+            <PainInterviewBlock instruction={E1_RICH_INSTRUCTIONS.painLocation} />
+          </IntroPanel>
 
           {/* Diagram and selection */}
           <div className="flex justify-center items-start gap-8 md:gap-16">
@@ -330,7 +318,9 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     return (
       <div className="space-y-6">
         {/* Instruction flow */}
-        <PainInterviewBlock instruction={E1_RICH_INSTRUCTIONS.headacheLocation} />
+        <IntroPanel title="Anweisungen">
+          <PainInterviewBlock instruction={E1_RICH_INSTRUCTIONS.headacheLocation} />
+        </IntroPanel>
 
         {/* Diagram and selection */}
         <div className="flex justify-center items-start gap-8 md:gap-16">
@@ -380,6 +370,9 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
+        <IntroPanel title="Einführung Untersuchung">
+          <MeasurementFlowBlock instruction={E1_RICH_INSTRUCTIONS.introduction} />
+        </IntroPanel>
         {E1_STEP_ORDER.map((stepId, index) => {
           const config = E1_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);

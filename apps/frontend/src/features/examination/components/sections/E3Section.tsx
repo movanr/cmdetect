@@ -18,7 +18,7 @@ import { E3_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle, SECTION_LABELS } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { MeasurementFlowBlock, SectionFooter } from "../ui";
+import { IntroPanel, MeasurementFlowBlock, SectionFooter } from "../ui";
 import type { SectionProps } from "./types";
 
 export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) {
@@ -50,7 +50,9 @@ export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) 
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Instruction flow */}
-        <MeasurementFlowBlock instruction={E3_RICH_INSTRUCTIONS.openingPattern} />
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E3_RICH_INSTRUCTIONS.openingPattern} />
+        </IntroPanel>
 
         {/* Pattern selection */}
         <div className="space-y-4">

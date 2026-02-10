@@ -22,6 +22,7 @@ import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/r
 import type { QuestionInstance } from "../../projections/to-instances";
 import {
   IncompleteDataDialog,
+  IntroPanel,
   MeasurementFlowBlock,
   MeasurementStep,
   PainInterviewBlock,
@@ -34,10 +35,9 @@ import type { ExpandedState } from "./e4/types";
 import type { SectionProps } from "./types";
 
 // Step configuration
-type E5StepId = "e5-intro" | ExaminationStepId;
+type E5StepId = ExaminationStepId;
 
 const E5_STEP_ORDER: E5StepId[] = [
-  "e5-intro",
   "e5a-measure",
   "e5a-interview",
   "e5b-measure",
@@ -47,7 +47,6 @@ const E5_STEP_ORDER: E5StepId[] = [
 ];
 
 const E5_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
-  "e5-intro": { badge: "U5", title: "Einführung Lateralbewegungen" },
   "e5a-measure": { badge: "U5A", title: "Laterotrusion rechts" },
   "e5a-interview": { badge: "U5A", title: "Schmerzbefragung" },
   "e5b-measure": { badge: "U5B", title: "Laterotrusion links" },
@@ -72,7 +71,6 @@ function computeStepStatusFromForm(
   instances: QuestionInstance[],
   getValue: (path: string) => unknown
 ): "completed" | "refused" | null {
-  if (stepId === "e5-intro") return null;
   const isInterview = isInterviewStep(String(stepId));
 
   if (isInterview) {
@@ -115,7 +113,6 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped" | "refused">>(() => {
     const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E5_STEP_ORDER) {
-      if (stepId === "e5-intro") continue;
       const instances = getInstancesForStep(stepId);
       const status = computeStepStatusFromForm(stepId, instances, (path) =>
         form.getValues(path as FieldPath<FormValues>)
@@ -152,7 +149,7 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const isLastStep = currentStepIndex === E5_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
   const isInterview = isInterviewStep(String(currentStepId));
-  const stepInstances = allComplete || currentStepId === "e5-intro" ? [] : getInstancesForStep(currentStepId as ExaminationStepId);
+  const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
@@ -204,13 +201,6 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   };
 
   const handleNext = () => {
-    // Intro step has no form data - just complete and advance
-    if (currentStepId === "e5-intro") {
-      setStepStatuses((prev) => ({ ...prev, "e5-intro": "completed" }));
-      onStepChange?.(currentStepIndex + 1);
-      return;
-    }
-
     // Check for refusal first
     const refusedInst = stepInstances.find((i) =>
       isInterview ? i.path.endsWith(".interviewRefused") : i.path.endsWith(".refused")
@@ -322,8 +312,7 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   // Get summary for a step (for collapsed display)
   const getStepSummary = (stepId: E5StepId): string => {
-    if (stepId === "e5-intro") return "";
-    const instances = getInstancesForStep(stepId as ExaminationStepId);
+    const instances = getInstancesForStep(stepId);
     const stepIsInterview = isInterviewStep(String(stepId));
 
     // Check for refused status first
@@ -396,24 +385,36 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   // Render instruction block based on step type
   const renderInstruction = (stepId: string, stepIsInterview: boolean) => {
-    if (stepId === "e5-intro") {
-      return <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.introduction} />;
-    }
-
     if (stepIsInterview) {
-      return <PainInterviewBlock instruction={E5_RICH_INSTRUCTIONS.painInterview} showFlow={true} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <PainInterviewBlock instruction={E5_RICH_INSTRUCTIONS.painInterview} showFlow={true} />
+        </IntroPanel>
+      );
     }
 
     if (stepId === "e5a-measure") {
-      return <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.lateralRightMeasurement} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.lateralRightMeasurement} />
+        </IntroPanel>
+      );
     }
 
     if (stepId === "e5b-measure") {
-      return <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.lateralLeftMeasurement} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.lateralLeftMeasurement} />
+        </IntroPanel>
+      );
     }
 
     if (stepId === "e5c-measure") {
-      return <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.protrusiveMeasurement} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.protrusiveMeasurement} />
+        </IntroPanel>
+      );
     }
 
     return null;
@@ -448,6 +449,9 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <IntroPanel title="Einführung Lateralbewegungen">
+          <MeasurementFlowBlock instruction={E5_RICH_INSTRUCTIONS.introduction} />
+        </IntroPanel>
         {E5_STEP_ORDER.map((stepId, index) => {
           const config = E5_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);
@@ -470,8 +474,8 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 {/* Instruction */}
                 {renderInstruction(stepId, stepIsInterview)}
 
-                {/* Content (intro step has no form content) */}
-                {stepId === "e5-intro" ? null : stepIsInterview ? (
+                {/* Content */}
+                {stepIsInterview ? (
                   <InterviewContent
                     stepInstances={stepInstances}
                     regions={regions}

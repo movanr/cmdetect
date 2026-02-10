@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { PALPATION_MODE_QUESTIONS, PALPATION_MODES, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
+import { PALPATION_MODE_QUESTIONS, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
@@ -43,6 +43,7 @@ import { PalpationSiteDropdown } from "../PalpationSiteDropdown";
 import type { IncompletePalpationSite as DropdownIncompleteSite } from "../PalpationSiteDropdown/types";
 import {
   IncompleteDataDialog,
+  IntroPanel,
   MeasurementFlowBlock,
   PainInterviewBlock,
   SectionFooter,
@@ -56,14 +57,12 @@ import type { SectionProps } from "./types";
 // =============================================================================
 
 type E9StepId =
-  | "e9-intro"
   | "e9-temporalis"
   | "e9-masseter"
   | "e9-tmj-lateral"
   | "e9-tmj-around";
 
 const E9_STEP_ORDER: E9StepId[] = [
-  "e9-intro",
   "e9-temporalis",
   "e9-masseter",
   "e9-tmj-lateral",
@@ -71,7 +70,6 @@ const E9_STEP_ORDER: E9StepId[] = [
 ];
 
 const E9_STEP_CONFIG: Record<E9StepId, { badge: string; title: string }> = {
-  "e9-intro": { badge: "U9", title: "Einführung Palpation" },
   "e9-temporalis": { badge: "U9", title: "Temporalis-Palpation" },
   "e9-masseter": { badge: "U9", title: "Masseter-Palpation" },
   "e9-tmj-lateral": { badge: "U9", title: "Lateraler Pol" },
@@ -80,7 +78,6 @@ const E9_STEP_CONFIG: Record<E9StepId, { badge: string; title: string }> = {
 
 /** Sites shown on each step */
 const E9_STEP_SITES: Record<E9StepId, readonly PalpationSite[]> = {
-  "e9-intro": [],
   "e9-temporalis": ["temporalisPosterior", "temporalisMiddle", "temporalisAnterior"],
   "e9-masseter": ["masseterOrigin", "masseterBody", "masseterInsertion"],
   "e9-tmj-lateral": ["tmjLateralPole"],
@@ -164,11 +161,6 @@ function computeE9StepStatus(
   leftInstances: QuestionInstance[],
   getValues: (path: string) => unknown
 ): "completed" | null {
-  if (stepId === "e9-intro") {
-    // Intro is complete when palpation mode is set (always has a default)
-    return palpationMode ? "completed" : null;
-  }
-
   const sites = E9_STEP_SITES[stepId];
   if (sites.length === 0) return null;
 
@@ -415,7 +407,6 @@ export function E9Section({
   // Build mode-aware instruction content (re-computed when mode changes)
   const e9Instructions = useMemo(() => createE9RichInstructions(palpationMode), [palpationMode]);
   const e9StepInstructions = useMemo((): Record<E9StepId, E9RichInstructions[keyof E9RichInstructions]> => ({
-    "e9-intro": e9Instructions.introduction,
     "e9-temporalis": e9Instructions.temporalisPalpation,
     "e9-masseter": e9Instructions.masseterPalpation,
     "e9-tmj-lateral": e9Instructions.tmjLateralPole,
@@ -559,10 +550,6 @@ export function E9Section({
   };
 
   const validateCurrentStep = (): boolean => {
-    if (currentStepId === "e9-intro") {
-      return true; // Intro always valid (palpation mode has default)
-    }
-
     // Refused steps are always valid
     if (stepRefusals[currentStepId]) {
       return true;
@@ -575,15 +562,6 @@ export function E9Section({
   };
 
   const handleNext = () => {
-    if (currentStepId === "e9-intro") {
-      // Intro is always valid
-      setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
-      setHasValidated(false);
-      setExpanded({ left: null, right: null });
-      onStepChange?.(currentStepIndex + 1);
-      return;
-    }
-
     // Check for step refusal - if refused, mark as refused and advance
     if (stepRefusals[currentStepId]) {
       setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
@@ -617,13 +595,11 @@ export function E9Section({
   const validateAllE9 = (): boolean => {
     // If all palpation steps are refused, validation passes
     const allPalpationStepsRefused = E9_STEP_ORDER
-      .filter((id) => id !== "e9-intro")
       .every((id) => stepRefusals[id]);
     if (allPalpationStepsRefused) return true;
 
     // Otherwise, validate per-step: refused steps pass, others must be complete
     for (const stepId of E9_STEP_ORDER) {
-      if (stepId === "e9-intro") continue; // Intro always valid
       if (stepRefusals[stepId]) continue; // Refused steps are valid
 
       const sites = E9_STEP_SITES[stepId];
@@ -661,10 +637,6 @@ export function E9Section({
       return COMMON.refused;
     }
 
-    if (stepId === "e9-intro") {
-      return PALPATION_MODES[palpationMode] ?? "—";
-    }
-
     const sites = E9_STEP_SITES[stepId];
     let hasPain = false;
     let hasFamiliarPain = false;
@@ -695,10 +667,15 @@ export function E9Section({
   // Render the instruction block for the current step
   const renderInstruction = (stepId: E9StepId) => {
     const instruction = e9StepInstructions[stepId];
-    if (isPainInterviewInstruction(instruction)) {
-      return <PainInterviewBlock instruction={instruction} />;
-    }
-    return <MeasurementFlowBlock instruction={instruction as RichMeasurementInstruction} />;
+    return (
+      <IntroPanel title="Anweisungen">
+        {isPainInterviewInstruction(instruction) ? (
+          <PainInterviewBlock instruction={instruction} />
+        ) : (
+          <MeasurementFlowBlock instruction={instruction as RichMeasurementInstruction} />
+        )}
+      </IntroPanel>
+    );
   };
 
   return (
@@ -721,6 +698,9 @@ export function E9Section({
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <IntroPanel title="Einführung Palpation">
+          <MeasurementFlowBlock instruction={e9Instructions.introduction} />
+        </IntroPanel>
         {E9_STEP_ORDER.map((stepId, index) => {
           const config = E9_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);
@@ -742,12 +722,7 @@ export function E9Section({
                 {renderInstruction(stepId)}
 
                 {/* Content */}
-                {stepId === "e9-intro" ? (
-                  // Intro step: palpation mode selector (already in header, show explanation)
-                  <div className="text-sm text-muted-foreground text-center py-2">
-                    Palpationsmodus oben auswählen, dann weiter zum ersten Palpationsschritt.
-                  </div>
-                ) : stepRefusals[stepId] ? (
+                {stepRefusals[stepId] ? (
                   // Refused state: show message + checkbox to undo
                   <div className="space-y-4">
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">

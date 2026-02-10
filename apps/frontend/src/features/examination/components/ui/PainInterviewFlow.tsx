@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ExternalLink,
   Image,
+  Info,
   CornerDownRight,
   MousePointerClick,
   Pause,
@@ -355,6 +356,42 @@ export function MeasurementFlowBlock({
 
       {/* Protocol references */}
       <ProtocolReferences protocolRefs={instruction.protocolRefs} />
+    </div>
+  );
+}
+
+/**
+ * Collapsible info panel for instructions.
+ * Used for section introductions and per-step procedure instructions.
+ */
+export function IntroPanel({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="rounded-lg border border-muted bg-muted/30">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {expanded ? (
+          <ChevronDown className="h-4 w-4 shrink-0" />
+        ) : (
+          <ChevronRight className="h-4 w-4 shrink-0" />
+        )}
+        <Info className="h-4 w-4 shrink-0" />
+        <span className="font-medium">{title}</span>
+      </button>
+      {expanded && (
+        <div className="px-3 pb-3">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

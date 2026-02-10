@@ -22,6 +22,7 @@ import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/r
 import type { QuestionInstance } from "../../projections/to-instances";
 import {
   IncompleteDataDialog,
+  IntroPanel,
   MeasurementFlowBlock,
   MeasurementStep,
   PainInterviewBlock,
@@ -35,10 +36,9 @@ import type { ExpandedState } from "./e4/types";
 import type { SectionProps } from "./types";
 
 // Step configuration
-type E4StepId = "e4-intro" | ExaminationStepId;
+type E4StepId = ExaminationStepId;
 
 const E4_STEP_ORDER: E4StepId[] = [
-  "e4-intro",
   "e4a",
   "e4b-measure",
   "e4b-interview",
@@ -47,7 +47,6 @@ const E4_STEP_ORDER: E4StepId[] = [
 ];
 
 const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
-  "e4-intro": { badge: "U4", title: "Einführung Öffnungsbewegungen" },
   e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
   "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
   "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
@@ -71,7 +70,6 @@ function computeStepStatusFromForm(
   instances: QuestionInstance[],
   getValue: (path: string) => unknown
 ): "completed" | "refused" | null {
-  if (stepId === "e4-intro") return null;
   const isInterview = isInterviewStep(String(stepId));
 
   if (isInterview) {
@@ -129,7 +127,6 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped" | "refused">>(() => {
     const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E4_STEP_ORDER) {
-      if (stepId === "e4-intro") continue; // Intro has no form data
       const instances = getInstancesForStep(stepId);
       const status = computeStepStatusFromForm(stepId, instances, (path) =>
         form.getValues(path as FieldPath<FormValues>)
@@ -166,7 +163,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
   const isInterview = isInterviewStep(String(currentStepId));
-  const stepInstances = allComplete || currentStepId === "e4-intro" ? [] : getInstancesForStep(currentStepId as ExaminationStepId);
+  const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
@@ -221,13 +218,6 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   };
 
   const handleNext = () => {
-    // Intro step has no form data - just complete and advance
-    if (currentStepId === "e4-intro") {
-      setStepStatuses((prev) => ({ ...prev, "e4-intro": "completed" }));
-      onStepChange?.(currentStepIndex + 1);
-      return;
-    }
-
     // Check for refusal first - if refused, mark as refused and proceed
     const refusedInst = stepInstances.find((i) =>
       isInterview ? i.path.endsWith(".interviewRefused") : i.path.endsWith(".refused")
@@ -343,8 +333,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   // Get summary for a step (for collapsed display)
   const getStepSummary = (stepId: E4StepId): string => {
-    if (stepId === "e4-intro") return "";
-    const instances = getInstancesForStep(stepId as ExaminationStepId);
+    const instances = getInstancesForStep(stepId);
     const stepIsInterview = isInterviewStep(String(stepId));
 
     // Check for refused status first
@@ -418,11 +407,6 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   // Render instruction block based on step type
   const renderInstruction = (stepId: string, stepIsInterview: boolean) => {
-    // E4 intro - overview of opening movements and pain interview
-    if (stepId === "e4-intro") {
-      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.introduction} />;
-    }
-
     // Pain interview - use appropriate interview flow based on step
     if (stepIsInterview) {
       // E4C uses different pain question (asks about examiner manipulation)
@@ -430,22 +414,38 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
         stepId === "e4c-interview"
           ? E4_RICH_INSTRUCTIONS.painInterviewAssistedOpening
           : E4_RICH_INSTRUCTIONS.painInterview;
-      return <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />
+        </IntroPanel>
+      );
     }
 
     // E4A - pain-free opening measurement (step-based flow)
     if (stepId === "e4a") {
-      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.painFreeOpening} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.painFreeOpening} />
+        </IntroPanel>
+      );
     }
 
     // E4B measurement - step-based flow
     if (stepId === "e4b-measure") {
-      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxUnassistedOpening} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxUnassistedOpening} />
+        </IntroPanel>
+      );
     }
 
     // E4C measurement - step-based flow with safety warning
     if (stepId === "e4c-measure") {
-      return <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxAssistedOpening} />;
+      return (
+        <IntroPanel title="Anweisungen">
+          <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxAssistedOpening} />
+        </IntroPanel>
+      );
     }
 
     return null;
@@ -480,6 +480,9 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <IntroPanel title="Einführung Öffnungsbewegungen">
+          <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.introduction} />
+        </IntroPanel>
         {E4_STEP_ORDER.map((stepId, index) => {
           const config = E4_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);
@@ -502,8 +505,8 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 {/* Instruction */}
                 {renderInstruction(stepId, stepIsInterview)}
 
-                {/* Content (intro step has no form content) */}
-                {stepId === "e4-intro" ? null : stepIsInterview ? (
+                {/* Content */}
+                {stepIsInterview ? (
                   <InterviewContent
                     stepInstances={stepInstances}
                     regions={regions}

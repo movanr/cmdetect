@@ -22,7 +22,7 @@ import { useExaminationForm, type FormValues } from "../../form/use-examination-
 import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { IncompleteDataDialog, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { IncompleteDataDialog, IntroPanel, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
 import type { SectionProps } from "./types";
 
 // Step configuration
@@ -213,7 +213,9 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       case "e2-ref":
         return (
           <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.referenceTooth} />
+            <IntroPanel title="Anweisungen">
+              <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.referenceTooth} />
+            </IntroPanel>
             <div className="max-w-sm space-y-4">
               <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-ref"].title}</h4>
               {referenceToothSelection && <QuestionField instance={referenceToothSelection} />}
@@ -225,7 +227,9 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       case "e2-mid":
         return (
           <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.midlineDeviation} />
+            <IntroPanel title="Anweisungen">
+              <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.midlineDeviation} />
+            </IntroPanel>
             <div className="max-w-sm space-y-4">
               <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-mid"].title}</h4>
               {midlineDirection && <QuestionField instance={midlineDirection} label="Richtung" />}
@@ -237,7 +241,9 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       case "e2-hov":
         return (
           <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.horizontalOverjet} />
+            <IntroPanel title="Anweisungen">
+              <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.horizontalOverjet} />
+            </IntroPanel>
             <div className="max-w-sm space-y-4">
               <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-hov"].title}</h4>
               {horizontalOverjet && <QuestionField instance={horizontalOverjet} />}
@@ -249,7 +255,9 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       case "e2-vov":
         return (
           <div className="space-y-4">
-            <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.verticalOverlap} />
+            <IntroPanel title="Anweisungen">
+              <MeasurementFlowBlock instruction={E2_RICH_INSTRUCTIONS.verticalOverlap} />
+            </IntroPanel>
             <div className="max-w-sm space-y-4">
               <h4 className="text-sm font-medium">{E2_STEP_CONFIG["e2-vov"].title}</h4>
               {verticalOverlap && <QuestionField instance={verticalOverlap} />}
