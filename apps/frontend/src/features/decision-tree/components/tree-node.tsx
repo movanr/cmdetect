@@ -14,6 +14,9 @@ interface TreeNodeProps {
   };
   color?: "blue" | "red";
   isEndNode?: boolean;
+  /** Links to another tree (makes node clickable) */
+  linkedTreeId?: string;
+  onLinkedNodeClick?: (treeId: string) => void;
   position: Position;
   width: number;
   height: number;
@@ -49,6 +52,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   subItems,
   color,
   isEndNode,
+  linkedTreeId,
+  onLinkedNodeClick,
   position,
   width,
   height,
@@ -57,7 +62,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 }) => {
   const colors = nodeColors[status];
 
-  // "red" end nodes (e.g. "Andere Diagnosen") get fixed red styling,
+  // "red" end nodes (e.g. "Keine DV mit Reposition") get fixed red styling,
   // all other nodes follow status colors
   const borderClass =
     color === "red" ? "border-red-400" : colors.borderColor;
@@ -66,17 +71,20 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   const textClass =
     color === "red" ? "text-red-900" : colors.textColor;
 
+  const isLinked = !!linkedTreeId;
+
   return (
     <div
       className={`absolute z-20 shadow-sm border-2 rounded-lg ${borderClass} ${bgClass} ${
         isActive ? "" : "opacity-50"
-      }`}
+      } ${isLinked ? "cursor-pointer hover:ring-2 hover:ring-blue-300 transition-shadow" : ""}`}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: `${width}px`,
         height: `${height}px`,
       }}
+      onClick={isLinked ? () => onLinkedNodeClick?.(linkedTreeId) : undefined}
     >
       <div className="p-3 rounded-lg flex flex-col items-center justify-center h-full">
         <div className={`text-center ${textClass}`}>

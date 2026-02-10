@@ -3,11 +3,11 @@ import { evaluate } from "@cmdetect/dc-tmd";
 import type {
   CriterionStatus,
   DecisionTreeDef,
+  NodeEvaluatedState,
   NodeStateMap,
   Position,
   TransitionFromIds,
   TransitionProps,
-  TransitionType,
   TreeNodeDef,
 } from "../types";
 import type { TemplateContext } from "@cmdetect/dc-tmd";
@@ -36,6 +36,7 @@ function formatContextLabel(context?: TemplateContext): string | undefined {
 interface DecisionTreeViewProps {
   tree: DecisionTreeDef;
   data: unknown;
+  onLinkedNodeClick?: (treeId: string) => void;
 }
 
 /** Evaluate a single node's criterion against data */
@@ -65,50 +66,60 @@ function getNodeStateMap(
   for (const node of nodes) {
     const status = evaluateNode(node, data);
     if (status === "positive" || status === "negative") {
-      result[node.id] = status as TransitionType;
+      result[node.id] = status as NodeEvaluatedState;
     }
   }
   return result;
 }
 
-/** Walk the tree from root following transitions based on node states */
+/**
+ * Walk the tree from root following transitions based on node states.
+ * Uses BFS to support unconditional transitions that always flow regardless of state.
+ */
 function getCurrentPath(
   startNodeId: string,
   transitions: TransitionFromIds[],
   state: NodeStateMap
 ): string[] {
-  const path: string[] = [];
-  let currentNodeId = startNodeId;
+  // Build separate maps: conditional (positive/negative) vs unconditional
+  const conditionalMap: Record<string, Record<string, string>> = {};
+  const unconditionalMap: Record<string, string[]> = {};
 
-  const transitionMap: Record<
-    string,
-    Record<TransitionType, string | undefined>
-  > = {};
-
-  for (const transition of transitions) {
-    if (!transitionMap[transition.from]) {
-      transitionMap[transition.from] = {
-        positive: undefined,
-        negative: undefined,
-      };
+  for (const t of transitions) {
+    if (t.type === "unconditional") {
+      if (!unconditionalMap[t.from]) unconditionalMap[t.from] = [];
+      unconditionalMap[t.from].push(t.to);
+    } else {
+      if (!conditionalMap[t.from]) conditionalMap[t.from] = {};
+      conditionalMap[t.from][t.type] = t.to;
     }
-    transitionMap[transition.from][transition.type] = transition.to;
   }
 
-  while (currentNodeId && state[currentNodeId]) {
-    path.push(currentNodeId);
-    const currentState = state[currentNodeId];
-    const nextNodeId = transitionMap[currentNodeId]?.[currentState];
-    if (!nextNodeId) break;
-    currentNodeId = nextNodeId;
+  const visited = new Set<string>();
+  const queue: string[] = [startNodeId];
+
+  while (queue.length > 0) {
+    const nodeId = queue.shift()!;
+    if (visited.has(nodeId)) continue;
+    visited.add(nodeId);
+
+    // Unconditional targets are always reachable (even from pending nodes)
+    const unconditionalTargets = unconditionalMap[nodeId] ?? [];
+    for (const target of unconditionalTargets) {
+      queue.push(target);
+    }
+
+    // State-based (conditional) targets added only when node has evaluated state
+    const nodeState = state[nodeId];
+    if (nodeState) {
+      const conditionalTarget = conditionalMap[nodeId]?.[nodeState];
+      if (conditionalTarget) {
+        queue.push(conditionalTarget);
+      }
+    }
   }
 
-  // Include the last node where we stopped (pending or end node)
-  if (currentNodeId && !path.includes(currentNodeId)) {
-    path.push(currentNodeId);
-  }
-
-  return path;
+  return Array.from(visited);
 }
 
 /** Calculate tree bounding box dimensions */
@@ -136,6 +147,7 @@ function getTreeDimensions(nodes: TreeNodeDef[]) {
 export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
   tree,
   data,
+  onLinkedNodeClick,
 }) => {
   const { nodes, transitions } = tree;
 
@@ -145,14 +157,24 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
     [nodes, transitions, nodeStateMap]
   );
 
-  // Pre-compute resolved nodes (position from center)
+  const treeDims = useMemo(() => getTreeDimensions(nodes), [nodes]);
+
+  // Offset all positions so the leftmost node starts at x=0.
+  // This keeps all SVG arrow paths in non-negative coordinate space,
+  // preventing clipping by the SVG viewport.
+  const offsetX = -treeDims.minX;
+
+  // Pre-compute resolved nodes (position from center, offset to non-negative x)
   const resolvedNodes = useMemo(
     () =>
-      nodes.map((node) => ({
-        ...node,
-        position: resolvePosition(node),
-      })),
-    [nodes]
+      nodes.map((node) => {
+        const pos = resolvePosition(node);
+        return {
+          ...node,
+          position: { x: pos.x + offsetX, y: pos.y },
+        };
+      }),
+    [nodes, offsetX]
   );
 
   // Node statuses for rendering
@@ -164,9 +186,6 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
     return map;
   }, [nodes, data]);
 
-  const treeDims = useMemo(() => getTreeDimensions(nodes), [nodes]);
-  const centerOffset = treeDims.minX < 0 ? Math.abs(treeDims.minX) : -treeDims.minX;
-
   return (
     <div className="flex justify-center">
       <div
@@ -174,7 +193,6 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
         style={{
           height: `${treeDims.height}px`,
           width: `${treeDims.width}px`,
-          transform: `translateX(${centerOffset}px)`,
         }}
       >
         {resolvedNodes.map((node) => (
@@ -187,6 +205,8 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
             subItems={node.subItems}
             color={node.color}
             isEndNode={node.isEndNode}
+            linkedTreeId={node.linkedTreeId}
+            onLinkedNodeClick={onLinkedNodeClick}
             position={node.position}
             width={node.width}
             height={node.height}

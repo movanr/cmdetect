@@ -40,8 +40,8 @@ const Transition: React.FC<TransitionProps> = ({
 
   return (
     <svg className={`absolute top-0 left-0 w-full h-full pointer-events-none ${isActive ? "z-10" : ""}`}>
-      <Arrow path={path} direction={endDirection} isActive={isActive} />{" "}
-      <Label text={label} position={labelPosition} isActive={isActive} />
+      <Arrow path={path} direction={endDirection} isActive={isActive} />
+      {label && <Label text={label} position={labelPosition} isActive={isActive} />}
     </svg>
   );
 };

@@ -62,6 +62,28 @@ export function evaluate(
   data: unknown,
   context: TemplateContext = {}
 ): CriterionResult {
+  const result = evaluateNode(criterion, data, context);
+
+  // Apply pendingAs override for optional criteria (e.g., E8 defaults to positive when missing)
+  if (
+    result.status === "pending" &&
+    "pendingAs" in criterion &&
+    criterion.pendingAs
+  ) {
+    return { ...result, status: criterion.pendingAs };
+  }
+
+  return result;
+}
+
+/**
+ * Internal dispatch — evaluates a single criterion node without pendingAs override
+ */
+function evaluateNode(
+  criterion: Criterion,
+  data: unknown,
+  context: TemplateContext
+): CriterionResult {
   switch (criterion.type) {
     case "field":
       return evaluateField(criterion, data, context);

@@ -29,7 +29,8 @@ import { useCallback, useMemo, useState } from "react";
 import {
   DecisionTreeView,
   createArthalgiaTree,
-  createDiscDisplacementTree,
+  createDdWithReductionTree,
+  createDjdTree,
   createHeadacheTree,
   createMyalgiaSubtypesTree,
   createMyalgiaTree,
@@ -56,7 +57,7 @@ type TreeTypeId =
   | "myalgiaSubtypes"
   | "arthralgia"
   | "headache"
-  | "discDisplacement"
+  | "ddWithReduction"
   | "degenerativeJointDisease";
 
 interface TreeTypeEntry {
@@ -70,7 +71,7 @@ const TREE_TYPES: readonly TreeTypeEntry[] = [
   { id: "myalgiaSubtypes", label: "Myalgie-Subtypen", regions: ["temporalis", "masseter"] },
   { id: "arthralgia", label: "Arthralgie", regions: ["tmj"] },
   { id: "headache", label: "Auf CMD zurückgeführte Kopfschmerzen", regions: ["temporalis"] },
-  { id: "discDisplacement", label: "Diskusverlagerung", regions: ["tmj"] },
+  { id: "ddWithReduction", label: "Diskusverlagerung", regions: ["tmj"] },
   { id: "degenerativeJointDisease", label: "Degenerative Gelenkerkrankung", regions: ["tmj"] },
 ];
 
@@ -88,7 +89,7 @@ function diagnosisToTreeType(id: DiagnosisId): TreeTypeId {
     case "discDisplacementWithReductionIntermittentLocking":
     case "discDisplacementWithoutReductionLimitedOpening":
     case "discDisplacementWithoutReductionWithoutLimitedOpening":
-      return "discDisplacement";
+      return "ddWithReduction";
     case "degenerativeJointDisease":
       return "degenerativeJointDisease";
     default:
@@ -314,10 +315,12 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
         return createArthalgiaTree(selectedSide);
       case "headache":
         return createHeadacheTree(selectedSide);
-      case "discDisplacement":
-        return createDiscDisplacementTree(selectedSide);
+      case "ddWithReduction":
+        return createDdWithReductionTree(selectedSide);
+      case "degenerativeJointDisease":
+        return createDjdTree(selectedSide);
       default:
-        return null; // Not yet implemented
+        return null;
     }
   }, [selectedTree, selectedSide, selectedRegion]);
 
@@ -436,7 +439,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
               {treeData ? (
                 <ScrollArea className="w-full">
                   <div className="min-w-fit pb-4">
-                    <DecisionTreeView tree={treeData} data={criteriaData} />
+                    <DecisionTreeView tree={treeData} data={criteriaData} onLinkedNodeClick={handleTreeSelect} />
                   </div>
                   <ScrollBar orientation="horizontal" />
                 </ScrollArea>

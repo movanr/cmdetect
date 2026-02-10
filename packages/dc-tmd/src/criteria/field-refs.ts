@@ -11,6 +11,8 @@ import type {
   E1Field,
   E2Field,
   E3Field,
+  E8LockingField,
+  E8LockingType,
   JointSound,
   MeasurementField,
   MovementType,
@@ -76,7 +78,7 @@ export type E5FieldRef = E5MeasurementRef | E5PainRef;
  */
 export type E6FieldRef = `e6.${Side}.${JointSound}`;
 export type E7FieldRef = `e7.${Side}.${JointSound}`;
-export type E8FieldRef = `e8.${Side}.${JointSound}`;
+export type E8FieldRef = `e8.${Side}.${E8LockingType}.${E8LockingField}`;
 
 /**
  * E9 Palpation field references

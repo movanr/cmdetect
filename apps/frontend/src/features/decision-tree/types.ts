@@ -35,6 +35,8 @@ export interface TreeNodeDef {
   color?: "blue" | "red";
   /** End node flag (no status badge) */
   isEndNode?: boolean;
+  /** Links to another tree (makes node clickable) */
+  linkedTreeId?: string;
   /** Center position (converted to top-left during rendering) */
   center: Position;
   width: number;
@@ -60,9 +62,12 @@ export interface DecisionTreeDef {
 // TRANSITIONS & ARROWS (unchanged from original)
 // ============================================================================
 
-export type TransitionType = "positive" | "negative";
+export type TransitionType = "positive" | "negative" | "unconditional";
 
-export type NodeStateMap = Record<string, TransitionType>;
+/** Evaluated state of a node (never "unconditional") */
+export type NodeEvaluatedState = "positive" | "negative";
+
+export type NodeStateMap = Record<string, NodeEvaluatedState>;
 
 export interface TransitionFromIds {
   from: string;
@@ -71,7 +76,7 @@ export interface TransitionFromIds {
   endDirection: Direction;
   joints?: Position[];
   type: TransitionType;
-  label: string;
+  label?: string;
 }
 
 /** Resolved transition with node references for rendering */
@@ -81,7 +86,7 @@ export interface TransitionProps {
   startDirection: Direction;
   endDirection: Direction;
   type: TransitionType;
-  label: string;
+  label?: string;
   joints?: Position[];
   isActive: boolean;
 }

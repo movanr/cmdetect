@@ -150,7 +150,7 @@ export const DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING: DiagnosisDef
  * SQ9 = "yes" (jaw ever locked/caught)
  * SQ10 = "yes" (limitation severe enough to affect eating)
  */
-const DD_WITHOUT_REDUCTION_ANAMNESIS: Criterion = and(
+export const DD_WITHOUT_REDUCTION_ANAMNESIS: Criterion = and(
   [
     field(sq("SQ9"), { equals: "yes" }),
     field(sq("SQ10"), { equals: "yes" }),

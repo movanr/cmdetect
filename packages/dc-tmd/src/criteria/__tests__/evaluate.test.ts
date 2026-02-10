@@ -528,4 +528,70 @@ describe("evaluate", () => {
       }
     });
   });
+
+  describe("pendingAs override", () => {
+    it("overrides pending to positive when pendingAs is set on or()", () => {
+      const criterion = or(
+        [field(sq("SQ1"), { equals: "yes" }), field(sq("SQ2"), { equals: "yes" })],
+        { pendingAs: "positive" }
+      );
+      const data = {}; // no data → both children pending
+
+      const result = evaluate(criterion, data);
+
+      expect(result.status).toBe("positive");
+    });
+
+    it("does not override when criterion evaluates to positive normally", () => {
+      const criterion = or(
+        [field(sq("SQ1"), { equals: "yes" })],
+        { pendingAs: "positive" }
+      );
+      const data = { sq: { SQ1: "yes" } };
+
+      const result = evaluate(criterion, data);
+
+      expect(result.status).toBe("positive");
+    });
+
+    it("does not override when criterion evaluates to negative", () => {
+      const criterion = or(
+        [field(sq("SQ1"), { equals: "yes" })],
+        { pendingAs: "positive" }
+      );
+      const data = { sq: { SQ1: "no" } };
+
+      const result = evaluate(criterion, data);
+
+      expect(result.status).toBe("negative");
+    });
+
+    it("works on and() criteria", () => {
+      const criterion = and(
+        [field(sq("SQ1"), { equals: "yes" }), field(sq("SQ2"), { equals: "yes" })],
+        { pendingAs: "negative" }
+      );
+      const data = { sq: { SQ1: "yes" } }; // SQ2 missing → pending
+
+      const result = evaluate(criterion, data);
+
+      expect(result.status).toBe("negative");
+    });
+
+    it("preserves child results when overriding status", () => {
+      const criterion = or(
+        [field(sq("SQ1"), { equals: "yes" }), field(sq("SQ2"), { equals: "yes" })],
+        { pendingAs: "positive" }
+      );
+      const data = {};
+
+      const result = evaluate(criterion, data);
+
+      expect(result.status).toBe("positive");
+      if ("children" in result) {
+        expect(result.children[0].status).toBe("pending");
+        expect(result.children[1].status).toBe("pending");
+      }
+    });
+  });
 });

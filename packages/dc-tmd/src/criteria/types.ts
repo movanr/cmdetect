@@ -44,6 +44,8 @@ export interface CriterionMetadata {
   id?: string;
   /** Human-readable label for UI display */
   label?: string;
+  /** Override status when evaluation result is "pending" (for optional criteria that default to a known status) */
+  pendingAs?: CriterionStatus;
 }
 
 // ============================================================================

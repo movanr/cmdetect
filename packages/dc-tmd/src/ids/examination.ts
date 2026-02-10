@@ -147,6 +147,19 @@ export const MOVEMENT_TYPES = {
 export type MovementType = keyof typeof MOVEMENT_TYPES;
 export const MOVEMENT_TYPE_KEYS = Object.keys(MOVEMENT_TYPES) as MovementType[];
 
+// === E8 JOINT LOCKING ===
+export const E8_LOCKING_TYPES = {
+  closedLocking: "closedLocking",
+  openLocking: "openLocking",
+} as const;
+export type E8LockingType = keyof typeof E8_LOCKING_TYPES;
+
+export const E8_LOCKING_FIELDS = {
+  locking: "locking",
+  reduction: "reduction",
+} as const;
+export type E8LockingField = keyof typeof E8_LOCKING_FIELDS;
+
 // === E6-E8 JOINT SOUNDS ===
 export const JOINT_SOUNDS = {
   click: "click",
