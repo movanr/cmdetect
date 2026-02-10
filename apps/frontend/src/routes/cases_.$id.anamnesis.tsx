@@ -20,6 +20,7 @@ import {
   useCaseProgress,
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
+import { useExaminationResponse } from "../features/examination";
 
 // GraphQL queries (same as original)
 const GET_PATIENT_RECORD = graphql(`
@@ -74,11 +75,15 @@ function AnamnesisLayout() {
   // Fetch questionnaire responses for workflow progress
   const { data: responses } = useQuestionnaireResponses(id);
 
+  // Fetch examination response for workflow progress
+  const { data: examination } = useExaminationResponse(id);
+
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
     patientRecordId: id,
     responses: responses ?? [],
     hasPatientData: !!record?.patient_data_completed_at,
+    examinationCompletedAt: examination?.completedAt,
   });
 
   // Update last viewed mutation

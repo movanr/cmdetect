@@ -24,7 +24,7 @@ import {
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
-import { ExaminationPersistenceProvider, ExaminationSummary, useExaminationPersistenceContext } from "../features/examination";
+import { ExaminationPersistenceProvider, ExaminationSummary, useExaminationPersistenceContext, useExaminationResponse } from "../features/examination";
 
 // GraphQL query for patient record
 const GET_PATIENT_RECORD = graphql(`
@@ -73,11 +73,15 @@ function ExaminationLayout() {
   // Fetch questionnaire responses for workflow progress
   const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
 
+  // Fetch examination response for workflow progress (shares cache with persistence provider)
+  const { data: examination } = useExaminationResponse(id);
+
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
     patientRecordId: id,
     responses: responses ?? [],
     hasPatientData: !!record?.patient_data_completed_at,
+    examinationCompletedAt: examination?.completedAt,
   });
 
   // Check step gating

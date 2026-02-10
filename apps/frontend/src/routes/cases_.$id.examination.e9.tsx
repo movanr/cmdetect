@@ -37,11 +37,11 @@ function ExaminationE9Page() {
     }
   };
 
-  // Complete examination and navigate to case overview (last section)
+  // Complete examination and navigate to evaluation (last section)
   const handleComplete = async () => {
     await completeExamination();
     navigate({
-      to: "/cases/$id",
+      to: "/cases/$id/evaluation",
       params: { id },
     });
   };
