@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
-    "build": "tsc && vite build",
+    "build": "tsr generate && tsc && vite build",
     "serve": "vite preview",
     "test": "vitest run",
     "codegen": "graphql-codegen --config codegen.ts",
@@ -68,6 +68,7 @@
     "@graphql-codegen/client-preset": "^5.0.0",
     "@graphql-codegen/schema-ast": "^5.0.0",
     "@parcel/watcher": "^2.5.1",
+    "@tanstack/router-cli": "^1.159.4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.3.1",
