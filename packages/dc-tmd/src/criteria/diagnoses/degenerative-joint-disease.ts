@@ -42,7 +42,7 @@ const crepitusByExaminer = or(
   ],
   {
     id: "crepitusByExaminer",
-    label: "Reiben vom Untersucher festgestellt",
+    label: "Reiben bei Kieferbewegungen",
   }
 );
 

@@ -36,7 +36,10 @@ import type { Criterion } from "../types";
  * Criterion A: Headache of any type in the temporal region
  * SQ5 = "yes"
  */
-export const headacheInTemporalRegion: Criterion = field(sq("SQ5"), { equals: "yes" });
+export const headacheInTemporalRegion: Criterion = field(sq("SQ5"), { equals: "yes" }, {
+  id: "headacheInTemporalRegion",
+  label: "Kopfschmerzen jeglicher Art in der Temporalregion",
+});
 
 /**
  * Criterion B: Headache modified by jaw movement, function, or parafunction
@@ -47,7 +50,7 @@ export const headacheModifiedByFunction: Criterion = any(
   { equals: "yes" },
   {
     id: "headacheModified",
-    label: "Kopfschmerz durch Kieferbewegung, -funktion oder Parafunktion modifiziert",
+    label: "Kopfschmerzen, die durch Kieferbewegungen, Funktion oder Parafunktion beeinflusst werden",
   }
 );
 
@@ -69,6 +72,9 @@ export const HEADACHE_ANAMNESIS: Criterion = and(
  */
 export const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.${side}", {
   includes: "temporalis",
+}, {
+  id: "headacheLocationConfirmed",
+  label: "Bestätigung von Kopfschmerzen im M. temporalis",
 });
 
 /**
@@ -94,7 +100,7 @@ export const familiarHeadacheProvoked: Criterion = or(
   ],
   {
     id: "familiarHeadache",
-    label: "Bekannter Kopfschmerz bei Öffnung, Bewegung oder Palpation",
+    label: "Angabe von bekanntem Kopfschmerz in der Temporalisregion durch Palpation des M. temporalis oder Kieferbewegungen",
   }
 );
 

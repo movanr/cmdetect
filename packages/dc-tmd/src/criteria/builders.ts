@@ -33,11 +33,12 @@ import type {
  * field("sq.SQ1", { equals: "yes" })
  * field("e1.painLocation.${side}", { includes: "${region}" })
  */
-export function field(ref: string, condition: FieldCondition): FieldCriterion {
+export function field(ref: string, condition: FieldCondition, metadata?: CriterionMetadata): FieldCriterion {
   return {
     type: "field",
     ref,
     condition,
+    ...metadata,
   };
 }
 
@@ -48,12 +49,13 @@ export function field(ref: string, condition: FieldCondition): FieldCriterion {
  * threshold("e4.maxUnassisted.measurement", ">=", 40)
  * threshold("e2.verticalOverlap", "<", 5)
  */
-export function threshold(ref: string, operator: NumericOperator, value: number): ThresholdCriterion {
+export function threshold(ref: string, operator: NumericOperator, value: number, metadata?: CriterionMetadata): ThresholdCriterion {
   return {
     type: "threshold",
     ref,
     operator,
     value,
+    ...metadata,
   };
 }
 
@@ -72,7 +74,8 @@ export function computed(
   refs: string[],
   compute: (values: Record<string, unknown>) => number,
   operator: NumericOperator,
-  value: number
+  value: number,
+  metadata?: CriterionMetadata
 ): ComputedCriterion {
   return {
     type: "computed",
@@ -80,6 +83,7 @@ export function computed(
     compute,
     operator,
     value,
+    ...metadata,
   };
 }
 

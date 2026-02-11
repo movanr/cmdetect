@@ -23,11 +23,24 @@ import type { Criterion } from "../types";
 // ANAMNESIS CRITERIA
 // ============================================================================
 
+/**
+ * SQ13: Jaw locking or catching in wide-open position.
+ */
+export const jawLockingOpenPositionAnamnesis: Criterion = field(sq("SQ13"), { equals: "yes" }, {
+  id: "jawLockingOpenPosition",
+  label: "KG-Arretierung oder Hängen bleiben bei weit geöffneter Kieferposition",
+});
+
+/**
+ * SQ14: Inability to close mouth without special maneuver.
+ */
+export const unableToCloseWithoutManeuverAnamnesis: Criterion = field(sq("SQ14"), { equals: "yes" }, {
+  id: "unableToCloseWithoutManeuver",
+  label: "Unfähigkeit den Mund ohne spezielles Umlenken zu schließen",
+});
+
 export const SUBLUXATION_ANAMNESIS: Criterion = and(
-  [
-    field(sq("SQ13"), { equals: "yes" }),
-    field(sq("SQ14"), { equals: "yes" }),
-  ],
+  [jawLockingOpenPositionAnamnesis, unableToCloseWithoutManeuverAnamnesis],
   {
     id: "subluxationHistory",
     label: "Subluxation-Anamnese",
@@ -65,7 +78,7 @@ const SUBLUXATION_EXAMINATION: LocationCriterion = {
   regions: ["tmj"],
   criterion: match("${region}", "tmj", {
     id: "subluxationExam",
-    label: "Subluxation-Untersuchungsbefund (optional)",
+    label: "Umlenken zum Mundschluss erforderlich (optional)",
   }),
 };
 

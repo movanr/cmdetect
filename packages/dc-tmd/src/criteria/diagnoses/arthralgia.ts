@@ -47,6 +47,9 @@ export const ARTHRALGIA_ANAMNESIS: Criterion = and(
  */
 export const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side}", {
   includes: "tmj",
+}, {
+  id: "painLocationConfirmedTmj",
+  label: "Bestätigung von Schmerzen in Kiefergelenk(en)",
 });
 
 /**
@@ -72,7 +75,7 @@ export const familiarPainProvokedTmj: Criterion = or(
   ],
   {
     id: "familiarPainTmj",
-    label: "Bekannter Schmerz bei Öffnung, Bewegung oder Palpation (KG)",
+    label: "Bekannte Schmerzen des Kiefergelenks bei Palpation oder Kieferbewegungen",
   }
 );
 

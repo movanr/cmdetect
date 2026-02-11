@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { getRelevantExaminationItems, collectFieldRefs } from "../relevance";
+import { getRelevantExaminationItems, getPerDiagnosisAnamnesisResults, getAnamnesisCriteriaSummary, collectFieldRefs } from "../relevance";
 import { ALL_DIAGNOSES } from "../index";
 import { MYALGIA } from "../diagnoses/myalgia";
+import { MYALGIA_SUBTYPE_IDS } from "../../ids/diagnosis";
 import { field, and, or, not, any, all, threshold, computed, match } from "../builders";
 
 // ============================================================================
@@ -264,5 +265,290 @@ describe("getRelevantExaminationItems", () => {
       // Only base myalgia refs (includes e4 for opening familiar pain)
       expect(result.relevantSections).toContain("e4");
     });
+  });
+});
+
+// ============================================================================
+// getPerDiagnosisAnamnesisResults
+// ============================================================================
+
+describe("getPerDiagnosisAnamnesisResults", () => {
+  it("returns exactly 9 diagnoses (12 minus 3 myalgia subtypes)", () => {
+    const results = getPerDiagnosisAnamnesisResults({});
+    expect(results).toHaveLength(9);
+  });
+
+  it("never contains myalgia subtypes", () => {
+    const results = getPerDiagnosisAnamnesisResults({});
+    const ids = results.map((r) => r.id);
+    for (const subtypeId of MYALGIA_SUBTYPE_IDS) {
+      expect(ids).not.toContain(subtypeId);
+    }
+  });
+
+  it("contains correct category and nameDE fields", () => {
+    const results = getPerDiagnosisAnamnesisResults({});
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.myalgia.category).toBe("pain");
+    expect(byId.myalgia.nameDE).toBe("Myalgie");
+
+    expect(byId.arthralgia.category).toBe("pain");
+    expect(byId.arthralgia.nameDE).toBe("Arthralgie");
+
+    expect(byId.headacheAttributedToTmd.category).toBe("pain");
+
+    expect(byId.discDisplacementWithReduction.category).toBe("joint");
+    expect(byId.degenerativeJointDisease.category).toBe("joint");
+    expect(byId.subluxation.category).toBe("joint");
+    expect(byId.subluxation.nameDE).toBe("Subluxation");
+  });
+
+  it("shows pain diagnoses as positive when SQ1+SQ3+SQ4 are positive", () => {
+    const results = getPerDiagnosisAnamnesisResults({
+      SQ1: "yes",
+      SQ3: "intermittent",
+      SQ4_A: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.myalgia.anamnesisStatus).toBe("positive");
+    expect(byId.arthralgia.anamnesisStatus).toBe("positive");
+
+    // Myalgia needs e1, e4, e9
+    expect(byId.myalgia.examinationSections).toContain("e1");
+    expect(byId.myalgia.examinationSections).toContain("e4");
+    expect(byId.myalgia.examinationSections).toContain("e9");
+
+    // Arthralgia needs e1, e4, e5, e9
+    expect(byId.arthralgia.examinationSections).toContain("e1");
+    expect(byId.arthralgia.examinationSections).toContain("e5");
+    expect(byId.arthralgia.examinationSections).toContain("e9");
+  });
+
+  it("shows headache as positive when SQ5+SQ7 are positive", () => {
+    const results = getPerDiagnosisAnamnesisResults({
+      SQ5: "yes",
+      SQ7_A: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.headacheAttributedToTmd.anamnesisStatus).toBe("positive");
+  });
+
+  it("shows DD with Reduction and DJD as positive when SQ8=yes", () => {
+    const results = getPerDiagnosisAnamnesisResults({
+      SQ8: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.discDisplacementWithReduction.anamnesisStatus).toBe("positive");
+    expect(byId.degenerativeJointDisease.anamnesisStatus).toBe("positive");
+
+    // Both need e6, e7
+    expect(byId.discDisplacementWithReduction.examinationSections).toContain("e6");
+    expect(byId.discDisplacementWithReduction.examinationSections).toContain("e7");
+    expect(byId.degenerativeJointDisease.examinationSections).toContain("e6");
+    expect(byId.degenerativeJointDisease.examinationSections).toContain("e7");
+  });
+
+  it("shows DD without Reduction variants as positive when SQ9+SQ10 are positive", () => {
+    const results = getPerDiagnosisAnamnesisResults({
+      SQ9: "yes",
+      SQ10: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.discDisplacementWithoutReductionLimitedOpening.anamnesisStatus).toBe("positive");
+    expect(byId.discDisplacementWithoutReductionWithoutLimitedOpening.anamnesisStatus).toBe("positive");
+
+    // DD without Reduction needs e2, e4
+    expect(byId.discDisplacementWithoutReductionLimitedOpening.examinationSections).toContain("e2");
+    expect(byId.discDisplacementWithoutReductionLimitedOpening.examinationSections).toContain("e4");
+  });
+
+  it("shows Subluxation as positive when SQ13+SQ14 are positive, with empty exam sections", () => {
+    const results = getPerDiagnosisAnamnesisResults({
+      SQ13: "yes",
+      SQ14: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.subluxation.anamnesisStatus).toBe("positive");
+    // Subluxation has no examination sections (diagnosis is anamnesis-only for criteria purposes)
+    expect(byId.subluxation.examinationSections).toEqual([]);
+  });
+
+  it("shows DD/DJD as pending (not negative) when SQ8=no due to E6/E7 patient noise refs", () => {
+    const results = getPerDiagnosisAnamnesisResults({
+      SQ1: "no",
+      SQ3: "never",
+      SQ4_A: "no",
+      SQ4_B: "no",
+      SQ4_C: "no",
+      SQ4_D: "no",
+      SQ5: "no",
+      SQ7_A: "no",
+      SQ7_B: "no",
+      SQ7_C: "no",
+      SQ7_D: "no",
+      SQ8: "no",
+      SQ9: "no",
+      SQ10: "no",
+      SQ11: "no",
+      SQ13: "no",
+      SQ14: "no",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    // DD with Reduction and DJD have TMJ_NOISE_ANAMNESIS which includes
+    // OR(SQ8, e6/e7 patient noise). SQ8=no but E6/E7 absent → pending
+    expect(byId.discDisplacementWithReduction.anamnesisStatus).toBe("pending");
+    expect(byId.degenerativeJointDisease.anamnesisStatus).toBe("pending");
+
+    // Pain diagnoses should be negative
+    expect(byId.myalgia.anamnesisStatus).toBe("negative");
+    expect(byId.arthralgia.anamnesisStatus).toBe("negative");
+    expect(byId.headacheAttributedToTmd.anamnesisStatus).toBe("negative");
+
+    // Subluxation should be negative (SQ13=no, SQ14=no)
+    expect(byId.subluxation.anamnesisStatus).toBe("negative");
+  });
+
+  it("orders results: pain disorders first, then joint disorders", () => {
+    const results = getPerDiagnosisAnamnesisResults({});
+    const categories = results.map((r) => r.category);
+
+    const firstJointIdx = categories.indexOf("joint");
+    const lastPainIdx = categories.lastIndexOf("pain");
+
+    // All pain diagnoses should come before all joint diagnoses
+    expect(lastPainIdx).toBeLessThan(firstJointIdx);
+  });
+});
+
+// ============================================================================
+// getAnamnesisCriteriaSummary
+// ============================================================================
+
+describe("getAnamnesisCriteriaSummary", () => {
+  it("returns exactly 10 criteria", () => {
+    const results = getAnamnesisCriteriaSummary({});
+    expect(results).toHaveLength(10);
+  });
+
+  it("returns all expected criteria IDs", () => {
+    const results = getAnamnesisCriteriaSummary({});
+    const ids = results.map((r) => r.id);
+    expect(ids).toEqual([
+      "painInMasticatory",
+      "painModified",
+      "headacheInTemporalRegion",
+      "headacheModified",
+      "tmjNoiseAnamnesis",
+      "jawLocking",
+      "lockingAffectsEating",
+      "intermittentLocking",
+      "jawLockingOpenPosition",
+      "unableToCloseWithoutManeuver",
+    ]);
+  });
+
+  it("all criteria have labels", () => {
+    const results = getAnamnesisCriteriaSummary({});
+    for (const r of results) {
+      expect(r.label).toBeTruthy();
+    }
+  });
+
+  it("shows pain criteria as positive when SQ1+SQ3+SQ4 are positive", () => {
+    const results = getAnamnesisCriteriaSummary({
+      SQ1: "yes",
+      SQ3: "intermittent",
+      SQ4_A: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.painInMasticatory.status).toBe("positive");
+    expect(byId.painModified.status).toBe("positive");
+  });
+
+  it("shows pain criteria as negative when SQ1=no", () => {
+    const results = getAnamnesisCriteriaSummary({
+      SQ1: "no",
+      SQ3: "never",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.painInMasticatory.status).toBe("negative");
+  });
+
+  it("shows headache criteria correctly", () => {
+    const results = getAnamnesisCriteriaSummary({
+      SQ5: "yes",
+      SQ7_A: "yes",
+    });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.headacheInTemporalRegion.status).toBe("positive");
+    expect(byId.headacheModified.status).toBe("positive");
+  });
+
+  it("shows TMJ noise as positive when SQ8=yes", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ8: "yes" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.tmjNoiseAnamnesis.status).toBe("positive");
+  });
+
+  it("shows TMJ noise as pending (not negative) when SQ8=no due to E6/E7 patient noise refs", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ8: "no" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.tmjNoiseAnamnesis.status).toBe("pending");
+  });
+
+  it("shows jaw locking (SQ9) as positive when SQ9=yes", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ9: "yes" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.jawLocking.status).toBe("positive");
+    expect(byId.lockingAffectsEating.status).toBe("pending");
+  });
+
+  it("shows locking affects eating (SQ10) as positive when SQ10=yes", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ10: "yes" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.lockingAffectsEating.status).toBe("positive");
+  });
+
+  it("shows intermittent locking (SQ11+SQ12) as positive when SQ11=yes and SQ12=no", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ11: "yes", SQ12: "no" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.intermittentLocking.status).toBe("positive");
+  });
+
+  it("shows jaw locking open position (SQ13) as positive when SQ13=yes", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ13: "yes" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.jawLockingOpenPosition.status).toBe("positive");
+    expect(byId.unableToCloseWithoutManeuver.status).toBe("pending");
+  });
+
+  it("shows unable to close without maneuver (SQ14) as positive when SQ14=yes", () => {
+    const results = getAnamnesisCriteriaSummary({ SQ14: "yes" });
+    const byId = Object.fromEntries(results.map((r) => [r.id, r]));
+
+    expect(byId.unableToCloseWithoutManeuver.status).toBe("positive");
+  });
+
+  it("shows all criteria as pending or negative with empty data", () => {
+    const results = getAnamnesisCriteriaSummary({});
+    for (const r of results) {
+      expect(["pending", "negative"]).toContain(r.status);
+    }
   });
 });

@@ -55,7 +55,7 @@ export interface CriterionMetadata {
 /**
  * Field criterion - compares a single field value
  */
-export interface FieldCriterion {
+export interface FieldCriterion extends CriterionMetadata {
   type: "field";
   /** Field reference (may contain template variables) */
   ref: string;
@@ -66,7 +66,7 @@ export interface FieldCriterion {
 /**
  * Threshold criterion - compares a numeric field to a threshold
  */
-export interface ThresholdCriterion {
+export interface ThresholdCriterion extends CriterionMetadata {
   type: "threshold";
   /** Field reference for numeric value */
   ref: string;
@@ -79,7 +79,7 @@ export interface ThresholdCriterion {
 /**
  * Computed criterion - evaluates a function over multiple fields
  */
-export interface ComputedCriterion {
+export interface ComputedCriterion extends CriterionMetadata {
   type: "computed";
   /** Field references to gather values from */
   refs: string[];

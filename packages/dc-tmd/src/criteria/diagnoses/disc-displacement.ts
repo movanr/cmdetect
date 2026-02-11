@@ -53,7 +53,7 @@ export const TMJ_NOISE_ANAMNESIS: Criterion = or(
   ],
   {
     id: "tmjNoiseAnamnesis",
-    label: "KG-Geräusch anamnestisch oder vom Patienten angegeben",
+    label: "Anamnestisch aktuell vorhandenes KG-Geräusch, oder Patient gibt während der Untersuchung Geräusche an",
   }
 );
 
@@ -132,7 +132,7 @@ function ddWithReductionExamCriterion(): Criterion {
       and([
         field("e6.${side}.click.examinerOpen", { equals: "yes" }),
         field("e6.${side}.click.examinerClose", { equals: "yes" }),
-      ], { id: "openCloseClick", label: "Knacken bei Öffnung und Schließung" }),
+      ], { id: "openCloseClick", label: "Knacken beim Öffnen und Schließen" }),
       // b) Click during opening or closing AND click during lateral/protrusive
       and([
         or([
@@ -140,7 +140,7 @@ function ddWithReductionExamCriterion(): Criterion {
           field("e6.${side}.click.examinerClose", { equals: "yes" }),
         ]),
         field("e7.${side}.click.examiner", { equals: "yes" }),
-      ], { id: "openOrCloseAndLateralClick", label: "Knacken bei Öffnung/Schließung und Lateralbewegung" }),
+      ], { id: "openOrCloseAndLateralClick", label: "Knacken beim Öffnen oder Schließen und Knacken bei Laterotrusion oder Protrusion" }),
     ],
     {
       id: "ddWithReductionExam",
@@ -169,15 +169,24 @@ export const DISC_DISPLACEMENT_WITH_REDUCTION: DiagnosisDefinition = {
 // ============================================================================
 
 /**
+ * SQ11 + SQ12: Intermittent locking — locking occurred in last 30 days (SQ11=yes)
+ * AND not currently locked, i.e. the locking resolved (SQ12=no).
+ */
+export const intermittentLockingAnamnesis: Criterion = and([
+  field(sq("SQ11"), { equals: "yes" }),
+  field(sq("SQ12"), { equals: "no" }),
+], {
+  id: "intermittentLocking",
+  label: "Aktuell intermittierende Blockade mit eingeschränkter Mundöffnung",
+});
+
+/**
  * Additional anamnesis: TMJ noise + intermittent locking
- * SQ11 = "yes" (locking occurred in last 30 days)
- * SQ12 = "no" (not currently locked — i.e., the locking resolved)
  */
 const DD_WITH_REDUCTION_INTERMITTENT_LOCKING_ANAMNESIS: Criterion = and(
   [
     TMJ_NOISE_ANAMNESIS,
-    field(sq("SQ11"), { equals: "yes" }),
-    field(sq("SQ12"), { equals: "no" }),
+    intermittentLockingAnamnesis,
   ],
   {
     id: "ddIntermittentLockingHistory",
@@ -220,15 +229,28 @@ export const DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING: DiagnosisDef
 // ============================================================================
 
 /**
+ * SQ9: Jaw ever locked/caught with limited opening.
+ */
+export const jawLockingAnamnesis: Criterion = field(sq("SQ9"), { equals: "yes" }, {
+  id: "jawLocking",
+  label: "Aktuell KG-Blockade mit eingeschränkter Mundöffnung",
+});
+
+/**
+ * SQ10: Limitation severe enough to affect eating.
+ */
+export const lockingAffectsEatingAnamnesis: Criterion = field(sq("SQ10"), { equals: "yes" }, {
+  id: "lockingAffectsEating",
+  label: "Einschränkung schwer genug, um die Fähigkeit zu Essen zu beeinträchtigen",
+});
+
+/**
  * Anamnesis for DD without Reduction (both variants):
  * SQ9 = "yes" (jaw ever locked/caught)
  * SQ10 = "yes" (limitation severe enough to affect eating)
  */
 export const DD_WITHOUT_REDUCTION_ANAMNESIS: Criterion = and(
-  [
-    field(sq("SQ9"), { equals: "yes" }),
-    field(sq("SQ10"), { equals: "yes" }),
-  ],
+  [jawLockingAnamnesis, lockingAffectsEatingAnamnesis],
   {
     id: "ddWithoutReductionHistory",
     label: "DV ohne Reposition-Anamnese",
@@ -252,7 +274,11 @@ const DD_WITHOUT_REDUCTION_LIMITED_EXAMINATION: LocationCriterion = {
       ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
       ((v["e2.verticalOverlap"] as number) ?? 0),
     "<",
-    40
+    40,
+    {
+      id: "passiveStretchLimited",
+      label: "Passive Dehnung (maximale passive Mundöffnung) < 40mm",
+    }
   ),
 };
 
@@ -281,7 +307,11 @@ const DD_WITHOUT_REDUCTION_NO_LIMITED_EXAMINATION: LocationCriterion = {
       ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
       ((v["e2.verticalOverlap"] as number) ?? 0),
     ">=",
-    40
+    40,
+    {
+      id: "passiveStretchNotLimited",
+      label: "Passive Dehnung (maximale passive Mundöffnung) \u2265 40mm",
+    }
   ),
 };
 

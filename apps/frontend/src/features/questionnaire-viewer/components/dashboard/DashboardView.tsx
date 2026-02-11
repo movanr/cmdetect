@@ -39,6 +39,9 @@ import {
 import { useState } from "react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
+import { AnamnesisDetailCard } from "./AnamnesisDetailCard";
+import { AnamnesisOverview } from "./AnamnesisOverview";
+import { AnamnesisRelevanceCard } from "./AnamnesisRelevanceCard";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import { DashboardInfoBlock } from "./DashboardInfoBlock";
 import {
@@ -292,6 +295,30 @@ export function DashboardView({
                   )}
                 </p>
                 <SQAnswersTable answers={sqResponse.answers} />
+                {!isScreeningNegative && sqAnswers && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                      Anamnese-Übersicht
+                    </h4>
+                    <AnamnesisOverview sqAnswers={sqAnswers} />
+                  </div>
+                )}
+                {!isScreeningNegative && sqAnswers && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                      Diagnose-Relevanz
+                    </h4>
+                    <AnamnesisRelevanceCard sqAnswers={sqAnswers} />
+                  </div>
+                )}
+                {!isScreeningNegative && sqAnswers && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                      Anamnese-Diagnose-Zuordnung
+                    </h4>
+                    <AnamnesisDetailCard sqAnswers={sqAnswers} />
+                  </div>
+                )}
               </section>
             )}
 
@@ -384,6 +411,36 @@ export function DashboardView({
                 </h3>
                 <DashboardInfoBlock info={AXIS1_INFO} className="mb-3" />
                 <SQStatusCard response={sqResponse} isScreeningNegative={isScreeningNegative} />
+                {!isScreeningNegative && sqAnswers && (
+                  <Card className="mt-3">
+                    <CardContent className="p-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                        Anamnese-Übersicht
+                      </h4>
+                      <AnamnesisOverview sqAnswers={sqAnswers} />
+                    </CardContent>
+                  </Card>
+                )}
+                {!isScreeningNegative && sqAnswers && (
+                  <Card className="mt-3">
+                    <CardContent className="p-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                        Diagnose-Relevanz
+                      </h4>
+                      <AnamnesisRelevanceCard sqAnswers={sqAnswers} />
+                    </CardContent>
+                  </Card>
+                )}
+                {!isScreeningNegative && sqAnswers && (
+                  <Card className="mt-3">
+                    <CardContent className="p-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                        Anamnese-Diagnose-Zuordnung
+                      </h4>
+                      <AnamnesisDetailCard sqAnswers={sqAnswers} />
+                    </CardContent>
+                  </Card>
+                )}
               </section>
             )}
 

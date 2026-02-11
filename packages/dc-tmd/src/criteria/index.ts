@@ -107,8 +107,16 @@ export {
 // Relevance analysis
 export {
   type AnamnesisRelevanceResult,
+  type DiagnosisAnamnesisResult,
+  type AnamnesisCriterionSummary,
+  type AnamnesisCriterionDetail,
+  type AnamnesisGroup,
   collectFieldRefs,
+  extractSqQuestionIds,
   getRelevantExaminationItems,
+  getPerDiagnosisAnamnesisResults,
+  getAnamnesisCriteriaSummary,
+  getGroupedAnamnesisCriteria,
 } from "./relevance";
 
 // Diagnoses — Pain disorders
@@ -152,13 +160,22 @@ export {
   TMJ_NOISE_SIDED_ANAMNESIS,
   DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   DD_WITHOUT_REDUCTION_ANAMNESIS,
+  jawLockingAnamnesis,
+  lockingAffectsEatingAnamnesis,
+  intermittentLockingAnamnesis,
   DISC_DISPLACEMENT_WITH_REDUCTION,
   DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
   DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING,
   DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING,
 } from "./diagnoses/disc-displacement";
 export { DEGENERATIVE_JOINT_DISEASE } from "./diagnoses/degenerative-joint-disease";
-export { SUBLUXATION, SUBLUXATION_ANAMNESIS, SUBLUXATION_SIDED_ANAMNESIS } from "./diagnoses/subluxation";
+export {
+  SUBLUXATION,
+  SUBLUXATION_ANAMNESIS,
+  SUBLUXATION_SIDED_ANAMNESIS,
+  jawLockingOpenPositionAnamnesis,
+  unableToCloseWithoutManeuverAnamnesis,
+} from "./diagnoses/subluxation";
 
 // All diagnoses (for iteration)
 import { MYALGIA } from "./diagnoses/myalgia";

@@ -47,6 +47,9 @@ const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter"];
  */
 const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
   includes: "${region}",
+}, {
+  id: "painLocationConfirmed",
+  label: "Bestätigung der Schmerzen in den Kaumuskel(n)",
 });
 
 /**
@@ -114,7 +117,7 @@ const localMyalgiaExamCriterion: Criterion = and(
         // D: Familiar pain from palpation of any site in the muscle group
         any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
           id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Palpation",
+          label: "Bekannter Schmerz bei Muskelpalpation",
         }),
         // E: No spreading pain at any site in the muscle group
         not(
@@ -174,12 +177,12 @@ const spreadingMyalgiaExamCriterion: Criterion = and(
         // D: Familiar pain from palpation
         any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
           id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Palpation",
+          label: "Bekannter Schmerz bei Muskelpalpation",
         }),
         // E: Spreading pain present at any site in the muscle group
         any(siteRefs(region, "spreadingPain"), { equals: "yes" }, {
           id: `${region}SpreadingPain`,
-          label: "Ausbreitender Schmerz vorhanden",
+          label: "Ausbreitender Schmerz bei Muskelpalpation",
         }),
         // F: No referred pain at any site in the muscle group
         not(
@@ -233,12 +236,12 @@ const referralMyalgiaExamCriterion: Criterion = and(
         // D: Familiar pain from palpation
         any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
           id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Palpation",
+          label: "Bekannter Schmerz bei Muskelpalpation",
         }),
         // E: Referred pain present at any site in the muscle group
         any(siteRefs(region, "referredPain"), { equals: "yes" }, {
           id: `${region}ReferredPain`,
-          label: "Übertragener Schmerz vorhanden",
+          label: "Übertragener Schmerz bei Muskelpalpation",
         }),
       ],
       {

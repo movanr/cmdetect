@@ -48,7 +48,7 @@ export const painModifiedByFunction: Criterion = any(
   { equals: "yes" },
   {
     id: "painModified",
-    label: "Schmerz durch Kieferbewegung, -funktion oder Parafunktion modifiziert",
+    label: "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
   }
 );
 
@@ -107,6 +107,9 @@ function createSiteFamiliarPainCriterion(): Criterion {
  */
 export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
   includes: "${region}",
+}, {
+  id: "painLocationConfirmed",
+  label: "Bestätigung von Schmerzen in Kaumuskel(n)",
 });
 
 /**
@@ -126,7 +129,7 @@ export const familiarPainProvoked: Criterion = or(
   ],
   {
     id: "familiarPain",
-    label: "Bekannter Schmerz bei Öffnung oder Palpation",
+    label: "Bekannter Schmerz in Kaumuskel(n) bei Muskelpalpation oder maximaler Öffnung",
   }
 );
 
