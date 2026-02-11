@@ -64,6 +64,17 @@ function buildDiagnosisLookup(
   return lookup;
 }
 
+/** Format side info from SQ office-use data (e.g. SQ8_office: { R: true, L: false }) */
+function formatSide(officeValue: unknown): string | null {
+  if (!officeValue || typeof officeValue !== "object") return null;
+  const o = officeValue as { R?: boolean; L?: boolean; DNK?: boolean };
+  if (o.DNK) return "Seite unklar";
+  if (o.R && o.L) return "beidseitig";
+  if (o.R) return "Rechte Seite";
+  if (o.L) return "Linke Seite";
+  return null;
+}
+
 /** Get anamnesisStatus for a diagnosis, defaulting to "negative" if not found */
 function diagStatus(
   diagLookup: Record<string, DiagnosisAnamnesisResult>,
@@ -98,7 +109,11 @@ function DomainCard({
             active ? "bg-blue-500" : "bg-gray-300"
           )}
         />
-        <h4 className={cn("text-sm font-medium", !active && "text-muted-foreground")}>{label}</h4>
+        <h4
+          className={cn("text-sm font-medium flex-1 min-w-0", !active && "text-muted-foreground")}
+        >
+          {label}
+        </h4>
       </div>
       {children}
     </div>
@@ -116,13 +131,13 @@ function PathwayIndicator({ label, status, note, sections }: PathwayInfo) {
         "flex items-center gap-1.5 text-xs",
         status === "positive" && "text-blue-700",
         status === "pending" && "text-amber-700",
-        status === "negative" && "text-muted-foreground/60"
+        status === "negative" && "text-muted-foreground"
       )}
     >
       <ArrowRight className="h-3 w-3 shrink-0" />
       <span className={cn(status !== "negative" && "font-medium")}>{label}</span>
       {status === "pending" && (
-        <span className="text-[10px] font-normal text-amber-600">(noch möglich)</span>
+        <span className="text-xs font-normal text-amber-600">(noch möglich)</span>
       )}
       {showSections && (
         <span className="flex gap-0.5 ml-auto shrink-0">
@@ -164,10 +179,16 @@ function AnswerLine({
   label,
   value,
   positive,
+  side,
+  sidePending,
 }: {
   label: string;
   value: string;
   positive?: boolean;
+  /** Formatted side string from formatSide() */
+  side?: string | null;
+  /** Show amber "Ausstehend" badge when examiner hasn't reviewed side info yet */
+  sidePending?: boolean;
 }) {
   return (
     <div className="flex items-center gap-1.5 text-xs">
@@ -179,6 +200,21 @@ function AnswerLine({
         ))}
       <span className="text-muted-foreground">{label}:</span>
       <span className={cn(positive ? "text-foreground" : "text-muted-foreground")}>{value}</span>
+      {side ? (
+        <Badge
+          variant="outline"
+          className="text-[10px] px-1 py-0 h-4 font-normal text-muted-foreground"
+        >
+          {side}
+        </Badge>
+      ) : sidePending ? (
+        <Badge
+          variant="outline"
+          className="text-[10px] px-1 py-0 h-4 font-normal text-amber-600 border-amber-200"
+        >
+          Seitenangabe ausstehend
+        </Badge>
+      ) : null}
     </div>
   );
 }
@@ -195,7 +231,7 @@ function PathwayBlock({
   if (actionable.length === 0) return null;
   return (
     <div className={cn("space-y-0.5", bordered && "pt-1.5 border-t border-border/30")}>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
         Zu untersuchen
       </p>
       {actionable.map((p) => (
@@ -216,7 +252,7 @@ function ModificationChecklist({ items }: { items: { label: string; value: boole
           ) : (
             <X className="h-3 w-3 shrink-0 text-muted-foreground/50" />
           )}
-          <span className={cn(item.value ? "text-foreground" : "text-muted-foreground/70")}>
+          <span className={cn(item.value ? "text-foreground" : "text-muted-foreground")}>
             {item.label}
           </span>
         </div>
@@ -250,20 +286,23 @@ function SchmerzDomain({
   ];
 
   return (
-    <DomainCard active={active} label="Schmerz">
+    <DomainCard active={active} label="Schmerz in einer mastikatorischen Struktur">
       {!active ? (
-        <p className="text-xs text-muted-foreground">Verneint</p>
+        <AnswerLine label="Jemals" value="Nein" positive={false} />
       ) : (
         <div className="space-y-1.5">
-          <AnswerLine label="Dauer" value={formatDuration(sqAnswers.SQ2)} />
+          <AnswerLine label="Jemals" value="Ja" positive />
+          <AnswerLine label="Erstmaliges Auftreten" value={formatDuration(sqAnswers.SQ2)} />
           <AnswerLine
-            label="Häufigkeit"
+            label="Letzte 30 Tage"
             value={
               SQ_PAIN_FREQUENCY_LABELS[sqAnswers.SQ3 as string] ?? String(sqAnswers.SQ3 ?? "—")
             }
             positive={sqAnswers.SQ3 === "intermittent" || sqAnswers.SQ3 === "continuous"}
           />
-          <p className="text-[11px] text-muted-foreground font-medium mt-1">Schmerzmodifikation</p>
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mt-1">
+            Schmerzmodifikation
+          </p>
           <ModificationChecklist
             items={[
               { label: "Kauen harter Nahrung", value: sqAnswers.SQ4_A === "yes" },
@@ -301,13 +340,14 @@ function KopfschmerzDomain({
   };
 
   return (
-    <DomainCard active={active} label="Kopfschmerz">
+    <DomainCard active={active} label="Kopfschmerzen in Temporalregion">
       {!active ? (
-        <p className="text-xs text-muted-foreground">Verneint</p>
+        <AnswerLine label="Letzte 30 Tage" value="Nein" positive={false} />
       ) : (
         <div className="space-y-1.5">
-          <AnswerLine label="Dauer" value={formatDuration(sqAnswers.SQ6)} />
-          <p className="text-[11px] text-muted-foreground font-medium mt-1">
+          <AnswerLine label="Letzte 30 Tage" value="Ja" positive />
+          <AnswerLine label="Erstmaliges Auftreten" value={formatDuration(sqAnswers.SQ6)} />
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mt-1">
             Kopfschmerzmodifikation
           </p>
           <ModificationChecklist
@@ -333,6 +373,7 @@ function GelenkgeraeuscheDomain({
   diagLookup: Record<string, DiagnosisAnamnesisResult>;
 }) {
   const active = sqAnswers.SQ8 === "yes";
+  const sq8Side = formatSide(sqAnswers.SQ8_office);
 
   // Merge all disc displacement variants into one entry (all share e6/e7 sections)
   const dvStatuses = [
@@ -362,13 +403,19 @@ function GelenkgeraeuscheDomain({
     <DomainCard active={active} label="Gelenkgeräusche">
       {!active ? (
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground">Verneint</p>
-          <p className="text-[10px] text-muted-foreground/70 italic">
-            Patient kann Geräusch während U bestätigen
+          <AnswerLine label="Letzte 30 Tage" value="Nein" positive={false} />
+          <p className="text-xs text-muted-foreground italic">
+            Patient kann Geräusch während Untersuchung bestätigen
           </p>
         </div>
       ) : (
-        <p className="text-xs text-foreground">Berichtet (letzte 30 Tage)</p>
+        <AnswerLine
+          label="Letzte 30 Tage"
+          value="Ja"
+          positive
+          side={sq8Side}
+          sidePending={sq8Side == null}
+        />
       )}
       <PathwayBlock pathways={pathways} />
     </DomainCard>
@@ -399,26 +446,39 @@ function KieferklemmeDomain({
   const sq8 = sqAnswers.SQ8 === "yes";
   const pathBStatus = diagStatus(diagLookup, "discDisplacementWithReductionIntermittentLocking");
 
+  const domainActive = sq9Active || sq11Active;
+
   return (
-    <DomainCard active={sq9Active} label="Kieferklemme">
-      {!sq9Active ? (
-        <p className="text-xs text-muted-foreground">Verneint</p>
+    <DomainCard active={domainActive} label="Kieferklemme">
+      {!domainActive ? (
+        <AnswerLine label="Jemals" value="Nein" positive={false} />
       ) : (
         <div className="space-y-2">
           {/* Path A — Blockade */}
           <div className="space-y-1">
-            <p className="text-[11px] text-muted-foreground font-medium">
-              Blockade (SF9+SF10)
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+              Blockade
             </p>
-            <AnswerLine label="Jemals blockiert" value="Ja" positive />
-            <AnswerLine label="Essen beeinträchtigt" value={sq10 ? "Ja" : "Nein"} positive={sq10} />
+            <AnswerLine label="Jemals" value={sq9Active ? "Ja" : "Nein"} positive={sq9Active} />
+            {sq9Active && (
+              <AnswerLine
+                label="Essen beeinträchtigt"
+                value={sq10 ? "Ja" : "Nein"}
+                positive={sq10}
+                side={formatSide(sqAnswers.SQ10_office)}
+                sidePending={!formatSide(sqAnswers.SQ10_office)}
+              />
+            )}
             <PathwayBlock
               bordered={false}
-              pathways={[{
-                label: "Diskusverlagerung",
-                status: pathAStatus,
-                sections: diagLookup.discDisplacementWithoutReductionLimitedOpening?.examinationSections,
-              }]}
+              pathways={[
+                {
+                  label: "Diskusverlagerung",
+                  status: pathAStatus,
+                  sections:
+                    diagLookup.discDisplacementWithoutReductionLimitedOpening?.examinationSections,
+                },
+              ]}
             />
           </div>
 
@@ -427,13 +487,15 @@ function KieferklemmeDomain({
 
           {/* Path B — Intermittierend */}
           <div className="space-y-1">
-            <p className="text-[11px] text-muted-foreground font-medium">
-              Intermittierend (SF11+SF12+SF8)
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+              Intermittierend
             </p>
             <AnswerLine
               label="Letzte 30 Tage, dann gelöst"
               value={sq11Active ? "Ja" : "Nein"}
               positive={sq11Active}
+              side={formatSide(sqAnswers.SQ11_office)}
+              sidePending={!formatSide(sqAnswers.SQ11_office)}
             />
             {sq11Active && (
               <AnswerLine
@@ -449,11 +511,15 @@ function KieferklemmeDomain({
             />
             <PathwayBlock
               bordered={false}
-              pathways={[{
-                label: "Diskusverlagerung",
-                status: pathBStatus,
-                sections: diagLookup.discDisplacementWithReductionIntermittentLocking?.examinationSections,
-              }]}
+              pathways={[
+                {
+                  label: "Diskusverlagerung",
+                  status: pathBStatus,
+                  sections:
+                    diagLookup.discDisplacementWithReductionIntermittentLocking
+                      ?.examinationSections,
+                },
+              ]}
             />
           </div>
         </div>
@@ -479,16 +545,24 @@ function KiefersperreDomain({
   };
 
   return (
-    <DomainCard active={active} label="Kiefersperre (offen)">
+    <DomainCard active={active} label="Kiefersperre">
       {!active ? (
-        <p className="text-xs text-muted-foreground">Verneint</p>
+        <AnswerLine label="Letzte 30 Tage" value="Nein" positive={false} />
       ) : (
         <div className="space-y-1">
-          <AnswerLine label="Weit geöffnet arretiert" value="Ja" positive />
+          <AnswerLine
+            label="Letzte 30 Tage"
+            value="Ja"
+            positive
+            side={formatSide(sqAnswers.SQ13_office)}
+            sidePending={!formatSide(sqAnswers.SQ13_office)}
+          />
           <AnswerLine
             label="Schließen nur mit Manöver"
             value={sq14 ? "Ja" : "Nein"}
             positive={sq14}
+            side={formatSide(sqAnswers.SQ14_office)}
+            sidePending={!formatSide(sqAnswers.SQ14_office)}
           />
         </div>
       )}
