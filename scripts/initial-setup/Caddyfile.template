@@ -13,12 +13,11 @@
 }
 
 
-# Common Security Headers
+# Common Security Headers (X-Frame-Options set per-site to allow SAMEORIGIN where needed)
 (security_headers) {
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
         Referrer-Policy "strict-origin-when-cross-origin"
         -Server
     }
@@ -28,6 +27,7 @@
 ${DOMAIN}, www.${DOMAIN} {
     import dev_auth
     import security_headers
+    header X-Frame-Options "DENY"
 
     root * /opt/cmdetect/apps/marketing/dist
     file_server
@@ -93,6 +93,7 @@ patient.${DOMAIN} {
 # Auth Server (PUBLIC - NO BASIC AUTH!)
 auth.${DOMAIN} {
     import security_headers
+    header X-Frame-Options "DENY"
 
     # TODO: Add rate limiting plugin later if needed
 
@@ -119,6 +120,7 @@ auth.${DOMAIN} {
 # Hasura API (PUBLIC - NO BASIC AUTH!)
 api.${DOMAIN} {
     import security_headers
+    header X-Frame-Options "DENY"
 
     # TODO: Add rate limiting plugin later if needed
 
