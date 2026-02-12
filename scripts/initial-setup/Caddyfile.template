@@ -52,7 +52,10 @@ app.${DOMAIN} {
     try_files {path} /index.html
     encode gzip zstd
 
-    header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.${DOMAIN} https://auth.${DOMAIN} wss://api.${DOMAIN}; font-src 'self' data:;"
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.${DOMAIN} https://auth.${DOMAIN} wss://api.${DOMAIN}; font-src 'self' data:;"
+    }
 
     log {
         output file /var/log/caddy/app.log {
