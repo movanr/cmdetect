@@ -25,8 +25,6 @@ import {
   calculatePHQ4Score,
   GCPS_1M_QUESTION_ORDER,
   GCPS_1M_QUESTIONS,
-  getPHQ4Interpretation,
-  getSubscaleInterpretation,
   isQuestionIdEnabled,
   isQuestionnaireEnabled,
   JFLS20_QUESTION_ORDER,
@@ -90,22 +88,10 @@ export function ScalePips({ value, max }: { value: number; max: number }) {
 
 // ─── Scores Overview ───────────────────────────────────────────────────
 
-// Severity levels for color-coding the interpretation column
-type Severity = "ok" | "mild" | "moderate" | "severe";
-
-const severityClasses: Record<Severity, string> = {
-  ok: "text-green-700 bg-green-50",
-  mild: "text-yellow-700 bg-yellow-50",
-  moderate: "text-orange-700 bg-orange-50",
-  severe: "text-red-700 bg-red-50",
-};
-
 export function ScoresOverviewTable({
   responses,
-  showSeverityColors = false,
 }: {
   responses: QuestionnaireResponse[];
-  showSeverityColors?: boolean;
 }) {
   const phq4 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
   const gcps = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
@@ -117,33 +103,18 @@ export function ScoresOverviewTable({
   const rows: Array<{
     instrument: string;
     score: string;
-    interpretation: string;
-    severity: Severity;
   }> = [];
 
   if (painDrawing) {
     const data = painDrawing.answers as unknown as PainDrawingData | undefined;
     if (data?.drawings && Object.keys(data.drawings).length > 0) {
       const pd = calculatePainDrawingScore(data);
-      const widespread = pd.patterns.hasWidespreadPain;
       rows.push({
         instrument: "Schmerzzeichnung",
         score:
           pd.regionCount === 0
             ? "Keine Schmerzgebiete"
             : `mindestens ${pd.regionCount} Schmerzgebiet${pd.regionCount !== 1 ? "e" : ""}, ${pd.totalElements} Markierung${pd.totalElements !== 1 ? "en" : ""}`,
-        interpretation: widespread
-          ? "Schmerz in mehreren Körperbereichen"
-          : pd.regionCount === 0
-            ? "Keine Schmerzgebiete"
-            : `mindestens ${pd.regionCount} Schmerzgebiet${pd.regionCount !== 1 ? "e" : ""}`,
-        severity: widespread
-          ? "severe"
-          : pd.regionCount >= 3
-            ? "moderate"
-            : pd.regionCount >= 1
-              ? "mild"
-              : "ok",
       });
     }
   }
@@ -151,65 +122,36 @@ export function ScoresOverviewTable({
   if (gcps && Object.keys(gcps.answers).length > 0) {
     const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
     const roman = s.grade === 0 ? "0" : ["I", "II", "III", "IV"][s.grade - 1];
-    // Grade 0 = ok, I-II = mild, III = moderate, IV = severe
-    const gcpsSeverity: Severity =
-      s.grade === 0 ? "ok" : s.grade <= 2 ? "mild" : s.grade === 3 ? "moderate" : "severe";
     rows.push({
       instrument: "GCPS-1M",
       score: `Grad ${roman} (CPI ${s.cpi}, ${s.totalDisabilityPoints} BP)`,
-      interpretation: s.gradeInterpretation.label,
-      severity: gcpsSeverity,
     });
   }
 
   if (jfls8 && Object.keys(jfls8.answers).length > 0) {
     const s = calculateJFLS8Score(jfls8.answers as JFLS8Answers);
-    // normal = ok, mild = mild, significant = severe
-    const jflsSeverity: Severity =
-      s.limitationLevel === "normal" ? "ok" : s.limitationLevel === "mild" ? "mild" : "severe";
     rows.push({
       instrument: "JFLS-8",
       score:
         s.isValid && s.globalScore !== null
           ? `${s.globalScore.toFixed(2)} / ${s.maxScore}`
           : `Ungültig (${s.missingCount} fehlend)`,
-      interpretation: s.limitationInterpretation?.label ?? "",
-      severity: s.isValid ? jflsSeverity : "ok",
     });
   }
 
   if (phq4 && Object.keys(phq4.answers).length > 0) {
     const s = calculatePHQ4Score(phq4.answers as Record<string, string>);
-    const interp = getPHQ4Interpretation(s);
-    const ax = getSubscaleInterpretation(s.anxiety);
-    const dep = getSubscaleInterpretation(s.depression);
-    // none = ok, mild = mild, moderate = moderate, severe = severe
-    const phqSeverity: Severity =
-      interp.severity === "none"
-        ? "ok"
-        : interp.severity === "mild"
-          ? "mild"
-          : interp.severity === "moderate"
-            ? "moderate"
-            : "severe";
     rows.push({
       instrument: "PHQ-4",
       score: `${s.total} / ${s.maxTotal} (Angst ${s.anxiety}/${s.maxAnxiety}, Depr. ${s.depression}/${s.maxDepression})`,
-      interpretation: `${interp.label}${ax.positive ? " · Angst +" : ""}${dep.positive ? " · Depression +" : ""}`,
-      severity: phqSeverity,
     });
   }
 
   if (obc && Object.keys(obc.answers).length > 0) {
     const s = calculateOBCScore(obc.answers as OBCAnswers);
-    // normal = ok, elevated = moderate, high = severe
-    const obcSeverity: Severity =
-      s.riskLevel === "normal" ? "ok" : s.riskLevel === "elevated" ? "moderate" : "severe";
     rows.push({
       instrument: "OBC",
       score: `${s.totalScore} / ${s.maxScore}`,
-      interpretation: s.riskInterpretation.label,
-      severity: obcSeverity,
     });
   }
 
@@ -227,16 +169,12 @@ export function ScoresOverviewTable({
         .filter(Boolean);
       subscaleStr = parts.length > 0 ? ` (${parts.join(", ")})` : "";
     }
-    const jfls20Severity: Severity =
-      s.limitationLevel === "normal" ? "ok" : s.limitationLevel === "mild" ? "mild" : "severe";
     rows.push({
       instrument: "JFLS-20",
       score:
         s.isValid && s.globalScore !== null
           ? `${s.globalScore.toFixed(2)} / ${s.maxScore}${subscaleStr}`
           : `Ungültig (${s.missingCount} fehlend)`,
-      interpretation: s.limitationInterpretation?.label ?? "",
-      severity: s.isValid ? jfls20Severity : "ok",
     });
   }
 
@@ -248,7 +186,6 @@ export function ScoresOverviewTable({
         <tr className={headerRowClass}>
           <th className={thClass}>Instrument</th>
           <th className={thClass}>Ergebnis</th>
-          <th className={thClass}>Bewertung</th>
         </tr>
       </thead>
       <tbody>
@@ -256,18 +193,6 @@ export function ScoresOverviewTable({
           <tr key={r.instrument} className={bodyRowClass}>
             <td className={`${tdClass} whitespace-nowrap font-medium`}>{r.instrument}</td>
             <td className={tdClass}>{r.score}</td>
-            <td className={tdClass}>
-              {r.interpretation &&
-                (showSeverityColors ? (
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${severityClasses[r.severity]}`}
-                  >
-                    {r.interpretation}
-                  </span>
-                ) : (
-                  <span className="text-gray-600">{r.interpretation}</span>
-                ))}
-            </td>
           </tr>
         ))}
       </tbody>
@@ -451,7 +376,7 @@ export function GCPSAnswersTable({
         {/* Score summary row */}
         <tr className="border-t-2 border-gray-300">
           <td colSpan={2} className={`${tdClass} font-semibold`}>
-            Grad {roman} — {s.gradeInterpretation.label}
+            Grad {roman}
           </td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
             CPI {s.cpi}, {s.totalDisabilityPoints} BP
@@ -472,7 +397,6 @@ export function PHQ4AnswersTable({
   showPips?: boolean;
 }) {
   const s = calculatePHQ4Score(answers);
-  const interp = getPHQ4Interpretation(s);
 
   return (
     <table className="w-full text-sm border-collapse">
@@ -502,7 +426,7 @@ export function PHQ4AnswersTable({
           );
         })}
         <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>{interp.label}</td>
+          <td colSpan={2} className={`${tdClass} font-semibold`}>Gesamt</td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
             {s.total} / {s.maxTotal}
           </td>
@@ -558,7 +482,7 @@ export function JFLS8AnswersTable({
         {s.isValid && s.globalScore !== null && (
           <tr className="border-t-2 border-gray-300">
             <td colSpan={2} className={`${tdClass} font-semibold`}>
-              {s.limitationInterpretation?.label ?? ""}
+              Gesamt
             </td>
             <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
               &#x2300; {s.globalScore.toFixed(2)}
@@ -614,7 +538,7 @@ export function JFLS20AnswersTable({
           <>
             <tr className="border-t-2 border-gray-300">
               <td colSpan={2} className={`${tdClass} font-semibold`}>
-                {s.limitationInterpretation?.label ?? ""}
+                Gesamt
               </td>
               <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
                 &#x2300; {s.globalScore.toFixed(2)}
@@ -714,7 +638,7 @@ export function OBCAnswersTable({
         {renderSection("Schlaf-Aktivitäten", sleepQuestions)}
         {renderSection("Wach-Aktivitäten", wakingQuestions)}
         <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>{s.riskInterpretation.label}</td>
+          <td colSpan={2} className={`${tdClass} font-semibold`}>Gesamt</td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
             {s.totalScore} / {s.maxScore}
           </td>

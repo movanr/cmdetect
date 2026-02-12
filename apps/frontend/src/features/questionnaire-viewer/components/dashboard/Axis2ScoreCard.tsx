@@ -23,13 +23,12 @@ import {
   calculateJFLS8Score,
   calculateOBCScore,
   calculatePHQ4Score,
-  getPHQ4Interpretation,
   getSubscaleInterpretation,
   JFLS20_REFERENCE_VALUES,
   JFLS20_SUBSCALE_LABELS,
   QUESTIONNAIRE_ID,
 } from "@cmdetect/questionnaires";
-import { AlertTriangle, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
@@ -40,9 +39,6 @@ import {
   OBCAnswersTable,
   PHQ4AnswersTable,
 } from "./questionnaire-tables";
-
-// Clinical cutoff threshold per Löwe et al. (2010)
-export const PHQ4_CLINICAL_CUTOFF = 6;
 
 // PHQ-4 Severity scale segments
 export const PHQ4_SEVERITY_SEGMENTS = [
@@ -242,7 +238,7 @@ function JFLS20SubscaleDisplay({
 
 /**
  * Horizontal 3-column layout for score cards:
- * LEFT: title/subtitle/warning | CENTER: scale bar | RIGHT: score + interpretation
+ * LEFT: title/subtitle | CENTER: scale bar | RIGHT: score
  */
 interface HorizontalScoreLayoutProps {
   title: string;
@@ -252,7 +248,6 @@ interface HorizontalScoreLayoutProps {
   scaleLabel: string;
   scaleBar: ReactNode;
   scoreDisplay: ReactNode;
-  warning?: ReactNode;
   subscales?: ReactNode;
   isExpanded: boolean;
   onToggleExpand: () => void;
@@ -266,7 +261,6 @@ function HorizontalScoreLayout({
   scaleLabel,
   scaleBar,
   scoreDisplay,
-  warning,
   subscales,
   isExpanded,
   onToggleExpand,
@@ -276,7 +270,7 @@ function HorizontalScoreLayout({
     <Card className="overflow-hidden py-0 gap-0">
       <div className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
-          {/* LEFT: Title + warning */}
+          {/* LEFT: Title */}
           <div className="min-w-0">
             <h4 className="font-medium text-sm leading-tight">{title}</h4>
             {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
@@ -291,7 +285,6 @@ function HorizontalScoreLayout({
                 Scoring-Anleitung
               </Link>
             )}
-            {warning && <div className="mt-1.5">{warning}</div>}
           </div>
 
           {/* CENTER: Scale bar */}
@@ -481,23 +474,7 @@ export function Axis2ScoreCard({
         scoreDisplay={
           <div className="text-left">
             <div className="text-xl font-bold leading-tight">Grad {gradeRoman}</div>
-            <div className="text-xs text-muted-foreground">
-              {gcpsScore.gradeInterpretation.label}
-            </div>
           </div>
-        }
-        warning={
-          gcpsScore.grade >= 3 ? (
-            <div className="flex items-center gap-1.5 text-red-600">
-              <AlertTriangle className="size-3.5 shrink-0" />
-              <span className="text-xs font-medium">Dysfunktionaler chronischer Schmerz</span>
-            </div>
-          ) : gcpsScore.grade >= 1 ? (
-            <div className="flex items-center gap-1.5 text-yellow-600">
-              <AlertTriangle className="size-3.5 shrink-0" />
-              <span className="text-xs font-medium">Funktional persistierender Schmerz</span>
-            </div>
-          ) : undefined
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
@@ -563,7 +540,6 @@ export function Axis2ScoreCard({
           (segment) => segment.level === jflsScore.limitationLevel
         )
       : -1;
-    const isSignificant = jflsScore.limitationLevel === "significant";
 
     return (
       <HorizontalScoreLayout
@@ -590,9 +566,6 @@ export function Axis2ScoreCard({
                     /{jflsScore.maxScore}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {jflsScore.limitationInterpretation?.label}
-                </div>
               </>
             ) : (
               <span className="text-xs text-muted-foreground">
@@ -600,14 +573,6 @@ export function Axis2ScoreCard({
               </span>
             )}
           </div>
-        }
-        warning={
-          isSignificant ? (
-            <div className="flex items-center gap-1.5 text-red-600">
-              <AlertTriangle className="size-3.5 shrink-0" />
-              <span className="text-xs font-medium">Deutliche Funktionseinschränkung</span>
-            </div>
-          ) : undefined
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
@@ -624,7 +589,6 @@ export function Axis2ScoreCard({
           (segment) => segment.level === jflsScore.limitationLevel
         )
       : -1;
-    const isSignificant = jflsScore.limitationLevel === "significant";
 
     return (
       <HorizontalScoreLayout
@@ -651,9 +615,6 @@ export function Axis2ScoreCard({
                     /{jflsScore.maxScore}
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {jflsScore.limitationInterpretation?.label}
-                </div>
               </>
             ) : (
               <span className="text-xs text-muted-foreground">
@@ -661,14 +622,6 @@ export function Axis2ScoreCard({
               </span>
             )}
           </div>
-        }
-        warning={
-          isSignificant ? (
-            <div className="flex items-center gap-1.5 text-red-600">
-              <AlertTriangle className="size-3.5 shrink-0" />
-              <span className="text-xs font-medium">Deutliche Funktionseinschränkung</span>
-            </div>
-          ) : undefined
         }
         subscales={
           jflsScore.isValid ? (
@@ -704,8 +657,6 @@ export function Axis2ScoreCard({
     const activeRiskIndex = OBC_RISK_SEGMENTS.findIndex(
       (segment) => segment.level === obcScore.riskLevel
     );
-    const isHighRisk = obcScore.riskLevel === "high";
-
     return (
       <HorizontalScoreLayout
         title={title}
@@ -729,16 +680,7 @@ export function Axis2ScoreCard({
                 /{obcScore.maxScore}
               </span>
             </div>
-            <div className="text-xs text-muted-foreground">{obcScore.riskInterpretation.label}</div>
           </div>
-        }
-        warning={
-          isHighRisk ? (
-            <div className="flex items-center gap-1.5 text-red-600">
-              <AlertTriangle className="size-3.5 shrink-0" />
-              <span className="text-xs font-medium">Risikofaktor zur Entstehung von CMD</span>
-            </div>
-          ) : undefined
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
@@ -760,11 +702,9 @@ export function Axis2ScoreCard({
   }
 
   const score = calculatePHQ4Score(answers as Record<string, string>);
-  const interpretation = getPHQ4Interpretation(score);
   const anxietyResult = getSubscaleInterpretation(score.anxiety);
   const depressionResult = getSubscaleInterpretation(score.depression);
   const activeSegment = getActiveSegment(score.total);
-  const isClinicallyRelevant = score.total >= PHQ4_CLINICAL_CUTOFF;
 
   return (
     <HorizontalScoreLayout
@@ -791,16 +731,7 @@ export function Axis2ScoreCard({
             {score.total}
             <span className="text-sm text-muted-foreground font-normal">/{score.maxTotal}</span>
           </div>
-          <div className="text-xs text-muted-foreground">{interpretation.label}</div>
         </div>
-      }
-      warning={
-        isClinicallyRelevant ? (
-          <div className="flex items-center gap-1.5 text-orange-600">
-            <AlertTriangle className="size-3.5 shrink-0" />
-            <span className="text-xs font-medium">Klinisch auffällig (≥6 Punkte)</span>
-          </div>
-        ) : undefined
       }
       subscales={
         <div className="flex gap-3 text-xs">

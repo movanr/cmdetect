@@ -13,34 +13,14 @@
  */
 
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { CriterionStatus } from "@cmdetect/dc-tmd";
-import {
-  getPerDiagnosisAnamnesisResults,
-  getSectionBadge,
-  type DiagnosisAnamnesisResult,
-  type SectionId,
-} from "@cmdetect/dc-tmd";
 import { SQ_PAIN_FREQUENCY_LABELS } from "@cmdetect/questionnaires";
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Info, X } from "lucide-react";
-import { useMemo } from "react";
+import { Check, X } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────
 
 interface AnamnesisOverviewProps {
   sqAnswers: Record<string, unknown>;
-  caseId?: string;
-}
-
-interface PathwayInfo {
-  label: string;
-  /** Diagnosis anamnesis status: positive = confirmed, pending = still possible, negative = ruled out */
-  status: CriterionStatus;
-  note?: string;
-  /** Examination sections needed for this diagnosis pathway */
-  sections?: SectionId[];
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────
@@ -55,17 +35,6 @@ function formatDuration(value: unknown): string {
   return parts.length > 0 ? parts.join(", ") : "—";
 }
 
-/** Build a lookup from diagnosis results by ID */
-function buildDiagnosisLookup(
-  results: DiagnosisAnamnesisResult[]
-): Record<string, DiagnosisAnamnesisResult> {
-  const lookup: Record<string, DiagnosisAnamnesisResult> = {};
-  for (const r of results) {
-    lookup[r.id] = r;
-  }
-  return lookup;
-}
-
 /** Format side info from SQ office-use data (e.g. SQ8_office: { R: true, L: false }) */
 function formatSide(officeValue: unknown): string | null {
   if (!officeValue || typeof officeValue !== "object") return null;
@@ -75,14 +44,6 @@ function formatSide(officeValue: unknown): string | null {
   if (o.R) return "Rechte Seite";
   if (o.L) return "Linke Seite";
   return null;
-}
-
-/** Get anamnesisStatus for a diagnosis, defaulting to "negative" if not found */
-function diagStatus(
-  diagLookup: Record<string, DiagnosisAnamnesisResult>,
-  id: string
-): CriterionStatus {
-  return diagLookup[id]?.anamnesisStatus ?? "negative";
 }
 
 // ─── Sub-components (local) ─────────────────────────────────────────────
@@ -120,82 +81,6 @@ function DomainCard({
       {children}
     </div>
   );
-}
-
-/** Single diagnostic pathway indicator with optional exam section badges.
- *  Three states: positive (blue), pending (amber — still possible), negative (gray) */
-function PathwayIndicator({
-  label,
-  status,
-  note,
-  sections,
-  caseId,
-}: PathwayInfo & { caseId?: string }) {
-  const showSections = status !== "negative" && sections && sections.length > 0;
-
-  const content = (
-    <div
-      className={cn(
-        "flex items-center gap-1.5 text-xs",
-        status === "positive" && "text-blue-700",
-        status === "pending" && "text-amber-700",
-        status === "negative" && "text-muted-foreground"
-      )}
-    >
-      <ArrowRight className="h-3 w-3 shrink-0" />
-      <span className={cn(status !== "negative" && "font-medium")}>{label}</span>
-      {status === "pending" && (
-        <span className="text-xs font-normal text-amber-600">(noch möglich)</span>
-      )}
-      {showSections && (
-        <span className="flex gap-0.5 ml-auto shrink-0">
-          {sections.map((s) => {
-            const badge = (
-              <Badge
-                key={s}
-                variant="outline"
-                className={cn(
-                  "text-[10px] px-1 py-0 h-4 font-normal",
-                  status === "positive" && "text-blue-600 border-blue-200",
-                  status === "pending" && "text-amber-600 border-amber-200",
-                  caseId && "cursor-pointer hover:bg-accent"
-                )}
-              >
-                {getSectionBadge(s)}
-              </Badge>
-            );
-            if (caseId) {
-              return (
-                <Link
-                  key={s}
-                  to={`/cases/$id/examination/${s}` as "/cases/$id/examination/e1"}
-                  params={{ id: caseId }}
-                  search={{ mode: "preview" as const }}
-                >
-                  {badge}
-                </Link>
-              );
-            }
-            return badge;
-          })}
-        </span>
-      )}
-      {note && <Info className="h-3 w-3 shrink-0 text-muted-foreground/50" />}
-    </div>
-  );
-
-  if (note) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
-        <TooltipContent side="top" className="max-w-xs text-xs">
-          {note}
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return content;
 }
 
 /** SQ answer display line (label + value with positive/negative indicator) */
@@ -243,30 +128,6 @@ function AnswerLine({
   );
 }
 
-/** Pathway block — only rendered when at least one pathway is not negative */
-function PathwayBlock({
-  pathways,
-  bordered = true,
-  caseId,
-}: {
-  pathways: PathwayInfo[];
-  bordered?: boolean;
-  caseId?: string;
-}) {
-  const actionable = pathways.filter((p) => p.status !== "negative");
-  if (actionable.length === 0) return null;
-  return (
-    <div className={cn("space-y-0.5", bordered && "pt-1.5 border-t border-border/30")}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-        Zu untersuchen
-      </p>
-      {actionable.map((p) => (
-        <PathwayIndicator key={p.label} {...p} caseId={caseId} />
-      ))}
-    </div>
-  );
-}
-
 /** Modification checklist (SQ4_A-D / SQ7_A-D) */
 function ModificationChecklist({ items }: { items: { label: string; value: boolean }[] }) {
   return (
@@ -291,27 +152,10 @@ function ModificationChecklist({ items }: { items: { label: string; value: boole
 
 function SchmerzDomain({
   sqAnswers,
-  diagLookup,
-  caseId,
 }: {
   sqAnswers: Record<string, unknown>;
-  diagLookup: Record<string, DiagnosisAnamnesisResult>;
-  caseId?: string;
 }) {
   const active = sqAnswers.SQ1 === "yes";
-
-  const pathways: PathwayInfo[] = [
-    {
-      label: "Myalgie",
-      status: diagStatus(diagLookup, "myalgia"),
-      sections: diagLookup.myalgia?.examinationSections,
-    },
-    {
-      label: "Arthralgie",
-      status: diagStatus(diagLookup, "arthralgia"),
-      sections: diagLookup.arthralgia?.examinationSections,
-    },
-  ];
 
   return (
     <DomainCard active={active} label="Schmerz in einer mastikatorischen Struktur">
@@ -341,33 +185,16 @@ function SchmerzDomain({
           />
         </div>
       )}
-      <PathwayBlock pathways={pathways} caseId={caseId} />
     </DomainCard>
   );
 }
 
 function KopfschmerzDomain({
   sqAnswers,
-  diagLookup,
-  caseId,
 }: {
   sqAnswers: Record<string, unknown>;
-  diagLookup: Record<string, DiagnosisAnamnesisResult>;
-  caseId?: string;
 }) {
   const active = sqAnswers.SQ5 === "yes";
-
-  // Headache attr. TMD is a secondary diagnosis — requires Myalgia or Arthralgia.
-  // Only show exam sections when at least one primary diagnosis is still possible.
-  const primaryPossible =
-    diagStatus(diagLookup, "myalgia") !== "negative" ||
-    diagStatus(diagLookup, "arthralgia") !== "negative";
-
-  const pathway: PathwayInfo = {
-    label: "Kopfschmerz attr. TMD",
-    status: primaryPossible ? diagStatus(diagLookup, "headacheAttributedToTmd") : "negative",
-    sections: primaryPossible ? diagLookup.headacheAttributedToTmd?.examinationSections : undefined,
-  };
 
   return (
     <DomainCard active={active} label="Kopfschmerzen in Temporalregion">
@@ -390,46 +217,17 @@ function KopfschmerzDomain({
           />
         </div>
       )}
-      <PathwayBlock pathways={[pathway]} caseId={caseId} />
     </DomainCard>
   );
 }
 
 function GelenkgeraeuscheDomain({
   sqAnswers,
-  diagLookup,
-  caseId,
 }: {
   sqAnswers: Record<string, unknown>;
-  diagLookup: Record<string, DiagnosisAnamnesisResult>;
-  caseId?: string;
 }) {
   const active = sqAnswers.SQ8 === "yes";
   const sq8Side = formatSide(sqAnswers.SQ8_office);
-
-  // Merge all disc displacement variants into one entry (all share e6/e7 sections)
-  const dvStatuses = [
-    diagStatus(diagLookup, "discDisplacementWithReduction"),
-    diagStatus(diagLookup, "discDisplacementWithReductionIntermittentLocking"),
-  ];
-  const dvStatus: CriterionStatus = dvStatuses.includes("positive")
-    ? "positive"
-    : dvStatuses.includes("pending")
-      ? "pending"
-      : "negative";
-
-  const pathways: PathwayInfo[] = [
-    {
-      label: "Diskusverlagerung",
-      status: dvStatus,
-      sections: diagLookup.discDisplacementWithReduction?.examinationSections,
-    },
-    {
-      label: "Degenerative Gelenkerkrankung",
-      status: diagStatus(diagLookup, "degenerativeJointDisease"),
-      sections: diagLookup.degenerativeJointDisease?.examinationSections,
-    },
-  ];
 
   return (
     <DomainCard active={active} label="Gelenkgeräusche">
@@ -449,36 +247,24 @@ function GelenkgeraeuscheDomain({
           sidePending={sq8Side == null}
         />
       )}
-      <PathwayBlock pathways={pathways} caseId={caseId} />
     </DomainCard>
   );
 }
 
 function KieferklemmeDomain({
   sqAnswers,
-  diagLookup,
-  caseId,
 }: {
   sqAnswers: Record<string, unknown>;
-  diagLookup: Record<string, DiagnosisAnamnesisResult>;
-  caseId?: string;
 }) {
   const sq9Active = sqAnswers.SQ9 === "yes";
 
   // Path A: DV ohne Reposition (SQ9 + SQ10)
   const sq10 = sqAnswers.SQ10 === "yes";
-  // Both DD-without-reduction variants share the same anamnesis; pick the more severe for status
-  const pathAStatus: CriterionStatus =
-    diagStatus(diagLookup, "discDisplacementWithoutReductionLimitedOpening") === "positive" ||
-    diagStatus(diagLookup, "discDisplacementWithoutReductionWithoutLimitedOpening") === "positive"
-      ? "positive"
-      : diagStatus(diagLookup, "discDisplacementWithoutReductionLimitedOpening");
 
   // Path B: DV mit Rep.+int. Klemme (SQ11 + SQ12 + SQ8)
   const sq11Active = sqAnswers.SQ11 === "yes";
   const sq12 = sqAnswers.SQ12;
   const sq8 = sqAnswers.SQ8 === "yes";
-  const pathBStatus = diagStatus(diagLookup, "discDisplacementWithReductionIntermittentLocking");
 
   const domainActive = sq9Active || sq11Active;
 
@@ -503,18 +289,6 @@ function KieferklemmeDomain({
                 sidePending={!formatSide(sqAnswers.SQ10_office)}
               />
             )}
-            <PathwayBlock
-              bordered={false}
-              caseId={caseId}
-              pathways={[
-                {
-                  label: "Diskusverlagerung",
-                  status: pathAStatus,
-                  sections:
-                    diagLookup.discDisplacementWithoutReductionLimitedOpening?.examinationSections,
-                },
-              ]}
-            />
           </div>
 
           {/* Divider */}
@@ -544,19 +318,6 @@ function KieferklemmeDomain({
               value={sq8 ? "Ja" : "Nein — kann in U bestätigt werden"}
               positive={sq8}
             />
-            <PathwayBlock
-              bordered={false}
-              caseId={caseId}
-              pathways={[
-                {
-                  label: "Diskusverlagerung",
-                  status: pathBStatus,
-                  sections:
-                    diagLookup.discDisplacementWithReductionIntermittentLocking
-                      ?.examinationSections,
-                },
-              ]}
-            />
           </div>
         </div>
       )}
@@ -566,21 +327,11 @@ function KieferklemmeDomain({
 
 function KiefersperreDomain({
   sqAnswers,
-  diagLookup,
-  caseId,
 }: {
   sqAnswers: Record<string, unknown>;
-  diagLookup: Record<string, DiagnosisAnamnesisResult>;
-  caseId?: string;
 }) {
   const active = sqAnswers.SQ13 === "yes";
   const sq14 = sqAnswers.SQ14 === "yes";
-
-  const pathway: PathwayInfo = {
-    label: "Subluxation",
-    status: diagStatus(diagLookup, "subluxation"),
-    sections: diagLookup.subluxation?.examinationSections,
-  };
 
   return (
     <DomainCard active={active} label="Kiefersperre">
@@ -604,29 +355,23 @@ function KiefersperreDomain({
           />
         </div>
       )}
-      <PathwayBlock pathways={[pathway]} caseId={caseId} />
     </DomainCard>
   );
 }
 
 // ─── Main component ─────────────────────────────────────────────────────
 
-export function AnamnesisOverview({ sqAnswers, caseId }: AnamnesisOverviewProps) {
-  const diagResults = useMemo(() => getPerDiagnosisAnamnesisResults(sqAnswers), [sqAnswers]);
-  const diagLookup = useMemo(() => buildDiagnosisLookup(diagResults), [diagResults]);
-
+export function AnamnesisOverview({ sqAnswers }: AnamnesisOverviewProps) {
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {/* Row 1: Pain domains (span 2 cols on md+) */}
-        <SchmerzDomain sqAnswers={sqAnswers} diagLookup={diagLookup} caseId={caseId} />
-        <KopfschmerzDomain sqAnswers={sqAnswers} diagLookup={diagLookup} caseId={caseId} />
+    <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {/* Row 1: Pain domains (span 2 cols on md+) */}
+      <SchmerzDomain sqAnswers={sqAnswers} />
+      <KopfschmerzDomain sqAnswers={sqAnswers} />
 
-        {/* Row 2: Joint domains */}
-        <GelenkgeraeuscheDomain sqAnswers={sqAnswers} diagLookup={diagLookup} caseId={caseId} />
-        <KieferklemmeDomain sqAnswers={sqAnswers} diagLookup={diagLookup} caseId={caseId} />
-        <KiefersperreDomain sqAnswers={sqAnswers} diagLookup={diagLookup} caseId={caseId} />
-      </div>
-    </TooltipProvider>
+      {/* Row 2: Joint domains */}
+      <GelenkgeraeuscheDomain sqAnswers={sqAnswers} />
+      <KieferklemmeDomain sqAnswers={sqAnswers} />
+      <KiefersperreDomain sqAnswers={sqAnswers} />
+    </div>
   );
 }
