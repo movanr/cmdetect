@@ -43,6 +43,7 @@ import type {
   PersistedDiagnosisEvaluation,
   PractitionerDecision,
 } from "../types";
+import { ClinicalFindingsCard } from "./ClinicalFindingsCard";
 import { DiagnosisDetailPanel } from "./DiagnosisDetailPanel";
 import { PositiveDiagnosesList, type PositiveGroup } from "./PositiveDiagnosesList";
 import { RegionDiagnosisList } from "./RegionDiagnosisList";
@@ -429,6 +430,9 @@ export function EvaluationView({
             ) && <DiagnosisDetailPanel diagnosisId={selectedDiagnosisId} />}
         </CardContent>
       </Card>
+
+      {/* Clinical findings summary */}
+      <ClinicalFindingsCard criteriaData={criteriaData} />
 
       {/* Decision tree explorer */}
       <Card>

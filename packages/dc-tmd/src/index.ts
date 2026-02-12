@@ -17,3 +17,6 @@ export * from "./types/results";
 
 // Criteria DSL
 export * from "./criteria";
+
+// Clinical findings categorization
+export * from "./categorization";
