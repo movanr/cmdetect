@@ -6,12 +6,13 @@
  * then evaluates all diagnoses and displays results.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
+import { useSession } from "@/lib/auth";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
 import { graphql } from "@/graphql";
@@ -19,7 +20,7 @@ import { execute } from "@/graphql/execute";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse, type FormValues } from "../features/examination";
-import { EvaluationView } from "../features/evaluation";
+import { EvaluationView, useDiagnosisSync } from "../features/evaluation";
 
 // Reuse the same GetPatientRecord query as examination route (codegen-typed)
 const GET_PATIENT_RECORD = graphql(`
@@ -51,6 +52,7 @@ export const Route = createFileRoute("/cases_/$id/evaluation")({
 function EvaluationPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { data: session } = useSession();
   const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
@@ -143,15 +145,40 @@ function EvaluationPage() {
     ? formatDate(new Date(decryptedData.dateOfBirth))
     : undefined;
 
-  const completedStepsArray = Array.from(completedSteps);
+  // Extract SQ answers from questionnaire responses (safe before loading complete)
+  const sqResponse = responses?.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
+  const sqAnswers = (sqResponse?.answers ?? {}) as Record<string, unknown>;
+
+  // Get examination data (default to empty object if not available)
+  const examinationData = (examination?.responseData ?? {}) as FormValues;
+
+  // Diagnosis sync: compute client-side, persist to backend
+  // Must be called unconditionally (React hooks rule)
+  const userId = session?.user?.id ?? "";
+  const isDataReady = !isRecordLoading && !isResponsesLoading && !isExaminationLoading;
+  const {
+    allResults,
+    evaluation: diagnosisEvaluation,
+    isSyncing,
+    updateDecision,
+  } = useDiagnosisSync({
+    patientRecordId: id,
+    sqAnswers,
+    examinationData,
+    userId,
+    enabled: isDataReady,
+  });
+
+  // Receptionist role is read-only for decisions
+  const activeRole = (session?.user as Record<string, unknown> | undefined)?.activeRole as
+    | string
+    | undefined;
+  const isReadOnly = activeRole === "receptionist";
+
+  const completedStepsArray = useMemo(() => Array.from(completedSteps), [completedSteps]);
 
   // Loading or gating redirect in progress
-  if (
-    isRecordLoading ||
-    isResponsesLoading ||
-    isExaminationLoading ||
-    !isCurrentStepAccessible
-  ) {
+  if (!isDataReady || !isCurrentStepAccessible) {
     return (
       <CaseLayout
         caseId={id}
@@ -165,13 +192,6 @@ function EvaluationPage() {
     );
   }
 
-  // Extract SQ answers from questionnaire responses
-  const sqResponse = responses?.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
-  const sqAnswers = (sqResponse?.answers ?? {}) as Record<string, unknown>;
-
-  // Get examination data (default to empty object if not available)
-  const examinationData = (examination?.responseData ?? {}) as FormValues;
-
   return (
     <CaseLayout
       caseId={id}
@@ -182,7 +202,14 @@ function EvaluationPage() {
       patientDob={patientDob}
       isDecrypting={isDecrypting}
     >
-      <EvaluationView sqAnswers={sqAnswers} examinationData={examinationData} />
+      <EvaluationView
+        sqAnswers={sqAnswers}
+        examinationData={examinationData}
+        allDiagnosisResults={allResults}
+        evaluation={diagnosisEvaluation}
+        onUpdateDecision={updateDecision}
+        readOnly={isReadOnly || isSyncing}
+      />
     </CaseLayout>
   );
 }

@@ -1,17 +1,38 @@
 /**
- * PositiveDiagnosesList — Shows positive diagnoses grouped by (region, side).
+ * PositiveDiagnosesList — Shows positive diagnoses grouped by (region, side)
+ * with inline confirm/reject/note controls.
  *
  * Each group has a heading like "Temporalis, Rechte Seite" followed by
- * a bulleted list of clickable diagnosis names.
+ * DiagnosisListItem rows with practitioner decision buttons.
  */
 
-import { REGIONS, SIDES, type DiagnosisId, type Region, type Side } from "@cmdetect/dc-tmd";
-import { cn } from "@/lib/utils";
+import {
+  REGIONS,
+  SIDES,
+  type CriterionStatus,
+  type DiagnosisId,
+  type Region,
+  type Side,
+} from "@cmdetect/dc-tmd";
+import type { PractitionerDecision } from "../types";
+import { DiagnosisListItem } from "./DiagnosisListItem";
+
+// Stable no-op — only reachable when readOnly hides all action buttons
+const NOOP_UPDATE_DECISION = () => {};
+
+export interface PositiveGroupDiagnosis {
+  diagnosisId: DiagnosisId;
+  nameDE: string;
+  resultId: string;
+  computedStatus: CriterionStatus;
+  practitionerDecision: PractitionerDecision;
+  note: string | null;
+}
 
 export interface PositiveGroup {
   region: Region;
   side: Side;
-  diagnoses: Array<{ diagnosisId: DiagnosisId; nameDE: string }>;
+  diagnoses: PositiveGroupDiagnosis[];
 }
 
 interface PositiveDiagnosesListProps {
@@ -23,6 +44,12 @@ interface PositiveDiagnosesListProps {
   /** Maps a DiagnosisId to its tree type for highlight comparison. */
   diagnosisToTree: (id: DiagnosisId) => string;
   onDiagnosisClick: (side: Side, region: Region, diagnosisId: DiagnosisId) => void;
+  onUpdateDecision?: (params: {
+    resultId: string;
+    practitionerDecision: PractitionerDecision;
+    note: string | null;
+  }) => void;
+  readOnly?: boolean;
 }
 
 export function PositiveDiagnosesList({
@@ -32,10 +59,12 @@ export function PositiveDiagnosesList({
   selectedTree,
   diagnosisToTree,
   onDiagnosisClick,
+  onUpdateDecision,
+  readOnly,
 }: PositiveDiagnosesListProps) {
   if (groups.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">Keine positiven Diagnosen</p>
+      <p className="text-sm text-muted-foreground">Keine Diagnosen</p>
     );
   }
 
@@ -46,32 +75,31 @@ export function PositiveDiagnosesList({
         return (
           <div key={`${group.side}-${group.region}`}>
             <h3 className="text-sm font-semibold mb-1">{heading}</h3>
-            <ul className="space-y-0.5 ml-1">
+            <div className="space-y-0.5 ml-1">
               {group.diagnoses.map((d) => {
                 const isSelected =
                   selectedTree === diagnosisToTree(d.diagnosisId) &&
                   selectedSide === group.side &&
                   selectedRegion === group.region;
                 return (
-                  <li key={d.diagnosisId}>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        onDiagnosisClick(group.side, group.region, d.diagnosisId)
-                      }
-                      className={cn(
-                        "flex items-center gap-2 text-sm px-2 py-0.5 rounded w-full text-left transition-colors",
-                        isSelected
-                          ? "bg-accent font-medium"
-                          : "hover:bg-muted text-foreground"
-                      )}
-                    >
-                      {d.nameDE}
-                    </button>
-                  </li>
+                  <DiagnosisListItem
+                    key={d.diagnosisId}
+                    diagnosisId={d.diagnosisId}
+                    nameDE={d.nameDE}
+                    computedStatus={d.computedStatus}
+                    practitionerDecision={d.practitionerDecision}
+                    note={d.note}
+                    resultId={d.resultId}
+                    isSelected={isSelected}
+                    onDiagnosisClick={() =>
+                      onDiagnosisClick(group.side, group.region, d.diagnosisId)
+                    }
+                    onUpdateDecision={onUpdateDecision ?? NOOP_UPDATE_DECISION}
+                    readOnly={readOnly || !onUpdateDecision}
+                  />
                 );
               })}
-            </ul>
+            </div>
           </div>
         );
       })}

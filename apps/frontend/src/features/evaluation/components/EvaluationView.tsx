@@ -39,6 +39,10 @@ import {
 import type { FormValues } from "../../examination";
 import { EMPTY_REGION_STATUS, type RegionStatus } from "../../examination/components/HeadDiagram";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
+import type {
+  PersistedDiagnosisEvaluation,
+  PractitionerDecision,
+} from "../types";
 import { DiagnosisDetailPanel } from "./DiagnosisDetailPanel";
 import { PositiveDiagnosesList, type PositiveGroup } from "./PositiveDiagnosesList";
 import { RegionDiagnosisList } from "./RegionDiagnosisList";
@@ -47,6 +51,18 @@ import { SummaryDiagrams } from "./SummaryDiagrams";
 interface EvaluationViewProps {
   sqAnswers: Record<string, unknown>;
   examinationData: FormValues;
+  /** Persisted diagnosis evaluation from backend */
+  evaluation?: PersistedDiagnosisEvaluation | null;
+  /** All computed diagnosis results (from useDiagnosisSync) */
+  allDiagnosisResults?: DiagnosisEvaluationResult[];
+  /** Callback to update a practitioner decision */
+  onUpdateDecision?: (params: {
+    resultId: string;
+    practitionerDecision: PractitionerDecision;
+    note: string | null;
+  }) => void;
+  /** Whether the current user can only view (receptionist) */
+  readOnly?: boolean;
 }
 
 /** Regions shown in the head diagrams and used for filtering */
@@ -203,7 +219,14 @@ function aggregateStatus(statuses: CriterionStatus[]): CriterionStatus {
   return "negative";
 }
 
-export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewProps) {
+export function EvaluationView({
+  sqAnswers,
+  examinationData,
+  evaluation,
+  allDiagnosisResults,
+  onUpdateDecision,
+  readOnly,
+}: EvaluationViewProps) {
   // ── State ──────────────────────────────────────────────────────────
   const [selectedSide, setSelectedSide] = useState<Side>("right");
   const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
@@ -218,10 +241,10 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
     [sqAnswers, examinationData]
   );
 
-  // 2. Evaluate all diagnoses
+  // 2. Use pre-computed results from sync hook, or evaluate inline as fallback
   const allResults = useMemo(
-    () => evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData),
-    [criteriaData]
+    () => allDiagnosisResults ?? evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData),
+    [allDiagnosisResults, criteriaData]
   );
 
   // 3. Flatten parent/subtype hierarchy
@@ -256,6 +279,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
   }, [flatResults]);
 
   // 5. Positive diagnoses grouped by (region, side) for the left panel
+  //    Enriched with persisted result data and manually added diagnoses
   const positiveGroups = useMemo((): PositiveGroup[] => {
     const groups: PositiveGroup[] = [];
     const seen = new Set<string>();
@@ -270,14 +294,20 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
           );
           if (!hasLocation) continue;
 
-          const key = `${side}-${region}`;
           const def = ALL_DIAGNOSES.find((d) => d.id === result.diagnosisId);
           if (!def) continue;
 
-          // Deduplicate: same diagnosis at same (side, region)
-          const dedupKey = `${key}-${result.diagnosisId}`;
+          const dedupKey = `${side}-${region}-${result.diagnosisId}`;
           if (seen.has(dedupKey)) continue;
           seen.add(dedupKey);
+
+          // Enrich with persisted result data for inline controls
+          const persisted = evaluation?.results.find(
+            (r) =>
+              r.diagnosisId === result.diagnosisId &&
+              r.side === side &&
+              r.region === region
+          );
 
           let group = groups.find((g) => g.side === side && g.region === region);
           if (!group) {
@@ -287,13 +317,17 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
           group.diagnoses.push({
             diagnosisId: result.diagnosisId as DiagnosisId,
             nameDE: def.nameDE,
+            resultId: persisted?.id ?? "",
+            computedStatus: persisted?.computedStatus ?? "positive",
+            practitionerDecision: persisted?.practitionerDecision ?? null,
+            note: persisted?.note ?? null,
           });
         }
       }
     }
 
     return groups;
-  }, [flatResults]);
+  }, [flatResults, evaluation]);
 
   // 6. Tree types applicable to the selected region
   const currentTreeTypes = useMemo(
@@ -356,15 +390,15 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
 
   return (
     <div className="space-y-6">
-      {/* Positive diagnoses + head diagrams */}
+      {/* Diagnoses + head diagrams */}
       <Card>
         <CardHeader>
-          <CardTitle>Positive DC/TMD-Kriterien</CardTitle>
+          <CardTitle>DC/TMD-Diagnosen</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Positive diagnoses list */}
-            <div className="lg:w-80 xl:w-96 shrink-0">
+            {/* Diagnoses list with inline confirmation controls */}
+            <div className="lg:w-96 xl:w-[28rem] shrink-0">
               <PositiveDiagnosesList
                 groups={positiveGroups}
                 selectedSide={selectedSide}
@@ -372,6 +406,8 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
                 selectedTree={selectedTree}
                 diagnosisToTree={diagnosisToTreeType}
                 onDiagnosisClick={handlePositiveDiagnosisClick}
+                onUpdateDecision={onUpdateDecision}
+                readOnly={readOnly}
               />
             </div>
             {/* Head diagrams — visual region+side selector */}
@@ -463,6 +499,7 @@ export function EvaluationView({ sqAnswers, examinationData }: EvaluationViewPro
           </div>
         </CardContent>
       </Card>
+
     </div>
   );
 }

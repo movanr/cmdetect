@@ -1,0 +1,136 @@
+table:
+  name: diagnosis_result
+  schema: public
+object_relationships:
+  - name: diagnosis_evaluation
+    using:
+      foreign_key_constraint_on: diagnosis_evaluation_id
+  - name: organization
+    using:
+      foreign_key_constraint_on: organization_id
+  - name: patient_record
+    using:
+      foreign_key_constraint_on: patient_record_id
+  - name: decider
+    using:
+      foreign_key_constraint_on: decided_by
+insert_permissions:
+  - role: org_admin
+    permission:
+      check: {}
+      set:
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - diagnosis_evaluation_id
+        - patient_record_id
+        - diagnosis_id
+        - side
+        - region
+        - computed_status
+    comment: ""
+  - role: physician
+    permission:
+      check: {}
+      set:
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - diagnosis_evaluation_id
+        - patient_record_id
+        - diagnosis_id
+        - side
+        - region
+        - computed_status
+    comment: ""
+select_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - id
+        - diagnosis_evaluation_id
+        - patient_record_id
+        - organization_id
+        - diagnosis_id
+        - side
+        - region
+        - computed_status
+        - practitioner_decision
+        - decided_by
+        - decided_at
+        - note
+        - created_at
+        - updated_at
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - id
+        - diagnosis_evaluation_id
+        - patient_record_id
+        - organization_id
+        - diagnosis_id
+        - side
+        - region
+        - computed_status
+        - practitioner_decision
+        - decided_by
+        - decided_at
+        - note
+        - created_at
+        - updated_at
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+    comment: ""
+  - role: receptionist
+    permission:
+      columns:
+        - id
+        - diagnosis_evaluation_id
+        - patient_record_id
+        - organization_id
+        - diagnosis_id
+        - side
+        - region
+        - computed_status
+        - practitioner_decision
+        - decided_by
+        - decided_at
+        - note
+        - created_at
+        - updated_at
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+    comment: ""
+update_permissions:
+  - role: org_admin
+    permission:
+      columns:
+        - practitioner_decision
+        - decided_by
+        - decided_at
+        - note
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+      check: {}
+      set:
+        updated_at: now()
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - practitioner_decision
+        - decided_by
+        - decided_at
+        - note
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+      check: null
+      set:
+        updated_at: now()
+    comment: ""
