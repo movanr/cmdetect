@@ -19,3 +19,6 @@ export type {
 
 // Extraction
 export { extractClinicalFindings } from "./extract";
+
+// Anamnesis text generation
+export { generateAnamnesisText } from "./anamnesis-text";

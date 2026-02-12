@@ -1,28 +1,32 @@
 /**
- * Evaluation Route
+ * Documentation Layout Route
  *
- * Displays DC/TMD diagnosis evaluation results for a case.
- * Fetches SQ questionnaire answers and examination data,
- * then evaluates all diagnoses and displays results.
+ * Layout component for the Documentation workflow step.
+ * Provides sub-step navigation tabs and renders child routes via Outlet.
+ *
+ * Route: /cases/:id/documentation
+ * Parent: cases_.$id.tsx (gets KeySetupGuard + CaseWorkflowProvider)
  */
 
-import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
-import { useSession } from "@/lib/auth";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
 import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
-import { useCaseProgress, useStepGating } from "../features/case-workflow";
+import {
+  getStepDefinition,
+  SubStepTabs,
+  useCaseProgress,
+  useStepGating,
+} from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { useExaminationResponse, type FormValues } from "../features/examination";
-import { EvaluationView, useDiagnosisSync } from "../features/evaluation";
+import { useExaminationResponse } from "../features/examination";
+import { useNavigate } from "@tanstack/react-router";
 
-// Reuse the same GetPatientRecord query as examination route (codegen-typed)
 const GET_PATIENT_RECORD = graphql(`
   query GetPatientRecord($id: String!) {
     patient_record_by_pk(id: $id) {
@@ -45,14 +49,13 @@ const GET_PATIENT_RECORD = graphql(`
   }
 `);
 
-export const Route = createFileRoute("/cases_/$id/evaluation")({
-  component: EvaluationPage,
+export const Route = createFileRoute("/cases_/$id/documentation")({
+  component: DocumentationLayout,
 });
 
-function EvaluationPage() {
+function DocumentationLayout() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { data: session } = useSession();
   const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
@@ -64,11 +67,11 @@ function EvaluationPage() {
 
   const record = data?.patient_record_by_pk;
 
-  // Fetch questionnaire responses
-  const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
+  // Fetch questionnaire responses for workflow progress
+  const { data: responses } = useQuestionnaireResponses(id);
 
-  // Fetch examination data
-  const { data: examination, isLoading: isExaminationLoading } = useExaminationResponse(id);
+  // Fetch examination response for workflow progress
+  const { data: examination } = useExaminationResponse(id);
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
@@ -82,15 +85,13 @@ function EvaluationPage() {
   const { isCurrentStepAccessible, redirectStep } = useStepGating({
     caseId: id,
     completedSteps,
-    currentStep: "evaluation",
+    currentStep: "documentation",
   });
 
   // Redirect if step is not accessible
   useEffect(() => {
     if (
       !isRecordLoading &&
-      !isResponsesLoading &&
-      !isExaminationLoading &&
       !isCurrentStepAccessible &&
       redirectStep
     ) {
@@ -100,15 +101,7 @@ function EvaluationPage() {
         replace: true,
       });
     }
-  }, [
-    isRecordLoading,
-    isResponsesLoading,
-    isExaminationLoading,
-    isCurrentStepAccessible,
-    redirectStep,
-    navigate,
-    id,
-  ]);
+  }, [isRecordLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
 
   // Decrypt patient data
   useEffect(() => {
@@ -135,6 +128,10 @@ function EvaluationPage() {
     decrypt();
   }, [record?.first_name_encrypted]);
 
+  // Get documentation step definition for sub-steps
+  const documentationStep = getStepDefinition("documentation");
+  const subSteps = documentationStep?.subSteps ?? [];
+
   // Format patient display data
   const patientName =
     decryptedData && !isDecrypting
@@ -145,44 +142,13 @@ function EvaluationPage() {
     ? formatDate(new Date(decryptedData.dateOfBirth))
     : undefined;
 
-  // Extract SQ answers from questionnaire responses (safe before loading complete)
-  const sqResponse = responses?.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
-  const sqAnswers = (sqResponse?.answers ?? {}) as Record<string, unknown>;
+  const completedStepsArray = Array.from(completedSteps);
 
-  // Get examination data (default to empty object if not available)
-  const examinationData = (examination?.responseData ?? {}) as FormValues;
-
-  // Diagnosis sync: compute client-side, persist to backend
-  // Must be called unconditionally (React hooks rule)
-  const userId = session?.user?.id ?? "";
-  const isDataReady = !isRecordLoading && !isResponsesLoading && !isExaminationLoading;
-  const {
-    allResults,
-    evaluation: diagnosisEvaluation,
-    isSyncing,
-    updateDecision,
-  } = useDiagnosisSync({
-    patientRecordId: id,
-    sqAnswers,
-    examinationData,
-    userId,
-    enabled: isDataReady,
-  });
-
-  // Receptionist role is read-only for decisions
-  const activeRole = (session?.user as Record<string, unknown> | undefined)?.activeRole as
-    | string
-    | undefined;
-  const isReadOnly = activeRole === "receptionist";
-
-  const completedStepsArray = useMemo(() => Array.from(completedSteps), [completedSteps]);
-
-  // Loading or gating redirect in progress
-  if (!isDataReady || !isCurrentStepAccessible) {
+  if (isRecordLoading) {
     return (
       <CaseLayout
         caseId={id}
-        currentStep="evaluation"
+        currentStep="documentation"
         completedSteps={completedStepsArray}
       >
         <div className="flex items-center justify-center p-8">
@@ -196,21 +162,24 @@ function EvaluationPage() {
     <CaseLayout
       caseId={id}
       patientInternalId={record?.clinic_internal_id ?? undefined}
-      currentStep="evaluation"
+      currentStep="documentation"
       completedSteps={completedStepsArray}
       patientName={patientName}
       patientDob={patientDob}
       isDecrypting={isDecrypting}
     >
-      <EvaluationView
-        sqAnswers={sqAnswers}
-        examinationData={examinationData}
-        allDiagnosisResults={allResults}
-        evaluation={diagnosisEvaluation}
-        onUpdateDecision={updateDecision}
-        readOnly={isReadOnly || isSyncing}
-        caseId={id}
-      />
+      <div className="space-y-4">
+        {/* Sub-step navigation tabs */}
+        <SubStepTabs
+          caseId={id}
+          parentStep="documentation"
+          subSteps={subSteps}
+          className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
+        />
+
+        {/* Child route content */}
+        <Outlet />
+      </div>
     </CaseLayout>
   );
 }

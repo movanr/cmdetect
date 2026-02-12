@@ -14,9 +14,10 @@ export type MainStep = "anamnesis" | "examination" | "evaluation" | "documentati
 // Sub-step identifiers for each main step
 export type AnamnesisSubStep = "review" | "wizard";
 export type ExaminationSubStep = SectionId;
+export type DocumentationSubStep = "report";
 
 // Union of all sub-step types
-export type SubStep = AnamnesisSubStep | ExaminationSubStep;
+export type SubStep = AnamnesisSubStep | ExaminationSubStep | DocumentationSubStep;
 
 // Sub-step definition
 export interface SubStepDefinition {
@@ -102,6 +103,9 @@ export const MAIN_STEPS: StepDefinition[] = [
     id: "documentation",
     label: "Dokumentation",
     order: 4,
+    subSteps: [
+      { id: "report", label: "Befundbericht", order: 1, route: "report" },
+    ],
   },
   {
     id: "export",
@@ -164,8 +168,8 @@ export function canAccessStep(step: MainStep, completedSteps: Set<MainStep>): bo
       return completedSteps.has("examination");
 
     case "documentation":
-      // Documentation requires evaluation to be complete
-      return completedSteps.has("evaluation");
+      // Documentation requires examination to be complete (same gate as evaluation)
+      return completedSteps.has("examination");
 
     case "export":
       // Export requires documentation to be complete

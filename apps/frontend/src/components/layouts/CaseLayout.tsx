@@ -92,8 +92,8 @@ export function CaseLayout({
           const current = isStepCurrent(step.id);
           const accessible = isStepAccessible(step.id);
 
-          // Implemented routes: anamnesis, examination, and evaluation
-          const hasRoute = step.id === "anamnesis" || step.id === "examination" || step.id === "evaluation";
+          // Implemented routes: anamnesis, examination, evaluation, documentation
+          const hasRoute = step.id === "anamnesis" || step.id === "examination" || step.id === "evaluation" || step.id === "documentation";
 
           // Step indicator component
           const stepIndicator = (
@@ -122,6 +122,8 @@ export function CaseLayout({
               ? "/cases/$id/anamnesis"
               : step.id === "examination"
               ? "/cases/$id/examination"
+              : step.id === "documentation"
+              ? "/cases/$id/documentation"
               : "/cases/$id/evaluation";
 
             return (

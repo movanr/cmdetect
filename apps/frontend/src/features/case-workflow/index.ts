@@ -11,6 +11,7 @@ export {
   type SubStep,
   type AnamnesisSubStep,
   type ExaminationSubStep,
+  type DocumentationSubStep,
   type SubStepDefinition,
   type StepDefinition,
   type CaseData,

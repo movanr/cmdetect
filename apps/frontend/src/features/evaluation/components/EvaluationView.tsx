@@ -10,6 +10,8 @@
  * the parent myalgia diagnosis.
  */
 
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -25,6 +27,7 @@ import {
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
+import { ArrowRight } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import {
   DecisionTreeView,
@@ -64,6 +67,8 @@ interface EvaluationViewProps {
   }) => void;
   /** Whether the current user can only view (receptionist) */
   readOnly?: boolean;
+  /** Case ID for navigation to report page */
+  caseId?: string;
 }
 
 /** Regions shown in the head diagrams and used for filtering */
@@ -227,6 +232,7 @@ export function EvaluationView({
   allDiagnosisResults,
   onUpdateDecision,
   readOnly,
+  caseId,
 }: EvaluationViewProps) {
   // ── State ──────────────────────────────────────────────────────────
   const [selectedSide, setSelectedSide] = useState<Side>("right");
@@ -391,6 +397,18 @@ export function EvaluationView({
 
   return (
     <div className="space-y-6">
+      {/* Navigation to next step */}
+      {caseId && (
+        <div className="flex justify-end">
+          <Button asChild>
+            <Link to="/cases/$id/documentation" params={{ id: caseId }}>
+              Weiter zur Dokumentation
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
+
       {/* Diagnoses + head diagrams */}
       <Card>
         <CardHeader>
@@ -504,6 +522,17 @@ export function EvaluationView({
         </CardContent>
       </Card>
 
+      {/* Navigation to next step */}
+      {caseId && (
+        <div className="flex justify-end pt-2">
+          <Button asChild>
+            <Link to="/cases/$id/documentation" params={{ id: caseId }}>
+              Weiter zur Dokumentation
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
