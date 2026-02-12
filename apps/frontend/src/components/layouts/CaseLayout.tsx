@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "../../lib/auth";
 import { Header } from "../navigation/Header";
 import { cn } from "@/lib/utils";
-import { Check, X, Menu, Lock } from "lucide-react";
+import { Check, Eye, X, Menu, Lock } from "lucide-react";
 import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -81,45 +81,11 @@ export function CaseLayout({
     navigate({ to: "/cases" });
   };
 
+  const hasPatientInfo = patientInternalId || patientName || patientDob || isDecrypting;
+
   // Reusable sidebar content
   const sidebarContent = (
     <>
-      {/* Case Info Section */}
-      <div className="p-6 border-b space-y-3">
-        {patientInternalId && (
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">{t.caseSteps.patientIdLabel}</div>
-            <div className="font-semibold text-sm">{patientInternalId}</div>
-          </div>
-        )}
-
-        {patientName && (
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">{t.columns.patientName}</div>
-            <div className="font-medium text-sm">
-              {isDecrypting ? t.loadingStates.decrypting : patientName}
-            </div>
-          </div>
-        )}
-
-        {patientDob && !isDecrypting && (
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">{t.columns.dob}</div>
-            <div className="text-sm">{patientDob}</div>
-          </div>
-        )}
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCloseCase}
-          className="w-full justify-start"
-        >
-          <X className="h-4 w-4 mr-2" />
-          {t.caseSteps.closeCase}
-        </Button>
-      </div>
-
       <nav className="p-6 space-y-2">
         {steps.map((step) => {
           const completed = isStepCompleted(step.id);
@@ -159,39 +125,61 @@ export function CaseLayout({
               : "/cases/$id/evaluation";
 
             return (
-              <Link
-                key={step.id}
-                to={route}
-                params={{ id: caseId }}
-                onClick={() => setSidebarOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                  current && "bg-primary text-primary-foreground",
-                  !current && completed && "text-foreground hover:bg-muted",
-                  !current && !completed && "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                {stepIndicator}
-                <span>{step.label}</span>
-              </Link>
+                <Link
+                  key={step.id}
+                  to={route}
+                  params={{ id: caseId }}
+                  onClick={() => setSidebarOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    current && "bg-primary text-primary-foreground",
+                    !current && completed && "text-foreground hover:bg-muted",
+                    !current && !completed && "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {stepIndicator}
+                  <span>{step.label}</span>
+                </Link>
+            );
+          }
+
+          // Examination step: allow preview mode even when locked
+          if (step.id === "examination" && hasRoute && !accessible) {
+            return (
+                <Link
+                  key={step.id}
+                  to="/cases/$id/examination"
+                  params={{ id: caseId }}
+                  search={{ mode: "preview" as const }}
+                  onClick={() => setSidebarOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                    current && "bg-primary text-primary-foreground",
+                    !current && "text-muted-foreground/70 hover:bg-muted hover:text-muted-foreground"
+                  )}
+                >
+                  {stepIndicator}
+                  <span>{step.label}</span>
+                  {!current && <Eye className="h-3.5 w-3.5 ml-auto text-muted-foreground/50" />}
+                </Link>
             );
           }
 
           // Render as non-interactive div for inaccessible or unimplemented steps
           return (
-            <div
-              key={step.id}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-                current && "bg-primary text-primary-foreground",
-                !current && completed && "text-foreground",
-                !current && !completed && accessible && "text-muted-foreground",
-                !current && !completed && !accessible && "text-muted-foreground/50"
-              )}
-            >
-              {stepIndicator}
-              <span>{step.label}</span>
-            </div>
+              <div
+                key={step.id}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
+                  current && "bg-primary text-primary-foreground",
+                  !current && completed && "text-foreground",
+                  !current && !completed && accessible && "text-muted-foreground",
+                  !current && !completed && !accessible && "text-muted-foreground/50"
+                )}
+              >
+                {stepIndicator}
+                <span>{step.label}</span>
+              </div>
           );
         })}
       </nav>
@@ -203,7 +191,41 @@ export function CaseLayout({
       {/* Header */}
       <Header />
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      {/* Patient info top bar */}
+      {hasPatientInfo && (
+        <div className="flex items-center gap-4 border-b bg-muted/40 px-4 py-2 xl:px-6">
+          {patientInternalId && (
+            <div className="flex items-center gap-1.5 text-sm">
+              <span className="text-muted-foreground">{t.caseSteps.patientIdLabel}:</span>
+              <span className="font-semibold">{patientInternalId}</span>
+            </div>
+          )}
+          {patientName && (
+            <div className="flex items-center gap-1.5 text-sm">
+              <span className="text-muted-foreground">{t.columns.patientName}:</span>
+              <span className="font-medium">
+                {isDecrypting ? t.loadingStates.decrypting : patientName}
+              </span>
+            </div>
+          )}
+          {patientDob && !isDecrypting && (
+            <div className="flex items-center gap-1.5 text-sm">
+              <span className="text-muted-foreground">{t.columns.dob}:</span>
+              <span>{patientDob}</span>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCloseCase}
+            className="ml-auto h-7 px-2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      <div className={cn("flex", hasPatientInfo ? "h-[calc(100vh-4rem-2.5rem)]" : "h-[calc(100vh-4rem)]")}>
         {/* Sidebar Sheet for tablet portrait (md to lg) */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent side="left" className="w-64 p-0">

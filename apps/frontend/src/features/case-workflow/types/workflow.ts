@@ -199,3 +199,11 @@ export function getPreviousStep(currentStep: MainStep): MainStep | undefined {
   const prevStep = MAIN_STEPS.find((s) => s.order === currentDef.order - 1);
   return prevStep?.id;
 }
+
+// Get first incomplete step (for smart case entry redirect)
+export function getFirstIncompleteStep(completedSteps: Set<MainStep>): MainStep {
+  for (const step of MAIN_STEPS) {
+    if (!completedSteps.has(step.id)) return step.id;
+  }
+  return "export";
+}

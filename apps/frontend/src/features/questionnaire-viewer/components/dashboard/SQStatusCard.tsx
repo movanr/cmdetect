@@ -13,10 +13,8 @@ import {
   SQ_OFFICE_USE_QUESTIONS,
   isQuestionIdEnabled,
 } from "@cmdetect/questionnaires";
-import { getAnamnesisCriteriaSummary } from "@cmdetect/dc-tmd";
-import { cn } from "@/lib/utils";
 import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { SQAnswersTable } from "./questionnaire-tables";
@@ -67,12 +65,6 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
   const { answers, submittedAt, reviewedAt } = response;
   const pendingConfirmations = isScreeningNegative ? 0 : countPendingConfirmations(answers);
   const isReviewed = !!reviewedAt;
-
-  const criteriaSummary = useMemo(
-    () => (isScreeningNegative ? [] : getAnamnesisCriteriaSummary(answers)),
-    [answers, isScreeningNegative]
-  );
-  const hasAnyCriteria = criteriaSummary.some((c) => c.status === "positive");
 
   return (
     <Card className="overflow-hidden py-0 gap-0">
@@ -136,33 +128,6 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
               </div>
             )}
 
-            {/* Anamnesis criteria summary */}
-            {!isScreeningNegative && hasAnyCriteria && (
-              <div className="mt-3 space-y-0.5">
-                {criteriaSummary.map((c) => {
-                  const isPositive = c.status === "positive";
-                  return (
-                    <div
-                      key={c.id}
-                      className={cn(
-                        "flex items-center gap-2 text-sm",
-                        !isPositive && "opacity-50"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "inline-block h-1.5 w-1.5 rounded-full shrink-0",
-                          isPositive ? "bg-blue-500" : "bg-gray-300"
-                        )}
-                      />
-                      <span className={cn(!isPositive && "text-muted-foreground")}>
-                        {c.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
 
           {/* Details toggle */}

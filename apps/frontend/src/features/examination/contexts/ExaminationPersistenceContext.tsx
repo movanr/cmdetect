@@ -8,7 +8,7 @@
  * diagnostically relevant based on SQ questionnaire answers.
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type PropsWithChildren, type ReactNode } from "react";
 import { useExaminationPersistence } from "../hooks/use-examination-persistence";
 import type { SectionId } from "../sections/registry";
 import type { ExaminationStatus } from "../hooks/use-examination-response";
@@ -97,8 +97,36 @@ export function ExaminationPersistenceProvider({
 }
 
 /**
+ * Preview Persistence Provider
+ *
+ * Noop persistence provider for preview/preparation mode.
+ * All save operations are noops, all sections appear relevant, and hydration is immediate.
+ */
+const NOOP_PREVIEW_VALUE: ExaminationPersistenceContextValue = {
+  saveSection: async () => {},
+  saveDraft: async () => {},
+  completeExamination: async () => {},
+  isSaving: false,
+  completedSections: [],
+  isHydrated: true,
+  status: null,
+  relevantSections: null,
+  possibleDiagnoses: null,
+  ruledOutDiagnoses: null,
+  isSectionRelevant: () => true,
+};
+
+export function PreviewPersistenceProvider({ children }: PropsWithChildren) {
+  return (
+    <ExaminationPersistenceContext.Provider value={NOOP_PREVIEW_VALUE}>
+      {children}
+    </ExaminationPersistenceContext.Provider>
+  );
+}
+
+/**
  * Hook to access examination persistence context.
- * Must be used within ExaminationPersistenceProvider.
+ * Must be used within ExaminationPersistenceProvider or PreviewPersistenceProvider.
  */
 export function useExaminationPersistenceContext(): ExaminationPersistenceContextValue {
   const context = useContext(ExaminationPersistenceContext);

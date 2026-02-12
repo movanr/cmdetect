@@ -23,6 +23,7 @@ export {
   getFirstSubStep,
   getNextStep,
   getPreviousStep,
+  getFirstIncompleteStep,
 } from "./types/workflow";
 
 // Hooks

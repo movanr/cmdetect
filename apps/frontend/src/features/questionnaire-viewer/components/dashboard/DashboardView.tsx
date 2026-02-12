@@ -32,6 +32,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  Eye,
   LayoutList,
   Printer,
   Rows3,
@@ -87,6 +88,8 @@ interface DashboardViewProps {
   onStartReview: () => void;
   /** Callback to continue to the examination (shown after review is complete) */
   onContinueToExamination?: () => void;
+  /** Callback to open examination in preview/preparation mode */
+  onPrepareExamination?: () => void;
   /** Patient record / case ID (for print export) */
   caseId?: string;
 }
@@ -95,6 +98,7 @@ export function DashboardView({
   responses,
   onStartReview,
   onContinueToExamination,
+  onPrepareExamination,
   caseId,
 }: DashboardViewProps) {
   const [layout, setLayout] = useState<DashboardLayout>(getStoredLayout);
@@ -239,6 +243,13 @@ export function DashboardView({
                 {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
               </Button>
             )}
+            {/* Prepare examination button */}
+            {onPrepareExamination && (
+              <Button variant="outline" onClick={onPrepareExamination}>
+                <Eye className="mr-2 h-4 w-4" />
+                Untersuchung vorbereiten
+              </Button>
+            )}
             {/* Top navigation button(s) */}
             {showNextStepButton &&
               (isReviewed ? (
@@ -295,10 +306,8 @@ export function DashboardView({
                 <SQAnswersTable answers={sqResponse.answers} />
                 {!isScreeningNegative && sqAnswers && (
                   <div className="mt-4 pt-4 border-t">
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                      Anamnese-Übersicht
-                    </h4>
-                    <AnamnesisOverview sqAnswers={sqAnswers} />
+                    <h4 className="font-medium mb-2">Anamnesekriterien</h4>
+                    <AnamnesisOverview sqAnswers={sqAnswers} caseId={caseId} />
                   </div>
                 )}
               </section>
@@ -394,12 +403,10 @@ export function DashboardView({
                 <DashboardInfoBlock info={AXIS1_INFO} className="mb-3" />
                 <SQStatusCard response={sqResponse} isScreeningNegative={isScreeningNegative} />
                 {!isScreeningNegative && sqAnswers && (
-                  <Card className="mt-3">
+                  <Card className="mt-3 py-0">
                     <CardContent className="p-4">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                        Anamnese-Übersicht
-                      </h4>
-                      <AnamnesisOverview sqAnswers={sqAnswers} />
+                      <h4 className="font-medium mb-2">Anamnesekriterien</h4>
+                      <AnamnesisOverview sqAnswers={sqAnswers} caseId={caseId} />
                     </CardContent>
                   </Card>
                 )}
