@@ -9,7 +9,6 @@ import { AuthEndpoints } from "./auth-endpoints";
 import { DatabaseService } from "./database";
 import { env } from "./env";
 import { handleAsyncError } from "./errors";
-import { handlePdfAnamnesisExport } from "./pdf-export";
 
 const app = express();
 
@@ -33,8 +32,7 @@ app.use(
 );
 
 // JSON middleware after auth handler
-// Increased limit for PDF export payloads with pain drawing images
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json({ limit: "1mb" }));
 
 // Hasura Actions
 app.post(
@@ -81,12 +79,6 @@ app.post(
 app.post(
   "/api/auth/switch-role",
   handleAsyncError((req, res) => authEndpoints.switchRole(req, res), "Failed to switch role")
-);
-
-// PDF Export endpoint
-app.post(
-  "/api/pdf/anamnesis",
-  handleAsyncError(handlePdfAnamnesisExport, "Failed to generate PDF")
 );
 
 // Auth routes (must be after custom routes)

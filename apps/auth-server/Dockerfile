@@ -25,7 +25,6 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/auth-server/package.json ./apps/auth-server/
 COPY packages/config/package.json ./packages/config/
 COPY packages/questionnaires/package.json ./packages/questionnaires/
-COPY packages/pdf-templates/package.json ./packages/pdf-templates/
 
 # Install all dependencies
 RUN pnpm install --frozen-lockfile --filter @cmdetect/auth-server...
@@ -44,7 +43,6 @@ COPY --from=deps /app/packages/questionnaires/node_modules ./packages/questionna
 # Copy source code
 COPY packages/config ./packages/config
 COPY packages/questionnaires ./packages/questionnaires
-COPY packages/pdf-templates ./packages/pdf-templates
 COPY apps/auth-server ./apps/auth-server
 COPY tsconfig.json ./
 COPY tsconfig.base.json ./
@@ -79,10 +77,6 @@ COPY --from=builder --chown=authserver:nodejs /app/packages/config/dist ./packag
 COPY --from=builder --chown=authserver:nodejs /app/packages/config/package.json ./packages/config/
 COPY --from=builder --chown=authserver:nodejs /app/packages/questionnaires/dist ./packages/questionnaires/dist
 COPY --from=builder --chown=authserver:nodejs /app/packages/questionnaires/package.json ./packages/questionnaires/
-
-# Copy PDF templates (static files, no build needed)
-COPY --from=builder --chown=authserver:nodejs /app/packages/pdf-templates/templates ./packages/pdf-templates/templates
-COPY --from=builder --chown=authserver:nodejs /app/packages/pdf-templates/package.json ./packages/pdf-templates/
 
 USER authserver
 

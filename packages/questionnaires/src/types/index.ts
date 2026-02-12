@@ -86,19 +86,3 @@ export type {
   JFLS20SubscaleScore,
   JFLS20Score,
 } from "./jfls20";
-
-export type {
-  // PDF Export types
-  AnamnesisExportData,
-  AnamnesisExportMetadata,
-  AnamnesisExportPatient,
-  AnamnesisExportQuestionnaires,
-  SQExportData,
-  PainDrawingExportData,
-  PainDrawingScore,
-  PainDrawingImageId,
-  PainDrawingRiskLevel,
-  PainDrawingElementCounts,
-  PainDrawingPatterns,
-  PainDrawingInterpretation,
-} from "./pdf-export";

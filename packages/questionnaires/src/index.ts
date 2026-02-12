@@ -91,19 +91,6 @@ export type {
   JFLS20SubscaleId,
   JFLS20SubscaleScore,
   JFLS20Score,
-  // PDF Export types
-  AnamnesisExportData,
-  AnamnesisExportMetadata,
-  AnamnesisExportPatient,
-  AnamnesisExportQuestionnaires,
-  SQExportData,
-  PainDrawingExportData,
-  PainDrawingScore,
-  PainDrawingImageId,
-  PainDrawingRiskLevel,
-  PainDrawingElementCounts,
-  PainDrawingPatterns,
-  PainDrawingInterpretation,
 } from "./types";
 
 // ============================================================================
@@ -361,16 +348,4 @@ export {
   PainDrawingPatternsSchema,
   PainDrawingInterpretationSchema,
   PainDrawingScoreSchema,
-  // PDF Export schemas
-  AnamnesisExportMetadataSchema,
-  AnamnesisExportPatientSchema,
-  SQExportDataSchema,
-  PHQ4ExportDataSchema,
-  GCPS1MExportDataSchema,
-  JFLS8ExportDataSchema,
-  JFLS20ExportDataSchema,
-  OBCExportDataSchema,
-  PainDrawingExportDataSchema,
-  AnamnesisExportQuestionnairesSchema,
-  AnamnesisExportDataSchema,
 } from "./schemas";

@@ -38,18 +38,3 @@ export {
   PainDrawingInterpretationSchema,
   PainDrawingScoreSchema,
 } from "./scores";
-
-// PDF Export schemas
-export {
-  AnamnesisExportMetadataSchema,
-  AnamnesisExportPatientSchema,
-  SQExportDataSchema,
-  PHQ4ExportDataSchema,
-  GCPS1MExportDataSchema,
-  JFLS8ExportDataSchema,
-  JFLS20ExportDataSchema,
-  OBCExportDataSchema,
-  PainDrawingExportDataSchema,
-  AnamnesisExportQuestionnairesSchema,
-  AnamnesisExportDataSchema,
-} from "./pdf-export";
