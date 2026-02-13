@@ -198,6 +198,24 @@ export interface I18nStrings {
     adminPrivilegesRequired: string;
   };
 
+  // Create invite page
+  createInvite: {
+    title: string;
+    description: string;
+    patientInternalId: string;
+    patientInternalIdPlaceholder: string;
+    patientInternalIdHint: string;
+    patientInternalIdRequired: string;
+    createButton: string;
+    creating: string;
+    cancel: string;
+    successMessage: string;
+    failedToCreate: string;
+    copy: string;
+    backToInvites: string;
+    createAnother: string;
+  };
+
   // Case workflow steps
   caseSteps: {
     caseLabel: string;
@@ -380,6 +398,23 @@ export const translations: Record<Language, I18nStrings> = {
     accessControl: {
       accessDenied: "Access Denied",
       adminPrivilegesRequired: "You need administrator privileges to access team management.",
+    },
+
+    createInvite: {
+      title: "Create New Invite",
+      description: "Generate a new patient invitation link",
+      patientInternalId: "Patient Internal ID",
+      patientInternalIdPlaceholder: "e.g., PAT-2024-001",
+      patientInternalIdHint: "A unique identifier for this patient in your clinic system",
+      patientInternalIdRequired: "Patient internal ID is required",
+      createButton: "Create Invite",
+      creating: "Creating...",
+      cancel: "Cancel",
+      successMessage: "Invite created successfully",
+      failedToCreate: "Failed to create invite",
+      copy: "Copy",
+      backToInvites: "Back to Invites",
+      createAnother: "Create Another",
     },
 
     caseSteps: {
@@ -565,6 +600,23 @@ export const translations: Record<Language, I18nStrings> = {
       accessDenied: "Zugriff verweigert",
       adminPrivilegesRequired:
         "Sie benötigen Administratorrechte, um auf die Teamverwaltung zuzugreifen.",
+    },
+
+    createInvite: {
+      title: "Neue Einladung erstellen",
+      description: "Einen neuen Einladungslink für Patienten generieren",
+      patientInternalId: "Interne Patienten-ID",
+      patientInternalIdPlaceholder: "z.B. PAT-2024-001",
+      patientInternalIdHint: "Eine eindeutige Kennung für diesen Patienten in Ihrem Praxissystem",
+      patientInternalIdRequired: "Interne Patienten-ID ist erforderlich",
+      createButton: "Einladung erstellen",
+      creating: "Wird erstellt...",
+      cancel: "Abbrechen",
+      successMessage: "Einladung erfolgreich erstellt",
+      failedToCreate: "Einladung konnte nicht erstellt werden",
+      copy: "Kopieren",
+      backToInvites: "Zurück zu Einladungen",
+      createAnother: "Weitere erstellen",
     },
 
     caseSteps: {

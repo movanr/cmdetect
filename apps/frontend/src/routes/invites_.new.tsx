@@ -1,6 +1,7 @@
 import { CreateInviteForm } from "@/features/patient-records/components/CreateInviteForm";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "../components/layouts/AppLayout";
+import { getTranslations } from "../config/i18n";
 import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 
 export const Route = createFileRoute("/invites_/new")({
@@ -8,15 +9,17 @@ export const Route = createFileRoute("/invites_/new")({
 });
 
 function CreateInvitePage() {
+  const t = getTranslations();
+
   return (
     <KeySetupGuard>
       <AppLayout>
         <div className="space-y-6">
           {/* Page header */}
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Create New Invite</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">{t.createInvite.title}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Generate a new patient invitation link
+              {t.createInvite.description}
             </p>
           </div>
 
