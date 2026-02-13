@@ -16,7 +16,7 @@ interface SQInstructionBlockProps {
 }
 
 export function SQInstructionBlock({ instruction, className }: SQInstructionBlockProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div
