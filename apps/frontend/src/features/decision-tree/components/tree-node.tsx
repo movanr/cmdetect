@@ -208,9 +208,12 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
         {imagingNote && (
           <div className="mt-1">
-            <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">
+            <Badge
+              variant="outline"
+              className="text-[10px] px-1 py-0 h-4 font-normal text-amber-700 border-amber-200"
+            >
               {`Durch ${imagingNote} bestätigen, wenn indiziert`}
-            </span>
+            </Badge>
           </div>
         )}
 
