@@ -36,4 +36,4 @@ export type { QuestionnaireResponse } from "./hooks/useQuestionnaireResponses";
 export { getEnabledSections, filterEnabledAnswers } from "./utils";
 
 // Re-export scoring utilities
-export { calculatePHQ4Score, getPHQ4Interpretation } from "@cmdetect/questionnaires";
+export { calculatePHQ4Score } from "@cmdetect/questionnaires";

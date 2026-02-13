@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import {
   calculatePHQ4Score,
-  getPHQ4Interpretation,
   PHQ4_OPTIONS,
   PHQ4_QUESTION_ORDER,
   PHQ4_QUESTIONS,
@@ -33,7 +32,6 @@ interface PHQ4SummaryProps {
 
 export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
   const score = calculatePHQ4Score(answers);
-  const interpretation = getPHQ4Interpretation(score);
 
   return (
     <Card className="py-0 gap-0">
@@ -95,7 +93,7 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
 
       <CardFooter className="bg-muted/50 border-t px-4 py-3 flex justify-between">
         <span className="font-medium">
-          {interpretation.label} — {score.total}/{score.maxTotal}
+          {score.total}/{score.maxTotal}
         </span>
         <span className="text-muted-foreground text-sm">
           Angst {score.anxiety}/{score.maxAnxiety}, Depression{" "}

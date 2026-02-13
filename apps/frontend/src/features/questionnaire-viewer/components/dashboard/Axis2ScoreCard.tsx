@@ -42,10 +42,10 @@ import {
 
 // PHQ-4 Severity scale segments
 export const PHQ4_SEVERITY_SEGMENTS = [
-  { label: "Normal", range: "0-2", min: 0, max: 2, color: "bg-green-500" },
-  { label: "Mild", range: "3-5", min: 3, max: 5, color: "bg-yellow-500" },
-  { label: "Moderat", range: "6-8", min: 6, max: 8, color: "bg-orange-500" },
-  { label: "Schwer", range: "9-12", min: 9, max: 12, color: "bg-red-500" },
+  { label: "0–2", range: "0-2", min: 0, max: 2, color: "bg-green-500" },
+  { label: "3–5", range: "3-5", min: 3, max: 5, color: "bg-yellow-500" },
+  { label: "6–8", range: "6-8", min: 6, max: 8, color: "bg-orange-500", sublabel: "Cutoff ≥6" },
+  { label: "9–12", range: "9-12", min: 9, max: 12, color: "bg-red-500" },
 ] as const;
 
 // GCPS Grade scale segments (0-IV) - German labels per DC/TMD manual
@@ -55,11 +55,11 @@ export const GCPS_GRADE_SEGMENTS: Array<{
   sublabel: string;
   color: string;
 }> = [
-  { grade: 0, label: "0", sublabel: "Kein Schmerz", color: "bg-green-500" },
-  { grade: 1, label: "I", sublabel: "Geringe Intensität", color: "bg-yellow-400" },
-  { grade: 2, label: "II", sublabel: "Hohe Intensität", color: "bg-yellow-500" },
-  { grade: 3, label: "III", sublabel: "Mäßige Einschr.", color: "bg-orange-500" },
-  { grade: 4, label: "IV", sublabel: "Hochgradige Einschr.", color: "bg-red-500" },
+  { grade: 0, label: "0", sublabel: "CPI = 0", color: "bg-green-500" },
+  { grade: 1, label: "I", sublabel: "CPI < 50", color: "bg-yellow-400" },
+  { grade: 2, label: "II", sublabel: "CPI ≥ 50", color: "bg-yellow-500" },
+  { grade: 3, label: "III", sublabel: "3–4 BP", color: "bg-orange-500" },
+  { grade: 4, label: "IV", sublabel: "5–6 BP", color: "bg-red-500" },
 ];
 
 // OBC Risk level segments based on TMD prevalence comparison
@@ -74,8 +74,8 @@ export const OBC_RISK_SEGMENTS: Array<{
 }> = [
   {
     level: "normal",
-    label: "Normal",
-    sublabel: "Normale Verhaltensweisen",
+    label: "0–16",
+    sublabel: "",
     range: "0-16",
     min: 0,
     max: 16,
@@ -83,7 +83,7 @@ export const OBC_RISK_SEGMENTS: Array<{
   },
   {
     level: "elevated",
-    label: "Erhöht",
+    label: "17–24",
     sublabel: "2× häufiger bei CMD",
     range: "17-24",
     min: 17,
@@ -92,7 +92,7 @@ export const OBC_RISK_SEGMENTS: Array<{
   },
   {
     level: "high",
-    label: "Hoch",
+    label: "25+",
     sublabel: "17× häufiger bei CMD",
     range: "25+",
     min: 25,
@@ -114,8 +114,8 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
 }> = [
   {
     level: "normal",
-    label: "Normal",
-    sublabel: "Ref: 0.16",
+    label: "<0.5",
+    sublabel: "Ref: Gesund 0.16",
     range: "<0.5",
     min: 0,
     max: 0.5,
@@ -123,8 +123,8 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
   },
   {
     level: "mild",
-    label: "Leicht",
-    sublabel: "Leichte Einschränkung",
+    label: "0.5–1.5",
+    sublabel: "",
     range: "0.5-1.5",
     min: 0.5,
     max: 1.5,
@@ -132,8 +132,8 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
   },
   {
     level: "significant",
-    label: "Deutlich",
-    sublabel: "Ref TMD: 1.74",
+    label: "≥1.5",
+    sublabel: "Ref: TMD 1.74",
     range: "≥1.5",
     min: 1.5,
     max: 10,
@@ -153,8 +153,8 @@ export const JFLS20_LIMITATION_SEGMENTS: Array<{
 }> = [
   {
     level: "normal",
-    label: "Normal",
-    sublabel: "Ref: 0.16",
+    label: "<0.5",
+    sublabel: "Ref: Gesund 0.16",
     range: "<0.5",
     min: 0,
     max: 0.5,
@@ -162,8 +162,8 @@ export const JFLS20_LIMITATION_SEGMENTS: Array<{
   },
   {
     level: "mild",
-    label: "Leicht",
-    sublabel: "Leichte Einschränkung",
+    label: "0.5–1.5",
+    sublabel: "",
     range: "0.5-1.5",
     min: 0.5,
     max: 1.5,
@@ -171,8 +171,8 @@ export const JFLS20_LIMITATION_SEGMENTS: Array<{
   },
   {
     level: "significant",
-    label: "Deutlich",
-    sublabel: "Ref TMD: 1.74",
+    label: "≥1.5",
+    sublabel: "Ref: TMD 1.74",
     range: "≥1.5",
     min: 1.5,
     max: 10,
@@ -548,13 +548,7 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Kieferfunktions-Einschränkung"
         scaleBar={
-          <>
-            <ScaleBar segments={JFLS8_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
-            <ScaleLabels
-              labels={JFLS8_LIMITATION_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
-              activeIndex={activeLimitationIndex}
-            />
-          </>
+          <ScaleBar segments={JFLS8_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
         }
         scoreDisplay={
           <div className="text-left">
@@ -597,13 +591,7 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Kieferfunktions-Einschränkung (erweitert)"
         scaleBar={
-          <>
-            <ScaleBar segments={JFLS20_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
-            <ScaleLabels
-              labels={JFLS20_LIMITATION_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
-              activeIndex={activeLimitationIndex}
-            />
-          </>
+          <ScaleBar segments={JFLS20_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
         }
         scoreDisplay={
           <div className="text-left">
@@ -664,13 +652,7 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Orale Verhaltensweisen - CMD-Risiko"
         scaleBar={
-          <>
-            <ScaleBar segments={OBC_RISK_SEGMENTS} activeIndex={activeRiskIndex} />
-            <ScaleLabels
-              labels={OBC_RISK_SEGMENTS.map((s) => ({ label: s.label, key: s.level }))}
-              activeIndex={activeRiskIndex}
-            />
-          </>
+          <ScaleBar segments={OBC_RISK_SEGMENTS} activeIndex={activeRiskIndex} />
         }
         scoreDisplay={
           <div className="text-left">
@@ -713,17 +695,11 @@ export function Axis2ScoreCard({
       manualAnchor={manualAnchor}
       scaleLabel="Schweregrad"
       scaleBar={
-        <>
-          <ScaleBar
-            segments={PHQ4_SEVERITY_SEGMENTS}
-            activeIndex={activeSegment}
-            cutoffPosition="50%"
-          />
-          <ScaleLabels
-            labels={PHQ4_SEVERITY_SEGMENTS.map((s) => ({ label: s.label, key: s.label }))}
-            activeIndex={activeSegment}
-          />
-        </>
+        <ScaleBar
+          segments={PHQ4_SEVERITY_SEGMENTS}
+          activeIndex={activeSegment}
+          cutoffPosition="50%"
+        />
       }
       scoreDisplay={
         <div className="text-left">

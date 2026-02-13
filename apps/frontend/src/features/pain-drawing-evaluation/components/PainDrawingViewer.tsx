@@ -81,7 +81,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
             <span className="text-3xl font-bold">{score.regionCount}</span>
             <span className="text-xl text-muted-foreground ml-1">/ 5</span>
             <span className="ml-3 text-lg font-medium">
-              {score.interpretation.label}
+              {score.regionCount} {score.regionCount === 1 ? "Region" : "Regionen"}
             </span>
           </div>
 
