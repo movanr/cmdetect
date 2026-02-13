@@ -18,14 +18,15 @@ export function createDjdTree(side: Side): DecisionTreeDef {
   const colCenter = 200;
   const nodeW = 320;
   const endW = 240;
-  const endH = 140;
+  const endH = 180;
 
   const nodes: TreeNodeDef[] = [
     {
       id: "noise",
       label: "Anamnese",
       subLabel:
-        `Geräusch auf dieser Seite angegeben (${sideLabel}): SF 8 Seitenangabe ODER Patientenangabe U6/U7`,
+        `Geräusch auf dieser Seite angegeben (${sideLabel})`,
+      sources: ["SF8", "U6", "U7"],
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 80 },
@@ -35,7 +36,8 @@ export function createDjdTree(side: Side): DecisionTreeDef {
     {
       id: "crepitus",
       label: "Untersuchung",
-      subLabel: "Reiben bei Kieferbewegungen (U6 oder U7)",
+      subLabel: "Reiben bei Kieferbewegungen",
+      sources: ["U6", "U7"],
       criterion: DEGENERATIVE_JOINT_DISEASE.examination.criterion,
       context: ctx,
       center: { x: colCenter, y: 260 },
@@ -51,7 +53,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       imagingNote: "CT",
       criterion: and([DEGENERATIVE_JOINT_DISEASE.anamnesis, DEGENERATIVE_JOINT_DISEASE.examination.criterion]),
       context: ctx,
-      center: { x: colCenter, y: 450 },
+      center: { x: colCenter, y: 470 },
       width: endW,
       height: endH,
     },

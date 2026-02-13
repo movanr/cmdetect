@@ -24,10 +24,14 @@ export interface TreeNodeDef {
   negativeLabel?: string;
   /** Optional subtitle */
   subLabel?: string;
+  /** Data source references (e.g. ["SF1","U4"]) — rendered as badges on title-only nodes */
+  sources?: string[];
   /** Sub-criteria labels displayed with a connector (UND/ODER) */
   subItems?: {
     labels: string[];
     connector: "UND" | "ODER";
+    /** Per-label data source references (parallel to labels) */
+    sources?: string[][];
   };
   /** dc-tmd Criterion to evaluate (optional for end nodes) */
   criterion?: Criterion;

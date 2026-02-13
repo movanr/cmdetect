@@ -32,7 +32,7 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
   const colCenter = 150;
   const nodeW = 300;
   const endW = 200;
-  const endH = 80;
+  const endH = 120;
 
   const nodes: TreeNodeDef[] = [
     {
@@ -44,19 +44,21 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
           "Kopfschmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
         ],
         connector: "UND",
+        sources: [["SF5"], ["SF7"]],
       },
       criterion: HEADACHE_ANAMNESIS,
-      center: { x: colCenter, y: 65 },
+      center: { x: colCenter, y: 75 },
       width: nodeW,
-      height: 130,
+      height: 150,
     },
     {
       id: "headacheLocation",
       label: "Kopfschmerzlokalisation bestätigt",
       subLabel: "Kopfschmerz im Bereich des M. temporalis",
+      sources: ["U1"],
       criterion: headacheLocationConfirmed,
       context: ctx,
-      center: { x: colCenter, y: 225 },
+      center: { x: colCenter, y: 245 },
       width: nodeW,
       height: 120,
     },
@@ -70,10 +72,11 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
           "Bekannter Kopfschmerz bei Palpation",
         ],
         connector: "ODER",
+        sources: [["U4"], ["U5"], ["U9"]],
       },
       criterion: familiarHeadacheProvoked,
       context: ctx,
-      center: { x: colCenter, y: 410 },
+      center: { x: colCenter, y: 430 },
       width: nodeW,
       height: 190,
     },
@@ -85,7 +88,7 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
       diagnosisId: "headacheAttributedToTmd",
       criterion: and([HEADACHE_ANAMNESIS, HEADACHE_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter, y: 580 },
+      center: { x: colCenter, y: 620 },
       width: endW,
       height: endH,
     },
@@ -98,7 +101,7 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
         field(sq("SQ5"), { equals: "yes" }),
         field(`e1.headacheLocation.${side}`, { includes: "temporalis" }),
       ]),
-      center: { x: 430, y: 65 },
+      center: { x: 430, y: 75 },
       width: 180,
       height: 80,
     },

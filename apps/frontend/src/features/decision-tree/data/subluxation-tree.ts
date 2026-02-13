@@ -22,13 +22,14 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
   const colCenter = 200;
   const nodeW = 320;
   const endW = 200;
-  const endH = 80;
+  const endH = 120;
 
   const nodes: TreeNodeDef[] = [
     {
       id: "sq13",
       label: "Anamnese — Blockade in geöffneter Position",
-      subLabel: "Kiefer fängt oder blockiert bei weit geöffnetem Mund (SF 13)",
+      subLabel: "Kiefer fängt oder blockiert bei weit geöffnetem Mund",
+      sources: ["SF13"],
       criterion: field(sq("SQ13"), { equals: "yes" }),
       center: { x: colCenter, y: 90 },
       width: nodeW,
@@ -37,7 +38,8 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
     {
       id: "sq14",
       label: "Anamnese — Mund nicht schließbar + Seitenangabe",
-      subLabel: `Subluxation auf dieser Seite (${sideLabel}): SF 13 + SF 14 Seitenangabe`,
+      subLabel: `Subluxation auf dieser Seite (${sideLabel})`,
+      sources: ["SF13", "SF14"],
       criterion: SUBLUXATION_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 300 },
@@ -51,7 +53,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       isEndNode: true,
       diagnosisId: "subluxation",
       criterion: SUBLUXATION_ANAMNESIS,
-      center: { x: colCenter, y: 510 },
+      center: { x: colCenter, y: 530 },
       width: endW,
       height: endH,
     },
@@ -63,7 +65,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       criterion: field(sq("SQ13"), { equals: "yes" }),
       center: { x: colCenter + 350, y: 90 },
       width: endW,
-      height: endH,
+      height: 80,
     },
   ];
 

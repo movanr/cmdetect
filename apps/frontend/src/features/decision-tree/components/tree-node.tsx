@@ -1,8 +1,24 @@
+import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { CircleCheck } from "lucide-react";
 import React from "react";
 import type { PractitionerDecision } from "../../evaluation/types";
 import type { CriterionStatus, Position } from "../types";
+
+/** Inline badges for data source references */
+const SourceBadges: React.FC<{ sources: string[] }> = ({ sources }) => (
+  <span className="inline-flex gap-0.5 ml-1">
+    {sources.map((src) => (
+      <Badge
+        key={src}
+        variant="outline"
+        className="text-[10px] px-1 py-0 h-4 font-normal text-muted-foreground"
+      >
+        {src}
+      </Badge>
+    ))}
+  </span>
+);
 
 interface TreeNodeProps {
   id: string;
@@ -11,9 +27,12 @@ interface TreeNodeProps {
   subLabel?: string;
   /** Auto-generated location badge from node context (e.g. "M. temporalis · rechts") */
   contextLabel?: string;
+  /** Data source references rendered as badges (for title-only nodes) */
+  sources?: string[];
   subItems?: {
     labels: string[];
     connector: "UND" | "ODER";
+    sources?: string[][];
   };
   color?: "blue" | "red";
   isEndNode?: boolean;
@@ -67,6 +86,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   negativeLabel,
   subLabel,
   contextLabel,
+  sources,
   subItems,
   color,
   isEndNode,
@@ -128,12 +148,18 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         <div className={`text-center ${textClass}`}>
           <div className="text-sm font-medium mb-1">
             {negativeLabel && status === "negative" ? negativeLabel : label}
+            {!isEndNode && !subItems && sources && sources.length > 0 && (
+              <SourceBadges sources={sources} />
+            )}
           </div>
           {contextLabel && (
             <div className="mb-1">
-              <span className="inline-block text-[10px] font-medium text-gray-500 bg-gray-200/60 rounded-full px-2 py-0.5">
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1 py-0 h-4 font-normal text-muted-foreground"
+              >
                 {contextLabel}
-              </span>
+              </Badge>
             </div>
           )}
           {subLabel && <div className="text-xs text-gray-600 mb-1">{subLabel}</div>}
@@ -141,7 +167,12 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             <div className="space-y-0.5">
               {subItems.labels.map((item, idx) => (
                 <div key={idx}>
-                  <div className="text-xs text-gray-700">{item}</div>
+                  <div className="text-xs text-gray-700">
+                    {item}
+                    {subItems.sources?.[idx] && subItems.sources[idx].length > 0 && (
+                      <SourceBadges sources={subItems.sources[idx]} />
+                    )}
+                  </div>
                   {idx < subItems.labels.length - 1 && (
                     <div className="text-[10px] font-semibold text-gray-500">
                       {subItems.connector}
@@ -156,13 +187,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         {/* Befund label for criterion nodes */}
         {!isEndNode && (
           <div className="flex justify-center mt-1">
-            <span
-              className={`inline-block text-[10px] font-medium rounded-full px-2 py-0.5 ${
+            <Badge
+              variant="outline"
+              className={`text-[10px] px-1 py-0 h-4 font-normal ${
                 status === "positive"
-                  ? "text-blue-700 bg-blue-100"
+                  ? "text-blue-700 border-blue-200"
                   : status === "negative"
-                    ? "text-gray-600 bg-gray-200"
-                    : "text-yellow-700 bg-yellow-100"
+                    ? "text-muted-foreground"
+                    : "text-yellow-700 border-yellow-200"
               }`}
             >
               {status === "positive"
@@ -170,7 +202,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 : status === "negative"
                   ? "Negativer Befund (Nein)"
                   : "Kein Befund (nicht vollständig untersucht)"}
-            </span>
+            </Badge>
           </div>
         )}
 

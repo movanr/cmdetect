@@ -29,7 +29,7 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
   const colCenter = 150;
   const nodeW = 300;
   const endW = 200;
-  const endH = 80;
+  const endH = 120;
 
   const nodes: TreeNodeDef[] = [
     {
@@ -41,19 +41,21 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
           "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
         ],
         connector: "UND",
+        sources: [["SF1", "SF3"], ["SF4"]],
       },
       criterion: ARTHRALGIA_ANAMNESIS,
-      center: { x: colCenter, y: 65 },
+      center: { x: colCenter, y: 85 },
       width: nodeW,
-      height: 130,
+      height: 170,
     },
     {
       id: "painLocation",
       label: "Schmerzlokalisation bestätigt",
       subLabel: "KG-Schmerz im Bereich des Kiefergelenks",
+      sources: ["U1"],
       criterion: painLocationConfirmedTmj,
       context: ctx,
-      center: { x: colCenter, y: 225 },
+      center: { x: colCenter, y: 265 },
       width: nodeW,
       height: 120,
     },
@@ -67,10 +69,11 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
           "Bekannter Schmerz bei Palpation",
         ],
         connector: "ODER",
+        sources: [["U4"], ["U5"], ["U9"]],
       },
       criterion: familiarPainProvokedTmj,
       context: ctx,
-      center: { x: colCenter, y: 410 },
+      center: { x: colCenter, y: 450 },
       width: nodeW,
       height: 190,
     },
@@ -82,7 +85,7 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
       diagnosisId: "arthralgia",
       criterion: and([ARTHRALGIA_ANAMNESIS, ARTHRALGIA_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter, y: 580 },
+      center: { x: colCenter, y: 640 },
       width: endW,
       height: endH,
     },
@@ -95,7 +98,7 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
         field(sq("SQ1"), { equals: "yes" }),
         field(`e1.painLocation.${side}`, { includes: "tmj" }),
       ]),
-      center: { x: 430, y: 65 },
+      center: { x: 430, y: 85 },
       width: 180,
       height: 80,
     },

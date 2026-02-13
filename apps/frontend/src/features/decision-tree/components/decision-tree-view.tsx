@@ -219,6 +219,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
               negativeLabel={node.negativeLabel}
               subLabel={node.subLabel}
               contextLabel={formatContextLabel(node.context)}
+              sources={node.sources}
               subItems={node.subItems}
               color={node.color}
               isEndNode={node.isEndNode}

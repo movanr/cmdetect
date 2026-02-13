@@ -70,10 +70,10 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
 
   // Layout
   const colCenter = 200;
-  const nodeW = 280;
-  const nodeH = 90;
+  const nodeW = 300;
+  const nodeH = 110;
   const endW = 220;
-  const endH = 70;
+  const endH = 110;
 
   const nodes: TreeNodeDef[] = [
     {
@@ -89,27 +89,30 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "familiarPain",
       label: "Bekannter Schmerz bei Palpation",
+      sources: ["U9"],
       criterion: familiarPainPalpation,
       context: ctx,
-      center: { x: colCenter, y: 175 },
+      center: { x: colCenter, y: 185 },
       width: nodeW,
       height: nodeH,
     },
     {
       id: "referredPain",
       label: "Übertragener Schmerz bei Palpation",
+      sources: ["U9"],
       criterion: referredPainPalpation,
       context: ctx,
-      center: { x: colCenter, y: 310 },
+      center: { x: colCenter, y: 340 },
       width: nodeW,
       height: nodeH,
     },
     {
       id: "spreadingPain",
       label: "Ausbreitender Schmerz bei Palpation",
+      sources: ["U9"],
       criterion: spreadingPainPalpation,
       context: ctx,
-      center: { x: colCenter, y: 450 },
+      center: { x: colCenter, y: 500 },
       width: nodeW,
       height: nodeH,
     },
@@ -121,7 +124,7 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
       diagnosisId: "localMyalgia",
       criterion: and([MYALGIA_ANAMNESIS, LOCAL_MYALGIA_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter - 150, y: 580 },
+      center: { x: colCenter - 182, y: 660 },
       width: endW,
       height: endH,
     },
@@ -133,7 +136,7 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
       diagnosisId: "myofascialPainWithSpreading",
       criterion: and([MYALGIA_ANAMNESIS, MYOFASCIAL_SPREADING_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter + 160, y: 580 },
+      center: { x: colCenter + 192, y: 660 },
       width: endW,
       height: endH,
     },
@@ -145,7 +148,7 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
       diagnosisId: "myofascialPainWithReferral",
       criterion: and([MYALGIA_ANAMNESIS, MYOFASCIAL_REFERRAL_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter + 310, y: 450 },
+      center: { x: colCenter + 310, y: 520 },
       width: endW,
       height: endH,
     },
@@ -158,7 +161,7 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
         field(sq("SQ1"), { equals: "yes" }),
         field(`e1.painLocation.${side}`, { includes: region }),
       ]),
-      center: { x: colCenter + 310, y: 175 },
+      center: { x: colCenter + 310, y: 185 },
       width: 180,
       height: 80,
     },

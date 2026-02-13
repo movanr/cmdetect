@@ -31,7 +31,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
   const colCenter = 150;
   const nodeW = 300;
   const endW = 200;
-  const endH = 80;
+  const endH = 120;
 
   const nodes: TreeNodeDef[] = [
     {
@@ -43,18 +43,20 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
           "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
         ],
         connector: "UND",
+        sources: [["SF1", "SF3"], ["SF4"]],
       },
       criterion: MYALGIA_ANAMNESIS,
-      center: { x: colCenter, y: 65 },
+      center: { x: colCenter, y: 85 },
       width: nodeW,
-      height: 130,
+      height: 170,
     },
     {
       id: "painLocation",
       label: "Schmerzlokalisation bestätigt",
+      sources: ["U1"],
       criterion: painLocationConfirmed,
       context: ctx,
-      center: { x: colCenter, y: 220 },
+      center: { x: colCenter, y: 260 },
       width: nodeW,
       height: 100,
     },
@@ -64,10 +66,11 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
       subItems: {
         labels: ["Bekannter Schmerz bei maximaler Mundöffnung", "Bekannter Schmerz bei Palpation"],
         connector: "ODER",
+        sources: [["U4"], ["U9"]],
       },
       criterion: familiarPainProvoked,
       context: ctx,
-      center: { x: colCenter, y: 385 },
+      center: { x: colCenter, y: 425 },
       width: nodeW,
       height: 150,
     },
@@ -79,7 +82,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
       diagnosisId: "myalgia",
       criterion: and([MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION.criterion]),
       context: ctx,
-      center: { x: colCenter, y: 535 },
+      center: { x: colCenter, y: 595 },
       width: endW,
       height: endH,
     },
@@ -92,7 +95,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
         field(sq("SQ1"), { equals: "yes" }),
         field(`e1.painLocation.${side}`, { includes: region }),
       ]),
-      center: { x: 430, y: 65 },
+      center: { x: 430, y: 85 },
       width: 180,
       height: 80,
     },
