@@ -6,9 +6,8 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
  *
  * Path:
  * 1. SQ13: Jaw locks/catches in wide-open position
- * 2. SQ14: Unable to close without special maneuver
- * 3. Sided anamnesis: SQ13 + SQ14 side gate
- * 4. End: Subluxation (blue) or negative (red)
+ * 2. SQ14 sided: Unable to close + side gate (SQ13 + SQ14 side)
+ * 3. End: Subluxation (blue) or negative (red)
  *
  * Note: E8 (open locking) is optional clinical documentation per DC/TMD.
  * It does not influence the diagnosis — subluxation depends entirely on
@@ -37,20 +36,11 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
     },
     {
       id: "sq14",
-      label: "Anamnese — Mund nicht schließbar",
-      subLabel: "Unfähigkeit, den Mund ohne ein spezielles Manöver zu schließen (SF 14)",
-      criterion: field(sq("SQ14"), { equals: "yes" }),
-      center: { x: colCenter, y: 210 },
-      width: nodeW,
-      height: 100,
-    },
-    {
-      id: "subluxationSided",
-      label: `Seitenangabe — Subluxation (${sideLabel})`,
-      subLabel: "Subluxation auf dieser Seite (SF 13 + SF 14 Seitenangabe)",
+      label: "Anamnese — Mund nicht schließbar + Seitenangabe",
+      subLabel: `Subluxation auf dieser Seite (${sideLabel}): SF 13 + SF 14 Seitenangabe`,
       criterion: SUBLUXATION_SIDED_ANAMNESIS,
       context: ctx,
-      center: { x: colCenter, y: 360 },
+      center: { x: colCenter, y: 210 },
       width: nodeW,
       height: 100,
     },
@@ -61,7 +51,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       isEndNode: true,
       diagnosisId: "subluxation",
       criterion: SUBLUXATION_ANAMNESIS,
-      center: { x: colCenter, y: 520 },
+      center: { x: colCenter, y: 370 },
       width: endW,
       height: endH,
     },
@@ -96,22 +86,6 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
     },
     {
       from: "sq14",
-      to: "subluxationSided",
-      startDirection: "down",
-      endDirection: "down",
-      type: "positive",
-      label: "Ja",
-    },
-    {
-      from: "sq14",
-      to: "noSubluxation",
-      startDirection: "right",
-      endDirection: "up",
-      type: "negative",
-      label: "Nein",
-    },
-    {
-      from: "subluxationSided",
       to: "subluxation",
       startDirection: "down",
       endDirection: "down",
@@ -119,7 +93,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       label: "Ja",
     },
     {
-      from: "subluxationSided",
+      from: "sq14",
       to: "noSubluxation",
       startDirection: "right",
       endDirection: "up",

@@ -33,12 +33,30 @@ describe("TMJ_NOISE_SIDED_ANAMNESIS", () => {
     expect(result.status).toBe("negative");
   });
 
-  it("positive: SQ8_side marks both sides (DNK)", () => {
+  it("positive: SQ8_side marks both sides (bilateral)", () => {
     const data = { sq: { SQ8_side: { left: true, right: true } } };
     const resultL = evaluate(TMJ_NOISE_SIDED_ANAMNESIS, data, { side: "left", region: "tmj" });
     const resultR = evaluate(TMJ_NOISE_SIDED_ANAMNESIS, data, { side: "right", region: "tmj" });
     expect(resultL.status).toBe("positive");
     expect(resultR.status).toBe("positive");
+  });
+
+  it("negative: DNK produces both sides false (with complete E6/E7 data)", () => {
+    const data = {
+      sq: { SQ8_side: { left: false, right: false } },
+      e6: {
+        left: { click: { patient: "no" }, crepitus: { patient: "no" } },
+        right: { click: { patient: "no" }, crepitus: { patient: "no" } },
+      },
+      e7: {
+        left: { click: { patient: "no" }, crepitus: { patient: "no" } },
+        right: { click: { patient: "no" }, crepitus: { patient: "no" } },
+      },
+    };
+    const resultL = evaluate(TMJ_NOISE_SIDED_ANAMNESIS, data, { side: "left", region: "tmj" });
+    const resultR = evaluate(TMJ_NOISE_SIDED_ANAMNESIS, data, { side: "right", region: "tmj" });
+    expect(resultL.status).toBe("negative");
+    expect(resultR.status).toBe("negative");
   });
 
   it("positive: patient reports noise on this side during E6", () => {
@@ -295,7 +313,7 @@ describe("Subluxation — sided anamnesis gate", () => {
     expect(result.positiveLocations).toEqual([{ side: "right", region: "tmj" }]);
   });
 
-  it("positive on both sides with DNK (both true)", () => {
+  it("positive on both sides (bilateral)", () => {
     const data = {
       sq: {
         SQ13: "yes", SQ13_side: { left: true, right: true },

@@ -66,7 +66,7 @@ export const TMJ_NOISE_ANAMNESIS: Criterion = or(
  *
  * Evaluated per-location with ${side} template context.
  * Positive if:
- * - SQ8 office-use marks this side (or DNK = both), OR
+ * - SQ8 office-use marks this side, OR
  * - Patient reported noise on this side during E6/E7
  *
  * This ensures the diagnosis is only positive on sides where

@@ -21,7 +21,8 @@ const SQ_OFFICE_USE_IDS = ["SQ8", "SQ9", "SQ10", "SQ11", "SQ12", "SQ13", "SQ14"]
  * Transforms SQ office-use { R?, L?, DNK? } into side-keyed { left, right } format.
  *
  * Rules:
- * - If SQ answer is "yes" and office-use exists: left = L || DNK, right = R || DNK
+ * - If SQ answer is "yes" and office-use exists: left = L, right = R
+ *   (DNK means practitioner can't confirm the side → both false → diagnosis not assigned)
  * - If SQ answer is "yes" but no office-use: left = true, right = true (no constraint)
  * - If SQ answer is not "yes": no _side entry created (irrelevant)
  */
@@ -39,8 +40,8 @@ function transformOfficeSideData(
 
     if (office && (office.R || office.L || office.DNK)) {
       sideData[`${qId}_side`] = {
-        left: !!(office.L || office.DNK),
-        right: !!(office.R || office.DNK),
+        left: !!office.L,
+        right: !!office.R,
       };
     } else {
       // No office-use filled → both sides (backward compatible, no constraint)

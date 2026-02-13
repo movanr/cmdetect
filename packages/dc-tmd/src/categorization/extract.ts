@@ -213,7 +213,7 @@ function getPassiveOpening(data: unknown): number | null {
 
 /**
  * Check if a side is gated by SQ office-use marking.
- * Returns true if the office-use data marks this side (or DNK = both sides).
+ * Returns true if the office-use data marks this side.
  */
 function isSideGated(data: unknown, sqId: string, side: Side): boolean {
   const sideData = get(data, `sq.${sqId}_side.${side}`);
