@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "../../lib/auth";
 import { Header } from "../navigation/Header";
 import { cn } from "@/lib/utils";
-import { Check, Eye, X, Menu, Lock } from "lucide-react";
+import { Check, X, Menu, Lock } from "lucide-react";
 import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -141,28 +141,6 @@ export function CaseLayout({
                 >
                   {stepIndicator}
                   <span>{step.label}</span>
-                </Link>
-            );
-          }
-
-          // Examination step: allow preview mode even when locked
-          if (step.id === "examination" && hasRoute && !accessible) {
-            return (
-                <Link
-                  key={step.id}
-                  to="/cases/$id/examination"
-                  params={{ id: caseId }}
-                  search={{ mode: "preview" as const }}
-                  onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                    current && "bg-primary text-primary-foreground",
-                    !current && "text-muted-foreground/70 hover:bg-muted hover:text-muted-foreground"
-                  )}
-                >
-                  {stepIndicator}
-                  <span>{step.label}</span>
-                  {!current && <Eye className="h-3.5 w-3.5 ml-auto text-muted-foreground/50" />}
                 </Link>
             );
           }

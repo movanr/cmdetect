@@ -11,7 +11,7 @@ import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
 import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { SQAnswers } from "@cmdetect/questionnaires";
 import { isQuestionnaireEnabled, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
-import { ArrowRight, CheckCircle2, ClipboardList, Eye, Printer } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { AnamnesisOverview } from "./AnamnesisOverview";
@@ -28,8 +28,6 @@ interface DashboardViewProps {
   onStartReview: () => void;
   /** Callback to continue to the examination (shown after review is complete) */
   onContinueToExamination?: () => void;
-  /** Callback to open examination in preview/preparation mode */
-  onPrepareExamination?: () => void;
   /** Patient record / case ID (for print export) */
   caseId?: string;
 }
@@ -38,7 +36,6 @@ export function DashboardView({
   responses,
   onStartReview,
   onContinueToExamination,
-  onPrepareExamination,
   caseId,
 }: DashboardViewProps) {
   const { print, isPrinting } = useBackgroundPrint();
@@ -137,13 +134,6 @@ export function DashboardView({
             >
               <Printer className="mr-2 h-4 w-4" />
               {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
-            </Button>
-          )}
-          {/* Prepare examination button */}
-          {onPrepareExamination && (
-            <Button variant="outline" onClick={onPrepareExamination}>
-              <Eye className="mr-2 h-4 w-4" />
-              Untersuchung vorbereiten
             </Button>
           )}
           {/* Top navigation button(s) */}

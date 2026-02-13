@@ -56,21 +56,11 @@ function AnamnesisReviewPage() {
     });
   };
 
-  // Navigate to examination in preview/preparation mode
-  const handlePrepareExamination = () => {
-    navigate({
-      to: "/cases/$id/examination",
-      params: { id },
-      search: { mode: "preview" },
-    });
-  };
-
   return (
     <DashboardView
       responses={responses ?? []}
       onStartReview={handleStartReview}
       onContinueToExamination={handleContinueToExamination}
-      onPrepareExamination={handlePrepareExamination}
       caseId={id}
     />
   );
