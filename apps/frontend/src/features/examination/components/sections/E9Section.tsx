@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { PALPATION_MODE_QUESTIONS, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
@@ -522,6 +522,20 @@ export function E9Section({
     setExpanded({ [side]: site, [otherSide]: null } as ExpandedState);
   }, []);
 
+  // Set all unanswered pain questions to "no" for current step
+  const handleNoMorePainRegions = useCallback(() => {
+    const allStepInstances = [...filteredRight, ...filteredLeft];
+    const painInstances = allStepInstances.filter((i) => i.context.painType === "pain");
+    for (const inst of painInstances) {
+      const currentValue = getValues(inst.path as FieldPath<FormValues>);
+      if (currentValue == null) {
+        setInstanceValue(setValue, inst.path, "no");
+      }
+    }
+    setHasValidated(false);
+    setExpanded({ left: null, right: null });
+  }, [filteredRight, filteredLeft, getValues, setValue]);
+
   // Navigation handlers
   const handleBack = () => {
     if (isFirstStep || allComplete) {
@@ -750,29 +764,37 @@ export function E9Section({
                   // Palpation steps: bilateral subsections + refusal checkbox
                   <>
                     {showDiagram ? (
-                      <div className="flex justify-center items-start gap-8 md:gap-16">
-                        <PalpationSubsection
-                          side="right"
-                          sites={currentSites}
-                          instances={filteredRight}
-                          expanded={expanded.right}
-                          onExpandChange={(site) => handleExpandChange("right", site)}
-                          incompleteSites={hasValidated ? rightIncomplete : []}
-                          palpationMode={palpationMode}
-                          showDiagram
-                        />
-                        <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
-                        <PalpationSubsection
-                          side="left"
-                          sites={currentSites}
-                          instances={filteredLeft}
-                          expanded={expanded.left}
-                          onExpandChange={(site) => handleExpandChange("left", site)}
-                          incompleteSites={hasValidated ? leftIncomplete : []}
-                          palpationMode={palpationMode}
-                          showDiagram
-                        />
-                      </div>
+                      <>
+                        <div className="flex justify-center items-start gap-8 md:gap-16">
+                          <PalpationSubsection
+                            side="right"
+                            sites={currentSites}
+                            instances={filteredRight}
+                            expanded={expanded.right}
+                            onExpandChange={(site) => handleExpandChange("right", site)}
+                            incompleteSites={hasValidated ? rightIncomplete : []}
+                            palpationMode={palpationMode}
+                            showDiagram
+                          />
+                          <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+                          <PalpationSubsection
+                            side="left"
+                            sites={currentSites}
+                            instances={filteredLeft}
+                            expanded={expanded.left}
+                            onExpandChange={(site) => handleExpandChange("left", site)}
+                            incompleteSites={hasValidated ? leftIncomplete : []}
+                            palpationMode={palpationMode}
+                            showDiagram
+                          />
+                        </div>
+                        <div className="flex justify-center pt-2">
+                          <Button type="button" variant="outline" onClick={handleNoMorePainRegions}>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Keine weiteren Schmerzbereiche
+                          </Button>
+                        </div>
+                      </>
                     ) : (
                       <div className="grid grid-cols-2 gap-6">
                         <PalpationSubsection
