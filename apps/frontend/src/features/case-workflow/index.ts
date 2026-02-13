@@ -2,7 +2,7 @@
  * Case Workflow Feature
  *
  * Provides guided workflow infrastructure for case management.
- * Steps follow clinical pattern: Anamnesis -> Examination -> Evaluation -> Documentation -> Export
+ * Steps follow clinical pattern: Anamnesis -> Examination -> Evaluation -> Documentation
  */
 
 // Types

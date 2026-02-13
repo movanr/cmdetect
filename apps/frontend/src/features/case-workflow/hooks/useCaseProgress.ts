@@ -18,7 +18,6 @@ interface UseCaseProgressOptions {
   examinationCompletedAt?: string | null;
   evaluationCompletedAt?: string | null;
   documentationCompletedAt?: string | null;
-  exportedAt?: string | null;
 }
 
 interface CaseProgressResult {
@@ -67,7 +66,6 @@ export function useCaseProgress(options: UseCaseProgressOptions): CaseProgressRe
     examinationCompletedAt = null,
     evaluationCompletedAt = null,
     documentationCompletedAt = null,
-    exportedAt = null,
   } = options;
 
   return useMemo(() => {
@@ -83,7 +81,6 @@ export function useCaseProgress(options: UseCaseProgressOptions): CaseProgressRe
       examinationCompletedAt,
       evaluationCompletedAt,
       documentationCompletedAt,
-      exportedAt,
     };
 
     // Calculate completed steps
@@ -109,6 +106,5 @@ export function useCaseProgress(options: UseCaseProgressOptions): CaseProgressRe
     examinationCompletedAt,
     evaluationCompletedAt,
     documentationCompletedAt,
-    exportedAt,
   ]);
 }

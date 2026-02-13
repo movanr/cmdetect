@@ -207,7 +207,6 @@ export interface I18nStrings {
     examination: string;
     evaluation: string;
     documentation: string;
-    export: string;
   };
 }
 
@@ -391,7 +390,6 @@ export const translations: Record<Language, I18nStrings> = {
       examination: "Examination",
       evaluation: "Evaluation",
       documentation: "Documentation",
-      export: "Export",
     },
   },
 
@@ -577,7 +575,6 @@ export const translations: Record<Language, I18nStrings> = {
       examination: "Untersuchung",
       evaluation: "Auswertung",
       documentation: "Dokumentation",
-      export: "Export",
     },
   },
 };

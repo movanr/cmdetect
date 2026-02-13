@@ -10,7 +10,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsNotDesktop } from "@/hooks/use-mobile";
 import { canAccessStep, type MainStep } from "../../features/case-workflow";
 
-export type CaseStep = "anamnesis" | "examination" | "evaluation" | "documentation" | "export";
+export type CaseStep = "anamnesis" | "examination" | "evaluation" | "documentation";
 
 interface CaseLayoutProps {
   children: React.ReactNode;
@@ -69,7 +69,6 @@ export function CaseLayout({
     { id: "examination", label: t.caseSteps.examination, order: 2 },
     { id: "evaluation", label: t.caseSteps.evaluation, order: 3 },
     { id: "documentation", label: t.caseSteps.documentation, order: 4 },
-    { id: "export", label: t.caseSteps.export, order: 5 },
   ];
 
   const isStepCompleted = (stepId: CaseStep) => completedSteps.includes(stepId);

@@ -2,14 +2,14 @@
  * Case Workflow Type Definitions
  *
  * Defines the step registry and type definitions for the guided case workflow.
- * Steps follow clinical pattern: Anamnesis -> Examination -> Evaluation -> Documentation -> Export
+ * Steps follow clinical pattern: Anamnesis -> Examination -> Evaluation -> Documentation
  */
 
 import { getSectionTitle, SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
 import type { QuestionnaireResponse } from "../../questionnaire-viewer/hooks/useQuestionnaireResponses";
 
 // Main workflow steps
-export type MainStep = "anamnesis" | "examination" | "evaluation" | "documentation" | "export";
+export type MainStep = "anamnesis" | "examination" | "evaluation" | "documentation";
 
 // Sub-step identifiers for each main step
 export type AnamnesisSubStep = "review" | "wizard";
@@ -54,7 +54,6 @@ export interface CaseData {
   // Future markers
   evaluationCompletedAt: string | null;
   documentationCompletedAt: string | null;
-  exportedAt: string | null;
 }
 
 // Workflow context state
@@ -107,11 +106,6 @@ export const MAIN_STEPS: StepDefinition[] = [
       { id: "report", label: "Befundbericht", order: 1, route: "report" },
     ],
   },
-  {
-    id: "export",
-    label: "Export",
-    order: 5,
-  },
 ];
 
 // Helper to get step by id
@@ -144,9 +138,6 @@ export function isStepComplete(step: MainStep, caseData: CaseData): boolean {
     case "documentation":
       return caseData.documentationCompletedAt !== null;
 
-    case "export":
-      return caseData.exportedAt !== null;
-
     default:
       return false;
   }
@@ -170,10 +161,6 @@ export function canAccessStep(step: MainStep, completedSteps: Set<MainStep>): bo
     case "documentation":
       // Documentation requires examination to be complete (same gate as evaluation)
       return completedSteps.has("examination");
-
-    case "export":
-      // Export requires documentation to be complete
-      return completedSteps.has("documentation");
 
     default:
       return false;
@@ -209,5 +196,5 @@ export function getFirstIncompleteStep(completedSteps: Set<MainStep>): MainStep 
   for (const step of MAIN_STEPS) {
     if (!completedSteps.has(step.id)) return step.id;
   }
-  return "export";
+  return "documentation";
 }

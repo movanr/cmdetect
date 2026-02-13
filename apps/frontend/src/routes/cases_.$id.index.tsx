@@ -16,7 +16,6 @@ const STEP_ROUTES: Record<MainStep, string> = {
   examination: "/cases/$id/examination",
   evaluation: "/cases/$id/evaluation",
   documentation: "/cases/$id/documentation",
-  export: "/cases/$id/export",
 } as const;
 
 /**

@@ -55,7 +55,7 @@ export function useStepGating(options: UseStepGatingOptions): StepGatingResult {
     if (isCurrentStepAccessible) return undefined;
 
     // Find the last accessible step
-    const steps: MainStep[] = ["anamnesis", "examination", "evaluation", "documentation", "export"];
+    const steps: MainStep[] = ["anamnesis", "examination", "evaluation", "documentation"];
     let lastAccessible: MainStep = "anamnesis";
 
     for (const step of steps) {
@@ -101,7 +101,7 @@ export function useStepGating(options: UseStepGatingOptions): StepGatingResult {
 
   // Navigate to next available step
   const navigateToNext = useCallback(() => {
-    const steps: MainStep[] = ["anamnesis", "examination", "evaluation", "documentation", "export"];
+    const steps: MainStep[] = ["anamnesis", "examination", "evaluation", "documentation"];
     const currentIndex = steps.indexOf(currentStep);
 
     if (currentIndex === -1 || currentIndex === steps.length - 1) return;
@@ -114,7 +114,7 @@ export function useStepGating(options: UseStepGatingOptions): StepGatingResult {
 
   // Get first locked step
   const getFirstLockedStep = useCallback(() => {
-    const steps: MainStep[] = ["anamnesis", "examination", "evaluation", "documentation", "export"];
+    const steps: MainStep[] = ["anamnesis", "examination", "evaluation", "documentation"];
     return steps.find((step) => !canAccessStep(step, completedSteps));
   }, [completedSteps]);
 
