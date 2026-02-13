@@ -152,7 +152,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
-      negativeLabel: `Keine Hinweise auf Schmerzen in (${regionTitle}, ${sideTitle})`,
       color: "red",
       isEndNode: true,
       criterion: and([

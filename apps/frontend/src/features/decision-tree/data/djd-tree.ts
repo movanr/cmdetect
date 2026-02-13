@@ -69,7 +69,6 @@ export function createDjdTree(side: Side): DecisionTreeDef {
     {
       id: "noDjd",
       label: "Weitere Diagnosen untersuchen",
-      negativeLabel: `Kein KG-Geräusch angegeben (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
       criterion: field(sq("SQ8"), { equals: "yes" }),

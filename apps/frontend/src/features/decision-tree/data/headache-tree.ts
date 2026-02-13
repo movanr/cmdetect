@@ -92,7 +92,6 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
-      negativeLabel: `Keine Hinweise auf Kopfschmerzen in (Temporalis, ${sideLabel}) gefunden`,
       color: "red",
       isEndNode: true,
       criterion: and([

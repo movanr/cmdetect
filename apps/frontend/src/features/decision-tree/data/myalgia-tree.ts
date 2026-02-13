@@ -86,7 +86,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
-      negativeLabel: `Keine Hinweise auf Schmerzen in (${regionLabel}, ${sideLabel})`,
       color: "red",
       isEndNode: true,
       criterion: and([

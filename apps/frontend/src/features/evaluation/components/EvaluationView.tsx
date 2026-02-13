@@ -9,6 +9,7 @@
  * the parent myalgia diagnosis.
  */
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -22,7 +23,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { REGIONS, type Region, type Side } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Info } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import {
   DecisionTreeView,
@@ -296,6 +297,14 @@ export function EvaluationView({
                 Kein Entscheidungsbaum für die aktuelle Diagnose verfügbar.
               </p>
             )}
+            <Alert className="bg-blue-50/50 border-blue-200">
+              <Info className="text-blue-500" />
+              <AlertDescription className="text-blue-900">
+                Klicken Sie auf einen Endknoten, um eine Diagnose zu stellen oder
+                aufzuheben. Die Diagnoseentscheidung obliegt der behandelnden
+                Ärztin / dem behandelnden Arzt.
+              </AlertDescription>
+            </Alert>
           </div>
         </CardContent>
       </Card>

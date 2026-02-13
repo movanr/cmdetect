@@ -89,7 +89,6 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
     {
       id: "investigateOther",
       label: "Weitere Schmerzdiagnosen untersuchen",
-      negativeLabel: `Keine Hinweise auf Schmerzen in (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
       criterion: and([

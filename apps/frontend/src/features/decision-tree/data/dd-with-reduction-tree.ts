@@ -88,7 +88,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
     {
       id: "noDdWithReduction",
       label: "Weitere Diagnosen untersuchen",
-      negativeLabel: `Kein KG-Geräusch angegeben (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
       criterion: field(sq("SQ8"), { equals: "yes" }),
@@ -258,14 +257,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       endDirection: "down",
       type: "positive",
       label: "Ja",
-    },
-    {
-      from: "ddWithoutReductionSided",
-      to: "noDdWithReduction",
-      startDirection: "left",
-      endDirection: "up",
-      type: "negative",
-      label: "Nein",
     },
     {
       from: "openingMeasurement",

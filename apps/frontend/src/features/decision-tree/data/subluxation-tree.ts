@@ -68,7 +68,6 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
     {
       id: "noSubluxation",
       label: "Weitere Diagnosen untersuchen",
-      negativeLabel: `Keine Blockade in geöffneter Position angegeben (KG, ${sideLabel})`,
       color: "red",
       isEndNode: true,
       criterion: field(sq("SQ13"), { equals: "yes" }),
