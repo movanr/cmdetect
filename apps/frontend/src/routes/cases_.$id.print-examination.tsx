@@ -22,6 +22,7 @@ import { GET_EXAMINATION_RESPONSE } from "../features/examination/queries";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
 import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
 import { PrintableExamination } from "../features/examination/components/summary/PrintableExamination";
+import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
 
 const GET_PATIENT_RECORD = graphql(`
   query GetPatientRecord($id: String!) {
@@ -146,6 +147,18 @@ function PrintExaminationPage() {
   const patientDob = decryptedData?.dateOfBirth
     ? formatDate(new Date(decryptedData.dateOfBirth))
     : undefined;
+
+  // Set PDF filename for browser print dialog
+  const pdfTitle = decryptedData
+    ? formatFilename(
+        "Untersuchung",
+        decryptedData.firstName,
+        decryptedData.lastName,
+        formatDate(new Date())
+      )
+    : formatFilename("Untersuchung", record?.clinic_internal_id ?? id);
+
+  usePrintTitle(pdfTitle);
 
   // Loading state
   if (!isReady) {

@@ -19,6 +19,7 @@ import type { PatientPII } from "@/crypto/types";
 import { formatDate } from "@/lib/date-utils";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { PrintableAnamnesis } from "../features/questionnaire-viewer/components/dashboard/PrintableAnamnesis";
+import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
 
 const GET_PATIENT_RECORD = graphql(`
   query GetPatientRecord($id: String!) {
@@ -122,6 +123,18 @@ function PrintAnamnesisPage() {
   const patientDob = decryptedData?.dateOfBirth
     ? formatDate(new Date(decryptedData.dateOfBirth))
     : undefined;
+
+  // Set PDF filename for browser print dialog
+  const pdfTitle = decryptedData
+    ? formatFilename(
+        "Anamnese",
+        decryptedData.firstName,
+        decryptedData.lastName,
+        formatDate(new Date())
+      )
+    : formatFilename("Anamnese", record?.clinic_internal_id ?? id);
+
+  usePrintTitle(pdfTitle);
 
   // Loading state
   if (!isReady) {

@@ -26,6 +26,7 @@ import type { FormValues } from "../features/examination";
 import { PrintableBefundbericht } from "../features/evaluation/components/PrintableBefundbericht";
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
 
 // Reuse the same GetPatientRecord query (must match exact text for codegen)
 const GET_PATIENT_RECORD = graphql(`
@@ -160,6 +161,17 @@ function ReportSubPage() {
       }));
   }, [evalData]);
 
+  // Set PDF filename for browser print dialog
+  const pdfTitle = patientName
+    ? formatFilename(
+        "Befundbericht",
+        patientName,
+        examinationDate ?? formatDate(new Date())
+      )
+    : formatFilename("Befundbericht", record?.clinic_internal_id ?? id);
+
+  usePrintTitle(pdfTitle);
+
   // ── Loading ────────────────────────────────────────────────────────
 
   const isReady =
@@ -182,6 +194,18 @@ function ReportSubPage() {
     );
   }
 
+  // ── Print handler with render delay ───────────────────────────────
+
+  const handlePrint = () => {
+    // Use requestAnimationFrame to ensure content is painted before printing
+    // This prevents empty prints on slower connections/remote servers
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    });
+  };
+
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
@@ -191,7 +215,7 @@ function ReportSubPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => window.print()}
+          onClick={handlePrint}
           className="gap-1.5"
         >
           <Printer className="size-4" />

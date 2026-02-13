@@ -10,6 +10,7 @@
  * Follows the same print styling patterns as PrintableExamination.
  */
 
+import type { DiagnosisId } from "@cmdetect/dc-tmd";
 import {
   ALL_DIAGNOSES,
   REGIONS,
@@ -22,7 +23,6 @@ import {
   type SymptomDomain,
   type SymptomFinding,
 } from "@cmdetect/dc-tmd";
-import type { DiagnosisId } from "@cmdetect/dc-tmd";
 
 // ============================================================================
 // TYPES
@@ -99,7 +99,7 @@ const HEADACHE_DOMAINS: SymptomDomain[] = [
 function collapseByLocation(
   symptoms: SymptomFinding[],
   domains: SymptomDomain[],
-  prefix: string,
+  prefix: string
 ): CollapsedFinding[] {
   const domainSet = new Set(domains);
   const matched = symptoms.filter((s) => domainSet.has(s.domain));
@@ -132,7 +132,7 @@ interface JointSoundFinding {
 
 function extractJointSoundDetails(
   symptoms: SymptomFinding[],
-  criteriaData: unknown,
+  criteriaData: unknown
 ): JointSoundFinding[] {
   const results: JointSoundFinding[] = [];
 
@@ -261,7 +261,7 @@ interface LocationGroup {
 function groupFindingsByLocation(
   painFindings: CollapsedFinding[],
   headacheFindings: CollapsedFinding[],
-  examSigns: SignFinding[],
+  examSigns: SignFinding[]
 ): LocationGroup[] {
   const groupMap = new Map<string, LocationGroup>();
 
@@ -323,9 +323,7 @@ interface DiagnosisLocationGroup {
   diagnoses: DiagnosisWithLabel[];
 }
 
-function groupDiagnosesByLocation(
-  diagnoses: DiagnosisWithLabel[],
-): DiagnosisLocationGroup[] {
+function groupDiagnosesByLocation(diagnoses: DiagnosisWithLabel[]): DiagnosisLocationGroup[] {
   const groupMap = new Map<string, DiagnosisLocationGroup>();
 
   for (const d of diagnoses) {
@@ -362,9 +360,7 @@ interface JointSoundSideGroup {
   findings: JointSoundFinding[];
 }
 
-function groupJointSoundsBySide(
-  sounds: JointSoundFinding[],
-): JointSoundSideGroup[] {
+function groupJointSoundsBySide(sounds: JointSoundFinding[]): JointSoundSideGroup[] {
   const groups: JointSoundSideGroup[] = [];
 
   for (const side of SIDE_KEYS) {
@@ -470,9 +466,7 @@ export function PrintableBefundbericht({
       {/* ── Anamnese ──────────────────────────────────────── */}
       {anamnesisParagraphs.length > 0 && (
         <section className="mb-5 print:break-inside-avoid">
-          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
-            Anamnese
-          </h2>
+          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">Anamnese</h2>
           <div className="space-y-1.5 text-sm leading-relaxed">
             {anamnesisParagraphs.map((p, i) => (
               <p key={i}>{p}</p>
@@ -511,9 +505,7 @@ export function PrintableBefundbericht({
                     {group.findings.map((f, fi) => (
                       <li key={fi} className="ml-4 list-disc">
                         {f.label}
-                        {f.detail && (
-                          <span className="text-gray-500"> ({f.detail})</span>
-                        )}
+                        {f.detail && <span className="text-gray-500"> ({f.detail})</span>}
                       </li>
                     ))}
                   </ul>
@@ -526,7 +518,9 @@ export function PrintableBefundbericht({
         {/* Schmerzlokalisation und Palpationsbefunde — grouped by region */}
         {hasLocationFindings && (
           <div className="mb-3 print:break-inside-avoid">
-            <h3 className="text-sm font-semibold mb-1">Schmerzlokalisation und Palpationsbefunde</h3>
+            <h3 className="text-sm font-semibold mb-1">
+              Schmerzlokalisation und Palpationsbefunde
+            </h3>
             <div className="space-y-1.5">
               {locationGroups.map((group, gi) => (
                 <div key={gi}>
@@ -535,13 +529,19 @@ export function PrintableBefundbericht({
                   </h4>
                   <ul className="text-sm space-y-0.5">
                     {group.painFindings.map((f, fi) => (
-                      <li key={`p-${fi}`} className="ml-4 list-disc">{f}</li>
+                      <li key={`p-${fi}`} className="ml-4 list-disc">
+                        {f}
+                      </li>
                     ))}
                     {group.headacheFindings.map((f, fi) => (
-                      <li key={`h-${fi}`} className="ml-4 list-disc">{f}</li>
+                      <li key={`h-${fi}`} className="ml-4 list-disc">
+                        {f}
+                      </li>
                     ))}
                     {group.examSigns.map((s, si) => (
-                      <li key={`s-${si}`} className="ml-4 list-disc text-gray-600">{s}</li>
+                      <li key={`s-${si}`} className="ml-4 list-disc text-gray-600">
+                        {s}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -558,9 +558,7 @@ export function PrintableBefundbericht({
       {/* ── Diagnosen — grouped by location ───────────────── */}
       {diagnosisGroups.length > 0 && (
         <section className="mb-5 print:break-inside-avoid">
-          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
-            Diagnosen
-          </h2>
+          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">Diagnosen</h2>
           <div className="space-y-2">
             {diagnosisGroups.map((group, gi) => (
               <div key={gi}>
@@ -580,8 +578,7 @@ export function PrintableBefundbericht({
 
       {/* ── Footer ────────────────────────────────────────── */}
       <footer className="border-t border-gray-300 pt-2 mt-6 text-xs text-gray-400">
-        Dieser Befundbericht wurde auf Grundlage der standardisierten DC/TMD-Untersuchung erstellt
-        und dient als Anlage zum Arztbrief.
+        Dieser Befundbericht wurde auf Grundlage der standardisierten DC/TMD-Untersuchung erstellt.
       </footer>
     </div>
   );
