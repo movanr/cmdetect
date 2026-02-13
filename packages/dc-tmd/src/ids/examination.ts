@@ -27,10 +27,10 @@ export const SECTION_KEYS = Object.keys(SECTIONS) as SectionId[];
 // short: concise name for menus/badges, full: complete name for card titles
 export const SECTION_LABELS: Record<SectionId, { short: string; full: string }> = {
   e1: { short: "Schmerzlokalisation", full: "Schmerzlokalisation" },
-  e2: { short: "Schneidekantenverhältnisse", full: "Schneidekantenverhältnisse" },
+  e2: { short: "Schneidekanten-verhältnisse", full: "Schneidekantenverhältnisse" },
   e3: { short: "Öffnungsmuster", full: "Öffnungs- und Schließmuster" },
   e4: { short: "Mundöffnung", full: "Öffnungs- und Schließbewegungen" },
-  e5: { short: "Lateralbewegungen", full: "Lateral- und Protrusionsbewegungen" },
+  e5: { short: "Lateral-bewegungen", full: "Lateral- und Protrusionsbewegungen" },
   e6: { short: "Gelenkgeräusche Öffnung", full: "Gelenkgeräusche bei Öffnung" },
   e7: { short: "Gelenkgeräusche Lateral", full: "Gelenkgeräusche bei Lateralbewegungen" },
   e8: { short: "Gelenkblockierung", full: "Gelenkblockierung" },
