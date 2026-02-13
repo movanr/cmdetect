@@ -17,8 +17,8 @@ export function createDjdTree(side: Side): DecisionTreeDef {
   // Layout constants
   const colCenter = 200;
   const nodeW = 320;
-  const endW = 200;
-  const endH = 80;
+  const endW = 240;
+  const endH = 140;
 
   const nodes: TreeNodeDef[] = [
     {
@@ -28,9 +28,9 @@ export function createDjdTree(side: Side): DecisionTreeDef {
         `Geräusch auf dieser Seite angegeben (${sideLabel}): SF 8 Seitenangabe ODER Patientenangabe U6/U7`,
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
-      center: { x: colCenter, y: 60 },
+      center: { x: colCenter, y: 80 },
       width: nodeW,
-      height: 100,
+      height: 140,
     },
     {
       id: "crepitus",
@@ -38,9 +38,9 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       subLabel: "Reiben bei Kieferbewegungen (U6 oder U7)",
       criterion: DEGENERATIVE_JOINT_DISEASE.examination.criterion,
       context: ctx,
-      center: { x: colCenter, y: 210 },
+      center: { x: colCenter, y: 260 },
       width: nodeW,
-      height: 100,
+      height: 140,
     },
     {
       id: "djd",
@@ -51,7 +51,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       imagingNote: "CT",
       criterion: and([DEGENERATIVE_JOINT_DISEASE.anamnesis, DEGENERATIVE_JOINT_DISEASE.examination.criterion]),
       context: ctx,
-      center: { x: colCenter, y: 370 },
+      center: { x: colCenter, y: 450 },
       width: endW,
       height: endH,
     },
@@ -61,7 +61,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       color: "red",
       isEndNode: true,
       criterion: field(sq("SQ8"), { equals: "yes" }),
-      center: { x: colCenter + 350, y: 60 },
+      center: { x: colCenter + 350, y: 80 },
       width: 220,
       height: 80,
     },
