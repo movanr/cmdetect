@@ -69,6 +69,9 @@ interface EvaluationViewProps {
 /** Regions shown in the head diagrams (base 3) */
 const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
 
+/** Regions shown in the head diagrams when "Alle Regionen" is active (includes nonMast which has an SVG path) */
+const DIAGRAM_REGIONS_ALL: readonly Region[] = ["temporalis", "masseter", "tmj", "nonMast"];
+
 /** Extra regions only visible when "Alle Regionen" is active */
 const EXTRA_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
 
@@ -264,21 +267,37 @@ export function EvaluationView({
 
       {/* Decision tree / checklist explorer */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>DC/TMD-Kriterien abgleichen</CardTitle>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="show-all-regions"
+              checked={showAllRegions}
+              onCheckedChange={(checked) => {
+                setShowAllRegions(checked === true);
+                if (!checked && EXTRA_REGIONS.includes(selectedRegion)) {
+                  setSelectedRegion("temporalis");
+                }
+              }}
+            />
+            <label
+              htmlFor="show-all-regions"
+              className="text-xs text-muted-foreground cursor-pointer select-none"
+            >
+              Alle Regionen (U10)
+            </label>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Step 1: Location */}
           <div className="flex flex-col items-center gap-3">
             <StepLabel step={1} label="Lokalisation wählen" />
-            {!EXTRA_REGIONS.includes(selectedRegion) && (
-              <SummaryDiagrams
-                regions={DIAGRAM_REGIONS}
-                selectedSide={selectedSide}
-                selectedRegion={selectedRegion}
-                onRegionClick={handleRegionClick}
-              />
-            )}
+            <SummaryDiagrams
+              regions={showAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
+              selectedSide={selectedSide}
+              selectedRegion={selectedRegion === "otherMast" ? null : selectedRegion}
+              onRegionClick={handleRegionClick}
+            />
             <div className="flex flex-col items-center gap-2">
               <ToggleGroup
                 type="single"
@@ -299,25 +318,7 @@ export function EvaluationView({
                   </>
                 )}
               </ToggleGroup>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="show-all-regions"
-                  checked={showAllRegions}
-                  onCheckedChange={(checked) => {
-                    setShowAllRegions(checked === true);
-                    // Reset to base region if extra region was selected
-                    if (!checked && EXTRA_REGIONS.includes(selectedRegion)) {
-                      setSelectedRegion("temporalis");
-                    }
-                  }}
-                />
-                <label
-                  htmlFor="show-all-regions"
-                  className="text-xs text-muted-foreground cursor-pointer select-none"
-                >
-                  Alle Regionen (U10)
-                </label>
-              </div>
+
               <ToggleGroup
                 type="single"
                 variant="outline"
