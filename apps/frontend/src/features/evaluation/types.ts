@@ -6,7 +6,7 @@
 
 import type { CriterionStatus, DiagnosisId, Region, Side } from "@cmdetect/dc-tmd";
 
-export type PractitionerDecision = "confirmed" | "rejected" | "added" | null;
+export type PractitionerDecision = "confirmed" | null;
 
 export interface PersistedDiagnosisResult {
   id: string;

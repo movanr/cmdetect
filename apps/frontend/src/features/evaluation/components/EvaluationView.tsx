@@ -182,9 +182,7 @@ export function EvaluationView({
       );
       if (!persisted) return;
 
-      const isCurrentlyConfirmed =
-        persisted.practitionerDecision === "confirmed" ||
-        persisted.practitionerDecision === "added";
+      const isCurrentlyConfirmed = persisted.practitionerDecision === "confirmed";
 
       onUpdateDecision({
         resultId: persisted.id,

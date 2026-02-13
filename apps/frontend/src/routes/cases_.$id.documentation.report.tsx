@@ -152,7 +152,7 @@ function ReportSubPage() {
     if (!evalData) return [];
 
     return evalData.results
-      .filter((r) => r.practitionerDecision === "confirmed" || r.practitionerDecision === "added")
+      .filter((r) => r.practitionerDecision === "confirmed")
       .map((r) => ({
         diagnosisId: r.diagnosisId,
         side: r.side,

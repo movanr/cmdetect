@@ -556,11 +556,11 @@ export function PrintableBefundbericht({
       </section>
 
       {/* ── Diagnosen — grouped by location ───────────────── */}
-      <section className="mb-5 print:break-inside-avoid">
-        <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
-          Diagnosen
-        </h2>
-        {diagnosisGroups.length > 0 ? (
+      {diagnosisGroups.length > 0 && (
+        <section className="mb-5 print:break-inside-avoid">
+          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
+            Diagnosen
+          </h2>
           <div className="space-y-2">
             {diagnosisGroups.map((group, gi) => (
               <div key={gi}>
@@ -575,12 +575,8 @@ export function PrintableBefundbericht({
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500 italic">
-            Keine bestätigten Diagnosen vorhanden.
-          </p>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* ── Footer ────────────────────────────────────────── */}
       <footer className="border-t border-gray-300 pt-2 mt-6 text-xs text-gray-400">

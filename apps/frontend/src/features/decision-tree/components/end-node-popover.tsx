@@ -37,7 +37,7 @@ export function EndNodePopover({
   const nameDE = definition?.nameDE ?? diagnosisId;
   const regionLabel = REGIONS[region] ?? region;
   const sideLabel = SIDES[side] ?? side;
-  const isConfirmed = decision === "confirmed" || decision === "added";
+  const isConfirmed = decision === "confirmed";
 
   return (
     <PopoverContent className="w-80" onClick={(e) => e.stopPropagation()}>

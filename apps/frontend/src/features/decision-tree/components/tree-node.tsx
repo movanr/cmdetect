@@ -82,7 +82,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   status,
   isActive,
 }) => {
-  const isConfirmed = practitionerDecision === "confirmed" || practitionerDecision === "added";
+  const isConfirmed = practitionerDecision === "confirmed";
 
   const showNegativeLabel = negativeLabel && status === "negative";
 
