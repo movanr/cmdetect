@@ -100,7 +100,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   width,
   height,
   status,
-  isActive,
 }) => {
   const isConfirmed = practitionerDecision === "confirmed";
 
