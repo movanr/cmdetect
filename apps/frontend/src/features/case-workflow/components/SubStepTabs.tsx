@@ -16,8 +16,6 @@ interface SubStepTabsProps {
   parentStep: string;
   /** Available sub-steps */
   subSteps: SubStepDefinition[];
-  /** Optional set of step IDs that are diagnostically relevant. null = not loaded yet (show all normal). */
-  relevantSteps?: Set<string> | null;
   /** Optional className for customization */
   className?: string;
 }
@@ -26,7 +24,6 @@ export function SubStepTabs({
   caseId,
   parentStep,
   subSteps,
-  relevantSteps,
   className,
 }: SubStepTabsProps) {
   return (
@@ -37,37 +34,23 @@ export function SubStepTabs({
       )}
     >
       <nav className="flex gap-1 px-4" aria-label="Sub-step navigation">
-        {subSteps.map((subStep) => {
-          const isRelevant =
-            relevantSteps == null || relevantSteps.has(subStep.id);
-          const isNonRelevant = relevantSteps != null && !isRelevant;
-
-          return (
-            <Link
-              key={subStep.id}
-              to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
-              params={{ id: caseId }}
-              className={cn(
-                "relative px-4 py-2.5 text-sm font-medium rounded-t-md transition-colors",
-                "text-muted-foreground hover:text-foreground hover:bg-background/50",
-                "border-b-2 border-transparent -mb-px",
-                isNonRelevant && "opacity-50"
-              )}
-              activeProps={{
-                className: cn(
-                  "!text-primary bg-background font-semibold",
-                  "border-b-2 !border-primary",
-                  isNonRelevant && "!opacity-70"
-                ),
-              }}
-            >
-              {subStep.label}
-              {relevantSteps != null && isRelevant && (
-                <span className="absolute top-1.5 right-1 size-1.5 rounded-full bg-primary" />
-              )}
-            </Link>
-          );
-        })}
+        {subSteps.map((subStep) => (
+          <Link
+            key={subStep.id}
+            to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
+            params={{ id: caseId }}
+            className={cn(
+              "relative px-4 py-2.5 text-sm font-medium rounded-t-md transition-colors",
+              "text-muted-foreground hover:text-foreground hover:bg-background/50",
+              "border-b-2 border-transparent -mb-px",
+            )}
+            activeProps={{
+              className: "!text-primary bg-background font-semibold border-b-2 !border-primary",
+            }}
+          >
+            {subStep.label}
+          </Link>
+        ))}
       </nav>
     </div>
   );

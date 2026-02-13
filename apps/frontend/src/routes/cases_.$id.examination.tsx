@@ -6,7 +6,7 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { FormProvider, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
@@ -189,7 +189,7 @@ function ExaminationContent({
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
 }) {
-  const { isHydrated, status, relevantSections, saveDraft } = useExaminationPersistenceContext();
+  const { isHydrated, status, saveDraft } = useExaminationPersistenceContext();
   const { pathname } = useLocation();
 
   // Save draft to backend when navigating between examination sections
@@ -200,12 +200,6 @@ function ExaminationContent({
       saveDraft();
     }
   }, [pathname, saveDraft]);
-
-  // Convert relevantSections array to Set for SubStepTabs
-  const relevantSteps = useMemo(
-    () => (relevantSections ? new Set<string>(relevantSections) : null),
-    [relevantSections]
-  );
 
   // Scroll main container to top when navigating between examination sections
   useLayoutEffect(() => {
@@ -236,7 +230,6 @@ function ExaminationContent({
         caseId={caseId}
         parentStep="examination"
         subSteps={subSteps}
-        relevantSteps={relevantSteps}
         className="rounded-t-lg -mx-4 lg:-mx-8 mb-6 -mt-6 lg:-mt-8"
       />
 

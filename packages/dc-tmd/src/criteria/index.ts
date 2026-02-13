@@ -104,21 +104,6 @@ export {
   getDiagnosisClinicalContext,
 } from "./clinical-context";
 
-// Relevance analysis
-export {
-  type AnamnesisRelevanceResult,
-  type DiagnosisAnamnesisResult,
-  type AnamnesisCriterionSummary,
-  type AnamnesisCriterionDetail,
-  type AnamnesisGroup,
-  collectFieldRefs,
-  extractSqQuestionIds,
-  getRelevantExaminationItems,
-  getPerDiagnosisAnamnesisResults,
-  getAnamnesisCriteriaSummary,
-  getGroupedAnamnesisCriteria,
-} from "./relevance";
-
 // Diagnoses — Pain disorders
 export {
   MYALGIA,
