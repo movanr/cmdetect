@@ -59,6 +59,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       label: "Subluxation",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "subluxation",
       criterion: SUBLUXATION_ANAMNESIS,
       center: { x: colCenter, y: 520 },
       width: endW,

@@ -64,7 +64,13 @@ export function PositiveDiagnosesList({
 }: PositiveDiagnosesListProps) {
   if (groups.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">Keine Diagnosen</p>
+      <div className="space-y-1">
+        <p className="text-sm text-muted-foreground">Keine Diagnosen gestellt</p>
+        <p className="text-xs text-muted-foreground">
+          Wenn Sie eine DC/TMD-Diagnose stellen wollen, wählen Sie diese aus einem Endknoten des
+          jeweiligen Entscheidungsbaums aus.
+        </p>
+      </div>
     );
   }
 

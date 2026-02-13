@@ -82,6 +82,7 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
       label: "Auf CMD zurückgeführte Kopfschmerzen",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "headacheAttributedToTmd",
       criterion: and([HEADACHE_ANAMNESIS, HEADACHE_EXAMINATION.criterion]),
       context: ctx,
       center: { x: colCenter, y: 580 },

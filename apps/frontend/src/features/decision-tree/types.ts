@@ -41,6 +41,8 @@ export interface TreeNodeDef {
   linkedTreeId?: string;
   /** Imaging recommendation shown on diagnosis end nodes (e.g. "MRT", "CT") */
   imagingNote?: string;
+  /** DC/TMD diagnosis ID for blue end nodes (enables practitioner selection) */
+  diagnosisId?: string;
   /** Center position (converted to top-left during rendering) */
   center: Position;
   width: number;

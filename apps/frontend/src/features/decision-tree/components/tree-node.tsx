@@ -1,5 +1,7 @@
 import React from "react";
-import { StatusBadge } from "../../evaluation/components/StatusBadge";
+import { CircleCheck } from "lucide-react";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import type { PractitionerDecision } from "../../evaluation/types";
 import type { CriterionStatus, Position } from "../types";
 
 interface TreeNodeProps {
@@ -20,6 +22,12 @@ interface TreeNodeProps {
   onLinkedNodeClick?: (treeId: string) => void;
   /** Imaging recommendation (e.g. "MRT", "CT") */
   imagingNote?: string;
+  /** DC/TMD diagnosis ID for blue end nodes */
+  diagnosisId?: string;
+  /** Practitioner decision for this end node's diagnosis */
+  practitionerDecision?: PractitionerDecision;
+  /** Popover content rendered by parent (EndNodePopover) */
+  popoverContent?: React.ReactNode;
   position: Position;
   width: number;
   height: number;
@@ -48,6 +56,12 @@ const nodeColors: Record<
   },
 };
 
+const confirmedColors = {
+  borderColor: "border-green-500",
+  bgColor: "bg-green-50",
+  textColor: "text-green-900",
+};
+
 const TreeNode: React.FC<TreeNodeProps> = ({
   label,
   negativeLabel,
@@ -59,12 +73,18 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   linkedTreeId,
   onLinkedNodeClick,
   imagingNote,
+  diagnosisId,
+  practitionerDecision,
+  popoverContent,
   position,
   width,
   height,
   status,
   isActive,
 }) => {
+  const isConfirmed =
+    practitionerDecision === "confirmed" || practitionerDecision === "added";
+
   // Inactive nodes get a uniform disabled style; active nodes show status/color
   const disabled = {
     borderColor: "border-gray-200",
@@ -72,26 +92,36 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     textColor: "text-gray-400",
   };
   const showNegativeLabel = negativeLabel && status === "negative";
+
+  // Confirmed end nodes override to green regardless of active path
   const active =
-    isEndNode && color === "blue"
-      ? nodeColors.positive
-      : color === "red"
-        ? showNegativeLabel
-          ? nodeColors.negative // grey when gateway criterion is not met
-          : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
-        : nodeColors[status];
+    isEndNode && isConfirmed
+      ? confirmedColors
+      : isEndNode && color === "blue"
+        ? nodeColors.positive
+        : color === "red"
+          ? showNegativeLabel
+            ? nodeColors.negative // grey when gateway criterion is not met
+            : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
+          : nodeColors[status];
+
   const {
     borderColor: borderClass,
     bgColor: bgClass,
     textColor: textClass,
-  } = isActive ? active : disabled;
+  } = isActive || isConfirmed ? active : disabled;
 
   const isLinked = !!linkedTreeId;
+  const isClickableEndNode = !!diagnosisId && !!popoverContent;
 
-  return (
+  const nodeContent = (
     <div
       className={`absolute z-20 shadow-sm border-2 rounded-lg ${borderClass} ${bgClass} ${
-        isLinked ? "cursor-pointer hover:ring-2 hover:ring-blue-300 transition-shadow" : ""
+        isLinked
+          ? "cursor-pointer hover:ring-2 hover:ring-blue-300 transition-shadow"
+          : isClickableEndNode
+            ? "cursor-pointer hover:ring-2 hover:ring-blue-300 transition-shadow"
+            : ""
       }`}
       style={{
         left: `${position.x}px`,
@@ -138,15 +168,28 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           </div>
         )}
 
-        {/* Status Badge — same component as evaluation table */}
-        {!isEndNode && isActive && (
+        {/* Confirmed checkmark for diagnosis end nodes */}
+        {isConfirmed && (
           <div className="flex justify-center mt-1">
-            <StatusBadge status={status} />
+            <CircleCheck className="h-4 w-4 text-green-600" />
           </div>
         )}
+
       </div>
     </div>
   );
+
+  // Wrap blue end nodes with Popover
+  if (isClickableEndNode) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>{nodeContent}</PopoverTrigger>
+        {popoverContent}
+      </Popover>
+    );
+  }
+
+  return nodeContent;
 };
 
 export default TreeNode;

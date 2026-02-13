@@ -79,6 +79,7 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
       label: "Arthralgie",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "arthralgia",
       criterion: and([ARTHRALGIA_ANAMNESIS, ARTHRALGIA_EXAMINATION.criterion]),
       context: ctx,
       center: { x: colCenter, y: 580 },

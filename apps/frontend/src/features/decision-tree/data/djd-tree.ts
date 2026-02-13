@@ -58,6 +58,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       label: "Degenerative Gelenkerkrankung",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "degenerativeJointDisease",
       imagingNote: "CT",
       criterion: and([DEGENERATIVE_JOINT_DISEASE.anamnesis, DEGENERATIVE_JOINT_DISEASE.examination.criterion]),
       context: ctx,

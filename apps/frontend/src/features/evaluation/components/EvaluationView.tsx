@@ -46,7 +46,6 @@ import type {
   PersistedDiagnosisEvaluation,
   PractitionerDecision,
 } from "../types";
-import { DiagnosisDetailPanel } from "./DiagnosisDetailPanel";
 import { PositiveDiagnosesList, type PositiveGroup } from "./PositiveDiagnosesList";
 import { RegionDiagnosisList } from "./RegionDiagnosisList";
 import { SummaryDiagrams } from "./SummaryDiagrams";
@@ -237,7 +236,6 @@ export function EvaluationView({
   const [selectedSide, setSelectedSide] = useState<Side>("right");
   const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
   const [userSelectedTree, setUserSelectedTree] = useState<TreeTypeId | null>(null);
-  const [selectedDiagnosisId, setSelectedDiagnosisId] = useState<DiagnosisId | null>(null);
 
   // ── Memos (dependency order) ───────────────────────────────────────
 
@@ -284,36 +282,30 @@ export function EvaluationView({
     return statuses;
   }, [flatResults]);
 
-  // 5. Positive diagnoses grouped by (region, side) for the left panel
-  //    Enriched with persisted result data and manually added diagnoses
+  // 5. Selected diagnoses grouped by (region, side) for the left panel
+  //    Shows only diagnoses where the practitioner has made an active decision (confirmed/added)
   const positiveGroups = useMemo((): PositiveGroup[] => {
+    if (!evaluation?.results) return [];
+
     const groups: PositiveGroup[] = [];
     const seen = new Set<string>();
 
     // Ordered: temporalis → masseter → tmj, right → left
     for (const region of DIAGRAM_REGIONS) {
       for (const side of ["right", "left"] as Side[]) {
-        for (const result of flatResults) {
-          if (result.status !== "positive") continue;
-          const hasLocation = result.positiveLocations.some(
-            (loc) => loc.side === side && loc.region === region
-          );
-          if (!hasLocation) continue;
+        for (const persisted of evaluation.results) {
+          if (
+            persisted.practitionerDecision !== "confirmed" &&
+            persisted.practitionerDecision !== "added"
+          ) continue;
+          if (persisted.side !== side || persisted.region !== region) continue;
 
-          const def = ALL_DIAGNOSES.find((d) => d.id === result.diagnosisId);
+          const def = ALL_DIAGNOSES.find((d) => d.id === persisted.diagnosisId);
           if (!def) continue;
 
-          const dedupKey = `${side}-${region}-${result.diagnosisId}`;
+          const dedupKey = `${side}-${region}-${persisted.diagnosisId}`;
           if (seen.has(dedupKey)) continue;
           seen.add(dedupKey);
-
-          // Enrich with persisted result data for inline controls
-          const persisted = evaluation?.results.find(
-            (r) =>
-              r.diagnosisId === result.diagnosisId &&
-              r.side === side &&
-              r.region === region
-          );
 
           let group = groups.find((g) => g.side === side && g.region === region);
           if (!group) {
@@ -321,19 +313,19 @@ export function EvaluationView({
             groups.push(group);
           }
           group.diagnoses.push({
-            diagnosisId: result.diagnosisId as DiagnosisId,
+            diagnosisId: persisted.diagnosisId as DiagnosisId,
             nameDE: def.nameDE,
-            resultId: persisted?.id ?? "",
-            computedStatus: persisted?.computedStatus ?? "positive",
-            practitionerDecision: persisted?.practitionerDecision ?? null,
-            note: persisted?.note ?? null,
+            resultId: persisted.id,
+            computedStatus: persisted.computedStatus,
+            practitionerDecision: persisted.practitionerDecision,
+            note: persisted.note,
           });
         }
       }
     }
 
     return groups;
-  }, [flatResults, evaluation]);
+  }, [evaluation]);
 
   // 6. Tree types applicable to the selected region
   const currentTreeTypes = useMemo(
@@ -371,6 +363,18 @@ export function EvaluationView({
     }
   }, [selectedTree, selectedSide, selectedRegion]);
 
+  // 9. End node decisions for the current tree's (side, region)
+  const endNodeDecisions = useMemo(() => {
+    if (!evaluation?.results) return {};
+    const map: Record<string, PractitionerDecision> = {};
+    for (const r of evaluation.results) {
+      if (r.side === selectedSide && r.region === selectedRegion) {
+        map[r.diagnosisId] = r.practitionerDecision;
+      }
+    }
+    return map;
+  }, [evaluation, selectedSide, selectedRegion]);
+
   // ── Handlers ───────────────────────────────────────────────────────
 
   const handleRegionClick = useCallback((side: Side, region: Region) => {
@@ -383,9 +387,33 @@ export function EvaluationView({
       setSelectedSide(side);
       setSelectedRegion(region);
       setUserSelectedTree(diagnosisToTreeType(diagnosisId));
-      setSelectedDiagnosisId(diagnosisId);
     },
     []
+  );
+
+  const handleEndNodeConfirm = useCallback(
+    (diagnosisId: string, note: string | null) => {
+      if (!evaluation?.results || !onUpdateDecision) return;
+
+      const persisted = evaluation.results.find(
+        (r) =>
+          r.diagnosisId === diagnosisId &&
+          r.side === selectedSide &&
+          r.region === selectedRegion
+      );
+      if (!persisted) return;
+
+      const isCurrentlyConfirmed =
+        persisted.practitionerDecision === "confirmed" ||
+        persisted.practitionerDecision === "added";
+
+      onUpdateDecision({
+        resultId: persisted.id,
+        practitionerDecision: isCurrentlyConfirmed ? null : "confirmed",
+        note,
+      });
+    },
+    [evaluation, onUpdateDecision, selectedSide, selectedRegion]
   );
 
   const handleTreeSelect = useCallback((id: string) => {
@@ -439,12 +467,6 @@ export function EvaluationView({
               />
             </div>
           </div>
-
-          {/* Clinical context for selected positive diagnosis */}
-          {selectedDiagnosisId &&
-            positiveGroups.some((g) =>
-              g.diagnoses.some((d) => d.diagnosisId === selectedDiagnosisId)
-            ) && <DiagnosisDetailPanel diagnosisId={selectedDiagnosisId} />}
         </CardContent>
       </Card>
 
@@ -504,6 +526,9 @@ export function EvaluationView({
                       tree={treeData}
                       data={criteriaData}
                       onLinkedNodeClick={handleTreeSelect}
+                      endNodeDecisions={endNodeDecisions}
+                      onEndNodeConfirm={handleEndNodeConfirm}
+                      readOnly={readOnly}
                     />
                   </div>
                   <ScrollBar orientation="horizontal" />

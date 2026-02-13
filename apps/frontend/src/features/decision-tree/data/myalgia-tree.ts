@@ -76,6 +76,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
       label: "Myalgie",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "myalgia",
       criterion: and([MYALGIA_ANAMNESIS, MYALGIA_EXAMINATION.criterion]),
       context: ctx,
       center: { x: colCenter, y: 535 },

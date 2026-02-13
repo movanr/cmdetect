@@ -21,12 +21,6 @@ interface SummaryDiagramsProps {
   onRegionClick?: (side: Side, region: Region) => void;
 }
 
-const LEGEND_ITEMS = [
-  { label: "Positiv", className: "bg-blue-400" },
-  { label: "Negativ", className: "bg-zinc-400" },
-  { label: "Ausstehend", className: "bg-zinc-300" },
-];
-
 export function SummaryDiagrams({
   regionStatuses,
   regions,
@@ -58,15 +52,6 @@ export function SummaryDiagrams({
               className="w-[160px] sm:w-[180px]"
             />
           </div>
-        ))}
-      </div>
-      {/* Legend */}
-      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-        {LEGEND_ITEMS.map(({ label, className }) => (
-          <span key={label} className="flex items-center gap-1">
-            <span className={`inline-block w-2 h-2 rounded-full ${className}`} />
-            {label}
-          </span>
         ))}
       </div>
     </div>

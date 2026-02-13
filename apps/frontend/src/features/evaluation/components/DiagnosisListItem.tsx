@@ -35,38 +35,21 @@ interface DiagnosisListItemProps {
   readOnly?: boolean;
 }
 
-const STATUS_LABELS: Record<CriterionStatus, string> = {
-  positive: "Positiv",
-  negative: "Negativ",
-  pending: "Ausstehend",
-};
-
-function getStatusBadge(
-  computedStatus: CriterionStatus,
-  decision: PractitionerDecision
-) {
+function getStatusBadge(decision: PractitionerDecision) {
   if (decision === "confirmed") {
     return { label: "Bestätigt", className: "bg-green-600 text-white" };
+  }
+  if (decision === "added") {
+    return { label: "Hinzugefügt", className: "bg-blue-600 text-white" };
   }
   if (decision === "rejected") {
     return { label: "Abgelehnt", className: "bg-gray-500 text-white" };
   }
-  // No decision — show computed status
-  if (computedStatus === "positive") {
-    return { label: "Unbestätigt", className: "bg-gray-200 text-gray-600" };
-  }
-  return {
-    label: STATUS_LABELS[computedStatus],
-    className: cn(
-      computedStatus === "negative" && "bg-gray-400 text-white",
-      computedStatus === "pending" && "bg-gray-200 text-gray-600"
-    ),
-  };
+  return null;
 }
 
 export function DiagnosisListItem({
   nameDE,
-  computedStatus,
   practitionerDecision,
   note,
   resultId,
@@ -82,7 +65,7 @@ export function DiagnosisListItem({
   // When not editing, always reflect the latest prop
   const displayNote = editedNote ?? (note ?? "");
 
-  const badge = getStatusBadge(computedStatus, practitionerDecision);
+  const badge = getStatusBadge(practitionerDecision);
 
   function handleDecision(decision: PractitionerDecision) {
     const newDecision = decision === practitionerDecision ? null : decision;
@@ -129,9 +112,11 @@ export function DiagnosisListItem({
         </button>
 
         {/* Status badge */}
-        <Badge className={cn("text-[10px] shrink-0 ml-auto", badge.className)}>
-          {badge.label}
-        </Badge>
+        {badge && (
+          <Badge className={cn("text-[10px] shrink-0 ml-auto", badge.className)}>
+            {badge.label}
+          </Badge>
+        )}
 
         {/* Action buttons */}
         {!readOnly && (

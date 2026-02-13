@@ -11,8 +11,10 @@ import type {
   TreeNodeDef,
 } from "../types";
 import type { TemplateContext } from "@cmdetect/dc-tmd";
+import type { PractitionerDecision } from "../../evaluation/types";
 import TreeNode from "./tree-node";
 import Transition from "./transition";
+import { EndNodePopover } from "./end-node-popover";
 
 const REGION_LABELS: Record<string, string> = {
   temporalis: "M. temporalis",
@@ -37,6 +39,12 @@ interface DecisionTreeViewProps {
   tree: DecisionTreeDef;
   data: unknown;
   onLinkedNodeClick?: (treeId: string) => void;
+  /** Map of diagnosisId → practitioner decision for end nodes in this tree's (side, region) */
+  endNodeDecisions?: Record<string, PractitionerDecision>;
+  /** Callback when practitioner confirms/removes a diagnosis via end node popover */
+  onEndNodeConfirm?: (diagnosisId: string, note: string | null) => void;
+  /** Whether the current user can only view */
+  readOnly?: boolean;
 }
 
 /** Evaluate a single node's criterion against data */
@@ -157,6 +165,9 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
   tree,
   data,
   onLinkedNodeClick,
+  endNodeDecisions,
+  onEndNodeConfirm,
+  readOnly,
 }) => {
   const { nodes, transitions } = tree;
 
@@ -204,27 +215,46 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
           width: `${treeDims.width}px`,
         }}
       >
-        {resolvedNodes.map((node) => (
-          <TreeNode
-            key={node.id}
-            id={node.id}
-            label={node.label}
-            negativeLabel={node.negativeLabel}
-            subLabel={node.subLabel}
-            contextLabel={formatContextLabel(node.context)}
-            subItems={node.subItems}
-            color={node.color}
-            isEndNode={node.isEndNode}
-            linkedTreeId={node.linkedTreeId}
-            onLinkedNodeClick={onLinkedNodeClick}
-            imagingNote={node.imagingNote}
-            position={node.position}
-            width={node.width}
-            height={node.height}
-            status={nodeStatuses[node.id]}
-            isActive={activeNodes.includes(node.id)}
-          />
-        ))}
+        {resolvedNodes.map((node) => {
+          const decision = node.diagnosisId
+            ? endNodeDecisions?.[node.diagnosisId] ?? null
+            : undefined;
+          return (
+            <TreeNode
+              key={node.id}
+              id={node.id}
+              label={node.label}
+              negativeLabel={node.negativeLabel}
+              subLabel={node.subLabel}
+              contextLabel={formatContextLabel(node.context)}
+              subItems={node.subItems}
+              color={node.color}
+              isEndNode={node.isEndNode}
+              linkedTreeId={node.linkedTreeId}
+              onLinkedNodeClick={onLinkedNodeClick}
+              imagingNote={node.imagingNote}
+              diagnosisId={node.diagnosisId}
+              practitionerDecision={decision ?? undefined}
+              popoverContent={
+                node.diagnosisId && onEndNodeConfirm ? (
+                  <EndNodePopover
+                    diagnosisId={node.diagnosisId}
+                    side={tree.side}
+                    region={tree.region}
+                    decision={decision ?? null}
+                    onConfirm={onEndNodeConfirm}
+                    readOnly={readOnly}
+                  />
+                ) : undefined
+              }
+              position={node.position}
+              width={node.width}
+              height={node.height}
+              status={nodeStatuses[node.id]}
+              isActive={activeNodes.includes(node.id)}
+            />
+          );
+        })}
 
         {transitions.map((transition, idx) => (
           <Transition

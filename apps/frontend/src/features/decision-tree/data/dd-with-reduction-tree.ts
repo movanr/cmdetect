@@ -160,6 +160,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "DV ohne Reposition, ohne Mundöffnungseinschränkung",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "discDisplacementWithoutReductionWithoutLimitedOpening",
       criterion: and([
         DD_WITHOUT_REDUCTION_ANAMNESIS,
         DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING.examination.criterion,
@@ -185,6 +186,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "DV mit Reposition",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "discDisplacementWithReduction",
       criterion: and([
         DISC_DISPLACEMENT_WITH_REDUCTION.anamnesis,
         DISC_DISPLACEMENT_WITH_REDUCTION.examination.criterion,
@@ -209,6 +211,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "DV mit Reposition, mit intermittierender Kieferklemme",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "discDisplacementWithReductionIntermittentLocking",
       criterion: and([
         DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING.anamnesis,
         DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING.examination.criterion,
@@ -225,6 +228,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "DV ohne Reposition, mit Mundöffnungseinschränkung",
       color: "blue",
       isEndNode: true,
+      diagnosisId: "discDisplacementWithoutReductionLimitedOpening",
       criterion: and([
         DD_WITHOUT_REDUCTION_ANAMNESIS,
         DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING.examination.criterion,
