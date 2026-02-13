@@ -33,7 +33,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
   const colCenter = 200;
   const nodeW = 320;
   const endW = 240;
-  const endH = 80;
+  const endH = 120;
 
   // E8 closed-lock criterion: "if not observed → yes, else check reduction"
   const e8ClosedLockReduction = or(
@@ -73,9 +73,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       subLabel: `Kieferklemme auf dieser Seite (${sideLabel}): SF 9 + SF 10 Seitenangabe`,
       criterion: DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
       context: ctx,
-      center: { x: colCenter, y: 70 },
+      center: { x: colCenter, y: 90 },
       width: nodeW,
-      height: 120,
+      height: 160,
     },
     // ── Main DV mit Reposition flow (center) ──
     {
@@ -84,7 +84,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       color: "red",
       isEndNode: true,
       criterion: field(sq("SQ8"), { equals: "yes" }),
-      center: { x: colCenter - 300, y: 260 },
+      center: { x: colCenter - 300, y: 310 },
       width: 180,
       height: 80,
     },
@@ -95,9 +95,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
         `Geräusch auf dieser Seite angegeben (${sideLabel}): SF 8 Seitenangabe ODER Patientenangabe U6/U7`,
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
-      center: { x: colCenter, y: 260 },
+      center: { x: colCenter, y: 310 },
       width: nodeW,
-      height: 100,
+      height: 140,
     },
     // ── DV ohne Reposition branch (right) ──
     {
@@ -107,9 +107,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
         "Passive Dehnung (max. assistierte Mundöffnung + vertikaler Überbiss) < 40 mm (U4c)",
       criterion: openingLimited,
       context: ctx,
-      center: { x: colCenter + 400, y: 260 },
+      center: { x: colCenter + 400, y: 310 },
       width: nodeW,
-      height: 100,
+      height: 156,
     },
     {
       id: "clicks",
@@ -123,9 +123,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       },
       criterion: DISC_DISPLACEMENT_WITH_REDUCTION.examination.criterion,
       context: ctx,
-      center: { x: colCenter, y: 430 },
+      center: { x: colCenter, y: 510 },
       width: nodeW,
-      height: 140,
+      height: 180,
     },
     {
       id: "noLimitedOpening",
@@ -139,9 +139,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       ]),
       context: ctx,
       imagingNote: "MRT",
-      center: { x: colCenter + 550, y: 410 },
+      center: { x: colCenter + 625, y: 480 },
       width: endW,
-      height: 70,
+      height: 110,
     },
     {
       id: "intermittentLocking",
@@ -149,9 +149,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       subLabel:
         "Aktuell intermittierende Blockade mit eingeschränkter Mundöffnung (SF 11 = ja, SF 12 = nein)",
       criterion: intermittentLocking,
-      center: { x: colCenter, y: 620 },
+      center: { x: colCenter, y: 730 },
       width: nodeW,
-      height: 100,
+      height: 140,
     },
     {
       id: "ddWithReduction",
@@ -165,7 +165,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       ]),
       context: ctx,
       imagingNote: "MRT",
-      center: { x: colCenter - 170, y: 780 },
+      center: { x: colCenter - 240, y: 920 },
       width: endW,
       height: endH,
     },
@@ -174,9 +174,9 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "Klinische Beobachtung (U8)",
       subLabel: "Wenn klinisch feststellbar: Durch Manöver reponierbar? Sonst: Ja",
       criterion: e8ClosedLockReduction,
-      center: { x: colCenter + 200, y: 780 },
+      center: { x: colCenter + 200, y: 920 },
       width: 280,
-      height: 100,
+      height: 140,
     },
     {
       id: "ddWithReductionIL",
@@ -191,7 +191,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       ]),
       context: ctx,
       imagingNote: "MRT",
-      center: { x: colCenter + 60, y: 940 },
+      center: { x: colCenter - 10, y: 1100 },
       width: endW,
       height: endH,
     },
@@ -207,7 +207,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       ]),
       context: ctx,
       imagingNote: "MRT",
-      center: { x: colCenter + 400, y: 940 },
+      center: { x: colCenter + 400, y: 1100 },
       width: endW,
       height: endH,
     },

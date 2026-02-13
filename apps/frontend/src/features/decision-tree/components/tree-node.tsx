@@ -174,10 +174,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           </div>
         )}
 
-        {imagingNote && isActive && (
+        {imagingNote && (
           <div className="mt-1">
             <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">
-              {`Durch ${imagingNote} bestätigen`}
+              {`Durch ${imagingNote} bestätigen, wenn indiziert`}
             </span>
           </div>
         )}
