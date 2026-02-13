@@ -40,6 +40,8 @@ interface HeadDiagramProps {
   disabled?: boolean;
   /** Regions with validation errors */
   incompleteRegions?: IncompleteRegion[];
+  /** Hide muscle background images (temporalis, masseter) */
+  hideBackgroundImages?: boolean;
 }
 
 /** Stripe pattern ID for incomplete regions */
@@ -61,6 +63,7 @@ export function HeadDiagram({
   className,
   disabled = false,
   incompleteRegions = [],
+  hideBackgroundImages = false,
 }: HeadDiagramProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -235,11 +238,11 @@ export function HeadDiagram({
     for (const [region, backgroundId] of Object.entries(REGION_BACKGROUND_IDS)) {
       const background = svg.querySelector(`#${backgroundId}`) as SVGElement | null;
       if (background) {
-        const shouldShowBackground = regions.includes(region as Region);
+        const shouldShowBackground = !hideBackgroundImages && regions.includes(region as Region);
         background.style.display = shouldShowBackground ? "" : "none";
       }
     }
-  }, [regions, regionStatuses, selectedRegion, disabled, getStatus, incompleteRegions]);
+  }, [regions, regionStatuses, selectedRegion, disabled, getStatus, incompleteRegions, hideBackgroundImages]);
 
   // Handle click events via delegation
   const handleClick = useCallback(

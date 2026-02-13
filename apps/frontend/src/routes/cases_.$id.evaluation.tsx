@@ -157,7 +157,6 @@ function EvaluationPage() {
   const userId = session?.user?.id ?? "";
   const isDataReady = !isRecordLoading && !isResponsesLoading && !isExaminationLoading;
   const {
-    allResults,
     evaluation: diagnosisEvaluation,
     isSyncing,
     updateDecision,
@@ -205,7 +204,6 @@ function EvaluationPage() {
       <EvaluationView
         sqAnswers={sqAnswers}
         examinationData={examinationData}
-        allDiagnosisResults={allResults}
         evaluation={diagnosisEvaluation}
         onUpdateDecision={updateDecision}
         readOnly={isReadOnly || isSyncing}

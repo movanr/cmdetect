@@ -108,16 +108,16 @@ export const REGION_STATE_COLORS = {
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "rgba(212, 212, 216, 0.4)", // zinc-300 @ 40%
-    stroke: "#a1a1aa", // zinc-400
+    fill: "rgba(228, 228, 231, 0.3)", // zinc-200 @ 30%
+    stroke: "#d4d4d8", // zinc-300
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
     // Light gray = pain=yes but familiar not yet answered
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "rgba(212, 212, 216, 0.4)", // zinc-300 @ 40%
-    stroke: "#a1a1aa", // zinc-400
+    fill: "rgba(228, 228, 231, 0.3)", // zinc-200 @ 30%
+    stroke: "#d4d4d8", // zinc-300
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
     // Dark gray = complete, no significant findings
