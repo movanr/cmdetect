@@ -3,14 +3,13 @@ import type { Position } from "../types";
 const Label: React.FC<{
   text: string;
   position: Position;
-  isActive: boolean;
-}> = ({ text, position, isActive }) => {
+}> = ({ text, position }) => {
   return (
     <text
       x={position.x}
       y={position.y}
       fontSize="14"
-      fill={isActive ? "black" : "#d1d5db"}
+      fill="black"
     >
       {text}
     </text>

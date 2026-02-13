@@ -10,7 +10,6 @@ const Transition: React.FC<TransitionProps> = ({
   endDirection,
   joints,
   label,
-  isActive,
 }) => {
   const path = [];
   const start = getEdgePosition(from, startDirection);
@@ -39,9 +38,9 @@ const Transition: React.FC<TransitionProps> = ({
   const labelPosition = getLabelPosition(path[0], startDirection);
 
   return (
-    <svg className={`absolute top-0 left-0 w-full h-full pointer-events-none ${isActive ? "z-10" : ""}`}>
-      <Arrow path={path} direction={endDirection} isActive={isActive} />
-      {label && <Label text={label} position={labelPosition} isActive={isActive} />}
+    <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+      <Arrow path={path} direction={endDirection} />
+      {label && <Label text={label} position={labelPosition} />}
     </svg>
   );
 };

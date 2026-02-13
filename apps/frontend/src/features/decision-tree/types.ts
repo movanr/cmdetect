@@ -94,7 +94,6 @@ export interface TransitionProps {
   type: TransitionType;
   label?: string;
   joints?: Position[];
-  isActive: boolean;
 }
 
 /** Node with computed position (top-left corner) for rendering */
@@ -107,7 +106,6 @@ export interface ResolvedNode {
 export interface ArrowProps {
   path: Position[];
   direction: Direction;
-  isActive: boolean;
 }
 
 /** Status of a node as evaluated by dc-tmd */

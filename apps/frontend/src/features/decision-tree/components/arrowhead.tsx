@@ -6,8 +6,7 @@ const Arrowhead: React.FC<{
   length: number;
   width: number;
   direction: Direction;
-  isActive: boolean;
-}> = ({ end, length, width, direction, isActive }) => {
+}> = ({ end, length, width, direction }) => {
   switch (direction) {
     case "down":
       return (
@@ -15,7 +14,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - width},${end.y - length} ${end.x + width},${
             end.y - length
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "#d1d5db"}
+          fill="black"
         />
       );
     case "up":
@@ -24,7 +23,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - width},${end.y + length} ${end.x + width},${
             end.y + length
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "#d1d5db"}
+          fill="black"
         />
       );
     case "right":
@@ -33,7 +32,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - length},${end.y - width} ${end.x - length},${
             end.y + width
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "#d1d5db"}
+          fill="black"
         />
       );
     case "left":
@@ -42,7 +41,7 @@ const Arrowhead: React.FC<{
           points={`${end.x + length},${end.y - width} ${end.x + length},${
             end.y + width
           } ${end.x},${end.y}`}
-          fill={isActive ? "black" : "#d1d5db"}
+          fill="black"
         />
       );
   }
