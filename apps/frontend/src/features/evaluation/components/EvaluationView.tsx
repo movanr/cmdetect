@@ -2,7 +2,7 @@
  * EvaluationView — Main evaluation page component.
  *
  * Single-card layout with region × side toggles, head diagrams as an
- * alternative selector, diagnosis sidebar, and decision tree.
+ * alternative selector, diagnosis sidebar, and decision tree or checklist.
  *
  * Evaluates all DC/TMD diagnoses against SQ + examination data.
  * Myalgia subtypes are flattened: if a subtype is positive it replaces
@@ -21,9 +21,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { REGIONS, type Region, type Side } from "@cmdetect/dc-tmd";
+import {
+  ALL_DIAGNOSES,
+  evaluateAllDiagnoses,
+  REGIONS,
+  type DiagnosisDefinition,
+  type Region,
+  type Side,
+} from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Info } from "lucide-react";
+import { ArrowRight, GitBranch, Info, ListChecks } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import {
   DecisionTreeView,
@@ -38,6 +45,7 @@ import {
 import type { FormValues } from "../../examination";
 import type { PersistedDiagnosisEvaluation, PractitionerDecision } from "../types";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
+import { CriteriaChecklist } from "./CriteriaChecklist";
 import { SummaryDiagrams } from "./SummaryDiagrams";
 
 interface EvaluationViewProps {
@@ -59,6 +67,9 @@ interface EvaluationViewProps {
 
 /** Regions shown in the head diagrams and used for filtering */
 const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
+
+// ── View mode ──────────────────────────────────────────────────────
+type ViewMode = "tree" | "checklist";
 
 // ── Tree types — each entry maps 1:1 to a decision tree ────────────
 type TreeTypeId =
@@ -108,7 +119,9 @@ export function EvaluationView({
   // ── State ──────────────────────────────────────────────────────────
   const [selectedSide, setSelectedSide] = useState<Side>("right");
   const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
+  const [viewMode, setViewMode] = useState<ViewMode>("tree");
   const [userSelectedTree, setUserSelectedTree] = useState<TreeTypeId | null>(null);
+  const [userSelectedDiagnosisId, setUserSelectedDiagnosisId] = useState<string | null>(null);
 
   // ── Memos (dependency order) ───────────────────────────────────────
 
@@ -123,6 +136,28 @@ export function EvaluationView({
     () => TREE_TYPES.filter((t) => t.regions.includes(selectedRegion)),
     [selectedRegion]
   );
+
+  // 3. Diagnoses applicable to the selected region (for checklist mode)
+  const currentDiagnoses = useMemo(
+    () => ALL_DIAGNOSES.filter((d) => d.examination.regions.includes(selectedRegion)),
+    [selectedRegion]
+  );
+
+  // 4. Selected diagnosis for checklist mode (auto-select first if invalid)
+  const selectedDiagnosis = useMemo((): DiagnosisDefinition | null => {
+    if (currentDiagnoses.length === 0) return null;
+    const match = currentDiagnoses.find((d) => d.id === userSelectedDiagnosisId);
+    return match ?? currentDiagnoses[0];
+  }, [currentDiagnoses, userSelectedDiagnosisId]);
+
+  // 5. Cross-diagnosis requirement check (for headache's requires constraint)
+  const requirementMet = useMemo(() => {
+    if (!selectedDiagnosis?.requires) return undefined;
+    const allResults = evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData);
+    return selectedDiagnosis.requires.anyOf.some((reqId) =>
+      allResults.some((r) => r.diagnosisId === reqId && r.isPositive)
+    );
+  }, [selectedDiagnosis, criteriaData]);
 
   // 7. Derive effective selectedTree — auto-select first if user pick is invalid
   const selectedTree = useMemo((): TreeTypeId | null => {
@@ -198,6 +233,14 @@ export function EvaluationView({
     setUserSelectedTree(id as TreeTypeId);
   }, []);
 
+  const handleDiagnosisSelect = useCallback((id: string) => {
+    setUserSelectedDiagnosisId(id);
+  }, []);
+
+  const handleViewModeChange = useCallback((value: string) => {
+    if (value) setViewMode(value as ViewMode);
+  }, []);
+
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
@@ -214,7 +257,7 @@ export function EvaluationView({
         </div>
       )}
 
-      {/* Decision tree explorer */}
+      {/* Decision tree / checklist explorer */}
       <Card>
         <CardHeader>
           <CardTitle>DC/TMD-Kriterien abgleichen</CardTitle>
@@ -256,55 +299,116 @@ export function EvaluationView({
                 <ToggleGroupItem value="left">Links</ToggleGroupItem>
               </ToggleGroup>
             </div>
+
+            {/* View mode toggle */}
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={viewMode}
+              onValueChange={handleViewModeChange}
+            >
+              <ToggleGroupItem value="tree" className="gap-1.5">
+                <GitBranch className="h-3.5 w-3.5" />
+                Entscheidungsbaum
+              </ToggleGroupItem>
+              <ToggleGroupItem value="checklist" className="gap-1.5">
+                <ListChecks className="h-3.5 w-3.5" />
+                Checkliste
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
-          {/* Step 2: Tree selection */}
+          {/* Step 2: Selection (tree type or diagnosis) */}
           <div className="flex flex-col items-center gap-2">
-            <StepLabel step={2} label="Entscheidungsbaum wählen" />
-            <Select value={selectedTree ?? undefined} onValueChange={handleTreeSelect}>
-              <SelectTrigger className="w-72">
-                <SelectValue placeholder="Diagnose wählen…" />
-              </SelectTrigger>
-              <SelectContent>
-                {currentTreeTypes.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <StepLabel
+              step={2}
+              label={viewMode === "tree" ? "Entscheidungsbaum wählen" : "Diagnose wählen"}
+            />
+            {viewMode === "tree" ? (
+              <Select value={selectedTree ?? undefined} onValueChange={handleTreeSelect}>
+                <SelectTrigger className="w-72">
+                  <SelectValue placeholder="Diagnose wählen…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentTreeTypes.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select
+                value={selectedDiagnosis?.id ?? undefined}
+                onValueChange={handleDiagnosisSelect}
+              >
+                <SelectTrigger className="w-72">
+                  <SelectValue placeholder="Diagnose wählen…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentDiagnoses.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.nameDE}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
-          {/* Step 3: Decision tree */}
+          {/* Step 3: Decision tree or Checklist */}
           <div className="space-y-2">
             <StepLabel step={3} label="Diagnosekriterien auswerten" />
-            {treeData ? (
-              <ScrollArea className="w-full">
-                <div className="min-w-fit pb-4">
-                  <DecisionTreeView
-                    tree={treeData}
-                    data={criteriaData}
-                    onLinkedNodeClick={handleTreeSelect}
-                    endNodeDecisions={endNodeDecisions}
-                    onEndNodeConfirm={handleEndNodeConfirm}
-                    readOnly={readOnly}
-                  />
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+
+            {viewMode === "tree" ? (
+              <>
+                {treeData ? (
+                  <ScrollArea className="w-full">
+                    <div className="min-w-fit pb-4">
+                      <DecisionTreeView
+                        tree={treeData}
+                        data={criteriaData}
+                        onLinkedNodeClick={handleTreeSelect}
+                        endNodeDecisions={endNodeDecisions}
+                        onEndNodeConfirm={handleEndNodeConfirm}
+                        readOnly={readOnly}
+                      />
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center">
+                    Kein Entscheidungsbaum für die aktuelle Diagnose verfügbar.
+                  </p>
+                )}
+                <Alert className="bg-blue-50/50 border-blue-200">
+                  <Info className="text-blue-500" />
+                  <AlertDescription className="text-blue-900">
+                    Klicken Sie auf einen Endknoten, um eine Diagnose zu stellen oder
+                    aufzuheben. Die Diagnoseentscheidung obliegt der behandelnden
+                    Ärztin / dem behandelnden Arzt.
+                  </AlertDescription>
+                </Alert>
+              </>
+            ) : selectedDiagnosis ? (
+              <div className="max-w-xl mx-auto">
+                <CriteriaChecklist
+                  diagnosis={selectedDiagnosis}
+                  criteriaData={criteriaData}
+                  side={selectedSide}
+                  region={selectedRegion}
+                  practitionerDecision={endNodeDecisions[selectedDiagnosis.id]}
+                  onConfirm={handleEndNodeConfirm}
+                  readOnly={readOnly}
+                  requirementMet={requirementMet}
+                />
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center">
-                Kein Entscheidungsbaum für die aktuelle Diagnose verfügbar.
+                Keine Diagnose für die aktuelle Region verfügbar.
               </p>
             )}
-            <Alert className="bg-blue-50/50 border-blue-200">
-              <Info className="text-blue-500" />
-              <AlertDescription className="text-blue-900">
-                Klicken Sie auf einen Endknoten, um eine Diagnose zu stellen oder
-                aufzuheben. Die Diagnoseentscheidung obliegt der behandelnden
-                Ärztin / dem behandelnden Arzt.
-              </AlertDescription>
-            </Alert>
           </div>
         </CardContent>
       </Card>
