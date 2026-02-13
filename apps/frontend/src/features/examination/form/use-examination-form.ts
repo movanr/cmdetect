@@ -9,6 +9,7 @@ import {
   type StepDefinition,
 } from "../projections/to-instances";
 import { schemaFromModel } from "../projections/to-schema";
+import { E11_MODEL } from "../sections/e11.model";
 import { SECTION_REGISTRY, type SectionId } from "../sections/registry";
 import { createPathHelpers } from "./path-helpers";
 import {
@@ -34,8 +35,11 @@ function prefixStepPaths(
   );
 }
 
-// Build combined model from registry
-const EXAMINATION_MODEL = M.group(Object.fromEntries(SECTION_REGISTRY.map((s) => [s.id, s.model])));
+// Build combined model from registry + E11 (comments, not a workflow step)
+const EXAMINATION_MODEL = M.group(Object.fromEntries([
+  ...SECTION_REGISTRY.map((s) => [s.id, s.model]),
+  ["e11", E11_MODEL],
+]));
 
 // Build combined steps from registry
 const EXAMINATION_STEPS = SECTION_REGISTRY.reduce(

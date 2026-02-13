@@ -15,6 +15,8 @@ import { E6Summary } from "./E6Summary";
 import { E7Summary } from "./E7Summary";
 import { E8Summary } from "./E8Summary";
 import { E9Summary } from "./E9Summary";
+import { E10Summary } from "./E10Summary";
+import { E11Summary } from "./E11Summary";
 
 interface PrintableExaminationProps {
   patientName?: string;
@@ -108,8 +110,14 @@ export function PrintableExamination({
         <section className="border-b border-gray-200 pb-3">
           <E8Summary />
         </section>
-        <section className="pb-3">
+        <section className="border-b border-gray-200 pb-3">
           <E9Summary />
+        </section>
+        <section className="border-b border-gray-200 pb-3">
+          <E10Summary />
+        </section>
+        <section className="pb-3">
+          <E11Summary />
         </section>
       </div>
 

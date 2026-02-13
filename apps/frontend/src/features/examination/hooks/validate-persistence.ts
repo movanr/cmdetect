@@ -19,20 +19,29 @@ const sectionIdSchema = z.enum(SECTION_KEYS as [SectionId, ...SectionId[]]);
 const completedSectionsSchema = z.array(sectionIdSchema);
 
 /**
+ * Try to parse examination data against the schema.
+ * Returns validated FormValues on success, or null on failure. Does not log.
+ */
+function tryParse(data: unknown): FormValues | null {
+  const result = examinationSchema.safeParse(data);
+  if (result.success) {
+    return result.data as FormValues;
+  }
+  return null;
+}
+
+/**
  * Parse and validate examination form data from an untrusted source.
  *
  * Returns validated FormValues on success, or null if the data doesn't
  * match the current schema (e.g., stale localStorage draft after a model change).
  */
 export function parseExaminationData(data: unknown): FormValues | null {
-  const result = examinationSchema.safeParse(data);
-  if (result.success) {
-    return result.data as FormValues;
-  }
+  const result = tryParse(data);
+  if (result) return result;
 
   console.warn(
     "[examination] Failed to validate persisted data — falling back to defaults.",
-    result.error.issues.slice(0, 5) // Log first 5 issues to avoid noise
   );
   return null;
 }
@@ -127,11 +136,14 @@ export function migrateAndParseExaminationData(
   const migrated = migrateExaminationData(raw, version);
 
   // Try direct validation first (fast path)
-  const direct = parseExaminationData(migrated);
+  const direct = tryParse(migrated);
   if (direct) return direct;
 
   // No real examination data → nothing to recover
-  if (!hasSectionData) return null;
+  if (!hasSectionData) {
+    console.warn("[examination] Failed to validate persisted data — falling back to defaults.");
+    return null;
+  }
 
   // Fallback: deep-merge with defaults to fill any structural gaps
   // (e.g., fields added to e1-e9 models after the data was saved)
@@ -139,7 +151,11 @@ export function migrateAndParseExaminationData(
     migrated,
     examinationDefaults as Record<string, unknown>
   );
-  return parseExaminationData(merged);
+  const result = tryParse(merged);
+  if (!result) {
+    console.warn("[examination] Failed to validate persisted data after merge — falling back to defaults.");
+  }
+  return result;
 }
 
 export { CURRENT_MODEL_VERSION } from "./model-versioning";

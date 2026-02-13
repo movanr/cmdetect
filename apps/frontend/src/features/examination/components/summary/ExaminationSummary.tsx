@@ -12,6 +12,8 @@ import { E6Summary } from "./E6Summary";
 import { E7Summary } from "./E7Summary";
 import { E8Summary } from "./E8Summary";
 import { E9Summary } from "./E9Summary";
+import { E10Summary } from "./E10Summary";
+import { E11Summary } from "./E11Summary";
 
 interface ExaminationSummaryProps {
   caseId: string;
@@ -54,6 +56,8 @@ export function ExaminationSummary({ caseId }: ExaminationSummaryProps) {
         <E7Summary />
         <E8Summary />
         <E9Summary />
+        <E10Summary />
+        <E11Summary />
 
         <div className="flex justify-end pt-2 border-t">
           <Button onClick={handleNextStep}>
