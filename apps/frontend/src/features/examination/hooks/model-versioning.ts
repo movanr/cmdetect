@@ -19,14 +19,35 @@
 export type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 
 /** Current model version — bump when FormValues model changes. */
-export const CURRENT_MODEL_VERSION = 1;
+export const CURRENT_MODEL_VERSION = 2;
 
 /**
  * Ordered migration functions. Each transforms data from version N to N+1.
  * Index 0 = v1→v2, index 1 = v2→v3, etc.
  */
 export const migrations: Migration[] = [
-  // No migrations yet — v1 is the baseline.
+  // v1→v2: Add E10 supplemental palpation section with default null values
+  (data) => {
+    if (!data.e10) {
+      data.e10 = {
+        left: {
+          refused: false,
+          posteriorMandibular: { pain: null, familiarPain: null, referredPain: null },
+          submandibular: { pain: null, familiarPain: null, referredPain: null },
+          lateralPterygoid: { pain: null, familiarPain: null, referredPain: null },
+          temporalisTendon: { pain: null, familiarPain: null, referredPain: null },
+        },
+        right: {
+          refused: false,
+          posteriorMandibular: { pain: null, familiarPain: null, referredPain: null },
+          submandibular: { pain: null, familiarPain: null, referredPain: null },
+          lateralPterygoid: { pain: null, familiarPain: null, referredPain: null },
+          temporalisTendon: { pain: null, familiarPain: null, referredPain: null },
+        },
+      };
+    }
+    return data;
+  },
 ];
 
 // Runtime invariant: version and migration count must stay in sync.

@@ -9,7 +9,7 @@
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { E9Section, useExaminationPersistenceContext } from "../features/examination";
+import { E9Section } from "../features/examination";
 
 const e9SearchSchema = z.object({
   step: z.coerce.number().min(1).optional(),
@@ -24,7 +24,6 @@ function ExaminationE9Page() {
   const { id } = Route.useParams();
   const { step } = Route.useSearch();
   const navigate = useNavigate();
-  const { completeExamination } = useExaminationPersistenceContext();
 
   // Navigate to a specific step (0-indexed), or null for summary view
   const navigateToStep = (stepIndex: number | null) => {
@@ -37,11 +36,10 @@ function ExaminationE9Page() {
     }
   };
 
-  // Complete examination and navigate to evaluation (last section)
-  const handleComplete = async () => {
-    await completeExamination();
+  // Navigate to next section (E10)
+  const handleComplete = () => {
     navigate({
-      to: "/cases/$id/evaluation",
+      to: "/cases/$id/examination/e10",
       params: { id },
     });
   };
@@ -60,7 +58,7 @@ function ExaminationE9Page() {
       onStepChange={navigateToStep}
       onComplete={handleComplete}
       onBack={handleBack}
-      isLastSection
+      isLastSection={false}
     />
   );
 }

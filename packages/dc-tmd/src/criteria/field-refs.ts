@@ -102,9 +102,13 @@ export type E8FieldRef = `e8.${Side}.${E8LockingType}.${E8LockingField}`;
 export type E9FieldRef = `e9.${Side}.${PalpationSite}.${PainType}`;
 
 /**
- * E10 Supplemental examination field references
+ * E10 Supplemental palpation field references
+ * Format: e10.{side}.{site}.{painType}
+ *
+ * E10 sites: posteriorMandibular, submandibular, lateralPterygoid, temporalisTendon
+ * E10 pain types: pain, familiarPain, referredPain (no headache, no spreading)
  */
-export type E10FieldRef = `e10.${string}`;
+export type E10FieldRef = `e10.${Side}.${PalpationSite}.${PainType}`;
 
 /**
  * All examination field references

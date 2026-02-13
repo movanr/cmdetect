@@ -398,10 +398,12 @@ describe("Myalgia diagnosis", () => {
       expect(MYALGIA.category).toBe("pain");
     });
 
-    it("examination targets temporalis and masseter regions", () => {
+    it("examination targets temporalis, masseter, otherMast and nonMast regions", () => {
       expect(MYALGIA_EXAMINATION.regions).toContain("temporalis");
       expect(MYALGIA_EXAMINATION.regions).toContain("masseter");
-      expect(MYALGIA_EXAMINATION.regions).toHaveLength(2);
+      expect(MYALGIA_EXAMINATION.regions).toContain("otherMast");
+      expect(MYALGIA_EXAMINATION.regions).toContain("nonMast");
+      expect(MYALGIA_EXAMINATION.regions).toHaveLength(4);
     });
   });
 });

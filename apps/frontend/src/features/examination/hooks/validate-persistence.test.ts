@@ -172,5 +172,69 @@ describe("validate-persistence", () => {
       expect(typeof CURRENT_MODEL_VERSION).toBe("number");
       expect(CURRENT_MODEL_VERSION).toBeGreaterThanOrEqual(1);
     });
+
+    it("migrates v1 data (no e10) to current version", () => {
+      // Simulate old data: has e1-e9 but NO e10 and NO _modelVersion
+      const oldData = structuredClone(examinationDefaults) as Record<string, unknown>;
+      delete oldData.e10;
+
+      const result = migrateAndParseExaminationData(oldData);
+      expect(result).not.toBeNull();
+      // E10 should be added by migration with default values
+      expect(result).toHaveProperty("e10");
+    });
+
+    it("migrates v1 data with _modelVersion:1 (no e10) to current version", () => {
+      const oldData = structuredClone(examinationDefaults) as Record<string, unknown>;
+      delete oldData.e10;
+      oldData._modelVersion = 1;
+
+      const result = migrateAndParseExaminationData(oldData);
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty("e10");
+    });
+
+    it("recovers old data with structural gaps via deep-merge", () => {
+      // Simulate old data that has sections but is missing some nested fields
+      const oldData = structuredClone(examinationDefaults) as Record<string, unknown>;
+      delete oldData.e10;
+
+      // Remove a nested field to simulate structural gap
+      const e9 = oldData.e9 as Record<string, unknown>;
+      const e9Left = e9.left as Record<string, unknown>;
+      delete e9Left.siteDetailMode;
+
+      const result = migrateAndParseExaminationData(oldData);
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty("e9");
+      expect(result).toHaveProperty("e10");
+    });
+
+    it("preserves actual values during deep-merge recovery", () => {
+      // Old data with real palpation values that should be preserved
+      const oldData = structuredClone(examinationDefaults) as Record<string, unknown>;
+      delete oldData.e10;
+
+      // Set actual palpation answers in e9
+      const e9 = oldData.e9 as Record<string, unknown>;
+      const e9Right = e9.right as Record<string, unknown>;
+      const temporalisPosterior = e9Right.temporalisPosterior as Record<string, unknown>;
+      temporalisPosterior.pain = "yes";
+      temporalisPosterior.familiarPain = "yes";
+
+      // Remove a nested field to force deep-merge path
+      const e9Left = e9.left as Record<string, unknown>;
+      delete e9Left.siteDetailMode;
+
+      const result = migrateAndParseExaminationData(oldData);
+      expect(result).not.toBeNull();
+
+      // Actual values should be preserved
+      const resultE9 = (result as Record<string, unknown>).e9 as Record<string, unknown>;
+      const resultRight = resultE9.right as Record<string, unknown>;
+      const resultPost = resultRight.temporalisPosterior as Record<string, unknown>;
+      expect(resultPost.pain).toBe("yes");
+      expect(resultPost.familiarPain).toBe("yes");
+    });
   });
 });

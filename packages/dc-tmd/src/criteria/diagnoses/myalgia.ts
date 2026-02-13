@@ -14,14 +14,14 @@
  * D. Familiar pain on palpation or movement (E4, E9)
  */
 
-import { SITES_BY_GROUP, type PainType, type Region } from "../../ids/anatomy";
+import { SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../ids/anatomy";
 import { and, any, familiarPainDuringOpening, field, match, or } from "../builders";
 import { sq } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion } from "../types";
 
-// Regions applicable to myalgia (temporalis + masseter)
-const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter"];
+// Regions applicable to myalgia (temporalis, masseter, otherMast, nonMast)
+const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
 
 // ============================================================================
 // ANAMNESIS CRITERIA (SQ Questionnaire)
@@ -72,10 +72,13 @@ export const MYALGIA_ANAMNESIS: Criterion = and(
 // ============================================================================
 
 /**
- * Generate E9 palpation site refs for a specific region with ${side} template.
+ * Generate palpation site refs for a specific region with ${side} template.
+ * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
  */
 function siteRefs(region: Region, painType: PainType): string[] {
-  return SITES_BY_GROUP[region].map((site) => `e9.\${side}.${site}.${painType}`);
+  return SITES_BY_GROUP[region].map(
+    (site) => `${SITE_CONFIG[site].section}.\${side}.${site}.${painType}`
+  );
 }
 
 /**
@@ -116,7 +119,7 @@ export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}",
 
 /**
  * Criterion D: Familiar pain provoked by ONE of:
- * - Palpation of temporalis or masseter muscle (E9)
+ * - Palpation of muscle (E9 for temporalis/masseter, E10 for otherMast/nonMast)
  * - Maximum unassisted or assisted opening (E4b, E4c)
  *
  * Region-gated: only evaluates sites matching the current evaluation region,
@@ -159,7 +162,7 @@ export const familiarPainProvoked: Criterion = forEachRegion(
  * Both C and D must be positive for a location to be positive.
  */
 export const MYALGIA_EXAMINATION: LocationCriterion = {
-  regions: ["temporalis", "masseter"],
+  regions: MYALGIA_REGIONS,
   criterion: and([painLocationConfirmed, familiarPainProvoked], {
     id: "myalgiaExam",
     label: "Myalgie-Untersuchungsbefund",

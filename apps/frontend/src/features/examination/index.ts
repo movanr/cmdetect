@@ -46,6 +46,7 @@ export { E6_MODEL, E6_STEPS } from "./sections/e6.model";
 export { E7_MODEL, E7_STEPS } from "./sections/e7.model";
 export { E8_MODEL, E8_STEPS } from "./sections/e8.model";
 export { E9_MODEL, E9_STEPS } from "./sections/e9.model";
+export { E10_MODEL, E10_STEPS } from "./sections/e10.model";
 export {
   getSection,
   SECTION_IDS,
@@ -127,6 +128,7 @@ export { E6Section } from "./components/sections/E6Section";
 export { E7Section } from "./components/sections/E7Section";
 export { E8Section } from "./components/sections/E8Section";
 export { E9Section } from "./components/sections/E9Section";
+export { E10Section } from "./components/sections/E10Section";
 export { ExaminationSummary } from "./components/summary";
 export { SectionFooter, type SectionFooterProps } from "./components/ui/SectionFooter";
 

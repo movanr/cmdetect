@@ -57,14 +57,55 @@ export function parseCompletedSections(data: unknown): SectionId[] {
 }
 
 /**
+ * Deep-merge source into target: fills missing keys from target (defaults)
+ * while preserving existing values from source (persisted data).
+ */
+function deepMergeWithDefaults(
+  source: Record<string, unknown>,
+  defaults: Record<string, unknown>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...defaults };
+
+  for (const key of Object.keys(source)) {
+    const srcVal = source[key];
+    const defVal = defaults[key];
+
+    if (
+      srcVal != null &&
+      typeof srcVal === "object" &&
+      !Array.isArray(srcVal) &&
+      defVal != null &&
+      typeof defVal === "object" &&
+      !Array.isArray(defVal)
+    ) {
+      // Recursively merge nested objects
+      result[key] = deepMergeWithDefaults(
+        srcVal as Record<string, unknown>,
+        defVal as Record<string, unknown>
+      );
+    } else if (key in defaults) {
+      // Preserve source value for known keys
+      result[key] = srcVal;
+    }
+    // Unknown keys (not in defaults) are dropped — zod would strip them anyway
+  }
+
+  return result;
+}
+
+/**
  * Migrate persisted data to the current model version, then validate.
  *
  * Extracts `_modelVersion` from the data itself (embedded alongside form fields).
  * Use this on the **load path** (backend responses, localStorage drafts)
  * to ensure old data is transformed before zod validation.
  *
+ * If schema validation fails after migration (e.g., old data missing fields
+ * added between saves), falls back to deep-merging with current defaults
+ * to fill structural gaps while preserving existing values.
+ *
  * Returns validated FormValues on success, or null if the data is invalid
- * even after migration.
+ * even after migration and merge.
  */
 export function migrateAndParseExaminationData(
   data: unknown
@@ -76,8 +117,29 @@ export function migrateAndParseExaminationData(
   const raw = data as Record<string, unknown>;
   const version = typeof raw._modelVersion === "number" ? raw._modelVersion : null;
 
+  // Only attempt recovery if the source data has real section keys.
+  // This prevents turning empty/junk objects into valid defaults.
+  const sectionKeys = new Set(SECTION_KEYS as readonly string[]);
+  const hasSectionData = Object.keys(raw).some(
+    (k) => sectionKeys.has(k) && raw[k] != null && typeof raw[k] === "object"
+  );
+
   const migrated = migrateExaminationData(raw, version);
-  return parseExaminationData(migrated);
+
+  // Try direct validation first (fast path)
+  const direct = parseExaminationData(migrated);
+  if (direct) return direct;
+
+  // No real examination data → nothing to recover
+  if (!hasSectionData) return null;
+
+  // Fallback: deep-merge with defaults to fill any structural gaps
+  // (e.g., fields added to e1-e9 models after the data was saved)
+  const merged = deepMergeWithDefaults(
+    migrated,
+    examinationDefaults as Record<string, unknown>
+  );
+  return parseExaminationData(merged);
 }
 
 export { CURRENT_MODEL_VERSION } from "./model-versioning";

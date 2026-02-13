@@ -5,7 +5,7 @@
  * These builders make it easy to define diagnostic criteria declaratively.
  */
 
-import { SITES_BY_GROUP, type Region, type PainType } from "../ids/anatomy";
+import { SITES_BY_GROUP, SITE_CONFIG, type Region, type PainType } from "../ids/anatomy";
 import type {
   Criterion,
   FieldCondition,
@@ -222,10 +222,11 @@ export function all(refs: string[], condition: FieldCondition, metadata?: Criter
 // ============================================================================
 
 /**
- * Creates an ANY criterion for E9 palpation sites within a region
+ * Creates an ANY criterion for palpation sites within a region
  *
  * This helper generates refs for all palpation sites in the given region
  * and checks if any has the specified pain question positive.
+ * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
  *
  * @example
  * // Any temporalis site has familiar pain on left side
@@ -254,9 +255,8 @@ export function anySiteInGroup(
     };
   }
 
-  // For concrete regions, expand to all sites in the group
-  const sites = SITES_BY_GROUP[region];
-  const refs = sites.map((site) => `e9.${side}.${site}.${painQuestion}`);
+  // For concrete regions, expand to all sites in the group (section-aware)
+  const refs = getSiteRefs(region, side, painQuestion);
 
   return {
     type: "any",
@@ -269,22 +269,25 @@ export function anySiteInGroup(
 /**
  * Creates refs for all palpation sites in a region
  *
- * Useful for building custom criteria over E9 sites.
+ * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
  *
  * @example
  * const refs = getSiteRefs("temporalis", "left", "familiarPain")
  * // ["e9.left.temporalisPosterior.familiarPain", "e9.left.temporalisMiddle.familiarPain", ...]
+ *
+ * const refs = getSiteRefs("otherMast", "left", "familiarPain")
+ * // ["e10.left.lateralPterygoid.familiarPain", "e10.left.temporalisTendon.familiarPain"]
  */
 export function getSiteRefs(region: Region, side: string, painQuestion: PainType): string[] {
   const sites = SITES_BY_GROUP[region];
-  return sites.map((site) => `e9.${side}.${site}.${painQuestion}`);
+  return sites.map((site) => `${SITE_CONFIG[site].section}.${side}.${site}.${painQuestion}`);
 }
 
 /**
- * Creates template refs for E9 palpation sites
+ * Creates template refs for palpation sites
  *
  * Uses ${side} and checks all sites in a given region.
- * The region can be a template variable ${region} or a concrete value.
+ * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
  *
  * @example
  * getSiteRefsTemplate("temporalis", "familiarPain")
@@ -292,7 +295,7 @@ export function getSiteRefs(region: Region, side: string, painQuestion: PainType
  */
 export function getSiteRefsTemplate(region: Region, painQuestion: PainType): string[] {
   const sites = SITES_BY_GROUP[region];
-  return sites.map((site) => `e9.\${side}.${site}.${painQuestion}`);
+  return sites.map((site) => `${SITE_CONFIG[site].section}.\${side}.${site}.${painQuestion}`);
 }
 
 // ============================================================================

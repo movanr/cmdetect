@@ -13,6 +13,7 @@ import { E6Section } from "./sections/E6Section";
 import { E7Section } from "./sections/E7Section";
 import { E8Section } from "./sections/E8Section";
 import { E9Section } from "./sections/E9Section";
+import { E10Section } from "./sections/E10Section";
 import type { SectionProps } from "./sections/types";
 
 // Map section IDs to components (only implemented sections)
@@ -26,6 +27,7 @@ const SECTION_COMPONENTS: Partial<Record<SectionId, React.ComponentType<SectionP
   e7: E7Section,
   e8: E8Section,
   e9: E9Section,
+  e10: E10Section,
 };
 
 interface ExaminationFormProps {

@@ -103,19 +103,23 @@ describe("evaluateDiagnosis", () => {
       expect(result.anamnesisStatus).toBe("pending");
     });
 
-    it("evaluates correct number of locations (2 sides × 2 regions)", () => {
+    it("evaluates correct number of locations (2 sides × 4 regions)", () => {
       const result = evaluateDiagnosis(MYALGIA, positivePatient);
 
-      // Myalgia has regions: temporalis, masseter
+      // Myalgia has regions: temporalis, masseter, otherMast, nonMast
       // Sides: left, right
-      // Total: 2 × 2 = 4 locations
-      expect(result.locationResults).toHaveLength(4);
+      // Total: 2 × 4 = 8 locations
+      expect(result.locationResults).toHaveLength(8);
 
       const locations = result.locationResults.map((l) => `${l.side}-${l.region}`);
       expect(locations).toContain("left-temporalis");
       expect(locations).toContain("left-masseter");
+      expect(locations).toContain("left-otherMast");
+      expect(locations).toContain("left-nonMast");
       expect(locations).toContain("right-temporalis");
       expect(locations).toContain("right-masseter");
+      expect(locations).toContain("right-otherMast");
+      expect(locations).toContain("right-nonMast");
     });
 
     it("identifies correct positive locations", () => {

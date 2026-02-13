@@ -374,10 +374,12 @@ describe("Local Myalgia diagnosis", () => {
       expect(LOCAL_MYALGIA.category).toBe("pain");
     });
 
-    it("targets temporalis and masseter regions", () => {
+    it("targets all myalgia regions including supplemental", () => {
       expect(LOCAL_MYALGIA_EXAMINATION.regions).toContain("temporalis");
       expect(LOCAL_MYALGIA_EXAMINATION.regions).toContain("masseter");
-      expect(LOCAL_MYALGIA_EXAMINATION.regions).toHaveLength(2);
+      expect(LOCAL_MYALGIA_EXAMINATION.regions).toContain("otherMast");
+      expect(LOCAL_MYALGIA_EXAMINATION.regions).toContain("nonMast");
+      expect(LOCAL_MYALGIA_EXAMINATION.regions).toHaveLength(4);
     });
 
     it("shares anamnesis with base myalgia", () => {

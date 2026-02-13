@@ -48,9 +48,10 @@ export const getMovementPainQuestions = (region: Region) =>
     ? (["pain", "familiarPain", "familiarHeadache"] as const satisfies readonly PainType[])
     : (["pain", "familiarPain"] as const satisfies readonly PainType[]);
 
-// === PALPATION SITES (E9) ===
-// 8 specific palpation sites for muscle examination
+// === PALPATION SITES (E9 + E10) ===
+// 8 E9 sites for muscle/TMJ examination + 4 E10 supplemental sites
 export const PALPATION_SITES = {
+  // E9 sites
   temporalisPosterior: "Temporalis (posterior)",
   temporalisMiddle: "Temporalis (media)",
   temporalisAnterior: "Temporalis (anterior)",
@@ -59,13 +60,37 @@ export const PALPATION_SITES = {
   masseterInsertion: "Masseter (Ansatz)",
   tmjLateralPole: "Kiefergelenk (lateraler Pol)",
   tmjAroundLateralPole: "Kiefergelenk (um den lateralen Pol)",
+  // E10 supplemental sites
+  posteriorMandibular: "Regio retromandibularis",
+  submandibular: "Regio submandibularis",
+  lateralPterygoid: "Bereich des M. pteryg. lat.",
+  temporalisTendon: "Temporalissehne",
 } as const;
 export type PalpationSite = keyof typeof PALPATION_SITES;
 export const PALPATION_SITE_KEYS = Object.keys(PALPATION_SITES) as PalpationSite[];
 
 // === PALPATION REGIONS (E9) ===
-// The 3 regions that have palpation sites: temporalis, masseter, tmj
+// The 3 regions that have E9 palpation sites: temporalis, masseter, tmj
 export const PALPATION_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
+
+// === E10 SUPPLEMENTAL PALPATION ===
+// The 2 regions that have E10 supplemental palpation sites
+export const E10_PALPATION_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
+
+// E10 palpation site keys (subset of PALPATION_SITE_KEYS)
+export const E10_SITE_KEYS: readonly PalpationSite[] = [
+  "posteriorMandibular",
+  "submandibular",
+  "lateralPterygoid",
+  "temporalisTendon",
+];
+
+// E10 pain questions (no headache, no spreading — only pain, familiarPain, referredPain)
+export const E10_PAIN_QUESTIONS = [
+  "pain",
+  "familiarPain",
+  "referredPain",
+] as const satisfies readonly PainType[];
 
 // === PAIN QUESTION TYPES ===
 export const PAIN_TYPES = {
@@ -78,62 +103,102 @@ export const PAIN_TYPES = {
 export type PainType = keyof typeof PAIN_TYPES;
 export const PAIN_TYPE_KEYS = Object.keys(PAIN_TYPES) as PainType[];
 
-// Site configuration: pressure (kg), and which optional questions apply
+// Site configuration: pressure (kg), which optional questions apply, and which section owns the site
 export interface SiteConfig {
   region: Region;
   pressure: number;
   hasHeadache: boolean;
   hasSpreading: boolean;
+  /** Which examination section this site belongs to (used for field ref prefixes) */
+  section: "e9" | "e10";
 }
 
 export const SITE_CONFIG: Record<PalpationSite, SiteConfig> = {
+  // E9 sites
   temporalisPosterior: {
     region: "temporalis",
     pressure: 1.0,
     hasHeadache: true,
     hasSpreading: true,
+    section: "e9",
   },
   temporalisMiddle: {
     region: "temporalis",
     pressure: 1.0,
     hasHeadache: true,
     hasSpreading: true,
+    section: "e9",
   },
   temporalisAnterior: {
     region: "temporalis",
     pressure: 1.0,
     hasHeadache: true,
     hasSpreading: true,
+    section: "e9",
   },
   masseterOrigin: {
     region: "masseter",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: true,
+    section: "e9",
   },
   masseterBody: {
     region: "masseter",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: true,
+    section: "e9",
   },
   masseterInsertion: {
     region: "masseter",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: true,
+    section: "e9",
   },
   tmjLateralPole: {
     region: "tmj",
     pressure: 0.5,
     hasHeadache: false,
     hasSpreading: false,
+    section: "e9",
   },
   tmjAroundLateralPole: {
     region: "tmj",
     pressure: 1.0,
     hasHeadache: false,
     hasSpreading: false,
+    section: "e9",
+  },
+  // E10 supplemental sites
+  posteriorMandibular: {
+    region: "nonMast",
+    pressure: 0.5,
+    hasHeadache: false,
+    hasSpreading: false,
+    section: "e10",
+  },
+  submandibular: {
+    region: "nonMast",
+    pressure: 0.5,
+    hasHeadache: false,
+    hasSpreading: false,
+    section: "e10",
+  },
+  lateralPterygoid: {
+    region: "otherMast",
+    pressure: 0.5,
+    hasHeadache: false,
+    hasSpreading: false,
+    section: "e10",
+  },
+  temporalisTendon: {
+    region: "otherMast",
+    pressure: 0.5,
+    hasHeadache: false,
+    hasSpreading: false,
+    section: "e10",
   },
 };
 
@@ -181,8 +246,8 @@ export const SITES_BY_GROUP: Record<Region, readonly PalpationSite[]> = {
   temporalis: ["temporalisPosterior", "temporalisMiddle", "temporalisAnterior"],
   masseter: ["masseterOrigin", "masseterBody", "masseterInsertion"],
   tmj: ["tmjLateralPole", "tmjAroundLateralPole"],
-  otherMast: [], // TODO add palpation sites
-  nonMast: [], // TODO add palpation sites
+  otherMast: ["lateralPterygoid", "temporalisTendon"],
+  nonMast: ["posteriorMandibular", "submandibular"],
 };
 
 // Group-level question applicability (derived from site configs)

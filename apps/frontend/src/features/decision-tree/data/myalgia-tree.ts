@@ -5,11 +5,15 @@ import {
   MYALGIA_ANAMNESIS,
   MYALGIA_EXAMINATION,
   painLocationConfirmed,
+  REGIONS,
   sq,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
+
+/** E10 supplemental regions use U10 for palpation source, others use U9 */
+const E10_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
 
 /**
  * Generate the myalgia decision tree for a specific side and region.
@@ -17,7 +21,7 @@ import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
  * Nodes map to DC/TMD myalgia criteria:
  * 1. Myalgia anamnesis (SQ history A+B)
  * 2. Pain location confirmed (E1 criterion C)
- * 3. Familiar pain from opening or palpation (E4/E9 criterion D)
+ * 3. Familiar pain from opening or palpation (E4/E9 or E4/E10 criterion D)
  * 4. Myalgia — positive diagnosis end node
  * 5. Investigate other — negative end node
  */
@@ -25,7 +29,8 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
   const ctx = { side, region };
 
   const sideLabel = side === "right" ? "Rechts" : "Links";
-  const regionLabel = region === "temporalis" ? "Temporalis" : "Masseter";
+  const regionLabel = REGIONS[region];
+  const palpationSource = E10_REGIONS.includes(region) ? "U10" : "U9";
 
   // Layout constants
   const colCenter = 150;
@@ -66,7 +71,7 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
       subItems: {
         labels: ["Bekannter Schmerz bei maximaler Mundöffnung", "Bekannter Schmerz bei Palpation"],
         connector: "ODER",
-        sources: [["U4"], ["U9"]],
+        sources: [["U4"], [palpationSource]],
       },
       criterion: familiarPainProvoked,
       context: ctx,

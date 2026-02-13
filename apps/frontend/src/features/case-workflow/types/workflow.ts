@@ -91,6 +91,7 @@ export const MAIN_STEPS: StepDefinition[] = [
       { id: SECTIONS.e7, label: getSectionTitle(SECTIONS.e7), order: 7, route: SECTIONS.e7 },
       { id: SECTIONS.e8, label: getSectionTitle(SECTIONS.e8), order: 8, route: SECTIONS.e8 },
       { id: SECTIONS.e9, label: getSectionTitle(SECTIONS.e9), order: 9, route: SECTIONS.e9 },
+      { id: SECTIONS.e10, label: getSectionTitle(SECTIONS.e10), order: 10, route: SECTIONS.e10 },
     ],
   },
   {

@@ -35,7 +35,7 @@ export const SECTION_LABELS: Record<SectionId, { short: string; full: string }> 
   e7: { short: "Gelenkgeräusche Lateral", full: "Gelenkgeräusche bei Lateralbewegungen" },
   e8: { short: "Gelenkblockierung", full: "Gelenkblockierung" },
   e9: { short: "Palpation", full: "Palpation Muskeln & Kiefergelenk" },
-  e10: { short: "Ergänzende Untersuchungen", full: "Ergänzende Untersuchungen" },
+  e10: { short: "Ergänzende Palpation", full: "Ergänzende Muskelschmerzen bei Palpation" },
 };
 
 /** Get section number from ID (e.g., "e3" -> "3", "e10" -> "10") */

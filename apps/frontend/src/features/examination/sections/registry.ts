@@ -10,6 +10,7 @@ import { E6_MODEL, E6_STEPS } from "./e6.model";
 import { E7_MODEL, E7_STEPS } from "./e7.model";
 import { E8_MODEL, E8_STEPS } from "./e8.model";
 import { E9_MODEL, E9_STEPS } from "./e9.model";
+import { E10_MODEL, E10_STEPS } from "./e10.model";
 
 export type { SectionId };
 
@@ -75,6 +76,12 @@ export const SECTION_REGISTRY: SectionConfig[] = [
     label: getSectionTitle(SECTIONS.e9),
     model: E9_MODEL,
     steps: E9_STEPS,
+  },
+  {
+    id: SECTIONS.e10,
+    label: getSectionTitle(SECTIONS.e10),
+    model: E10_MODEL,
+    steps: E10_STEPS,
   },
 ];
 

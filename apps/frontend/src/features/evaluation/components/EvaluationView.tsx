@@ -12,6 +12,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -65,8 +66,11 @@ interface EvaluationViewProps {
   caseId?: string;
 }
 
-/** Regions shown in the head diagrams and used for filtering */
+/** Regions shown in the head diagrams (base 3) */
 const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
+
+/** Extra regions only visible when "Alle Regionen" is active */
+const EXTRA_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
 
 // ── View mode ──────────────────────────────────────────────────────
 type ViewMode = "tree" | "checklist";
@@ -88,8 +92,8 @@ interface TreeTypeEntry {
 }
 
 const TREE_TYPES: readonly TreeTypeEntry[] = [
-  { id: "myalgia", label: "Myalgie", regions: ["temporalis", "masseter"] },
-  { id: "myalgiaSubtypes", label: "Myalgie-Subtypen", regions: ["temporalis", "masseter"] },
+  { id: "myalgia", label: "Myalgie", regions: ["temporalis", "masseter", "otherMast", "nonMast"] },
+  { id: "myalgiaSubtypes", label: "Myalgie-Subtypen", regions: ["temporalis", "masseter", "otherMast", "nonMast"] },
   { id: "arthralgia", label: "Arthralgie", regions: ["tmj"] },
   { id: "headache", label: "Auf CMD zurückgeführte Kopfschmerzen", regions: ["temporalis"] },
   { id: "ddWithReduction", label: "Diskusverlagerung", regions: ["tmj"] },
@@ -119,6 +123,7 @@ export function EvaluationView({
   // ── State ──────────────────────────────────────────────────────────
   const [selectedSide, setSelectedSide] = useState<Side>("right");
   const [selectedRegion, setSelectedRegion] = useState<Region>("temporalis");
+  const [showAllRegions, setShowAllRegions] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("tree");
   const [userSelectedTree, setUserSelectedTree] = useState<TreeTypeId | null>(null);
   const [userSelectedDiagnosisId, setUserSelectedDiagnosisId] = useState<string | null>(null);
@@ -266,12 +271,14 @@ export function EvaluationView({
           {/* Step 1: Location */}
           <div className="flex flex-col items-center gap-3">
             <StepLabel step={1} label="Lokalisation wählen" />
-            <SummaryDiagrams
-              regions={DIAGRAM_REGIONS}
-              selectedSide={selectedSide}
-              selectedRegion={selectedRegion}
-              onRegionClick={handleRegionClick}
-            />
+            {!EXTRA_REGIONS.includes(selectedRegion) && (
+              <SummaryDiagrams
+                regions={DIAGRAM_REGIONS}
+                selectedSide={selectedSide}
+                selectedRegion={selectedRegion}
+                onRegionClick={handleRegionClick}
+              />
+            )}
             <div className="flex flex-col items-center gap-2">
               <ToggleGroup
                 type="single"
@@ -285,7 +292,32 @@ export function EvaluationView({
                 <ToggleGroupItem value="temporalis">Temporalis</ToggleGroupItem>
                 <ToggleGroupItem value="masseter">Masseter</ToggleGroupItem>
                 <ToggleGroupItem value="tmj">{REGIONS.tmj}</ToggleGroupItem>
+                {showAllRegions && (
+                  <>
+                    <ToggleGroupItem value="otherMast">{REGIONS.otherMast}</ToggleGroupItem>
+                    <ToggleGroupItem value="nonMast">{REGIONS.nonMast}</ToggleGroupItem>
+                  </>
+                )}
               </ToggleGroup>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="show-all-regions"
+                  checked={showAllRegions}
+                  onCheckedChange={(checked) => {
+                    setShowAllRegions(checked === true);
+                    // Reset to base region if extra region was selected
+                    if (!checked && EXTRA_REGIONS.includes(selectedRegion)) {
+                      setSelectedRegion("temporalis");
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="show-all-regions"
+                  className="text-xs text-muted-foreground cursor-pointer select-none"
+                >
+                  Alle Regionen (U10)
+                </label>
+              </div>
               <ToggleGroup
                 type="single"
                 variant="outline"

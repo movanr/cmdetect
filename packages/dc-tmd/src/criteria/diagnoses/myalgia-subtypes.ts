@@ -9,8 +9,12 @@
  * All subtypes require:
  * - Positive base myalgia anamnesis (criteria A+B)
  * - Pain location confirmation in muscle (criterion C, via E1)
- * - Familiar pain specifically from palpation (criterion D, via E9 only — NOT E4 opening)
+ * - Familiar pain specifically from palpation (criterion D, E9 or E10 — NOT E4 opening)
  * - 5-second palpation (standard mode) for spreading/referred assessment
+ *
+ * For supplemental regions (otherMast, nonMast) assessed via E10:
+ * - Spreading pain is not applicable (sites don't collect spreading data)
+ * - Only Local Myalgia and Myofascial Pain with Referral are possible subtypes
  *
  * Subtypes are differentiated by pain pattern during palpation:
  * - Local: no spreading, no referred
@@ -26,14 +30,14 @@
  * Journal of Oral & Facial Pain and Headache, 28:6-27
  */
 
-import { SITES_BY_GROUP, type PainType, type Region } from "../../ids/anatomy";
+import { GROUP_CONFIG, SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../ids/anatomy";
 import { and, any, field, match, not, or } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion } from "../types";
 import { MYALGIA_ANAMNESIS } from "./myalgia";
 
 // Regions applicable to myalgia subtypes (same as base myalgia)
-const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter"];
+const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
 
 // ============================================================================
 // SHARED HELPERS
@@ -53,16 +57,32 @@ const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
 });
 
 /**
- * Generate E9 palpation site refs for a specific region and pain type.
+ * Generate palpation site refs for a specific region and pain type.
  *
  * Expands a region into its constituent palpation sites with ${side} template.
+ * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
+ *
  * e.g., siteRefs("temporalis", "familiarPain") →
- *   ["e9.${side}.temporalisPosterior.familiarPain",
- *    "e9.${side}.temporalisMiddle.familiarPain",
- *    "e9.${side}.temporalisAnterior.familiarPain"]
+ *   ["e9.${side}.temporalisPosterior.familiarPain", ...]
+ * e.g., siteRefs("otherMast", "familiarPain") →
+ *   ["e10.${side}.lateralPterygoid.familiarPain", ...]
  */
 function siteRefs(region: Region, painType: PainType): string[] {
-  return SITES_BY_GROUP[region].map((site) => `e9.\${side}.${site}.${painType}`);
+  return SITES_BY_GROUP[region].map(
+    (site) => `${SITE_CONFIG[site].section}.\${side}.${site}.${painType}`
+  );
+}
+
+/**
+ * Generate spreading site refs, returning empty array for regions without spreading.
+ *
+ * For regions where GROUP_CONFIG.hasSpreading is false (tmj, otherMast, nonMast),
+ * returns [] so that any([], ...) evaluates to negative (no matching refs possible).
+ * This makes "no spreading" auto-pass and "spreading present" auto-fail for these regions.
+ */
+function spreadingSiteRefs(region: Region): string[] {
+  if (!GROUP_CONFIG[region].hasSpreading) return [];
+  return siteRefs(region, "spreadingPain");
 }
 
 /**
@@ -120,8 +140,10 @@ const localMyalgiaExamCriterion: Criterion = and(
           label: "Bekannter Schmerz bei Muskelpalpation",
         }),
         // E: No spreading pain at any site in the muscle group
+        // For regions without spreading (otherMast/nonMast), spreadingSiteRefs returns []
+        // → any([], ...) evaluates to negative → not(negative) = positive (auto-pass)
         not(
-          any(siteRefs(region, "spreadingPain"), { equals: "yes" }),
+          any(spreadingSiteRefs(region), { equals: "yes" }),
           { id: `${region}NoSpreading`, label: "Kein ausbreitender Schmerz" }
         ),
         // E: No referred pain at any site in the muscle group
@@ -180,7 +202,9 @@ const spreadingMyalgiaExamCriterion: Criterion = and(
           label: "Bekannter Schmerz bei Muskelpalpation",
         }),
         // E: Spreading pain present at any site in the muscle group
-        any(siteRefs(region, "spreadingPain"), { equals: "yes" }, {
+        // For regions without spreading, spreadingSiteRefs returns []
+        // → any([], ...) evaluates to negative → diagnosis impossible
+        any(spreadingSiteRefs(region), { equals: "yes" }, {
           id: `${region}SpreadingPain`,
           label: "Ausbreitender Schmerz bei Muskelpalpation",
         }),
