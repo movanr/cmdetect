@@ -256,9 +256,15 @@ function evaluateComputed(
   for (const ref of criterion.refs) {
     const resolvedRef = resolveFieldRef(ref, context);
     const value = getValueAtPath(data, resolvedRef);
-    values[resolvedRef] = value;
     if (value === undefined || value === null) {
-      hasPending = true;
+      if (criterion.defaults?.[resolvedRef] !== undefined) {
+        values[resolvedRef] = criterion.defaults[resolvedRef];
+      } else {
+        values[resolvedRef] = value;
+        hasPending = true;
+      }
+    } else {
+      values[resolvedRef] = value;
     }
   }
 

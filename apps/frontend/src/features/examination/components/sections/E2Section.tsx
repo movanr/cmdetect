@@ -11,7 +11,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { SECTIONS, E2_REFERENCE_TEETH, type E2ReferenceTooth } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -79,7 +79,7 @@ function getStepSummary(stepId: E2StepId, getValue: (path: string) => unknown): 
         const other = getValue("e2.referenceTooth.otherTooth") as string | undefined;
         return other || "Anderer";
       }
-      return selection || "—";
+      return selection ? (E2_REFERENCE_TEETH[selection as E2ReferenceTooth] ?? selection) : "—";
     }
     case "e2-mid": {
       const direction = getValue("e2.midlineDeviation.direction") as string | undefined;

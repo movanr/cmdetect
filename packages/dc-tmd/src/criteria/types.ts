@@ -89,6 +89,8 @@ export interface ComputedCriterion extends CriterionMetadata {
   operator: NumericOperator;
   /** Threshold value to compare against */
   value: number;
+  /** Default values for specific refs when data is null/undefined (avoids "pending" status) */
+  defaults?: Record<string, number>;
 }
 
 // ============================================================================

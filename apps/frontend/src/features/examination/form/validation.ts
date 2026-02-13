@@ -214,7 +214,7 @@ export function validateInstances(
     if (!isFieldEnabled(instance, getValue)) continue;
 
     const value = getValue(instance.path);
-    const config = instance.config as { required?: boolean; min?: number; max?: number };
+    const config = instance.config as { required?: boolean; min?: number; max?: number; allowNegative?: boolean };
 
     // Measurement-specific required validation
     if (instance.renderType === "measurement" && config.required) {
@@ -248,7 +248,7 @@ export function validateInstances(
 
       // Range validation for measurements with values
       const numValue = Number(value);
-      const min = config.min ?? 0;
+      const min = config.min ?? (config.allowNegative ? -100 : 0);
       const max = config.max ?? 100;
       if (numValue < min) {
         errors.push({ path: instance.path, message: `Minimum: ${min}` });
@@ -291,7 +291,7 @@ export function validateInstances(
     // Range validation for non-required measurements with values
     if (instance.renderType === "measurement" && value != null && value !== "") {
       const numValue = Number(value);
-      const min = config.min ?? 0;
+      const min = config.min ?? (config.allowNegative ? -100 : 0);
       const max = config.max ?? 100;
       if (numValue < min) {
         errors.push({ path: instance.path, message: `Minimum: ${min}` });

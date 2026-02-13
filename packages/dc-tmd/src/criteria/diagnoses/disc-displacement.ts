@@ -278,6 +278,7 @@ const DD_WITHOUT_REDUCTION_LIMITED_EXAMINATION: LocationCriterion = {
     {
       id: "passiveStretchLimited",
       label: "Passive Dehnung (maximale passive Mundöffnung) < 40mm",
+      defaults: { "e2.verticalOverlap": 0 },
     }
   ),
 };
@@ -311,6 +312,7 @@ const DD_WITHOUT_REDUCTION_NO_LIMITED_EXAMINATION: LocationCriterion = {
     {
       id: "passiveStretchNotLimited",
       label: "Passive Dehnung (maximale passive Mundöffnung) \u2265 40mm",
+      defaults: { "e2.verticalOverlap": 0 },
     }
   ),
 };

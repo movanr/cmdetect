@@ -88,8 +88,8 @@ export type E2Field = keyof typeof E2_FIELDS;
 
 // === E2 REFERENCE TOOTH OPTIONS (FDI notation) ===
 export const E2_REFERENCE_TEETH = {
-  tooth11: "11",
-  tooth21: "21",
+  tooth11: "Zahn 11",
+  tooth21: "Zahn 21",
   other: "Anderer",
 } as const;
 export type E2ReferenceTooth = keyof typeof E2_REFERENCE_TEETH;

@@ -75,15 +75,17 @@ export function computed(
   compute: (values: Record<string, unknown>) => number,
   operator: NumericOperator,
   value: number,
-  metadata?: CriterionMetadata
+  metadata?: CriterionMetadata & { defaults?: Record<string, number> }
 ): ComputedCriterion {
+  const { defaults, ...rest } = metadata ?? {};
   return {
     type: "computed",
     refs,
     compute,
     operator,
     value,
-    ...metadata,
+    defaults,
+    ...rest,
   };
 }
 
