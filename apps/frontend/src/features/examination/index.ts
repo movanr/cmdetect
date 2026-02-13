@@ -86,6 +86,7 @@ export {
 export {
   useUpsertExamination,
   useCompleteExamination,
+  useReopenExamination,
 } from "./hooks/use-save-examination";
 export {
   useExaminationPersistence,
