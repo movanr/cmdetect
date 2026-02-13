@@ -39,7 +39,7 @@ function formatDuration(value: unknown): string {
 function formatSide(officeValue: unknown): string | null {
   if (!officeValue || typeof officeValue !== "object") return null;
   const o = officeValue as { R?: boolean; L?: boolean; DNK?: boolean };
-  if (o.DNK) return "Seite unklar";
+  if (o.DNK) return "Lokalisation unklar";
   if (o.R && o.L) return "beidseitig";
   if (o.R) return "Rechte Seite";
   if (o.L) return "Linke Seite";
@@ -121,7 +121,7 @@ function AnswerLine({
           variant="outline"
           className="text-[10px] px-1 py-0 h-4 font-normal text-amber-600 border-amber-200"
         >
-          Seitenangabe ausstehend
+          Lokalisation ausstehend
         </Badge>
       ) : null}
     </div>
@@ -150,11 +150,7 @@ function ModificationChecklist({ items }: { items: { label: string; value: boole
 
 // ─── Domain renderers ───────────────────────────────────────────────────
 
-function SchmerzDomain({
-  sqAnswers,
-}: {
-  sqAnswers: Record<string, unknown>;
-}) {
+function SchmerzDomain({ sqAnswers }: { sqAnswers: Record<string, unknown> }) {
   const active = sqAnswers.SQ1 === "yes";
 
   return (
@@ -189,11 +185,7 @@ function SchmerzDomain({
   );
 }
 
-function KopfschmerzDomain({
-  sqAnswers,
-}: {
-  sqAnswers: Record<string, unknown>;
-}) {
+function KopfschmerzDomain({ sqAnswers }: { sqAnswers: Record<string, unknown> }) {
   const active = sqAnswers.SQ5 === "yes";
 
   return (
@@ -221,11 +213,7 @@ function KopfschmerzDomain({
   );
 }
 
-function GelenkgeraeuscheDomain({
-  sqAnswers,
-}: {
-  sqAnswers: Record<string, unknown>;
-}) {
+function GelenkgeraeuscheDomain({ sqAnswers }: { sqAnswers: Record<string, unknown> }) {
   const active = sqAnswers.SQ8 === "yes";
   const sq8Side = formatSide(sqAnswers.SQ8_office);
 
@@ -251,11 +239,7 @@ function GelenkgeraeuscheDomain({
   );
 }
 
-function KieferklemmeDomain({
-  sqAnswers,
-}: {
-  sqAnswers: Record<string, unknown>;
-}) {
+function KieferklemmeDomain({ sqAnswers }: { sqAnswers: Record<string, unknown> }) {
   const sq9Active = sqAnswers.SQ9 === "yes";
 
   // Path A: DV ohne Reposition (SQ9 + SQ10)
@@ -325,11 +309,7 @@ function KieferklemmeDomain({
   );
 }
 
-function KiefersperreDomain({
-  sqAnswers,
-}: {
-  sqAnswers: Record<string, unknown>;
-}) {
+function KiefersperreDomain({ sqAnswers }: { sqAnswers: Record<string, unknown> }) {
   const active = sqAnswers.SQ13 === "yes";
   const sq14 = sqAnswers.SQ14 === "yes";
 
