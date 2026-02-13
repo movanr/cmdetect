@@ -13,7 +13,7 @@ import { useFormContext } from "react-hook-form";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { execute } from "@/graphql/execute";
 import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
-import { useUpsertExamination, useCompleteExamination } from "./use-save-examination";
+import { useUpsertExamination, useCompleteExamination, useReopenExamination } from "./use-save-examination";
 import { SECTION_IDS, type SectionId } from "../sections/registry";
 import type { FormValues } from "../form/use-examination-form";
 import {
@@ -44,6 +44,8 @@ export interface UseExaminationPersistenceResult {
   saveDraft: () => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
+  /** Reopen a completed examination for editing */
+  reopenExamination: () => Promise<void>;
   /** Whether a save operation is in progress */
   isSaving: boolean;
   /** List of completed section IDs */
@@ -81,8 +83,9 @@ export function useExaminationPersistence({
 
   const upsertMutation = useUpsertExamination(patientRecordId);
   const completeMutation = useCompleteExamination(patientRecordId);
+  const reopenMutation = useReopenExamination(patientRecordId);
 
-  const isSaving = upsertMutation.isPending || completeMutation.isPending;
+  const isSaving = upsertMutation.isPending || completeMutation.isPending || reopenMutation.isPending;
 
   // Hydration: backend primary, localStorage fallback if newer
   useEffect(() => {
@@ -389,10 +392,21 @@ export function useExaminationPersistence({
     removeDraft,
   ]);
 
+  // Reopen a completed examination
+  const reopenExaminationFn = useCallback(async () => {
+    const examId = backendResponse?.id;
+    if (!examId) {
+      throw new Error("Could not determine examination ID for reopening");
+    }
+
+    await reopenMutation.mutateAsync({ id: examId });
+  }, [backendResponse, reopenMutation]);
+
   return {
     saveSection,
     saveDraft,
     completeExamination: completeExaminationFn,
+    reopenExamination: reopenExaminationFn,
     isSaving,
     completedSections,
     isHydrated,

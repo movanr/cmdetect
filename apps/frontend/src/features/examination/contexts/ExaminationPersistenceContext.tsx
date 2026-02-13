@@ -17,6 +17,8 @@ interface ExaminationPersistenceContextValue {
   saveDraft: () => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
+  /** Reopen a completed examination for editing */
+  reopenExamination: () => Promise<void>;
   /** Whether a save operation is in progress */
   isSaving: boolean;
   /** List of completed section IDs */

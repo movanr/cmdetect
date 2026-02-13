@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import {
   UPSERT_EXAMINATION_RESPONSE,
   COMPLETE_EXAMINATION,
+  REOPEN_EXAMINATION,
 } from "../queries";
 import type { FormValues } from "../form/use-examination-form";
 import type { ExaminationResponse, ExaminationStatus } from "./use-examination-response";
@@ -163,6 +164,55 @@ export function useCompleteExamination(patientRecordId: string) {
 
     onSuccess: () => {
       toast.success("Untersuchung abgeschlossen");
+    },
+  });
+}
+
+interface ReopenParams {
+  id: string;
+}
+
+/**
+ * Mutation hook for reopening a completed examination.
+ * Sets status back to 'in_progress' and clears completed_at.
+ */
+export function useReopenExamination(patientRecordId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["examination-response", patientRecordId];
+
+  return useMutation({
+    mutationFn: async ({ id }: ReopenParams) => {
+      return execute(REOPEN_EXAMINATION, { id });
+    },
+
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousResponse =
+        queryClient.getQueryData<ExaminationResponse | null>(queryKey);
+
+      queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
+        if (!old) return null;
+        return {
+          ...old,
+          status: "in_progress" as ExaminationStatus,
+          completedAt: null,
+          updatedAt: new Date().toISOString(),
+        };
+      });
+
+      return { previousResponse };
+    },
+
+    onError: (error, _variables, context) => {
+      if (context?.previousResponse !== undefined) {
+        queryClient.setQueryData(queryKey, context.previousResponse);
+      }
+      toast.error("Fehler beim Wiedereröffnen: " + error.message);
+    },
+
+    onSuccess: () => {
+      toast.success("Untersuchung zur Bearbeitung geöffnet");
     },
   });
 }

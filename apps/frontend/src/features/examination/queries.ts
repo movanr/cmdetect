@@ -82,3 +82,20 @@ export const COMPLETE_EXAMINATION = graphql(`
     }
   }
 `);
+
+/**
+ * Reopen a completed examination - sets status back to 'in_progress' and clears completed_at.
+ */
+export const REOPEN_EXAMINATION = graphql(`
+  mutation ReopenExamination($id: String!) {
+    update_examination_response_by_pk(
+      pk_columns: { id: $id }
+      _set: { status: "in_progress", completed_at: null }
+    ) {
+      id
+      status
+      completed_at
+      updated_at
+    }
+  }
+`);
