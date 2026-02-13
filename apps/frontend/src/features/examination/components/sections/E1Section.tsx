@@ -12,9 +12,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
+  ALL_REGIONS,
+  BASE_REGIONS,
   E1_HEADACHE_LOCATIONS,
+  E1_PAIN_LOCATION_KEYS,
   E1_PAIN_LOCATIONS,
   SECTIONS,
   SVG_REGIONS,
@@ -31,6 +36,7 @@ import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { getSectionCardTitle } from "../../labels";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
+import { CheckboxGroupField } from "../inputs/CheckboxGroupField";
 import { QuestionField } from "../QuestionField";
 import { IncompleteDataDialog, IntroPanel, MeasurementFlowBlock, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
 import { buildRegionSummary } from "../summary/summary-helpers";
@@ -45,11 +51,6 @@ const E1_STEP_CONFIG: Record<E1StepId, { badge: string; title: string }> = {
   e1a: { badge: "U1A", title: "Schmerzlokalisation (letzte 30 Tage)" },
   e1b: { badge: "U1B", title: "Kopfschmerzlokalisation (letzte 30 Tage)" },
 };
-
-/**
- * Regions supported by HeadDiagram for E1 pain location.
- */
-const E1_PAIN_SVG_REGIONS: readonly Region[] = SVG_REGIONS;
 
 /**
  * For headache location, only temporalis is visualizable.
@@ -111,6 +112,22 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     return statuses;
   });
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [includeAllRegions, setIncludeAllRegions] = useState(false);
+
+  // Determine which regions to show for E1a based on checkbox
+  const e1PainSvgRegions = useMemo(
+    () => (includeAllRegions ? SVG_REGIONS : BASE_REGIONS),
+    [includeAllRegions]
+  );
+  const e1PainOptions = useMemo(
+    () => {
+      const activeRegions: readonly string[] = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
+      return E1_PAIN_LOCATION_KEYS.filter(
+        (key) => key === "none" || activeRegions.includes(key)
+      );
+    },
+    [includeAllRegions]
+  );
 
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
@@ -130,8 +147,6 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const allInstances = getInstancesForStep("e1-all");
 
   // Split instances by type and side
-  const painRight = allInstances.find((i) => i.path === "e1.painLocation.right");
-  const painLeft = allInstances.find((i) => i.path === "e1.painLocation.left");
   const headacheRight = allInstances.find((i) => i.path === "e1.headacheLocation.right");
   const headacheLeft = allInstances.find((i) => i.path === "e1.headacheLocation.left");
 
@@ -150,19 +165,19 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   // Compute region statuses for pain location diagrams
   const painRightStatuses = useMemo(() => {
     const statuses: Partial<Record<Region, RegionStatus>> = {};
-    for (const region of E1_PAIN_SVG_REGIONS) {
+    for (const region of e1PainSvgRegions) {
       statuses[region] = computeE1RegionStatus(region, painRightValues);
     }
     return statuses;
-  }, [painRightValues]);
+  }, [painRightValues, e1PainSvgRegions]);
 
   const painLeftStatuses = useMemo(() => {
     const statuses: Partial<Record<Region, RegionStatus>> = {};
-    for (const region of E1_PAIN_SVG_REGIONS) {
+    for (const region of e1PainSvgRegions) {
       statuses[region] = computeE1RegionStatus(region, painLeftValues);
     }
     return statuses;
-  }, [painLeftValues]);
+  }, [painLeftValues, e1PainSvgRegions]);
 
   // Compute region statuses for headache location diagrams
   const headacheRightStatuses = useMemo(() => {
@@ -289,11 +304,17 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               <span className="text-sm font-medium text-muted-foreground">Rechte Seite</span>
               <HeadDiagram
                 side="right"
-                regions={E1_PAIN_SVG_REGIONS}
+                regions={e1PainSvgRegions}
                 regionStatuses={painRightStatuses}
                 onRegionClick={(region) => handleRegionClick("e1a", region, "right")}
               />
-              <div className="w-44">{painRight && <QuestionField instance={painRight} />}</div>
+              <div className="w-44">
+                <CheckboxGroupField
+                  name="e1.painLocation.right"
+                  options={e1PainOptions}
+                  labels={E1_PAIN_LOCATIONS as Record<string, string>}
+                />
+              </div>
             </div>
 
             <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
@@ -303,11 +324,17 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               <span className="text-sm font-medium text-muted-foreground">Linke Seite</span>
               <HeadDiagram
                 side="left"
-                regions={E1_PAIN_SVG_REGIONS}
+                regions={e1PainSvgRegions}
                 regionStatuses={painLeftStatuses}
                 onRegionClick={(region) => handleRegionClick("e1a", region, "left")}
               />
-              <div className="w-44">{painLeft && <QuestionField instance={painLeft} />}</div>
+              <div className="w-44">
+                <CheckboxGroupField
+                  name="e1.painLocation.left"
+                  options={e1PainOptions}
+                  labels={E1_PAIN_LOCATIONS as Record<string, string>}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -360,14 +387,28 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{getSectionCardTitle(SECTIONS.e1)}</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/protocol/$section" params={{ section: "e1" }}>
-            <BookOpen className="h-4 w-4 mr-1" />
-            Protokoll
-          </Link>
-        </Button>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>{getSectionCardTitle(SECTIONS.e1)}</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="e1-alle-regionen"
+                checked={includeAllRegions}
+                onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
+              />
+              <Label htmlFor="e1-alle-regionen" className="text-xs text-muted-foreground cursor-pointer">
+                Alle Regionen
+              </Label>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/protocol/$section" params={{ section: "e1" }}>
+                <BookOpen className="h-4 w-4 mr-1" />
+                Protokoll
+              </Link>
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <IntroPanel title="Einführung Untersuchung">
