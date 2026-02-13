@@ -48,6 +48,14 @@ export function DrawingToolbar({
       {/* Action buttons */}
       <div className="flex gap-2 justify-center">
         <Button
+          variant="destructive"
+          size="sm"
+          onClick={onClear}
+        >
+          <TrashIcon />
+          {TOOL_LABELS.clear}
+        </Button>
+        <Button
           variant="outline"
           size="sm"
           onClick={onUndo}
@@ -64,14 +72,6 @@ export function DrawingToolbar({
         >
           <RedoIcon />
           {TOOL_LABELS.redo}
-        </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onClear}
-        >
-          <TrashIcon />
-          {TOOL_LABELS.clear}
         </Button>
       </div>
     </div>

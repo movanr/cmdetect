@@ -58,7 +58,8 @@ export type HistoryAction =
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'CLEAR' }
-  | { type: 'SET'; elements: DrawingElement[] };
+  | { type: 'SET'; elements: DrawingElement[] }
+  | { type: 'RESTORE'; state: HistoryState };
 
 export interface HistoryState {
   past: DrawingElement[][];

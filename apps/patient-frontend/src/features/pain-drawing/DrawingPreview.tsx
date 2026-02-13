@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Stage, Layer, Line, Circle, Arrow, Image as KonvaImage } from 'react-konva';
 import type { DrawingElement, ImageConfig } from './types';
 import { DRAWING_STYLES } from './constants';
@@ -6,45 +6,64 @@ import { DRAWING_STYLES } from './constants';
 interface DrawingPreviewProps {
   imageConfig: ImageConfig;
   elements: DrawingElement[];
+  /** Fixed pixel size. If omitted, auto-sizes to fill the container. */
   size?: number;
 }
 
 export function DrawingPreview({
   imageConfig,
   elements,
-  size = 150,
+  size: sizeProp,
 }: DrawingPreviewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState(sizeProp ?? 150);
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
-  const [canvasSize, setCanvasSize] = useState({ width: size, height: size, scale: 1 });
 
-  // Load background image
+  const size = sizeProp ?? containerSize;
+
+  // Auto-measure container when no explicit size is given
+  useEffect(() => {
+    if (sizeProp) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (width > 0 && height > 0) {
+        setContainerSize(Math.floor(Math.min(width, height)));
+      }
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [sizeProp]);
+
+  // Load background image (independent of size)
   useEffect(() => {
     const img = new window.Image();
     img.src = imageConfig.src;
-    img.onload = () => {
-      setBackgroundImage(img);
-      // Calculate size to fit within square while maintaining aspect ratio
-      const imageAspect = img.height / img.width;
-      let width: number;
-      let height: number;
+    img.onload = () => setBackgroundImage(img);
+  }, [imageConfig.src]);
 
-      if (imageAspect > 1) {
-        // Taller than wide - constrain by height
-        height = size;
-        width = size / imageAspect;
-      } else {
-        // Wider than tall - constrain by width
-        width = size;
-        height = size * imageAspect;
-      }
+  // Calculate canvas dimensions from image aspect ratio and current size
+  const canvasSize = useMemo(() => {
+    if (!backgroundImage) return { width: size, height: size, scale: 1 };
+    const imageAspect = backgroundImage.height / backgroundImage.width;
+    let width: number;
+    let height: number;
 
-      setCanvasSize({
-        width,
-        height,
-        scale: width / img.width,
-      });
-    };
-  }, [imageConfig.src, size]);
+    if (imageAspect > 1) {
+      height = size;
+      width = size / imageAspect;
+    } else {
+      width = size;
+      height = size * imageAspect;
+    }
+
+    return { width, height, scale: width / backgroundImage.width };
+  }, [backgroundImage, size]);
 
   // Scale for positioning (image coordinates to canvas coordinates)
   const positionScale = canvasSize.scale;
@@ -92,7 +111,7 @@ export function DrawingPreview({
   };
 
   return (
-    <div className="flex justify-center items-center w-full h-full">
+    <div ref={containerRef} className="flex justify-center items-center w-full h-full">
       <Stage
         width={canvasSize.width}
         height={canvasSize.height}

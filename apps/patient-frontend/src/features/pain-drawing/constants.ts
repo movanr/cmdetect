@@ -42,7 +42,7 @@ export const IMAGE_CONFIGS: Record<ImageId, ImageConfig> = {
   mouth: {
     id: "mouth",
     src: "/images/pain-drawing/mouth.jpeg",
-    label: "Mund und Zaehne",
+    label: "Mund und Zähne",
     aspectRatio: 1.608, // 849 / 528
   },
   "head-right": {
@@ -61,13 +61,13 @@ export const IMAGE_CONFIGS: Record<ImageId, ImageConfig> = {
   "body-front": {
     id: "body-front",
     src: "/images/pain-drawing/body-front.png",
-    label: "Koerper Vorderseite",
+    label: "Körper Vorderseite",
     aspectRatio: 1.905, // 1579 / 829
   },
   "body-back": {
     id: "body-back",
     src: "/images/pain-drawing/body-back.png",
-    label: "Koerper Rueckseite",
+    label: "Körper Rückseite",
     aspectRatio: 1.905, // 1579 / 829
   },
 };
@@ -89,17 +89,17 @@ export const WIZARD_STEPS: WizardStep[] = [
   {
     type: "drawing",
     imageId: "mouth",
-    title: "Mund und Zaehne",
+    title: "Mund und Zähne",
   },
   {
     type: "drawing",
     imageId: "body-front",
-    title: "Koerper Vorderseite",
+    title: "Körper Vorderseite",
   },
   {
     type: "drawing",
     imageId: "body-back",
-    title: "Koerper Rueckseite",
+    title: "Körper Rückseite",
   },
   {
     type: "review",
@@ -142,7 +142,7 @@ export const TOOL_LABELS = {
   shade: "Schattieren",
   point: "Punkt",
   arrow: "Pfeil",
-  undo: "Rueckgaengig",
+  undo: "Rückgängig",
   redo: "Wiederholen",
-  clear: "Loeschen",
+  clear: "Löschen",
 } as const;

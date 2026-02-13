@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type Konva from 'konva';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { DrawingTool, DrawingElement, PainDrawingData } from './types';
+import type { DrawingTool, DrawingElement, PainDrawingData, HistoryState } from './types';
 import { WIZARD_STEPS, IMAGE_CONFIGS, INSTRUCTION_TEXT } from './constants';
 import { PainDrawingCanvas } from './PainDrawingCanvas';
 import { DrawingToolbar } from './DrawingToolbar';
@@ -96,6 +96,8 @@ export function PainDrawingWizard({
     redo,
     clear,
     setElements,
+    getHistoryState,
+    restoreState,
   } = useDrawingHistory([]);
 
   // Keep refs for callbacks to avoid stale closures
@@ -107,15 +109,32 @@ export function PainDrawingWizard({
     updateElementsRef.current = updateElements;
   });
 
-  // Reset history and tool when image changes
+  // Per-image history storage (preserves undo/redo stacks across navigation)
+  const savedHistoriesRef = useRef<Record<string, HistoryState>>({});
+
+  // Save and restore history when switching between images
   useEffect(() => {
     if (currentImageId && currentImageId !== currentImageIdRef.current) {
+      const oldImageId = currentImageIdRef.current;
       currentImageIdRef.current = currentImageId;
-      setElements(drawings[currentImageId].elements);
+
+      // Save history state for the image we're leaving
+      if (oldImageId) {
+        savedHistoriesRef.current[oldImageId] = getHistoryState();
+      }
+
+      // Restore saved history or initialize from stored elements
+      const saved = savedHistoriesRef.current[currentImageId];
+      if (saved) {
+        restoreState(saved);
+      } else {
+        setElements(drawings[currentImageId].elements);
+      }
+
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional reset on image change
-      setActiveTool('shade'); // Reset to default tool
+      setActiveTool('shade');
     }
-  }, [currentImageId, drawings, setElements]);
+  }, [currentImageId, drawings, setElements, getHistoryState, restoreState]);
 
   // Initialize on first mount for drawing step
   const initializedRef = useRef(false);
@@ -196,7 +215,7 @@ export function PainDrawingWizard({
   };
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden bg-background">
+    <div className="flex flex-col h-dvh overflow-hidden bg-background max-w-2xl mx-auto w-full">
       {/* Help overlay */}
       {showHelp && (
         <div className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -330,9 +349,9 @@ export function PainDrawingWizard({
 
         {/* Navigation buttons */}
         {!isTransitioning && (
-          <div className="flex gap-3">
+          <div className="flex gap-3 justify-center">
             {onCancel && isFirstStep && !isEditMode && (
-              <Button variant="outline" onClick={onCancel} className="flex-1">
+              <Button variant="outline" onClick={onCancel}>
                 Abbrechen
               </Button>
             )}
@@ -341,7 +360,6 @@ export function PainDrawingWizard({
               <Button
                 variant="outline"
                 onClick={handlePrevious}
-                className="flex-1"
               >
                 <ChevronLeftIcon />
                 Abbrechen
@@ -352,14 +370,13 @@ export function PainDrawingWizard({
               <Button
                 variant="outline"
                 onClick={handlePrevious}
-                className="flex-1"
               >
                 <ChevronLeftIcon />
-                Zurueck
+                Zurück
               </Button>
             )}
 
-            <Button onClick={handleNext} className="flex-1">
+            <Button onClick={handleNext}>
               {isReviewStep ? (
                 <>
                   Fertig

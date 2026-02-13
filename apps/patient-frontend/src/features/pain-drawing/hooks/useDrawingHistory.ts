@@ -1,4 +1,4 @@
-import { useReducer, useCallback } from 'react';
+import { useReducer, useCallback, useRef } from 'react';
 import type { DrawingElement, HistoryState, HistoryAction } from '../types';
 
 const initialState: HistoryState = {
@@ -51,6 +51,9 @@ function historyReducer(state: HistoryState, action: HistoryAction): HistoryStat
         future: [],
       };
     }
+    case 'RESTORE': {
+      return action.state;
+    }
     default:
       return state;
   }
@@ -65,6 +68,8 @@ export interface UseDrawingHistoryReturn {
   redo: () => void;
   clear: () => void;
   setElements: (elements: DrawingElement[]) => void;
+  getHistoryState: () => HistoryState;
+  restoreState: (state: HistoryState) => void;
 }
 
 export function useDrawingHistory(
@@ -95,6 +100,18 @@ export function useDrawingHistory(
     dispatch({ type: 'SET', elements });
   }, []);
 
+  // Keep a ref to always have the latest state available (avoids stale closures)
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const getHistoryState = useCallback((): HistoryState => {
+    return stateRef.current;
+  }, []);
+
+  const restoreState = useCallback((historyState: HistoryState) => {
+    dispatch({ type: 'RESTORE', state: historyState });
+  }, []);
+
   return {
     elements: state.present,
     canUndo: state.past.length > 0,
@@ -104,5 +121,7 @@ export function useDrawingHistory(
     redo,
     clear,
     setElements,
+    getHistoryState,
+    restoreState,
   };
 }

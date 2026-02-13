@@ -14,7 +14,7 @@ export function ReviewStep({ drawings, onEditStep }: ReviewStepProps) {
   const drawingSteps = WIZARD_STEPS.filter((step) => step.type === "drawing");
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-md mx-auto w-full">
       <h2 className="text-lg font-semibold text-center">Überprüfung Ihrer Zeichnungen</h2>
 
       <div className="grid grid-cols-2 gap-4">
@@ -23,8 +23,7 @@ export function ReviewStep({ drawings, onEditStep }: ReviewStepProps) {
           const config = IMAGE_CONFIGS[imageId];
           const drawing = drawings[imageId];
           const hasDrawing = drawing && drawing.elements.length > 0;
-          // Step index in the wizard (add 1 for instruction step)
-          const wizardStepIndex = index + 1;
+          const wizardStepIndex = index;
 
           return (
             <Card
@@ -40,7 +39,6 @@ export function ReviewStep({ drawings, onEditStep }: ReviewStepProps) {
                   <DrawingPreview
                     imageConfig={config}
                     elements={drawing?.elements ?? []}
-                    size={140}
                   />
 
                   {/* Overlay indicator */}
