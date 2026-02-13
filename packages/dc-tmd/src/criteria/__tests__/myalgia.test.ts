@@ -183,18 +183,12 @@ describe("Myalgia diagnosis", () => {
           maxUnassisted: { left: { temporalis: { familiarPain: "no" } } },
           maxAssisted: { left: { temporalis: { familiarPain: "no" } } },
         },
-        // Need to provide ALL palpation sites data for definitive negative
-        // because the criterion checks both temporalis AND masseter in an OR
+        // Only need to provide the evaluated region's palpation sites (region-gated)
         e9: {
           left: {
-            // Temporalis sites
             temporalisPosterior: { familiarPain: "no" },
             temporalisMiddle: { familiarPain: "no" },
             temporalisAnterior: { familiarPain: "no" },
-            // Masseter sites
-            masseterOrigin: { familiarPain: "no" },
-            masseterBody: { familiarPain: "no" },
-            masseterInsertion: { familiarPain: "no" },
           },
         },
       };
@@ -202,6 +196,34 @@ describe("Myalgia diagnosis", () => {
       const result = evaluate(MYALGIA_EXAMINATION.criterion, data, {
         side: "left",
         region: "temporalis",
+      });
+
+      expect(result.status).toBe("negative");
+    });
+
+    it("cross-region isolation: temporalis familiarPain should not affect masseter evaluation", () => {
+      const data = {
+        e1: { painLocation: { right: ["masseter"] } },
+        // Temporalis has familiar pain, but masseter does NOT
+        e9: {
+          right: {
+            temporalisPosterior: { familiarPain: "yes" },
+            temporalisMiddle: { familiarPain: "yes" },
+            masseterOrigin: { familiarPain: "no" },
+            masseterBody: { familiarPain: "no" },
+            masseterInsertion: { familiarPain: "no" },
+          },
+        },
+        e4: {
+          maxUnassisted: { right: { masseter: { familiarPain: "no" } } },
+          maxAssisted: { right: { masseter: { familiarPain: "no" } } },
+        },
+      };
+
+      // Evaluating for masseter — should be negative despite temporalis having familiar pain
+      const result = evaluate(MYALGIA_EXAMINATION.criterion, data, {
+        side: "right",
+        region: "masseter",
       });
 
       expect(result.status).toBe("negative");

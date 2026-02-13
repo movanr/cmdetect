@@ -14,11 +14,14 @@
  * D. Familiar pain on palpation or movement (E4, E9)
  */
 
-import { SITES_BY_GROUP } from "../../ids/anatomy";
-import { and, any, familiarPainDuringOpening, field, or } from "../builders";
+import { SITES_BY_GROUP, type PainType, type Region } from "../../ids/anatomy";
+import { and, any, familiarPainDuringOpening, field, match, or } from "../builders";
 import { sq } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion } from "../types";
+
+// Regions applicable to myalgia (temporalis + masseter)
+const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter"];
 
 // ============================================================================
 // ANAMNESIS CRITERIA (SQ Questionnaire)
@@ -69,35 +72,34 @@ export const MYALGIA_ANAMNESIS: Criterion = and(
 // ============================================================================
 
 /**
- * Helper: Generate ANY criterion for all palpation sites in a region
- *
- * Uses template variables that will be resolved during evaluation:
- * - ${side} → "left" | "right"
- * - ${region} → "temporalis" | "masseter"
- *
- * This generates concrete refs at definition time for the region,
- * but uses ${side} template for the side.
+ * Generate E9 palpation site refs for a specific region with ${side} template.
  */
-function createSiteFamiliarPainCriterion(): Criterion {
-  // For temporalis: check all 3 temporalis sites
-  const temporalisSites = SITES_BY_GROUP.temporalis;
-  const temporalisRefs = temporalisSites.map((site) => `e9.\${side}.${site}.familiarPain`);
+function siteRefs(region: Region, painType: PainType): string[] {
+  return SITES_BY_GROUP[region].map((site) => `e9.\${side}.${site}.${painType}`);
+}
 
-  // For masseter: check all 3 masseter sites
-  const masseterSites = SITES_BY_GROUP.masseter;
-  const masseterRefs = masseterSites.map((site) => `e9.\${side}.${site}.familiarPain`);
+/**
+ * Region-gated criterion branch: only activates when evaluation context matches.
+ *
+ * When evaluating for e.g. (left, temporalis):
+ * - match("${region}", "temporalis") → positive → rest of AND evaluated
+ * - match("${region}", "masseter")  → negative → AND short-circuits
+ */
+function regionGated(region: Region, criteria: Criterion[]): Criterion {
+  return and([match("${region}", region), ...criteria]);
+}
 
-  // We need to check sites based on ${region}
-  // Since we can't dynamically switch refs at definition time,
-  // we use an OR that checks the appropriate sites based on region matching
+/**
+ * OR over all myalgia regions with region-gated criteria.
+ * Only the branch matching the current evaluation region activates.
+ */
+function forEachRegion(
+  buildCriteria: (region: Region) => Criterion[],
+  metadata?: { id?: string; label?: string }
+): Criterion {
   return or(
-    [
-      // If evaluating temporalis, these will be the relevant refs
-      any(temporalisRefs, { equals: "yes" }, { id: "temporalisPalpationFamiliar" }),
-      // If evaluating masseter, these will be the relevant refs
-      any(masseterRefs, { equals: "yes" }, { id: "masseterPalpationFamiliar" }),
-    ],
-    { id: "palpationFamiliarPain", label: "Bekannter Schmerz bei Palpation" }
+    MYALGIA_REGIONS.map((region) => regionGated(region, buildCriteria(region))),
+    metadata
   );
 }
 
@@ -116,16 +118,30 @@ export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}",
  * Criterion D: Familiar pain provoked by ONE of:
  * - Palpation of temporalis or masseter muscle (E9)
  * - Maximum unassisted or assisted opening (E4b, E4c)
+ *
+ * Region-gated: only evaluates sites matching the current evaluation region,
+ * preventing cross-region data contamination.
  */
-export const familiarPainProvoked: Criterion = or(
-  [
-    // E4: Familiar pain during opening movements
-    familiarPainDuringOpening("${side}", "${region}", {
-      id: "openingFamiliarPain",
-      label: "Bekannter Schmerz bei Mundöffnung",
-    }),
-    // E9: Familiar pain during palpation of any site in the muscle group
-    createSiteFamiliarPainCriterion(),
+export const familiarPainProvoked: Criterion = forEachRegion(
+  (region) => [
+    or(
+      [
+        // E4: Familiar pain during opening movements
+        familiarPainDuringOpening("${side}", region, {
+          id: "openingFamiliarPain",
+          label: "Bekannter Schmerz bei Mundöffnung",
+        }),
+        // E9: Familiar pain during palpation of any site in the muscle group
+        any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
+          id: `${region}PalpationFamiliar`,
+          label: "Bekannter Schmerz bei Palpation",
+        }),
+      ],
+      {
+        id: "familiarPainOr",
+        label: "Bekannter Schmerz in Kaumuskel(n) bei Muskelpalpation oder maximaler Öffnung",
+      }
+    ),
   ],
   {
     id: "familiarPain",
