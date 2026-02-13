@@ -439,12 +439,25 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       );
     }
 
-    // E4C measurement - step-based flow with safety warning
+    // E4C measurement - step-based flow with safety warning always visible
     if (stepId === "e4c-measure") {
+      const warnings = E4_RICH_INSTRUCTIONS.maxAssistedOpening.warnings;
       return (
-        <IntroPanel title="Anweisungen">
-          <MeasurementFlowBlock instruction={E4_RICH_INSTRUCTIONS.maxAssistedOpening} />
-        </IntroPanel>
+        <>
+          {warnings && warnings.length > 0 && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+              {warnings.map((warning, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-amber-600">⚠️</span>
+                  <span>{warning.message}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <IntroPanel title="Anweisungen">
+            <MeasurementFlowBlock instruction={{ ...E4_RICH_INSTRUCTIONS.maxAssistedOpening, warnings: undefined }} />
+          </IntroPanel>
+        </>
       );
     }
 
