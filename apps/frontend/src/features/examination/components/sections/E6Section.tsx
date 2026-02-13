@@ -17,6 +17,7 @@ import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { YesNoField } from "../inputs/YesNoField";
 import { IntroPanel, MeasurementFlowBlock, SectionFooter } from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 
 const SIDES = [
@@ -43,12 +44,15 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{getSectionCardTitle(SECTIONS.e6)}</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/protocol/$section" params={{ section: "e6" }}>
-            <BookOpen className="h-4 w-4 mr-1" />
-            Protokoll
-          </Link>
-        </Button>
+        <div className="flex items-center gap-1">
+          <SectionCommentButton sectionId="e6" />
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/protocol/$section" params={{ section: "e6" }}>
+              <BookOpen className="h-4 w-4 mr-1" />
+              Protokoll
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-8">
         {/* Instruction flow */}

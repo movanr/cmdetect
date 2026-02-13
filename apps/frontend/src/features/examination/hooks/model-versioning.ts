@@ -19,7 +19,7 @@
 export type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 
 /** Current model version — bump when FormValues model changes. */
-export const CURRENT_MODEL_VERSION = 2;
+export const CURRENT_MODEL_VERSION = 3;
 
 /**
  * Ordered migration functions. Each transforms data from version N to N+1.
@@ -44,6 +44,24 @@ export const migrations: Migration[] = [
           lateralPterygoid: { pain: null, familiarPain: null, referredPain: null },
           temporalisTendon: { pain: null, familiarPain: null, referredPain: null },
         },
+      };
+    }
+    return data;
+  },
+  // v2→v3: Add E11 examiner comments section with null values for each section
+  (data) => {
+    if (!data.e11) {
+      data.e11 = {
+        e1: null,
+        e2: null,
+        e3: null,
+        e4: null,
+        e5: null,
+        e6: null,
+        e7: null,
+        e8: null,
+        e9: null,
+        e10: null,
       };
     }
     return data;

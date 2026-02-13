@@ -1,13 +1,13 @@
 /**
  * DC/TMD Examination Protocol IDs
  *
- * Section IDs (E1-E10) and common field keys for examination data paths.
+ * Section IDs (E1-E11) and common field keys for examination data paths.
  * Pain types are in anatomy.ts.
  */
 
 import { REGIONS } from "./anatomy";
 
-// === SECTIONS (E1-E10) ===
+// === SECTIONS (E1-E11) ===
 export const SECTIONS = {
   e1: "e1",
   e2: "e2",
@@ -19,6 +19,7 @@ export const SECTIONS = {
   e8: "e8",
   e9: "e9",
   e10: "e10",
+  e11: "e11",
 } as const;
 export type SectionId = keyof typeof SECTIONS;
 export const SECTION_KEYS = Object.keys(SECTIONS) as SectionId[];
@@ -36,6 +37,7 @@ export const SECTION_LABELS: Record<SectionId, { short: string; full: string }> 
   e8: { short: "Gelenkblockierung", full: "Gelenkblockierung" },
   e9: { short: "Palpation", full: "Palpation Muskeln & Kiefergelenk" },
   e10: { short: "Ergänzende Palpation", full: "Ergänzende Muskelschmerzen bei Palpation" },
+  e11: { short: "Kommentare", full: "Untersucherkommentare" },
 };
 
 /** Get section number from ID (e.g., "e3" -> "3", "e10" -> "10") */

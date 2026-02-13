@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS, E2_REFERENCE_TEETH, type E2ReferenceTooth } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
@@ -275,12 +276,15 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{getSectionCardTitle(SECTIONS.e2)}</CardTitle>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/protocol/$section" params={{ section: "e2" }}>
-            <BookOpen className="h-4 w-4 mr-1" />
-            Protokoll
-          </Link>
-        </Button>
+        <div className="flex items-center gap-1">
+          <SectionCommentButton sectionId="e2" />
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/protocol/$section" params={{ section: "e2" }}>
+              <BookOpen className="h-4 w-4 mr-1" />
+              Protokoll
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {E2_STEP_ORDER.map((stepId, index) => {

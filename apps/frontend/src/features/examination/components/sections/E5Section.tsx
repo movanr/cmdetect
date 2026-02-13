@@ -30,6 +30,7 @@ import {
   StepBar,
   type StepStatus,
 } from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { InterviewContent } from "./e4/InterviewContent";
 import type { ExpandedState } from "./e4/types";
 import type { SectionProps } from "./types";
@@ -439,6 +440,7 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 Alle Regionen
               </Label>
             </div>
+            <SectionCommentButton sectionId="e5" />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e5" }}>
                 <BookOpen className="h-4 w-4 mr-1" />

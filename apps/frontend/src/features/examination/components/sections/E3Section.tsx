@@ -19,6 +19,7 @@ import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle, SECTION_LABELS } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { IntroPanel, MeasurementFlowBlock, SectionFooter } from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 
 export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) {
@@ -41,12 +42,15 @@ export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           <CardTitle>{getSectionCardTitle(SECTIONS.e3)}</CardTitle>
           <Badge variant="secondary">Zusatz</Badge>
         </div>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/protocol/$section" params={{ section: "e3" }}>
-            <BookOpen className="h-4 w-4 mr-1" />
-            Protokoll
-          </Link>
-        </Button>
+        <div className="flex items-center gap-1">
+          <SectionCommentButton sectionId="e3" />
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/protocol/$section" params={{ section: "e3" }}>
+              <BookOpen className="h-4 w-4 mr-1" />
+              Protokoll
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Instruction flow */}

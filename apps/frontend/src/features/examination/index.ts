@@ -47,6 +47,7 @@ export { E7_MODEL, E7_STEPS } from "./sections/e7.model";
 export { E8_MODEL, E8_STEPS } from "./sections/e8.model";
 export { E9_MODEL, E9_STEPS } from "./sections/e9.model";
 export { E10_MODEL, E10_STEPS } from "./sections/e10.model";
+export { E11_MODEL, E11_STEPS } from "./sections/e11.model";
 export {
   getSection,
   SECTION_IDS,

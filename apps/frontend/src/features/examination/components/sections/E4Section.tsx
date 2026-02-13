@@ -30,6 +30,7 @@ import {
   StepBar,
   type StepStatus,
 } from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { E4AMeasurementContent } from "./e4/E4AMeasurementContent";
 import { InterviewContent } from "./e4/InterviewContent";
 import type { ExpandedState } from "./e4/types";
@@ -483,6 +484,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 Alle Regionen
               </Label>
             </div>
+            <SectionCommentButton sectionId="e4" />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e4" }}>
                 <BookOpen className="h-4 w-4 mr-1" />

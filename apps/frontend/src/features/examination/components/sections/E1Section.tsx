@@ -39,6 +39,7 @@ import type { RegionStatus } from "../HeadDiagram/types";
 import { CheckboxGroupField } from "../inputs/CheckboxGroupField";
 import { QuestionField } from "../QuestionField";
 import { IncompleteDataDialog, IntroPanel, MeasurementFlowBlock, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { buildRegionSummary } from "../summary/summary-helpers";
 import type { SectionProps } from "./types";
 
@@ -401,6 +402,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 Alle Regionen
               </Label>
             </div>
+            <SectionCommentButton sectionId="e1" />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e1" }}>
                 <BookOpen className="h-4 w-4 mr-1" />
