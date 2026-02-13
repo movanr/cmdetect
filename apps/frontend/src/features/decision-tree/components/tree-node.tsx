@@ -1,6 +1,6 @@
-import React from "react";
-import { CircleCheck } from "lucide-react";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { CircleCheck } from "lucide-react";
+import React from "react";
 import type { PractitionerDecision } from "../../evaluation/types";
 import type { CriterionStatus, Position } from "../types";
 
@@ -82,34 +82,27 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   status,
   isActive,
 }) => {
-  const isConfirmed =
-    practitionerDecision === "confirmed" || practitionerDecision === "added";
+  const isConfirmed = practitionerDecision === "confirmed" || practitionerDecision === "added";
 
-  // Inactive nodes get a uniform disabled style; active nodes show status/color
-  const disabled = {
-    borderColor: "border-gray-200",
-    bgColor: "bg-gray-50",
-    textColor: "text-gray-400",
-  };
   const showNegativeLabel = negativeLabel && status === "negative";
 
-  // Confirmed end nodes override to green regardless of active path
+  const endNodeColors = {
+    borderColor: "border-gray-400",
+    bgColor: "bg-white",
+    textColor: "text-gray-900",
+  };
+
+  // Confirmed end nodes override to green; all other end nodes use uniform style
   const active =
     isEndNode && isConfirmed
       ? confirmedColors
-      : isEndNode && color === "blue"
-        ? nodeColors.positive
-        : color === "red"
-          ? showNegativeLabel
-            ? nodeColors.negative // grey when gateway criterion is not met
-            : { borderColor: "border-red-400", bgColor: "bg-red-50", textColor: "text-red-900" }
+      : isEndNode
+        ? endNodeColors
+        : color === "red" && showNegativeLabel
+          ? nodeColors.negative
           : nodeColors[status];
 
-  const {
-    borderColor: borderClass,
-    bgColor: bgClass,
-    textColor: textClass,
-  } = isActive || isConfirmed ? active : disabled;
+  const { borderColor: borderClass, bgColor: bgClass, textColor: textClass } = active;
 
   const isLinked = !!linkedTreeId;
   const isClickableEndNode = !!diagnosisId && !!popoverContent;
@@ -160,6 +153,27 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           )}
         </div>
 
+        {/* Befund label for criterion nodes */}
+        {!isEndNode && (
+          <div className="flex justify-center mt-1">
+            <span
+              className={`inline-block text-[10px] font-medium rounded-full px-2 py-0.5 ${
+                status === "positive"
+                  ? "text-blue-700 bg-blue-100"
+                  : status === "negative"
+                    ? "text-gray-600 bg-gray-200"
+                    : "text-yellow-700 bg-yellow-100"
+              }`}
+            >
+              {status === "positive"
+                ? "Positiver Befund (Ja)"
+                : status === "negative"
+                  ? "Negativer Befund (Nein)"
+                  : "Kein Befund (nicht vollständig untersucht)"}
+            </span>
+          </div>
+        )}
+
         {imagingNote && isActive && (
           <div className="mt-1">
             <span className="inline-block text-[10px] font-medium text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">
@@ -174,7 +188,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             <CircleCheck className="h-4 w-4 text-green-600" />
           </div>
         )}
-
       </div>
     </div>
   );
