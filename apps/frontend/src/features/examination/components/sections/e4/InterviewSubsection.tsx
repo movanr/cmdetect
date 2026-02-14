@@ -156,6 +156,7 @@ export function InterviewSubsection({
           selectedRegion={expanded[side]}
           onRegionClick={handleRegionClick(side)}
           incompleteRegions={sideIncompleteRegions}
+          hideBackgroundImages={true}
         />
 
         {/* RegionDropdowns */}

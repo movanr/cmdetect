@@ -120,20 +120,20 @@ export const REGION_STATE_COLORS = {
     stroke: "#d4d4d8", // zinc-300
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
-    // Dark gray = complete, no significant findings
+    // Light gray = complete, no significant findings (subtle when unselected)
     text: "text-zinc-600",
     bg: "bg-zinc-200",
     border: "border-zinc-400",
-    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40%
-    stroke: "#71717a", // zinc-500
+    fill: "rgba(212, 212, 216, 0.35)", // zinc-300 @ 35% - more subtle
+    stroke: "#d4d4d8", // zinc-300 - subtle border
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
-    // Blue = significant finding (familiar pain positive)
+    // Blue = significant finding (familiar pain positive) - subtle for status indication
     text: "text-blue-700",
     bg: "bg-blue-100",
     border: "border-blue-500",
-    fill: "rgba(147, 197, 253, 0.5)", // blue-300 @ 50%
-    stroke: "#3b82f6", // blue-500
+    fill: "rgba(191, 219, 254, 0.35)", // blue-200 @ 35% - more subtle for findings
+    stroke: "#d4d4d8", // zinc-300 - same as pending for subtle border
   },
 } as const;
 

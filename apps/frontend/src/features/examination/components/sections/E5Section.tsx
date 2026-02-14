@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { E5_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
@@ -151,6 +151,28 @@ export function E5Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const isFirstStep = currentStepIndex === 0;
   const isInterview = isInterviewStep(String(currentStepId));
   const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
+
+  // Reactively update incomplete regions when form values change
+  useEffect(() => {
+    // Only subscribe if we have incomplete regions to potentially clear
+    if (incompleteRegions.length === 0) return;
+
+    // Only validate interview steps
+    if (currentStepIndex < 0 || currentStepIndex >= E5_STEP_ORDER.length) return;
+    const stepId = E5_STEP_ORDER[currentStepIndex];
+    if (!isInterviewStep(String(stepId))) return;
+
+    // Subscribe to form changes and re-validate on any change
+    const subscription = form.watch(() => {
+      const stepInstances = getInstancesForStep(stepId);
+      const result = validateInterviewCompletion(stepInstances, (path) =>
+        form.getValues(path as FieldPath<FormValues>)
+      );
+      setIncompleteRegions(result.incompleteRegions);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [currentStepIndex, incompleteRegions.length, form, getInstancesForStep]);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;

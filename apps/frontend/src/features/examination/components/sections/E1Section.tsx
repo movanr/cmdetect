@@ -308,6 +308,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 regions={e1PainSvgRegions}
                 regionStatuses={painRightStatuses}
                 onRegionClick={(region) => handleRegionClick("e1a", region, "right")}
+                hideBackgroundImages={true}
               />
               <div className="w-44">
                 <CheckboxGroupField
@@ -328,6 +329,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 regions={e1PainSvgRegions}
                 regionStatuses={painLeftStatuses}
                 onRegionClick={(region) => handleRegionClick("e1a", region, "left")}
+                hideBackgroundImages={true}
               />
               <div className="w-44">
                 <CheckboxGroupField
@@ -360,6 +362,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               regions={E1_HEADACHE_SVG_REGIONS}
               regionStatuses={headacheRightStatuses}
               onRegionClick={(region) => handleRegionClick("e1b", region, "right")}
+              hideBackgroundImages={true}
             />
             <div className="w-44">
               {headacheRight && <QuestionField instance={headacheRight} />}
@@ -376,6 +379,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               regions={E1_HEADACHE_SVG_REGIONS}
               regionStatuses={headacheLeftStatuses}
               onRegionClick={(region) => handleRegionClick("e1b", region, "left")}
+              hideBackgroundImages={true}
             />
             <div className="w-44">
               {headacheLeft && <QuestionField instance={headacheLeft} />}
