@@ -7,18 +7,18 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { ClipboardList } from "lucide-react";
 import {
   QUESTIONNAIRE_ID,
   QUESTIONNAIRE_TITLES,
+  SQ_ENABLE_WHEN,
   SQ_OFFICE_USE_QUESTIONS,
   SQ_QUESTION_LABELS,
-  SQ_SECTION_NAMES_ORDER,
-  SQ_ENABLE_WHEN,
   SQ_QUESTION_ORDER,
+  SQ_SECTION_NAMES_ORDER,
   isQuestionIdEnabled,
   type SQQuestionId,
 } from "@cmdetect/questionnaires";
+import { ClipboardList } from "lucide-react";
 import {
   useQuestionnaireResponses,
   type QuestionnaireResponse,
@@ -111,7 +111,9 @@ function QuestionnaireTabContent({ response, patientRecordId }: QuestionnaireTab
       </div>
 
       {/* Questionnaire-specific rendering */}
-      {questionnaireId === QUESTIONNAIRE_ID.PHQ4 && <PHQ4Content answers={answers as Record<string, string>} />}
+      {questionnaireId === QUESTIONNAIRE_ID.PHQ4 && (
+        <PHQ4Content answers={answers as Record<string, string>} />
+      )}
       {questionnaireId === QUESTIONNAIRE_ID.SQ && (
         <SQContent response={response} patientRecordId={patientRecordId} />
       )}
@@ -231,7 +233,9 @@ function SQContent({
       {pendingConfirmations > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center gap-2">
           <span className="text-amber-600 font-medium text-sm">
-            {pendingConfirmations} {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"} Seitenbestätigung
+            {pendingConfirmations}{" "}
+            {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"} Bestätigung der
+            Lokalisation
           </span>
         </div>
       )}

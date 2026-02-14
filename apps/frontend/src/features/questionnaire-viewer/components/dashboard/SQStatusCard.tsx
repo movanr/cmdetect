@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
-import { Link } from "@tanstack/react-router";
 import {
   SQ_ENABLE_WHEN,
   SQ_OFFICE_USE_QUESTIONS,
   isQuestionIdEnabled,
 } from "@cmdetect/questionnaires";
+import { Link } from "@tanstack/react-router";
 import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
@@ -122,12 +122,11 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
                 <AlertCircle className="h-4 w-4" />
                 <span>
                   {pendingConfirmations}{" "}
-                  {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"}{" "}
-                  Seitenbestätigung
+                  {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"} Bestätigung
+                  der Lokalisation
                 </span>
               </div>
             )}
-
           </div>
 
           {/* Details toggle */}
