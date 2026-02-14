@@ -6,7 +6,8 @@ const Arrowhead: React.FC<{
   length: number;
   width: number;
   direction: Direction;
-}> = ({ end, length, width, direction }) => {
+  color?: string;
+}> = ({ end, length, width, direction, color }) => {
   switch (direction) {
     case "down":
       return (
@@ -14,7 +15,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - width},${end.y - length} ${end.x + width},${
             end.y - length
           } ${end.x},${end.y}`}
-          fill="black"
+          fill={color ?? "black"}
         />
       );
     case "up":
@@ -23,7 +24,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - width},${end.y + length} ${end.x + width},${
             end.y + length
           } ${end.x},${end.y}`}
-          fill="black"
+          fill={color ?? "black"}
         />
       );
     case "right":
@@ -32,7 +33,7 @@ const Arrowhead: React.FC<{
           points={`${end.x - length},${end.y - width} ${end.x - length},${
             end.y + width
           } ${end.x},${end.y}`}
-          fill="black"
+          fill={color ?? "black"}
         />
       );
     case "left":
@@ -41,7 +42,7 @@ const Arrowhead: React.FC<{
           points={`${end.x + length},${end.y - width} ${end.x + length},${
             end.y + width
           } ${end.x},${end.y}`}
-          fill="black"
+          fill={color ?? "black"}
         />
       );
   }

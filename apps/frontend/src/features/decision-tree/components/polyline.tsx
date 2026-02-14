@@ -1,7 +1,10 @@
 import React from "react";
 import type { Position } from "../types";
 
-const Polyline: React.FC<{ path: Position[] }> = ({ path }) => {
+const Polyline: React.FC<{ path: Position[]; color?: string }> = ({
+  path,
+  color,
+}) => {
   if (path.length < 2) {
     console.warn("path length less than 2");
     return <></>;
@@ -11,6 +14,13 @@ const Polyline: React.FC<{ path: Position[] }> = ({ path }) => {
     idx === 0 ? `M ${pos.x} ${pos.y}` : `L ${pos.x} ${pos.y}`
   );
 
-  return <path d={data.join(" ")} fill="none" stroke="black" strokeWidth="2" />;};
+  return (
+    <path
+      d={data.join(" ")}
+      fill="none"
+      stroke={color ?? "black"}
+      strokeWidth="2"
+    />
+  );};
 
 export default Polyline;

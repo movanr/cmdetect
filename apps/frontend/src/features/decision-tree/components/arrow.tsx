@@ -3,7 +3,11 @@ import type { ArrowProps, Direction, Position } from "../types";
 import Arrowhead from "./arrowhead";
 import Polyline from "./polyline";
 
-const Arrow: React.FC<ArrowProps> = ({ path, direction }) => {
+const Arrow: React.FC<ArrowProps & { color?: string }> = ({
+  path,
+  direction,
+  color,
+}) => {
   const arrowHeadLength = 10;
 
   if (path.length < 2) {
@@ -18,12 +22,13 @@ const Arrow: React.FC<ArrowProps> = ({ path, direction }) => {
 
   return (
     <>
-      <Polyline path={shortenedPath} />
+      <Polyline path={shortenedPath} color={color} />
       <Arrowhead
         end={end}
         width={5}
         length={arrowHeadLength}
         direction={direction}
+        color={color}
       />
     </>
   );

@@ -2,6 +2,7 @@ import React from "react";
 import type { Direction, ResolvedNode, Position, TransitionProps } from "../types";
 import Arrow from "./arrow";
 import Label from "./label";
+import { getArrowColor } from "./arrow-colors";
 
 const Transition: React.FC<TransitionProps> = ({
   from,
@@ -10,6 +11,7 @@ const Transition: React.FC<TransitionProps> = ({
   endDirection,
   joints,
   label,
+  type,
 }) => {
   const path = [];
   const start = getEdgePosition(from, startDirection);
@@ -36,10 +38,11 @@ const Transition: React.FC<TransitionProps> = ({
   path.push(end);
 
   const labelPosition = getLabelPosition(path[0], startDirection);
+  const arrowColor = getArrowColor(type);
 
   return (
     <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-      <Arrow path={path} direction={endDirection} />
+      <Arrow path={path} direction={endDirection} color={arrowColor} />
       {label && <Label text={label} position={labelPosition} />}
     </svg>
   );
