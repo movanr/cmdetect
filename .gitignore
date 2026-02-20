@@ -65,3 +65,16 @@ apps/*/src/routeTree.gen.ts
 # Database
 *.db
 *.sqlite
+
+# Internal documents
+finanzen/
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/terraform.tfvars
+infra/.terraform.lock.hcl
+
+# infra
+infra/

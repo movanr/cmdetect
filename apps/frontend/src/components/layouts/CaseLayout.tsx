@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Check, X, Menu, Lock } from "lucide-react";
 import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useIsNotDesktop } from "@/hooks/use-mobile";
 import { canAccessStep, type MainStep } from "../../features/case-workflow";
 
@@ -208,6 +208,7 @@ export function CaseLayout({
         {/* Sidebar Sheet for tablet portrait (md to lg) */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <SheetContent side="left" className="w-64 p-0">
+            <SheetTitle className="sr-only">Navigation</SheetTitle>
             {sidebarContent}
           </SheetContent>
         </Sheet>
