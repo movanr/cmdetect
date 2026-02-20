@@ -34,23 +34,29 @@ export function SubStepTabs({
       )}
     >
       <nav className="flex gap-1 px-4" aria-label="Sub-step navigation">
-        {subSteps.map((subStep) => (
-          <Link
-            key={subStep.id}
-            to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
-            params={{ id: caseId }}
-            className={cn(
-              "relative px-4 py-2.5 text-sm font-medium rounded-t-md transition-colors",
-              "text-muted-foreground hover:text-foreground hover:bg-background/50",
-              "border-b-2 border-transparent -mb-px",
-            )}
-            activeProps={{
-              className: "!text-primary bg-background font-semibold border-b-2 !border-primary",
-            }}
-          >
-            {subStep.label}
-          </Link>
-        ))}
+        {subSteps.map((subStep) => {
+          const shortLabel = subStep.label.includes(": ")
+            ? subStep.label.split(": ")[0]
+            : subStep.label;
+          return (
+            <Link
+              key={subStep.id}
+              to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
+              params={{ id: caseId }}
+              className={cn(
+                "relative px-3 xl:px-4 py-2.5 text-sm font-medium rounded-t-md transition-colors",
+                "text-muted-foreground hover:text-foreground hover:bg-background/50",
+                "border-b-2 border-transparent -mb-px whitespace-nowrap",
+              )}
+              activeProps={{
+                className: "!text-primary bg-background font-semibold border-b-2 !border-primary",
+              }}
+            >
+              <span className="xl:hidden">{shortLabel}</span>
+              <span className="hidden xl:block">{subStep.label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );

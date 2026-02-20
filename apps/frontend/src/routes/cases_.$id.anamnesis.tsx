@@ -175,7 +175,7 @@ function AnamnesisLayout() {
           caseId={id}
           parentStep="anamnesis"
           subSteps={subSteps}
-          className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
+          className="rounded-t-lg -mx-4 xl:-mx-8 -mt-6 xl:-mt-8 mb-6"
         />
 
         {/* Child route content */}
