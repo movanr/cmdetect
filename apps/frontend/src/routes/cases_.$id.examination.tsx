@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useBlocker, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -206,10 +206,41 @@ function ExaminationContent({
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
 }) {
-  const { isHydrated, status, saveDraft, completeExamination, isSaving } = useExaminationPersistenceContext();
+  const { isHydrated, status, saveDraft, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [isSavingBeforeLeave, setIsSavingBeforeLeave] = useState(false);
+
+  const blocker = useBlocker({
+    shouldBlockFn: ({ next }) => {
+      if (status === "completed") return false;
+      const isLeavingCase = !next.fullPath.startsWith(`/cases/${caseId}`);
+      return isLeavingCase && hasUnsavedBackendChangesRef.current;
+    },
+    withResolver: true,
+  });
+
+  const handleSaveAndLeave = async () => {
+    setIsSavingBeforeLeave(true);
+    try {
+      await saveDraft();
+    } finally {
+      setIsSavingBeforeLeave(false);
+    }
+    blocker.proceed?.();
+  };
+
+  // Warn on browser tab close / page refresh
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedBackendChangesRef.current && status !== "completed") {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasUnsavedBackendChangesRef, status]);
 
   const handleCompleteExamination = async () => {
     setShowCompleteDialog(false);
@@ -283,6 +314,28 @@ function ExaminationContent({
               Abschließen
             </AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={blocker.status === "blocked"}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Untersuchung speichern?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sie verlassen die Untersuchung. Möchten Sie den aktuellen Stand speichern?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex flex-col gap-2 pt-2">
+            <Button onClick={handleSaveAndLeave} disabled={isSavingBeforeLeave || isSaving}>
+              {isSavingBeforeLeave ? "Wird gespeichert…" : "Speichern und verlassen"}
+            </Button>
+            <Button variant="ghost" onClick={() => blocker.proceed?.()}>
+              Ohne Speichern verlassen
+            </Button>
+            <Button variant="outline" onClick={() => blocker.reset?.()}>
+              Abbrechen
+            </Button>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

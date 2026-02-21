@@ -8,7 +8,7 @@
  * - Clears localStorage draft after successful backend save
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useFormContext } from "react-hook-form";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { execute } from "@/graphql/execute";
@@ -56,6 +56,8 @@ export interface UseExaminationPersistenceResult {
   completedSections: SectionId[];
   /** Whether initial hydration is complete */
   isHydrated: boolean;
+  /** Ref tracking whether there are unsaved backend changes */
+  hasUnsavedBackendChangesRef: MutableRefObject<boolean>;
   /** Current examination status */
   status: ExaminationStatus | null;
 }
@@ -420,6 +422,7 @@ export function useExaminationPersistence({
     isSaving,
     completedSections,
     isHydrated,
+    hasUnsavedBackendChangesRef,
     status: backendResponse?.status ?? (completedSections.length > 0 ? "in_progress" : null),
   };
 }

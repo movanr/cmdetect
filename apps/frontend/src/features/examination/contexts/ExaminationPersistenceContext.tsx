@@ -5,7 +5,7 @@
  * Needed because TanStack Router's <Outlet> cannot pass props to children.
  */
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode, type MutableRefObject } from "react";
 import { useExaminationPersistence } from "../hooks/use-examination-persistence";
 import type { SectionId } from "../sections/registry";
 import type { ExaminationStatus } from "../hooks/use-examination-response";
@@ -27,6 +27,8 @@ interface ExaminationPersistenceContextValue {
   isHydrated: boolean;
   /** Current examination status */
   status: ExaminationStatus | null;
+  /** Ref tracking whether there are unsaved backend changes */
+  hasUnsavedBackendChangesRef: MutableRefObject<boolean>;
 }
 
 const ExaminationPersistenceContext =
