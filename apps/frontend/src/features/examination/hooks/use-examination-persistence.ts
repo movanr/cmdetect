@@ -22,6 +22,10 @@ import {
 } from "./validate-persistence";
 import { CURRENT_MODEL_VERSION } from "./model-versioning";
 import { UPSERT_EXAMINATION_RESPONSE } from "../queries";
+import {
+  setLocalExamCompletion,
+  clearLocalExamCompletion,
+} from "./use-examination-local-completion";
 
 const STORAGE_KEY_PREFIX = "cmdetect_exam_draft_";
 const AUTO_SAVE_DEBOUNCE_MS = 2000;
@@ -376,6 +380,9 @@ export function useExaminationPersistence({
     // Clear localStorage draft
     removeDraft();
 
+    // Persist completion marker for offline/race-condition fallback
+    setLocalExamCompletion(patientRecordId, new Date().toISOString());
+
     // Clear backend auto-save tracking
     hasUnsavedBackendChangesRef.current = false;
     if (backendPeriodicTimerRef.current) {
@@ -400,7 +407,10 @@ export function useExaminationPersistence({
     }
 
     await reopenMutation.mutateAsync({ id: examId });
-  }, [backendResponse, reopenMutation]);
+
+    // Clear local completion marker when reopening for editing
+    clearLocalExamCompletion(patientRecordId);
+  }, [backendResponse, reopenMutation, patientRecordId]);
 
   return {
     saveSection,

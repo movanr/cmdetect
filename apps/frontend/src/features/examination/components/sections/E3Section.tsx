@@ -71,8 +71,7 @@ export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) 
         onSkipConfirm={onComplete}
         onBack={onBack}
         isFirstStep={isFirstSection}
-        warnOnSkip
-        checkIncomplete={() => !validateStep("e3-all")}
+        directSkipLabel="Abschnitt überspringen"
       />
     </Card>
   );

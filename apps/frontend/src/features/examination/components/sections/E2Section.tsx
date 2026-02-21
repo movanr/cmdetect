@@ -10,11 +10,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SECTIONS, E2_REFERENCE_TEETH, type E2ReferenceTooth } from "@cmdetect/dc-tmd";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { E2_REFERENCE_TEETH, SECTIONS, type E2ReferenceTooth } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
-import { SectionCommentButton } from "../ui/SectionCommentButton";
+import { BookOpen, ChevronLeft } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
@@ -23,7 +22,8 @@ import { useExaminationForm, type FormValues } from "../../form/use-examination-
 import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { IncompleteDataDialog, IntroPanel, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { IntroPanel, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 
 // Step configuration
@@ -105,9 +105,15 @@ function getStepSummary(stepId: E2StepId, getValue: (path: string) => unknown): 
   }
 }
 
-export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E2SectionProps) {
+export function E2Section({
+  step,
+  onStepChange,
+  onComplete,
+  onBack,
+  isFirstSection,
+}: E2SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
-  const { getValues } = useFormContext<FormValues>();
+  const { getValues, setValue, watch } = useFormContext<FormValues>();
   const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   const instances = getInstancesForStep("e2-all");
@@ -120,18 +126,25 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const midlineDirection = instances.find((i) => i.path === "e2.midlineDeviation.direction");
   const midlineMm = instances.find((i) => i.path === "e2.midlineDeviation.mm");
 
+  // Watch fields for reactive skip button visibility
+  watch("e2.referenceTooth.selection" as FieldPath<FormValues>);
+  watch("e2.midlineDeviation.direction" as FieldPath<FormValues>);
+  watch("e2.horizontalOverjet" as FieldPath<FormValues>);
+  watch("e2.verticalOverlap" as FieldPath<FormValues>);
+
   // Keep stepStatuses in state (computed from form on mount)
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>(() => {
     const statuses: Record<string, "completed" | "skipped"> = {};
+    const skippedSteps = (getValues("_skippedSteps") as unknown as string[] | undefined) ?? [];
     for (const stepId of E2_STEP_ORDER) {
       if (stepHasData(stepId, (path) => getValues(path as FieldPath<FormValues>))) {
         statuses[stepId] = "completed";
+      } else if (skippedSteps.includes(stepId)) {
+        statuses[stepId] = "skipped";
       }
     }
     return statuses;
   });
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
-
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
     if (step !== undefined) {
@@ -152,6 +165,14 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const currentStepId = allComplete ? E2_STEP_ORDER[0] : E2_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E2_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
+  const isCurrentStepComplete =
+    !allComplete &&
+    stepHasData(currentStepId, (path) => getValues(path as FieldPath<FormValues>));
+  const sectionIsDone = E2_STEP_ORDER.every(
+    (stepId) =>
+      !!stepStatuses[stepId] ||
+      stepHasData(stepId, (path) => getValues(path as FieldPath<FormValues>))
+  );
 
   // Navigation handlers
   const handleBack = () => {
@@ -162,18 +183,29 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     }
   };
 
+  const handleSectionSkip = () => {
+    const stepsToSkip = E2_STEP_ORDER.filter((stepId) => !stepStatuses[stepId]);
+    if (stepsToSkip.length > 0) {
+      const currentSkipped = (getValues("_skippedSteps") as unknown as string[] | undefined) ?? [];
+      setValue("_skippedSteps", [...currentSkipped, ...stepsToSkip] as never);
+      setStepStatuses((prev) => {
+        const next = { ...prev };
+        for (const stepId of stepsToSkip) next[stepId] = "skipped";
+        return next;
+      });
+    }
+    onComplete?.();
+  };
+
   const performSkip = () => {
+    const currentSkipped = (getValues("_skippedSteps") as unknown as string[] | undefined) ?? [];
+    setValue("_skippedSteps", [...currentSkipped, currentStepId] as never);
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
-  };
-
-  const handleConfirmSkip = () => {
-    setShowSkipDialog(false);
-    performSkip();
   };
 
   const handleNext = () => {
@@ -181,15 +213,13 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     const isValid = validateStep(currentStepId);
 
     if (!isValid) {
-      // Invalid data - show skip confirmation dialog
-      setShowSkipDialog(true);
       return;
     }
 
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
 
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -320,10 +350,23 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                     Zurück
                   </Button>
 
-                  <Button type="button" onClick={handleNext}>
-                    {isLastStep ? "Abschließen" : "Weiter"}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  {/* Right: skip + Next/Abschließen buttons */}
+                  <div className="flex items-center gap-2">
+                    {!isCurrentStepComplete && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={performSkip}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Schritt überspringen
+                      </Button>
+                    )}
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -340,21 +383,23 @@ export function E2Section({ step, onStepChange, onComplete, onBack, isFirstSecti
             />
           );
         })}
-
-        <IncompleteDataDialog
-          open={showSkipDialog}
-          onOpenChange={setShowSkipDialog}
-          onConfirm={handleConfirmSkip}
-        />
       </CardContent>
 
-      {/* Section-level footer when all steps are complete */}
-      {allComplete && (
-        <SectionFooter
-          onNext={onComplete}
-          onBack={onBack}
-          isFirstStep={isFirstSection}
-        />
+      {/* Section-level footer */}
+      {(allComplete || sectionIsDone) ? (
+        <SectionFooter onNext={onComplete} onBack={onBack} isFirstStep={isFirstSection} />
+      ) : (
+        <CardFooter className="flex justify-end border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleSectionSkip}
+            className="text-muted-foreground text-xs"
+          >
+            Abschnitt überspringen
+          </Button>
+        </CardFooter>
       )}
     </Card>
   );

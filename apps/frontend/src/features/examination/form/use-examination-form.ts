@@ -58,11 +58,16 @@ for (const section of SECTION_REGISTRY) {
   allInstances.push(...instancesFromModel(section.id, section.model));
 }
 
-const defaults = defaultsFromModel(EXAMINATION_MODEL);
+const modelDefaults = defaultsFromModel(EXAMINATION_MODEL) as Record<string, unknown>;
+const defaults = { ...modelDefaults, _skippedSteps: [] as string[] };
 const pathHelpers = createPathHelpers(allInstances);
 
 // Schema is for type coercion only - all validation via validateInstances()
-const schema = schemaFromModel(EXAMINATION_MODEL);
+// Use intersection to add _skippedSteps tracking (persisted with draft, not model-derived)
+const schema = z.intersection(
+  schemaFromModel(EXAMINATION_MODEL),
+  z.object({ _skippedSteps: z.array(z.string()).default([]) })
+);
 type FormValues = z.infer<typeof schema>;
 
 /**

@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
 import { ArrowRight, ChevronLeft } from "lucide-react";
-import { IncompleteDataDialog } from "./IncompleteDataDialog";
 
 export interface SectionFooterProps {
-  /** Called when Next is clicked and validation passes */
+  /** Called when Next is clicked */
   onNext?: () => void;
-  /** Called when user confirms skip in the dialog */
+  /** Called when the direct skip button is clicked */
   onSkipConfirm?: () => void;
   /** Called when Back is clicked */
   onBack?: () => void;
@@ -19,16 +18,16 @@ export interface SectionFooterProps {
   isValidating?: boolean;
   /** Optional custom label for next button */
   nextLabel?: string;
-  /** If true, shows confirmation dialog when Next is clicked with incomplete data */
-  warnOnSkip?: boolean;
-  /** Returns true if data is incomplete (used when warnOnSkip is true) */
-  checkIncomplete?: () => boolean;
+  /** When provided, renders a small skip button next to "Weiter" that calls onSkipConfirm directly. */
+  directSkipLabel?: string;
+  /** When false, hides the Back button and aligns content to the right. Default: true */
+  showBack?: boolean;
 }
 
 /**
  * Reusable footer component for examination sections with Back/Next navigation.
- * Layout: Back button on left, Next button on right.
- * When Next is clicked with incomplete data and warnOnSkip is true, shows a skip confirmation dialog.
+ * Layout: Back button on left, optional skip + Next button on right.
+ * Validation errors are shown inline by the section; no confirmation dialog here.
  */
 export function SectionFooter({
   onNext,
@@ -38,31 +37,15 @@ export function SectionFooter({
   isLastSection = false,
   isValidating = false,
   nextLabel,
-  warnOnSkip = false,
-  checkIncomplete,
+  directSkipLabel,
+  showBack = true,
 }: SectionFooterProps) {
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
   const defaultNextLabel = isLastSection ? "Abschließen" : "Weiter";
 
-  const handleNextClick = () => {
-    // If warnOnSkip is enabled and data is incomplete, show confirmation dialog
-    // Note: checkIncomplete() typically calls validateStep() which triggers form errors
-    if (warnOnSkip && checkIncomplete?.()) {
-      setShowSkipDialog(true);
-    } else {
-      onNext?.();
-    }
-  };
-
-  const handleConfirmSkip = () => {
-    setShowSkipDialog(false);
-    onSkipConfirm?.();
-  };
-
   return (
-    <>
-      <CardFooter className="flex items-center justify-between pt-6 border-t">
-        {/* Left: Back button */}
+    <CardFooter className={cn("flex items-center pt-6 border-t", showBack ? "justify-between" : "justify-end")}>
+      {/* Left: Back button */}
+      {showBack && (
         <Button
           type="button"
           variant="ghost"
@@ -73,23 +56,31 @@ export function SectionFooter({
           <ChevronLeft className="h-4 w-4 mr-1" />
           Zurück
         </Button>
+      )}
 
-        {/* Right: Next button */}
+      {/* Right: skip button (optional) + Next button */}
+      <div className="flex items-center gap-2">
+        {directSkipLabel && onSkipConfirm && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onSkipConfirm}
+            disabled={isValidating}
+            className="text-muted-foreground text-xs"
+          >
+            {directSkipLabel}
+          </Button>
+        )}
         <Button
           type="button"
-          onClick={handleNextClick}
+          onClick={onNext}
           disabled={isValidating}
         >
           {nextLabel ?? defaultNextLabel}
           <ArrowRight className="h-4 w-4 ml-1" />
         </Button>
-      </CardFooter>
-
-      <IncompleteDataDialog
-        open={showSkipDialog}
-        onOpenChange={setShowSkipDialog}
-        onConfirm={handleConfirmSkip}
-      />
-    </>
+      </div>
+    </CardFooter>
   );
 }

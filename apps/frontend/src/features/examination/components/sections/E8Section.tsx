@@ -12,9 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, CheckCircle } from "lucide-react";
+import type { FieldPath } from "react-hook-form";
 import { E8_RICH_INSTRUCTIONS } from "../../content/instructions";
-import { useExaminationForm } from "../../form/use-examination-form";
+import { setInstanceValue } from "../../form/form-helpers";
+import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { YesNoField } from "../inputs/YesNoField";
@@ -33,12 +35,29 @@ const LOCKING_TYPES = [
 ] as const;
 
 export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) {
-  const { getInstancesForStep, validateStep } = useExaminationForm();
+  const { form, getInstancesForStep, validateStep } = useExaminationForm();
 
   const instances = getInstancesForStep("e8-all");
 
   const getInstance = (path: string) =>
     instances.find((i) => i.path === path);
+
+  const yesNoPaths = instances
+    .filter((i) => i.renderType === "yesNo")
+    .map((i) => i.path as FieldPath<FormValues>);
+  const hasUnansweredLockings = form.watch(yesNoPaths).some((v) => v == null);
+
+  // Set all unanswered locking questions to "no"
+  const handleNoMoreLockings = () => {
+    for (const inst of instances) {
+      if (inst.renderType === "yesNo") {
+        const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
+        if (currentValue == null) {
+          setInstanceValue(form.setValue, inst.path, "no");
+        }
+      }
+    }
+  };
 
   const handleNext = () => {
     const isValid = validateStep("e8-all");
@@ -67,8 +86,8 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           <MeasurementFlowBlock instruction={E8_RICH_INSTRUCTIONS.jointLocking} />
         </IntroPanel>
 
-        {/* Bilateral locking observations — side by side */}
-        <div className="grid grid-cols-2 gap-6">
+        {/* Bilateral locking observations — side by side (single column on small screens) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {SIDES.map(({ key: side, label: sideLabel }) => (
           <div key={side} className="space-y-4">
             {/* Locking observation table */}
@@ -106,14 +125,20 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           </div>
         ))}
         </div>
+        {/* "Keine weiteren Blockierungen" shortcut — only shown when there are unanswered fields */}
+        {hasUnansweredLockings && <div className="flex justify-end">
+          <Button type="button" variant="outline" size="sm" onClick={handleNoMoreLockings}>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Keine weiteren Blockierungen
+          </Button>
+        </div>}
       </CardContent>
       <SectionFooter
         onNext={handleNext}
         onSkipConfirm={onComplete}
         onBack={onBack}
         isFirstStep={isFirstSection}
-        warnOnSkip
-        checkIncomplete={() => !validateStep("e8-all")}
+        directSkipLabel="Abschnitt überspringen"
       />
     </Card>
   );

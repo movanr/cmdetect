@@ -1,15 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
+import { BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { E4_RICH_INSTRUCTIONS } from "../../content/instructions";
-import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { setInstanceValue } from "../../form/form-helpers";
 import {
   useExaminationForm,
@@ -17,11 +16,11 @@ import {
   type FormValues,
 } from "../../form/use-examination-form";
 import { validateInterviewCompletion, type IncompleteRegion } from "../../form/validation";
+import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { COMMON, getSectionCardTitle } from "../../labels";
 import { ALL_REGIONS, BASE_REGIONS, type Region, type Side } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import {
-  IncompleteDataDialog,
   IntroPanel,
   MeasurementFlowBlock,
   MeasurementStep,
@@ -64,13 +63,14 @@ interface E4SectionProps extends SectionProps {
 
 /**
  * Compute step completion status from form values.
- * Returns "completed" if the step has valid data, "refused" if refused, null otherwise.
+ * Returns "completed" if the step has valid data, "refused" if refused,
+ * "skipped" if explicitly skipped (persisted in _skippedSteps), null otherwise.
  */
 function computeStepStatusFromForm(
   stepId: E4StepId,
   instances: QuestionInstance[],
   getValue: (path: string) => unknown
-): "completed" | "refused" | null {
+): "completed" | "refused" | "skipped" | null {
   const isInterview = isInterviewStep(String(stepId));
 
   if (isInterview) {
@@ -78,54 +78,69 @@ function computeStepStatusFromForm(
     const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
     if (interviewRefusedInst) {
       // Also check if parent measurement was refused (auto-skip on remount)
-      const measurementRefusedPath = interviewRefusedInst.path.replace(".interviewRefused", ".refused");
+      const measurementRefusedPath = interviewRefusedInst.path.replace(
+        ".interviewRefused",
+        ".refused"
+      );
       if (getValue(measurementRefusedPath) === true) return "refused";
       if (getValue(interviewRefusedInst.path) === true) return "refused";
     }
     // Check if all pain questions are answered (validates interview completion)
     const result = validateInterviewCompletion(instances, getValue);
-    return result.valid ? "completed" : null;
-  }
-
-  // Measurement step - check for refusal first
-  const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
-  if (refusedInst && getValue(refusedInst.path) === true) {
-    return "refused";
-  }
-
-  // Check if measurement field has value or terminated
-  const measurementInst = instances.find((i) => i.renderType === "measurement");
-  if (measurementInst) {
-    const value = getValue(measurementInst.path);
-    const terminatedPath = measurementInst.path.replace(/\.[^.]+$/, ".terminated");
-    const terminated = getValue(terminatedPath);
-    if (terminated === true || (value != null && value !== "")) {
-      return "completed";
+    if (result.valid) return "completed";
+  } else {
+    // Measurement step - check for refusal first
+    const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
+    if (refusedInst && getValue(refusedInst.path) === true) {
+      return "refused";
     }
-  }
 
-  // For E4A which uses QuestionField directly (not MeasurementStep)
-  if (stepId === "e4a") {
-    for (const inst of instances) {
-      const config = inst.config as { required?: boolean };
-      if (config.required) {
-        const value = getValue(inst.path);
-        if (value != null && value !== "") {
-          return "completed";
+    // Check if measurement field has value or terminated
+    const measurementInst = instances.find((i) => i.renderType === "measurement");
+    if (measurementInst) {
+      const value = getValue(measurementInst.path);
+      const terminatedPath = measurementInst.path.replace(/\.[^.]+$/, ".terminated");
+      const terminated = getValue(terminatedPath);
+      if (terminated === true || (value != null && value !== "")) {
+        return "completed";
+      }
+    }
+
+    // For E4A which uses QuestionField directly (not MeasurementStep)
+    if (stepId === "e4a") {
+      for (const inst of instances) {
+        const config = inst.config as { required?: boolean };
+        if (config.required) {
+          const value = getValue(inst.path);
+          if (value != null && value !== "") {
+            return "completed";
+          }
         }
       }
     }
   }
 
+  // Check if explicitly skipped (checked last so real data takes priority)
+  const skippedSteps = getValue("_skippedSteps") as string[] | undefined;
+  if (skippedSteps?.includes(String(stepId))) return "skipped";
+
   return null;
 }
 
-export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E4SectionProps) {
+export function E4Section({
+  step,
+  onStepChange,
+  onComplete,
+  onBack,
+  isFirstSection,
+}: E4SectionProps) {
   const { form, validateStep, getInstancesForStep } = useExaminationForm();
   const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   // Keep stepStatuses in state (computed from form on mount)
-  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped" | "refused">>(() => {
+  const [stepStatuses, setStepStatuses] = useState<
+    Record<string, "completed" | "skipped" | "refused">
+  >(() => {
     const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E4_STEP_ORDER) {
       const instances = getInstancesForStep(stepId);
@@ -141,7 +156,6 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   // Track expanded dropdowns for interview steps
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
 
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
@@ -165,6 +179,24 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const isFirstStep = currentStepIndex === 0;
   const isInterview = isInterviewStep(String(currentStepId));
   const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
+
+  // Subscribe to current step's fields for reactive skip button
+  form.watch(stepInstances.map((i) => i.path));
+
+  const currentStepStatus = allComplete
+    ? null
+    : computeStepStatusFromForm(currentStepId, stepInstances, (path) =>
+        form.getValues(path as FieldPath<FormValues>)
+      );
+  const isCurrentStepComplete = currentStepStatus === "completed" || currentStepStatus === "refused";
+  const sectionIsDone = E4_STEP_ORDER.every((stepId) => {
+    if (stepStatuses[stepId]) return true;
+    const instances = getInstancesForStep(stepId);
+    const status = computeStepStatusFromForm(stepId, instances, (path) =>
+      form.getValues(path as FieldPath<FormValues>)
+    );
+    return status === "completed" || status === "refused";
+  });
 
   // Reactively update incomplete regions when form values change
   useEffect(() => {
@@ -209,20 +241,53 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     }
   };
 
+  const handleSectionSkip = () => {
+    const stepsToSkip = E4_STEP_ORDER.filter((stepId) => !stepStatuses[stepId]);
+    if (stepsToSkip.length > 0) {
+      const currentSkipped = form.getValues("_skippedSteps") ?? [];
+      form.setValue("_skippedSteps", [...currentSkipped, ...stepsToSkip]);
+      setStepStatuses((prev) => {
+        const next = { ...prev };
+        for (const stepId of stepsToSkip) next[stepId] = "skipped";
+        return next;
+      });
+    }
+    onComplete?.();
+  };
+
   const performSkip = () => {
     setIncompleteRegions([]);
     setExpanded({ left: null, right: null });
-    setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
-    if (isLastStep) {
-      onComplete?.();
-    } else {
-      onStepChange?.(currentStepIndex + 1);
-    }
-  };
 
-  const handleConfirmSkip = () => {
-    setShowSkipDialog(false);
-    performSkip();
+    const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
+    const isMeasureWithInterview =
+      !isInterview && nextStepId && isInterviewStep(String(nextStepId));
+
+    if (isMeasureWithInterview) {
+      // Auto-skip the paired interview step so the user doesn't have to skip it separately
+      const currentSkipped = form.getValues("_skippedSteps") ?? [];
+      form.setValue("_skippedSteps", [...currentSkipped, currentStepId, nextStepId]);
+      setStepStatuses((prev) => ({
+        ...prev,
+        [currentStepId]: "skipped",
+        [nextStepId]: "skipped",
+      }));
+      const skipToIndex = currentStepIndex + 2;
+      if (skipToIndex >= E4_STEP_ORDER.length) {
+        onStepChange?.(null); // collapse to allComplete view
+      } else {
+        onStepChange?.(skipToIndex);
+      }
+    } else {
+      const currentSkipped = form.getValues("_skippedSteps") ?? [];
+      form.setValue("_skippedSteps", [...currentSkipped, currentStepId]);
+      setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
+      if (isLastStep) {
+        onStepChange?.(null); // collapse to allComplete view
+      } else {
+        onStepChange?.(currentStepIndex + 1);
+      }
+    }
   };
 
   // Set all unanswered pain questions to "no"
@@ -255,7 +320,8 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
       // If a measurement step is refused, auto-refuse the following interview step
       const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
-      const isMeasureWithInterview = !isInterview && nextStepId && isInterviewStep(String(nextStepId));
+      const isMeasureWithInterview =
+        !isInterview && nextStepId && isInterviewStep(String(nextStepId));
 
       if (isMeasureWithInterview && refusedInst) {
         // Set interviewRefused = true in form data
@@ -276,14 +342,14 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
         }));
         const skipToIndex = currentStepIndex + 2;
         if (skipToIndex >= E4_STEP_ORDER.length) {
-          onComplete?.();
+          onStepChange?.(null); // collapse to allComplete view
         } else {
           onStepChange?.(skipToIndex);
         }
       } else {
         setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
         if (isLastStep) {
-          onComplete?.();
+          onStepChange?.(null); // collapse to allComplete view
         } else {
           onStepChange?.(currentStepIndex + 1);
         }
@@ -294,10 +360,17 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     // If measurement step proceeds normally, clear any previously auto-refused interview
     if (!isInterview) {
       const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
-      if (nextStepId && isInterviewStep(String(nextStepId)) && stepStatuses[nextStepId] === "refused") {
+      if (
+        nextStepId &&
+        isInterviewStep(String(nextStepId)) &&
+        stepStatuses[nextStepId] === "refused"
+      ) {
         const measRefusedInst = stepInstances.find((i) => i.path.endsWith(".refused"));
         if (measRefusedInst) {
-          const interviewRefusedPath = measRefusedInst.path.replace(".refused", ".interviewRefused");
+          const interviewRefusedPath = measRefusedInst.path.replace(
+            ".refused",
+            ".interviewRefused"
+          );
           form.setValue(interviewRefusedPath as FieldPath<FormValues>, false as never);
         }
         setStepStatuses((prev) => {
@@ -315,8 +388,6 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       );
       if (!result.valid) {
         setIncompleteRegions(result.incompleteRegions);
-        // Show skip dialog when validation fails
-        setShowSkipDialog(true);
         return;
       }
       setIncompleteRegions([]);
@@ -324,8 +395,6 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
     const isValid = validateStep(currentStepId as ExaminationStepId);
     if (!isValid) {
-      // Show skip dialog when validation fails
-      setShowSkipDialog(true);
       return;
     }
 
@@ -333,7 +402,7 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     setExpanded({ left: null, right: null });
 
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -368,7 +437,9 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       // Check for interview refusal
       const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
       if (interviewRefusedInst) {
-        const isRefused = form.getValues(interviewRefusedInst.path as FieldPath<FormValues>) as unknown as boolean;
+        const isRefused = form.getValues(
+          interviewRefusedInst.path as FieldPath<FormValues>
+        ) as unknown as boolean;
         if (isRefused === true) {
           return COMMON.refused;
         }
@@ -380,7 +451,9 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
       let hasFamiliarHeadache = false;
 
       for (const inst of instances) {
-        const value = form.getValues(inst.path as FieldPath<FormValues>) as unknown as string | null;
+        const value = form.getValues(inst.path as FieldPath<FormValues>) as unknown as
+          | string
+          | null;
         if (inst.context.painType === "pain" && value === "yes") {
           hasPain = true;
         }
@@ -411,7 +484,9 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     // Check for measurement refusal
     const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
     if (refusedInst) {
-      const isRefused = form.getValues(refusedInst.path as FieldPath<FormValues>) as unknown as boolean;
+      const isRefused = form.getValues(
+        refusedInst.path as FieldPath<FormValues>
+      ) as unknown as boolean;
       if (isRefused === true) {
         return COMMON.refused;
       }
@@ -478,7 +553,9 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
             </div>
           )}
           <IntroPanel title="Anweisungen">
-            <MeasurementFlowBlock instruction={{ ...E4_RICH_INSTRUCTIONS.maxAssistedOpening, warnings: undefined }} />
+            <MeasurementFlowBlock
+              instruction={{ ...E4_RICH_INSTRUCTIONS.maxAssistedOpening, warnings: undefined }}
+            />
           </IntroPanel>
         </>
       );
@@ -574,11 +651,23 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                     Zurück
                   </Button>
 
-                  {/* Right: Next button */}
-                  <Button type="button" onClick={handleNext}>
-                    {isLastStep ? "Abschließen" : "Weiter"}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  {/* Right: skip + Next/Abschließen buttons */}
+                  <div className="flex items-center gap-2">
+                    {!isCurrentStepComplete && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={performSkip}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Schritt überspringen
+                      </Button>
+                    )}
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -595,21 +684,23 @@ export function E4Section({ step, onStepChange, onComplete, onBack, isFirstSecti
             />
           );
         })}
-
-        <IncompleteDataDialog
-          open={showSkipDialog}
-          onOpenChange={setShowSkipDialog}
-          onConfirm={handleConfirmSkip}
-        />
       </CardContent>
 
-      {/* Section-level footer when all steps are complete */}
-      {allComplete && (
-        <SectionFooter
-          onNext={onComplete}
-          onBack={onBack}
-          isFirstStep={isFirstSection}
-        />
+      {/* Section-level footer */}
+      {(allComplete || sectionIsDone) ? (
+        <SectionFooter onNext={onComplete} onBack={onBack} isFirstStep={isFirstSection} />
+      ) : (
+        <CardFooter className="flex justify-end border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleSectionSkip}
+            className="text-muted-foreground text-xs"
+          >
+            Abschnitt überspringen
+          </Button>
+        </CardFooter>
       )}
     </Card>
   );

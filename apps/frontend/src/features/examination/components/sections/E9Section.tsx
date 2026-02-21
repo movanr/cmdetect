@@ -1,31 +1,22 @@
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { PALPATION_MODE_QUESTIONS, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
+import { BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
-import {
-  createE9RichInstructions,
-  isPainInterviewInstruction,
-} from "../../content/instructions";
 import type { E9RichInstructions } from "../../content/instructions";
+import { createE9RichInstructions, isPainInterviewInstruction } from "../../content/instructions";
 import type { RichMeasurementInstruction } from "../../content/types";
-import {
-  clearInstanceErrors,
-  setInstanceValue,
-} from "../../form/form-helpers";
+import { clearInstanceErrors, setInstanceValue } from "../../form/form-helpers";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
-import {
-  validatePalpationCompletion,
-  type IncompletePalpationSite,
-} from "../../form/validation";
+import { validatePalpationCompletion, type IncompletePalpationSite } from "../../form/validation";
+import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { COMMON, getPainTypeLabel, getSectionCardTitle } from "../../labels";
 import {
   type PainType,
@@ -42,7 +33,6 @@ import { YesNoField } from "../inputs/YesNoField";
 import { PalpationSiteDropdown } from "../PalpationSiteDropdown";
 import type { IncompletePalpationSite as DropdownIncompleteSite } from "../PalpationSiteDropdown/types";
 import {
-  IncompleteDataDialog,
   IntroPanel,
   MeasurementFlowBlock,
   PainInterviewBlock,
@@ -57,11 +47,7 @@ import type { SectionProps } from "./types";
 // Step Configuration
 // =============================================================================
 
-type E9StepId =
-  | "e9-temporalis"
-  | "e9-masseter"
-  | "e9-tmj-lateral"
-  | "e9-tmj-around";
+type E9StepId = "e9-temporalis" | "e9-masseter" | "e9-tmj-lateral" | "e9-tmj-around";
 
 const E9_STEP_ORDER: E9StepId[] = [
   "e9-temporalis",
@@ -131,8 +117,7 @@ function computeSiteStatus(
   const isPainPositive = painValue === "yes";
   const hasFamiliarPainData = familiarPainValue === "yes" || familiarPainValue === "no";
   const hasFamiliarPain = familiarPainValue === "yes";
-  const hasFamiliarHeadacheData =
-    familiarHeadacheValue === "yes" || familiarHeadacheValue === "no";
+  const hasFamiliarHeadacheData = familiarHeadacheValue === "yes" || familiarHeadacheValue === "no";
   const hasFamiliarHeadache = familiarHeadacheValue === "yes";
 
   // Complete if: no pain, OR pain with all follow-ups answered
@@ -154,6 +139,7 @@ function computeSiteStatus(
 
 /**
  * Compute step completion status for a palpation sub-step.
+ * Returns "completed" if all sites are answered, "skipped" if explicitly skipped, null otherwise.
  */
 function computeE9StepStatus(
   stepId: E9StepId,
@@ -161,7 +147,7 @@ function computeE9StepStatus(
   rightInstances: QuestionInstance[],
   leftInstances: QuestionInstance[],
   getValues: (path: string) => unknown
-): "completed" | null {
+): "completed" | "skipped" | null {
   const sites = E9_STEP_SITES[stepId];
   if (sites.length === 0) return null;
 
@@ -176,12 +162,14 @@ function computeE9StepStatus(
   const palpationContext = { palpationMode };
 
   const rightResult = validatePalpationCompletion(filteredRight, getValues, palpationContext);
-  if (!rightResult.valid) return null;
-
   const leftResult = validatePalpationCompletion(filteredLeft, getValues, palpationContext);
-  if (!leftResult.valid) return null;
+  if (rightResult.valid && leftResult.valid) return "completed";
 
-  return "completed";
+  // Check if explicitly skipped (checked last so real data takes priority)
+  const skippedSteps = getValues("_skippedSteps") as string[] | undefined;
+  if (skippedSteps?.includes(stepId)) return "skipped";
+
+  return null;
 }
 
 // =============================================================================
@@ -239,9 +227,7 @@ function PalpationSubsection({
   // Get incomplete site for a specific site (for dropdown error styling)
   const getIncompleteSite = useCallback(
     (site: PalpationSite): DropdownIncompleteSite | undefined => {
-      const incomplete = incompleteSites.find(
-        (s) => s.site === site && s.side === side
-      );
+      const incomplete = incompleteSites.find((s) => s.site === site && s.side === side);
       if (!incomplete) return undefined;
       return {
         site: incomplete.site as PalpationSite,
@@ -306,7 +292,9 @@ function PalpationSubsection({
           <table className="w-full">
             <thead>
               <tr className="bg-muted/50">
-                <th className="text-left text-sm font-medium p-3" colSpan={2}>{tmjSideLabel}</th>
+                <th className="text-left text-sm font-medium p-3" colSpan={2}>
+                  {tmjSideLabel}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -407,16 +395,18 @@ export function E9Section({
 
   // Build mode-aware instruction content (re-computed when mode changes)
   const e9Instructions = useMemo(() => createE9RichInstructions(palpationMode), [palpationMode]);
-  const e9StepInstructions = useMemo((): Record<E9StepId, E9RichInstructions[keyof E9RichInstructions]> => ({
-    "e9-temporalis": e9Instructions.temporalisPalpation,
-    "e9-masseter": e9Instructions.masseterPalpation,
-    "e9-tmj-lateral": e9Instructions.tmjLateralPole,
-    "e9-tmj-around": e9Instructions.tmjAroundPole,
-  }), [e9Instructions]);
+  const e9StepInstructions = useMemo(
+    (): Record<E9StepId, E9RichInstructions[keyof E9RichInstructions]> => ({
+      "e9-temporalis": e9Instructions.temporalisPalpation,
+      "e9-masseter": e9Instructions.masseterPalpation,
+      "e9-tmj-lateral": e9Instructions.tmjLateralPole,
+      "e9-tmj-around": e9Instructions.tmjAroundPole,
+    }),
+    [e9Instructions]
+  );
 
   // Track expanded dropdown for each side
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
   // Only show validation errors after user clicks Next (reset on step change)
   const [hasValidated, setHasValidated] = useState(false);
   // Per-step refusal state (not persisted in form — data is cleared when refused)
@@ -448,7 +438,9 @@ export function E9Section({
 
   // Compute step statuses from form state on mount (like E4Section)
   // Using useState instead of useMemo so that checking RF doesn't auto-advance
-  const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped" | "refused">>(() => {
+  const [stepStatuses, setStepStatuses] = useState<
+    Record<string, "completed" | "skipped" | "refused">
+  >(() => {
     const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E9_STEP_ORDER) {
       if (stepRefusals[stepId]) {
@@ -508,14 +500,45 @@ export function E9Section({
     [leftInstances, currentSites]
   );
 
+  // Subscribe to current step's fields for reactive skip button
+  watch([...filteredRight, ...filteredLeft].map((i) => i.path));
+
+  const isCurrentStepComplete =
+    !allComplete &&
+    (stepRefusals[currentStepId] === true ||
+      computeE9StepStatus(
+        currentStepId,
+        palpationMode,
+        filteredRight,
+        filteredLeft,
+        (path) => getValues(path as FieldPath<FormValues>)
+      ) === "completed");
+  const sectionIsDone = E9_STEP_ORDER.every((stepId) => {
+    if (stepStatuses[stepId] || stepRefusals[stepId]) return true;
+    const sites = E9_STEP_SITES[stepId];
+    const filteredR = rightInstances.filter(
+      (i) => i.context.site && sites.includes(i.context.site as PalpationSite)
+    );
+    const filteredL = leftInstances.filter(
+      (i) => i.context.site && sites.includes(i.context.site as PalpationSite)
+    );
+    return (
+      computeE9StepStatus(stepId, palpationMode, filteredR, filteredL, (path) =>
+        getValues(path as FieldPath<FormValues>)
+      ) === "completed"
+    );
+  });
+
   // Compute incomplete sites for current step
   const palpationContext = { palpationMode };
-  const rightIncomplete = currentSites.length > 0
-    ? validatePalpationCompletion(filteredRight, getValues, palpationContext).incompleteSites
-    : [];
-  const leftIncomplete = currentSites.length > 0
-    ? validatePalpationCompletion(filteredLeft, getValues, palpationContext).incompleteSites
-    : [];
+  const rightIncomplete =
+    currentSites.length > 0
+      ? validatePalpationCompletion(filteredRight, getValues, palpationContext).incompleteSites
+      : [];
+  const leftIncomplete =
+    currentSites.length > 0
+      ? validatePalpationCompletion(filteredLeft, getValues, palpationContext).incompleteSites
+      : [];
 
   // Handle expanded state changes
   const handleExpandChange = useCallback((side: Side, site: PalpationSite | null) => {
@@ -548,20 +571,40 @@ export function E9Section({
     }
   };
 
+  const handleSectionSkip = () => {
+    const stepsToSkip = E9_STEP_ORDER.filter(
+      (stepId) => !stepStatuses[stepId] && !stepRefusals[stepId]
+    );
+    if (stepsToSkip.length > 0) {
+      const currentSkipped =
+        (getValues("_skippedSteps" as FieldPath<FormValues>) as unknown as string[] | undefined) ??
+        [];
+      setValue(
+        "_skippedSteps" as FieldPath<FormValues>,
+        [...currentSkipped, ...stepsToSkip] as never
+      );
+      setStepStatuses((prev) => {
+        const next = { ...prev };
+        for (const stepId of stepsToSkip) next[stepId] = "skipped";
+        return next;
+      });
+    }
+    onComplete?.();
+  };
+
   const performSkip = () => {
+    const currentSkipped =
+      (getValues("_skippedSteps" as FieldPath<FormValues>) as unknown as string[] | undefined) ??
+      [];
+    setValue("_skippedSteps" as FieldPath<FormValues>, [...currentSkipped, currentStepId] as never);
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     setHasValidated(false);
     setExpanded({ left: null, right: null });
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
-  };
-
-  const handleConfirmSkip = () => {
-    setShowSkipDialog(false);
-    performSkip();
   };
 
   const validateCurrentStep = (): boolean => {
@@ -583,7 +626,7 @@ export function E9Section({
       setHasValidated(false);
       setExpanded({ left: null, right: null });
       if (isLastStep) {
-        onComplete?.();
+        onStepChange?.(null); // collapse to allComplete view
       } else {
         onStepChange?.(currentStepIndex + 1);
       }
@@ -592,7 +635,6 @@ export function E9Section({
 
     if (!validateCurrentStep()) {
       setHasValidated(true);
-      setShowSkipDialog(true);
       return;
     }
 
@@ -600,7 +642,7 @@ export function E9Section({
     setHasValidated(false);
     setExpanded({ left: null, right: null });
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -609,8 +651,7 @@ export function E9Section({
   // Validate all E9 data for final completion
   const validateAllE9 = (): boolean => {
     // If all palpation steps are refused, validation passes
-    const allPalpationStepsRefused = E9_STEP_ORDER
-      .every((id) => stepRefusals[id]);
+    const allPalpationStepsRefused = E9_STEP_ORDER.every((id) => stepRefusals[id]);
     if (allPalpationStepsRefused) return true;
 
     // Otherwise, validate per-step: refused steps pass, others must be complete
@@ -660,9 +701,15 @@ export function E9Section({
     for (const side of ["right", "left"] as Side[]) {
       const prefix = `e9.${side}`;
       for (const site of sites) {
-        const painVal = getValues(`${prefix}.${site}.pain` as FieldPath<FormValues>) as unknown as string | null;
-        const fpVal = getValues(`${prefix}.${site}.familiarPain` as FieldPath<FormValues>) as unknown as string | null;
-        const fhVal = getValues(`${prefix}.${site}.familiarHeadache` as FieldPath<FormValues>) as unknown as string | null;
+        const painVal = getValues(`${prefix}.${site}.pain` as FieldPath<FormValues>) as unknown as
+          | string
+          | null;
+        const fpVal = getValues(
+          `${prefix}.${site}.familiarPain` as FieldPath<FormValues>
+        ) as unknown as string | null;
+        const fhVal = getValues(
+          `${prefix}.${site}.familiarHeadache` as FieldPath<FormValues>
+        ) as unknown as string | null;
         if (painVal === "yes") hasPain = true;
         if (fpVal === "yes") hasFamiliarPain = true;
         if (fhVal === "yes") hasFamiliarHeadache = true;
@@ -778,7 +825,10 @@ export function E9Section({
                             palpationMode={palpationMode}
                             showDiagram
                           />
-                          <Separator orientation="vertical" className="hidden md:block h-auto self-stretch" />
+                          <Separator
+                            orientation="vertical"
+                            className="hidden md:block h-auto self-stretch"
+                          />
                           <PalpationSubsection
                             side="left"
                             sites={currentSites}
@@ -798,7 +848,7 @@ export function E9Section({
                         </div>
                       </>
                     ) : (
-                      <div className="grid grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <PalpationSubsection
                           side="right"
                           sites={currentSites}
@@ -854,10 +904,23 @@ export function E9Section({
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Zurück
                   </Button>
-                  <Button type="button" onClick={handleNext}>
-                    {isLastStep ? "Abschließen" : "Weiter"}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  {/* Right: skip + Next/Abschließen buttons */}
+                  <div className="flex items-center gap-2">
+                    {!isCurrentStepComplete && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={performSkip}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Schritt überspringen
+                      </Button>
+                    )}
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -874,16 +937,10 @@ export function E9Section({
             />
           );
         })}
-
-        <IncompleteDataDialog
-          open={showSkipDialog}
-          onOpenChange={setShowSkipDialog}
-          onConfirm={handleConfirmSkip}
-        />
       </CardContent>
 
-      {/* Section-level footer when all steps are complete */}
-      {allComplete && (
+      {/* Section-level footer */}
+      {(allComplete || sectionIsDone) ? (
         <SectionFooter
           onNext={() => {
             if (validateAllE9()) {
@@ -894,9 +951,20 @@ export function E9Section({
           onBack={onBack}
           isFirstStep={isFirstSection}
           isLastSection={isLastSection}
-          warnOnSkip
-          checkIncomplete={() => !validateAllE9()}
+          directSkipLabel="Abschnitt überspringen"
         />
+      ) : (
+        <CardFooter className="flex justify-end border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleSectionSkip}
+            className="text-muted-foreground text-xs"
+          >
+            Abschnitt überspringen
+          </Button>
+        </CardFooter>
       )}
     </Card>
   );

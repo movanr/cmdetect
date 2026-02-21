@@ -304,8 +304,7 @@ export function E10Section({
         onBack={onBack}
         isFirstStep={isFirstSection}
         isLastSection={isLastSection}
-        warnOnSkip
-        checkIncomplete={() => !validateAllE10()}
+        directSkipLabel="Abschnitt überspringen"
       />
     </Card>
   );

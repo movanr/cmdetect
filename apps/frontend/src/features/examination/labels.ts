@@ -70,6 +70,8 @@ export const COMMON = {
   refused: "RF",
   refusedFull: "Patient verweigert (RF)",
   refusedTooltip: "Patient verweigert oder kann nicht teilnehmen",
+  skipped: "Übersprungen",
+  skippedTooltip: "Schritt übersprungen",
 } as const;
 
 // === LABEL LOOKUP FUNCTIONS ===

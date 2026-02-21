@@ -11,7 +11,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -27,7 +27,7 @@ import {
   type Side,
 } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, ChevronLeft } from "lucide-react";
+import { BookOpen, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { E1_RICH_INSTRUCTIONS } from "../../content/instructions";
@@ -38,9 +38,16 @@ import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
 import { CheckboxGroupField } from "../inputs/CheckboxGroupField";
 import { QuestionField } from "../QuestionField";
-import { IncompleteDataDialog, IntroPanel, MeasurementFlowBlock, PainInterviewBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
-import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { buildRegionSummary } from "../summary/summary-helpers";
+import {
+  IntroPanel,
+  MeasurementFlowBlock,
+  PainInterviewBlock,
+  SectionFooter,
+  StepBar,
+  type StepStatus,
+} from "../ui";
+import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 
 // Step configuration
@@ -82,22 +89,25 @@ function computeE1RegionStatus(region: Region, values: string[] | undefined): Re
 /**
  * Check if a step has data (for computing initial state).
  */
-function stepHasData(
-  stepId: E1StepId,
-  getValue: (path: string) => unknown
-): boolean {
+function stepHasData(stepId: E1StepId, getValue: (path: string) => unknown): boolean {
   if (stepId === "e1a") {
     const right = getValue("e1.painLocation.right") as string[] | undefined;
     const left = getValue("e1.painLocation.left") as string[] | undefined;
-    return (right != null && right.length > 0) || (left != null && left.length > 0);
+    return (right != null && right.length > 0) && (left != null && left.length > 0);
   } else {
     const right = getValue("e1.headacheLocation.right") as string[] | undefined;
     const left = getValue("e1.headacheLocation.left") as string[] | undefined;
-    return (right != null && right.length > 0) || (left != null && left.length > 0);
+    return (right != null && right.length > 0) && (left != null && left.length > 0);
   }
 }
 
-export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSection }: E1SectionProps) {
+export function E1Section({
+  step,
+  onStepChange,
+  onComplete,
+  onBack,
+  isFirstSection,
+}: E1SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
   const { watch, getValues, setValue } = useFormContext();
   const activeStepRef = useScrollToActiveStep(step ?? 0);
@@ -105,14 +115,16 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   // Keep stepStatuses in state (computed from form on mount)
   const [stepStatuses, setStepStatuses] = useState<Record<string, "completed" | "skipped">>(() => {
     const statuses: Record<string, "completed" | "skipped"> = {};
+    const skippedSteps = (getValues("_skippedSteps") as string[] | undefined) ?? [];
     for (const stepId of E1_STEP_ORDER) {
       if (stepHasData(stepId, getValues)) {
         statuses[stepId] = "completed";
+      } else if (skippedSteps.includes(stepId)) {
+        statuses[stepId] = "skipped";
       }
     }
     return statuses;
   });
-  const [showSkipDialog, setShowSkipDialog] = useState(false);
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
   // Determine which regions to show for E1a based on checkbox
@@ -120,15 +132,10 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     () => (includeAllRegions ? SVG_REGIONS : BASE_REGIONS),
     [includeAllRegions]
   );
-  const e1PainOptions = useMemo(
-    () => {
-      const activeRegions: readonly string[] = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
-      return E1_PAIN_LOCATION_KEYS.filter(
-        (key) => key === "none" || activeRegions.includes(key)
-      );
-    },
-    [includeAllRegions]
-  );
+  const e1PainOptions = useMemo(() => {
+    const activeRegions: readonly string[] = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;
+    return E1_PAIN_LOCATION_KEYS.filter((key) => key === "none" || activeRegions.includes(key));
+  }, [includeAllRegions]);
 
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
@@ -162,6 +169,10 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
   const currentStepId = allComplete ? E1_STEP_ORDER[0] : E1_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E1_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
+  const isCurrentStepComplete = !allComplete && stepHasData(currentStepId, getValues);
+  const sectionIsDone = E1_STEP_ORDER.every(
+    (stepId) => !!stepStatuses[stepId] || stepHasData(stepId, getValues)
+  );
 
   // Compute region statuses for pain location diagrams
   const painRightStatuses = useMemo(() => {
@@ -227,18 +238,29 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     }
   };
 
+  const handleSectionSkip = () => {
+    const stepsToSkip = E1_STEP_ORDER.filter((stepId) => !stepStatuses[stepId]);
+    if (stepsToSkip.length > 0) {
+      const currentSkipped = (getValues("_skippedSteps") as string[] | undefined) ?? [];
+      setValue("_skippedSteps", [...currentSkipped, ...stepsToSkip]);
+      setStepStatuses((prev) => {
+        const next = { ...prev };
+        for (const stepId of stepsToSkip) next[stepId] = "skipped";
+        return next;
+      });
+    }
+    onComplete?.();
+  };
+
   const performSkip = () => {
+    const currentSkipped = (getValues("_skippedSteps") as string[] | undefined) ?? [];
+    setValue("_skippedSteps", [...currentSkipped, currentStepId]);
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
-  };
-
-  const handleConfirmSkip = () => {
-    setShowSkipDialog(false);
-    performSkip();
   };
 
   const handleNext = () => {
@@ -247,15 +269,13 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
     const isValid = validateStep(stepIdForValidation);
 
     if (!isValid) {
-      // Invalid data - show skip confirmation dialog
-      setShowSkipDialog(true);
       return;
     }
 
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
 
     if (isLastStep) {
-      onComplete?.();
+      onStepChange?.(null); // collapse to allComplete view
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
@@ -272,12 +292,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
 
   const getStepSummary = (stepId: E1StepId): string => {
     if (stepId === "e1a") {
-      return buildRegionSummary(
-        painRightValues,
-        painLeftValues,
-        E1_PAIN_LOCATIONS,
-        "Kein Schmerz"
-      );
+      return buildRegionSummary(painRightValues, painLeftValues, E1_PAIN_LOCATIONS, "Kein Schmerz");
     } else {
       return buildRegionSummary(
         headacheRightValues,
@@ -381,9 +396,7 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
               onRegionClick={(region) => handleRegionClick("e1b", region, "left")}
               hideBackgroundImages={true}
             />
-            <div className="w-44">
-              {headacheLeft && <QuestionField instance={headacheLeft} />}
-            </div>
+            <div className="w-44">{headacheLeft && <QuestionField instance={headacheLeft} />}</div>
           </div>
         </div>
       </div>
@@ -402,7 +415,10 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                 checked={includeAllRegions}
                 onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
               />
-              <Label htmlFor="e1-alle-regionen" className="text-xs text-muted-foreground cursor-pointer">
+              <Label
+                htmlFor="e1-alle-regionen"
+                className="text-xs text-muted-foreground cursor-pointer"
+              >
                 Alle Regionen
               </Label>
             </div>
@@ -454,11 +470,23 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
                     Zurück
                   </Button>
 
-                  {/* Right: Next button */}
-                  <Button type="button" onClick={handleNext}>
-                    {isLastStep ? "Abschließen" : "Weiter"}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  {/* Right: skip + Next/Abschließen buttons */}
+                  <div className="flex items-center gap-2">
+                    {!isCurrentStepComplete && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={performSkip}
+                        className="text-muted-foreground text-xs"
+                      >
+                        Schritt überspringen
+                      </Button>
+                    )}
+                    <Button type="button" onClick={handleNext}>
+                      {isLastStep ? "Abschließen" : "Weiter"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
@@ -475,21 +503,23 @@ export function E1Section({ step, onStepChange, onComplete, onBack, isFirstSecti
             />
           );
         })}
-
-        <IncompleteDataDialog
-          open={showSkipDialog}
-          onOpenChange={setShowSkipDialog}
-          onConfirm={handleConfirmSkip}
-        />
       </CardContent>
 
-      {/* Section-level footer when all steps are complete */}
-      {allComplete && (
-        <SectionFooter
-          onNext={onComplete}
-          onBack={onBack}
-          isFirstStep={isFirstSection}
-        />
+      {/* Section-level footer */}
+      {(allComplete || sectionIsDone) ? (
+        <SectionFooter onNext={onComplete} onBack={onBack} isFirstStep={isFirstSection} />
+      ) : (
+        <CardFooter className="flex justify-end border-t pt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleSectionSkip}
+            className="text-muted-foreground text-xs"
+          >
+            Abschnitt überspringen
+          </Button>
+        </CardFooter>
       )}
     </Card>
   );

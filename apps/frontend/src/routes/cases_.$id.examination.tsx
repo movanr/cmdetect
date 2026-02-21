@@ -36,6 +36,7 @@ import {
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
 import { ExaminationPersistenceProvider, ExaminationSummary, useExaminationPersistenceContext, useExaminationResponse } from "../features/examination";
+import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
 
 // GraphQL query for patient record
 const GET_PATIENT_RECORD = graphql(`
@@ -85,14 +86,19 @@ function ExaminationLayout() {
   const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
 
   // Fetch examination response for workflow progress (shares cache with persistence provider)
-  const { data: examination } = useExaminationResponse(id);
+  const { data: examination, isLoading: isExamLoading } = useExaminationResponse(id);
+
+  // Combine backend completedAt with localStorage fallback to avoid race conditions
+  const examinationCompletedAt =
+    examination?.completedAt ??
+    (isExamLoading ? undefined : getLocalExamCompletion(id));
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
     patientRecordId: id,
     responses: responses ?? [],
     hasPatientData: !!record?.patient_data_completed_at,
-    examinationCompletedAt: examination?.completedAt,
+    examinationCompletedAt: examinationCompletedAt ?? null,
   });
 
   // Check step gating
@@ -104,14 +110,14 @@ function ExaminationLayout() {
 
   // Redirect if step is not accessible
   useEffect(() => {
-    if (!isRecordLoading && !isResponsesLoading && !isCurrentStepAccessible && redirectStep) {
+    if (!isRecordLoading && !isResponsesLoading && !isExamLoading && !isCurrentStepAccessible && redirectStep) {
       navigate({
         to: `/cases/$id/${redirectStep}`,
         params: { id },
         replace: true,
       });
     }
-  }, [isRecordLoading, isResponsesLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
+  }, [isRecordLoading, isResponsesLoading, isExamLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
 
   // Decrypt patient data
   useEffect(() => {
@@ -156,7 +162,7 @@ function ExaminationLayout() {
   const completedStepsArray = Array.from(completedSteps);
 
   // Loading or gating redirect in progress
-  if (isRecordLoading || isResponsesLoading || !isCurrentStepAccessible) {
+  if (isRecordLoading || isResponsesLoading || isExamLoading || !isCurrentStepAccessible) {
     return (
       <CaseLayout
         caseId={id}
@@ -244,12 +250,12 @@ function ExaminationContent({
 
   return (
     <div className="space-y-4">
-      {/* Sub-step navigation tabs */}
+      {/* Sub-step navigation tabs — sticky within the scroll container */}
       <SubStepTabs
         caseId={caseId}
         parentStep="examination"
         subSteps={subSteps}
-        className="rounded-t-lg -mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8"
+        className="-mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8 sticky top-0 z-10 bg-background"
       />
 
       {/* Complete at any time */}

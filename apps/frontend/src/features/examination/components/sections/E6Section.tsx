@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, CheckCircle } from "lucide-react";
+import type { FieldPath } from "react-hook-form";
 import { E6_RICH_INSTRUCTIONS } from "../../content/instructions";
-import { useExaminationForm } from "../../form/use-examination-form";
+import { setInstanceValue } from "../../form/form-helpers";
+import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { YesNoField } from "../inputs/YesNoField";
@@ -26,7 +28,7 @@ const SIDES = [
 ] as const;
 
 export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) {
-  const { getInstancesForStep, validateStep } = useExaminationForm();
+  const { form, getInstancesForStep, validateStep } = useExaminationForm();
 
   const instances = getInstancesForStep("e6-all");
 
@@ -37,6 +39,24 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
     const isValid = validateStep("e6-all");
     if (isValid) {
       onComplete?.();
+    }
+  };
+
+  const yesNoPaths = instances
+    .filter((i) => i.renderType === "yesNo" && !i.enableWhen)
+    .map((i) => i.path as FieldPath<FormValues>);
+  const hasUnansweredSounds = form.watch(yesNoPaths).some((v) => v == null);
+
+  // Set all unanswered top-level sound questions to "no".
+  // Excludes conditional fields (painWithClick, familiarPain) identified by enableWhen.
+  const handleNoMoreSounds = () => {
+    for (const inst of instances) {
+      if (inst.renderType === "yesNo" && !inst.enableWhen) {
+        const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
+        if (currentValue == null) {
+          setInstanceValue(form.setValue, inst.path, "no");
+        }
+      }
     }
   };
 
@@ -60,8 +80,8 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           <MeasurementFlowBlock instruction={E6_RICH_INSTRUCTIONS.jointSounds} />
         </IntroPanel>
 
-        {/* Bilateral tables — side by side */}
-        <div className="grid grid-cols-2 gap-6">
+        {/* Bilateral tables — side by side (single column on small screens) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {SIDES.map(({ key: side, label }) => (
           <div key={side} className="space-y-4">
             <h4 className="font-medium">{label}</h4>
@@ -149,14 +169,20 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           </div>
         ))}
         </div>
+        {/* "Keine weiteren Geräusche" shortcut — only shown when there are unanswered top-level fields */}
+        {hasUnansweredSounds && <div className="flex justify-end">
+          <Button type="button" variant="outline" size="sm" onClick={handleNoMoreSounds}>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Keine weiteren Geräusche
+          </Button>
+        </div>}
       </CardContent>
       <SectionFooter
         onNext={handleNext}
         onSkipConfirm={onComplete}
         onBack={onBack}
         isFirstStep={isFirstSection}
-        warnOnSkip
-        checkIncomplete={() => !validateStep("e6-all")}
+        directSkipLabel="Abschnitt überspringen"
       />
     </Card>
   );

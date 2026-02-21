@@ -52,8 +52,7 @@ export function SubStepTabs({
                 className: "!text-primary bg-background font-semibold border-b-2 !border-primary",
               }}
             >
-              <span className="xl:hidden">{shortLabel}</span>
-              <span className="hidden xl:block">{subStep.label}</span>
+              {shortLabel}
             </Link>
           );
         })}

@@ -20,6 +20,7 @@ import { execute } from "@/graphql/execute";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse, type FormValues } from "../features/examination";
+import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
 import { EvaluationView, useDiagnosisSync } from "../features/evaluation";
 
 // Reuse the same GetPatientRecord query as examination route (codegen-typed)
@@ -70,12 +71,17 @@ function EvaluationPage() {
   // Fetch examination data
   const { data: examination, isLoading: isExaminationLoading } = useExaminationResponse(id);
 
+  // Combine backend completedAt with localStorage fallback to avoid race conditions
+  const examinationCompletedAt =
+    examination?.completedAt ??
+    (isExaminationLoading ? undefined : getLocalExamCompletion(id));
+
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
     patientRecordId: id,
     responses: responses ?? [],
     hasPatientData: !!record?.patient_data_completed_at,
-    examinationCompletedAt: examination?.completedAt,
+    examinationCompletedAt: examinationCompletedAt ?? null,
   });
 
   // Check step gating
