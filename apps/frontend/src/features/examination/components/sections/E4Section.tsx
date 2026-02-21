@@ -38,23 +38,20 @@ import type { SectionProps } from "./types";
 // Step configuration
 type E4StepId = ExaminationStepId;
 
-const E4_STEP_ORDER: E4StepId[] = [
-  "e4a",
-  "e4b-measure",
-  "e4b-interview",
-  "e4c-measure",
-  "e4c-interview",
-];
+// 3 combined steps: measurement + interview shown together on one screen
+const E4_STEP_ORDER: E4StepId[] = ["e4a", "e4b-measure", "e4c-measure"];
 
 const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
   e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
   "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
-  "e4b-interview": { badge: "U4B", title: "Schmerzbefragung" },
   "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
-  "e4c-interview": { badge: "U4C", title: "Schmerzbefragung" },
 };
 
-const isInterviewStep = (id: string) => id.endsWith("-interview");
+// Maps each measurement step to its paired interview step (stored in form data)
+const MEASURE_TO_INTERVIEW: Partial<Record<string, ExaminationStepId>> = {
+  "e4b-measure": "e4b-interview",
+  "e4c-measure": "e4c-interview",
+};
 
 interface E4SectionProps extends SectionProps {
   step?: number; // 1-indexed from URL, undefined = auto-detect
@@ -63,59 +60,52 @@ interface E4SectionProps extends SectionProps {
 
 /**
  * Compute step completion status from form values.
- * Returns "completed" if the step has valid data, "refused" if refused,
- * "skipped" if explicitly skipped (persisted in _skippedSteps), null otherwise.
+ * For combined steps (e4b-measure, e4c-measure): requires both measurement
+ * AND interview to be complete (or measurement refused).
+ * interviewInstances should be passed for combined steps.
  */
 function computeStepStatusFromForm(
   stepId: E4StepId,
   instances: QuestionInstance[],
-  getValue: (path: string) => unknown
+  getValue: (path: string) => unknown,
+  interviewInstances?: QuestionInstance[]
 ): "completed" | "refused" | "skipped" | null {
-  const isInterview = isInterviewStep(String(stepId));
+  // Measurement refusal takes priority over everything
+  const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
+  if (refusedInst && getValue(refusedInst.path) === true) {
+    return "refused";
+  }
 
-  if (isInterview) {
-    // Check for interview refusal first
-    const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
-    if (interviewRefusedInst) {
-      // Also check if parent measurement was refused (auto-skip on remount)
-      const measurementRefusedPath = interviewRefusedInst.path.replace(
-        ".interviewRefused",
-        ".refused"
-      );
-      if (getValue(measurementRefusedPath) === true) return "refused";
-      if (getValue(interviewRefusedInst.path) === true) return "refused";
+  if (stepId === "e4a") {
+    // E4A is measurement-only: check if required field has a value
+    for (const inst of instances) {
+      const config = inst.config as { required?: boolean };
+      if (config.required) {
+        const value = getValue(inst.path);
+        if (value != null && value !== "") {
+          const skippedSteps = getValue("_skippedSteps") as string[] | undefined;
+          if (skippedSteps?.includes(String(stepId))) return "skipped";
+          return "completed";
+        }
+      }
     }
-    // Check if all pain questions are answered (validates interview completion)
-    const result = validateInterviewCompletion(instances, getValue);
-    if (result.valid) return "completed";
   } else {
-    // Measurement step - check for refusal first
-    const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
-    if (refusedInst && getValue(refusedInst.path) === true) {
-      return "refused";
-    }
-
-    // Check if measurement field has value or terminated
+    // Combined measurement + interview step
     const measurementInst = instances.find((i) => i.renderType === "measurement");
     if (measurementInst) {
       const value = getValue(measurementInst.path);
       const terminatedPath = measurementInst.path.replace(/\.[^.]+$/, ".terminated");
       const terminated = getValue(terminatedPath);
-      if (terminated === true || (value != null && value !== "")) {
-        return "completed";
-      }
-    }
+      const measurementDone = terminated === true || (value != null && value !== "");
 
-    // For E4A which uses QuestionField directly (not MeasurementStep)
-    if (stepId === "e4a") {
-      for (const inst of instances) {
-        const config = inst.config as { required?: boolean };
-        if (config.required) {
-          const value = getValue(inst.path);
-          if (value != null && value !== "") {
-            return "completed";
-          }
+      if (measurementDone && interviewInstances && interviewInstances.length > 0) {
+        const result = validateInterviewCompletion(interviewInstances, getValue);
+        if (result.valid) {
+          const skippedSteps = getValue("_skippedSteps") as string[] | undefined;
+          if (skippedSteps?.includes(String(stepId))) return "skipped";
+          return "completed";
         }
+        // Measurement done but interview incomplete → not complete yet
       }
     }
   }
@@ -125,6 +115,34 @@ function computeStepStatusFromForm(
   if (skippedSteps?.includes(String(stepId))) return "skipped";
 
   return null;
+}
+
+/** Derive interview summary text from interview instances */
+function getInterviewSummaryText(
+  instances: QuestionInstance[],
+  getValue: (path: string) => unknown
+): string {
+  const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
+  if (interviewRefusedInst && getValue(interviewRefusedInst.path) === true) {
+    return COMMON.refused;
+  }
+
+  let hasPain = false;
+  let hasFamiliarPain = false;
+  let hasFamiliarHeadache = false;
+
+  for (const inst of instances) {
+    const value = getValue(inst.path) as string | null;
+    if (inst.context.painType === "pain" && value === "yes") hasPain = true;
+    if (inst.context.painType === "familiarPain" && value === "yes") hasFamiliarPain = true;
+    if (inst.context.painType === "familiarHeadache" && value === "yes") hasFamiliarHeadache = true;
+  }
+
+  if (!hasPain) return "Kein Schmerz";
+  if (hasFamiliarPain && hasFamiliarHeadache) return "Bek. Schmerz + Kopfschmerz";
+  if (hasFamiliarPain) return "Bekannter Schmerz";
+  if (hasFamiliarHeadache) return "Bekannter Kopfschmerz";
+  return "Keine Übereinstimmung";
 }
 
 export function E4Section({
@@ -144,8 +162,13 @@ export function E4Section({
     const statuses: Record<string, "completed" | "skipped" | "refused"> = {};
     for (const stepId of E4_STEP_ORDER) {
       const instances = getInstancesForStep(stepId);
-      const status = computeStepStatusFromForm(stepId, instances, (path) =>
-        form.getValues(path as FieldPath<FormValues>)
+      const pairedInterviewId = MEASURE_TO_INTERVIEW[stepId as string];
+      const iInstances = pairedInterviewId ? getInstancesForStep(pairedInterviewId) : undefined;
+      const status = computeStepStatusFromForm(
+        stepId,
+        instances,
+        (path) => form.getValues(path as FieldPath<FormValues>),
+        iInstances
       );
       if (status) statuses[stepId] = status;
     }
@@ -154,7 +177,7 @@ export function E4Section({
   const [incompleteRegions, setIncompleteRegions] = useState<IncompleteRegion[]>([]);
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
 
-  // Track expanded dropdowns for interview steps
+  // Track expanded dropdowns for interview content
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
 
   // Derive currentStepIndex from URL prop
@@ -177,41 +200,63 @@ export function E4Section({
   const currentStepId = allComplete ? E4_STEP_ORDER[0] : E4_STEP_ORDER[currentStepIndex];
   const isLastStep = currentStepIndex === E4_STEP_ORDER.length - 1;
   const isFirstStep = currentStepIndex === 0;
-  const isInterview = isInterviewStep(String(currentStepId));
-  const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
 
-  // Subscribe to current step's fields for reactive skip button
+  // Paired interview step info for the current combined step
+  const pairedInterviewId = allComplete
+    ? undefined
+    : (MEASURE_TO_INTERVIEW[String(currentStepId)] as ExaminationStepId | undefined);
+  const hasPairedInterview = pairedInterviewId !== undefined;
+
+  const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
+  const interviewInstances = pairedInterviewId ? getInstancesForStep(pairedInterviewId) : [];
+
+  // Subscribe to both measurement and interview fields for reactive updates
   form.watch(stepInstances.map((i) => i.path));
+  form.watch(interviewInstances.map((i) => i.path));
+
+  // Reactively compute whether measurement is refused (controls interview section visibility)
+  const measureRefusedInst = stepInstances.find((i) => i.path.endsWith(".refused"));
+  const isMeasurementRefused = measureRefusedInst
+    ? (form.getValues(measureRefusedInst.path as FieldPath<FormValues>) as unknown as boolean) ===
+      true
+    : false;
 
   const currentStepStatus = allComplete
     ? null
-    : computeStepStatusFromForm(currentStepId, stepInstances, (path) =>
-        form.getValues(path as FieldPath<FormValues>)
+    : computeStepStatusFromForm(
+        currentStepId,
+        stepInstances,
+        (path) => form.getValues(path as FieldPath<FormValues>),
+        interviewInstances.length > 0 ? interviewInstances : undefined
       );
-  const isCurrentStepComplete = currentStepStatus === "completed" || currentStepStatus === "refused";
+  const isCurrentStepComplete =
+    currentStepStatus === "completed" || currentStepStatus === "refused";
+
   const sectionIsDone = E4_STEP_ORDER.every((stepId) => {
     if (stepStatuses[stepId]) return true;
     const instances = getInstancesForStep(stepId);
-    const status = computeStepStatusFromForm(stepId, instances, (path) =>
-      form.getValues(path as FieldPath<FormValues>)
+    const pId = MEASURE_TO_INTERVIEW[stepId as string];
+    const iInsts = pId ? getInstancesForStep(pId) : undefined;
+    const status = computeStepStatusFromForm(
+      stepId,
+      instances,
+      (path) => form.getValues(path as FieldPath<FormValues>),
+      iInsts
     );
     return status === "completed" || status === "refused";
   });
 
-  // Reactively update incomplete regions when form values change
+  // Reactively clear incomplete regions when interview answers change
   useEffect(() => {
-    // Only subscribe if we have incomplete regions to potentially clear
     if (incompleteRegions.length === 0) return;
-
-    // Only validate interview steps
     if (currentStepIndex < 0 || currentStepIndex >= E4_STEP_ORDER.length) return;
     const stepId = E4_STEP_ORDER[currentStepIndex];
-    if (!isInterviewStep(String(stepId))) return;
+    const interviewId = MEASURE_TO_INTERVIEW[stepId as string];
+    if (!interviewId) return; // No paired interview (e4a)
 
-    // Subscribe to form changes and re-validate on any change
     const subscription = form.watch(() => {
-      const stepInstances = getInstancesForStep(stepId);
-      const result = validateInterviewCompletion(stepInstances, (path) =>
+      const iInstances = getInstancesForStep(interviewId);
+      const result = validateInterviewCompletion(iInstances, (path) =>
         form.getValues(path as FieldPath<FormValues>)
       );
       setIncompleteRegions(result.incompleteRegions);
@@ -232,7 +277,6 @@ export function E4Section({
   // Navigation handlers
   const handleBack = () => {
     if (isFirstStep) {
-      // On first internal step, go back to previous section
       onBack?.();
     } else {
       setIncompleteRegions([]);
@@ -244,8 +288,13 @@ export function E4Section({
   const handleSectionSkip = () => {
     const stepsToSkip = E4_STEP_ORDER.filter((stepId) => !stepStatuses[stepId]);
     if (stepsToSkip.length > 0) {
+      // Also skip paired interview step IDs for data consistency
+      const allStepsToSkip = stepsToSkip.flatMap((stepId) => {
+        const pairedId = MEASURE_TO_INTERVIEW[stepId as string];
+        return pairedId ? [stepId, pairedId] : [stepId];
+      });
       const currentSkipped = form.getValues("_skippedSteps") ?? [];
-      form.setValue("_skippedSteps", [...currentSkipped, ...stepsToSkip]);
+      form.setValue("_skippedSteps", [...currentSkipped, ...allStepsToSkip]);
       setStepStatuses((prev) => {
         const next = { ...prev };
         for (const stepId of stepsToSkip) next[stepId] = "skipped";
@@ -259,57 +308,39 @@ export function E4Section({
     setIncompleteRegions([]);
     setExpanded({ left: null, right: null });
 
-    const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
-    const isMeasureWithInterview =
-      !isInterview && nextStepId && isInterviewStep(String(nextStepId));
+    // Skip both measurement and paired interview step IDs for data consistency
+    const pairedId = MEASURE_TO_INTERVIEW[String(currentStepId)];
+    const stepsToMarkSkipped = pairedId
+      ? [String(currentStepId), String(pairedId)]
+      : [String(currentStepId)];
 
-    if (isMeasureWithInterview) {
-      // Auto-skip the paired interview step so the user doesn't have to skip it separately
-      const currentSkipped = form.getValues("_skippedSteps") ?? [];
-      form.setValue("_skippedSteps", [...currentSkipped, currentStepId, nextStepId]);
-      setStepStatuses((prev) => ({
-        ...prev,
-        [currentStepId]: "skipped",
-        [nextStepId]: "skipped",
-      }));
-      const skipToIndex = currentStepIndex + 2;
-      if (skipToIndex >= E4_STEP_ORDER.length) {
-        onStepChange?.(null); // collapse to allComplete view
-      } else {
-        onStepChange?.(skipToIndex);
-      }
+    const currentSkipped = form.getValues("_skippedSteps") ?? [];
+    form.setValue("_skippedSteps", [...currentSkipped, ...stepsToMarkSkipped]);
+    setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
+
+    if (isLastStep) {
+      onStepChange?.(null);
     } else {
-      const currentSkipped = form.getValues("_skippedSteps") ?? [];
-      form.setValue("_skippedSteps", [...currentSkipped, currentStepId]);
-      setStepStatuses((prev) => ({ ...prev, [currentStepId]: "skipped" }));
-      if (isLastStep) {
-        onStepChange?.(null); // collapse to allComplete view
-      } else {
-        onStepChange?.(currentStepIndex + 1);
-      }
+      onStepChange?.(currentStepIndex + 1);
     }
   };
 
   // Set all unanswered pain questions to "no"
   const handleNoMorePainRegions = () => {
-    const painInstances = stepInstances.filter((i) => i.context.painType === "pain");
+    const painInstances = interviewInstances.filter((i) => i.context.painType === "pain");
     for (const inst of painInstances) {
       const currentValue = form.getValues(inst.path as FieldPath<FormValues>);
       if (currentValue == null) {
         setInstanceValue(form.setValue, inst.path, "no");
       }
     }
-    // Clear any validation errors since we've filled in the missing values
     setIncompleteRegions([]);
-    // Reset expanded state
     setExpanded({ left: null, right: null });
   };
 
   const handleNext = () => {
-    // Check for refusal first - if refused, mark as refused and proceed
-    const refusedInst = stepInstances.find((i) =>
-      isInterview ? i.path.endsWith(".interviewRefused") : i.path.endsWith(".refused")
-    );
+    // Check for measurement refusal first
+    const refusedInst = stepInstances.find((i) => i.path.endsWith(".refused"));
     const isStepRefused = refusedInst
       ? (form.getValues(refusedInst.path as FieldPath<FormValues>) as unknown as boolean) === true
       : false;
@@ -318,72 +349,33 @@ export function E4Section({
       setExpanded({ left: null, right: null });
       setIncompleteRegions([]);
 
-      // If a measurement step is refused, auto-refuse the following interview step
-      const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
-      const isMeasureWithInterview =
-        !isInterview && nextStepId && isInterviewStep(String(nextStepId));
-
-      if (isMeasureWithInterview && refusedInst) {
-        // Set interviewRefused = true in form data
+      // Auto-refuse the paired interview: set interviewRefused and clear interview data
+      if (hasPairedInterview && refusedInst) {
         const interviewRefusedPath = refusedInst.path.replace(".refused", ".interviewRefused");
         form.setValue(interviewRefusedPath as FieldPath<FormValues>, true as never);
-        // Clear all interview pain data
-        const interviewInstances = getInstancesForStep(nextStepId as ExaminationStepId);
         for (const inst of interviewInstances) {
           if (!inst.path.endsWith(".interviewRefused")) {
             setInstanceValue(form.setValue, inst.path, null);
           }
         }
-        // Mark both current and next step as refused, skip over interview
-        setStepStatuses((prev) => ({
-          ...prev,
-          [currentStepId]: "refused",
-          [nextStepId]: "refused",
-        }));
-        const skipToIndex = currentStepIndex + 2;
-        if (skipToIndex >= E4_STEP_ORDER.length) {
-          onStepChange?.(null); // collapse to allComplete view
-        } else {
-          onStepChange?.(skipToIndex);
-        }
+      }
+
+      setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
+      if (isLastStep) {
+        onStepChange?.(null);
       } else {
-        setStepStatuses((prev) => ({ ...prev, [currentStepId]: "refused" }));
-        if (isLastStep) {
-          onStepChange?.(null); // collapse to allComplete view
-        } else {
-          onStepChange?.(currentStepIndex + 1);
-        }
+        onStepChange?.(currentStepIndex + 1);
       }
       return;
     }
 
-    // If measurement step proceeds normally, clear any previously auto-refused interview
-    if (!isInterview) {
-      const nextStepId = E4_STEP_ORDER[currentStepIndex + 1];
-      if (
-        nextStepId &&
-        isInterviewStep(String(nextStepId)) &&
-        stepStatuses[nextStepId] === "refused"
-      ) {
-        const measRefusedInst = stepInstances.find((i) => i.path.endsWith(".refused"));
-        if (measRefusedInst) {
-          const interviewRefusedPath = measRefusedInst.path.replace(
-            ".refused",
-            ".interviewRefused"
-          );
-          form.setValue(interviewRefusedPath as FieldPath<FormValues>, false as never);
-        }
-        setStepStatuses((prev) => {
-          const next = { ...prev };
-          delete next[nextStepId];
-          return next;
-        });
-      }
-    }
+    // Validate measurement fields
+    const isValid = validateStep(currentStepId as ExaminationStepId);
+    if (!isValid) return;
 
-    // For interview steps, validate completeness first
-    if (isInterview) {
-      const result = validateInterviewCompletion(stepInstances, (path) =>
+    // For combined steps, also validate interview (when measurement is not refused)
+    if (hasPairedInterview && !isMeasurementRefused) {
+      const result = validateInterviewCompletion(interviewInstances, (path) =>
         form.getValues(path as FieldPath<FormValues>)
       );
       if (!result.valid) {
@@ -393,26 +385,19 @@ export function E4Section({
       setIncompleteRegions([]);
     }
 
-    const isValid = validateStep(currentStepId as ExaminationStepId);
-    if (!isValid) {
-      return;
-    }
-
     setStepStatuses((prev) => ({ ...prev, [currentStepId]: "completed" }));
     setExpanded({ left: null, right: null });
 
     if (isLastStep) {
-      onStepChange?.(null); // collapse to allComplete view
+      onStepChange?.(null);
     } else {
       onStepChange?.(currentStepIndex + 1);
     }
   };
 
   const getStepStatus = (stepId: E4StepId, index: number): StepStatus => {
-    // -1 means all complete, no active step
     if (allComplete) {
       const status = stepStatuses[stepId];
-      // Map "refused" to "completed" for StepBar display (will show RF badge via summary)
       if (status === "refused") return "completed";
       return status || "pending";
     }
@@ -423,103 +408,55 @@ export function E4Section({
     return "pending";
   };
 
-  // Get summary for a step (for collapsed display)
+  // Get summary for a step (for collapsed StepBar display)
   const getStepSummary = (stepId: E4StepId): string => {
     const instances = getInstancesForStep(stepId);
-    const stepIsInterview = isInterviewStep(String(stepId));
 
-    // Check for refused status first
-    if (stepStatuses[stepId] === "refused") {
-      return COMMON.refused;
-    }
+    if (stepStatuses[stepId] === "refused") return COMMON.refused;
 
-    if (stepIsInterview) {
-      // Check for interview refusal
-      const interviewRefusedInst = instances.find((i) => i.path.endsWith(".interviewRefused"));
-      if (interviewRefusedInst) {
-        const isRefused = form.getValues(
-          interviewRefusedInst.path as FieldPath<FormValues>
-        ) as unknown as boolean;
-        if (isRefused === true) {
-          return COMMON.refused;
-        }
-      }
-
-      // Check pain and familiar pain values across all regions
-      let hasPain = false;
-      let hasFamiliarPain = false;
-      let hasFamiliarHeadache = false;
-
-      for (const inst of instances) {
-        const value = form.getValues(inst.path as FieldPath<FormValues>) as unknown as
-          | string
-          | null;
-        if (inst.context.painType === "pain" && value === "yes") {
-          hasPain = true;
-        }
-        if (inst.context.painType === "familiarPain" && value === "yes") {
-          hasFamiliarPain = true;
-        }
-        if (inst.context.painType === "familiarHeadache" && value === "yes") {
-          hasFamiliarHeadache = true;
-        }
-      }
-
-      if (!hasPain) {
-        return "Kein Schmerz";
-      }
-      if (hasFamiliarPain && hasFamiliarHeadache) {
-        return "Bek. Schmerz + Kopfschmerz";
-      }
-      if (hasFamiliarPain) {
-        return "Bekannter Schmerz";
-      }
-      if (hasFamiliarHeadache) {
-        return "Bekannter Kopfschmerz";
-      }
-      // Pain reported but no familiar pain/headache
-      return "Keine Übereinstimmung";
-    }
-
-    // Check for measurement refusal
+    // Check for measurement refusal in form data
     const refusedInst = instances.find((i) => i.path.endsWith(".refused"));
     if (refusedInst) {
       const isRefused = form.getValues(
         refusedInst.path as FieldPath<FormValues>
       ) as unknown as boolean;
-      if (isRefused === true) {
-        return COMMON.refused;
-      }
+      if (isRefused === true) return COMMON.refused;
     }
 
-    // Measurement step - show value
+    // Measurement value
     const measurementInst = instances.find((i) => i.renderType === "measurement");
     if (measurementInst) {
       const value = form.getValues(measurementInst.path as keyof typeof form.getValues);
       if (value != null && value !== "") {
+        // Combined step: append interview summary
+        const pairedId = MEASURE_TO_INTERVIEW[String(stepId)];
+        if (pairedId) {
+          const iInstances = getInstancesForStep(pairedId);
+          const interviewSummary = getInterviewSummaryText(iInstances, (path) =>
+            form.getValues(path as FieldPath<FormValues>)
+          );
+          return `${value} mm · ${interviewSummary}`;
+        }
         return `${value} mm`;
       }
     }
+
+    // E4A: check required field value
+    if (stepId === "e4a") {
+      for (const inst of instances) {
+        const config = inst.config as { required?: boolean };
+        if (config.required) {
+          const value = form.getValues(inst.path as FieldPath<FormValues>);
+          if (value != null && value !== "") return String(value);
+        }
+      }
+    }
+
     return "—";
   };
 
-  // Render instruction block based on step type
-  const renderInstruction = (stepId: string, stepIsInterview: boolean) => {
-    // Pain interview - use appropriate interview flow based on step
-    if (stepIsInterview) {
-      // E4C uses different pain question (asks about examiner manipulation)
-      const interviewInstruction =
-        stepId === "e4c-interview"
-          ? E4_RICH_INSTRUCTIONS.painInterviewAssistedOpening
-          : E4_RICH_INSTRUCTIONS.painInterview;
-      return (
-        <IntroPanel title="Anweisungen">
-          <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />
-        </IntroPanel>
-      );
-    }
-
-    // E4A - pain-free opening measurement (step-based flow)
+  // Render measurement instruction block
+  const renderMeasurementInstruction = (stepId: string) => {
     if (stepId === "e4a") {
       return (
         <IntroPanel title="Anweisungen">
@@ -528,7 +465,6 @@ export function E4Section({
       );
     }
 
-    // E4B measurement - step-based flow
     if (stepId === "e4b-measure") {
       return (
         <IntroPanel title="Anweisungen">
@@ -537,7 +473,6 @@ export function E4Section({
       );
     }
 
-    // E4C measurement - step-based flow with safety warning always visible
     if (stepId === "e4c-measure") {
       const warnings = E4_RICH_INSTRUCTIONS.maxAssistedOpening.warnings;
       return (
@@ -562,6 +497,19 @@ export function E4Section({
     }
 
     return null;
+  };
+
+  // Render interview instruction block (keyed on interview step ID)
+  const renderInterviewInstruction = (interviewStepId: string) => {
+    const interviewInstruction =
+      interviewStepId === "e4c-interview"
+        ? E4_RICH_INSTRUCTIONS.painInterviewAssistedOpening
+        : E4_RICH_INSTRUCTIONS.painInterview;
+    return (
+      <IntroPanel title="Anweisungen">
+        <PainInterviewBlock instruction={interviewInstruction} showFlow={true} />
+      </IntroPanel>
+    );
   };
 
   return (
@@ -602,7 +550,10 @@ export function E4Section({
           const status = getStepStatus(stepId, index);
 
           if (status === "active") {
-            const stepIsInterview = isInterviewStep(String(stepId));
+            const stepPairedInterviewId = MEASURE_TO_INTERVIEW[String(stepId)];
+            const stepInterviewInstances = stepPairedInterviewId
+              ? getInstancesForStep(stepPairedInterviewId)
+              : [];
 
             return (
               <div
@@ -616,30 +567,40 @@ export function E4Section({
                   <h3 className="font-semibold">{config.title}</h3>
                 </div>
 
-                {/* Instruction */}
-                {renderInstruction(stepId, stepIsInterview)}
+                {/* Measurement instruction */}
+                {renderMeasurementInstruction(stepId)}
 
-                {/* Content */}
-                {stepIsInterview ? (
-                  <InterviewContent
-                    stepInstances={stepInstances}
-                    regions={regions}
-                    expanded={expanded}
-                    onExpandChange={handleExpandChange}
-                    incompleteRegions={incompleteRegions}
-                    onNoMorePainRegions={handleNoMorePainRegions}
-                    onClearIncompleteRegions={() => setIncompleteRegions([])}
-                  />
-                ) : stepId === "e4a" ? (
-                  // E4A uses QuestionField directly for the pain-free opening measurement
+                {/* Measurement content */}
+                {stepId === "e4a" ? (
                   <E4AMeasurementContent stepInstances={stepInstances} />
                 ) : (
                   <MeasurementStep instances={stepInstances} />
                 )}
 
+                {/* Interview section — only for combined steps, hidden when measurement refused */}
+                {stepPairedInterviewId && !isMeasurementRefused && (
+                  <>
+                    <div className="border-t pt-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="secondary">{config.badge}</Badge>
+                        <h4 className="font-medium text-sm">Schmerzbefragung</h4>
+                      </div>
+                    </div>
+                    {renderInterviewInstruction(stepPairedInterviewId)}
+                    <InterviewContent
+                      stepInstances={stepInterviewInstances}
+                      regions={regions}
+                      expanded={expanded}
+                      onExpandChange={handleExpandChange}
+                      incompleteRegions={incompleteRegions}
+                      onNoMorePainRegions={handleNoMorePainRegions}
+                      onClearIncompleteRegions={() => setIncompleteRegions([])}
+                    />
+                  </>
+                )}
+
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-2 border-t">
-                  {/* Left: Back button */}
                   <Button
                     type="button"
                     variant="ghost"
@@ -651,7 +612,6 @@ export function E4Section({
                     Zurück
                   </Button>
 
-                  {/* Right: skip + Next/Abschließen buttons */}
                   <div className="flex items-center gap-2">
                     {!isCurrentStepComplete && (
                       <Button
@@ -687,7 +647,7 @@ export function E4Section({
       </CardContent>
 
       {/* Section-level footer */}
-      {(allComplete || sectionIsDone) ? (
+      {allComplete || sectionIsDone ? (
         <SectionFooter onNext={onComplete} onBack={onBack} isFirstStep={isFirstSection} />
       ) : (
         <CardFooter className="flex justify-end border-t pt-4">
