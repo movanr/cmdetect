@@ -69,7 +69,7 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
   return (
     <Card className="overflow-hidden py-0 gap-0">
       {/* Header */}
-      <div className="p-4">
+      <div className="p-4 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -101,7 +101,7 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
               <Link
                 to="/docs/scoring-manual"
                 hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
-                onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
+                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline shrink-0"
               >
                 <BookOpen className="h-3 w-3" />
@@ -133,7 +133,7 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
             className="text-muted-foreground flex-shrink-0"
           >
             {isExpanded ? (

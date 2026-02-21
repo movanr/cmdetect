@@ -64,7 +64,7 @@ export function PainDrawingScoreCard({
   return (
     <>
       <Card className="overflow-hidden py-0 gap-0">
-        <div className="p-4">
+        <div className="p-4 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
           <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
             {/* LEFT: Title + warning */}
             <div className="min-w-0">
@@ -73,7 +73,7 @@ export function PainDrawingScoreCard({
               <Link
                 to="/docs/scoring-manual"
                 hash="pain-drawing"
-                onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
+                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
               >
                 <BookOpen className="h-3 w-3" />
@@ -140,7 +140,7 @@ export function PainDrawingScoreCard({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
                 className="text-muted-foreground h-7 px-2 text-xs shrink-0"
               >
                 {isExpanded ? (
