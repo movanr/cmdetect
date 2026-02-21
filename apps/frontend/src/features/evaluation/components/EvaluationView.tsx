@@ -44,7 +44,7 @@ import {
   createSubluxationTree,
 } from "../../decision-tree";
 import type { FormValues } from "../../examination";
-import type { PersistedDiagnosisEvaluation, PractitionerDecision } from "../types";
+import type { PersistedDiagnosisResult, PractitionerDecision } from "../types";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
 import { CriteriaChecklist } from "./CriteriaChecklist";
 import { SummaryDiagrams } from "./SummaryDiagrams";
@@ -52,8 +52,8 @@ import { SummaryDiagrams } from "./SummaryDiagrams";
 interface EvaluationViewProps {
   sqAnswers: Record<string, unknown>;
   examinationData: FormValues;
-  /** Persisted diagnosis evaluation from backend */
-  evaluation?: PersistedDiagnosisEvaluation | null;
+  /** Persisted diagnosis results from backend */
+  results: PersistedDiagnosisResult[];
   /** Callback to update a practitioner decision */
   onUpdateDecision?: (params: {
     resultId: string;
@@ -118,7 +118,7 @@ function StepLabel({ step, label }: { step: number; label: string }) {
 export function EvaluationView({
   sqAnswers,
   examinationData,
-  evaluation,
+  results,
   onUpdateDecision,
   readOnly,
   caseId,
@@ -199,15 +199,14 @@ export function EvaluationView({
 
   // 9. End node decisions for the current tree's (side, region)
   const endNodeDecisions = useMemo(() => {
-    if (!evaluation?.results) return {};
     const map: Record<string, PractitionerDecision> = {};
-    for (const r of evaluation.results) {
+    for (const r of results) {
       if (r.side === selectedSide && r.region === selectedRegion) {
         map[r.diagnosisId] = r.practitionerDecision;
       }
     }
     return map;
-  }, [evaluation, selectedSide, selectedRegion]);
+  }, [results, selectedSide, selectedRegion]);
 
   // ── Handlers ───────────────────────────────────────────────────────
 
@@ -218,9 +217,9 @@ export function EvaluationView({
 
   const handleEndNodeConfirm = useCallback(
     (diagnosisId: string, note: string | null) => {
-      if (!evaluation?.results || !onUpdateDecision) return;
+      if (!onUpdateDecision) return;
 
-      const persisted = evaluation.results.find(
+      const persisted = results.find(
         (r) =>
           r.diagnosisId === diagnosisId && r.side === selectedSide && r.region === selectedRegion
       );
@@ -234,7 +233,7 @@ export function EvaluationView({
         note,
       });
     },
-    [evaluation, onUpdateDecision, selectedSide, selectedRegion]
+    [results, onUpdateDecision, selectedSide, selectedRegion]
   );
 
   const handleTreeSelect = useCallback((id: string) => {

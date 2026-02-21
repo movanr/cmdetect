@@ -14,5 +14,4 @@ export { useDiagnosisSync } from "./hooks/use-diagnosis-sync";
 export type {
   PractitionerDecision,
   PersistedDiagnosisResult,
-  PersistedDiagnosisEvaluation,
 } from "./types";

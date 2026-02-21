@@ -19,12 +19,3 @@ export interface PersistedDiagnosisResult {
   decidedAt: string | null;
   note: string | null;
 }
-
-export interface PersistedDiagnosisEvaluation {
-  id: string;
-  patientRecordId: string;
-  sourceDataHash: string;
-  evaluatedBy: string;
-  evaluatedAt: string;
-  results: PersistedDiagnosisResult[];
-}

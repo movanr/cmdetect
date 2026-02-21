@@ -2,18 +2,15 @@ table:
   name: diagnosis_result
   schema: public
 object_relationships:
-  - name: diagnosis_evaluation
+  - name: decider
     using:
-      foreign_key_constraint_on: diagnosis_evaluation_id
+      foreign_key_constraint_on: decided_by
   - name: organization
     using:
       foreign_key_constraint_on: organization_id
   - name: patient_record
     using:
       foreign_key_constraint_on: patient_record_id
-  - name: decider
-    using:
-      foreign_key_constraint_on: decided_by
 insert_permissions:
   - role: org_admin
     permission:
@@ -21,7 +18,6 @@ insert_permissions:
       set:
         organization_id: x-hasura-Organization-Id
       columns:
-        - diagnosis_evaluation_id
         - patient_record_id
         - diagnosis_id
         - side
@@ -34,7 +30,6 @@ insert_permissions:
       set:
         organization_id: x-hasura-Organization-Id
       columns:
-        - diagnosis_evaluation_id
         - patient_record_id
         - diagnosis_id
         - side
@@ -46,7 +41,6 @@ select_permissions:
     permission:
       columns:
         - id
-        - diagnosis_evaluation_id
         - patient_record_id
         - organization_id
         - diagnosis_id
@@ -67,7 +61,6 @@ select_permissions:
     permission:
       columns:
         - id
-        - diagnosis_evaluation_id
         - patient_record_id
         - organization_id
         - diagnosis_id
@@ -88,7 +81,6 @@ select_permissions:
     permission:
       columns:
         - id
-        - diagnosis_evaluation_id
         - patient_record_id
         - organization_id
         - diagnosis_id

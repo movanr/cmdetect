@@ -1,4 +1,3 @@
-- "!include public_diagnosis_evaluation.yaml"
 - "!include public_diagnosis_result.yaml"
 - "!include public_examination_response.yaml"
 - "!include public_organization.yaml"

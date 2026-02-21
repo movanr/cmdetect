@@ -3,12 +3,11 @@
  *
  * Orchestrates client-side diagnosis evaluation with backend persistence.
  * - Computes diagnoses client-side via evaluateAllDiagnoses
- * - Computes SHA-256 hash of source data
- * - Syncs results to backend (insert new or reuse existing if hash matches)
+ * - Upserts computed_status to backend (preserves practitioner decisions on conflict)
  * - Provides mutation for practitioner decisions
  */
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   ALL_DIAGNOSES,
   evaluateAllDiagnoses,
@@ -20,13 +19,12 @@ import {
 } from "@cmdetect/dc-tmd";
 import type { FormValues } from "../../examination";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
-import { computeSourceDataHash } from "../utils/source-data-hash";
-import { useDiagnosisEvaluation } from "./use-diagnosis-evaluation";
+import { useDiagnosisResults } from "./use-diagnosis-evaluation";
 import {
-  useSaveDiagnosisEvaluation,
+  useUpsertDiagnosisResults,
   useUpdateDiagnosisDecision,
 } from "./use-save-diagnosis-evaluation";
-import type { PersistedDiagnosisEvaluation, PractitionerDecision } from "../types";
+import type { PersistedDiagnosisResult, PractitionerDecision } from "../types";
 
 interface UseDiagnosisSyncParams {
   patientRecordId: string;
@@ -40,8 +38,8 @@ interface UseDiagnosisSyncParams {
 interface UseDiagnosisSyncResult {
   /** Client-side computed diagnosis results */
   allResults: DiagnosisEvaluationResult[];
-  /** Persisted evaluation from backend (null while loading/syncing) */
-  evaluation: PersistedDiagnosisEvaluation | null;
+  /** Persisted results from backend */
+  results: PersistedDiagnosisResult[];
   /** Whether sync is in progress (loading or saving) */
   isSyncing: boolean;
   /** Update a practitioner decision on a single result row */
@@ -110,66 +108,19 @@ export function useDiagnosisSync({
   );
 
   // Backend state
-  const {
-    data: evaluation,
-    isLoading: isLoadingEvaluation,
-  } = useDiagnosisEvaluation(patientRecordId);
+  const { data: results, isLoading: isLoadingResults } = useDiagnosisResults(patientRecordId);
 
-  const saveMutation = useSaveDiagnosisEvaluation(patientRecordId);
+  const upsertMutation = useUpsertDiagnosisResults(patientRecordId);
   const updateMutation = useUpdateDiagnosisDecision(patientRecordId);
 
-  // Track whether we've already initiated sync for this hash to avoid double-fires
-  const syncingHashRef = useRef<string | null>(null);
-
-  // Sync: compare hash and save if needed
+  // Sync: upsert computed results whenever criteria data changes
   useEffect(() => {
-    if (!enabled || isLoadingEvaluation) return;
+    if (!enabled || isLoadingResults || upsertMutation.isPending) return;
 
-    let cancelled = false;
-
-    async function sync() {
-      const hash = await computeSourceDataHash(criteriaData);
-      if (cancelled) return;
-
-      // Already syncing this exact hash
-      if (syncingHashRef.current === hash) return;
-
-      // Hash matches existing evaluation — no action needed
-      if (evaluation?.sourceDataHash === hash) {
-        syncingHashRef.current = null;
-        return;
-      }
-
-      // Hash differs or no evaluation exists — save new results
-      syncingHashRef.current = hash;
-
-      const rows = buildResultRows(allResults, patientRecordId);
-
-      saveMutation.mutate(
-        {
-          oldEvaluationId: evaluation?.id,
-          patientRecordId,
-          sourceDataHash: hash,
-          results: rows,
-        },
-        {
-          onSettled: () => {
-            // Allow re-sync if data changes again
-            if (syncingHashRef.current === hash) {
-              syncingHashRef.current = null;
-            }
-          },
-        }
-      );
-    }
-
-    sync();
-
-    return () => {
-      cancelled = true;
-    };
+    const rows = buildResultRows(allResults, patientRecordId);
+    upsertMutation.mutate(rows);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, criteriaData, allResults, evaluation, isLoadingEvaluation, patientRecordId]);
+  }, [criteriaData, allResults, enabled]);
 
   const updateDecision = useCallback(
     (params: {
@@ -189,8 +140,8 @@ export function useDiagnosisSync({
 
   return {
     allResults,
-    evaluation: evaluation ?? null,
-    isSyncing: isLoadingEvaluation || saveMutation.isPending,
+    results: results ?? [],
+    isSyncing: isLoadingResults || upsertMutation.isPending,
     updateDecision,
     isUpdatingDecision: updateMutation.isPending,
   };

@@ -25,13 +25,6 @@ object_relationships:
           name: user
           schema: public
 array_relationships:
-  - name: diagnosis_evaluations
-    using:
-      foreign_key_constraint_on:
-        column: patient_record_id
-        table:
-          name: diagnosis_evaluation
-          schema: public
   - name: examination_response
     using:
       foreign_key_constraint_on:

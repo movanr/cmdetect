@@ -1,15 +1,11 @@
 /**
- * Hook for fetching persisted diagnosis evaluation for a patient record.
+ * Hook for fetching persisted diagnosis results for a patient record.
  */
 
 import { useQuery } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
-import { GET_DIAGNOSIS_EVALUATION } from "../queries";
-import type {
-  PersistedDiagnosisEvaluation,
-  PersistedDiagnosisResult,
-  PractitionerDecision,
-} from "../types";
+import { GET_DIAGNOSIS_RESULTS } from "../queries";
+import type { PersistedDiagnosisResult, PractitionerDecision } from "../types";
 import type { CriterionStatus, DiagnosisId, Region, Side } from "@cmdetect/dc-tmd";
 
 function mapResult(row: {
@@ -36,27 +32,17 @@ function mapResult(row: {
   };
 }
 
-export const DIAGNOSIS_EVALUATION_QUERY_KEY = "diagnosis-evaluation";
+export const DIAGNOSIS_RESULTS_QUERY_KEY = "diagnosis-results";
 
-export function useDiagnosisEvaluation(patientRecordId: string) {
+export function useDiagnosisResults(patientRecordId: string) {
   return useQuery({
-    queryKey: [DIAGNOSIS_EVALUATION_QUERY_KEY, patientRecordId],
-    queryFn: async (): Promise<PersistedDiagnosisEvaluation | null> => {
-      const result = await execute(GET_DIAGNOSIS_EVALUATION, {
+    queryKey: [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId],
+    queryFn: async (): Promise<PersistedDiagnosisResult[]> => {
+      const result = await execute(GET_DIAGNOSIS_RESULTS, {
         patient_record_id: patientRecordId,
       });
 
-      const evaluation = result.diagnosis_evaluation?.[0];
-      if (!evaluation) return null;
-
-      return {
-        id: evaluation.id,
-        patientRecordId: evaluation.patient_record_id,
-        sourceDataHash: evaluation.source_data_hash,
-        evaluatedBy: evaluation.evaluated_by,
-        evaluatedAt: evaluation.evaluated_at,
-        results: evaluation.diagnosis_results.map(mapResult),
-      };
+      return (result.diagnosis_result ?? []).map(mapResult);
     },
     enabled: !!patientRecordId,
   });

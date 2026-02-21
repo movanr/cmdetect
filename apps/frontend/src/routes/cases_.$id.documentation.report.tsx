@@ -19,7 +19,7 @@ import type { PatientPII } from "@/crypto/types";
 import { formatDate } from "@/lib/date-utils";
 import { GET_EXAMINATION_RESPONSE } from "../features/examination/queries";
 import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
-import { useDiagnosisEvaluation } from "../features/evaluation/hooks/use-diagnosis-evaluation";
+import { useDiagnosisResults } from "../features/evaluation/hooks/use-diagnosis-evaluation";
 import { mapToCriteriaData } from "../features/evaluation/utils/map-to-criteria-data";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import type { FormValues } from "../features/examination";
@@ -76,7 +76,7 @@ function ReportSubPage() {
     queryFn: () => execute(GET_EXAMINATION_RESPONSE, { patient_record_id: id }),
   });
 
-  const { data: evalData, isLoading: isEvalLoading } = useDiagnosisEvaluation(id);
+  const { data: evalData, isLoading: isEvalLoading } = useDiagnosisResults(id);
 
   // ── Decrypt patient data (for print header) ──────────────────────
 
@@ -152,7 +152,7 @@ function ReportSubPage() {
   const confirmedDiagnoses = useMemo(() => {
     if (!evalData) return [];
 
-    return evalData.results
+    return evalData
       .filter((r) => r.practitionerDecision === "confirmed")
       .map((r) => ({
         diagnosisId: r.diagnosisId,

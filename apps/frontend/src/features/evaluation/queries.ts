@@ -5,22 +5,38 @@
 import { graphql } from "@/graphql/gql";
 
 /**
- * Get diagnosis evaluation with nested results for a patient record.
+ * Fetch all diagnosis results for a patient record directly.
  */
-export const GET_DIAGNOSIS_EVALUATION = graphql(`
-  query GetDiagnosisEvaluation($patient_record_id: String!) {
-    diagnosis_evaluation(
-      where: { patient_record_id: { _eq: $patient_record_id } }
-      limit: 1
-    ) {
+export const GET_DIAGNOSIS_RESULTS = graphql(`
+  query GetDiagnosisResults($patient_record_id: String!) {
+    diagnosis_result(where: { patient_record_id: { _eq: $patient_record_id } }) {
       id
-      patient_record_id
-      source_data_hash
-      evaluated_by
-      evaluated_at
-      created_at
-      updated_at
-      diagnosis_results {
+      diagnosis_id
+      side
+      region
+      computed_status
+      practitioner_decision
+      decided_by
+      decided_at
+      note
+    }
+  }
+`);
+
+/**
+ * Upsert diagnosis result rows — only updates computed_status on conflict,
+ * never touches practitioner_decision.
+ */
+export const UPSERT_DIAGNOSIS_RESULTS = graphql(`
+  mutation UpsertDiagnosisResults($results: [diagnosis_result_insert_input!]!) {
+    insert_diagnosis_result(
+      objects: $results
+      on_conflict: {
+        constraint: diagnosis_result_unique
+        update_columns: [computed_status]
+      }
+    ) {
+      returning {
         id
         diagnosis_id
         side
@@ -31,53 +47,6 @@ export const GET_DIAGNOSIS_EVALUATION = graphql(`
         decided_at
         note
       }
-    }
-  }
-`);
-
-/**
- * Insert diagnosis evaluation with nested result rows atomically.
- */
-export const INSERT_DIAGNOSIS_EVALUATION = graphql(`
-  mutation InsertDiagnosisEvaluation(
-    $patient_record_id: String!
-    $source_data_hash: String!
-    $results: [diagnosis_result_insert_input!]!
-  ) {
-    insert_diagnosis_evaluation_one(
-      object: {
-        patient_record_id: $patient_record_id
-        source_data_hash: $source_data_hash
-        diagnosis_results: { data: $results }
-      }
-    ) {
-      id
-      patient_record_id
-      source_data_hash
-      evaluated_by
-      evaluated_at
-      diagnosis_results {
-        id
-        diagnosis_id
-        side
-        region
-        computed_status
-        practitioner_decision
-        decided_by
-        decided_at
-        note
-      }
-    }
-  }
-`);
-
-/**
- * Delete diagnosis evaluation by PK (cascade deletes all results).
- */
-export const DELETE_DIAGNOSIS_EVALUATION = graphql(`
-  mutation DeleteDiagnosisEvaluation($id: String!) {
-    delete_diagnosis_evaluation_by_pk(id: $id) {
-      id
     }
   }
 `);

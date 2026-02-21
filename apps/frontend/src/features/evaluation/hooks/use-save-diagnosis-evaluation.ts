@@ -4,13 +4,9 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
-import {
-  DELETE_DIAGNOSIS_EVALUATION,
-  INSERT_DIAGNOSIS_EVALUATION,
-  UPDATE_DIAGNOSIS_RESULT_DECISION,
-} from "../queries";
-import { DIAGNOSIS_EVALUATION_QUERY_KEY } from "./use-diagnosis-evaluation";
-import type { PractitionerDecision, PersistedDiagnosisEvaluation } from "../types";
+import { UPSERT_DIAGNOSIS_RESULTS, UPDATE_DIAGNOSIS_RESULT_DECISION } from "../queries";
+import { DIAGNOSIS_RESULTS_QUERY_KEY } from "./use-diagnosis-evaluation";
+import type { PractitionerDecision, PersistedDiagnosisResult } from "../types";
 import type { CriterionStatus, DiagnosisId, Region, Side } from "@cmdetect/dc-tmd";
 
 interface DiagnosisResultInput {
@@ -21,42 +17,20 @@ interface DiagnosisResultInput {
   computed_status: CriterionStatus;
 }
 
-interface SaveEvaluationParams {
-  oldEvaluationId?: string;
-  patientRecordId: string;
-  sourceDataHash: string;
-  results: DiagnosisResultInput[];
-}
-
 /**
- * Saves a new diagnosis evaluation, deleting any existing one first.
- * This resets all practitioner decisions when source data changes.
+ * Upserts diagnosis result rows — only updates computed_status on conflict,
+ * preserving practitioner decisions.
  */
-export function useSaveDiagnosisEvaluation(patientRecordId: string) {
+export function useUpsertDiagnosisResults(patientRecordId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      oldEvaluationId,
-      patientRecordId: prId,
-      sourceDataHash,
-      results,
-    }: SaveEvaluationParams) => {
-      // Delete existing evaluation (cascade deletes results)
-      if (oldEvaluationId) {
-        await execute(DELETE_DIAGNOSIS_EVALUATION, { id: oldEvaluationId });
-      }
-
-      // Insert new evaluation with nested results
-      return execute(INSERT_DIAGNOSIS_EVALUATION, {
-        patient_record_id: prId,
-        source_data_hash: sourceDataHash,
-        results,
-      });
+    mutationFn: async (results: DiagnosisResultInput[]) => {
+      return execute(UPSERT_DIAGNOSIS_RESULTS, { results });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [DIAGNOSIS_EVALUATION_QUERY_KEY, patientRecordId],
+        queryKey: [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId],
       });
     },
   });
@@ -75,7 +49,7 @@ interface UpdateDecisionParams {
  */
 export function useUpdateDiagnosisDecision(patientRecordId: string) {
   const queryClient = useQueryClient();
-  const queryKey = [DIAGNOSIS_EVALUATION_QUERY_KEY, patientRecordId];
+  const queryKey = [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId];
 
   return useMutation({
     mutationFn: async ({
@@ -94,26 +68,23 @@ export function useUpdateDiagnosisDecision(patientRecordId: string) {
     },
     onMutate: async ({ resultId, practitionerDecision, userId, note }) => {
       await queryClient.cancelQueries({ queryKey });
-      const previous =
-        queryClient.getQueryData<PersistedDiagnosisEvaluation | null>(queryKey);
+      const previous = queryClient.getQueryData<PersistedDiagnosisResult[]>(queryKey);
 
       if (previous) {
-        queryClient.setQueryData<PersistedDiagnosisEvaluation>(queryKey, {
-          ...previous,
-          results: previous.results.map((r) =>
+        queryClient.setQueryData<PersistedDiagnosisResult[]>(
+          queryKey,
+          previous.map((r) =>
             r.id === resultId
               ? {
                   ...r,
                   practitionerDecision,
                   decidedBy: practitionerDecision ? userId : null,
-                  decidedAt: practitionerDecision
-                    ? new Date().toISOString()
-                    : null,
+                  decidedAt: practitionerDecision ? new Date().toISOString() : null,
                   note,
                 }
               : r
-          ),
-        });
+          )
+        );
       }
 
       return { previous };
