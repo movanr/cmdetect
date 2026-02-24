@@ -4,7 +4,7 @@
 
 import type { Context } from 'hono';
 import { DatabaseService } from './database.js';
-import { validateRoleData } from './validation.js';
+import { toValidatedRole, toOrganizationUserId } from './validation.js';
 import { sendHttpError, sendHttpSuccess } from './errors.js';
 import { auth } from './auth.js';
 
@@ -17,10 +17,9 @@ export class AuthEndpoints {
   async switchRole(c: Context): Promise<Response> {
     const { role } = await c.req.json();
 
-    // Validate role data
-    const roleValidation = validateRoleData(role);
-    if (!roleValidation.valid) {
-      return sendHttpError(c, 400, roleValidation.error!);
+    const validatedRole = toValidatedRole(role);
+    if (!validatedRole) {
+      return sendHttpError(c, 400, "Invalid role");
     }
 
     // Get current session using Better Auth
@@ -36,18 +35,18 @@ export class AuthEndpoints {
     const userRoles = (user.roles as string[]) || [];
 
     // Validate that user has the requested role
-    if (!userRoles.includes(role)) {
-      return sendHttpError(c, 403, `You don't have permission to switch to role: ${role}`);
+    if (!userRoles.includes(validatedRole)) {
+      return sendHttpError(c, 403, `You don't have permission to switch to role: ${validatedRole}`);
     }
 
     // Update user's active role in database
-    await this.db.updateUserActiveRole(user.id, role);
+    await this.db.updateUserActiveRole(toOrganizationUserId(user.id), validatedRole);
 
-    console.log(`User ${user.email} switched to role: ${role}`);
+    console.log(`User ${user.email} switched to role: ${validatedRole}`);
 
     return sendHttpSuccess(c, {
       success: true,
-      activeRole: role,
+      activeRole: validatedRole,
       availableRoles: userRoles,
       message: "Role switched successfully. Please refresh your session to get a new token."
     });

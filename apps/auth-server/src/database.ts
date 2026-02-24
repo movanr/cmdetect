@@ -3,6 +3,7 @@
  */
 
 import { Pool } from 'pg';
+import type { ValidatedRole, OrganizationUserId } from './types.js';
 
 export interface PatientRecord {
   id: string;
@@ -140,9 +141,7 @@ export class DatabaseService {
   /**
    * Updates user's active role
    */
-  // TODO (nice-to-have): Hier sollte role ein tagged type sein (verifiedRole), also etwas was du nur kriegen kannst wenn du vorher `validateRole` callest (oder am besten ein domain type in der Datenbank, ist am besten)
-  // TODO (nice-to-have): Kannst du bspw auch tun für userId, dass es ein OrganizationUserId ist, dann kannst du die Funktion nie callen mit einer UserID die ggf einem Patienten gehört
-  async updateUserActiveRole(userId: string, role: string): Promise<void> {
+  async updateUserActiveRole(userId: OrganizationUserId, role: ValidatedRole): Promise<void> {
     const query = 'UPDATE "user" SET "activeRole" = $1 WHERE id = $2';
     await this.db.query(query, [role, userId]);
   }

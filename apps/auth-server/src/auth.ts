@@ -4,6 +4,8 @@ import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
 import { sendEmail } from "./email.js";
 import { env } from "./env.js";
+import { ValidRolesSchema } from "./validation.js";
+import type { ValidatedRole } from "./types.js";
 
 // Better Auth user will now have these fields directly instead of JSON metadata
 
@@ -31,18 +33,16 @@ export const auth = betterAuth({
         definePayload: ({ user }) => {
           // Validate roles array and apply hierarchy for authenticated users
           // Clinical roles (physician, receptionist) have priority over admin role
-          const userRoles = (user.roles as string[]) || [];
-          // TODO: Lieber parsen statt Code der was checkt -> Deklarativ > Imperativ
-          const validRoles = userRoles.filter((role) => roleHierarchy.includes(role as any));
+          const validRoles = ValidRolesSchema.parse(user.roles);
 
           if (validRoles.length > 0 && user.organizationId) {
             // Use activeRole from user if set, otherwise use hierarchy default
 
             // Würd immer ne ActiveRole requiren, gibts einen Grund warum das null sein könnte?
             const activeRole =
-              user.activeRole && validRoles.includes(user.activeRole)
+              user.activeRole && validRoles.includes(user.activeRole as ValidatedRole)
                 ? user.activeRole
-                : roleHierarchy.find((role) => validRoles.includes(role)) || validRoles[0];
+                : roleHierarchy.find((role) => validRoles.includes(role as ValidatedRole)) || validRoles[0];
 
             const defaultRole = activeRole;
 

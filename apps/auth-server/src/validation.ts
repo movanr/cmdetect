@@ -8,6 +8,8 @@ import {
   checkSQCompletion,
   QUESTIONNAIRE_IDS,
 } from "@cmdetect/questionnaires";
+import { roleHierarchy } from "@cmdetect/config";
+import type { ValidatedRole, OrganizationUserId } from "./types.js";
 
 /**
  * Schema for questionnaire IDs - uses single source of truth from package
@@ -147,6 +149,40 @@ export function validateResponseData(response_data: unknown): ValidationResult {
     return { valid: false, error: "Invalid response data" };
   }
   return { valid: true };
+}
+
+// Internal schema for app roles (physician, receptionist, org_admin)
+const AppRoleSchema = z.enum(roleHierarchy as [string, ...string[]]);
+
+/**
+ * Parses and filters an input (e.g. user.roles from DB) into ValidatedRole[].
+ * Non-roles and invalid values are silently dropped.
+ */
+export const ValidRolesSchema = z.preprocess(
+  (val) => (Array.isArray(val) ? val : []),
+  z
+    .array(z.unknown())
+    .transform((arr) =>
+      arr.flatMap((r) =>
+        AppRoleSchema.safeParse(r).success ? [r as ValidatedRole] : []
+      )
+    )
+);
+
+/**
+ * Returns a ValidatedRole if role is in the hierarchy, otherwise null.
+ */
+export function toValidatedRole(role: unknown): ValidatedRole | null {
+  const result = AppRoleSchema.safeParse(role);
+  return result.success ? (role as ValidatedRole) : null;
+}
+
+/**
+ * Type-level only: tags a Better Auth user ID as an OrganizationUserId.
+ * Better Auth user IDs always belong to organisation users, never patients.
+ */
+export function toOrganizationUserId(id: string): OrganizationUserId {
+  return id as OrganizationUserId;
 }
 
 /**
