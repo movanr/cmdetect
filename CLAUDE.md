@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-CMDetect is a healthcare application monorepo for TMD (temporomandibular disorder) diagnostics. Built with TypeScript, it features a React 19 practitioner frontend, a React 19 patient questionnaire frontend, a Better Auth authentication server with Express 5, and a Hasura GraphQL backend. The system implements multi-tenant organization isolation with role-based access control, end-to-end encryption for patient PII, and DC/TMD diagnostic criteria evaluation.
+CMDetect is a healthcare application monorepo for TMD (temporomandibular disorder) diagnostics. Built with TypeScript, it features a React 19 practitioner frontend, a React 19 patient questionnaire frontend, a Better Auth authentication server with Hono, and a Hasura GraphQL backend. The system implements multi-tenant organization isolation with role-based access control, end-to-end encryption for patient PII, and DC/TMD diagnostic criteria evaluation.
 
 ## Monorepo Structure
 
 This is a **pnpm workspace** with **Turbo v2** for build orchestration:
 
 **Applications:**
-- **apps/auth-server**: Better Auth authentication service with Express 5, JWT integration, and Hasura action handlers (port 3001)
+- **apps/auth-server**: Better Auth authentication service with Hono, JWT integration, and Hasura action handlers (port 3001)
 - **apps/frontend**: Practitioner frontend - React 19 + Vite 7 + TanStack Router + TanStack Query (port 3000)
 - **apps/patient-frontend**: Patient questionnaire frontend - React 19 + Vite 7 + TanStack Router (port 3002)
 - **apps/hasura**: Hasura GraphQL Engine v2.46.0 configuration - metadata, migrations, and seeds
@@ -78,10 +78,13 @@ This is a **pnpm workspace** with **Turbo v2** for build orchestration:
    - Custom actions forwarded to auth-server
 
 2. **Authentication Server** (port 3001) - `apps/auth-server`
-   - Express 5 with Better Auth for JWT tokens
+   - Hono web framework with `@hono/node-server` runtime
+   - Better Auth for JWT tokens and session management
+   - Built-in middleware: `hono/cors`, `hono/secure-headers`
    - Email verification workflow (optional SMTP)
    - Hasura action handlers for anonymous operations (consent, questionnaire submission, token validation)
-   - Custom auth endpoints (role switching, user listing)
+   - Custom auth endpoints (role switching)
+   - Branded types (`ValidatedRole`, `OrganizationUserId`) for type-safe authorization
    - CORS configured for practitioner frontend
    - Runs in Docker (Node 22 Alpine, multi-stage build)
 
@@ -165,13 +168,16 @@ GraphQL types are generated from the Hasura schema using GraphQL Code Generator:
 
 ### Hasura Actions
 
-All actions use the `public` role (anonymous access) and are handled by the auth-server:
+All actions are handled by the auth-server. Public actions (anonymous access):
 
 - `validateInviteToken` - Token validation returning organization public key
 - `submitPatientConsent` - Anonymous consent capture
 - `submitPatientPersonalData` - Encrypted PII submission
 - `submitQuestionnaireResponse` - Questionnaire answer submission
 - `getPatientProgress` (query) - Patient's completion status (consent, personal data, questionnaires)
+
+Authenticated actions (require JWT):
+- `resetInviteToken` - Reset and extend invite token expiration (organization-scoped)
 
 ### Key GraphQL Patterns
 
@@ -315,40 +321,36 @@ Production uses subdomain routing: `app.DOMAIN`, `patient.DOMAIN`, `api.DOMAIN`,
 
 ## Module System Configuration
 
-**Intentional Mix of CommonJS and ESM:**
+**All packages use ESM** (`"type": "module"`):
 
-- **Auth Server** (`apps/auth-server`): CommonJS (`"type": "commonjs"`)
-  - Better Auth and Express 5 backend
-  - Compiles TypeScript to CommonJS via `tsc`
+- **Auth Server** (`apps/auth-server`): ESM with `NodeNext` module resolution
+  - Hono web framework (ESM-native)
+  - Compiles TypeScript to ESM via `tsc` with `module: "NodeNext"`
+  - Uses `.js` extensions in all imports (ESM requirement)
   - Uses `tsx` for development with `nodemon`
 
-- **Frontends** (`apps/frontend`, `apps/patient-frontend`): ESM (`"type": "module"`)
+- **Frontends** (`apps/frontend`, `apps/patient-frontend`): ESM
   - Required by Vite bundler
   - Modern React 19 with ESM imports
 
-- **Shared Packages**: ESM (`"type": "module"`) for `config` and `questionnaires`
-  - `packages/questionnaires` and `packages/dc-tmd`: Dual ESM/CJS output via `tsup` with conditional exports
+- **Shared Packages**: All ESM (`"type": "module"`)
+  - `packages/questionnaires`: ESM-only output via `tsup` (CJS removed after auth-server ESM migration)
+  - `packages/dc-tmd`: Dual ESM/CJS output via `tsup` (CJS retained for potential external consumers)
   - `packages/config`: ESM only via `tsc`
-  - `packages/test-utils`: No `"type"` field (implicitly CommonJS)
+  - `packages/test-utils`: No `"type"` field
 
-### ESM/CJS Bridge (questionnaires and dc-tmd packages)
+### Package Build with tsup
 
-These packages are consumed by both ESM (frontends) and CommonJS (auth-server) consumers:
+`packages/questionnaires` and `packages/dc-tmd` use `tsup` for bundling:
 
-1. **Dual format build** via `tsup`:
-   ```typescript
-   format: ["esm", "cjs"]  // Outputs both .js and .cjs
-   ```
+```typescript
+// questionnaires: ESM-only, bundles zod for Docker portability
+format: ["esm"]
+noExternal: ["zod"]
 
-2. **Conditional exports** in `package.json`:
-   ```json
-   "exports": {
-     ".": {
-       "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-       "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
-     }
-   }
-   ```
+// dc-tmd: dual format (ESM + CJS)
+format: ["esm", "cjs"]
+```
 
 ## End-to-End Encryption System
 
@@ -445,7 +447,7 @@ Each feature in `apps/frontend/src/features/` follows this structure:
 
 ## Key File Locations
 
-- **Auth Server Source**: `apps/auth-server/src/` (flat structure: `server.ts`, `actions.ts`, `database.ts`, `auth.ts`, `validation.ts`, etc.)
+- **Auth Server Source**: `apps/auth-server/src/` (flat structure: `server.ts`, `actions.ts`, `database.ts`, `auth.ts`, `validation.ts`, `types.ts`, `errors.ts`, `env.ts`, `jwt-utils.ts`, `email.ts`)
 - **Hasura Metadata**: `apps/hasura/metadata/`
 - **Hasura Migrations**: `apps/hasura/migrations/default/`
 - **Hasura Actions**: `apps/hasura/metadata/actions.yaml` and `actions.graphql`
@@ -465,6 +467,7 @@ Each feature in `apps/frontend/src/features/` follows this structure:
 
 - **Base config** (`tsconfig.base.json`): ES2022 target, ESNext modules, bundler resolution, strict mode, React JSX
 - **Root config** (`tsconfig.json`): Extends base, includes `tests/` with path aliases for `@cmdetect/config` and `@cmdetect/test-utils`
+- **Auth server** (`apps/auth-server/tsconfig.json`): Overrides to `module: "NodeNext"`, `moduleResolution: "NodeNext"` for Node.js ESM compatibility
 - **TypeScript 5.9+** across all packages
 
 ## Linting and Formatting
