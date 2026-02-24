@@ -4,6 +4,9 @@ actions:
       kind: ""
       handler: http://auth-server:3001/actions/get-patient-progress
       forward_client_headers: true
+      headers:
+        - name: x-hasura-action-secret
+          value_from_env: HASURA_ACTION_SECRET
     permissions:
       - role: public
   - name: submitPatientConsent
@@ -11,6 +14,9 @@ actions:
       kind: synchronous
       handler: http://auth-server:3001/actions/submit-patient-consent
       forward_client_headers: true
+      headers:
+        - name: x-hasura-action-secret
+          value_from_env: HASURA_ACTION_SECRET
     permissions:
       - role: public
   - name: submitPatientPersonalData
@@ -18,6 +24,9 @@ actions:
       kind: synchronous
       handler: http://auth-server:3001/actions/submit-patient-personal-data
       forward_client_headers: true
+      headers:
+        - name: x-hasura-action-secret
+          value_from_env: HASURA_ACTION_SECRET
     permissions:
       - role: public
   - name: submitQuestionnaireResponse
@@ -25,6 +34,9 @@ actions:
       kind: synchronous
       handler: http://auth-server:3001/actions/submit-questionnaire-response
       forward_client_headers: true
+      headers:
+        - name: x-hasura-action-secret
+          value_from_env: HASURA_ACTION_SECRET
     permissions:
       - role: public
   - name: validateInviteToken
@@ -32,6 +44,9 @@ actions:
       kind: synchronous
       handler: http://auth-server:3001/actions/validate-invite-token
       forward_client_headers: true
+      headers:
+        - name: x-hasura-action-secret
+          value_from_env: HASURA_ACTION_SECRET
     permissions:
       - role: public
 custom_types:

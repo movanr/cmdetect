@@ -3,6 +3,7 @@
  */
 
 import type { Context } from "hono";
+import { z } from "zod";
 import { ENABLED_QUESTIONNAIRES } from "@cmdetect/questionnaires";
 import { DatabaseService } from "./database.js";
 import { sendActionError, sendActionSuccess } from "./errors.js";
@@ -13,16 +14,30 @@ import {
   validateQuestionnaireResponseData,
 } from "./validation.js";
 
-// TODO: 1. Inputs immer parsen mit Zod und du kannst auch von Hasura aus einen Header mitschicken lassen, dass du weißt, dass die Action von Hasura gecalled wird
-// TODO (nice-to-have): 2. Scheint mir als könnten fast alle Actions direkt in Hasura gemacht werden mit native Queries die dir dann GraphQL exposen. Vorteil -> Permissions werden gechecked ob korrekt statt wie hier indirekt Superuser Access
+// TODO (nice-to-have): Scheint mir als könnten fast alle Actions direkt in Hasura gemacht werden mit native Queries die dir dann GraphQL exposen. Vorteil -> Permissions werden gechecked ob korrekt statt wie hier indirekt Superuser Access
+
+const HasuraBodySchema = z.object({
+  // Values are 'any' here — structural validation ensures 'input' key exists;
+  // per-field semantic validation happens via dedicated validators below.
+  input: z.record(z.string(), z.any()),
+  session_variables: z.record(z.string(), z.string()).optional(),
+});
+
 export class ActionHandlers {
   constructor(private db: DatabaseService) {}
+
+  private async parseBody(c: Context) {
+    const raw = await c.req.json(); // global handler catches SyntaxError → 400
+    const result = HasuraBodySchema.safeParse(raw);
+    return result.success ? result.data : null;
+  }
 
   /**
    * Handles patient consent submission
    */
   async submitPatientConsent(c: Context): Promise<Response> {
-    const body = await c.req.json();
+    const body = await this.parseBody(c);
+    if (!body) return sendActionError(c, "Invalid request body");
     const { invite_token, consent_data } = body.input;
 
     // Validate invite token
@@ -59,7 +74,8 @@ export class ActionHandlers {
    * Handles questionnaire response submission
    */
   async submitQuestionnaireResponse(c: Context): Promise<Response> {
-    const body = await c.req.json();
+    const body = await this.parseBody(c);
+    if (!body) return sendActionError(c, "Invalid request body");
     const { invite_token, response_data } = body.input;
 
     // Validate invite token
@@ -125,7 +141,8 @@ export class ActionHandlers {
    * Handles patient personal information submission
    */
   async submitPatientPersonalData(c: Context): Promise<Response> {
-    const body = await c.req.json();
+    const body = await this.parseBody(c);
+    if (!body) return sendActionError(c, "Invalid request body");
     const { invite_token, patient_data } = body.input;
 
     // Validate invite token
@@ -169,7 +186,8 @@ export class ActionHandlers {
    * Validates invite token and returns organization public key for encryption
    */
   async validateInviteToken(c: Context): Promise<Response> {
-    const body = await c.req.json();
+    const body = await this.parseBody(c);
+    if (!body) return c.json({ valid: false, error_message: "Invalid request body" });
     const { invite_token } = body.input;
 
     // Basic token format validation
@@ -197,7 +215,8 @@ export class ActionHandlers {
    * Gets patient progress for resume functionality
    */
   async getPatientProgress(c: Context): Promise<Response> {
-    const body = await c.req.json();
+    const body = await this.parseBody(c);
+    if (!body) return c.json({ valid: false, has_consent: false, consent_given: false, has_personal_data: false, submitted_questionnaires: [], error_message: "Invalid request body" });
     const { invite_token } = body.input;
 
     // Basic token format validation
@@ -222,7 +241,8 @@ export class ActionHandlers {
    * Resets an invite token (extends expiration, clears completion)
    */
   async resetInviteToken(c: Context): Promise<Response> {
-    const body = await c.req.json();
+    const body = await this.parseBody(c);
+    if (!body) return sendActionError(c, "Invalid request body");
     const { patient_record_id } = body.input;
     const sessionVariables = body.session_variables;
 

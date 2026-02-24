@@ -13,7 +13,7 @@ const app = new Hono();
 
 // Database connection
 const dbPool = new Pool({
-  connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST || 'localhost'}:${env.POSTGRES_PORT || 5432}/${env.POSTGRES_DB}`,
+  connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${env.POSTGRES_PORT}/${env.POSTGRES_DB}`,
 });
 
 // Initialize services
@@ -25,10 +25,24 @@ const authEndpoints = new AuthEndpoints(databaseService);
 app.use(secureHeaders());
 app.use(
   cors({
-    origin: env.FRONTEND_URL || "http://localhost:3000",
+    origin: env.FRONTEND_URL,
     credentials: true,
   })
 );
+
+// Secret header validation for Hasura actions
+app.use("/actions/*", async (c, next) => {
+  const secret = env.HASURA_ACTION_SECRET;
+  if (secret) {
+    const header = c.req.header("x-hasura-action-secret");
+    if (header !== secret) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+  } else {
+    console.warn("HASURA_ACTION_SECRET not set — action secret validation disabled");
+  }
+  await next();
+});
 
 // Hasura Actions
 app.post("/actions/submit-patient-consent", (c) =>
