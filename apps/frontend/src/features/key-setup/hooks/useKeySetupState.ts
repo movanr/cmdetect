@@ -13,7 +13,7 @@ function keySetupReducer(state: KeySetupState, action: KeySetupAction): KeySetup
       if (hasPublicKey && hasPrivateKey) {
         if (isCompatible === true) return { type: 'setup-complete' };
         if (isCompatible === false) return { type: 'key-mismatch', error: 'Keys are incompatible' };
-        return { type: 'loading' }; // Still validating
+        return { type: 'error', error: 'Key validation produced an indeterminate result. Try reloading.' };
       }
 
       if (!hasPublicKey && !hasPrivateKey) {
@@ -31,7 +31,7 @@ function keySetupReducer(state: KeySetupState, action: KeySetupAction): KeySetup
           : { type: 'user-waiting-for-admin' };
       }
 
-      return { type: 'loading' };
+      return { type: 'error', error: 'Unexpected key setup state. Try reloading.' };
     }
 
     case 'START_ADMIN_GENERATION':

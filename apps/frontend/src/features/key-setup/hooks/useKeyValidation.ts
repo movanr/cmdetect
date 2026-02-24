@@ -30,7 +30,10 @@ export function useKeyValidation({
   callbackRef.current = onValidationComplete;
 
   const validateKeys = useCallback(async () => {
-    if (organizationPublicKey === undefined) return; // Wait for org data
+    if (organizationPublicKey === undefined) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
       setIsLoading(true);

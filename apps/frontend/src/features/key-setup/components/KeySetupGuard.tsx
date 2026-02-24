@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useSession } from "../../../lib/auth";
 import { useKeySetup } from "../hooks/useKeySetup";
 import { LoadingStep } from "./steps/LoadingStep";
 
@@ -10,9 +11,12 @@ interface KeySetupGuardProps {
 export function KeySetupGuard({ children }: KeySetupGuardProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: session } = useSession();
   const { state } = useKeySetup();
 
   useEffect(() => {
+    if (!session) return; // No session — AppLayout handles the /login redirect
+
     const needsSetup =
       state.type !== "setup-complete" && state.type !== "loading";
 
@@ -22,7 +26,11 @@ export function KeySetupGuard({ children }: KeySetupGuardProps) {
         navigate({ to: "/key-setup" });
       }, 0);
     }
-  }, [state.type, location.pathname, navigate]);
+  }, [session, state.type, location.pathname, navigate]);
+
+  if (!session) {
+    return <>{children}</>;
+  }
 
   if (state.type === "loading") {
     return (

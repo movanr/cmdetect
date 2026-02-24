@@ -75,6 +75,20 @@ export function useKeySetup() {
     }
   }, [orgLoading, validationLoading, actions]);
 
+  // Advance state when org data is unavailable (post-logout, disabled query, query error)
+  useEffect(() => {
+    if (!orgLoading && !validationLoading && organizationPublicKey === undefined) {
+      actions.setContext({
+        organizationId,
+        organizationName,
+        hasPublicKey: false,
+        hasPrivateKey: false,
+        isCompatible: null,
+        isAdmin: activeRole === roles.ORG_ADMIN,
+      });
+    }
+  }, [orgLoading, validationLoading, organizationPublicKey, organizationId, organizationName, activeRole, actions]);
+
   return {
     state,
     actions,

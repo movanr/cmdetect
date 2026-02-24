@@ -36,6 +36,10 @@ export async function getJWTToken(): Promise<string | null> {
   }
 }
 
+export function clearJWTToken(): void {
+  token = null;
+}
+
 export const refreshJWTToken = async () => {
   token = null;
   const newToken = await getJWTToken();

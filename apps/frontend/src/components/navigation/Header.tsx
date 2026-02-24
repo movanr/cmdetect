@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useSession, signOut } from "../../lib/auth";
+import { useSession, signOut, clearJWTToken } from "../../lib/auth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -40,13 +40,13 @@ export function Header() {
   const privilegedRoles: UserRole[] = [roles.ORG_ADMIN];
 
   const handleSignOut = async () => {
+    clearJWTToken();
     try {
       await signOut();
-      navigate({ to: "/login" });
     } catch (error) {
       console.error("Sign out error:", error);
-      toast.error(t.messages.signOutFailed);
     }
+    navigate({ to: "/login" });
   };
 
   const handleRoleSwitch = async (role: UserRole) => {
