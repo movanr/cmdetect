@@ -467,13 +467,14 @@ Each feature in `apps/frontend/src/features/` follows this structure:
 - **Root config** (`tsconfig.json`): Extends base, includes `tests/` with path aliases for `@cmdetect/config` and `@cmdetect/test-utils`
 - **TypeScript 5.9+** across all packages
 
-## Linting
+## Linting and Formatting
 
 - **ESLint 9** with flat config (`eslint.config.js` at root)
 - TypeScript plugin with `no-explicit-any: warn`, `no-unused-vars: warn` (with `_` prefix ignore)
 - React plugin for frontend apps (hooks rules, refresh plugin)
 - `apps/hasura/` and `components/ui/` (shadcn) excluded from linting
 - Test files have relaxed rules (any allowed, require imports allowed)
+- **Prettier** (`.prettierrc`): double quotes, semicolons, 100 char width, 2-space indent, ES5 trailing commas, LF line endings
 
 ## Package Manager Requirements
 
