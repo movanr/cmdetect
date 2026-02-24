@@ -2,16 +2,16 @@
  * Hasura action handlers
  */
 
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { ENABLED_QUESTIONNAIRES } from "@cmdetect/questionnaires";
-import { DatabaseService } from "./database";
-import { sendActionError, sendActionSuccess } from "./errors";
+import { DatabaseService } from "./database.js";
+import { sendActionError, sendActionSuccess } from "./errors.js";
 import {
   validateConsentData,
   validateInviteToken,
   validatePatientPersonalData,
   validateQuestionnaireResponseData,
-} from "./validation";
+} from "./validation.js";
 
 // TODO: 1. Inputs immer parsen mit Zod und du kannst auch von Hasura aus einen Header mitschicken lassen, dass du weißt, dass die Action von Hasura gecalled wird
 // TODO (nice-to-have): 2. Scheint mir als könnten fast alle Actions direkt in Hasura gemacht werden mit native Queries die dir dann GraphQL exposen. Vorteil -> Permissions werden gechecked ob korrekt statt wie hier indirekt Superuser Access
@@ -21,25 +21,26 @@ export class ActionHandlers {
   /**
    * Handles patient consent submission
    */
-  async submitPatientConsent(req: Request, res: Response): Promise<void> {
-    const { invite_token, consent_data } = req.body.input;
+  async submitPatientConsent(c: Context): Promise<Response> {
+    const body = await c.req.json();
+    const { invite_token, consent_data } = body.input;
 
     // Validate invite token
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      return sendActionError(res, tokenValidation.error!);
+      return sendActionError(c, tokenValidation.error!);
     }
 
     // Validate consent data
     const consentValidation = validateConsentData(consent_data);
     if (!consentValidation.valid) {
-      return sendActionError(res, consentValidation.error!);
+      return sendActionError(c, consentValidation.error!);
     }
 
     // Get patient record
     const patientRecord = await this.db.getPatientRecordByInviteToken(invite_token);
     if (!patientRecord) {
-      return sendActionError(res, "Invalid or expired invite token");
+      return sendActionError(c, "Invalid or expired invite token");
     }
 
     // Upsert patient consent
@@ -51,38 +52,39 @@ export class ActionHandlers {
       consent_data.consent_version
     );
 
-    sendActionSuccess(res, { patient_consent_id: consentId });
+    return sendActionSuccess(c, { patient_consent_id: consentId });
   }
 
   /**
    * Handles questionnaire response submission
    */
-  async submitQuestionnaireResponse(req: Request, res: Response): Promise<void> {
-    const { invite_token, response_data } = req.body.input;
+  async submitQuestionnaireResponse(c: Context): Promise<Response> {
+    const body = await c.req.json();
+    const { invite_token, response_data } = body.input;
 
     // Validate invite token
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      return sendActionError(res, tokenValidation.error!);
+      return sendActionError(c, tokenValidation.error!);
     }
 
     // Validate response data structure
     const responseValidation = validateQuestionnaireResponseData(response_data);
     if (!responseValidation.valid) {
-      return sendActionError(res, responseValidation.error!);
+      return sendActionError(c, responseValidation.error!);
     }
 
     // Get patient record
     const patientRecord = await this.db.getPatientRecordByInviteToken(invite_token);
     if (!patientRecord) {
-      return sendActionError(res, "Invalid or expired invite token");
+      return sendActionError(c, "Invalid or expired invite token");
     }
 
     // Check if consent exists
     const consent = await this.db.getPatientConsentByRecordId(patientRecord.id);
     if (!consent) {
       return sendActionError(
-        res,
+        c,
         "No consent found for this patient record. Please submit consent first."
       );
     }
@@ -116,36 +118,37 @@ export class ActionHandlers {
       );
     }
 
-    sendActionSuccess(res, { questionnaire_response_id: responseId });
+    return sendActionSuccess(c, { questionnaire_response_id: responseId });
   }
 
   /**
    * Handles patient personal information submission
    */
-  async submitPatientPersonalData(req: Request, res: Response): Promise<void> {
-    const { invite_token, patient_data } = req.body.input;
+  async submitPatientPersonalData(c: Context): Promise<Response> {
+    const body = await c.req.json();
+    const { invite_token, patient_data } = body.input;
 
     // Validate invite token
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      return sendActionError(res, tokenValidation.error!);
+      return sendActionError(c, tokenValidation.error!);
     }
 
     // Validate patient personal data
     const personalDataValidation = validatePatientPersonalData(patient_data);
     if (!personalDataValidation.valid) {
-      return sendActionError(res, personalDataValidation.error!);
+      return sendActionError(c, personalDataValidation.error!);
     }
 
     // Get patient record
     const patientRecord = await this.db.getPatientRecordByInviteToken(invite_token);
     if (!patientRecord) {
-      return sendActionError(res, "Invalid or expired invite token");
+      return sendActionError(c, "Invalid or expired invite token");
     }
 
     // Check if patient data is already completed
     if (patientRecord.patient_data_completed_at) {
-      return sendActionError(res, "Patient personal data has already been completed");
+      return sendActionError(c, "Patient personal data has already been completed");
     }
 
     // Update patient record with encrypted personal data
@@ -156,7 +159,7 @@ export class ActionHandlers {
       patient_data.date_of_birth_encrypted
     );
 
-    sendActionSuccess(res, {
+    return sendActionSuccess(c, {
       patient_record_id: patientRecord.id,
       message: "Patient personal data submitted successfully",
     });
@@ -165,17 +168,17 @@ export class ActionHandlers {
   /**
    * Validates invite token and returns organization public key for encryption
    */
-  async validateInviteToken(req: Request, res: Response): Promise<void> {
-    const { invite_token } = req.body.input;
+  async validateInviteToken(c: Context): Promise<Response> {
+    const body = await c.req.json();
+    const { invite_token } = body.input;
 
     // Basic token format validation
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      res.json({
+      return c.json({
         valid: false,
         error_message: tokenValidation.error,
       });
-      return;
     }
 
     // Validate token and get organization details
@@ -187,19 +190,20 @@ export class ActionHandlers {
     );
 
     // Return the validation result directly
-    res.json(result);
+    return c.json(result);
   }
 
   /**
    * Gets patient progress for resume functionality
    */
-  async getPatientProgress(req: Request, res: Response): Promise<void> {
-    const { invite_token } = req.body.input;
+  async getPatientProgress(c: Context): Promise<Response> {
+    const body = await c.req.json();
+    const { invite_token } = body.input;
 
     // Basic token format validation
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      res.json({
+      return c.json({
         valid: false,
         has_consent: false,
         consent_given: false,
@@ -207,45 +211,45 @@ export class ActionHandlers {
         submitted_questionnaires: [],
         error_message: tokenValidation.error,
       });
-      return;
     }
 
     // Get patient progress from database
     const result = await this.db.getPatientProgress(invite_token);
-    res.json(result);
+    return c.json(result);
   }
 
   /**
    * Resets an invite token (extends expiration, clears completion)
    */
-  async resetInviteToken(req: Request, res: Response): Promise<void> {
-    const { patient_record_id } = req.body.input;
-    const sessionVariables = req.body.session_variables;
+  async resetInviteToken(c: Context): Promise<Response> {
+    const body = await c.req.json();
+    const { patient_record_id } = body.input;
+    const sessionVariables = body.session_variables;
 
     // Get organization ID from session (JWT claim)
     const organizationId = sessionVariables?.["x-hasura-organization-id"];
     if (!organizationId) {
-      return sendActionError(res, "Organization ID not found in session");
+      return sendActionError(c, "Organization ID not found in session");
     }
 
     // Validate patient_record_id
     if (!patient_record_id || typeof patient_record_id !== "string") {
-      return sendActionError(res, "Invalid patient record ID");
+      return sendActionError(c, "Invalid patient record ID");
     }
 
     try {
       const newExpiresAt = await this.db.resetInviteToken(patient_record_id, organizationId);
 
       if (!newExpiresAt) {
-        return sendActionError(res, "Patient record not found or access denied");
+        return sendActionError(c, "Patient record not found or access denied");
       }
 
-      sendActionSuccess(res, {
+      return sendActionSuccess(c, {
         new_expires_at: newExpiresAt.toISOString(),
       });
     } catch (error) {
       console.error("Error resetting invite token:", error);
-      return sendActionError(res, "Failed to reset invite token");
+      return sendActionError(c, "Failed to reset invite token");
     }
   }
 }

@@ -7,7 +7,12 @@
  */
 
 import dotenv from "dotenv";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Load environment from root .env file
 // __dirname when compiled will be in dist/, so we go up to apps/auth-server, then to root

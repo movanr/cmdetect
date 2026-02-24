@@ -1,16 +1,15 @@
-import { toNodeHandler } from "better-auth/node";
-import cors from "cors";
-import express from "express";
-import helmet from "helmet";
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { Pool } from "pg";
-import { ActionHandlers } from "./actions";
-import { auth } from "./auth";
-import { AuthEndpoints } from "./auth-endpoints";
-import { DatabaseService } from "./database";
-import { env } from "./env";
-import { handleAsyncError } from "./errors";
+import { ActionHandlers } from "./actions.js";
+import { auth } from "./auth.js";
+import { AuthEndpoints } from "./auth-endpoints.js";
+import { DatabaseService } from "./database.js";
+import { env } from "./env.js";
 
-const app = express();
+const app = new Hono();
 
 // Database connection
 const dbPool = new Pool({
@@ -23,90 +22,51 @@ const actionHandlers = new ActionHandlers(databaseService);
 const authEndpoints = new AuthEndpoints(databaseService);
 
 // Middleware
-app.use(helmet());
+app.use(secureHeaders());
 app.use(
   cors({
-    origin: env.FRONTEND_URL,
+    origin: env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
   })
 );
 
-// JSON middleware after auth handler
-app.use(express.json({ limit: "1mb" }));
-
 // Hasura Actions
-app.post(
-  "/actions/submit-patient-consent",
-  handleAsyncError(
-    (req, res) => actionHandlers.submitPatientConsent(req, res),
-    "Failed to submit consent"
-  )
+app.post("/actions/submit-patient-consent", (c) =>
+  actionHandlers.submitPatientConsent(c)
+);
+app.post("/actions/submit-questionnaire-response", (c) =>
+  actionHandlers.submitQuestionnaireResponse(c)
+);
+app.post("/actions/submit-patient-personal-data", (c) =>
+  actionHandlers.submitPatientPersonalData(c)
+);
+app.post("/actions/validate-invite-token", (c) =>
+  actionHandlers.validateInviteToken(c)
+);
+app.post("/actions/get-patient-progress", (c) =>
+  actionHandlers.getPatientProgress(c)
 );
 
-app.post(
-  "/actions/submit-questionnaire-response",
-  handleAsyncError(
-    (req, res) => actionHandlers.submitQuestionnaireResponse(req, res),
-    "Failed to submit questionnaire response"
-  )
-);
+// Authentication endpoints (registered before Better Auth wildcard)
+app.post("/api/auth/switch-role", (c) => authEndpoints.switchRole(c));
 
-app.post(
-  "/actions/submit-patient-personal-data",
-  handleAsyncError(
-    (req, res) => actionHandlers.submitPatientPersonalData(req, res),
-    "Failed to submit patient personal data"
-  )
-);
-
-app.post(
-  "/actions/validate-invite-token",
-  handleAsyncError(
-    (req, res) => actionHandlers.validateInviteToken(req, res),
-    "Failed to validate invite token"
-  )
-);
-
-app.post(
-  "/actions/get-patient-progress",
-  handleAsyncError(
-    (req, res) => actionHandlers.getPatientProgress(req, res),
-    "Failed to get patient progress"
-  )
-);
-
-// Authentication endpoints
-app.post(
-  "/api/auth/switch-role",
-  handleAsyncError((req, res) => authEndpoints.switchRole(req, res), "Failed to switch role")
-);
-
-// Auth routes (must be after custom routes)
-app.all("/api/auth/*splat", toNodeHandler(auth));
+// Better Auth routes (must be after custom routes)
+app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 // Health check
-app.get("/health", (_, res) => {
-  res.json({ status: "OK", service: "cmdetect-auth-server" });
-});
+app.get("/health", (c) =>
+  c.json({ status: "OK", service: "cmdetect-auth-server" })
+);
 
-// Global error handler for Express middleware errors (including JSON parsing)
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  // Handle JSON parsing errors from express.json() middleware
-  if (err instanceof SyntaxError && "body" in err) {
-    return res.status(400).json({
-      error: "Invalid JSON format in request body",
-    });
+// Global error handler
+app.onError((err, c) => {
+  if (err instanceof SyntaxError) {
+    return c.json({ error: "Invalid JSON format in request body" }, 400);
   }
-
-  // Log unexpected errors
   console.error("Unexpected server error:", err);
-
-  // Send generic error response
-  res.status(500).json({
-    error: "Internal server error",
-  });
+  return c.json({ error: "Internal server error" }, 500);
 });
 
-app.listen(3001, "0.0.0.0", () => {
-  console.log(`Auth server running on 0.0.0.0:3001`);
+serve({ fetch: app.fetch, port: 3001, hostname: "0.0.0.0" }, (info) => {
+  console.log(`Auth server running on 0.0.0.0:${info.port}`);
 });

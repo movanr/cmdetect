@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport";
-import { env } from "./env";
+import { env } from "./env.js";
 
 interface EmailOptions {
   to: string;
@@ -20,7 +19,7 @@ const transporter = env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS
         user: env.SMTP_USER,
         pass: env.SMTP_PASS,
       },
-    } as SMTPTransport.Options)
+    })
   : null;
 
 export async function sendEmail(options: EmailOptions): Promise<void> {

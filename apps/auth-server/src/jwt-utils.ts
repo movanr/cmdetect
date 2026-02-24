@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { UserJWTPayload } from './types';
+import { UserJWTPayload } from './types.js';
 
 /**
  * Verifies and decodes a user JWT token from Authorization header

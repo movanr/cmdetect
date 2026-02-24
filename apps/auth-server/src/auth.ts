@@ -2,8 +2,8 @@ import { roleHierarchy, roles } from "@cmdetect/config";
 import { betterAuth } from "better-auth";
 import { jwt } from "better-auth/plugins";
 import { Pool } from "pg";
-import { sendEmail } from "./email";
-import { env } from "./env";
+import { sendEmail } from "./email.js";
+import { env } from "./env.js";
 
 // Better Auth user will now have these fields directly instead of JSON metadata
 

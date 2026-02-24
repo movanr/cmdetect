@@ -2,17 +2,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/index.ts"],
-  /**
-   * ESM/CJS BRIDGE: Dual format output
-   *
-   * We build both ESM and CJS because:
-   * - apps/frontend (ESM) uses "import" → gets dist/index.js
-   * - apps/auth-server (CommonJS) uses "require" → gets dist/index.cjs
-   *
-   * If auth-server switches to ESM (e.g., Hono/Elysia with "type": "module"),
-   * you can simplify to: format: ["esm"]
-   */
-  format: ["esm", "cjs"],
+  format: ["esm"],
   dts: true,
   clean: true,
   sourcemap: true,

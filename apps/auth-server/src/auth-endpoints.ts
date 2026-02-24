@@ -2,11 +2,11 @@
  * Authentication endpoint handlers
  */
 
-import { Request, Response } from 'express';
-import { DatabaseService } from './database';
-import { validateRoleData } from './validation';
-import { sendHttpError, sendHttpSuccess } from './errors';
-import { auth } from './auth';
+import type { Context } from 'hono';
+import { DatabaseService } from './database.js';
+import { validateRoleData } from './validation.js';
+import { sendHttpError, sendHttpSuccess } from './errors.js';
+import { auth } from './auth.js';
 
 export class AuthEndpoints {
   constructor(private db: DatabaseService) {}
@@ -14,22 +14,22 @@ export class AuthEndpoints {
   /**
    * Handles role switching requests
    */
-  async switchRole(req: Request, res: Response): Promise<void> {
-    const { role } = req.body;
+  async switchRole(c: Context): Promise<Response> {
+    const { role } = await c.req.json();
 
     // Validate role data
     const roleValidation = validateRoleData(role);
     if (!roleValidation.valid) {
-      return sendHttpError(res, 400, roleValidation.error!);
+      return sendHttpError(c, 400, roleValidation.error!);
     }
 
     // Get current session using Better Auth
     const sessionResult = await auth.api.getSession({
-      headers: new Headers(req.headers as HeadersInit)
+      headers: c.req.raw.headers
     });
 
     if (!sessionResult || !sessionResult.user) {
-      return sendHttpError(res, 401, "Invalid session");
+      return sendHttpError(c, 401, "Invalid session");
     }
 
     const user = sessionResult.user;
@@ -37,7 +37,7 @@ export class AuthEndpoints {
 
     // Validate that user has the requested role
     if (!userRoles.includes(role)) {
-      return sendHttpError(res, 403, `You don't have permission to switch to role: ${role}`);
+      return sendHttpError(c, 403, `You don't have permission to switch to role: ${role}`);
     }
 
     // Update user's active role in database
@@ -45,7 +45,7 @@ export class AuthEndpoints {
 
     console.log(`User ${user.email} switched to role: ${role}`);
 
-    sendHttpSuccess(res, {
+    return sendHttpSuccess(c, {
       success: true,
       activeRole: role,
       availableRoles: userRoles,
