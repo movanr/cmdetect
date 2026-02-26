@@ -7,9 +7,9 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
-    "test": "jest",
-    "test:permissions": "jest tests/permissions",
-    "test:watch": "jest --watch",
+    "test": "NODE_ENV=test jest",
+    "test:permissions": "NODE_ENV=test jest tests/permissions",
+    "test:watch": "NODE_ENV=test jest --watch",
     "test:users": "pnpm --filter @cmdetect/auth-server seed:users",
     "clean": "turbo run clean",
     "type-check": "turbo run type-check",

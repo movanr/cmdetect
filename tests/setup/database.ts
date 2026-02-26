@@ -1,3 +1,4 @@
+import { GraphQLClient } from "graphql-request";
 import { createAdminClient } from "./graphql-client";
 
 function assertTestEnvironment(): void {
@@ -72,4 +73,40 @@ export async function setupTestData(): Promise<void> {
 export async function resetTestDatabase(): Promise<void> {
   await clearTestData();
   await setupTestData();
+}
+
+/**
+ * Creates a test patient record using an authenticated receptionist client
+ * (organization_id and created_by are auto-set from the JWT), then sets
+ * invite_expires_at via the admin client.
+ *
+ * Use this instead of inserting via admin client with hardcoded user IDs.
+ */
+export async function createTestPatientRecord(
+  receptionistClient: GraphQLClient,
+  adminClient: GraphQLClient,
+  clinicInternalId: string,
+  expiresInMs = 24 * 60 * 60 * 1000
+): Promise<{ id: string; inviteToken: string }> {
+  const result = (await receptionistClient.request(`
+    mutation {
+      insert_patient_record(objects: [{ clinic_internal_id: "${clinicInternalId}" }]) {
+        returning { id invite_token }
+      }
+    }
+  `)) as any;
+
+  const id: string = result.insert_patient_record.returning[0].id;
+  const inviteToken: string = result.insert_patient_record.returning[0].invite_token;
+
+  await adminClient.request(`
+    mutation {
+      update_patient_record_by_pk(
+        pk_columns: { id: "${id}" }
+        _set: { invite_expires_at: "${new Date(Date.now() + expiresInMs).toISOString()}" }
+      ) { id }
+    }
+  `);
+
+  return { id, inviteToken };
 }

@@ -96,7 +96,7 @@ describe("Role Switching Endpoint", () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toBe("Role is required and must be a string");
+      expect(data.error).toBe("Invalid role");
     });
 
     it("should reject non-string role parameter", async () => {
@@ -113,7 +113,7 @@ describe("Role Switching Endpoint", () => {
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toBe("Role is required and must be a string");
+      expect(data.error).toBe("Invalid role");
     });
 
     it("should reject role user doesn't have", async () => {

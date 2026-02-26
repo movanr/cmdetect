@@ -3,8 +3,8 @@
  * Tests the /actions/validate-invite-token endpoint
  */
 
-import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
-import { isAuthServerAvailable } from "../setup/auth-server";
+import { resetTestDatabase, testDatabaseConnection, createTestPatientRecord } from "../setup/database";
+import { isAuthServerAvailable, createAuthenticatedClient } from "../setup/auth-server";
 import { createAdminClient } from "../setup/graphql-client";
 import { TestDataIds } from "@cmdetect/test-utils";
 
@@ -13,6 +13,8 @@ describe("Validate Invite Token Action Handler", () => {
   let patientRecordId: string;
   let inviteToken: string;
   const adminClient = createAdminClient();
+  let receptionistClient: Awaited<ReturnType<typeof createAuthenticatedClient>>;
+  let receptionistId: string;
 
   beforeAll(async () => {
     // Check services availability
@@ -25,6 +27,14 @@ describe("Validate Invite Token Action Handler", () => {
     if (!authServerAvailable) {
       throw new Error("Auth server is not available. Please start the auth server before running tests.");
     }
+
+    receptionistClient = await createAuthenticatedClient("org1Receptionist");
+
+    // Resolve the receptionist's actual user ID for cross-org admin mutations
+    const userResult = await adminClient.request<{ user: Array<{ id: string }> }>(`
+      query { user(where: { email: { _eq: "reception1@test.com" } }, limit: 1) { id } }
+    `);
+    receptionistId = userResult.user[0].id;
 
     // Reset test data and create fresh patient record
     await resetTestDatabase();
@@ -46,25 +56,9 @@ describe("Validate Invite Token Action Handler", () => {
       }
     `);
 
-    // Create a patient record with invite token for testing
-    const result = await adminClient.request(`
-      mutation {
-        insert_patient_record(objects: [{
-          organization_id: "${TestDataIds.organizations.org1}",
-          clinic_internal_id: "P001-INVITE-VALIDATION-TEST",
-          created_by: "${TestDataIds.users.org1Receptionist}",
-          invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-        }]) {
-          returning {
-            id
-            invite_token
-          }
-        }
-      }
-    `) as any;
-    
-    patientRecordId = result.insert_patient_record.returning[0].id;
-    inviteToken = result.insert_patient_record.returning[0].invite_token;
+    ({ id: patientRecordId, inviteToken } = await createTestPatientRecord(
+      receptionistClient, adminClient, "P001-INVITE-VALIDATION-TEST"
+    ));
   };
 
   describe("Input Validation", () => {
@@ -119,14 +113,11 @@ describe("Validate Invite Token Action Handler", () => {
     });
 
     it.skip("should handle expired invite token", async () => {
-      // Create a patient record that expires very soon, then use database to manually update it to be expired
-      const shortLivedResult = await adminClient.request(`
+      // Create a patient record, then manually backdate the expiration via admin
+      const shortLivedResult = await receptionistClient.request(`
         mutation {
           insert_patient_record(objects: [{
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P002-EXPIRED-TEST",
-            created_by: "${TestDataIds.users.org1Receptionist}",
-            invite_expires_at: "${new Date(Date.now() + 1000).toISOString()}"
+            clinic_internal_id: "P002-EXPIRED-TEST"
           }]) {
             returning {
               id
@@ -229,13 +220,13 @@ describe("Validate Invite Token Action Handler", () => {
 
       const orgWithoutKeyId = orgWithoutKeyResult.insert_organization.returning[0].id;
 
-      // Create patient record for this organization
+      // Create patient record for this organization via admin (dynamic org requires explicit fields)
       const patientResult = await adminClient.request(`
         mutation {
           insert_patient_record(objects: [{
             organization_id: "${orgWithoutKeyId}",
             clinic_internal_id: "P003-NO-KEY-TEST",
-            created_by: "${TestDataIds.users.org1Receptionist}",
+            created_by: "${receptionistId}",
             invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
           }]) {
             returning {

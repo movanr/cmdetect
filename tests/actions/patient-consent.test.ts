@@ -3,8 +3,8 @@
  * Tests the /actions/submit-patient-consent endpoint
  */
 
-import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
-import { isAuthServerAvailable } from "../setup/auth-server";
+import { resetTestDatabase, testDatabaseConnection, createTestPatientRecord } from "../setup/database";
+import { isAuthServerAvailable, createAuthenticatedClient } from "../setup/auth-server";
 import { createAdminClient } from "../setup/graphql-client";
 import { TestDataIds } from "@cmdetect/test-utils";
 
@@ -13,6 +13,7 @@ describe("Patient Consent Action Handler", () => {
   let patientRecordId: string;
   let inviteToken: string;
   const adminClient = createAdminClient();
+  let receptionistClient: Awaited<ReturnType<typeof createAuthenticatedClient>>;
 
   beforeAll(async () => {
     // Check services availability
@@ -26,31 +27,17 @@ describe("Patient Consent Action Handler", () => {
       throw new Error("Auth server is not available. Please start the auth server before running tests.");
     }
 
+    receptionistClient = await createAuthenticatedClient("org1Receptionist");
+
     // Reset test data and create fresh patient record
     await resetTestDatabase();
     await setupPatientRecord();
   });
 
   const setupPatientRecord = async () => {
-    // Create a patient record with invite token for testing
-    const result = await adminClient.request(`
-      mutation {
-        insert_patient_record(objects: [{
-          organization_id: "${TestDataIds.organizations.org1}",
-          clinic_internal_id: "P001-TEST",
-          created_by: "${TestDataIds.users.org1Receptionist}",
-          invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-        }]) {
-          returning {
-            id
-            invite_token
-          }
-        }
-      }
-    `) as any;
-    
-    patientRecordId = result.insert_patient_record.returning[0].id;
-    inviteToken = result.insert_patient_record.returning[0].invite_token;
+    ({ id: patientRecordId, inviteToken } = await createTestPatientRecord(
+      receptionistClient, adminClient, "P001-TEST"
+    ));
   };
 
   describe("Input Validation", () => {
@@ -267,23 +254,9 @@ describe("Patient Consent Action Handler", () => {
     });
 
     it("should successfully submit consent with false consent_given", async () => {
-      // Create another patient record for this test
-      const newPatientResult = await adminClient.request(`
-        mutation {
-          insert_patient_record(objects: [{
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P002-TEST",
-            created_by: "${TestDataIds.users.org1Receptionist}",
-            invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-          }]) {
-            returning {
-              invite_token
-            }
-          }
-        }
-      `) as any;
-
-      const newInviteToken = newPatientResult.insert_patient_record.returning[0].invite_token;
+      const { inviteToken: newInviteToken } = await createTestPatientRecord(
+        receptionistClient, adminClient, "P002-TEST"
+      );
 
       const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-patient-consent`, {
         method: "POST",
@@ -376,22 +349,9 @@ describe("Patient Consent Action Handler", () => {
 
     it("should handle minimal consent data", async () => {
       // Create another patient record for this test
-      const newPatientResult = await adminClient.request(`
-        mutation {
-          insert_patient_record(objects: [{
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P-MINIMAL",
-            created_by: "${TestDataIds.users.org1Receptionist}",
-            invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-          }]) {
-            returning {
-              invite_token
-            }
-          }
-        }
-      `) as any;
-
-      const minimalInviteToken = newPatientResult.insert_patient_record.returning[0].invite_token;
+      const { inviteToken: minimalInviteToken } = await createTestPatientRecord(
+        receptionistClient, adminClient, "P-MINIMAL"
+      );
 
       const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-patient-consent`, {
         method: "POST",

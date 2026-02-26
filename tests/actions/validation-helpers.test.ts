@@ -6,8 +6,7 @@
 describe("Validation Helper Functions", () => {
   // Since the validation functions are not exported from server.ts,
   // we'll test them indirectly through the endpoints that use them.
-  // In a real-world scenario, these would be extracted to a separate module.
-  
+
   const AUTH_SERVER_URL = process.env.AUTH_SERVER_URL || "http://localhost:3001";
 
   describe("validateUUID function (tested via invite_token validation)", () => {
@@ -92,9 +91,9 @@ describe("Validation Helper Functions", () => {
         });
 
         const data = await response.json();
-        
+
         if (expectValid) {
-          // If UUID is valid, we should get past UUID validation 
+          // If UUID is valid, we should get past UUID validation
           // (might fail later due to token not existing, but error should be different)
           if (!data.success) {
             expect(data.error).not.toBe("Invalid invite token format");
@@ -163,18 +162,59 @@ describe("Validation Helper Functions", () => {
     });
   });
 
-  describe("validateFHIRQuestionnaireResponse function", () => {
-    const baseValidResource = {
-      resourceType: "QuestionnaireResponse",
-      questionnaire: "http://example.com/questionnaire/123",
-      status: "completed"
-    };
+  describe("validateQuestionnaireResponseData function", () => {
+    describe("response_data structure validation", () => {
+      it("should reject missing response_data", async () => {
+        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input: {
+              invite_token: "12345678-1234-4567-8901-123456789012",
+            }
+          })
+        });
 
-    describe("resourceType validation", () => {
-      it("should reject missing resourceType", async () => {
-        const invalidResource = { ...baseValidResource };
-        delete (invalidResource as any).resourceType;
+        const data = await response.json();
+        expect(data.success).toBe(false);
+        expect(data.error).toBe("Invalid response data");
+      });
 
+      it("should reject non-object response_data (string)", async () => {
+        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input: {
+              invite_token: "12345678-1234-4567-8901-123456789012",
+              response_data: "not-an-object"
+            }
+          })
+        });
+
+        const data = await response.json();
+        expect(data.success).toBe(false);
+        expect(data.error).toBe("Invalid response data");
+      });
+
+      it("should reject non-object response_data (array)", async () => {
+        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input: {
+              invite_token: "12345678-1234-4567-8901-123456789012",
+              response_data: []
+            }
+          })
+        });
+
+        const data = await response.json();
+        expect(data.success).toBe(false);
+        expect(data.error).toBe("Invalid response data");
+      });
+
+      it("should reject missing questionnaire_id", async () => {
         const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -182,7 +222,8 @@ describe("Validation Helper Functions", () => {
             input: {
               invite_token: "12345678-1234-4567-8901-123456789012",
               response_data: {
-                fhir_resource: invalidResource
+                questionnaire_version: "v1.0",
+                answers: {}
               }
             }
           })
@@ -190,15 +231,12 @@ describe("Validation Helper Functions", () => {
 
         const data = await response.json();
         expect(data.success).toBe(false);
-        expect(data.error).toBe("resourceType must be 'QuestionnaireResponse'");
+        // Not a format error — the UUID was valid, fails on questionnaire_id
+        expect(data.error).not.toBe("Invalid invite token format");
+        expect(data.error).not.toBe("Invalid response data");
       });
 
-      it("should reject wrong resourceType", async () => {
-        const invalidResource = { 
-          ...baseValidResource, 
-          resourceType: "Patient" 
-        };
-
+      it("should reject invalid questionnaire_id", async () => {
         const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -206,7 +244,9 @@ describe("Validation Helper Functions", () => {
             input: {
               invite_token: "12345678-1234-4567-8901-123456789012",
               response_data: {
-                fhir_resource: invalidResource
+                questionnaire_id: "not-a-valid-questionnaire",
+                questionnaire_version: "v1.0",
+                answers: {}
               }
             }
           })
@@ -214,408 +254,8 @@ describe("Validation Helper Functions", () => {
 
         const data = await response.json();
         expect(data.success).toBe(false);
-        expect(data.error).toBe("resourceType must be 'QuestionnaireResponse'");
-      });
-
-      it("should accept correct resourceType", async () => {
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: baseValidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        // Should pass resourceType validation (will fail later due to invalid token)
-        if (!data.success) {
-          expect(data.error).not.toBe("resourceType must be 'QuestionnaireResponse'");
-        }
-      });
-    });
-
-    describe("questionnaire field validation", () => {
-      it("should reject missing questionnaire field", async () => {
-        const invalidResource = { ...baseValidResource };
-        delete (invalidResource as any).questionnaire;
-
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: invalidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.error).toBe("questionnaire field is required and must be a string");
-      });
-
-      it("should reject non-string questionnaire field", async () => {
-        const invalidResource = { 
-          ...baseValidResource, 
-          questionnaire: 123 
-        };
-
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: invalidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.error).toBe("questionnaire field is required and must be a string");
-      });
-
-      it("should accept valid questionnaire URLs", async () => {
-        const validQuestionnaires = [
-          "http://example.com/questionnaire/123",
-          "https://fhir.example.org/Questionnaire/patient-intake",
-          "urn:uuid:12345678-1234-4567-8901-123456789012",
-          "Questionnaire/123"
-        ];
-
-        for (const questionnaire of validQuestionnaires) {
-          const validResource = { 
-            ...baseValidResource, 
-            questionnaire 
-          };
-
-          const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              input: {
-                invite_token: "12345678-1234-4567-8901-123456789012",
-                response_data: {
-                  fhir_resource: validResource
-                }
-              }
-            })
-          });
-
-          const data = await response.json();
-          // Should pass questionnaire validation (will fail later due to invalid token)
-          if (!data.success) {
-            expect(data.error).not.toBe("questionnaire field is required and must be a string");
-          }
-        }
-      });
-    });
-
-    describe("status field validation", () => {
-      it("should reject missing status field", async () => {
-        const invalidResource = { ...baseValidResource };
-        delete (invalidResource as any).status;
-
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: invalidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.error).toBe("status field is required and must be a string");
-      });
-
-      it("should reject non-string status field", async () => {
-        const invalidResource = { 
-          ...baseValidResource, 
-          status: 123 
-        };
-
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: invalidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.error).toBe("status field is required and must be a string");
-      });
-
-      it("should accept all valid FHIR status values", async () => {
-        const validStatuses = [
-          'in-progress', 
-          'completed', 
-          'amended', 
-          'entered-in-error', 
-          'stopped'
-        ];
-
-        for (const status of validStatuses) {
-          const validResource = { 
-            ...baseValidResource, 
-            status 
-          };
-
-          const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              input: {
-                invite_token: "12345678-1234-4567-8901-123456789012",
-                response_data: {
-                  fhir_resource: validResource
-                }
-              }
-            })
-          });
-
-          const data = await response.json();
-          // Should pass status validation (will fail later due to invalid token)
-          if (!data.success) {
-            expect(data.error).not.toContain("status must be one of:");
-          }
-        }
-      });
-
-      it("should reject invalid status values", async () => {
-        const invalidStatuses = [
-          'pending',
-          'draft',
-          'final',
-          'unknown',
-          'cancelled',
-          'COMPLETED', // case sensitive
-          'complete' // not exact match
-        ];
-
-        for (const status of invalidStatuses) {
-          const invalidResource = { 
-            ...baseValidResource, 
-            status 
-          };
-
-          const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              input: {
-                invite_token: "12345678-1234-4567-8901-123456789012",
-                response_data: {
-                  fhir_resource: invalidResource
-                }
-              }
-            })
-          });
-
-          const data = await response.json();
-          expect(data.success).toBe(false);
-          expect(data.error).toContain("status must be one of:");
-        }
-
-        // Test empty string separately as it triggers different validation
-        const emptyStatusResource = { 
-          ...baseValidResource, 
-          status: '' 
-        };
-
-        const emptyStatusResponse = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: emptyStatusResource
-              }
-            }
-          })
-        });
-
-        const emptyStatusData = await emptyStatusResponse.json();
-        expect(emptyStatusData.success).toBe(false);
-        expect(emptyStatusData.error).toBe("status field is required and must be a string");
-      });
-    });
-
-    describe("FHIR resource object validation", () => {
-      it("should reject null fhir_resource", async () => {
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: null
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.error).toBe("FHIR resource must be an object");
-      });
-
-      it("should reject string fhir_resource", async () => {
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: "not an object"
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        expect(data.error).toBe("FHIR resource must be an object");
-      });
-
-      it("should reject array fhir_resource", async () => {
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: []
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        expect(data.success).toBe(false);
-        // Arrays in JavaScript are objects, so they pass the typeof check but fail resourceType validation
-        expect(data.error).toBe("resourceType must be 'QuestionnaireResponse'");
-      });
-
-      it("should accept valid FHIR object structure", async () => {
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: baseValidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        // Should pass FHIR validation (will fail later due to invalid token)
-        if (!data.success) {
-          expect(data.error).not.toBe("FHIR resource must be an object");
-          expect(data.error).not.toContain("resourceType must be");
-          expect(data.error).not.toContain("questionnaire field");
-          expect(data.error).not.toContain("status");
-        }
-      });
-    });
-
-    describe("Complex FHIR objects", () => {
-      it("should accept complex valid FHIR QuestionnaireResponse", async () => {
-        const complexValidResource = {
-          resourceType: "QuestionnaireResponse",
-          id: "response-123",
-          questionnaire: "http://example.com/questionnaire/intake",
-          status: "completed",
-          authored: "2023-10-01T10:00:00Z",
-          subject: {
-            reference: "Patient/123",
-            display: "John Doe"
-          },
-          author: {
-            reference: "Patient/123"
-          },
-          item: [
-            {
-              linkId: "1",
-              text: "Chief complaint",
-              answer: [{
-                valueString: "Headache"
-              }]
-            },
-            {
-              linkId: "2", 
-              text: "Pain scale",
-              answer: [{
-                valueInteger: 7
-              }]
-            },
-            {
-              linkId: "3",
-              text: "Medical history",
-              item: [
-                {
-                  linkId: "3.1",
-                  text: "Previous surgeries",
-                  answer: [{
-                    valueBoolean: false
-                  }]
-                }
-              ]
-            }
-          ]
-        };
-
-        const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-questionnaire-response`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: "12345678-1234-4567-8901-123456789012",
-              response_data: {
-                fhir_resource: complexValidResource
-              }
-            }
-          })
-        });
-
-        const data = await response.json();
-        // Should pass all FHIR validation (will fail later due to invalid token)
-        if (!data.success) {
-          expect(data.error).not.toContain("FHIR resource");
-          expect(data.error).not.toContain("resourceType");
-          expect(data.error).not.toContain("questionnaire");
-          expect(data.error).not.toContain("status");
-        }
+        expect(data.error).not.toBe("Invalid invite token format");
+        expect(data.error).not.toBe("Invalid response data");
       });
     });
   });

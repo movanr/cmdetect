@@ -19,8 +19,7 @@ export interface TestUser {
   email: string;
   password: string;
 
-  // Hasura user data
-  userId: string;
+  // Hasura user data (userId is not stored here — resolved dynamically at runtime)
   organizationId: string;
   roles: TestRole[];
   defaultRole?: TestRole;
@@ -74,7 +73,6 @@ export const TestUsers: Record<string, TestUser> = {
     roles: [roles.ORG_ADMIN],
     defaultRole: roles.ORG_ADMIN,
     organizationId: TestOrganizations.org1.id,
-    userId: "8zfoUXwLajI1gI0L4BAW6os3y8fJzwXL",
     firstName: "Admin",
     lastName: "One",
     isActive: true,
@@ -87,7 +85,6 @@ export const TestUsers: Record<string, TestUser> = {
     roles: [roles.PHYSICIAN],
     defaultRole: roles.PHYSICIAN,
     organizationId: TestOrganizations.org1.id,
-    userId: "q2Lo5gunCw5gu0qrBR14qKoPZjDzfeiB",
     firstName: "Doctor",
     lastName: "One",
     isActive: true,
@@ -100,7 +97,6 @@ export const TestUsers: Record<string, TestUser> = {
     roles: [roles.RECEPTIONIST],
     defaultRole: roles.RECEPTIONIST,
     organizationId: TestOrganizations.org1.id,
-    userId: "6isMAY5VuGQ4oJsyFctqyeQRk900Kaq1",
     firstName: "Reception",
     lastName: "One",
     isActive: true,
@@ -113,7 +109,6 @@ export const TestUsers: Record<string, TestUser> = {
     roles: [roles.ORG_ADMIN],
     defaultRole: roles.ORG_ADMIN,
     organizationId: TestOrganizations.org2.id,
-    userId: "gNPfYwVrE078HxDo9CQwFxbTIzm3uOmq",
     firstName: "Admin",
     lastName: "Two",
     isActive: true,
@@ -126,7 +121,6 @@ export const TestUsers: Record<string, TestUser> = {
     roles: [roles.PHYSICIAN, roles.RECEPTIONIST],
     defaultRole: roles.PHYSICIAN,
     organizationId: TestOrganizations.org2.id,
-    userId: "ZUS4p8gKfWkGtFsAFK7rrlyJhMB0vU2q",
     firstName: "Doctor",
     lastName: "Two",
     isActive: true,
@@ -144,13 +138,6 @@ export const TestDataIds = {
     org1: TestOrganizations.org1.id,
     org2: TestOrganizations.org2.id,
     org3: TestOrganizations.org3.id,
-  },
-  users: {
-    org1Admin: TestUsers.org1Admin.userId,
-    org1Physician: TestUsers.org1Physician.userId,
-    org1Receptionist: TestUsers.org1Receptionist.userId,
-    org2Admin: TestUsers.org2Admin.userId,
-    org2Physician: TestUsers.org2Physician.userId,
   },
 };
 

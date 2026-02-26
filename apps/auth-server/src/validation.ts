@@ -51,10 +51,7 @@ const InviteTokenSchema = z.object({
 export function validateInviteToken(invite_token: unknown): ValidationResult {
   const result = InviteTokenSchema.safeParse({ invite_token });
   if (!result.success) {
-    return {
-      valid: false,
-      error: result.error.issues[0]?.message ?? "Invalid invite token format",
-    };
+    return { valid: false, error: "Invalid invite token format" };
   }
   return { valid: true };
 }
@@ -76,6 +73,14 @@ const QuestionnaireResponseInputSchema = z.object({
 export function validateQuestionnaireResponseData(
   response_data: unknown
 ): ValidationResult {
+  if (
+    response_data === undefined ||
+    response_data === null ||
+    typeof response_data !== "object" ||
+    Array.isArray(response_data)
+  ) {
+    return { valid: false, error: "Invalid response data" };
+  }
   // 1. Validate base structure
   const baseResult = QuestionnaireResponseInputSchema.safeParse(response_data);
   if (!baseResult.success) {
@@ -115,22 +120,36 @@ export function isSQComplete(answers: unknown): {
  * Consent data validation schema
  */
 const ConsentDataSchema = z.object({
-  consent_given: z.boolean(),
-  consent_text: z.string().min(1, "consent_text is required"),
-  consent_version: z.string().min(1, "consent_version is required"),
+  consent_given: z.boolean({
+    required_error: "consent_given must be a boolean",
+    invalid_type_error: "consent_given must be a boolean",
+  }),
+  consent_text: z.string({
+    required_error: "consent_text is required and must be a string",
+    invalid_type_error: "consent_text is required and must be a string",
+  }).min(1, "consent_text is required and must be a string"),
+  consent_version: z.string({
+    required_error: "consent_version is required and must be a string",
+    invalid_type_error: "consent_version is required and must be a string",
+  }).min(1, "consent_version is required and must be a string"),
 });
 
 /**
  * Validates patient consent data structure
  */
 export function validateConsentData(consent_data: unknown): ValidationResult {
+  if (
+    consent_data === undefined ||
+    consent_data === null ||
+    typeof consent_data !== "object" ||
+    Array.isArray(consent_data)
+  ) {
+    return { valid: false, error: "Invalid consent data" };
+  }
   const result = ConsentDataSchema.safeParse(consent_data);
   if (!result.success) {
     const issue = result.error.issues[0];
-    return {
-      valid: false,
-      error: issue?.message ?? "Invalid consent data",
-    };
+    return { valid: false, error: issue?.message ?? "Invalid consent data" };
   }
   return { valid: true };
 }
@@ -204,17 +223,23 @@ export function validateRoleData(role: unknown): ValidationResult {
  */
 const PatientPersonalDataSchema = z.object({
   first_name_encrypted: z
-    .string()
+    .string({
+      required_error: "first_name_encrypted is required and must be a non-empty string",
+      invalid_type_error: "first_name_encrypted is required and must be a non-empty string",
+    })
     .min(1, "first_name_encrypted is required and must be a non-empty string"),
   last_name_encrypted: z
-    .string()
+    .string({
+      required_error: "last_name_encrypted is required and must be a non-empty string",
+      invalid_type_error: "last_name_encrypted is required and must be a non-empty string",
+    })
     .min(1, "last_name_encrypted is required and must be a non-empty string"),
   date_of_birth_encrypted: z
-    .string()
-    .min(
-      1,
-      "date_of_birth_encrypted is required and must be a non-empty string"
-    ),
+    .string({
+      required_error: "date_of_birth_encrypted is required and must be a non-empty string",
+      invalid_type_error: "date_of_birth_encrypted is required and must be a non-empty string",
+    })
+    .min(1, "date_of_birth_encrypted is required and must be a non-empty string"),
 });
 
 /**
@@ -223,13 +248,18 @@ const PatientPersonalDataSchema = z.object({
 export function validatePatientPersonalData(
   patient_data: unknown
 ): ValidationResult {
+  if (
+    patient_data === undefined ||
+    patient_data === null ||
+    typeof patient_data !== "object" ||
+    Array.isArray(patient_data)
+  ) {
+    return { valid: false, error: "Invalid patient personal data" };
+  }
   const result = PatientPersonalDataSchema.safeParse(patient_data);
   if (!result.success) {
     const issue = result.error.issues[0];
-    return {
-      valid: false,
-      error: issue?.message ?? "Invalid patient personal data",
-    };
+    return { valid: false, error: issue?.message ?? "Invalid patient personal data" };
   }
   return { valid: true };
 }

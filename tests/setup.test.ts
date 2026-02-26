@@ -30,8 +30,5 @@ describe("Test Setup Verification", () => {
     expect(TestDataIds.organizations.org3).toBe(
       "33333333-3333-3333-3333-333333333333"
     );
-    expect(TestDataIds.users.org1Admin).toBe(
-      "4gLI1mnAaxP91SdpIDWmPf8RDKou5vHC"
-    );
   });
 });

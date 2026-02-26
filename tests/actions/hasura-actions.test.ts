@@ -3,7 +3,8 @@
  * Tests the validateInviteToken and other actions via Hasura GraphQL
  */
 
-import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
+import { resetTestDatabase, testDatabaseConnection, createTestPatientRecord } from "../setup/database";
+import { createAuthenticatedClient } from "../setup/auth-server";
 import { createAdminClient } from "../setup/graphql-client";
 import { TestDataIds } from "@cmdetect/test-utils";
 
@@ -13,6 +14,7 @@ describe("Hasura Actions Integration", () => {
   const adminClient = createAdminClient();
   const HASURA_URL =
     process.env.HASURA_URL || "http://localhost:8080/v1/graphql";
+  let receptionistClient: Awaited<ReturnType<typeof createAuthenticatedClient>>;
 
   beforeAll(async () => {
     // Check services availability
@@ -22,6 +24,8 @@ describe("Hasura Actions Integration", () => {
         "Hasura is not available. Please start Hasura before running tests."
       );
     }
+
+    receptionistClient = await createAuthenticatedClient("org1Receptionist");
 
     // Reset test data and create fresh patient record
     await resetTestDatabase();
@@ -44,25 +48,9 @@ describe("Hasura Actions Integration", () => {
       }
     `);
 
-    // Create a patient record with invite token for testing
-    const result = (await adminClient.request(`
-      mutation {
-        insert_patient_record(objects: [{
-          organization_id: "${TestDataIds.organizations.org1}",
-          clinic_internal_id: "P001-HASURA-ACTION-TEST",
-          created_by: "${TestDataIds.users.org1Receptionist}",
-          invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-        }]) {
-          returning {
-            id
-            invite_token
-          }
-        }
-      }
-    `)) as any;
-
-    patientRecordId = result.insert_patient_record.returning[0].id;
-    inviteToken = result.insert_patient_record.returning[0].invite_token;
+    ({ id: patientRecordId, inviteToken } = await createTestPatientRecord(
+      receptionistClient, adminClient, "P001-HASURA-ACTION-TEST"
+    ));
   };
 
   const hasuraGraphQLRequest = async (query: string, variables?: any) => {

@@ -3,8 +3,8 @@
  * Tests the /actions/submit-questionnaire-response endpoint
  */
 
-import { resetTestDatabase, testDatabaseConnection } from "../setup/database";
-import { isAuthServerAvailable } from "../setup/auth-server";
+import { resetTestDatabase, testDatabaseConnection, createTestPatientRecord } from "../setup/database";
+import { isAuthServerAvailable, createAuthenticatedClient } from "../setup/auth-server";
 import { createAdminClient } from "../setup/graphql-client";
 import { TestDataIds } from "@cmdetect/test-utils";
 
@@ -15,6 +15,7 @@ describe("Questionnaire Response Action Handler", () => {
   let inviteToken: string;
   let consentId: string;
   const adminClient = createAdminClient();
+  let receptionistClient: Awaited<ReturnType<typeof createAuthenticatedClient>>;
 
   beforeAll(async () => {
     // Check services availability
@@ -32,32 +33,17 @@ describe("Questionnaire Response Action Handler", () => {
       );
     }
 
+    receptionistClient = await createAuthenticatedClient("org1Receptionist");
+
     // Reset test data and create necessary setup
     await resetTestDatabase();
     await setupPatientRecordWithConsent();
   });
 
   const setupPatientRecordWithConsent = async () => {
-    // Create a patient record with invite token
-    const patientRecordResult = (await adminClient.request(`
-      mutation {
-        insert_patient_record(objects: [{
-          organization_id: "${TestDataIds.organizations.org1}",
-          clinic_internal_id: "P001-QR-TEST",
-          created_by: "${TestDataIds.users.org1Receptionist}",
-          invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-        }]) {
-          returning {
-            id
-            invite_token
-          }
-        }
-      }
-    `)) as any;
-
-    patientRecordId = patientRecordResult.insert_patient_record.returning[0].id;
-    inviteToken =
-      patientRecordResult.insert_patient_record.returning[0].invite_token;
+    ({ id: patientRecordId, inviteToken } = await createTestPatientRecord(
+      receptionistClient, adminClient, "P001-QR-TEST"
+    ));
 
     // Create consent for the patient record
     const consentResult = (await adminClient.request(`
@@ -80,24 +66,14 @@ describe("Questionnaire Response Action Handler", () => {
     consentId = consentResult.insert_patient_consent.returning[0].id;
   };
 
-  describe("Input Validation", () => {
-    const validFHIRResource = {
-      resourceType: "QuestionnaireResponse",
-      questionnaire: "http://example.com/questionnaire/123",
-      status: "completed",
-      item: [
-        {
-          linkId: "1",
-          text: "What is your name?",
-          answer: [
-            {
-              valueString: "John Doe",
-            },
-          ],
-        },
-      ],
-    };
+  // Valid response data for PHQ-4 (uses GenericAnswersSchema - accepts any key-value pairs)
+  const validResponseData = {
+    questionnaire_id: "phq-4",
+    questionnaire_version: "v1.0",
+    answers: { q1: 0, q2: 1, q3: 2, q4: 3 },
+  };
 
+  describe("Input Validation", () => {
     it("should reject missing invite_token", async () => {
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
@@ -106,9 +82,7 @@ describe("Questionnaire Response Action Handler", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             input: {
-              response_data: {
-                fhir_resource: validFHIRResource,
-              },
+              response_data: validResponseData,
             },
           }),
         }
@@ -128,9 +102,7 @@ describe("Questionnaire Response Action Handler", () => {
           body: JSON.stringify({
             input: {
               invite_token: "not-a-uuid",
-              response_data: {
-                fhir_resource: validFHIRResource,
-              },
+              response_data: validResponseData,
             },
           }),
         }
@@ -181,28 +153,8 @@ describe("Questionnaire Response Action Handler", () => {
     });
   });
 
-  describe("FHIR Validation", () => {
-    it("should reject missing fhir_resource", async () => {
-      const response = await fetch(
-        `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: inviteToken,
-              response_data: {},
-            },
-          }),
-        }
-      );
-
-      const data = await response.json();
-      expect(data.success).toBe(false);
-      expect(data.error).toBe("FHIR resource must be an object");
-    });
-
-    it("should reject non-object fhir_resource", async () => {
+  describe("Response Data Validation", () => {
+    it("should reject missing questionnaire_id", async () => {
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
         {
@@ -212,7 +164,8 @@ describe("Questionnaire Response Action Handler", () => {
             input: {
               invite_token: inviteToken,
               response_data: {
-                fhir_resource: "not-an-object",
+                questionnaire_version: "v1.0",
+                answers: { q1: 0 },
               },
             },
           }),
@@ -221,10 +174,9 @@ describe("Questionnaire Response Action Handler", () => {
 
       const data = await response.json();
       expect(data.success).toBe(false);
-      expect(data.error).toBe("FHIR resource must be an object");
     });
 
-    it("should reject wrong resourceType", async () => {
+    it("should reject invalid questionnaire_id", async () => {
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
         {
@@ -234,11 +186,9 @@ describe("Questionnaire Response Action Handler", () => {
             input: {
               invite_token: inviteToken,
               response_data: {
-                fhir_resource: {
-                  resourceType: "Patient",
-                  questionnaire: "http://example.com/questionnaire/123",
-                  status: "completed",
-                },
+                questionnaire_id: "not-a-valid-id",
+                questionnaire_version: "v1.0",
+                answers: { q1: 0 },
               },
             },
           }),
@@ -247,10 +197,9 @@ describe("Questionnaire Response Action Handler", () => {
 
       const data = await response.json();
       expect(data.success).toBe(false);
-      expect(data.error).toBe("resourceType must be 'QuestionnaireResponse'");
     });
 
-    it("should reject missing questionnaire field", async () => {
+    it("should reject missing questionnaire_version", async () => {
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
         {
@@ -260,10 +209,8 @@ describe("Questionnaire Response Action Handler", () => {
             input: {
               invite_token: inviteToken,
               response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  status: "completed",
-                },
+                questionnaire_id: "phq-4",
+                answers: { q1: 0 },
               },
             },
           }),
@@ -272,12 +219,9 @@ describe("Questionnaire Response Action Handler", () => {
 
       const data = await response.json();
       expect(data.success).toBe(false);
-      expect(data.error).toBe(
-        "questionnaire field is required and must be a string"
-      );
     });
 
-    it("should reject non-string questionnaire field", async () => {
+    it("should reject missing answers", async () => {
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
         {
@@ -287,11 +231,8 @@ describe("Questionnaire Response Action Handler", () => {
             input: {
               invite_token: inviteToken,
               response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: 123,
-                  status: "completed",
-                },
+                questionnaire_id: "phq-4",
+                questionnaire_version: "v1.0",
               },
             },
           }),
@@ -300,136 +241,6 @@ describe("Questionnaire Response Action Handler", () => {
 
       const data = await response.json();
       expect(data.success).toBe(false);
-      expect(data.error).toBe(
-        "questionnaire field is required and must be a string"
-      );
-    });
-
-    it("should reject missing status field", async () => {
-      const response = await fetch(
-        `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: inviteToken,
-              response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: "http://example.com/questionnaire/123",
-                },
-              },
-            },
-          }),
-        }
-      );
-
-      const data = await response.json();
-      expect(data.success).toBe(false);
-      expect(data.error).toBe("status field is required and must be a string");
-    });
-
-    it("should reject invalid status values", async () => {
-      const response = await fetch(
-        `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: inviteToken,
-              response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: "http://example.com/questionnaire/123",
-                  status: "invalid-status",
-                },
-              },
-            },
-          }),
-        }
-      );
-
-      const data = await response.json();
-      expect(data.success).toBe(false);
-      expect(data.error).toBe(
-        "status must be one of: in-progress, completed, amended, entered-in-error, stopped"
-      );
-    });
-
-    it("should accept all valid status values", async () => {
-      const validStatuses = [
-        "in-progress",
-        "completed",
-        "amended",
-        "entered-in-error",
-        "stopped",
-      ];
-
-      for (const status of validStatuses) {
-        // Create a new patient record for each test to avoid conflicts
-        const newPatientResult = (await adminClient.request(`
-          mutation {
-            insert_patient_record(objects: [{
-              organization_id: "${TestDataIds.organizations.org1}",
-              clinic_internal_id: "P-${status.toUpperCase()}",
-              created_by: "${TestDataIds.users.org1Receptionist}",
-              invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-            }]) {
-              returning {
-                id
-                invite_token
-              }
-            }
-          }
-        `)) as any;
-
-        const newPatientRecordId =
-          newPatientResult.insert_patient_record.returning[0].id;
-        const newInviteToken =
-          newPatientResult.insert_patient_record.returning[0].invite_token;
-
-        // Create consent for the new patient record
-        (await adminClient.request(`
-          mutation {
-            insert_patient_consent(objects: [{
-              patient_record_id: "${newPatientRecordId}",
-              organization_id: "${TestDataIds.organizations.org1}",
-              consent_given: true,
-              consent_text: "Test consent text",
-              consent_version: "v1.0",
-              consented_at: "2024-01-01T10:00:00Z"
-            }]) {
-              returning { id }
-            }
-          }
-        `)) as any;
-
-        const response = await fetch(
-          `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              input: {
-                invite_token: newInviteToken,
-                response_data: {
-                  fhir_resource: {
-                    resourceType: "QuestionnaireResponse",
-                    questionnaire: "http://example.com/questionnaire/123",
-                    status: status,
-                  },
-                },
-              },
-            }),
-          }
-        );
-
-        const data = await response.json();
-        expect(data.success).toBe(true);
-        expect(data.questionnaire_response_id).toBeDefined();
-      }
     });
   });
 
@@ -445,13 +256,7 @@ describe("Questionnaire Response Action Handler", () => {
           body: JSON.stringify({
             input: {
               invite_token: invalidToken,
-              response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: "http://example.com/questionnaire/123",
-                  status: "completed",
-                },
-              },
+              response_data: validResponseData,
             },
           }),
         }
@@ -469,24 +274,9 @@ describe("Questionnaire Response Action Handler", () => {
     });
 
     it("should require consent before submitting questionnaire response", async () => {
-      // Create a patient record without consent
-      const noConsentResult = (await adminClient.request(`
-        mutation {
-          insert_patient_record(objects: [{
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P-NO-CONSENT",
-            created_by: "${TestDataIds.users.org1Receptionist}",
-            invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-          }]) {
-            returning {
-              invite_token
-            }
-          }
-        }
-      `)) as any;
-
-      const noConsentToken =
-        noConsentResult.insert_patient_record.returning[0].invite_token;
+      const { inviteToken: noConsentToken } = await createTestPatientRecord(
+        receptionistClient, adminClient, "P-NO-CONSENT"
+      );
 
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
@@ -496,13 +286,7 @@ describe("Questionnaire Response Action Handler", () => {
           body: JSON.stringify({
             input: {
               invite_token: noConsentToken,
-              response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: "http://example.com/questionnaire/123",
-                  status: "completed",
-                },
-              },
+              response_data: validResponseData,
             },
           }),
         }
@@ -517,46 +301,7 @@ describe("Questionnaire Response Action Handler", () => {
   });
 
   describe("Successful Response Submission", () => {
-    it("should successfully submit a complete FHIR questionnaire response", async () => {
-      const fhirResource = {
-        resourceType: "QuestionnaireResponse",
-        questionnaire: "http://example.com/questionnaire/patient-intake",
-        status: "completed",
-        authored: "2023-10-01T10:00:00Z",
-        subject: {
-          reference: "Patient/123",
-        },
-        item: [
-          {
-            linkId: "1",
-            text: "What is your chief complaint?",
-            answer: [
-              {
-                valueString: "Headache for the past week",
-              },
-            ],
-          },
-          {
-            linkId: "2",
-            text: "Rate your pain on a scale of 1-10",
-            answer: [
-              {
-                valueInteger: 7,
-              },
-            ],
-          },
-          {
-            linkId: "3",
-            text: "Any allergies?",
-            answer: [
-              {
-                valueBoolean: true,
-              },
-            ],
-          },
-        ],
-      };
-
+    it("should successfully submit a questionnaire response", async () => {
       const response = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
         {
@@ -565,9 +310,7 @@ describe("Questionnaire Response Action Handler", () => {
           body: JSON.stringify({
             input: {
               invite_token: inviteToken,
-              response_data: {
-                fhir_resource: fhirResource,
-              },
+              response_data: validResponseData,
             },
           }),
         }
@@ -585,7 +328,7 @@ describe("Questionnaire Response Action Handler", () => {
             patient_record_id
             patient_consent_id
             organization_id
-            fhir_resource
+            response_data
             submitted_at
           }
         }
@@ -594,38 +337,19 @@ describe("Questionnaire Response Action Handler", () => {
       const storedResponse = responseQuery.questionnaire_response[0];
       expect(storedResponse.patient_record_id).toBe(patientRecordId);
       expect(storedResponse.patient_consent_id).toBe(consentId);
-      expect(storedResponse.organization_id).toBe(
-        TestDataIds.organizations.org1
-      );
-      expect(storedResponse.fhir_resource).toEqual(fhirResource);
+      expect(storedResponse.organization_id).toBe(TestDataIds.organizations.org1);
+      expect(storedResponse.response_data.questionnaire_id).toBe("phq-4");
+      expect(storedResponse.response_data.questionnaire_version).toBe("v1.0");
+      expect(storedResponse.response_data.answers).toEqual({ q1: 0, q2: 1, q3: 2, q4: 3 });
       expect(storedResponse.submitted_at).toBeDefined();
     });
 
-    it("should handle minimal valid FHIR questionnaire response", async () => {
-      // Create another patient record for this test
-      const newPatientResult = (await adminClient.request(`
-        mutation {
-          insert_patient_record(objects: [{
-            organization_id: "${TestDataIds.organizations.org1}",
-            clinic_internal_id: "P-MINIMAL-FHIR",
-            created_by: "${TestDataIds.users.org1Receptionist}",
-            invite_expires_at: "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}"
-          }]) {
-            returning {
-              id
-              invite_token
-            }
-          }
-        }
-      `)) as any;
+    it("should allow multiple responses for the same patient record (different questionnaires)", async () => {
+      const { id: newPatientRecordId, inviteToken: newInviteToken } =
+        await createTestPatientRecord(receptionistClient, adminClient, "P-MULTI-QR");
 
-      const newPatientRecordId =
-        newPatientResult.insert_patient_record.returning[0].id;
-      const newInviteToken =
-        newPatientResult.insert_patient_record.returning[0].invite_token;
-
-      // Create consent for the new patient record
-      (await adminClient.request(`
+      // Create consent
+      await adminClient.request(`
         mutation {
           insert_patient_consent(objects: [{
             patient_record_id: "${newPatientRecordId}",
@@ -638,15 +362,10 @@ describe("Questionnaire Response Action Handler", () => {
             returning { id }
           }
         }
-      `)) as any;
+      `);
 
-      const minimalFhirResource = {
-        resourceType: "QuestionnaireResponse",
-        questionnaire: "http://example.com/questionnaire/minimal",
-        status: "in-progress",
-      };
-
-      const response = await fetch(
+      // Submit two different questionnaires
+      const firstResponse = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
         {
           method: "POST",
@@ -655,54 +374,14 @@ describe("Questionnaire Response Action Handler", () => {
             input: {
               invite_token: newInviteToken,
               response_data: {
-                fhir_resource: minimalFhirResource,
+                questionnaire_id: "phq-4",
+                questionnaire_version: "v1.0",
+                answers: { q1: 0, q2: 0, q3: 0, q4: 0 },
               },
             },
           }),
         }
       );
-
-      const data = await response.json();
-      expect(data.success).toBe(true);
-      expect(data.questionnaire_response_id).toBeDefined();
-
-      // Verify minimal response was stored correctly
-      const responseQuery = (await adminClient.request(`
-        query {
-          questionnaire_response(where: {id: {_eq: "${data.questionnaire_response_id}"}}) {
-            fhir_resource
-          }
-        }
-      `)) as any;
-
-      expect(responseQuery.questionnaire_response[0].fhir_resource).toEqual(
-        minimalFhirResource
-      );
-    });
-
-    it("should allow multiple responses for the same patient record", async () => {
-      const firstResponse = await fetch(
-        `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            input: {
-              invite_token: inviteToken,
-              response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: "http://example.com/questionnaire/first",
-                  status: "completed",
-                },
-              },
-            },
-          }),
-        }
-      );
-
-      const firstData = await firstResponse.json();
-      expect(firstData.success).toBe(true);
 
       const secondResponse = await fetch(
         `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
@@ -711,44 +390,25 @@ describe("Questionnaire Response Action Handler", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             input: {
-              invite_token: inviteToken,
+              invite_token: newInviteToken,
               response_data: {
-                fhir_resource: {
-                  resourceType: "QuestionnaireResponse",
-                  questionnaire: "http://example.com/questionnaire/second",
-                  status: "completed",
-                },
+                questionnaire_id: "gcps-1m",
+                questionnaire_version: "v1.0",
+                answers: { q1: 5, q2: 3 },
               },
             },
           }),
         }
       );
 
+      const firstData = await firstResponse.json();
       const secondData = await secondResponse.json();
+
+      expect(firstData.success).toBe(true);
+      expect(firstData.questionnaire_response_id).toBeDefined();
       expect(secondData.success).toBe(true);
-
-      // Verify both responses exist
-      const responseQuery = (await adminClient.request(`
-        query {
-          questionnaire_response(where: {patient_record_id: {_eq: "${patientRecordId}"}}) {
-            id
-            fhir_resource
-          }
-        }
-      `)) as any;
-
-      // Should have at least the 2 responses we just submitted
-      expect(responseQuery.questionnaire_response.length).toBeGreaterThanOrEqual(2);
-
-      const questionnaires = responseQuery.questionnaire_response.map(
-        (r: any) => r.fhir_resource.questionnaire
-      );
-      expect(questionnaires).toContain(
-        "http://example.com/questionnaire/first"
-      );
-      expect(questionnaires).toContain(
-        "http://example.com/questionnaire/second"
-      );
+      expect(secondData.questionnaire_response_id).toBeDefined();
+      expect(firstData.questionnaire_response_id).not.toBe(secondData.questionnaire_response_id);
     });
   });
 });

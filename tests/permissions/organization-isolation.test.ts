@@ -1,11 +1,24 @@
-import { createTestClients } from "../setup/graphql-client";
+import { createTestClients, createAdminClient } from "../setup/graphql-client";
 import { TestDataIds } from "@cmdetect/test-utils";
 
 describe("Organization Isolation", () => {
   let clients: Awaited<ReturnType<typeof createTestClients>>;
+  let org1AdminId: string;
 
   beforeEach(async () => {
     clients = await createTestClients();
+  });
+
+  beforeAll(async () => {
+    const adminClient = createAdminClient();
+    const result = await adminClient.request<{ user: Array<{ id: string }> }>(`
+      query {
+        user(where: { email: { _eq: "admin1@test.com" } }, limit: 1) {
+          id
+        }
+      }
+    `);
+    org1AdminId = result.user[0].id;
   });
 
   describe("Patient Record Access Control", () => {
@@ -285,13 +298,11 @@ describe("Organization Isolation", () => {
     });
 
     it("physician can only see patient records created by them", async () => {
-      // First create a registration created by physician
-      await clients.admin.request(`
+      // Create a registration as the physician — created_by auto-set from JWT
+      await clients.org1Physician.request(`
         mutation {
           insert_patient_record_one(object: {
-            organization_id: "${TestDataIds.organizations.org1}"
             clinic_internal_id: "P004-PHYSICIAN-TEST"
-            created_by: "${TestDataIds.users.org1Physician}"
           }) {
             id
           }
@@ -439,7 +450,7 @@ describe("Organization Isolation", () => {
         user_by_pk: { id: string; email: string } | null;
       }>(`
         query {
-          user_by_pk(id: "${TestDataIds.users.org1Admin}") {
+          user_by_pk(id: "${org1AdminId}") {
             id
             email
           }
