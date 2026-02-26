@@ -1,16 +1,12 @@
-/**
- * Hook for fetching patient records filtered to submissions only
- */
-
 import { useMemo } from "react";
 import { usePatientRecords } from "./usePatientRecords";
-import { filterSubmissions } from "../utils/filters";
+import { getCaseStatus, isSubmissionStatus } from "../utils/status";
 
 export function useSubmissions() {
   const { data, ...rest } = usePatientRecords();
 
   const submissions = useMemo(() => {
-    return data ? filterSubmissions(data) : [];
+    return data ? data.filter((record) => isSubmissionStatus(getCaseStatus(record))) : [];
   }, [data]);
 
   return { data: submissions, ...rest };

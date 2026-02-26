@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Shield } from "lucide-react";
 import { useEffect } from "react";
 import { Header } from "../components/navigation/Header";
-import { Sidebar } from "../components/navigation/Sidebar";
 
 export const Route = createFileRoute("/key-setup")({
   component: KeySetupPage,
@@ -33,34 +32,25 @@ function KeySetupPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar />
+      <Header />
 
-      {/* Main content area with offset for sidebar on desktop */}
-      <div className="lg:pl-64">
-        {/* Header */}
-        <Header />
-
-        {/* Main content */}
-        <div className="flex items-center justify-center p-4 lg:p-8">
-          <div className="w-full max-w-4xl space-y-8">
-            {/* Page Header */}
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">
-                Encryption Setup Required
-              </h1>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>Complete setup to secure patient data</span>
-              </div>
+      <div className="flex items-center justify-center p-4 lg:p-8">
+        <div className="w-full max-w-4xl space-y-8">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Encryption Setup Required
+            </h1>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Shield className="h-4 w-4" />
+              <span>Complete setup to secure patient data</span>
             </div>
-
-            <Card>
-              <CardContent className="p-8">
-                <KeySetup onSetupComplete={handleSetupComplete} />
-              </CardContent>
-            </Card>
           </div>
+
+          <Card>
+            <CardContent className="p-8">
+              <KeySetup onSetupComplete={handleSetupComplete} />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

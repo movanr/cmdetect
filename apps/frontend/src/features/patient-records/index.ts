@@ -6,7 +6,6 @@
  * - GraphQL queries and mutations
  * - React hooks for data fetching
  * - Status calculation utilities
- * - Filter utilities
  */
 
 // Types
@@ -38,7 +37,6 @@ export {
   isInviteStatus,
   isSubmissionStatus,
 } from "./utils/status";
-export { filterSubmissions } from "./utils/filters";
 
 // Components
 export { StatusBadge } from "./components/StatusBadge";
