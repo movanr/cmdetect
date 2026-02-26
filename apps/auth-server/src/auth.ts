@@ -14,8 +14,12 @@ export const auth = betterAuth({
     connectionString: `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST || 'localhost'}:${env.POSTGRES_PORT || 5432}/${env.POSTGRES_DB}`,
   }),
 
-  // Better Auth session secret (separate from JWT signing key)
   secret: env.BETTER_AUTH_SECRET,
+
+  session: {
+    expiresIn: 60 * 60 * 8,  // 8h rolling — covers a full shift
+    updateAge: 60 * 60,       // extend at most once per hour
+  },
 
   // Trusted origins for CORS
   trustedOrigins: [env.FRONTEND_URL || "http://localhost:3000"],
@@ -27,9 +31,7 @@ export const auth = betterAuth({
       jwt: {
         issuer: "cmdetect-auth-server",
         audience: "hasura",
-        // TODO: expirationTime so klein wie möglich und lieber öfter refreshen
-        // (kein Refresh Token notwendig weil Session available, also bei nem 401 wenn expired ist, nochmal den JWT neu holen im execute)
-        expirationTime: "8h", // Longer session for healthcare workflow
+        expirationTime: "15m",
         definePayload: ({ user }) => {
           // Validate roles array and apply hierarchy for authenticated users
           // Clinical roles (physician, receptionist) have priority over admin role

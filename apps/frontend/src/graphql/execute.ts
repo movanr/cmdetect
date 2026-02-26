@@ -33,15 +33,13 @@ export async function execute<TResult, TVariables>(
     }),
   });
 
-  if (!response.ok) {
-    // If the JWT is expired, refresh it and try again
-    // TODO: Check mal ab mit den variables, ich glaube das ist so immer noch korrekt vom Type
-    let isExpiredError = false; // Hasura response hier checken
-
-    if (response.status === 401 && isExpiredError && !refreshed) {
+  if (response.status === 401 && !refreshed) {
+    const errorBody = await response.json().catch(() => ({}));
+    if (typeof errorBody?.message === "string" && errorBody.message.includes("JWTExpired")) {
       await refreshJWTToken();
       return execute(query, variables, true);
     }
+    throw new Error(errorBody?.message || "Unauthorized");
   }
 
   const result = await response.json();
