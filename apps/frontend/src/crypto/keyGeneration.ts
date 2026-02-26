@@ -209,7 +209,7 @@ export async function testKeyCompatibility(
 
     // Check if decryption succeeded and matches original
     return decryptedData.testValidationField === testMessage;
-  } catch (error) {
+  } catch {
     // If encryption/decryption fails, keys are incompatible
     return false;
   }

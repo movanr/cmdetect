@@ -15,7 +15,7 @@ export interface PatientPII {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 

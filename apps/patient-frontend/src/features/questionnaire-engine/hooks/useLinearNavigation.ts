@@ -34,7 +34,7 @@ export function useLinearNavigation({
     if (historyRef.current.length === 0) return;
 
     const newHistory = [...historyRef.current];
-    const previousIndex = newHistory.pop()!;
+    const previousIndex = newHistory.pop() ?? 0;
     historyRef.current = newHistory;
     setHistoryLength(newHistory.length);
     setCurrentIndex(previousIndex);

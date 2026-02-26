@@ -199,7 +199,7 @@ function PatientFlowPage() {
       );
 
       return execute(submitPatientPersonalData, {
-        invite_token: token!,
+        invite_token: token ?? "",
         patient_data: {
           first_name_encrypted: encryptedPayload,
           last_name_encrypted: encryptedPayload,
@@ -238,7 +238,7 @@ function PatientFlowPage() {
       answers: Record<string, unknown>;
     }) =>
       execute(submitQuestionnaireResponse, {
-        invite_token: token!,
+        invite_token: token ?? "",
         questionnaire_id: params.questionnaire_id,
         questionnaire_version: params.questionnaire_version,
         answers: params.answers,

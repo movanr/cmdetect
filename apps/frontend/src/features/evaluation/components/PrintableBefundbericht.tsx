@@ -276,6 +276,7 @@ function groupFindingsByLocation(
         examSigns: [],
       });
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return groupMap.get(key)!;
   }
 
@@ -334,6 +335,7 @@ function groupDiagnosesByLocation(diagnoses: DiagnosisWithLabel[]): DiagnosisLoc
         diagnoses: [],
       });
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     groupMap.get(key)!.diagnoses.push(d);
   }
 

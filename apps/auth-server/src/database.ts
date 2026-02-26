@@ -26,7 +26,7 @@ export interface QuestionnaireResponse {
   patient_record_id: string;
   patient_consent_id: string;
   organization_id: string;
-  response_data: any;
+  response_data: unknown;
 }
 
 export interface InviteValidationResult {
@@ -118,7 +118,7 @@ export class DatabaseService {
     patientRecordId: string,
     patientConsentId: string,
     organizationId: string,
-    responseData: any
+    responseData: unknown
   ): Promise<string> {
     const query = `
       INSERT INTO questionnaire_response (

@@ -56,6 +56,7 @@ export function ExaminationPersistenceProvider({
  * Hook to access examination persistence context.
  * Must be used within ExaminationPersistenceProvider.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useExaminationPersistenceContext(): ExaminationPersistenceContextValue {
   const context = useContext(ExaminationPersistenceContext);
   if (!context) {

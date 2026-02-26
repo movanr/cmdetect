@@ -157,14 +157,15 @@ export async function decryptPatientData(
   }
 }
 
-function validatePatientPII(data: any): asserts data is PatientPII {
+function validatePatientPII(data: unknown): asserts data is PatientPII {
   if (!data || typeof data !== "object") {
     throw new Error("Invalid patient data: must be an object");
   }
 
+  const obj = data as Record<string, unknown>;
   const required = ["firstName", "lastName", "dateOfBirth"];
   for (const field of required) {
-    if (typeof data[field] !== "string" || !data[field].trim()) {
+    if (typeof obj[field] !== "string" || !(obj[field] as string).trim()) {
       throw new Error(
         `Invalid patient data: ${field} must be a non-empty string`
       );
@@ -172,7 +173,7 @@ function validatePatientPII(data: any): asserts data is PatientPII {
   }
 
   const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!isoDateRegex.test(data.dateOfBirth)) {
+  if (!isoDateRegex.test(obj["dateOfBirth"] as string)) {
     throw new Error(
       "Invalid patient data: dateOfBirth must be in YYYY-MM-DD format"
     );

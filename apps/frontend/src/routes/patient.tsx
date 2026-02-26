@@ -29,6 +29,7 @@ function PatientPage() {
 
   // Consent submission mutation
   const submitConsentMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: (consentData: any) =>
       execute(submitPatientConsent, consentData),
     onSuccess: (data) => {
@@ -40,6 +41,7 @@ function PatientPage() {
 
   // Questionnaire response mutation
   const submitResponseMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: (responseData: any) =>
       execute(submitQuestionnaireResponse, responseData),
     onSuccess: (data) => {
@@ -69,6 +71,7 @@ function PatientPage() {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmitQuestionnaire = async (questionnaireData: any) => {
     if (!invite_token) return;
 
@@ -125,10 +128,10 @@ function PatientPage() {
             <p className="text-sm text-gray-700">
               <strong>Consent Statement:</strong>
               <br />
-              "I agree to participate in this medical questionnaire and consent
+              &quot;I agree to participate in this medical questionnaire and consent
               to the processing of my medical data for healthcare purposes. I
               understand that my responses will be reviewed by my healthcare
-              provider."
+              provider.&quot;
             </p>
           </div>
 

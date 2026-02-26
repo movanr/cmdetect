@@ -45,6 +45,7 @@ export function SectionLink({ sectionNum, children }: SectionLinkProps) {
  * Pattern 1: "6.2.1: Description" at start of text (list items)
  * Pattern 2: "Abschnitt X" anywhere in text
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function processTextWithCrossRefs(text: string): ReactNode[] {
   const result: ReactNode[] = [];
   let lastIndex = 0;
@@ -102,6 +103,7 @@ export function processTextWithCrossRefs(text: string): ReactNode[] {
 /**
  * Process children recursively to handle cross-references in text nodes.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function processChildren(children: ReactNode): ReactNode {
   if (typeof children === "string") {
     const processed = processTextWithCrossRefs(children);

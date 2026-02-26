@@ -3,7 +3,7 @@ import { AppLayout } from "../components/layouts/AppLayout";
 import { getTranslations } from "../config/i18n";
 import { cn } from "@/lib/utils";
 import { User, Lock, Building } from "lucide-react";
-import { useRole } from "../contexts/RoleContext";
+import { useRole, type UserRole } from "../contexts/RoleContext";
 import { roles } from "@cmdetect/config";
 
 export const Route = createFileRoute("/settings")({
@@ -35,7 +35,7 @@ function SettingsLayout() {
 
   const filterByRole = (item: typeof settingsNav[0]) => {
     if (!item.roles) return true;
-    return item.roles.some((role) => hasRole(role as any));
+    return item.roles.some((role) => hasRole(role as UserRole));
   };
 
   return (

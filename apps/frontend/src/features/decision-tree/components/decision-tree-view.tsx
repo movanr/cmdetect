@@ -108,7 +108,7 @@ function getActiveNodes(
   const queue: string[] = [startNodeId];
 
   while (queue.length > 0) {
-    const nodeId = queue.shift()!;
+    const nodeId = queue.shift() ?? "";
     if (visited.has(nodeId)) continue;
     visited.add(nodeId);
 

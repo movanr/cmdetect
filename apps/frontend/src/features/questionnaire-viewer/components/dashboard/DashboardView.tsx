@@ -89,8 +89,8 @@ export function DashboardView({
       <CheckCircle2 className="h-5 w-5 text-green-600" />
       <AlertTitle className="text-green-800">Screening negativ</AlertTitle>
       <AlertDescription className="text-green-700">
-        Der Patient hat alle Screening-Fragen mit "Nein" beantwortet. Es liegen keine Hinweise auf
-        eine CMD vor. Weitere Fragebögen wurden übersprungen.
+        Der Patient hat alle Screening-Fragen mit &quot;Nein&quot; beantwortet. Es liegen keine
+        Hinweise auf eine CMD vor. Weitere Fragebögen wurden übersprungen.
       </AlertDescription>
     </Alert>
   );
@@ -209,9 +209,7 @@ export function DashboardView({
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.JFLS8}
                 title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
-                answers={
-                  jfls8Response ? (jfls8Response.answers as Record<string, string>) : null
-                }
+                answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
               />
             )}
 
@@ -237,9 +235,7 @@ export function DashboardView({
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.JFLS20}
                 title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
-                answers={
-                  jfls20Response ? (jfls20Response.answers as Record<string, string>) : null
-                }
+                answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
               />
             )}
           </div>

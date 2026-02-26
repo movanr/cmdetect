@@ -202,6 +202,7 @@ export function ScoresOverviewTable({
 
 // ─── SQ Answers ─────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function formatSQAnswer(questionId: SQQuestionId, value: unknown): string {
   if (value === undefined || value === null) return "—";
 
@@ -224,6 +225,7 @@ export function formatSQAnswer(questionId: SQQuestionId, value: unknown): string
   return String(value);
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function formatOfficeUse(
   questionId: SQQuestionId,
   answers: Record<string, unknown>
@@ -688,5 +690,6 @@ export function PainDrawingDetail({
 
 // ─── Re-exports for convenience ────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { isQuestionnaireEnabled, QUESTIONNAIRE_ID };
 export type { QuestionnaireResponse };

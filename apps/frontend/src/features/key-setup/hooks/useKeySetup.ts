@@ -15,7 +15,7 @@ export function useKeySetup() {
   const { state, actions } = useKeySetupState();
 
   const organizationId =
-    (session?.user as any)?.organizationId || "org_unknown";
+    (session?.user as { organizationId?: string } | undefined)?.organizationId ?? "org_unknown";
 
   // Fetch organization data
   const { data: organizationData, isLoading: orgLoading } = useQuery({

@@ -62,6 +62,7 @@ function E10SideTable({ side, instances, refused, hasValidated }: E10SideTablePr
       const painType = inst.context.painType;
       if (!site || !painType) continue;
       if (!map.has(site)) map.set(site, new Map());
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       map.get(site)!.set(painType, inst);
     }
     return map;

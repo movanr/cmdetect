@@ -43,13 +43,13 @@ export class ActionHandlers {
     // Validate invite token
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      return sendActionError(c, tokenValidation.error!);
+      return sendActionError(c, tokenValidation.error ?? "Validation error");
     }
 
     // Validate consent data
     const consentValidation = validateConsentData(consent_data);
     if (!consentValidation.valid) {
-      return sendActionError(c, consentValidation.error!);
+      return sendActionError(c, consentValidation.error ?? "Validation error");
     }
 
     // Get patient record
@@ -81,13 +81,13 @@ export class ActionHandlers {
     // Validate invite token
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      return sendActionError(c, tokenValidation.error!);
+      return sendActionError(c, tokenValidation.error ?? "Validation error");
     }
 
     // Validate response data structure
     const responseValidation = validateQuestionnaireResponseData(response_data);
     if (!responseValidation.valid) {
-      return sendActionError(c, responseValidation.error!);
+      return sendActionError(c, responseValidation.error ?? "Validation error");
     }
 
     // Get patient record
@@ -148,13 +148,13 @@ export class ActionHandlers {
     // Validate invite token
     const tokenValidation = validateInviteToken(invite_token);
     if (!tokenValidation.valid) {
-      return sendActionError(c, tokenValidation.error!);
+      return sendActionError(c, tokenValidation.error ?? "Validation error");
     }
 
     // Validate patient personal data
     const personalDataValidation = validatePatientPersonalData(patient_data);
     if (!personalDataValidation.valid) {
-      return sendActionError(c, personalDataValidation.error!);
+      return sendActionError(c, personalDataValidation.error ?? "Validation error");
     }
 
     // Get patient record

@@ -32,6 +32,7 @@ export function YesNoField<T extends FieldValues>({
   // Clear value when field becomes disabled
   useEffect(() => {
     if (disabled && value != null) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setValue(name, null as any);
     }
   }, [disabled, value, name, setValue]);

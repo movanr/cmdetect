@@ -31,7 +31,9 @@ export function E8Summary() {
             <h4 className="text-sm font-medium mb-2">{sideLabel}</h4>
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
               {LOCKING_TYPES.map(({ key: lockingType, label: lockingLabel }) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const locking = getValues(`e8.${side}.${lockingType}.locking` as any) as string | null;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const reduction = getValues(`e8.${side}.${lockingType}.reduction` as any) as string | null;
 
                 return (

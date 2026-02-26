@@ -11,7 +11,7 @@ export interface ApiError {
 
 export interface ApiSuccess {
   success: true;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export type ApiResponse = ApiSuccess | ApiError;
@@ -26,7 +26,7 @@ export function sendActionError(c: Context, error: string): Response {
 /**
  * Sends a standardized success response for Hasura actions
  */
-export function sendActionSuccess(c: Context, data: Record<string, any>): Response {
+export function sendActionSuccess(c: Context, data: Record<string, unknown>): Response {
   return c.json({ success: true, ...data });
 }
 
@@ -34,12 +34,13 @@ export function sendActionSuccess(c: Context, data: Record<string, any>): Respon
  * Sends a standardized HTTP error response
  */
 export function sendHttpError(c: Context, statusCode: number, error: string): Response {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return c.json({ error }, statusCode as any);
 }
 
 /**
  * Sends a standardized HTTP success response
  */
-export function sendHttpSuccess(c: Context, data: Record<string, any>): Response {
+export function sendHttpSuccess(c: Context, data: Record<string, unknown>): Response {
   return c.json(data);
 }

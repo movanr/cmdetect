@@ -102,6 +102,7 @@ export function InlineQuestionItem({
 /**
  * Determine the answer type for a question ID
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getAnswerType(questionId: string): AnswerType {
   if (questionId === "SQ2" || questionId === "SQ6") {
     return "duration";

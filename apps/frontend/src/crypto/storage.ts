@@ -67,7 +67,7 @@ export async function hasStoredPrivateKey(): Promise<boolean> {
       request.onerror = () =>
         reject(new Error("Failed to check for stored key"));
     });
-  } catch (error) {
+  } catch {
     return false;
   }
 }

@@ -85,7 +85,7 @@ export function CasesView() {
       key: "new_indicator" as keyof PatientRecord,
       header: "",
       width: "3%",
-      render: (_: any, record: PatientRecord) => {
+      render: (_: unknown, record: PatientRecord) => {
         const status = getCaseStatus(record);
         return status === "new" ? (
           <div className="flex items-center justify-center">
@@ -101,7 +101,7 @@ export function CasesView() {
       key: "first_name_encrypted" as keyof PatientRecord,
       header: t.columns.patientName,
       width: "15%",
-      render: (_: any, record: PatientRecord) => {
+      render: (_: unknown, record: PatientRecord) => {
         const patientData = decryptedData[record.id];
 
         if (isDecrypting) {
@@ -135,7 +135,7 @@ export function CasesView() {
       header: t.columns.dob,
       width: "15%",
       hideBelow: "md" as const,
-      render: (_: any, record: PatientRecord) => {
+      render: (_: unknown, record: PatientRecord) => {
         const patientData = decryptedData[record.id];
 
         if (isDecrypting || !patientData?.dateOfBirth) {
@@ -169,7 +169,7 @@ export function CasesView() {
       key: "status" as keyof PatientRecord,
       header: t.columns.status,
       width: "10%",
-      render: (_: any, record: PatientRecord) => (
+      render: (_: unknown, record: PatientRecord) => (
         <StatusBadge status={getCaseStatus(record)} />
       ),
     },
@@ -186,7 +186,7 @@ export function CasesView() {
       header: t.columns.lastViewedBy,
       width: "12%",
       hideBelow: "xl" as const,
-      render: (_: any, record: PatientRecord) => {
+      render: (_: unknown, record: PatientRecord) => {
         if (!record.last_viewed_by) {
           return <span className="text-muted-foreground">-</span>;
         }

@@ -19,7 +19,8 @@ export function ReviewStep({ drawings, onEditStep }: ReviewStepProps) {
 
       <div className="grid grid-cols-2 gap-4">
         {drawingSteps.map((step, index) => {
-          const imageId = step.imageId!;
+          if (!step.imageId) return null;
+          const imageId = step.imageId;
           const config = IMAGE_CONFIGS[imageId];
           const drawing = drawings[imageId];
           const hasDrawing = drawing && drawing.elements.length > 0;

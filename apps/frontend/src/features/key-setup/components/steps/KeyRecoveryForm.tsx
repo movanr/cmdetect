@@ -55,7 +55,7 @@ export function KeyRecoveryForm({
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Your local private key doesn't match the organization's public key.
+            Your local private key doesn&apos;t match the organization&apos;s public key.
             Please recover the correct private key.
           </AlertDescription>
         </Alert>

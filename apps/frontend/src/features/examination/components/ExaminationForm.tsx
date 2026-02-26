@@ -43,6 +43,7 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
   });
 
   // Watch values for debug display
+  // eslint-disable-next-line react-hooks/incompatible-library
   const allValues = form.watch();
 
   return (

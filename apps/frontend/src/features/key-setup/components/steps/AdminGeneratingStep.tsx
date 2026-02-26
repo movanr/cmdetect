@@ -110,7 +110,7 @@ export function AdminGeneratingStep({
     try {
       await navigator.clipboard.writeText(state.keys.mnemonic);
       toast.success("Mnemonic copied to clipboard");
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy mnemonic");
     }
   };

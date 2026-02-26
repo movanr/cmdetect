@@ -16,7 +16,9 @@ export function E6Summary() {
     <SummarySection sectionId="e6">
       <div className="grid grid-cols-2 gap-6">
         {SIDES.map(({ key: side, label: sideLabel }) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const click = getValues(`e6.${side}.click` as any) as Record<string, unknown>;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const crepitus = getValues(`e6.${side}.crepitus` as any) as Record<string, unknown>;
 
           return (

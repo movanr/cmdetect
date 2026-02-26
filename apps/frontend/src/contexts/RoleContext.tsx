@@ -34,8 +34,9 @@ export function RoleProvider({ children }: RoleProviderProps) {
   // Extract roles from session when it changes
   useEffect(() => {
     if (session?.user) {
-      const userRoles = ((session.user as any).roles as UserRole[]) || [];
-      const currentActiveRole = (session.user as any).activeRole as UserRole;
+      const sessionUser = session.user as { roles?: UserRole[]; activeRole?: UserRole };
+      const userRoles = sessionUser.roles ?? [];
+      const currentActiveRole = sessionUser.activeRole as UserRole;
       
       setAvailableRoles(userRoles);
       
@@ -130,6 +131,7 @@ export function RoleProvider({ children }: RoleProviderProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRole(): RoleContextType {
   const context = useContext(RoleContext);
   if (context === undefined) {
@@ -139,6 +141,7 @@ export function useRole(): RoleContextType {
 }
 
 // Helper hook for role-based conditional rendering
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRoleAccess(allowedRoles: UserRole[]) {
   const { activeRole, canAccessRoute } = useRole();
   

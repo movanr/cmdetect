@@ -35,6 +35,7 @@ export function CaseWorkflowProvider({ caseId, children }: CaseWorkflowProviderP
 }
 
 // Hook to get caseId from context
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCaseId(): string {
   const context = useContext(CaseWorkflowContext);
   if (!context) {
@@ -44,6 +45,7 @@ export function useCaseId(): string {
 }
 
 // Optional hook that returns null if not in context
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCaseIdSafe(): string | null {
   const context = useContext(CaseWorkflowContext);
   return context?.caseId ?? null;

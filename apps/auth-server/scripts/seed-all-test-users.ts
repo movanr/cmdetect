@@ -12,7 +12,7 @@ const testAuth = betterAuth({
   database: new Pool({
     connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST || 'localhost'}:${process.env.POSTGRES_PORT || 5432}/${process.env.POSTGRES_DB}`,
   }),
-  secret: process.env.BETTER_AUTH_SECRET!,
+  secret: process.env.BETTER_AUTH_SECRET ?? "",
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Disabled for testing
@@ -221,8 +221,8 @@ async function seedAllTestUsers() {
           ...userData,
           userId: signupResult.user.id,
         });
-      } catch (error: any) {
-        console.log(`❌ Error creating ${userData.email}: ${error.message}`);
+      } catch (error: unknown) {
+        console.log(`❌ Error creating ${userData.email}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -244,8 +244,8 @@ async function seedAllTestUsers() {
         } else {
           console.log(`❌ Login test failed for ${testUser.email}`);
         }
-      } catch (error: any) {
-        console.log(`❌ Login test error: ${error.message}`);
+      } catch (error: unknown) {
+        console.log(`❌ Login test error: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 

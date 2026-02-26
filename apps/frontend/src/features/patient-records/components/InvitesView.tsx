@@ -176,7 +176,7 @@ export function InvitesView() {
       key: "id" as keyof PatientRecord,
       header: t.columns.status,
       width: "12%",
-      render: (_: any, record: PatientRecord) => (
+      render: (_: unknown, record: PatientRecord) => (
         <StatusBadge status={getInviteStatus(record)} />
       ),
     },

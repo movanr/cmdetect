@@ -41,6 +41,7 @@ import {
 } from "./questionnaire-tables";
 
 // PHQ-4 Severity scale segments
+// eslint-disable-next-line react-refresh/only-export-components
 export const PHQ4_SEVERITY_SEGMENTS = [
   { label: "0–2", range: "0-2", min: 0, max: 2, color: "bg-green-500" },
   { label: "3–5", range: "3-5", min: 3, max: 5, color: "bg-yellow-500" },
@@ -49,6 +50,7 @@ export const PHQ4_SEVERITY_SEGMENTS = [
 ] as const;
 
 // GCPS Grade scale segments (0-IV) - German labels per DC/TMD manual
+// eslint-disable-next-line react-refresh/only-export-components
 export const GCPS_GRADE_SEGMENTS: Array<{
   grade: GCPSGrade;
   label: string;
@@ -63,6 +65,7 @@ export const GCPS_GRADE_SEGMENTS: Array<{
 ];
 
 // OBC Risk level segments based on TMD prevalence comparison
+// eslint-disable-next-line react-refresh/only-export-components
 export const OBC_RISK_SEGMENTS: Array<{
   level: OBCRiskLevel;
   label: string;
@@ -103,6 +106,7 @@ export const OBC_RISK_SEGMENTS: Array<{
 
 // JFLS-8 Limitation level segments based on reference values
 // Healthy: 0.16, Chronic TMD: 1.74
+// eslint-disable-next-line react-refresh/only-export-components
 export const JFLS8_LIMITATION_SEGMENTS: Array<{
   level: JFLS8LimitationLevel;
   label: string;
@@ -142,6 +146,7 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
 ];
 
 // JFLS-20 Limitation level segments (same reference values as JFLS-8)
+// eslint-disable-next-line react-refresh/only-export-components
 export const JFLS20_LIMITATION_SEGMENTS: Array<{
   level: JFLS20LimitationLevel;
   label: string;
@@ -192,6 +197,7 @@ interface Axis2ScoreCardProps {
 /**
  * Gets the active segment index for a given PHQ-4 score
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getActiveSegment(score: number): number {
   if (score <= 2) return 0;
   if (score <= 5) return 1;

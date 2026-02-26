@@ -124,6 +124,12 @@ export default [
         clearTimeout: "readonly",
         setInterval: "readonly",
         clearInterval: "readonly",
+        // Additional browser globals
+        SVGTitleElement: "readonly",
+        StorageEvent: "readonly",
+        requestAnimationFrame: "readonly",
+        BeforeUnloadEvent: "readonly",
+        IntersectionObserver: "readonly",
       },
     },
     plugins: {
@@ -207,11 +213,13 @@ export default [
         global: "readonly",
         vi: "readonly",
         vitest: "readonly",
+        structuredClone: "readonly",
       },
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "off", // Allow any in tests
       "@typescript-eslint/no-require-imports": "off", // Allow require in test setup
+      "@typescript-eslint/no-non-null-assertion": "off", // Allow non-null assertions in tests
       "no-useless-catch": "off", // Allow useless catch in tests
     },
   },

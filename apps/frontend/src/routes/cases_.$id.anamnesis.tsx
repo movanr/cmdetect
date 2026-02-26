@@ -100,7 +100,7 @@ function AnamnesisLayout() {
     if (record?.id && !updateViewedMutation.isPending) {
       updateViewedMutation.mutate({ id: record.id });
     }
-  }, [record?.id]);
+  }, [record?.id, updateViewedMutation]);
 
   // Decrypt patient data
   useEffect(() => {

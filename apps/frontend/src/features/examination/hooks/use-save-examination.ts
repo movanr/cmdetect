@@ -105,6 +105,7 @@ export function useUpsertExamination(patientRecordId: string) {
         const validatedData = parseExaminationData(response.response_data);
         if (validatedData) {
           queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => ({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...old!,
             id: response.id,
             responseData: validatedData,

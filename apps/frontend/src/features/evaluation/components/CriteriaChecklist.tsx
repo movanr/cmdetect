@@ -168,7 +168,7 @@ export function CriteriaChecklist({
       locationResult.sidedAnamnesisResult,
       "Seitenspezifische Anamnese"
     );
-  }, [locationResult?.sidedAnamnesisResult]);
+  }, [locationResult]);
 
   const examinationItems = useMemo(() => {
     if (!locationResult) return [];

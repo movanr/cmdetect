@@ -48,7 +48,7 @@ export const auth = betterAuth({
 
             const defaultRole = activeRole;
 
-            const claims: Record<string, any> = {
+            const claims: Record<string, unknown> = {
               "x-hasura-default-role": defaultRole,
               "x-hasura-allowed-roles": validRoles,
               "x-hasura-user-id": user.id,

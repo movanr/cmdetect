@@ -155,7 +155,7 @@ export function PrintableAnamnesis({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
             GCPS-1M — Graduierung chronischer Schmerzen
           </h2>
-          <GCPSAnswersTable answers={gcps1mResponse!.answers as GCPS1MAnswers} />
+          <GCPSAnswersTable answers={gcps1mResponse?.answers as GCPS1MAnswers} />
         </section>
       )}
 
@@ -165,7 +165,7 @@ export function PrintableAnamnesis({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
             PHQ-4 — Depression &amp; Angst
           </h2>
-          <PHQ4AnswersTable answers={phq4Response!.answers as Record<string, string>} />
+          <PHQ4AnswersTable answers={phq4Response?.answers as Record<string, string>} />
         </section>
       )}
 
@@ -175,7 +175,7 @@ export function PrintableAnamnesis({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
             JFLS-8 — Kieferfunktions-Einschränkungsskala
           </h2>
-          <JFLS8AnswersTable answers={jfls8Response!.answers as JFLS8Answers} />
+          <JFLS8AnswersTable answers={jfls8Response?.answers as JFLS8Answers} />
         </section>
       )}
 
@@ -185,7 +185,7 @@ export function PrintableAnamnesis({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
             OBC — Oral Behaviors Checklist
           </h2>
-          <OBCAnswersTable answers={obcResponse!.answers as OBCAnswers} />
+          <OBCAnswersTable answers={obcResponse?.answers as OBCAnswers} />
         </section>
       )}
 
@@ -195,7 +195,7 @@ export function PrintableAnamnesis({
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
             JFLS-20 — Kieferfunktions-Einschränkungsskala (erweitert)
           </h2>
-          <JFLS20AnswersTable answers={jfls20Response!.answers as JFLS20Answers} />
+          <JFLS20AnswersTable answers={jfls20Response?.answers as JFLS20Answers} />
         </section>
       )}
 

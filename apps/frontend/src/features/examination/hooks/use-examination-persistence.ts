@@ -348,6 +348,7 @@ export function useExaminationPersistence({
   // Complete examination
   const completeExaminationFn = useCallback(async () => {
     const formValues = form.getValues();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const lastSectionId = SECTION_IDS.at(-1)!;
     const finalCompletedSections = completedSections.includes(lastSectionId)
       ? completedSections

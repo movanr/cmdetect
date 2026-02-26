@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export interface UseLocalStorageOptions<T> {
   /** Custom serializer (default: JSON.stringify) */
@@ -58,7 +58,9 @@ export function useLocalStorage<T>(
   // Ref to access current value without adding it as a useCallback dependency,
   // keeping setValue identity stable across renders.
   const storedValueRef = useRef(storedValue);
-  storedValueRef.current = storedValue;
+  useLayoutEffect(() => {
+    storedValueRef.current = storedValue;
+  });
 
   // Set value to localStorage and state
   const setValue = useCallback(
