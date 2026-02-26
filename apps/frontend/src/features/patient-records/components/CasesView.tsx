@@ -17,6 +17,8 @@ import { FileText } from "lucide-react";
 import { getTranslations, interpolate } from "@/config/i18n";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
+import { useRole } from "@/contexts/RoleContext";
+import { roles } from "@cmdetect/config";
 
 interface DecryptedPatientData {
   [recordId: string]: PatientPII | null;
@@ -28,6 +30,8 @@ export function CasesView() {
   const { data: submissions, isLoading } = useSubmissions();
   const t = getTranslations();
   const navigate = useNavigate();
+  const { activeRole } = useRole();
+  const isReceptionist = activeRole === roles.RECEPTIONIST;
   const [decryptedData, setDecryptedData] = useState<DecryptedPatientData>({});
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -283,7 +287,7 @@ export function CasesView() {
         <DataTable
           data={filteredSubmissions}
           columns={columns}
-          onRowClick={handleRowClick}
+          onRowClick={isReceptionist ? undefined : handleRowClick}
         />
       )}
     </div>
