@@ -9,9 +9,6 @@ describe("Role-Based Access Control", () => {
   });
 
   describe("Org Admin Permissions", () => {
-    // TODO: User creation should go through Better Auth webhook/API, not direct Hasura mutations
-    // Remove this test until webhook is implemented
-
     it("org_admin can access all patient records in their organization", async () => {
       const records = await clients.org1Admin.request<{
         patient_record: Array<{ id: string; organization_id: string }>;
@@ -193,6 +190,4 @@ describe("Role-Based Access Control", () => {
       ).rejects.toThrow();
     });
   });
-  // TODO: Würde auf jeden Fall ein paar Tests haben für Public User, dass die Tables die er nicht accessen darf immer sofort failen (Schema Error von Hasura weil anders).
-  // TODO: Eigl ist es deklarativ genug mit Hasura, ggf kannst du auch die YAML File parsen für die Tables und checken
 });

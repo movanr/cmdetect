@@ -38,3 +38,10 @@ export async function createTestClients() {
 }
 
 export type TestClients = Awaited<ReturnType<typeof createTestClients>>;
+
+/**
+ * Create a GraphQL client with no authentication (uses Hasura's public role)
+ */
+export function createPublicClient(): GraphQLClient {
+  return new GraphQLClient(HASURA_ENDPOINT);
+}
