@@ -1,4 +1,4 @@
-import { useKeySetup } from '../hooks/useKeySetup';
+import { useKeySetupContext } from '../../../contexts/KeySetupContext';
 import { LoadingStep } from './steps/LoadingStep';
 import { AdminSetupStep } from './steps/AdminSetupStep';
 import { AdminGeneratingStep } from './steps/AdminGeneratingStep';
@@ -12,7 +12,7 @@ interface KeySetupProps {
 }
 
 export function KeySetup({ onSetupComplete }: KeySetupProps) {
-  const { state, actions, context, revalidate } = useKeySetup();
+  const { state, actions, context, revalidate } = useKeySetupContext();
 
   const renderStep = () => {
     switch (state.type) {

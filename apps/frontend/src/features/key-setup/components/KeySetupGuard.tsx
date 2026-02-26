@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useSession } from "../../../lib/auth";
-import { useKeySetup } from "../hooks/useKeySetup";
+import { useKeySetupContext } from "../../../contexts/KeySetupContext";
 import { LoadingStep } from "./steps/LoadingStep";
 
 interface KeySetupGuardProps {
@@ -12,7 +12,7 @@ export function KeySetupGuard({ children }: KeySetupGuardProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: session } = useSession();
-  const { state } = useKeySetup();
+  const { state } = useKeySetupContext();
 
   useEffect(() => {
     if (!session) return; // No session — AppLayout handles the /login redirect
