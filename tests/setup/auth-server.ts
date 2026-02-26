@@ -122,8 +122,9 @@ export async function createAuthenticatedClient(
   }
 
   const token = await authenticateUser(user.email, user.password);
-  const HASURA_ENDPOINT =
-    process.env.HASURA_TEST_ENDPOINT || "http://localhost:8080/v1/graphql";
+  const HASURA_ENDPOINT = process.env.HASURA_API_URL
+    ? `${process.env.HASURA_API_URL}/v1/graphql`
+    : "http://localhost:8080/v1/graphql";
 
   return new GraphQLClient(HASURA_ENDPOINT, {
     headers: {
