@@ -42,6 +42,22 @@ import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { PersonalDataForm } from "./-components/PersonalDataForm";
 import type { PersonalDataFormValues } from "./-components/personalDataSchema";
 
+// Maps known English server error strings to German patient-facing messages
+function translateServerError(error: string | null | undefined): string | null {
+  if (!error) return null;
+  const translations: Record<string, string> = {
+    "Invalid invite link":
+      "Ihr Einladungslink ist ungültig. Bitte kontaktieren Sie Ihre Praxis.",
+    "Invite link has expired":
+      "Ihr Einladungslink ist abgelaufen. Bitte kontaktieren Sie Ihre Praxis für einen neuen Link.",
+    "Invalid or expired invite token":
+      "Ihr Einladungslink ist abgelaufen. Bitte kontaktieren Sie Ihre Praxis für einen neuen Link.",
+    "Organization encryption not configured":
+      "Die Verschlüsselung für Ihre Praxis ist nicht konfiguriert. Bitte kontaktieren Sie Ihre Praxis.",
+  };
+  return translations[error] ?? error;
+}
+
 // Consent constants
 const CONSENT_TEXT =
   "Ich willige in die Erhebung und Verarbeitung meiner persönlichen Gesundheitsdaten zum Zweck der medizinischen Versorgung ein. Ich verstehe, dass meine Daten verschlüsselt und sicher gespeichert werden.";
@@ -143,7 +159,7 @@ function PatientFlowPage() {
         }
       } else {
         setError(
-          tokenResult.validateInviteToken.error_message || "Ungültiger Einladungslink"
+          translateServerError(tokenResult.validateInviteToken.error_message) || "Ungültiger Einladungslink"
         );
       }
     },
@@ -172,7 +188,7 @@ function PatientFlowPage() {
         setError("");
       } else {
         setError(
-          data.submitPatientConsent.error ||
+          translateServerError(data.submitPatientConsent.error) ||
             "Einwilligung konnte nicht übermittelt werden"
         );
       }
@@ -216,7 +232,7 @@ function PatientFlowPage() {
         setError("");
       } else {
         setError(
-          data.submitPatientPersonalData.error ||
+          translateServerError(data.submitPatientPersonalData.error) ||
             "Persönliche Daten konnten nicht übermittelt werden"
         );
       }
@@ -369,7 +385,7 @@ function PatientFlowPage() {
           setTransitionPhase("completing");
         } else {
           setSubmissionError(
-            result.submitQuestionnaireResponse.error ||
+            translateServerError(result.submitQuestionnaireResponse.error) ||
               "Fragebogen konnte nicht übermittelt werden"
           );
         }
