@@ -204,10 +204,31 @@ describe("Patient Consent Action Handler", () => {
       expect(data.error).toBe("Invalid or expired invite token");
     });
 
-    // TODO: Re-enable this test when we can properly handle expired tokens in test environment
-    // Database constraints prevent creating records with past expiration dates
-    it.skip("should reject expired invite token", async () => {
-      // Test skipped due to database constraints on invite_expires_at
+    it("should reject expired invite token", async () => {
+      const { inviteToken: expiredToken } = await createTestPatientRecord(
+        receptionistClient, adminClient, "P-EXPIRED-CONSENT", 1500
+      );
+
+      await new Promise(r => setTimeout(r, 2000));
+
+      const response = await fetch(`${AUTH_SERVER_URL}/actions/submit-patient-consent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input: {
+            invite_token: expiredToken,
+            consent_data: {
+              consent_given: true,
+              consent_text: "Test consent text",
+              consent_version: "v1.0"
+            }
+          }
+        })
+      });
+
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe("Invalid or expired invite token");
     });
   });
 

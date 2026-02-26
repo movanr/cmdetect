@@ -267,10 +267,30 @@ describe("Questionnaire Response Action Handler", () => {
       expect(data.error).toBe("Invalid or expired invite token");
     });
 
-    // TODO: Re-enable this test when we can properly handle expired tokens in test environment
-    // Database constraints prevent creating records with past expiration dates
-    it.skip("should reject expired invite token", async () => {
-      // Test skipped due to database constraints on invite_expires_at
+    it("should reject expired invite token", async () => {
+      const { inviteToken: expiredToken } = await createTestPatientRecord(
+        receptionistClient, adminClient, "P-EXPIRED-QR", 1500
+      );
+
+      await new Promise(r => setTimeout(r, 2000));
+
+      const response = await fetch(
+        `${AUTH_SERVER_URL}/actions/submit-questionnaire-response`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input: {
+              invite_token: expiredToken,
+              response_data: validResponseData,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe("Invalid or expired invite token");
     });
 
     it("should require consent before submitting questionnaire response", async () => {

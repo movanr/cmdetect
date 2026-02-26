@@ -112,35 +112,15 @@ describe("Validate Invite Token Action Handler", () => {
       expect(data.error_message).toBe("Invalid invite link");
     });
 
-    it.skip("should handle expired invite token", async () => {
-      // Create a patient record, then manually backdate the expiration via admin
-      const shortLivedResult = await receptionistClient.request(`
-        mutation {
-          insert_patient_record(objects: [{
-            clinic_internal_id: "P002-EXPIRED-TEST"
-          }]) {
-            returning {
-              id
-              invite_token
-            }
-          }
-        }
-      `) as any;
+    it("should handle expired invite token", async () => {
+      // Create a record with a very short expiry, then wait for it to expire.
+      // The DB constraint only requires invite_expires_at > created_at, so we
+      // can't backdate it — we must let it expire naturally.
+      const { inviteToken: expiredToken } = await createTestPatientRecord(
+        receptionistClient, adminClient, "P002-EXPIRED-TEST", 1500
+      );
 
-      const recordId = shortLivedResult.insert_patient_record.returning[0].id;
-      const expiredToken = shortLivedResult.insert_patient_record.returning[0].invite_token;
-
-      // Manually update the expiration to be in the past using database update
-      await adminClient.request(`
-        mutation {
-          update_patient_record_by_pk(
-            pk_columns: { id: "${recordId}" }
-            _set: { invite_expires_at: "${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()}" }
-          ) {
-            id
-          }
-        }
-      `);
+      await new Promise(r => setTimeout(r, 2000));
 
       const response = await fetch(`${AUTH_SERVER_URL}/actions/validate-invite-token`, {
         method: "POST",
