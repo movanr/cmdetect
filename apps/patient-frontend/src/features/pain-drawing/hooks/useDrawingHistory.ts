@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useRef } from 'react';
+import { useReducer, useCallback, useRef, useLayoutEffect } from 'react';
 import type { DrawingElement, HistoryState, HistoryAction } from '../types';
 
 const initialState: HistoryState = {
@@ -102,7 +102,9 @@ export function useDrawingHistory(
 
   // Keep a ref to always have the latest state available (avoids stale closures)
   const stateRef = useRef(state);
-  stateRef.current = state;
+  useLayoutEffect(() => {
+    stateRef.current = state;
+  });
 
   const getHistoryState = useCallback((): HistoryState => {
     return stateRef.current;
