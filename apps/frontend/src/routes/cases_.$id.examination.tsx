@@ -215,7 +215,7 @@ function ExaminationContent({
   const blocker = useBlocker({
     shouldBlockFn: ({ next }) => {
       if (status === "completed") return false;
-      const isLeavingCase = !next.fullPath.startsWith(`/cases/${caseId}`);
+      const isLeavingCase = !next.pathname.startsWith(`/cases/${caseId}`);
       return isLeavingCase && hasUnsavedBackendChangesRef.current;
     },
     withResolver: true,
