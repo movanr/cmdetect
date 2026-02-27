@@ -28,7 +28,6 @@ import {
   Plus,
   Copy,
   ExternalLink,
-  CheckCircle2,
   XCircle,
   RefreshCw,
 } from "lucide-react";
@@ -37,7 +36,6 @@ import { toast } from "sonner";
 
 const INVITE_STATUSES: readonly InviteStatus[] = [
   "pending",
-  "submitted",
   "expired",
   "consent_denied",
 ] as const;
@@ -113,10 +111,9 @@ export function InvitesView() {
       render: (token: string, record: PatientRecord) => {
         const status = getInviteStatus(record);
         const isPending = status === "pending";
-        const isSuccess = status === "submitted";
         const isFailure = status === "expired" || status === "consent_denied";
         const url = token
-          ? `${window.location.protocol}//${window.location.hostname.replace(/^app\./, 'patient.')}?token=${token}`
+          ? `${window.location.protocol}//${window.location.hostname.replace(/^app\./, "patient.")}?token=${token}`
           : "";
 
         return (
@@ -136,11 +133,6 @@ export function InvitesView() {
             >
               {"..." + token?.slice(-8) || "N/A"}
             </Badge>
-            {isSuccess && (
-              <div title="Submitted successfully">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-              </div>
-            )}
             {isFailure && (
               <div title={status === "expired" ? "Expired" : "Consent denied"}>
                 <XCircle className="h-4 w-4 text-red-600" />
@@ -189,9 +181,7 @@ export function InvitesView() {
 
   const renderActions = (record: PatientRecord) => {
     const status = getInviteStatus(record);
-    const isSubmitted = status === "submitted";
-    const isExpired = status === "expired";
-    const canReset = isExpired || isSubmitted;
+    const canReset = status === "expired";
 
     return (
       <ActionButtons>
@@ -214,7 +204,7 @@ export function InvitesView() {
             <DropdownMenuItem
               variant="destructive"
               onClick={() => handleDelete(record.id)}
-              disabled={deleteMutation.isPending || isSubmitted}
+              disabled={deleteMutation.isPending}
             >
               <Trash className="h-4 w-4" />
               {deleteMutation.isPending
