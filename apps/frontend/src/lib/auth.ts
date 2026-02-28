@@ -10,6 +10,7 @@ export const authClient = createAuthClient({
 export const { signIn, signOut, signUp, useSession } = authClient;
 
 let token: string | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 // Helper to get JWT token (automatically includes active role)
 export async function getJWTToken(): Promise<string | null> {
   try {
@@ -40,14 +41,15 @@ export function clearJWTToken(): void {
   token = null;
 }
 
-export const refreshJWTToken = async () => {
-  token = null;
-  const newToken = await getJWTToken();
-  if (newToken) {
-    token = newToken;
-    return token;
+export const refreshJWTToken = async (): Promise<string | null> => {
+  // Deduplicate concurrent refresh calls — return the in-flight promise if one exists
+  if (!refreshPromise) {
+    token = null;
+    refreshPromise = getJWTToken().finally(() => {
+      refreshPromise = null;
+    });
   }
-  return null;
+  return refreshPromise;
 };
 
 // Helper to switch user role

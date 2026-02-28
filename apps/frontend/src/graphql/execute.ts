@@ -45,7 +45,16 @@ export async function execute<TResult, TVariables>(
   const result = await response.json();
 
   if (result.errors) {
-    throw new Error(result.errors[0]?.message || "GraphQL Error");
+    const firstError = result.errors[0];
+    // Hasura returns JWT errors as HTTP 200 with a GraphQL error body (not HTTP 401)
+    const isJwtError =
+      firstError?.extensions?.code === "invalid-jwt" ||
+      firstError?.message?.includes("JWTExpired");
+    if (isJwtError && !refreshed) {
+      await refreshJWTToken();
+      return execute(query, variables, true);
+    }
+    throw new Error(firstError?.message || "GraphQL Error");
   }
 
   return result.data as TResult;

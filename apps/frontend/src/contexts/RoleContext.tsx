@@ -26,20 +26,23 @@ interface RoleProviderProps {
 }
 
 export function RoleProvider({ children }: RoleProviderProps) {
-  const { data: session } = useSession();
+  const { data: session, isPending: isSessionPending } = useSession();
   const [activeRole, setActiveRole] = useState<UserRole | null>(null);
   const [availableRoles, setAvailableRoles] = useState<UserRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Extract roles from session when it changes
   useEffect(() => {
+    // Wait for Better Auth to finish its initial session fetch before processing
+    if (isSessionPending) return;
+
     if (session?.user) {
       const sessionUser = session.user as { roles?: UserRole[]; activeRole?: UserRole };
       const userRoles = sessionUser.roles ?? [];
       const currentActiveRole = sessionUser.activeRole as UserRole;
-      
+
       setAvailableRoles(userRoles);
-      
+
       // Set active role from session or default to first available role
       if (currentActiveRole && userRoles.includes(currentActiveRole)) {
         setActiveRole(currentActiveRole);
@@ -49,7 +52,7 @@ export function RoleProvider({ children }: RoleProviderProps) {
       } else {
         setActiveRole(null);
       }
-      
+
       setIsLoading(false);
     } else {
       // No session - reset everything
@@ -57,7 +60,7 @@ export function RoleProvider({ children }: RoleProviderProps) {
       setActiveRole(null);
       setIsLoading(false);
     }
-  }, [session]);
+  }, [session, isSessionPending]);
 
   // Persist active role in localStorage
   useEffect(() => {

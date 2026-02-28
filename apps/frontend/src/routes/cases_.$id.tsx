@@ -12,7 +12,7 @@ export const Route = createFileRoute("/cases_/$id")({
 // This component provides workflow context to all child routes
 function CaseRoute() {
   const { id } = Route.useParams();
-  const { activeRole } = useRole();
+  const { activeRole, isLoading } = useRole();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,8 +21,15 @@ function CaseRoute() {
     }
   }, [activeRole, navigate]);
 
-  // Don't render case workflow for receptionist (redirect in progress)
-  if (!activeRole || activeRole === roles.RECEPTIONIST) {
+  // Redirect to login when session has expired (not still loading)
+  useEffect(() => {
+    if (!isLoading && !activeRole) {
+      navigate({ to: "/login" });
+    }
+  }, [isLoading, activeRole, navigate]);
+
+  // Don't render case workflow while loading, redirecting, or for receptionist
+  if (isLoading || !activeRole || activeRole === roles.RECEPTIONIST) {
     return null;
   }
 
