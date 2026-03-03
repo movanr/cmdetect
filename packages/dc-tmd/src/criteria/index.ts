@@ -48,6 +48,7 @@ export {
   isQuantifierResult,
   getCriterionId,
   getCriterionLabel,
+  getCriterionSources,
 } from "./types";
 
 // Location types

@@ -33,7 +33,7 @@
 import { GROUP_CONFIG, SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../ids/anatomy";
 import { and, any, field, match, not, or } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion } from "../types";
+import type { Criterion, CriterionMetadata } from "../types";
 import { MYALGIA_ANAMNESIS } from "./myalgia";
 
 // Regions applicable to myalgia subtypes (same as base myalgia)
@@ -54,6 +54,7 @@ const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
 }, {
   id: "painLocationConfirmed",
   label: "Bestätigung der Schmerzen in den Kaumuskel(n)",
+  sources: ["U1"],
 });
 
 /**
@@ -109,7 +110,7 @@ function regionGated(region: Region, criteria: Criterion[]): Criterion {
  */
 function forEachRegion(
   buildCriteria: (region: Region) => Criterion[],
-  metadata?: { id?: string; label?: string }
+  metadata?: CriterionMetadata
 ): Criterion {
   return or(
     MYALGIA_REGIONS.map((region) => regionGated(region, buildCriteria(region))),
@@ -155,6 +156,7 @@ const localMyalgiaExamCriterion: Criterion = and(
       {
         id: "localMyalgiaPalpation",
         label: "Palpation: bekannter Schmerz, lokal begrenzt",
+        sources: ["U9", "U10"],
       }
     ),
   ],
@@ -217,6 +219,7 @@ const spreadingMyalgiaExamCriterion: Criterion = and(
       {
         id: "spreadingMyalgiaPalpation",
         label: "Palpation: bekannter Schmerz mit Ausbreitung",
+        sources: ["U9", "U10"],
       }
     ),
   ],
@@ -271,6 +274,7 @@ const referralMyalgiaExamCriterion: Criterion = and(
       {
         id: "referralMyalgiaPalpation",
         label: "Palpation: bekannter Schmerz mit Übertragung",
+        sources: ["U9", "U10"],
       }
     ),
   ],

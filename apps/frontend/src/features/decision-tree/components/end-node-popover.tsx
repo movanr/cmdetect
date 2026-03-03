@@ -13,7 +13,7 @@ import {
   PopoverTitle,
 } from "@/components/ui/popover";
 import { getDiagnosisById, REGIONS, SIDES, type Region, type Side } from "@cmdetect/dc-tmd";
-import { CircleCheck, CircleMinus } from "lucide-react";
+import { CircleMinus } from "lucide-react";
 import type { PractitionerDecision } from "../../evaluation/types";
 
 interface EndNodePopoverProps {
@@ -62,10 +62,7 @@ export function EndNodePopover({
                 Diagnose aufheben
               </>
             ) : (
-              <>
-                <CircleCheck className="mr-2 h-4 w-4" />
-                Diagnose stellen
-              </>
+              <>Diagnose dokumentieren</>
             )}
           </Button>
         </div>

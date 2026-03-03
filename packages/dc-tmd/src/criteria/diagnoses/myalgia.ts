@@ -18,7 +18,7 @@ import { SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../i
 import { and, any, familiarPainDuringOpening, field, match, or } from "../builders";
 import { sq } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion } from "../types";
+import type { Criterion, CriterionMetadata } from "../types";
 
 // Regions applicable to myalgia (temporalis, masseter, otherMast, nonMast)
 const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
@@ -39,6 +39,7 @@ export const painInMasticatoryStructure: Criterion = and(
   {
     id: "painInMasticatory",
     label: "Schmerz in einer mastikatorischen Struktur",
+    sources: ["SF1", "SF3"],
   }
 );
 
@@ -52,6 +53,7 @@ export const painModifiedByFunction: Criterion = any(
   {
     id: "painModified",
     label: "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
+    sources: ["SF4"],
   }
 );
 
@@ -98,7 +100,7 @@ function regionGated(region: Region, criteria: Criterion[]): Criterion {
  */
 function forEachRegion(
   buildCriteria: (region: Region) => Criterion[],
-  metadata?: { id?: string; label?: string }
+  metadata?: CriterionMetadata
 ): Criterion {
   return or(
     MYALGIA_REGIONS.map((region) => regionGated(region, buildCriteria(region))),
@@ -115,6 +117,7 @@ export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}",
 }, {
   id: "painLocationConfirmed",
   label: "Bestätigung von Schmerzen in Kaumuskel(n)",
+  sources: ["U1"],
 });
 
 /**
@@ -133,11 +136,13 @@ export const familiarPainProvoked: Criterion = forEachRegion(
         familiarPainDuringOpening("${side}", region, {
           id: "openingFamiliarPain",
           label: "Bekannter Schmerz bei Mundöffnung",
+          sources: ["U4"],
         }),
-        // E9: Familiar pain during palpation of any site in the muscle group
+        // E9/E10: Familiar pain during palpation of any site in the muscle group
         any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
           id: `${region}PalpationFamiliar`,
           label: "Bekannter Schmerz bei Palpation",
+          sources: ["U9", "U10"],
         }),
       ],
       {
@@ -149,6 +154,7 @@ export const familiarPainProvoked: Criterion = forEachRegion(
   {
     id: "familiarPain",
     label: "Bekannter Schmerz in Kaumuskel(n) bei Muskelpalpation oder maximaler Öffnung",
+    sources: ["U4", "U9", "U10"],
   }
 );
 

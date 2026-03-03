@@ -23,15 +23,34 @@ interface DiagnosisResultInput {
  */
 export function useUpsertDiagnosisResults(patientRecordId: string) {
   const queryClient = useQueryClient();
+  const queryKey = [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId];
 
   return useMutation({
     mutationFn: async (results: DiagnosisResultInput[]) => {
       return execute(UPSERT_DIAGNOSIS_RESULTS, { results });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId],
-      });
+    onSuccess: (data) => {
+      // Populate cache immediately from the mutation's returning data.
+      // This avoids a race window where isSyncing becomes false but results
+      // is still [] (waiting for a background refetch after invalidation).
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const returning: any[] = (data as any)?.insert_diagnosis_result?.returning ?? [];
+      if (returning.length > 0) {
+        const mapped: PersistedDiagnosisResult[] = returning.map((row) => ({
+          id: row.id,
+          diagnosisId: row.diagnosis_id as DiagnosisId,
+          side: row.side as Side,
+          region: row.region as Region,
+          computedStatus: row.computed_status as CriterionStatus,
+          practitionerDecision: (row.practitioner_decision ?? null) as PractitionerDecision,
+          decidedBy: row.decided_by ?? null,
+          decidedAt: row.decided_at ?? null,
+          note: row.note ?? null,
+        }));
+        queryClient.setQueryData<PersistedDiagnosisResult[]>(queryKey, mapped);
+      } else {
+        queryClient.invalidateQueries({ queryKey });
+      }
     },
   });
 }

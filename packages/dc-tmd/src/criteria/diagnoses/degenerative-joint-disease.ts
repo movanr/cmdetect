@@ -43,6 +43,7 @@ const crepitusByExaminer = or(
   {
     id: "crepitusByExaminer",
     label: "Reiben bei Kieferbewegungen",
+    sources: ["U6", "U7"],
   }
 );
 

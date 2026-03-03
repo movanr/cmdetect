@@ -46,6 +46,8 @@ export interface CriterionMetadata {
   label?: string;
   /** Override status when evaluation result is "pending" (for optional criteria that default to a known status) */
   pendingAs?: CriterionStatus;
+  /** Data source references for UI display (e.g. ["SF1", "U4"]) */
+  sources?: string[];
 }
 
 // ============================================================================
@@ -313,4 +315,11 @@ export function getCriterionLabel(criterion: Criterion): string | undefined {
     return criterion.label;
   }
   return undefined;
+}
+
+/**
+ * Extracts the source references from a criterion (if present)
+ */
+export function getCriterionSources(criterion: Criterion): string[] | undefined {
+  return criterion.sources;
 }

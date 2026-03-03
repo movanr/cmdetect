@@ -29,6 +29,7 @@ import type { Criterion } from "../types";
 export const jawLockingOpenPositionAnamnesis: Criterion = field(sq("SQ13"), { equals: "yes" }, {
   id: "jawLockingOpenPosition",
   label: "KG-Arretierung oder Hängen bleiben bei weit geöffneter Kieferposition",
+  sources: ["SF13"],
 });
 
 /**
@@ -37,6 +38,7 @@ export const jawLockingOpenPositionAnamnesis: Criterion = field(sq("SQ13"), { eq
 export const unableToCloseWithoutManeuverAnamnesis: Criterion = field(sq("SQ14"), { equals: "yes" }, {
   id: "unableToCloseWithoutManeuver",
   label: "Unfähigkeit den Mund ohne spezielles Umlenken zu schließen",
+  sources: ["SF14"],
 });
 
 export const SUBLUXATION_ANAMNESIS: Criterion = and(

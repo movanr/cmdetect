@@ -54,6 +54,7 @@ export const TMJ_NOISE_ANAMNESIS: Criterion = or(
   {
     id: "tmjNoiseAnamnesis",
     label: "Anamnestisch aktuell vorhandenes KG-Geräusch, oder Patient gibt während der Untersuchung Geräusche an",
+    sources: ["SF8", "U6", "U7"],
   }
 );
 
@@ -91,6 +92,7 @@ export const TMJ_NOISE_SIDED_ANAMNESIS: Criterion = or(
   {
     id: "tmjNoiseSidedAnamnesis",
     label: "KG-Geräusch auf dieser Seite",
+    sources: ["SF8", "U6", "U7"],
   }
 );
 
@@ -111,6 +113,7 @@ export const DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS: Criterion = and(
   {
     id: "ddWithoutReductionSidedAnamnesis",
     label: "Kieferklemme auf dieser Seite",
+    sources: ["SF9", "SF10"],
   }
 );
 
@@ -145,6 +148,7 @@ function ddWithReductionExamCriterion(): Criterion {
     {
       id: "ddWithReductionExam",
       label: "Diskusverlagerung mit Reposition-Untersuchungsbefund",
+      sources: ["U6", "U7"],
     }
   );
 }
@@ -178,6 +182,7 @@ export const intermittentLockingAnamnesis: Criterion = and([
 ], {
   id: "intermittentLocking",
   label: "Aktuell intermittierende Blockade mit eingeschränkter Mundöffnung",
+  sources: ["SF11", "SF12"],
 });
 
 /**
@@ -234,6 +239,7 @@ export const DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING: DiagnosisDef
 export const jawLockingAnamnesis: Criterion = field(sq("SQ9"), { equals: "yes" }, {
   id: "jawLocking",
   label: "Aktuell KG-Blockade mit eingeschränkter Mundöffnung",
+  sources: ["SF9"],
 });
 
 /**
@@ -242,6 +248,7 @@ export const jawLockingAnamnesis: Criterion = field(sq("SQ9"), { equals: "yes" }
 export const lockingAffectsEatingAnamnesis: Criterion = field(sq("SQ10"), { equals: "yes" }, {
   id: "lockingAffectsEating",
   label: "Einschränkung schwer genug, um die Fähigkeit zu Essen zu beeinträchtigen",
+  sources: ["SF10"],
 });
 
 /**
@@ -278,6 +285,7 @@ const DD_WITHOUT_REDUCTION_LIMITED_EXAMINATION: LocationCriterion = {
     {
       id: "passiveStretchLimited",
       label: "Passive Dehnung (maximale passive Mundöffnung) < 40mm",
+      sources: ["U2", "U4"],
       defaults: { "e2.verticalOverlap": 0 },
     }
   ),
@@ -312,6 +320,7 @@ const DD_WITHOUT_REDUCTION_NO_LIMITED_EXAMINATION: LocationCriterion = {
     {
       id: "passiveStretchNotLimited",
       label: "Passive Dehnung (maximale passive Mundöffnung) \u2265 40mm",
+      sources: ["U2", "U4"],
       defaults: { "e2.verticalOverlap": 0 },
     }
   ),
