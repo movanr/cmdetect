@@ -131,7 +131,6 @@ export { E7Section } from "./components/sections/E7Section";
 export { E8Section } from "./components/sections/E8Section";
 export { E9Section } from "./components/sections/E9Section";
 export { E10Section } from "./components/sections/E10Section";
-export { ExaminationSummary } from "./components/summary";
 export { SectionFooter, type SectionFooterProps } from "./components/ui/SectionFooter";
 
 // Labels

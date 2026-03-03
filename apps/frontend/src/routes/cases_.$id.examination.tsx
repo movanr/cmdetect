@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useBackgroundPrint } from "@/hooks/use-background-print";
 import { FormProvider, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
@@ -35,7 +36,7 @@ import {
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
-import { ExaminationPersistenceProvider, ExaminationSummary, useExaminationPersistenceContext, useExaminationResponse } from "../features/examination";
+import { ExaminationPersistenceProvider, useExaminationPersistenceContext, useExaminationResponse } from "../features/examination";
 import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
 
 // GraphQL query for patient record
@@ -209,6 +210,7 @@ function ExaminationContent({
   const { isHydrated, status, saveDraft, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { print, isPrinting } = useBackgroundPrint();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [isSavingBeforeLeave, setIsSavingBeforeLeave] = useState(false);
 
@@ -274,11 +276,6 @@ function ExaminationContent({
     );
   }
 
-  // Show readonly summary for completed examinations
-  if (status === "completed") {
-    return <ExaminationSummary caseId={caseId} />;
-  }
-
   return (
     <div className="space-y-4">
       {/* Sub-step navigation tabs — sticky within the scroll container */}
@@ -289,11 +286,30 @@ function ExaminationContent({
         className="-mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8 sticky top-0 z-10 bg-background"
       />
 
-      {/* Complete at any time */}
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={() => setShowCompleteDialog(true)}>
-          Untersuchung abschließen
-        </Button>
+      {/* Status-conditional action buttons */}
+      <div className="flex justify-end gap-2">
+        {status === "completed" ? (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => print(`/cases/${caseId}/print-examination`)}
+              disabled={isPrinting}
+            >
+              {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => navigate({ to: "/cases/$id/evaluation", params: { id: caseId } })}
+            >
+              Zur Auswertung
+            </Button>
+          </>
+        ) : (
+          <Button variant="outline" size="sm" onClick={() => setShowCompleteDialog(true)}>
+            Untersuchung abschließen
+          </Button>
+        )}
       </div>
 
       {/* Child route content */}
