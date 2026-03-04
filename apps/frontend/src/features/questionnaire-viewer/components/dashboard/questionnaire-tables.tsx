@@ -121,10 +121,9 @@ export function ScoresOverviewTable({
 
   if (gcps && Object.keys(gcps.answers).length > 0) {
     const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
-    const roman = s.grade === 0 ? "0" : ["I", "II", "III", "IV"][s.grade - 1];
     rows.push({
       instrument: "GCPS-1M",
-      score: `Grad ${roman} (CPI ${s.cpi}, ${s.totalDisabilityPoints} BP)`,
+      score: `CPI ${s.cpi}, ${s.totalDisabilityPoints} BP`,
     });
   }
 
@@ -344,7 +343,6 @@ export function GCPSAnswersTable({
   showPips?: boolean;
 }) {
   const s = calculateGCPS1MScore(answers);
-  const roman = s.grade === 0 ? "0" : ["I", "II", "III", "IV"][s.grade - 1];
 
   return (
     <table className="w-full text-sm border-collapse">
@@ -378,7 +376,7 @@ export function GCPSAnswersTable({
         {/* Score summary row */}
         <tr className="border-t-2 border-gray-300">
           <td colSpan={2} className={`${tdClass} font-semibold`}>
-            Grad {roman}
+            Auswertung
           </td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
             CPI {s.cpi}, {s.totalDisabilityPoints} BP
