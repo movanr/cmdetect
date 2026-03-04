@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ALL_DIAGNOSES,
   E10_SITE_KEYS,
@@ -31,8 +32,19 @@ import {
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
+import {
+  DecisionTreeView,
+  createArthalgiaTree,
+  createDdWithReductionTree,
+  createDjdTree,
+  createHeadacheTree,
+  createMyalgiaSubtypesTree,
+  createMyalgiaTree,
+  createSubluxationTree,
+  type DecisionTreeDef,
+} from "../../decision-tree";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, ArrowRight, ListChecks, Network } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FormValues } from "../../examination";
 import type { PersistedDiagnosisResult, PractitionerDecision } from "../types";
@@ -57,6 +69,22 @@ const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
 const DIAGRAM_REGIONS_ALL: readonly Region[] = ["temporalis", "masseter", "tmj", "nonMast"];
 const EXTRA_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
 
+function getTreeForDiagnosis(diagnosis: DiagnosisDefinition, side: Side, region: Region): DecisionTreeDef | null {
+  switch (diagnosis.id) {
+    case "myalgia": return createMyalgiaTree(side, region);
+    case "localMyalgia":
+    case "myofascialPainWithSpreading":
+    case "myofascialPainWithReferral": return createMyalgiaSubtypesTree(side, region);
+    case "arthralgia": return createArthalgiaTree(side);
+    case "headacheAttributedToTmd": return createHeadacheTree(side);
+    case "discDisplacementWithReduction":
+    case "discDisplacementWithReductionIntermittentLocking": return createDdWithReductionTree(side);
+    case "degenerativeJointDisease": return createDjdTree(side);
+    case "subluxation": return createSubluxationTree(side);
+    default: return null;
+  }
+}
+
 export function EvaluationView({
   sqAnswers,
   examinationData,
@@ -65,6 +93,7 @@ export function EvaluationView({
 }: EvaluationViewProps) {
   // ── Reference panel state (Card 1) ─────────────────────────────────
   const [refDiagnosisId, setRefDiagnosisId] = useState<string | null>(null);
+  const [refView, setRefView] = useState<"checklist" | "tree">("checklist");
 
   // ── Document panel state (Card 2) ──────────────────────────────────
   const [confirmSide, setConfirmSide] = useState<Side>("right");
@@ -296,8 +325,22 @@ export function EvaluationView({
 
       {/* Card 1: Reference tool */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>DC/TMD-Kriterien nachschlagen</CardTitle>
+          <ToggleGroup
+            type="single"
+            value={refView}
+            onValueChange={(v) => { if (v) setRefView(v as "checklist" | "tree"); }}
+            variant="outline"
+            size="sm"
+          >
+            <ToggleGroupItem value="checklist" aria-label="Checkliste">
+              <ListChecks className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="tree" aria-label="Entscheidungsbaum">
+              <Network className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
         </CardHeader>
         <CardContent className="space-y-4">
           <Select value={refDiagnosis?.id} onValueChange={setRefDiagnosisId}>
@@ -313,7 +356,7 @@ export function EvaluationView({
             </SelectContent>
           </Select>
 
-          {refDiagnosis ? (
+          {refDiagnosis && refView === "checklist" && (
             <div className="max-w-xl">
               <CriteriaChecklist
                 diagnosis={refDiagnosis}
@@ -322,7 +365,20 @@ export function EvaluationView({
                 region={refRegion}
               />
             </div>
-          ) : null}
+          )}
+
+          {refDiagnosis && refView === "tree" && (() => {
+            const tree = getTreeForDiagnosis(refDiagnosis, refSide, refRegion);
+            return tree ? (
+              <div className="overflow-x-auto">
+                <DecisionTreeView tree={tree} data={criteriaData} />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Kein Entscheidungsbaum für diese Diagnose verfügbar.
+              </p>
+            );
+          })()}
         </CardContent>
       </Card>
 

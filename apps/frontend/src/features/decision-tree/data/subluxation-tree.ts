@@ -1,4 +1,4 @@
-import { field, sq, SUBLUXATION_ANAMNESIS, SUBLUXATION_SIDED_ANAMNESIS, type Side } from "@cmdetect/dc-tmd";
+import { jawLockingOpenPositionAnamnesis, SUBLUXATION_ANAMNESIS, SUBLUXATION_SIDED_ANAMNESIS, type Side } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
 /**
@@ -29,8 +29,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       id: "sq13",
       label: "Anamnese — Blockade in geöffneter Position",
       subLabel: "Kiefer fängt oder blockiert bei weit geöffnetem Mund",
-      sources: ["SF13"],
-      criterion: field(sq("SQ13"), { equals: "yes" }),
+      criterion: jawLockingOpenPositionAnamnesis,
       center: { x: colCenter, y: 90 },
       width: nodeW,
       height: 160,
@@ -39,7 +38,6 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       id: "sq14",
       label: "Anamnese — Mund nicht schließbar + Seitenangabe",
       subLabel: `Subluxation auf dieser Seite (${sideLabel})`,
-      sources: ["SF13", "SF14"],
       criterion: SUBLUXATION_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 300 },
@@ -62,7 +60,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
       label: "Weitere Diagnosen untersuchen",
       color: "red",
       isEndNode: true,
-      criterion: field(sq("SQ13"), { equals: "yes" }),
+      criterion: jawLockingOpenPositionAnamnesis,
       center: { x: colCenter + 350, y: 90 },
       width: endW,
       height: 80,

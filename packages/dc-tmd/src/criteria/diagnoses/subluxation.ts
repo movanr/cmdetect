@@ -64,6 +64,7 @@ export const SUBLUXATION_SIDED_ANAMNESIS: Criterion = and(
   {
     id: "subluxationSidedAnamnesis",
     label: "Subluxation auf dieser Seite",
+    sources: ["SF13", "SF14"],
   }
 );
 

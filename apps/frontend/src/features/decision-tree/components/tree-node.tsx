@@ -147,7 +147,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         <div className={`text-center ${textClass}`}>
           <div className="text-sm font-medium mb-1">
             {negativeLabel && status === "negative" ? negativeLabel : label}
-            {!isEndNode && !subItems && sources && sources.length > 0 && (
+            {!isEndNode && sources && sources.length > 0 && (
               <SourceBadges sources={sources} />
             )}
           </div>

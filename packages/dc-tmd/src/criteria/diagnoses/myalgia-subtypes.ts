@@ -30,7 +30,13 @@
  * Journal of Oral & Facial Pain and Headache, 28:6-27
  */
 
-import { GROUP_CONFIG, SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../ids/anatomy";
+import {
+  GROUP_CONFIG,
+  SITES_BY_GROUP,
+  SITE_CONFIG,
+  type PainType,
+  type Region,
+} from "../../ids/anatomy";
 import { and, any, field, match, not, or } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion, CriterionMetadata } from "../types";
@@ -49,13 +55,17 @@ const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast
  *
  * Same as base myalgia — uses template variables resolved during evaluation.
  */
-const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
-  includes: "${region}",
-}, {
-  id: "painLocationConfirmed",
-  label: "Bestätigung der Schmerzen in den Kaumuskel(n)",
-  sources: ["U1"],
-});
+const painLocationConfirmed: Criterion = field(
+  "e1.painLocation.${side}",
+  {
+    includes: "${region}",
+  },
+  {
+    id: "painLocationConfirmed",
+    label: "Bestätigung der Schmerzen in den Kaumuskel(n)",
+    sources: ["U1"],
+  }
+);
 
 /**
  * Generate palpation site refs for a specific region and pain type.
@@ -136,26 +146,30 @@ const localMyalgiaExamCriterion: Criterion = and(
     forEachRegion(
       (region) => [
         // D: Familiar pain from palpation of any site in the muscle group
-        any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
-          id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Muskelpalpation",
-        }),
+        any(
+          siteRefs(region, "familiarPain"),
+          { equals: "yes" },
+          {
+            id: `${region}PalpationFamiliar`,
+            label: "Bekannter Schmerz bei Muskelpalpation",
+          }
+        ),
         // E: No spreading pain at any site in the muscle group
         // For regions without spreading (otherMast/nonMast), spreadingSiteRefs returns []
         // → any([], ...) evaluates to negative → not(negative) = positive (auto-pass)
-        not(
-          any(spreadingSiteRefs(region), { equals: "yes" }),
-          { id: `${region}NoSpreading`, label: "Kein ausbreitender Schmerz" }
-        ),
+        not(any(spreadingSiteRefs(region), { equals: "yes" }), {
+          id: `${region}NoSpreading`,
+          label: "Kein ausbreitender Schmerz",
+        }),
         // E: No referred pain at any site in the muscle group
-        not(
-          any(siteRefs(region, "referredPain"), { equals: "yes" }),
-          { id: `${region}NoReferred`, label: "Kein übertragener Schmerz" }
-        ),
+        not(any(siteRefs(region, "referredPain"), { equals: "yes" }), {
+          id: `${region}NoReferred`,
+          label: "Kein übertragener Schmerz",
+        }),
       ],
       {
         id: "localMyalgiaPalpation",
-        label: "Palpation: bekannter Schmerz, lokal begrenzt",
+        label: "Palpation: bekannter Schmerz, ohne Ausbreitung, ohne Übertragung",
         sources: ["U9", "U10"],
       }
     ),
@@ -199,26 +213,34 @@ const spreadingMyalgiaExamCriterion: Criterion = and(
     forEachRegion(
       (region) => [
         // D: Familiar pain from palpation
-        any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
-          id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Muskelpalpation",
-        }),
+        any(
+          siteRefs(region, "familiarPain"),
+          { equals: "yes" },
+          {
+            id: `${region}PalpationFamiliar`,
+            label: "Bekannter Schmerz bei Muskelpalpation",
+          }
+        ),
         // E: Spreading pain present at any site in the muscle group
         // For regions without spreading, spreadingSiteRefs returns []
         // → any([], ...) evaluates to negative → diagnosis impossible
-        any(spreadingSiteRefs(region), { equals: "yes" }, {
-          id: `${region}SpreadingPain`,
-          label: "Ausbreitender Schmerz bei Muskelpalpation",
-        }),
-        // F: No referred pain at any site in the muscle group
-        not(
-          any(siteRefs(region, "referredPain"), { equals: "yes" }),
-          { id: `${region}NoReferred`, label: "Kein übertragener Schmerz" }
+        any(
+          spreadingSiteRefs(region),
+          { equals: "yes" },
+          {
+            id: `${region}SpreadingPain`,
+            label: "Ausbreitender Schmerz bei Muskelpalpation",
+          }
         ),
+        // F: No referred pain at any site in the muscle group
+        not(any(siteRefs(region, "referredPain"), { equals: "yes" }), {
+          id: `${region}NoReferred`,
+          label: "Kein übertragener Schmerz",
+        }),
       ],
       {
         id: "spreadingMyalgiaPalpation",
-        label: "Palpation: bekannter Schmerz mit Ausbreitung",
+        label: "Palpation: bekannter Schmerz mit Ausbreitung, ohne Übertragung",
         sources: ["U9", "U10"],
       }
     ),
@@ -261,15 +283,23 @@ const referralMyalgiaExamCriterion: Criterion = and(
     forEachRegion(
       (region) => [
         // D: Familiar pain from palpation
-        any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
-          id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Muskelpalpation",
-        }),
+        any(
+          siteRefs(region, "familiarPain"),
+          { equals: "yes" },
+          {
+            id: `${region}PalpationFamiliar`,
+            label: "Bekannter Schmerz bei Muskelpalpation",
+          }
+        ),
         // E: Referred pain present at any site in the muscle group
-        any(siteRefs(region, "referredPain"), { equals: "yes" }, {
-          id: `${region}ReferredPain`,
-          label: "Übertragener Schmerz bei Muskelpalpation",
-        }),
+        any(
+          siteRefs(region, "referredPain"),
+          { equals: "yes" },
+          {
+            id: `${region}ReferredPain`,
+            label: "Übertragener Schmerz bei Muskelpalpation",
+          }
+        ),
       ],
       {
         id: "referralMyalgiaPalpation",

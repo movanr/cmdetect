@@ -135,7 +135,7 @@ function ddWithReductionExamCriterion(): Criterion {
       and([
         field("e6.${side}.click.examinerOpen", { equals: "yes" }),
         field("e6.${side}.click.examinerClose", { equals: "yes" }),
-      ], { id: "openCloseClick", label: "Knacken beim Öffnen und Schließen" }),
+      ], { id: "openCloseClick", label: "Knacken beim Öffnen und Schließen", sources: ["U6"] }),
       // b) Click during opening or closing AND click during lateral/protrusive
       and([
         or([
@@ -143,7 +143,7 @@ function ddWithReductionExamCriterion(): Criterion {
           field("e6.${side}.click.examinerClose", { equals: "yes" }),
         ]),
         field("e7.${side}.click.examiner", { equals: "yes" }),
-      ], { id: "openOrCloseAndLateralClick", label: "Knacken beim Öffnen oder Schließen und Knacken bei Laterotrusion oder Protrusion" }),
+      ], { id: "openOrCloseAndLateralClick", label: "Knacken beim Öffnen oder Schließen und Knacken bei Laterotrusion oder Protrusion", sources: ["U6", "U7"] }),
     ],
     {
       id: "ddWithReductionExam",

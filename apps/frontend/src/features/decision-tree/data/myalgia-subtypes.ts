@@ -16,9 +16,6 @@ import {
 } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
-/** E10 supplemental regions use U10 for palpation source */
-const E10_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
-
 /**
  * Generate the myalgia subtypes decision tree for a specific side and region.
  *
@@ -33,7 +30,6 @@ const E10_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
 export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionTreeDef {
   const ctx = { side, region };
   const hasSpreading = GROUP_CONFIG[region].hasSpreading;
-  const palpationSource = E10_REGIONS.includes(region) ? "U10" : "U9";
 
   // Build palpation criteria using dc-tmd builders
   const familiarPainRefs = getSiteRefs(region, side, "familiarPain");
@@ -91,7 +87,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
       {
         id: "familiarPain",
         label: "Bekannter Schmerz bei Palpation",
-        sources: [palpationSource],
         criterion: familiarPainPalpation,
         context: ctx,
         center: { x: colCenter, y: 210 },
@@ -101,7 +96,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
       {
         id: "referredPain",
         label: "Übertragener Schmerz bei Palpation",
-        sources: [palpationSource],
         criterion: referredPainPalpation,
         context: ctx,
         center: { x: colCenter, y: 365 },
@@ -235,7 +229,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "familiarPain",
       label: "Bekannter Schmerz bei Palpation",
-      sources: [palpationSource],
       criterion: familiarPainPalpation,
       context: ctx,
       center: { x: colCenter, y: 210 },
@@ -245,7 +238,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "referredPain",
       label: "Übertragener Schmerz bei Palpation",
-      sources: [palpationSource],
       criterion: referredPainPalpation,
       context: ctx,
       center: { x: colCenter, y: 365 },
@@ -255,7 +247,6 @@ export function createMyalgiaSubtypesTree(side: Side, region: Region): DecisionT
     {
       id: "spreadingPain",
       label: "Ausbreitender Schmerz bei Palpation",
-      sources: [palpationSource],
       criterion: spreadingPainPalpation,
       context: ctx,
       center: { x: colCenter, y: 520 },

@@ -26,7 +26,6 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       label: "Anamnese",
       subLabel:
         `Geräusch auf dieser Seite angegeben (${sideLabel})`,
-      sources: ["SF8", "U6", "U7"],
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 80 },
@@ -37,7 +36,6 @@ export function createDjdTree(side: Side): DecisionTreeDef {
       id: "crepitus",
       label: "Untersuchung",
       subLabel: "Reiben bei Kieferbewegungen",
-      sources: ["U6", "U7"],
       criterion: DEGENERATIVE_JOINT_DISEASE.examination.criterion,
       context: ctx,
       center: { x: colCenter, y: 260 },

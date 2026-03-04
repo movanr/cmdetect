@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { evaluate } from "@cmdetect/dc-tmd";
+import { evaluate, getCriterionSources } from "@cmdetect/dc-tmd";
 import type {
   CriterionStatus,
   DecisionTreeDef,
@@ -45,6 +45,43 @@ interface DecisionTreeViewProps {
   onEndNodeConfirm?: (diagnosisId: string, note: string | null) => void;
   /** Whether the current user can only view */
   readOnly?: boolean;
+}
+
+/**
+ * Derive sources for a tree node from its criterion.
+ *
+ * - Simple nodes (no subItems): top-level criterion sources → title badges
+ * - Composite nodes where child count matches subItems label count: per-item sources from children
+ * - Mismatch: top-level criterion sources → title badges, subItems unchanged
+ */
+function resolveNodeSources(node: TreeNodeDef): {
+  sources?: string[];
+  subItems?: TreeNodeDef["subItems"];
+} {
+  const { criterion, subItems } = node;
+
+  if (!criterion) {
+    return { sources: node.sources, subItems };
+  }
+
+  if (!subItems) {
+    return { sources: getCriterionSources(criterion) };
+  }
+
+  if (
+    (criterion.type === "and" || criterion.type === "or") &&
+    criterion.criteria.length === subItems.labels.length
+  ) {
+    return {
+      subItems: {
+        ...subItems,
+        sources: criterion.criteria.map((c) => getCriterionSources(c) ?? []),
+      },
+    };
+  }
+
+  // Count mismatch: show criterion's top-level sources on node title
+  return { sources: getCriterionSources(criterion), subItems };
 }
 
 /** Evaluate a single node's criterion against data */
@@ -181,9 +218,12 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
     () =>
       nodes.map((node) => {
         const pos = resolvePosition(node);
+        const { sources, subItems } = resolveNodeSources(node);
         return {
           ...node,
           position: { x: pos.x + offsetX, y: pos.y },
+          sources,
+          subItems,
         };
       }),
     [nodes, offsetX]

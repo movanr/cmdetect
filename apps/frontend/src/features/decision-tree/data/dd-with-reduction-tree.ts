@@ -46,7 +46,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
         field(`e8.${side}.closedLocking.reduction`, { notEquals: "notReduced" }),
       ]),
     ],
-    { id: "e8ClosedLockCheck", label: "U8 Geschlossene Blockierung", pendingAs: "positive" }
+    { id: "e8ClosedLockCheck", label: "U8 Geschlossene Blockierung", pendingAs: "positive", sources: ["U8"] }
   );
 
   // Opening measurement: maxAssisted + verticalOverlap < 40mm
@@ -56,13 +56,14 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
       ((v["e2.verticalOverlap"] as number) ?? 0),
     "<",
-    40
+    40,
+    { sources: ["U4", "U2"] }
   );
 
   // Intermittent locking criterion: SQ11=yes AND SQ12=no
   const intermittentLocking = and(
     [field(sq("SQ11"), { equals: "yes" }), field(sq("SQ12"), { equals: "no" })],
-    { id: "intermittentLockingCheck", label: "Intermittierende Kieferklemme", pendingAs: "negative" }
+    { id: "intermittentLockingCheck", label: "Intermittierende Kieferklemme", pendingAs: "negative", sources: ["SF11", "SF12"] }
   );
 
   const nodes: TreeNodeDef[] = [
@@ -71,7 +72,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       id: "ddWithoutReductionCheck",
       label: "DV ohne Reposition — Anamnese + Seitenangabe",
       subLabel: `Kieferklemme auf dieser Seite (${sideLabel})`,
-      sources: ["SF9", "SF10"],
       criterion: DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 90 },
@@ -94,7 +94,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "Anamnese — KG-Geräusch",
       subLabel:
         `Geräusch auf dieser Seite angegeben (${sideLabel})`,
-      sources: ["SF8", "U6", "U7"],
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 310 },
@@ -107,7 +106,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "Untersuchung — Mundöffnung eingeschränkt?",
       subLabel:
         "Passive Dehnung (max. assistierte Mundöffnung + vertikaler Überbiss) < 40 mm",
-      sources: ["U4", "U2"],
       criterion: openingLimited,
       context: ctx,
       center: { x: colCenter + 400, y: 310 },
@@ -123,7 +121,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
           "Knacken beim Öffnen oder Schließen UND Knacken bei Laterotrusion oder Protrusion",
         ],
         connector: "ODER",
-        sources: [["U6"], ["U6", "U7"]],
       },
       criterion: DISC_DISPLACEMENT_WITH_REDUCTION.examination.criterion,
       context: ctx,
@@ -152,7 +149,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       label: "Anamnese — Intermittierende Kieferklemme",
       subLabel:
         "Aktuell intermittierende Blockade mit eingeschränkter Mundöffnung",
-      sources: ["SF11", "SF12"],
       criterion: intermittentLocking,
       center: { x: colCenter, y: 730 },
       width: nodeW,
@@ -177,7 +173,6 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
     {
       id: "e8Check",
       label: "Klinische Beobachtung",
-      sources: ["U8"],
       subLabel: "Wenn klinisch feststellbar: Durch Manöver reponierbar? Sonst: Ja",
       criterion: e8ClosedLockReduction,
       center: { x: colCenter + 200, y: 920 },

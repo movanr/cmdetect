@@ -12,9 +12,6 @@ import {
 } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
-/** E10 supplemental regions use U10 for palpation source, others use U9 */
-const E10_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
-
 /**
  * Generate the myalgia decision tree for a specific side and region.
  *
@@ -30,7 +27,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
 
   const sideLabel = side === "right" ? "Rechts" : "Links";
   const regionLabel = REGIONS[region];
-  const palpationSource = E10_REGIONS.includes(region) ? "U10" : "U9";
 
   // Layout constants
   const colCenter = 150;
@@ -48,7 +44,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
           "Schmerz, der durch Kieferbewegungen, Funktion oder Parafunktion modifiziert wird",
         ],
         connector: "UND",
-        sources: [["SF1", "SF3"], ["SF4"]],
       },
       criterion: MYALGIA_ANAMNESIS,
       center: { x: colCenter, y: 85 },
@@ -58,7 +53,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
     {
       id: "painLocation",
       label: "Schmerzlokalisation bestätigt",
-      sources: ["U1"],
       criterion: painLocationConfirmed,
       context: ctx,
       center: { x: colCenter, y: 260 },
@@ -71,7 +65,6 @@ export function createMyalgiaTree(side: Side, region: Region): DecisionTreeDef {
       subItems: {
         labels: ["Bekannter Schmerz bei maximaler Mundöffnung", "Bekannter Schmerz bei Palpation"],
         connector: "ODER",
-        sources: [["U4"], [palpationSource]],
       },
       criterion: familiarPainProvoked,
       context: ctx,
