@@ -18,12 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ALL_DIAGNOSES,
+  E10_SITE_KEYS,
   evaluateAllDiagnoses,
+  PALPATION_SITES,
   REGIONS,
+  SITE_CONFIG,
   type DiagnosisDefinition,
+  type PalpationSite,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
@@ -65,8 +69,9 @@ export function EvaluationView({
   // ── Document panel state (Card 2) ──────────────────────────────────
   const [confirmSide, setConfirmSide] = useState<Side>("right");
   const [confirmRegion, setConfirmRegion] = useState<Region>("temporalis");
+  const [confirmSite, setConfirmSite] = useState<PalpationSite | null>(null);
   const [confirmShowAllRegions, setConfirmShowAllRegions] = useState(false);
-  // Local confirmed diagnoses: key = "diagnosisId:side:region"
+  // Local confirmed diagnoses: key = "diagnosisId:side:site-or-region"
   const [confirmed, setConfirmed] = useState<Record<string, boolean>>({});
 
   // ── Memos ──────────────────────────────────────────────────────────
@@ -88,9 +93,11 @@ export function EvaluationView({
 
   const refSide: Side = "right";
 
+  const activeRegion: Region = confirmSite ? SITE_CONFIG[confirmSite].region : confirmRegion;
+
   const confirmApplicableDiagnoses = useMemo(
-    () => ALL_DIAGNOSES.filter((d) => d.examination.regions.includes(confirmRegion)),
-    [confirmRegion]
+    () => ALL_DIAGNOSES.filter((d) => d.examination.regions.includes(activeRegion)),
+    [activeRegion]
   );
 
   const requirementMetMap = useMemo(() => {
@@ -112,16 +119,17 @@ export function EvaluationView({
   const handleRegionClick = useCallback((side: Side, region: Region) => {
     setConfirmSide(side);
     setConfirmRegion(region);
+    setConfirmSite(null);
   }, []);
 
   function handleToggle(diagnosisId: string) {
     if (readOnly) return;
-    const key = `${diagnosisId}:${confirmSide}:${confirmRegion}`;
+    const key = `${diagnosisId}:${confirmSide}:${confirmSite ?? confirmRegion}`;
     setConfirmed((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
   function isChecked(diagnosisId: string) {
-    return confirmed[`${diagnosisId}:${confirmSide}:${confirmRegion}`] === true;
+    return confirmed[`${diagnosisId}:${confirmSide}:${confirmSite ?? confirmRegion}`] === true;
   }
 
   // ── Render ─────────────────────────────────────────────────────────
@@ -141,73 +149,103 @@ export function EvaluationView({
 
       {/* Card 2: Documentation — purely local state */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>Diagnose dokumentieren</CardTitle>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="confirm-all-regions"
-              checked={confirmShowAllRegions}
-              onCheckedChange={(checked) => {
-                setConfirmShowAllRegions(checked === true);
-                if (!checked && EXTRA_REGIONS.includes(confirmRegion)) {
-                  setConfirmRegion("temporalis");
-                }
-              }}
-            />
-            <label
-              htmlFor="confirm-all-regions"
-              className="text-xs text-muted-foreground cursor-pointer select-none"
-            >
-              Alle Regionen (U10)
-            </label>
-          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-col items-center gap-3">
-            <SummaryDiagrams
-              regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
-              selectedSide={confirmSide}
-              selectedRegion={confirmRegion === "otherMast" ? null : confirmRegion}
-              onRegionClick={handleRegionClick}
-            />
-            <div className="flex flex-col items-center gap-2">
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                size="sm"
-                value={confirmRegion}
-                onValueChange={(v) => {
-                  if (v) setConfirmRegion(v as Region);
-                }}
-              >
-                <ToggleGroupItem value="temporalis">Temporalis</ToggleGroupItem>
-                <ToggleGroupItem value="masseter">Masseter</ToggleGroupItem>
-                <ToggleGroupItem value="tmj">{REGIONS.tmj}</ToggleGroupItem>
-                {confirmShowAllRegions && (
-                  <>
-                    <ToggleGroupItem value="otherMast">{REGIONS.otherMast}</ToggleGroupItem>
-                    <ToggleGroupItem value="nonMast">{REGIONS.nonMast}</ToggleGroupItem>
-                  </>
-                )}
-              </ToggleGroup>
+          <div className="flex gap-6">
+            <div className="flex flex-col gap-2">
+              <SummaryDiagrams
+                regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
+                selectedSide={confirmSide}
+                selectedRegion={activeRegion === "otherMast" ? null : activeRegion}
+                onRegionClick={handleRegionClick}
+              />
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="confirm-all-regions"
+                  checked={confirmShowAllRegions}
+                  onCheckedChange={(checked) => {
+                    setConfirmShowAllRegions(checked === true);
+                    if (!checked) {
+                      if (EXTRA_REGIONS.includes(confirmRegion)) setConfirmRegion("temporalis");
+                      setConfirmSite(null);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="confirm-all-regions"
+                  className="text-xs text-muted-foreground cursor-pointer select-none"
+                >
+                  Ergänzende Palpationsgebiete anzeigen
+                </label>
+              </div>
+            </div>
+            <div className="flex gap-8">
+              <div className="space-y-1.5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Lokalisation
+                </p>
+                <RadioGroup
+                  value={confirmSite ?? confirmRegion}
+                  onValueChange={(v) => {
+                    if ((E10_SITE_KEYS as readonly string[]).includes(v)) {
+                      const site = v as PalpationSite;
+                      setConfirmSite(site);
+                      setConfirmRegion(SITE_CONFIG[site].region);
+                    } else {
+                      setConfirmSite(null);
+                      setConfirmRegion(v as Region);
+                    }
+                  }}
+                >
+                  {(["temporalis", "masseter", "tmj"] as const).map((r) => (
+                    <div key={r} className="flex items-center gap-2">
+                      <RadioGroupItem value={r} id={`loc-${r}`} />
+                      <label htmlFor={`loc-${r}`} className="text-sm cursor-pointer">
+                        {REGIONS[r]}
+                      </label>
+                    </div>
+                  ))}
+                  {confirmShowAllRegions &&
+                    E10_SITE_KEYS.map((site) => (
+                      <div key={site} className="flex items-center gap-2">
+                        <RadioGroupItem value={site} id={`loc-${site}`} />
+                        <label htmlFor={`loc-${site}`} className="text-sm cursor-pointer">
+                          {PALPATION_SITES[site]}
+                        </label>
+                      </div>
+                    ))}
+                </RadioGroup>
+              </div>
 
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                size="sm"
-                value={confirmSide}
-                onValueChange={(v) => {
-                  if (v) setConfirmSide(v as Side);
-                }}
-              >
-                <ToggleGroupItem value="right">Rechts</ToggleGroupItem>
-                <ToggleGroupItem value="left">Links</ToggleGroupItem>
-              </ToggleGroup>
+              <div className="space-y-1.5">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Seite
+                </p>
+                <RadioGroup
+                  value={confirmSide}
+                  onValueChange={(v) => setConfirmSide(v as Side)}
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="right" id="side-right" />
+                    <label htmlFor="side-right" className="text-sm cursor-pointer">
+                      Rechte Seite
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="left" id="side-left" />
+                    <label htmlFor="side-left" className="text-sm cursor-pointer">
+                      Linke Seite
+                    </label>
+                  </div>
+                </RadioGroup>
+              </div>
             </div>
           </div>
 
           {confirmApplicableDiagnoses.length > 0 ? (
-            <div className="space-y-1 max-w-xl mx-auto">
+            <div className="space-y-1 max-w-xl">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-3 pb-1">
                 In Befundbericht übernehmen
               </p>
@@ -215,7 +253,7 @@ export function EvaluationView({
                 const checked = isChecked(d.id);
                 const reqMet = requirementMetMap[d.id];
                 const sideLabel = confirmSide === "right" ? "rechte Seite" : "linke Seite";
-                const localisationLabel = `${REGIONS[confirmRegion]}, ${sideLabel}`;
+                const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion]}, ${sideLabel}`;
                 return (
                   <div key={d.id}>
                     <div
