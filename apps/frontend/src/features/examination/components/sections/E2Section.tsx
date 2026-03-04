@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { E2_REFERENCE_TEETH, SECTIONS, type E2ReferenceTooth } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { BookOpen, ChevronLeft } from "lucide-react";
-import { useMemo, useState } from "react";
+import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
@@ -145,6 +145,9 @@ export function E2Section({
     }
     return statuses;
   });
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  useEffect(() => { setIsCollapsed(false); }, [step]);
+
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
     if (step !== undefined) {
@@ -321,18 +324,36 @@ export function E2Section({
           const config = E2_STEP_CONFIG[stepId];
           const status = getStatus(stepId, index);
 
+          if (status === "active" && isCollapsed) {
+            return (
+              <StepBar
+                key={stepId}
+                config={config}
+                status="completed"
+                summary={getSummary(stepId)}
+                onClick={() => setIsCollapsed(false)}
+              />
+            );
+          }
+
           if (status === "active") {
             return (
               <div
                 key={stepId}
                 ref={activeStepRef}
-                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card overflow-hidden"
               >
                 {/* Header */}
-                <div className="flex items-center gap-2">
-                  <Badge>{config.badge}</Badge>
-                  <h3 className="font-semibold">{config.title}</h3>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCollapsed(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 border-b border-primary/20 text-left hover:bg-accent/30 transition-colors"
+                >
+                  <Badge className="shrink-0">{config.badge}</Badge>
+                  <span className="flex-1 font-medium text-sm">{config.title}</span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+                <div className="p-4 space-y-4">
 
                 {/* Content */}
                 {renderStepContent(stepId)}
@@ -367,6 +388,7 @@ export function E2Section({
                       {isLastStep ? "Abschließen" : "Weiter"}
                     </Button>
                   </div>
+                </div>
                 </div>
               </div>
             );

@@ -6,8 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { PALPATION_MODE_QUESTIONS, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { BookOpen, CheckCircle, ChevronLeft } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { BookOpen, CheckCircle, ChevronDown, ChevronLeft } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import type { E9RichInstructions } from "../../content/instructions";
@@ -459,6 +459,9 @@ export function E9Section({
     return statuses;
   });
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  useEffect(() => { setIsCollapsed(false); }, [step]);
+
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
     if (step !== undefined) {
@@ -768,18 +771,36 @@ export function E9Section({
           const config = E9_STEP_CONFIG[stepId];
           const status = getStepStatus(stepId, index);
 
+          if (status === "active" && isCollapsed) {
+            return (
+              <StepBar
+                key={stepId}
+                config={config}
+                status="completed"
+                summary={getStepSummary(stepId)}
+                onClick={() => setIsCollapsed(false)}
+              />
+            );
+          }
+
           if (status === "active") {
             return (
               <div
                 key={stepId}
                 ref={activeStepRef}
-                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card p-4 space-y-4"
+                className="scroll-mt-16 xl:scroll-mt-0 rounded-lg border border-primary/30 bg-card overflow-hidden"
               >
                 {/* Header */}
-                <div className="flex items-center gap-2">
-                  <Badge>{config.badge}</Badge>
-                  <h3 className="font-semibold">{config.title}</h3>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCollapsed(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 border-b border-primary/20 text-left hover:bg-accent/30 transition-colors"
+                >
+                  <Badge className="shrink-0">{config.badge}</Badge>
+                  <span className="flex-1 font-medium text-sm">{config.title}</span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+                <div className="p-4 space-y-4">
 
                 {/* Instruction */}
                 {renderInstruction(stepId)}
@@ -921,6 +942,7 @@ export function E9Section({
                       {isLastStep ? "Abschließen" : "Weiter"}
                     </Button>
                   </div>
+                </div>
                 </div>
               </div>
             );
