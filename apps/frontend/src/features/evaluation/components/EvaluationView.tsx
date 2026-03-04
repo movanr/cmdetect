@@ -139,38 +139,6 @@ export function EvaluationView({
         </div>
       )}
 
-      {/* Card 1: Reference tool */}
-      <Card>
-        <CardHeader>
-          <CardTitle>DC/TMD-Kriterien nachschlagen</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Select value={refDiagnosis?.id} onValueChange={setRefDiagnosisId}>
-            <SelectTrigger className="w-72">
-              <SelectValue placeholder="Diagnose wählen…" />
-            </SelectTrigger>
-            <SelectContent>
-              {ALL_DIAGNOSES.map((d) => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.nameDE}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {refDiagnosis ? (
-            <div className="max-w-xl">
-              <CriteriaChecklist
-                diagnosis={refDiagnosis}
-                criteriaData={criteriaData}
-                side={refSide}
-                region={refRegion}
-              />
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-
       {/* Card 2: Documentation — purely local state */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -240,9 +208,14 @@ export function EvaluationView({
 
           {confirmApplicableDiagnoses.length > 0 ? (
             <div className="space-y-1 max-w-xl mx-auto">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-3 pb-1">
+                In Befundbericht übernehmen
+              </p>
               {confirmApplicableDiagnoses.map((d) => {
                 const checked = isChecked(d.id);
                 const reqMet = requirementMetMap[d.id];
+                const sideLabel = confirmSide === "right" ? "rechte Seite" : "linke Seite";
+                const localisationLabel = `${REGIONS[confirmRegion]}, ${sideLabel}`;
                 return (
                   <div key={d.id}>
                     <div
@@ -256,7 +229,12 @@ export function EvaluationView({
                         onClick={(e) => e.stopPropagation()}
                         className="shrink-0"
                       />
-                      <span className="text-sm font-medium flex-1">{d.nameDE}</span>
+                      <span className="text-sm font-medium flex-1">
+                        {d.nameDE}{" "}
+                        <span className="font-normal text-muted-foreground">
+                          ({localisationLabel})
+                        </span>
+                      </span>
                       {reqMet === false && (
                         <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
                       )}
@@ -275,6 +253,38 @@ export function EvaluationView({
               Keine Diagnosen für die gewählte Region verfügbar.
             </p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Card 1: Reference tool */}
+      <Card>
+        <CardHeader>
+          <CardTitle>DC/TMD-Kriterien nachschlagen</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Select value={refDiagnosis?.id} onValueChange={setRefDiagnosisId}>
+            <SelectTrigger className="w-72">
+              <SelectValue placeholder="Diagnose wählen…" />
+            </SelectTrigger>
+            <SelectContent>
+              {ALL_DIAGNOSES.map((d) => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.nameDE}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {refDiagnosis ? (
+            <div className="max-w-xl">
+              <CriteriaChecklist
+                diagnosis={refDiagnosis}
+                criteriaData={criteriaData}
+                side={refSide}
+                region={refRegion}
+              />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
