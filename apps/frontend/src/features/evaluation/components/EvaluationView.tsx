@@ -153,7 +153,7 @@ export function EvaluationView({
           <CardTitle>Diagnose dokumentieren</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-6">
+          <div className="rounded-lg border border-border/50 bg-muted/20 p-4 flex gap-6">
             <div className="flex flex-col gap-2">
               <SummaryDiagrams
                 regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
@@ -245,7 +245,7 @@ export function EvaluationView({
           </div>
 
           {confirmApplicableDiagnoses.length > 0 ? (
-            <div className="space-y-1 max-w-xl">
+            <div className="rounded-lg border border-border/50 bg-muted/20 p-4 space-y-1 max-w-xl">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-3 pb-1">
                 In Befundbericht übernehmen
               </p>
