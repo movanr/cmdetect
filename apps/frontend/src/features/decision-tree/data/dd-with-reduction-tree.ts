@@ -92,8 +92,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
     {
       id: "noise",
       label: "Anamnese — KG-Geräusch",
-      subLabel:
-        `Geräusch auf dieser Seite angegeben (${sideLabel})`,
+      subLabel: `Geräusch auf dieser Seite angegeben (${sideLabel})`,
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 310 },

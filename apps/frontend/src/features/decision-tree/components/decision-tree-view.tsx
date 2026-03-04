@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { evaluate, getCriterionSources } from "@cmdetect/dc-tmd";
+import { evaluate, getCriterionLabel, getCriterionSources } from "@cmdetect/dc-tmd";
 import type {
   CriterionStatus,
   DecisionTreeDef,
@@ -10,30 +10,10 @@ import type {
   TransitionProps,
   TreeNodeDef,
 } from "../types";
-import type { TemplateContext } from "@cmdetect/dc-tmd";
 import type { PractitionerDecision } from "../../evaluation/types";
 import TreeNode from "./tree-node";
 import Transition from "./transition";
 import { EndNodePopover } from "./end-node-popover";
-
-const REGION_LABELS: Record<string, string> = {
-  temporalis: "M. temporalis",
-  masseter: "M. masseter",
-  tmj: "Kiefergelenk",
-};
-
-const SIDE_LABELS: Record<string, string> = {
-  right: "rechts",
-  left: "links",
-};
-
-function formatContextLabel(context?: TemplateContext): string | undefined {
-  if (!context?.side && !context?.region) return undefined;
-  const parts: string[] = [];
-  if (context.region) parts.push(REGION_LABELS[context.region] ?? context.region);
-  if (context.side) parts.push(SIDE_LABELS[context.side] ?? context.side);
-  return parts.join(" · ");
-}
 
 interface DecisionTreeViewProps {
   tree: DecisionTreeDef;
@@ -48,24 +28,28 @@ interface DecisionTreeViewProps {
 }
 
 /**
- * Derive sources for a tree node from its criterion.
+ * Derive display properties for a tree node from its criterion.
  *
+ * - label: from criterion label when the node has no explicit label
  * - Simple nodes (no subItems): top-level criterion sources → title badges
  * - Composite nodes where child count matches subItems label count: per-item sources from children
  * - Mismatch: top-level criterion sources → title badges, subItems unchanged
  */
-function resolveNodeSources(node: TreeNodeDef): {
+function resolveNodeDisplay(node: TreeNodeDef): {
+  label?: string;
   sources?: string[];
   subItems?: TreeNodeDef["subItems"];
 } {
   const { criterion, subItems } = node;
+
+  const label = criterion ? getCriterionLabel(criterion) : undefined;
 
   if (!criterion) {
     return { sources: node.sources, subItems };
   }
 
   if (!subItems) {
-    return { sources: getCriterionSources(criterion) };
+    return { label, sources: getCriterionSources(criterion) };
   }
 
   if (
@@ -73,6 +57,7 @@ function resolveNodeSources(node: TreeNodeDef): {
     criterion.criteria.length === subItems.labels.length
   ) {
     return {
+      label,
       subItems: {
         ...subItems,
         sources: criterion.criteria.map((c) => getCriterionSources(c) ?? []),
@@ -81,7 +66,7 @@ function resolveNodeSources(node: TreeNodeDef): {
   }
 
   // Count mismatch: show criterion's top-level sources on node title
-  return { sources: getCriterionSources(criterion), subItems };
+  return { label, sources: getCriterionSources(criterion), subItems };
 }
 
 /** Evaluate a single node's criterion against data */
@@ -213,30 +198,22 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
   // preventing clipping by the SVG viewport.
   const offsetX = -treeDims.minX;
 
-  // Pre-compute resolved nodes (position from center, offset to non-negative x)
+  // Pre-compute resolved nodes (position from center, offset to non-negative x, derived label)
   const resolvedNodes = useMemo(
     () =>
       nodes.map((node) => {
         const pos = resolvePosition(node);
-        const { sources, subItems } = resolveNodeSources(node);
+        const { label: derivedLabel, sources, subItems } = resolveNodeDisplay(node);
         return {
           ...node,
           position: { x: pos.x + offsetX, y: pos.y },
+          label: node.label ?? derivedLabel ?? node.id,
           sources,
           subItems,
         };
       }),
     [nodes, offsetX]
   );
-
-  // Node statuses for rendering
-  const nodeStatuses = useMemo(() => {
-    const map: Record<string, CriterionStatus> = {};
-    for (const node of nodes) {
-      map[node.id] = evaluateNode(node, data);
-    }
-    return map;
-  }, [nodes, data]);
 
   return (
     <div className="flex justify-center">
@@ -258,7 +235,6 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
               label={node.label}
               negativeLabel={node.negativeLabel}
               subLabel={node.subLabel}
-              contextLabel={formatContextLabel(node.context)}
               sources={node.sources}
               subItems={node.subItems}
               color={node.color}
@@ -283,7 +259,6 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
               position={node.position}
               width={node.width}
               height={node.height}
-              status={nodeStatuses[node.id]}
               isActive={activeNodes.includes(node.id)}
             />
           );

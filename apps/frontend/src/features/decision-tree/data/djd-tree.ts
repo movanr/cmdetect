@@ -24,8 +24,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
     {
       id: "noise",
       label: "Anamnese",
-      subLabel:
-        `Geräusch auf dieser Seite angegeben (${sideLabel})`,
+      subLabel: `Geräusch auf dieser Seite angegeben (${sideLabel})`,
       criterion: TMJ_NOISE_SIDED_ANAMNESIS,
       context: ctx,
       center: { x: colCenter, y: 80 },

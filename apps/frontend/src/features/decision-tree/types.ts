@@ -18,8 +18,8 @@ export type Direction = "right" | "left" | "up" | "down";
 export interface TreeNodeDef {
   /** Unique node identifier */
   id: string;
-  /** Display title (German) */
-  label: string;
+  /** Display title (German) — omit to derive from criterion label */
+  label?: string;
   /** Alternative label shown when the node's criterion evaluates to negative */
   negativeLabel?: string;
   /** Optional subtitle */

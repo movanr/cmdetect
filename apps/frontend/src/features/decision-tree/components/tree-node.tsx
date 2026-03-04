@@ -3,7 +3,7 @@ import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { CircleCheck } from "lucide-react";
 import React from "react";
 import type { PractitionerDecision } from "../../evaluation/types";
-import type { CriterionStatus, Position } from "../types";
+import type { Position } from "../types";
 
 /** Inline badges for data source references */
 const SourceBadges: React.FC<{ sources: string[] }> = ({ sources }) => (
@@ -25,8 +25,6 @@ interface TreeNodeProps {
   label: string;
   negativeLabel?: string;
   subLabel?: string;
-  /** Auto-generated location badge from node context (e.g. "M. temporalis · rechts") */
-  contextLabel?: string;
   /** Data source references rendered as badges (for title-only nodes) */
   sources?: string[];
   subItems?: {
@@ -50,30 +48,8 @@ interface TreeNodeProps {
   position: Position;
   width: number;
   height: number;
-  status: CriterionStatus;
   isActive: boolean;
 }
-
-const nodeColors: Record<
-  CriterionStatus,
-  { borderColor: string; bgColor: string; textColor: string }
-> = {
-  positive: {
-    borderColor: "border-blue-500",
-    bgColor: "bg-blue-50",
-    textColor: "text-blue-900",
-  },
-  negative: {
-    borderColor: "border-gray-400",
-    bgColor: "bg-gray-100",
-    textColor: "text-gray-700",
-  },
-  pending: {
-    borderColor: "border-yellow-400",
-    bgColor: "bg-yellow-50",
-    textColor: "text-yellow-900",
-  },
-};
 
 const confirmedColors = {
   borderColor: "border-green-500",
@@ -81,14 +57,17 @@ const confirmedColors = {
   textColor: "text-green-900",
 };
 
+const neutralColors = {
+  borderColor: "border-border",
+  bgColor: "bg-card",
+  textColor: "text-foreground",
+};
+
 const TreeNode: React.FC<TreeNodeProps> = ({
   label,
-  negativeLabel,
   subLabel,
-  contextLabel,
   sources,
   subItems,
-  color,
   isEndNode,
   linkedTreeId,
   onLinkedNodeClick,
@@ -99,11 +78,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   position,
   width,
   height,
-  status,
 }) => {
   const isConfirmed = practitionerDecision === "confirmed";
-
-  const showNegativeLabel = negativeLabel && status === "negative";
 
   const endNodeColors = {
     borderColor: "border-gray-400",
@@ -111,15 +87,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     textColor: "text-gray-900",
   };
 
-  // Confirmed end nodes override to green; all other end nodes use uniform style
+  // Confirmed end nodes override to green; all other end nodes use uniform style;
+  // criterion nodes use neutral (border-border / bg-card)
   const active =
     isEndNode && isConfirmed
       ? confirmedColors
       : isEndNode
         ? endNodeColors
-        : color === "red" && showNegativeLabel
-          ? nodeColors.negative
-          : nodeColors[status];
+        : neutralColors;
 
   const { borderColor: borderClass, bgColor: bgClass, textColor: textClass } = active;
 
@@ -146,21 +121,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       <div className="p-3 rounded-lg flex flex-col items-center justify-center h-full">
         <div className={`text-center ${textClass}`}>
           <div className="text-sm font-medium mb-1">
-            {negativeLabel && status === "negative" ? negativeLabel : label}
+            {label}
             {!isEndNode && sources && sources.length > 0 && (
               <SourceBadges sources={sources} />
             )}
           </div>
-          {contextLabel && (
-            <div className="mb-1">
-              <Badge
-                variant="outline"
-                className="text-[10px] px-1 py-0 h-4 font-normal text-muted-foreground"
-              >
-                {contextLabel}
-              </Badge>
-            </div>
-          )}
           {subLabel && <div className="text-xs text-gray-600 mb-1">{subLabel}</div>}
           {subItems && (
             <div className="space-y-0.5">
@@ -182,28 +147,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             </div>
           )}
         </div>
-
-        {/* Befund label for criterion nodes */}
-        {!isEndNode && (
-          <div className="flex justify-center mt-1">
-            <Badge
-              variant="outline"
-              className={`text-[10px] px-1 py-0 h-4 font-normal ${
-                status === "positive"
-                  ? "text-blue-700 border-blue-200"
-                  : status === "negative"
-                    ? "text-muted-foreground"
-                    : "text-yellow-700 border-yellow-200"
-              }`}
-            >
-              {status === "positive"
-                ? "Positiver Befund (Ja)"
-                : status === "negative"
-                  ? "Negativer Befund (Nein)"
-                  : "Kein Befund (nicht vollständig untersucht)"}
-            </Badge>
-          </div>
-        )}
 
         {imagingNote && (
           <div className="mt-1">
