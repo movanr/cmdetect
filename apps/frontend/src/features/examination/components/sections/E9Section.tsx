@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { PALPATION_MODE_QUESTIONS, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle, ChevronDown, ChevronLeft } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import type { E9RichInstructions } from "../../content/instructions";
@@ -459,8 +459,8 @@ export function E9Section({
     return statuses;
   });
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => { setIsCollapsed(false); }, [step]);
+  const [collapsedAtStep, setCollapsedAtStep] = useState<number | undefined>(undefined);
+  const isCollapsed = collapsedAtStep !== undefined && collapsedAtStep === step;
 
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
@@ -778,7 +778,7 @@ export function E9Section({
                 config={config}
                 status="completed"
                 summary={getStepSummary(stepId)}
-                onClick={() => setIsCollapsed(false)}
+                onClick={() => setCollapsedAtStep(undefined)}
               />
             );
           }
@@ -793,7 +793,7 @@ export function E9Section({
                 {/* Header */}
                 <button
                   type="button"
-                  onClick={() => setIsCollapsed(true)}
+                  onClick={() => setCollapsedAtStep(step)}
                   className="w-full flex items-center gap-3 px-4 py-3 border-b border-primary/20 text-left hover:bg-accent/30 transition-colors"
                 >
                   <Badge className="shrink-0">{config.badge}</Badge>

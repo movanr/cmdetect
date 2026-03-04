@@ -28,7 +28,7 @@ import {
 } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { E1_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
@@ -126,8 +126,8 @@ export function E1Section({
     return statuses;
   });
   const [includeAllRegions, setIncludeAllRegions] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => { setIsCollapsed(false); }, [step]);
+  const [collapsedAtStep, setCollapsedAtStep] = useState<number | undefined>(undefined);
+  const isCollapsed = collapsedAtStep !== undefined && collapsedAtStep === step;
 
   // Determine which regions to show for E1a based on checkbox
   const e1PainSvgRegions = useMemo(
@@ -449,7 +449,7 @@ export function E1Section({
                 config={config}
                 status="completed"
                 summary={getStepSummary(stepId)}
-                onClick={() => setIsCollapsed(false)}
+                onClick={() => setCollapsedAtStep(undefined)}
               />
             );
           }
@@ -464,7 +464,7 @@ export function E1Section({
                 {/* Header */}
                 <button
                   type="button"
-                  onClick={() => setIsCollapsed(true)}
+                  onClick={() => setCollapsedAtStep(step)}
                   className="w-full flex items-center gap-3 px-4 py-3 border-b border-primary/20 text-left hover:bg-accent/30 transition-colors"
                 >
                   <Badge className="shrink-0">{config.badge}</Badge>

@@ -14,7 +14,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { E2_REFERENCE_TEETH, SECTIONS, type E2ReferenceTooth } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import { E2_RICH_INSTRUCTIONS } from "../../content/instructions";
@@ -145,8 +145,8 @@ export function E2Section({
     }
     return statuses;
   });
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => { setIsCollapsed(false); }, [step]);
+  const [collapsedAtStep, setCollapsedAtStep] = useState<number | undefined>(undefined);
+  const isCollapsed = collapsedAtStep !== undefined && collapsedAtStep === step;
 
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
@@ -331,7 +331,7 @@ export function E2Section({
                 config={config}
                 status="completed"
                 summary={getSummary(stepId)}
-                onClick={() => setIsCollapsed(false)}
+                onClick={() => setCollapsedAtStep(undefined)}
               />
             );
           }
@@ -346,7 +346,7 @@ export function E2Section({
                 {/* Header */}
                 <button
                   type="button"
-                  onClick={() => setIsCollapsed(true)}
+                  onClick={() => setCollapsedAtStep(step)}
                   className="w-full flex items-center gap-3 px-4 py-3 border-b border-primary/20 text-left hover:bg-accent/30 transition-colors"
                 >
                   <Badge className="shrink-0">{config.badge}</Badge>

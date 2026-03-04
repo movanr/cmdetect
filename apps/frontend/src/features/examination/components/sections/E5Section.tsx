@@ -163,8 +163,8 @@ export function E5Section({
   // Track expanded dropdowns for interview content
   const [expanded, setExpanded] = useState<ExpandedState>({ left: null, right: null });
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  useEffect(() => { setIsCollapsed(false); }, [step]);
+  const [collapsedAtStep, setCollapsedAtStep] = useState<number | undefined>(undefined);
+  const isCollapsed = collapsedAtStep !== undefined && collapsedAtStep === step;
 
   // Derive currentStepIndex from URL prop
   const currentStepIndex = useMemo(() => {
@@ -501,7 +501,7 @@ export function E5Section({
                 config={config}
                 status="completed"
                 summary={getStepSummary(stepId)}
-                onClick={() => setIsCollapsed(false)}
+                onClick={() => setCollapsedAtStep(undefined)}
               />
             );
           }
@@ -521,7 +521,7 @@ export function E5Section({
                 {/* Header */}
                 <button
                   type="button"
-                  onClick={() => setIsCollapsed(true)}
+                  onClick={() => setCollapsedAtStep(step)}
                   className="w-full flex items-center gap-3 px-4 py-3 border-b border-primary/20 text-left hover:bg-accent/30 transition-colors"
                 >
                   <Badge className="shrink-0">{config.badge}</Badge>
