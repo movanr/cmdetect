@@ -2,17 +2,15 @@
 
 ## Last session: 2026-03-05
 
-What was done: Initial codebase scan. Coverage map built. No documentation written yet.
-What was deferred: All actual documentation work.
-Next recommended: Fix `apps/auth-server/CLAUDE.md` — actively misleading (describes Express, references deleted files, wrong DB name/user). S effort, high priority.
+What was done: Fixed stale `apps/frontend/README.md` — replaced 291-line TanStack boilerplate with accurate project overview (correct commands, structure, patterns). Previous session fixed `apps/auth-server/CLAUDE.md` (commit 1db5a62).
+What was deferred: All remaining backlog items.
+Next recommended: Add README to `packages/dc-tmd/` — core diagnostic engine with no entry-point docs, scope M.
 Open questions: None.
 
 ## Backlog
 
 <!-- Ordered by priority. Tag each: API, Architecture, Onboarding, Stale, Inline, README -->
 
-- [Stale] `apps/auth-server/CLAUDE.md` describes Express (now Hono), references deleted `admin-routes.ts`, wrong DB name (`cmdetect_auth`), wrong DB user (`auth_user`), uses `npm` (project uses `pnpm`) — scope S — area `apps/auth-server/`
-- [Stale] `apps/frontend/README.md` is boilerplate TanStack scaffold — says `npm install`/`npm run start`, "This project uses CSS for styling", no mention of CMDetect/shadcn/Tailwind — scope S — area `apps/frontend/`
 - [README] `packages/dc-tmd/` has no README — core diagnostic engine, imported by evaluation feature — scope M — area `packages/dc-tmd/`
 - [README] `apps/patient-frontend/` has no README — public-facing app with crypto, invite tokens, Konva — scope M — area `apps/patient-frontend/`
 - [Inline] `apps/frontend/src/crypto/` — security-critical ECIES implementation with almost no JSDoc (5 lines, all in `fileRecovery.ts`); `encryption.ts`, `keyGeneration.ts`, `storage.ts` undocumented — scope M — area `apps/frontend/src/crypto/`
@@ -32,8 +30,8 @@ Open questions: None.
 | `packages/config/src/`            | ✅ Good     | Module-level doc present                                       |
 | `apps/frontend/src/features/*/`   | ✅ Partial  | Most index.ts files have brief module-level JSDoc              |
 | `apps/auth-server/src/`           | ⚠️ Partial  | Some JSDoc on action handlers; types.ts thin; server.ts none   |
-| `apps/auth-server/CLAUDE.md`      | ❌ Stale    | Describes wrong framework, wrong files, wrong DB               |
-| `apps/frontend/README.md`         | ❌ Stale    | Boilerplate scaffold, not CMDetect-specific                    |
+| `apps/auth-server/CLAUDE.md`      | ✅ Fixed    | Updated to reflect Hono migration (commit 1db5a62)             |
+| `apps/frontend/README.md`         | ✅ Fixed    | Replaced boilerplate with accurate project overview            |
 | `apps/frontend/src/crypto/`       | ❌ Missing  | Security-critical; almost no JSDoc                             |
 | `apps/patient-frontend/`          | ❌ Missing  | No README                                                      |
 | `packages/dc-tmd/`                | ❌ Missing  | No README (good inline docs but no entry-point explanation)    |
