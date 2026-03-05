@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Hard Rules
+
+- Never modify database schema, migrations, or Hasura metadata.
+- Never edit generated files directly (e.g. codegen output).
+- Shared packages must not import from app packages.
+
 ## Project Overview
 
 CMDetect is a healthcare application monorepo for TMD (temporomandibular disorder) diagnostics. Built with TypeScript, it features a React 19 practitioner frontend, a React 19 patient questionnaire frontend, a Better Auth authentication server with Hono, and a Hasura GraphQL backend. The system implements multi-tenant organization isolation with role-based access control, end-to-end encryption for patient PII, and DC/TMD diagnostic criteria evaluation.
@@ -11,18 +17,21 @@ CMDetect is a healthcare application monorepo for TMD (temporomandibular disorde
 This is a **pnpm workspace** with **Turbo v2** for build orchestration:
 
 **Applications:**
+
 - **apps/auth-server**: Better Auth authentication service with Hono, JWT integration, and Hasura action handlers (port 3001)
 - **apps/frontend**: Practitioner frontend - React 19 + Vite 7 + TanStack Router + TanStack Query (port 3000)
 - **apps/patient-frontend**: Patient questionnaire frontend - React 19 + Vite 7 + TanStack Router (port 3002)
 - **apps/hasura**: Hasura GraphQL Engine v2.46.0 configuration - metadata, migrations, and seeds
 
 **Shared Packages:**
+
 - **packages/config**: Shared role constants (single file: `src/index.ts`)
 - **packages/questionnaires**: Questionnaire definitions (GCPS-1M, JFLS-20, JFLS-8, OBC, PHQ-4, SQ) and Zod validation schemas
 - **packages/dc-tmd**: DC/TMD diagnostic criteria evaluation engine with decision tree logic
 - **packages/test-utils**: Shared test utilities and helpers for integration tests
 
 **Other Directories:**
+
 - **tests/**: Integration tests for Hasura permissions, actions, and auth endpoints
 - **scripts/**: Deployment and setup scripts (`deploy-app.sh`, `generate-envs.sh`, `backup.sh`, `initial-setup/`)
 - **docs/**: DC/TMD reference documentation (diagnostic criteria, examination forms, pain drawing, questionnaires, scoring manual)
@@ -126,9 +135,11 @@ This is a **pnpm workspace** with **Turbo v2** for build orchestration:
 **Single PostgreSQL 15 database shared by Better Auth and Hasura:**
 
 **Auth Tables** (managed by Better Auth):
+
 - `user`, `account`, `session`, `verification`, `jwks`
 
 **Application Tables** (managed by Hasura migrations):
+
 - `organization` - Multi-tenant root with encryption keys (`public_key_pem`, `key_fingerprint`)
 - `patient_record` - Cases with encrypted PII (`first_name_encrypted`, `last_name_encrypted`, `date_of_birth_encrypted`), invite tokens, submission tracking
 - `patient_consent` - GDPR-compliant consent with version tracking
@@ -149,16 +160,19 @@ GraphQL types are generated from the Hasura schema using GraphQL Code Generator:
 - `pnpm --filter @cmdetect/patient-frontend codegen` - Patient frontend only
 
 **When to run codegen:**
+
 - After adding/modifying GraphQL queries or mutations in frontend code
 - After changing Hasura schema (tables, permissions, relationships)
 - After pulling changes that include Hasura metadata updates
 - Requires running Hasura instance (schema fetched from `http://localhost:8080/v1/graphql`)
 
 **Generated files (NOT tracked in git):**
+
 - `apps/frontend/src/graphql/gql.ts`, `graphql.ts`, `fragment-masking.ts`
 - `apps/patient-frontend/src/graphql/gql.ts`, `graphql.ts`, `fragment-masking.ts`
 
 **Custom files (tracked in git):**
+
 - `apps/frontend/src/graphql/execute.ts` - GraphQL execution with JWT auth
 - `apps/frontend/src/graphql/index.ts` - Custom exports
 - `apps/patient-frontend/src/graphql/execute.ts` - GraphQL execution (no auth)
@@ -177,6 +191,7 @@ All actions are handled by the auth-server. Public actions (anonymous access):
 - `getPatientProgress` (query) - Patient's completion status (consent, personal data, questionnaires)
 
 Authenticated actions (require JWT):
+
 - `resetInviteToken` - Reset and extend invite token expiration (organization-scoped)
 
 ### Key GraphQL Patterns
@@ -252,6 +267,7 @@ Three Docker Compose files at project root:
 - **`docker-compose.bootstrap.yml`** - Initial setup: PostgreSQL, Hasura, and data connector only (no auth-server, no JWT requirement) for running migrations before auth-server is built
 
 **Auth Server Dockerfile** (`apps/auth-server/Dockerfile`):
+
 - Multi-stage build (deps -> builder -> runner)
 - Node 22 Alpine base
 - Non-root user (`authserver`)
@@ -259,14 +275,14 @@ Three Docker Compose files at project root:
 
 ## Local Development Port Configuration
 
-| Port | Service | Notes |
-|------|---------|-------|
-| 3000 | Practitioner Frontend | Authenticated users |
-| 3001 | Auth Server | Better Auth + action handlers |
-| 3002 | Patient Frontend | Public access, no auth |
-| 5432 | PostgreSQL | Shared database |
-| 8080 | Hasura GraphQL Engine | Database API |
-| 8081 | Data Connector Agent | Hasura data connector |
+| Port | Service               | Notes                         |
+| ---- | --------------------- | ----------------------------- |
+| 3000 | Practitioner Frontend | Authenticated users           |
+| 3001 | Auth Server           | Better Auth + action handlers |
+| 3002 | Patient Frontend      | Public access, no auth        |
+| 5432 | PostgreSQL            | Shared database               |
+| 8080 | Hasura GraphQL Engine | Database API                  |
+| 8081 | Data Connector Agent  | Hasura data connector         |
 
 ## Environment Configuration
 
@@ -275,41 +291,48 @@ Three Docker Compose files at project root:
 ### Root `.env`
 
 **Database (Shared by Better Auth + Hasura):**
+
 - `POSTGRES_DB` - Database name (default: cmdetect)
 - `POSTGRES_USER` - Username (default: postgres)
 - `POSTGRES_PASSWORD` - Password (required)
 - `POSTGRES_PORT` - Port (default: 5432)
 
 **Hasura:**
+
 - `HASURA_PORT` - Hasura port (default: 8080)
 - `HASURA_GRAPHQL_ADMIN_SECRET` - Admin access (required, 32+ chars)
 - `HASURA_GRAPHQL_JWT_SECRET` - JWT config: `{"jwk_url":"http://auth-server:3001/api/auth/jwks"}`
 - `HASURA_GRAPHQL_UNAUTHORIZED_ROLE` - Default unauthenticated role (default: public)
 - `HASURA_GRAPHQL_ENABLE_CONSOLE` - Enable console (true for dev)
 - `HASURA_GRAPHQL_DEV_MODE` - Dev mode (true for dev)
-- `HASURA_GRAPHQL_CORS_DOMAIN` - CORS domains (dev: *, prod: https://*.domain)
+- `HASURA_GRAPHQL_CORS_DOMAIN` - CORS domains (dev: _, prod: https://_.domain)
 
 **Auth Server:**
+
 - `BETTER_AUTH_SECRET` - Session encryption key (required, 32+ chars)
 - `FRONTEND_URL` - Practitioner frontend URL for CORS
 - `PATIENT_FRONTEND_URL` - Patient frontend URL
 
 **SMTP (Optional):**
+
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
 
 ### Frontend `.env` Files
 
 Both frontends use Vite environment variables:
+
 - `VITE_HASURA_GRAPHQL_URL` - Hasura GraphQL endpoint
 - `VITE_AUTH_SERVER_URL` - Auth server URL (practitioner frontend only)
 
 For local development:
+
 - `VITE_HASURA_GRAPHQL_URL=http://localhost:8080/v1/graphql`
 - `VITE_AUTH_SERVER_URL=http://localhost:3001`
 
 ### Production Deployment
 
 Uses `scripts/deploy-app.sh` which:
+
 1. Sources environment from `/var/www/cmdetect/server.env` and `secrets.env`
 2. Generates `.env` files from templates via `scripts/generate-envs.sh`
 3. Installs dependencies, runs bootstrap containers for migrations
@@ -345,11 +368,11 @@ Production uses subdomain routing: `app.DOMAIN`, `patient.DOMAIN`, `api.DOMAIN`,
 
 ```typescript
 // questionnaires: ESM-only, bundles zod for Docker portability
-format: ["esm"]
-noExternal: ["zod"]
+format: ["esm"];
+noExternal: ["zod"];
 
 // dc-tmd: dual format (ESM + CJS)
-format: ["esm", "cjs"]
+format: ["esm", "cjs"];
 ```
 
 ## End-to-End Encryption System
@@ -362,6 +385,7 @@ format: ["esm", "cjs"]
 - **Browser Implementation**: Noble Curves library (@noble/curves, @noble/ciphers, @noble/hashes, @scure/bip39)
 
 **Crypto Module** (`apps/frontend/src/crypto/`):
+
 - `keyGeneration.ts` - Key pair generation and BIP39 mnemonic
 - `encryption.ts` - ECIES encrypt/decrypt utilities
 - `storage.ts` - IndexedDB storage for private keys
@@ -369,6 +393,7 @@ format: ["esm", "cjs"]
 - `types.ts` - Crypto type definitions
 
 **Patient Data Flow:**
+
 1. Patient visits invite URL with token
 2. Patient frontend validates token via `validateInviteToken` action, receives organization public key
 3. Patient data encrypted client-side using ECIES before submission
@@ -380,12 +405,14 @@ format: ["esm", "cjs"]
 ### Packages
 
 **`packages/dc-tmd`** - Diagnostic criteria evaluation engine:
+
 - `src/criteria/diagnoses/` - Diagnosis definitions: arthralgia, degenerative joint disease, disc displacement, headache, myalgia, myalgia subtypes, subluxation
 - `src/criteria/evaluate.ts` - Main evaluation entry point
 - `src/categorization/` - Result categorization and anamnesis text generation
 - Uses field references to extract data from examination and questionnaire responses
 
 **`packages/questionnaires`** - Questionnaire definitions:
+
 - `src/sq/` - Screening Questionnaire
 - `src/gcps-1m/` - Graded Chronic Pain Scale (1 month)
 - `src/jfls20/` - Jaw Functional Limitation Scale (20 items)
@@ -398,6 +425,7 @@ format: ["esm", "cjs"]
 ### Examination Sections (E1-E11)
 
 Clinical examination workflow in `apps/frontend/src/features/examination/sections/`:
+
 - **E1**: Pain location regions
 - **E2**: Incisal measurements (opening, overbite, overjet)
 - **E3**: Opening pattern assessment
@@ -423,6 +451,7 @@ Clinical examination workflow in `apps/frontend/src/features/examination/section
 ### Frontend Feature Module Convention
 
 Each feature in `apps/frontend/src/features/` follows this structure:
+
 - `index.ts` - Public exports
 - `queries.ts` - GraphQL queries/mutations
 - `types.ts` - TypeScript type definitions
