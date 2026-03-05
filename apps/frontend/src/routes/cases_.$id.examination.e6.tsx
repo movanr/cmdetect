@@ -5,8 +5,8 @@
  * Single-step section (no multi-step URL).
  */
 
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { E6Section, useExaminationPersistenceContext } from "../features/examination";
+import { createFileRoute } from "@tanstack/react-router";
+import { E6Section, useExaminationRouteNavigation } from "../features/examination";
 
 export const Route = createFileRoute("/cases_/$id/examination/e6")({
   component: ExaminationE6Page,
@@ -14,25 +14,7 @@ export const Route = createFileRoute("/cases_/$id/examination/e6")({
 
 function ExaminationE6Page() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
-  const { saveSection } = useExaminationPersistenceContext();
-
-  // Save section and navigate to next section (E7) on completion
-  const handleComplete = async () => {
-    await saveSection("e6");
-    navigate({
-      to: "/cases/$id/examination/e7",
-      params: { id },
-    });
-  };
-
-  // Navigate to previous section (E5)
-  const handleBack = () => {
-    navigate({
-      to: "/cases/$id/examination/e5",
-      params: { id },
-    });
-  };
+  const { handleComplete, handleBack } = useExaminationRouteNavigation({ section: "e6", id });
 
   return <E6Section onComplete={handleComplete} onBack={handleBack} />;
 }
