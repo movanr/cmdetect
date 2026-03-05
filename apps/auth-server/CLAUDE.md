@@ -4,61 +4,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Node.js/TypeScript authentication server built with Better Auth, designed to integrate with Hasura GraphQL. The server provides JWT-based authentication with PostgreSQL as the backend database, email verification, and multi-tenant organization isolation with role-based access control.
+Node.js/TypeScript authentication server built with **Hono 4.x** + `@hono/node-server` and **Better Auth**. Integrates with Hasura GraphQL via JWT (JWKS endpoint) and handles Hasura action requests. Shared PostgreSQL 15 database with Hasura.
 
 ## Development Commands
 
-- `npm run dev` - Start development server with auto-reload using nodemon and tsx
-- `npm run build` - Compile TypeScript to JavaScript in dist/ directory  
-- `npm start` - Start production server from compiled JavaScript
-- `npm run migrate` - Run Better Auth database migrations
-- `npm run seed:users` - Create test users for all roles
-- `npm run seed:users:cleanup` - Remove test users
-- `npm run seed:single` - Create a single test user
-- `npm run seed:single:cleanup` - Remove single test user
+Run from the monorepo root with pnpm filter, or directly inside this package:
+
+- `pnpm run dev` - Start development server with nodemon + tsx
+- `pnpm run build` - Compile TypeScript to `dist/`
+- `pnpm start` - Start production server from compiled JavaScript
+- `pnpm run migrate` - Run Better Auth database migrations
+- `pnpm run seed:users` - Create test users for all roles
+- `pnpm run seed:users:cleanup` - Remove test users
 
 ## Architecture
 
-### Core Components
+### Source Files
 
-- **src/server.ts**: Express server setup with CORS, Helmet security, and Better Auth integration
-- **src/auth.ts**: Better Auth configuration with JWT plugin for Hasura integration and email verification
-- **src/email.ts**: Email service using Nodemailer for verification emails
-- **src/admin-routes.ts**: Admin endpoints placeholder for future admin functionality
+- **src/server.ts**: Hono app setup — `secureHeaders()`, CORS, action secret middleware, route registration, global error handler, `@hono/node-server` entry point
+- **src/auth.ts**: Better Auth configuration — JWT plugin for Hasura claims, email verification
+- **src/actions.ts**: `ActionHandlers` class — Hasura action request handlers (anonymous operations)
+- **src/auth-endpoints.ts**: `AuthEndpoints` class — authenticated endpoints (role switching)
+- **src/database.ts**: `DatabaseService` class — direct PostgreSQL queries via `pg`
+- **src/validation.ts**: Zod-based request validation for action payloads
+- **src/errors.ts**: Typed error classes
+- **src/env.ts**: Environment variable loading and validation
 - **src/jwt-utils.ts**: JWT utilities for user authorization validation
-- **src/types.ts**: TypeScript interfaces for JWT payloads
+- **src/types.ts**: TypeScript interfaces for JWT payloads and branded types
+- **src/email.ts**: Nodemailer email service for verification emails
+
+### Endpoints
+
+**Hasura Actions** (`/actions/*`) — validated by `HASURA_ACTION_SECRET` header:
+- `POST /actions/validate-invite-token`
+- `POST /actions/submit-patient-consent`
+- `POST /actions/submit-patient-personal-data`
+- `POST /actions/submit-questionnaire-response`
+- `POST /actions/get-patient-progress`
+
+**Auth Endpoints** (authenticated, registered before Better Auth wildcard):
+- `POST /api/auth/switch-role` — role switching
+
+**Better Auth** (handles all remaining `/api/auth/*`):
+- `GET/POST /api/auth/*` — sign-in, sign-up, session, JWKS, token, etc.
+
+**Health:**
+- `GET /health`
 
 ### Authentication Flow
 
-The server uses Better Auth with:
-- JWT tokens with RS256 asymmetric encryption (8-hour expiration)
+- Better Auth issues JWT tokens with RS256 (8-hour expiration)
+- JWKS endpoint: `/api/auth/jwks` — consumed by Hasura for JWT verification
 - Multi-tenant organization isolation via `x-hasura-organization-id` claim
-- Multi-role system stored in user metadata (roles array)
-- Custom Hasura claims including `x-hasura-practitioner-id` for user linkage
-- Email verification workflow (required for account activation)
-- Metadata-driven role assignment
+- Role-based access: `org_admin`, `physician`, `receptionist`, `unverified`
+- Email verification required for account activation
 
-### Database Setup
+### Database
 
-- PostgreSQL 16 container via Docker Compose
-- Database: `cmdetect_auth`
-- User: `auth_user` 
-- Port: 5432
-- Healthcheck enabled
+- PostgreSQL 15 shared with Hasura
+- Database: `cmdetect`, User: `postgres`, Port: 5432
+- Action handlers query PostgreSQL directly — no Hasura API calls needed
 
 ## JWT Claims Structure
 
-The server generates JWT tokens with the following Hasura claims:
 - `x-hasura-user-id`: Better Auth user ID
 - `x-hasura-practitioner-id`: UUID from user metadata
 - `x-hasura-organization-id`: UUID for organization isolation
 - `x-hasura-default-role`: First role from metadata roles array
 - `x-hasura-allowed-roles`: Full roles array from metadata
-- `x-hasura-roles`: Additional roles array for convenience
 
 ## User Metadata Structure
 
-Users store role and organization information in metadata:
 ```json
 {
   "roles": ["org_admin", "physician"],
@@ -71,54 +87,39 @@ Users without valid metadata get `unverified` role with limited access.
 
 ## Test Users
 
-The seeding scripts create test users with different roles:
+All test users use password: `TestPassword123!`
 
 - `admin@test.com` (org_admin role)
-- `physician@test.com` (physician role) 
+- `physician@test.com` (physician role)
 - `receptionist@test.com` (receptionist role)
 - `unverified@test.com` (no roles)
 
-All test users use password: `TestPassword123!`
+## Environment Variables
 
-## Environment Variables Required
-
-### Authentication Server
-
-The auth server reads environment variables from the root `.env` file (not from `apps/auth-server/.env`).
+The auth server reads from the root `.env` file (not `apps/auth-server/.env`).
 
 **Required:**
-- `POSTGRES_DB`: Database name (e.g., cmdetect)
-- `POSTGRES_USER`: Database username (e.g., postgres)
-- `POSTGRES_PASSWORD`: Database password
-- `BETTER_AUTH_SECRET`: Better Auth session secret (minimum 32 characters)
-- `FRONTEND_URL`: Practitioner frontend URL for CORS (e.g., http://localhost:3000 or https://app.yourdomain.com)
+- `POSTGRES_DB` — database name (default: `cmdetect`)
+- `POSTGRES_USER` — database username (default: `postgres`)
+- `POSTGRES_PASSWORD` — database password
+- `POSTGRES_HOST` — database host
+- `POSTGRES_PORT` — database port (default: `5432`)
+- `BETTER_AUTH_SECRET` — session encryption key (32+ chars)
+- `FRONTEND_URL` — practitioner frontend URL for CORS
 
 **Optional:**
-- `PATIENT_FRONTEND_URL`: Patient frontend URL for additional CORS (e.g., http://localhost:3002)
-- `SMTP_HOST`: SMTP server hostname (e.g., smtp.gmail.com)
-- `SMTP_PORT`: SMTP port (587 for TLS, 465 for SSL)
-- `SMTP_USER`: SMTP username/email
-- `SMTP_PASS`: SMTP password/app password
-- `SMTP_FROM`: From email address (optional, defaults to SMTP_USER)
-
-**Note:**
-- The auth server connects directly to PostgreSQL (shared database with Hasura)
-- Better Auth generates JWT keys automatically (JWKS endpoint: `/api/auth/jwks`)
-- No `HASURA_API_URL` or `HASURA_GRAPHQL_ADMIN_SECRET` needed - action handlers query PostgreSQL directly
-
+- `HASURA_ACTION_SECRET` — shared secret for Hasura action request validation; if unset, validation is skipped (warning logged)
+- `PATIENT_FRONTEND_URL` — patient frontend URL for additional CORS
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — email delivery
 
 ## Development Setup
 
-1. Start PostgreSQL: `docker-compose up -d`
-2. Run migrations: `npm run migrate`
-3. Create test users: `npm run seed:users`
-4. Start development server: `npm run dev`
+1. Start PostgreSQL and Hasura: `docker compose up -d`
+2. Run migrations: `pnpm --filter @cmdetect/auth-server migrate`
+3. Create test users: `pnpm --filter @cmdetect/auth-server seed:users`
+4. Start development server: `pnpm --filter @cmdetect/auth-server dev`
 
-The server runs on port 3001 with:
-- Auth endpoints at `/api/auth/*`
-- Admin endpoints at `/admin/*` (placeholder for future features)
-- Health check at `/health`
-
+After source changes in Docker context: `docker compose build auth-server && docker compose up -d auth-server`
 
 ## Testing Authentication
 
@@ -135,7 +136,13 @@ The server runs on port 3001 with:
      -H "Authorization: Bearer YOUR_SESSION_TOKEN"
    ```
 
-3. **Use JWT token for protected endpoints** (when admin features are added)
+3. **Switch active role:**
+   ```bash
+   curl -X POST http://localhost:3001/api/auth/switch-role \
+     -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"role": "physician"}'
+   ```
 
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
