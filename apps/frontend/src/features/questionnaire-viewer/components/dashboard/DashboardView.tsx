@@ -14,7 +14,6 @@ import { isQuestionnaireEnabled, QUESTIONNAIRE_ID } from "@cmdetect/questionnair
 import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
-import { AnamnesisOverview } from "./AnamnesisOverview";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import { DashboardInfoBlock } from "./DashboardInfoBlock";
 import { SQStatusCard } from "./SQStatusCard";
@@ -169,15 +168,12 @@ export function DashboardView({
               Achse 1 - Symptomfragebogen
             </h3>
             <DashboardInfoBlock info={AXIS1_INFO} className="mb-3" />
-            <SQStatusCard response={sqResponse} isScreeningNegative={isScreeningNegative} />
-            {!isScreeningNegative && sqAnswers && (
-              <Card className="mt-3 py-0">
-                <CardContent className="p-4">
-                  <h4 className="font-medium mb-2">Anamnesekriterien</h4>
-                  <AnamnesisOverview sqAnswers={sqAnswers} />
-                </CardContent>
-              </Card>
-            )}
+            <SQStatusCard
+              response={sqResponse}
+              isScreeningNegative={isScreeningNegative}
+              onStartReview={onStartReview}
+              isReviewed={isReviewed}
+            />
           </section>
         )}
 

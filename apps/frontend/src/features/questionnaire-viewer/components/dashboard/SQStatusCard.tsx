@@ -14,15 +14,19 @@ import {
 } from "@cmdetect/questionnaires";
 import { Link } from "@tanstack/react-router";
 import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+
 import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
+import { AnamnesisOverview } from "./AnamnesisOverview";
 import { SQAnswersTable } from "./questionnaire-tables";
 
 interface SQStatusCardProps {
   response: QuestionnaireResponse | undefined;
   /** Whether SQ screening is negative (all screening questions answered "no") */
   isScreeningNegative?: boolean;
+  onStartReview?: () => void;
+  isReviewed?: boolean;
 }
 
 /**
@@ -42,7 +46,12 @@ function countPendingConfirmations(answers: Record<string, unknown>): number {
   }).length;
 }
 
-export function SQStatusCard({ response, isScreeningNegative = false }: SQStatusCardProps) {
+export function SQStatusCard({
+  response,
+  isScreeningNegative = false,
+  onStartReview,
+  isReviewed = false,
+}: SQStatusCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // No SQ data
@@ -64,12 +73,14 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
 
   const { answers, submittedAt, reviewedAt } = response;
   const pendingConfirmations = isScreeningNegative ? 0 : countPendingConfirmations(answers);
-  const isReviewed = !!reviewedAt;
 
   return (
     <Card className="overflow-hidden py-0 gap-0">
       {/* Header */}
-      <div className="p-4 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
+      <div
+        className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -101,7 +112,10 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
               <Link
                 to="/docs/scoring-manual"
                 hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
-                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sessionStorage.setItem("docs-return-url", window.location.pathname);
+                }}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline shrink-0"
               >
                 <BookOpen className="h-3 w-3" />
@@ -133,7 +147,10 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
             className="text-muted-foreground flex-shrink-0"
           >
             {isExpanded ? (
@@ -148,6 +165,17 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
           </Button>
         </div>
       </div>
+
+      {/* Anamnesis overview — always visible */}
+      {!isScreeningNegative && (
+        <div className="px-4 pb-4">
+          <AnamnesisOverview
+            sqAnswers={answers}
+            onStartReview={onStartReview}
+            isReviewed={isReviewed}
+          />
+        </div>
+      )}
 
       {/* Expandable details */}
       <div
