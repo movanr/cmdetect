@@ -350,34 +350,43 @@ function HorizontalScoreLayout({
  */
 export function ScaleBar({
   segments,
+  activeIndex,
   cutoffPosition,
 }: {
   segments: ReadonlyArray<{ label?: string; range?: string; color: string }>;
+  activeIndex: number;
   cutoffPosition?: string;
 }) {
   return (
-    <div>
-      <div className="relative">
-        <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-          {segments.map((segment, index) => (
+    <div className="relative">
+      <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
+        {segments.map((segment, index) => {
+          const isActive = index === activeIndex;
+          return (
             <div
               key={index}
-              className={`flex-1 ${segment.color} flex items-center justify-center`}
+              className={`flex-1 ${
+                isActive
+                  ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                  : "bg-gray-200"
+              } flex items-center justify-center transition-all`}
             >
-              <span className="text-[9px] font-medium text-white drop-shadow-sm">
+              <span
+                className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+              >
                 {segment.range ?? segment.label}
               </span>
             </div>
-          ))}
-        </div>
-        {cutoffPosition && (
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-black/60"
-            style={{ left: cutoffPosition }}
-            title="Klinischer Cutoff"
-          />
-        )}
+          );
+        })}
       </div>
+      {cutoffPosition && (
+        <div
+          className="absolute top-0 bottom-0 w-0.5 bg-black/60"
+          style={{ left: cutoffPosition }}
+          title="Klinischer Cutoff"
+        />
+      )}
     </div>
   );
 }
@@ -446,6 +455,9 @@ export function Axis2ScoreCard({
   // GCPS-1M Scoring
   if (questionnaireId === QUESTIONNAIRE_ID.GCPS_1M) {
     const gcpsScore = calculateGCPS1MScore(answers as GCPS1MAnswers);
+    const activeGradeIndex = gcpsScore.grade;
+
+    const gradeRoman = gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1];
 
     return (
       <HorizontalScoreLayout
@@ -454,20 +466,23 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Chronifizierungsgrad"
         scaleBar={
-          <ScaleBar
-            segments={GCPS_GRADE_SEGMENTS.map((s) => ({
-              label: s.label,
-              color: s.color,
-            }))}
-          />
+          <>
+            <ScaleBar
+              segments={GCPS_GRADE_SEGMENTS.map((s) => ({
+                label: s.label,
+                color: s.color,
+              }))}
+              activeIndex={activeGradeIndex}
+            />
+            <ScaleLabels
+              labels={GCPS_GRADE_SEGMENTS.map((s) => ({ label: s.sublabel, key: s.grade }))}
+              activeIndex={activeGradeIndex}
+            />
+          </>
         }
         scoreDisplay={
           <div className="text-left">
-            <div className="text-xl font-bold leading-tight">
-              {gcpsScore.cpi}
-              <span className="text-sm text-muted-foreground font-normal"> CPI</span>
-            </div>
-            <div className="text-sm text-muted-foreground">{gcpsScore.totalDisabilityPoints} BP</div>
+            <div className="text-xl font-bold leading-tight">Grad {gradeRoman}</div>
           </div>
         }
         isExpanded={isExpanded}
@@ -529,7 +544,11 @@ export function Axis2ScoreCard({
   // JFLS-8 Scoring
   if (questionnaireId === QUESTIONNAIRE_ID.JFLS8) {
     const jflsScore = calculateJFLS8Score(answers as JFLS8Answers);
-
+    const activeLimitationIndex = jflsScore.limitationLevel
+      ? JFLS8_LIMITATION_SEGMENTS.findIndex(
+          (segment) => segment.level === jflsScore.limitationLevel
+        )
+      : -1;
 
     return (
       <HorizontalScoreLayout
@@ -538,7 +557,7 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Kieferfunktions-Einschränkung"
         scaleBar={
-          <ScaleBar segments={JFLS8_LIMITATION_SEGMENTS} />
+          <ScaleBar segments={JFLS8_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
         }
         scoreDisplay={
           <div className="text-left">
@@ -568,7 +587,11 @@ export function Axis2ScoreCard({
   // JFLS-20 Scoring
   if (questionnaireId === QUESTIONNAIRE_ID.JFLS20) {
     const jflsScore = calculateJFLS20Score(answers as JFLS20Answers);
-
+    const activeLimitationIndex = jflsScore.limitationLevel
+      ? JFLS20_LIMITATION_SEGMENTS.findIndex(
+          (segment) => segment.level === jflsScore.limitationLevel
+        )
+      : -1;
 
     return (
       <HorizontalScoreLayout
@@ -577,7 +600,7 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Kieferfunktions-Einschränkung (erweitert)"
         scaleBar={
-          <ScaleBar segments={JFLS20_LIMITATION_SEGMENTS} />
+          <ScaleBar segments={JFLS20_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
         }
         scoreDisplay={
           <div className="text-left">
@@ -628,7 +651,9 @@ export function Axis2ScoreCard({
   // OBC Scoring
   if (questionnaireId === QUESTIONNAIRE_ID.OBC) {
     const obcScore = calculateOBCScore(answers as OBCAnswers);
-
+    const activeRiskIndex = OBC_RISK_SEGMENTS.findIndex(
+      (segment) => segment.level === obcScore.riskLevel
+    );
     return (
       <HorizontalScoreLayout
         title={title}
@@ -636,7 +661,7 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         scaleLabel="Orale Verhaltensweisen - CMD-Risiko"
         scaleBar={
-          <ScaleBar segments={OBC_RISK_SEGMENTS} />
+          <ScaleBar segments={OBC_RISK_SEGMENTS} activeIndex={activeRiskIndex} />
         }
         scoreDisplay={
           <div className="text-left">
@@ -670,7 +695,7 @@ export function Axis2ScoreCard({
   const score = calculatePHQ4Score(answers as Record<string, string>);
   const anxietyResult = getSubscaleInterpretation(score.anxiety);
   const depressionResult = getSubscaleInterpretation(score.depression);
-
+  const activeSegment = getActiveSegment(score.total);
 
   return (
     <HorizontalScoreLayout
@@ -681,6 +706,7 @@ export function Axis2ScoreCard({
       scaleBar={
         <ScaleBar
           segments={PHQ4_SEVERITY_SEGMENTS}
+          activeIndex={activeSegment}
           cutoffPosition="50%"
         />
       }

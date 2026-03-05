@@ -21,7 +21,8 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
   const [selectedRegion, setSelectedRegion] = useState<ImageId>("head-right");
   const score = calculatePainDrawingScore(data);
 
-
+  // Get active segment index for severity scale
+  const activeSegmentIndex = Math.min(score.regionCount, 5);
 
   return (
     <div className="space-y-6">
@@ -37,14 +38,39 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
               Betroffene Regionen
             </p>
             <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {SEVERITY_SEGMENTS.map((segment) => (
+              {SEVERITY_SEGMENTS.map((segment, index) => {
+                const isActive = index === activeSegmentIndex;
+                return (
+                  <div
+                    key={segment.label}
+                    className={`flex-1 ${
+                      isActive
+                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                        : "bg-gray-200"
+                    } flex items-center justify-center transition-all`}
+                  >
+                    <span
+                      className={`text-sm font-bold ${
+                        isActive ? "text-white drop-shadow-sm" : "text-gray-400"
+                      }`}
+                    >
+                      {segment.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex mt-1 text-[9px]">
+              {SEVERITY_SEGMENTS.map((segment, index) => (
                 <div
                   key={segment.label}
-                  className={`flex-1 ${segment.color} flex items-center justify-center`}
+                  className={`flex-1 text-center ${
+                    index === activeSegmentIndex
+                      ? "font-medium text-foreground"
+                      : "text-muted-foreground"
+                  }`}
                 >
-                  <span className="text-sm font-bold text-white drop-shadow-sm">
-                    {segment.label}
-                  </span>
+                  {segment.label}
                 </div>
               ))}
             </div>

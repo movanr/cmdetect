@@ -58,7 +58,7 @@ export function PainDrawingScoreCard({
   }
 
   const score = calculatePainDrawingScore(data);
-
+  const activeSegmentIndex = Math.min(score.regionCount, 5);
   const isWidespread = score.patterns.hasWidespreadPain;
 
   return (
@@ -90,18 +90,29 @@ export function PainDrawingScoreCard({
             {/* CENTER: Severity scale */}
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground mb-1">Anzahl Schmerzgebiete</p>
-              <div>
+              <div className="relative">
                 <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                  {SEVERITY_SEGMENTS.map((segment) => (
-                    <div
-                      key={segment.label}
-                      className={`flex-1 ${segment.color} flex items-center justify-center`}
-                    >
-                      <span className="text-[9px] font-bold text-white drop-shadow-sm">
-                        {segment.label}
-                      </span>
-                    </div>
-                  ))}
+                  {SEVERITY_SEGMENTS.map((segment, index) => {
+                    const isActive = index === activeSegmentIndex;
+                    return (
+                      <div
+                        key={segment.label}
+                        className={`flex-1 ${
+                          isActive
+                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
+                            : "bg-gray-200"
+                        } flex items-center justify-center transition-all`}
+                      >
+                        <span
+                          className={`text-[9px] font-bold ${
+                            isActive ? "text-white drop-shadow-sm" : "text-gray-400"
+                          }`}
+                        >
+                          {segment.label}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               {/* Risk interpretation - only shown when pain is marked */}
