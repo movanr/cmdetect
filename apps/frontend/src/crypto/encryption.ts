@@ -5,6 +5,17 @@ import { p256 } from "@noble/curves/nist";
 import { hkdf } from "@noble/hashes/hkdf";
 import { sha256 } from "@noble/hashes/sha2";
 
+/**
+ * Encrypts patient PII using ECIES (ECDH P-256 + AES-256-GCM).
+ *
+ * Each call generates a fresh ephemeral key pair and random IV,
+ * so encrypting the same data twice produces different ciphertext.
+ *
+ * @param patientData - Patient PII to encrypt
+ * @param publicKeyPem - Organization's PEM-encoded ECDSA P-256 public key
+ * @returns JSON string containing the {@link EncryptedPayload}
+ * @throws {CryptoError} with code `ENCRYPTION_FAILED`
+ */
 export async function encryptPatientData(
   patientData: PatientPII,
   publicKeyPem: string
@@ -79,6 +90,18 @@ export async function encryptPatientData(
   }
 }
 
+/**
+ * Decrypts an ECIES-encrypted payload back to patient PII.
+ *
+ * Reverses the ECDH key agreement using the organization's private key,
+ * then decrypts with AES-256-GCM. The decrypted data is runtime-validated
+ * to ensure it contains valid `firstName`, `lastName`, and ISO `dateOfBirth`.
+ *
+ * @param encryptedData - JSON string produced by {@link encryptPatientData}
+ * @param privateKeyPem - Organization's PEM-encoded ECDSA P-256 private key
+ * @returns Validated patient PII
+ * @throws {CryptoError} with code `DECRYPTION_FAILED` (includes version mismatch, bad key, corrupt data)
+ */
 export async function decryptPatientData(
   encryptedData: string,
   privateKeyPem: string

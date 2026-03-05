@@ -130,7 +130,11 @@ export function createAndDownloadRecoveryFile(
 }
 
 /**
- * Handles file upload and returns the recovery data
+ * Opens a file picker dialog for the user to select a recovery JSON file.
+ * Parses and validates the selected file via {@link parseRecoveryFile}.
+ *
+ * @returns Validated recovery data from the uploaded file
+ * @throws {Error} If no file is selected, the file cannot be read, or validation fails
  */
 export function uploadRecoveryFile(): Promise<RecoveryFileData> {
   return new Promise((resolve, reject) => {

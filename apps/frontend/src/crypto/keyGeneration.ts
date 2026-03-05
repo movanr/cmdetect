@@ -9,6 +9,15 @@ import { hkdf } from "@noble/hashes/hkdf";
 import { sha256 } from "@noble/hashes/sha2";
 import { CRYPTO_CONSTANTS } from "./types";
 
+/**
+ * Generates a new organization key pair with a BIP39 12-word mnemonic.
+ *
+ * The mnemonic deterministically derives an ECDSA P-256 key pair via
+ * BIP39 seed → HKDF. The same mnemonic always produces the same keys,
+ * enabling recovery without storing the private key server-side.
+ *
+ * @returns PEM-encoded public/private keys and the English mnemonic
+ */
 export async function generateOrganizationKeys(): Promise<{
   publicKey: string;
   privateKey: string;
@@ -25,7 +34,11 @@ export async function generateOrganizationKeys(): Promise<{
   };
 }
 
-// Helper function to verify deterministic key generation
+/**
+ * Verifies that a mnemonic produces the same keys on repeated derivation.
+ *
+ * @throws {Error} If the mnemonic is invalid
+ */
 export async function verifyDeterministicKeys(
   mnemonic: string
 ): Promise<boolean> {
@@ -39,6 +52,15 @@ export async function verifyDeterministicKeys(
   return keyPair1.publicKeyPem === keyPair2.publicKeyPem; // Same mnemonic should produce identical keys
 }
 
+/**
+ * Recovers an organization's key pair from its BIP39 mnemonic.
+ *
+ * Deterministic: the same mnemonic always yields the same keys.
+ *
+ * @param englishMnemonic - 12-word BIP39 English mnemonic
+ * @returns PEM-encoded public and private keys
+ * @throws {Error} If the mnemonic is invalid
+ */
 export async function recoverKeysFromMnemonic(
   englishMnemonic: string
 ): Promise<{
@@ -125,7 +147,12 @@ async function generateKeyPairFromMnemonic(mnemonic: string): Promise<{
   };
 }
 
-// Simple PEM decoding functions
+/**
+ * Decodes a private key from simplified PEM format to raw bytes.
+ *
+ * Uses a simplified PEM encoding (raw base64, not full ASN.1/PKCS#8),
+ * so these PEM strings are only compatible within this module.
+ */
 export function parsePrivateKeyFromPem(privateKeyPem: string): Uint8Array {
   const keyData = privateKeyPem
     .replace("-----BEGIN PRIVATE KEY-----", "")
@@ -135,6 +162,12 @@ export function parsePrivateKeyFromPem(privateKeyPem: string): Uint8Array {
   return new Uint8Array(base64ToArrayBuffer(keyData));
 }
 
+/**
+ * Decodes a public key from simplified PEM format to raw uncompressed bytes (65 bytes).
+ *
+ * Uses a simplified PEM encoding (raw base64, not full ASN.1/SPKI),
+ * so these PEM strings are only compatible within this module.
+ */
 export function parsePublicKeyFromPem(publicKeyPem: string): Uint8Array {
   const keyData = publicKeyPem
     .replace("-----BEGIN PUBLIC KEY-----", "")
@@ -162,7 +195,14 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer as ArrayBuffer;
 }
 
-// Generate key fingerprint from public key PEM
+/**
+ * Generates a human-readable fingerprint from a public key PEM.
+ *
+ * Computes SHA-256 of the raw public key bytes, truncates to 16 bytes,
+ * and formats as colon-separated uppercase hex (e.g. `"AB:CD:EF:..."`).
+ *
+ * @throws {Error} If the PEM cannot be parsed
+ */
 export function generateKeyFingerprint(publicKeyPem: string): string {
   try {
     const publicKeyBytes = parsePublicKeyFromPem(publicKeyPem);
@@ -178,7 +218,12 @@ export function generateKeyFingerprint(publicKeyPem: string): string {
   }
 }
 
-// Test if private key can decrypt data encrypted with public key
+/**
+ * Tests whether a private key can decrypt data encrypted with a public key.
+ *
+ * Performs a full encrypt/decrypt round-trip with test data.
+ * Returns `false` (never throws) if the keys are incompatible.
+ */
 export async function testKeyCompatibility(
   privateKeyPem: string,
   publicKeyPem: string
@@ -215,7 +260,13 @@ export async function testKeyCompatibility(
   }
 }
 
-// Key validation function
+/**
+ * Validates that a public key matches a private key by deriving the public
+ * key from the private key and comparing byte-by-byte.
+ *
+ * Faster than {@link testKeyCompatibility} (no encryption round-trip),
+ * but only checks mathematical relationship, not encrypt/decrypt capability.
+ */
 export function validateKeyPair(
   privateKeyPem: string,
   publicKeyPem: string
