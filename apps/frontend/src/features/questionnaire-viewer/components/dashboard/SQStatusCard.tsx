@@ -1,9 +1,11 @@
 /**
- * SQ Status Card - Shows SF answers always expanded, consistent with Axis 2 cards
+ * SQ Status Card - Shows review status with expandable details
+ * Allows starting the interactive review wizard with the patient
  */
 
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import {
   SQ_ENABLE_WHEN,
@@ -11,7 +13,8 @@ import {
   isQuestionIdEnabled,
 } from "@cmdetect/questionnaires";
 import { Link } from "@tanstack/react-router";
-import { AlertCircle, BookOpen, CheckCircle2 } from "lucide-react";
+import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { SQAnswersTable } from "./questionnaire-tables";
@@ -40,19 +43,21 @@ function countPendingConfirmations(answers: Record<string, unknown>): number {
 }
 
 export function SQStatusCard({ response, isScreeningNegative = false }: SQStatusCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // No SQ data
   if (!response) {
     return (
-      <Card className="bg-muted/30 py-0 gap-0">
-        <div className="p-4">
+      <Card className="bg-muted/30 py-0">
+        <CardContent className="p-4">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-muted-foreground" />
             <div>
-              <h4 className="font-medium text-sm">SF - DC/TMD Symptomfragebogen</h4>
+              <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
               <p className="text-sm text-muted-foreground mt-1">Noch nicht eingereicht</p>
             </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
     );
   }
@@ -64,68 +69,96 @@ export function SQStatusCard({ response, isScreeningNegative = false }: SQStatus
   return (
     <Card className="overflow-hidden py-0 gap-0">
       {/* Header */}
-      <div className="p-4 pb-2 flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h4 className="font-medium text-sm">SF - DC/TMD Symptomfragebogen</h4>
-            {isScreeningNegative ? (
-              <Badge className="bg-green-100 text-green-800 border-green-200">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Negativ
-              </Badge>
-            ) : isReviewed ? (
-              <Badge className="bg-green-100 text-green-800 border-green-200">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Überprüft
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="text-amber-600 border-amber-300">
-                Überprüfung mit Patient ausstehend
-              </Badge>
+      <div className="p-4 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-medium">SF - DC/TMD Symptomfragebogen</h4>
+              {isScreeningNegative ? (
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Negativ
+                </Badge>
+              ) : isReviewed ? (
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Überprüft
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-amber-600 border-amber-300">
+                  Überprüfung mit Patient ausstehend
+                </Badge>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-sm text-muted-foreground">
+                Eingereicht {formatDistanceToNow(new Date(submittedAt), { addSuffix: true })}
+                {isReviewed && reviewedAt && (
+                  <> · Überprüft {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}</>
+                )}
+              </p>
+              <Link
+                to="/docs/scoring-manual"
+                hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
+                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline shrink-0"
+              >
+                <BookOpen className="h-3 w-3" />
+                Scoring-Anleitung
+              </Link>
+            </div>
+
+            {/* Negative screening message */}
+            {isScreeningNegative && (
+              <p className="text-sm text-green-700 mt-2">
+                Alle 5 Screening-Fragen mit &quot;Nein&quot; beantwortet - keine CMD-Symptome.
+              </p>
+            )}
+
+            {/* Pending confirmations warning */}
+            {pendingConfirmations > 0 && (
+              <div className="flex items-center gap-1.5 mt-2 text-sm text-amber-600">
+                <AlertCircle className="h-4 w-4" />
+                <span>
+                  {pendingConfirmations}{" "}
+                  {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"} Bestätigung
+                  der Lokalisation
+                </span>
+              </div>
             )}
           </div>
 
-          <div className="flex items-center gap-3 mt-0.5">
-            <p className="text-xs text-muted-foreground">
-              Eingereicht {formatDistanceToNow(new Date(submittedAt), { addSuffix: true })}
-              {isReviewed && reviewedAt && (
-                <> · Überprüft {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}</>
-              )}
-            </p>
-          </div>
-
-          {isScreeningNegative && (
-            <p className="text-sm text-green-700 mt-1">
-              Alle 5 Screening-Fragen mit &quot;Nein&quot; beantwortet - keine CMD-Symptome.
-            </p>
-          )}
-
-          {pendingConfirmations > 0 && (
-            <div className="flex items-center gap-1.5 mt-1 text-sm text-amber-600">
-              <AlertCircle className="h-4 w-4" />
-              <span>
-                {pendingConfirmations}{" "}
-                {pendingConfirmations === 1 ? "Frage benötigt" : "Fragen benötigen"} Bestätigung
-                der Lokalisation
-              </span>
-            </div>
-          )}
+          {/* Details toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+            className="text-muted-foreground flex-shrink-0"
+          >
+            {isExpanded ? (
+              <>
+                Ausblenden <ChevronUp className="ml-1 h-4 w-4" />
+              </>
+            ) : (
+              <>
+                Details <ChevronDown className="ml-1 h-4 w-4" />
+              </>
+            )}
+          </Button>
         </div>
-
-        <Link
-          to="/docs/scoring-manual"
-          hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
-          onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
-          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline shrink-0 ml-3"
-        >
-          <BookOpen className="h-3 w-3" />
-          Scoring-Anleitung
-        </Link>
       </div>
 
-      {/* Answer table — always visible */}
-      <div className="px-4 pb-4">
-        <SQAnswersTable answers={answers} />
+      {/* Expandable details */}
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <CardContent className="border-t bg-muted/20 p-4">
+            <SQAnswersTable answers={answers} />
+          </CardContent>
+        </div>
       </div>
     </Card>
   );

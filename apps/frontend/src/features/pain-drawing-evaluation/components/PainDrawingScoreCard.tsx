@@ -1,15 +1,16 @@
 /**
- * Pain Drawing Score Card - Displays pain region thumbnails always expanded
- * Used in the dashboard for pain assessment before patient review
+ * Pain Drawing Score Card - Displays pain region count with visual severity scale
+ * Used in the dashboard for quick pain assessment before patient review
+ * Follows the horizontal 3-column layout for consistent UI
  */
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertTriangle, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { IMAGE_CONFIGS, REGION_ORDER } from "../constants";
+import { IMAGE_CONFIGS, REGION_ORDER, SEVERITY_SEGMENTS } from "../constants";
 import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
 import type { ImageId, PainDrawingData } from "../types";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
@@ -23,13 +24,14 @@ interface PainDrawingScoreCardProps {
 
 /**
  * Dashboard card component for pain drawing evaluation
- * Shows region thumbnails always visible; click to zoom in on a region
+ * Shows severity scale, region count, and expandable thumbnail grid
  */
 export function PainDrawingScoreCard({
   data,
   title = "Schmerzzeichnung",
   subtitle = "DC/TMD Schmerzgebiete",
 }: PainDrawingScoreCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
 
   // Check if data is empty (null, undefined, empty object, or missing drawings)
@@ -56,43 +58,112 @@ export function PainDrawingScoreCard({
   }
 
   const score = calculatePainDrawingScore(data);
+
   const isWidespread = score.patterns.hasWidespreadPain;
 
   return (
     <>
       <Card className="overflow-hidden py-0 gap-0">
-        <div className="p-4 pb-2 flex items-start justify-between">
-          <div>
-            <h4 className="font-medium text-sm leading-tight">{title}</h4>
-            {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
-            {isWidespread && (
-              <div className="flex items-center gap-1.5 text-red-600 mt-1">
-                <AlertTriangle className="size-3.5 shrink-0" />
-                <span className="text-xs font-medium">Schmerz in mehreren Körperbereichen</span>
+        <div className="p-4 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
+            {/* LEFT: Title + warning */}
+            <div className="min-w-0">
+              <h4 className="font-medium text-sm leading-tight">{title}</h4>
+              {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+              <Link
+                to="/docs/scoring-manual"
+                hash="pain-drawing"
+                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
+              >
+                <BookOpen className="h-3 w-3" />
+                Scoring-Anleitung
+              </Link>
+              {isWidespread && (
+                <div className="flex items-center gap-1.5 text-red-600 mt-1.5">
+                  <AlertTriangle className="size-3.5 shrink-0" />
+                  <span className="text-xs font-medium">Schmerz in mehreren Körperbereichen</span>
+                </div>
+              )}
+            </div>
+
+            {/* CENTER: Severity scale */}
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground mb-1">Anzahl Schmerzgebiete</p>
+              <div>
+                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
+                  {SEVERITY_SEGMENTS.map((segment) => (
+                    <div
+                      key={segment.label}
+                      className={`flex-1 ${segment.color} flex items-center justify-center`}
+                    >
+                      <span className="text-[9px] font-bold text-white drop-shadow-sm">
+                        {segment.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
+              {/* Risk interpretation - only shown when pain is marked */}
+              {score.regionCount >= 1 && (
+                <p className="text-[9px] text-muted-foreground mt-1">
+                  Jedes Schmerzgebiet erhöht das Risiko für weitere Schmerzerkrankungen.
+                </p>
+              )}
+            </div>
+
+            {/* RIGHT: Region count + expand */}
+            <div className="flex items-start justify-between gap-2 min-w-0">
+              <div>
+                <div className="text-xl font-bold leading-tight">
+                  {score.regionCount}
+                  <span className="text-sm text-muted-foreground font-normal">
+                    {" "}
+                    {score.regionCount === 1 ? "Schmerzgebiet" : "Schmerzgebiete"}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {score.totalElements} Markierung{score.totalElements !== 1 ? "en" : ""}
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                className="text-muted-foreground h-7 px-2 text-xs shrink-0"
+              >
+                {isExpanded ? (
+                  <>
+                    Ausblenden <ChevronUp className="ml-1 h-3 w-3" />
+                  </>
+                ) : (
+                  <>
+                    Details <ChevronDown className="ml-1 h-3 w-3" />
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-          <Link
-            to="/docs/scoring-manual"
-            hash="pain-drawing"
-            onClick={() => sessionStorage.setItem("docs-return-url", window.location.pathname)}
-            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline shrink-0 ml-3"
-          >
-            <BookOpen className="h-3 w-3" />
-            Scoring-Anleitung
-          </Link>
         </div>
 
-        <div className="px-4 pb-4">
-          <div className="grid grid-cols-5 gap-2">
-            {REGION_ORDER.map((regionId) => (
-              <RegionThumbnail
-                key={regionId}
-                imageId={regionId}
-                elements={data.drawings[regionId]?.elements ?? []}
-                onClick={() => setSelectedRegion(regionId)}
-              />
-            ))}
+        {/* Expandable details with thumbnail grid */}
+        <div
+          className="grid transition-[grid-template-rows] duration-300 ease-out"
+          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
+        >
+          <div className="overflow-hidden">
+            <CardContent className="border-t bg-muted/20 p-4">
+              <div className="grid grid-cols-5 gap-2">
+                {REGION_ORDER.map((regionId) => (
+                  <RegionThumbnail
+                    key={regionId}
+                    imageId={regionId}
+                    elements={data.drawings[regionId]?.elements ?? []}
+                    onClick={() => setSelectedRegion(regionId)}
+                  />
+                ))}
+              </div>
+            </CardContent>
           </div>
         </div>
       </Card>
@@ -111,6 +182,7 @@ export function PainDrawingScoreCard({
           </DialogHeader>
           {selectedRegion && (
             <div className="flex flex-col items-center">
+              {/* Navigation and Canvas */}
               <div className="flex items-center gap-2 w-full">
                 <Button
                   variant="ghost"
