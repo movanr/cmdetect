@@ -36,11 +36,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { PractitionerDecision } from "../types";
-import {
-  collectLeafEntries,
-  formatDisplaySections,
-  type DisplaySection,
-} from "../utils/criterion-data-display";
+import { getDisplayRows } from "../utils/criterion-data-display";
 
 type CriterionUserState = "positive" | "negative" | "pending";
 
@@ -175,45 +171,35 @@ const STATE_OPTIONS = [
 ] as const;
 
 function CriterionDataDisplay({
-  result,
   sources,
+  criteriaData,
+  side,
+  region,
 }: {
-  result: CriterionResult;
-  sources?: string[];
+  sources: string[];
+  criteriaData: Record<string, unknown>;
+  side: Side;
+  region: Region;
 }) {
-  const sections = useMemo(() => {
-    const entries = collectLeafEntries(result);
-    return formatDisplaySections(entries, sources);
-  }, [result, sources]);
+  const rows = useMemo(
+    () => getDisplayRows(sources, criteriaData, side, region),
+    [sources, criteriaData, side, region]
+  );
 
-  if (sections.length === 0)
+  if (rows.length === 0)
     return <p className="text-xs text-muted-foreground">Keine Daten verfügbar.</p>;
 
   return (
-    <div className="space-y-3">
-      {sections.map((section: DisplaySection) => (
-        <div key={section.badge}>
-          <div className="flex items-center gap-2 mb-1.5">
-            <Badge variant="outline" className="text-xs font-mono px-1.5 py-0">
-              {section.badge}
+    <div className="space-y-0.5">
+      {rows.map((row, i) => (
+        <div key={i} className="flex items-baseline gap-1.5 text-xs">
+          {row.badge && (
+            <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
+              {row.badge}
             </Badge>
-            <span className="text-xs text-muted-foreground">{section.sectionLabel}</span>
-          </div>
-          {section.groups.map((group, gi) => (
-            <div key={gi} className="mb-2">
-              {group.locationLabel && (
-                <p className="text-xs font-medium mb-0.5">{group.locationLabel}</p>
-              )}
-              <div className="space-y-0.5 pl-2">
-                {group.rows.map((row) => (
-                  <div key={row.label} className="flex gap-2 text-xs">
-                    <span className="text-muted-foreground w-40 shrink-0">{row.label}</span>
-                    <span className="font-medium">{row.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+          )}
+          <span className="text-muted-foreground">{row.label}:</span>
+          <span className="font-medium whitespace-nowrap">{row.value}</span>
         </div>
       ))}
     </div>
@@ -224,10 +210,16 @@ function CriteriaItemDetail({
   item,
   userState,
   onStateChange,
+  criteriaData,
+  side,
+  region,
 }: {
   item: ChecklistItem;
   userState: CriterionUserState | undefined;
   onStateChange: (key: string, state: CriterionUserState) => void;
+  criteriaData: Record<string, unknown>;
+  side: Side;
+  region: Region;
 }) {
   const { result } = item;
   return (
@@ -263,7 +255,12 @@ function CriteriaItemDetail({
         </Alert>
       )}
 
-      <CriterionDataDisplay result={result} sources={item.sources} />
+      <CriterionDataDisplay
+        sources={item.sources ?? []}
+        criteriaData={criteriaData}
+        side={side}
+        region={region}
+      />
     </div>
   );
 }
@@ -483,6 +480,9 @@ export function CriteriaChecklist({
               item={selectedItem}
               userState={userStates[selectedItem.key]}
               onStateChange={handleStateChange}
+              criteriaData={criteriaData}
+              side={side}
+              region={region}
             />
           </div>
         )}
