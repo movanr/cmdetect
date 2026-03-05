@@ -12,7 +12,6 @@ import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
-import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
@@ -27,29 +26,7 @@ import { PrintableBefundbericht } from "../features/evaluation/components/Printa
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
-
-// Reuse the same GetPatientRecord query (must match exact text for codegen)
-const GET_PATIENT_RECORD = graphql(`
-  query GetPatientRecord($id: String!) {
-    patient_record_by_pk(id: $id) {
-      id
-      clinic_internal_id
-      first_name_encrypted
-      created_at
-      patient_data_completed_at
-      viewed
-      invite_expires_at
-      patient_consent {
-        consent_given
-      }
-      userByLastViewedBy {
-        id
-        name
-        email
-      }
-    }
-  }
-`);
+import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/documentation/report")({
   component: ReportSubPage,

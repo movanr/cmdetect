@@ -15,7 +15,6 @@ import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
-import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
 import {
   getStepDefinition,
@@ -27,28 +26,7 @@ import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse } from "../features/examination";
 import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
 import { useNavigate } from "@tanstack/react-router";
-
-const GET_PATIENT_RECORD = graphql(`
-  query GetPatientRecord($id: String!) {
-    patient_record_by_pk(id: $id) {
-      id
-      clinic_internal_id
-      first_name_encrypted
-      created_at
-      patient_data_completed_at
-      viewed
-      invite_expires_at
-      patient_consent {
-        consent_given
-      }
-      userByLastViewedBy {
-        id
-        name
-        email
-      }
-    }
-  }
-`);
+import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/documentation")({
   component: DocumentationLayout,

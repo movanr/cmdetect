@@ -5,6 +5,28 @@
 import { graphql } from "@/graphql/gql";
 
 // Queries
+export const GET_PATIENT_RECORD = graphql(`
+  query GetPatientRecord($id: String!) {
+    patient_record_by_pk(id: $id) {
+      id
+      clinic_internal_id
+      first_name_encrypted
+      created_at
+      patient_data_completed_at
+      viewed
+      invite_expires_at
+      patient_consent {
+        consent_given
+      }
+      userByLastViewedBy {
+        id
+        name
+        email
+      }
+    }
+  }
+`);
+
 export const GET_ALL_PATIENT_RECORDS = graphql(`
   query GetAllPatientRecords {
     patient_record(order_by: [{ created_at: desc }]) {

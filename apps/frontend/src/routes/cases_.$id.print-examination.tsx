@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FormProvider, useForm } from "react-hook-form";
-import { graphql } from "@/graphql";
 import { execute } from "@/graphql/execute";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
@@ -23,28 +22,7 @@ import { examinationFormConfig } from "../features/examination/form/use-examinat
 import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
 import { PrintableExamination } from "../features/examination/components/summary/PrintableExamination";
 import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
-
-const GET_PATIENT_RECORD = graphql(`
-  query GetPatientRecord($id: String!) {
-    patient_record_by_pk(id: $id) {
-      id
-      clinic_internal_id
-      first_name_encrypted
-      created_at
-      patient_data_completed_at
-      viewed
-      invite_expires_at
-      patient_consent {
-        consent_given
-      }
-      userByLastViewedBy {
-        id
-        name
-        email
-      }
-    }
-  }
-`);
+import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/print-examination")({
   component: PrintExaminationPage,
