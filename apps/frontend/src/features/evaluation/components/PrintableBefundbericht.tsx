@@ -17,6 +17,7 @@ import {
   SIDE_KEYS,
   extractClinicalFindings,
   generateAnamnesisText,
+  getValueAtPath as get,
   type Region,
   type Side,
   type SignFinding,
@@ -56,20 +57,6 @@ function sideLabel(side: Side): string {
 function regionGroupHeading(region: Region, side: Side): string {
   if (region === "tmj") return `Kiefergelenk ${sideLabel(side)}`;
   return `${REGIONS[region]} ${sideLabel(side)}`;
-}
-
-// ============================================================================
-// DATA ACCESS HELPER (for E6/E7 movement detail)
-// ============================================================================
-
-function get(data: unknown, path: string): unknown {
-  const parts = path.split(".");
-  let current = data;
-  for (const part of parts) {
-    if (current == null || typeof current !== "object") return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
 }
 
 // ============================================================================

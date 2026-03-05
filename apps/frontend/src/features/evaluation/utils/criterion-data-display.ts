@@ -13,6 +13,7 @@ import {
   SIDES,
   SITE_CONFIG,
   SITES_BY_GROUP,
+  getValueAtPath as get,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
@@ -28,15 +29,6 @@ export interface DisplayRow {
   badge?: string;
   label: string;
   value: string;
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────
-
-function get(obj: unknown, path: string): unknown {
-  return path.split(".").reduce<unknown>((curr, key) => {
-    if (curr == null || typeof curr !== "object") return undefined;
-    return (curr as Record<string, unknown>)[key];
-  }, obj);
 }
 
 function translateValue(value: unknown): string {
