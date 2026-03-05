@@ -457,8 +457,6 @@ export function Axis2ScoreCard({
     const gcpsScore = calculateGCPS1MScore(answers as GCPS1MAnswers);
     const activeGradeIndex = gcpsScore.grade;
 
-    const gradeRoman = gcpsScore.grade === 0 ? "0" : ["I", "II", "III", "IV"][gcpsScore.grade - 1];
-
     return (
       <HorizontalScoreLayout
         title={title}
@@ -482,7 +480,11 @@ export function Axis2ScoreCard({
         }
         scoreDisplay={
           <div className="text-left">
-            <div className="text-xl font-bold leading-tight">Grad {gradeRoman}</div>
+            <div className="text-xl font-bold leading-tight">
+              {gcpsScore.cpi}
+              <span className="text-sm text-muted-foreground font-normal"> CPI</span>
+            </div>
+            <div className="text-sm text-muted-foreground">{gcpsScore.totalDisabilityPoints} BP</div>
           </div>
         }
         isExpanded={isExpanded}
