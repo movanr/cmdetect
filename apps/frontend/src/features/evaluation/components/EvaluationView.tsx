@@ -321,39 +321,32 @@ export function EvaluationView({
                   const currentMyalgia = selectedMyalgiaId();
                   const sideLabel = confirmSide === "right" ? "rechte Seite" : "linke Seite";
                   return (
-                    <RadioGroup
-                      value={currentMyalgia}
-                      onValueChange={(v) => !readOnly && handleMyalgiaSelect(v)}
-                      className="gap-0"
-                    >
+                    <div className="gap-0">
                       {myalgiaDiagnoses.map((d) => {
                         const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion]}, ${sideLabel}`;
                         return (
                           <div
                             key={d.id}
                             className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 cursor-pointer"
-                            onClick={() => handleMyalgiaSelect(d.id)}
+                            onClick={() => !readOnly && handleMyalgiaSelect(d.id)}
                           >
-                            <RadioGroupItem
-                              value={d.id}
-                              id={`myalgia-${d.id}`}
+                            <Checkbox
+                              checked={currentMyalgia === d.id}
                               disabled={readOnly}
-                              className="shrink-0"
+                              onCheckedChange={() => handleMyalgiaSelect(d.id)}
                               onClick={(e) => e.stopPropagation()}
+                              className="shrink-0"
                             />
-                            <label
-                              htmlFor={`myalgia-${d.id}`}
-                              className="text-sm font-medium flex-1 cursor-pointer"
-                            >
+                            <span className="text-sm font-medium flex-1">
                               {d.nameDE}{" "}
                               <span className="font-normal text-muted-foreground">
                                 ({localisationLabel})
                               </span>
-                            </label>
+                            </span>
                           </div>
                         );
                       })}
-                    </RadioGroup>
+                    </div>
                   );
                 })()}
 
