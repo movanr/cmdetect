@@ -198,30 +198,19 @@ export function EvaluationView({
 
   return (
     <div className="space-y-6">
-      {caseId && (
-        <div className="flex justify-end">
-          <Button asChild>
-            <Link to="/cases/$id/documentation" params={{ id: caseId }}>
-              Weiter zur Dokumentation
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      )}
-
       {/* Single card: Documentation + Criteria lookup */}
       <Card>
         <CardHeader>
           <CardTitle>Diagnose dokumentieren</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {/* Left: localisation selection */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 Lokalisation auswählen
               </p>
-            <div className="rounded-lg border border-border/50 bg-muted/20 p-4 flex gap-6">
+              <div className="rounded-lg border border-border/50 bg-muted/20 p-4 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <SummaryDiagrams
                   regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
@@ -251,9 +240,6 @@ export function EvaluationView({
               </div>
               <div className="flex gap-8">
                 <div className="space-y-1.5">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Lokalisation
-                  </p>
                   <RadioGroup
                     value={confirmSite ?? confirmRegion}
                     onValueChange={(v) => {
@@ -312,10 +298,11 @@ export function EvaluationView({
 
             {/* Right: "In Befundbericht übernehmen" checklist */}
             {confirmApplicableDiagnoses.length > 0 ? (
-              <div className="rounded-lg border border-border/50 bg-muted/20 p-4 space-y-1">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-3 pb-1">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   In Befundbericht übernehmen
                 </p>
+                <div className="rounded-lg border border-border/50 bg-muted/20 p-4 space-y-1">
 
                 {/* Myalgia group — radio buttons, only one selectable */}
                 {(() => {
@@ -394,6 +381,7 @@ export function EvaluationView({
                       </div>
                     );
                   })}
+                </div>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground self-center text-center">
@@ -401,9 +389,6 @@ export function EvaluationView({
               </p>
             )}
           </div>
-
-          {/* Divider */}
-          <hr className="border-border" />
 
           {/* Criteria lookup section */}
           <div className="space-y-4">
