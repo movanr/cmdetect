@@ -96,6 +96,10 @@ export {
   ExaminationPersistenceProvider,
   useExaminationPersistenceContext,
 } from "./contexts/ExaminationPersistenceContext";
+export {
+  examinationStepSearchSchema,
+  useExaminationRouteNavigation,
+} from "./hooks/use-examination-route-navigation";
 
 // Components
 export { ExaminationForm } from "./components/ExaminationForm";

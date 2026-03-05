@@ -6,54 +6,23 @@
  * URL pattern: /cases/$id/examination/e4?step=1 (1-indexed)
  */
 
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { z } from "zod";
-import { E4Section, useExaminationPersistenceContext } from "../features/examination";
-
-const e4SearchSchema = z.object({
-  step: z.coerce.number().min(1).optional(),
-});
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  E4Section,
+  examinationStepSearchSchema,
+  useExaminationRouteNavigation,
+} from "../features/examination";
 
 export const Route = createFileRoute("/cases_/$id/examination/e4")({
-  validateSearch: (search) => e4SearchSchema.parse(search),
+  validateSearch: (search) => examinationStepSearchSchema.parse(search),
   component: ExaminationE4Page,
 });
 
 function ExaminationE4Page() {
   const { id } = Route.useParams();
   const { step } = Route.useSearch();
-  const navigate = useNavigate();
-  const { saveSection } = useExaminationPersistenceContext();
-
-  // Navigate to a specific step (0-indexed), or null for summary view
-  const navigateToStep = (stepIndex: number | null) => {
-    if (stepIndex === null) {
-      // Summary view - no step param
-      navigate({ to: "/cases/$id/examination/e4", params: { id }, search: {} });
-    } else {
-      // Convert 0-indexed to 1-indexed for URL
-      navigate({ to: "/cases/$id/examination/e4", params: { id }, search: { step: stepIndex + 1 } });
-    }
-  };
-
-  // Save section and navigate to next section (E5) on completion
-  const handleComplete = async () => {
-    await saveSection("e4");
-    navigate({
-      to: "/cases/$id/examination/e5",
-      params: { id },
-      search: {},
-    });
-  };
-
-  // Navigate to previous section (E3)
-  const handleBack = () => {
-    navigate({
-      to: "/cases/$id/examination/e3",
-      params: { id },
-      search: {},
-    });
-  };
+  const { navigateToStep, handleComplete, handleBack } =
+    useExaminationRouteNavigation({ section: "e4", id, hasSteps: true });
 
   return (
     <E4Section
