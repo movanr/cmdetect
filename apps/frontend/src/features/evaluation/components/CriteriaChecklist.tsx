@@ -100,8 +100,8 @@ function extractChecklistItems(
 
 function StateIcon({ state }: { state: CriterionUserState | undefined }) {
   if (state === "positive")
-    return <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0 mt-0.5" />;
-  if (state === "negative") return <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />;
+    return <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 shrink-0 mt-0.5" />;
+  if (state === "negative") return <XCircle className="h-3.5 w-3.5 text-gray-400 shrink-0 mt-0.5" />;
   if (state === "pending")
     return <CircleHelp className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />;
   return <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />;
@@ -158,13 +158,13 @@ const STATE_OPTIONS = [
     state: "positive" as const,
     label: "Positiv",
     Icon: CheckCircle2,
-    activeClass: "bg-green-100 border-green-400 text-green-700",
+    activeClass: "bg-blue-100 border-blue-400 text-blue-700",
   },
   {
     state: "negative" as const,
     label: "Negativ",
     Icon: XCircle,
-    activeClass: "bg-red-100 border-red-400 text-red-700",
+    activeClass: "bg-gray-100 border-gray-400 text-gray-600",
   },
   {
     state: "pending" as const,
@@ -258,7 +258,7 @@ function CriteriaItemDetail({
         <Alert className="bg-amber-50/50 border-amber-200 py-2">
           <AlertTriangle className="text-amber-500 h-4 w-4" />
           <AlertDescription className="text-amber-900 text-xs">
-            Das berechnete Ergebnis weicht von Ihrer Bewertung ab.
+            Ihre Angabe weicht von den erfassten Befunden ab.
           </AlertDescription>
         </Alert>
       )}
@@ -356,7 +356,7 @@ export function CriteriaChecklist({
   return (
     <div className="border rounded-lg overflow-hidden">
       {/* Header — split to match body columns */}
-      <div className={`flex divide-x border-b ${isConfirmed ? "bg-green-50" : "bg-gray-50"}`}>
+      <div className={`flex divide-x border-b ${isConfirmed ? "bg-blue-50" : "bg-gray-50"}`}>
         <div className={`flex items-center gap-2 px-4 py-3 min-w-0 ${listClass}`}>
           {titleSlot ?? <h3 className="text-sm font-semibold">{diagnosis.nameDE}</h3>}
           <Badge variant="outline" className="text-xs font-normal bg-background shrink-0">
@@ -365,7 +365,7 @@ export function CriteriaChecklist({
           {isConfirmed && (
             <Badge
               variant="outline"
-              className="text-xs px-2 py-0.5 font-medium text-green-700 border-green-300 bg-green-100 ml-auto"
+              className="text-xs px-2 py-0.5 font-medium text-blue-700 border-blue-300 bg-blue-100 ml-auto"
             >
               Bestätigt
             </Badge>

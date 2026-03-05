@@ -217,6 +217,10 @@ export function EvaluationView({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-2 gap-6 items-start">
             {/* Left: localisation selection */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Lokalisation auswählen
+              </p>
             <div className="rounded-lg border border-border/50 bg-muted/20 p-4 flex gap-6">
               <div className="flex flex-col gap-2">
                 <SummaryDiagrams
@@ -303,6 +307,7 @@ export function EvaluationView({
                   </RadioGroup>
                 </div>
               </div>
+            </div>
             </div>
 
             {/* Right: "In Befundbericht übernehmen" checklist */}
