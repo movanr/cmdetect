@@ -31,23 +31,7 @@ import type {
   QuantifierCriterionResult,
 } from "./types";
 import { resolveFieldRef, hasTemplateVars, type TemplateContext } from "./field-refs";
-
-/**
- * Get value at dot-separated path from data object
- *
- * @example
- * getValueAtPath({ sq: { SQ1: "yes" } }, "sq.SQ1") // => "yes"
- * getValueAtPath({ e1: { painLocation: { left: ["temporalis"] } } }, "e1.painLocation.left") // => ["temporalis"]
- */
-function getValueAtPath(data: unknown, path: string): unknown {
-  const parts = path.split(".");
-  let current = data;
-  for (const part of parts) {
-    if (current == null || typeof current !== "object") return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
+import { getValueAtPath } from "../utils";
 
 /**
  * Evaluate a criterion against data

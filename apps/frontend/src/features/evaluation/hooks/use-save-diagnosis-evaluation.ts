@@ -33,8 +33,7 @@ export function useUpsertDiagnosisResults(patientRecordId: string) {
       // Populate cache immediately from the mutation's returning data.
       // This avoids a race window where isSyncing becomes false but results
       // is still [] (waiting for a background refetch after invalidation).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const returning: any[] = (data as any)?.insert_diagnosis_result?.returning ?? [];
+      const returning = data?.insert_diagnosis_result?.returning ?? [];
       if (returning.length > 0) {
         const mapped: PersistedDiagnosisResult[] = returning.map((row) => ({
           id: row.id,

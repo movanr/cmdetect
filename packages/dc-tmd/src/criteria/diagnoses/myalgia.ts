@@ -21,7 +21,7 @@ import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion, CriterionMetadata } from "../types";
 
 // Regions applicable to myalgia (temporalis, masseter, otherMast, nonMast)
-const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
+export const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
 
 // ============================================================================
 // ANAMNESIS CRITERIA (SQ Questionnaire)
@@ -77,7 +77,7 @@ export const MYALGIA_ANAMNESIS: Criterion = and(
  * Generate palpation site refs for a specific region with ${side} template.
  * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
  */
-function siteRefs(region: Region, painType: PainType): string[] {
+export function siteRefs(region: Region, painType: PainType): string[] {
   return SITES_BY_GROUP[region].map(
     (site) => `${SITE_CONFIG[site].section}.\${side}.${site}.${painType}`
   );
@@ -90,7 +90,7 @@ function siteRefs(region: Region, painType: PainType): string[] {
  * - match("${region}", "temporalis") → positive → rest of AND evaluated
  * - match("${region}", "masseter")  → negative → AND short-circuits
  */
-function regionGated(region: Region, criteria: Criterion[]): Criterion {
+export function regionGated(region: Region, criteria: Criterion[]): Criterion {
   return and([match("${region}", region), ...criteria]);
 }
 
@@ -98,7 +98,7 @@ function regionGated(region: Region, criteria: Criterion[]): Criterion {
  * OR over all myalgia regions with region-gated criteria.
  * Only the branch matching the current evaluation region activates.
  */
-function forEachRegion(
+export function forEachRegion(
   buildCriteria: (region: Region) => Criterion[],
   metadata?: CriterionMetadata
 ): Criterion {

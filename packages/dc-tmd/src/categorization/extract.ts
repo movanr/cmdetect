@@ -11,6 +11,7 @@
  */
 
 import { SIDE_KEYS, SITES_BY_GROUP, type Region, type Side } from "../ids/anatomy";
+import { getValueAtPath as get } from "../utils";
 import type { DiagnosisId } from "../ids/diagnosis";
 import type { SectionId } from "../ids/examination";
 import type {
@@ -21,24 +22,6 @@ import type {
   SymptomDomain,
   SymptomFinding,
 } from "./types";
-
-// ============================================================================
-// DATA ACCESS HELPER
-// ============================================================================
-
-/**
- * Get value at dot-separated path from a nested data object.
- * Same pattern as the criteria evaluator.
- */
-function get(data: unknown, path: string): unknown {
-  const parts = path.split(".");
-  let current = data;
-  for (const part of parts) {
-    if (current == null || typeof current !== "object") return undefined;
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
 
 // ============================================================================
 // SQ ANAMNESIS GATES

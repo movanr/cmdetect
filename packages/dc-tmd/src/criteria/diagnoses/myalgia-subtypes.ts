@@ -30,20 +30,11 @@
  * Journal of Oral & Facial Pain and Headache, 28:6-27
  */
 
-import {
-  GROUP_CONFIG,
-  SITES_BY_GROUP,
-  SITE_CONFIG,
-  type PainType,
-  type Region,
-} from "../../ids/anatomy";
-import { and, any, field, match, not, or } from "../builders";
+import { GROUP_CONFIG, type Region } from "../../ids/anatomy";
+import { and, any, field, not } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion, CriterionMetadata } from "../types";
-import { MYALGIA_ANAMNESIS } from "./myalgia";
-
-// Regions applicable to myalgia subtypes (same as base myalgia)
-const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
+import type { Criterion } from "../types";
+import { MYALGIA_ANAMNESIS, MYALGIA_REGIONS, siteRefs, regionGated, forEachRegion } from "./myalgia";
 
 // ============================================================================
 // SHARED HELPERS
@@ -68,23 +59,6 @@ const painLocationConfirmed: Criterion = field(
 );
 
 /**
- * Generate palpation site refs for a specific region and pain type.
- *
- * Expands a region into its constituent palpation sites with ${side} template.
- * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
- *
- * e.g., siteRefs("temporalis", "familiarPain") →
- *   ["e9.${side}.temporalisPosterior.familiarPain", ...]
- * e.g., siteRefs("otherMast", "familiarPain") →
- *   ["e10.${side}.lateralPterygoid.familiarPain", ...]
- */
-function siteRefs(region: Region, painType: PainType): string[] {
-  return SITES_BY_GROUP[region].map(
-    (site) => `${SITE_CONFIG[site].section}.\${side}.${site}.${painType}`
-  );
-}
-
-/**
  * Generate spreading site refs, returning empty array for regions without spreading.
  *
  * For regions where GROUP_CONFIG.hasSpreading is false (tmj, otherMast, nonMast),
@@ -94,38 +68,6 @@ function siteRefs(region: Region, painType: PainType): string[] {
 function spreadingSiteRefs(region: Region): string[] {
   if (!GROUP_CONFIG[region].hasSpreading) return [];
   return siteRefs(region, "spreadingPain");
-}
-
-/**
- * Creates a region-specific criterion branch wrapped in a match gate.
- *
- * The match("${region}", region) gate ensures the branch only evaluates
- * to positive when the evaluation context's region matches. This prevents
- * cross-region contamination in negative checks (spreading/referred).
- *
- * When evaluating for e.g. (left, temporalis):
- * - match("${region}", "temporalis") → positive → rest of AND evaluated
- * - match("${region}", "masseter")  → negative → AND short-circuits
- */
-function regionGated(region: Region, criteria: Criterion[]): Criterion {
-  return and([match("${region}", region), ...criteria]);
-}
-
-/**
- * Creates an OR over all myalgia regions with region-gated criteria.
- *
- * Only the branch matching the current evaluation region activates.
- * This is the core pattern enabling region-specific negative checks
- * for the myalgia subtypes.
- */
-function forEachRegion(
-  buildCriteria: (region: Region) => Criterion[],
-  metadata?: CriterionMetadata
-): Criterion {
-  return or(
-    MYALGIA_REGIONS.map((region) => regionGated(region, buildCriteria(region))),
-    metadata
-  );
 }
 
 // ============================================================================
