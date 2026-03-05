@@ -20,3 +20,6 @@ export * from "./criteria";
 
 // Clinical findings categorization
 export * from "./categorization";
+
+// Utilities
+export { getValueAtPath } from "./utils";
