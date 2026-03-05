@@ -5,6 +5,13 @@ const DB_VERSION = 1;
 const STORE_NAME = "privateKeys";
 const KEY_ID = "organization_private_key";
 
+/**
+ * Stores the organization private key (PEM string) in IndexedDB.
+ *
+ * The key is stored unencrypted — browser-level storage security only.
+ *
+ * @throws {CryptoError} with code `STORAGE_FAILED`
+ */
 export async function storePrivateKey(privateKey: string): Promise<void> {
   try {
     const db = await openDatabase();
@@ -31,6 +38,12 @@ export async function storePrivateKey(privateKey: string): Promise<void> {
   }
 }
 
+/**
+ * Loads the organization private key from IndexedDB.
+ *
+ * @returns PEM string, or `null` if no key is stored
+ * @throws {CryptoError} with code `STORAGE_LOAD_FAILED` on database errors
+ */
 export async function loadPrivateKey(): Promise<string | null> {
   try {
     const db = await openDatabase();
@@ -55,6 +68,7 @@ export async function loadPrivateKey(): Promise<string | null> {
   }
 }
 
+/** Checks whether a private key exists in IndexedDB. Returns `false` on any error. */
 export async function hasStoredPrivateKey(): Promise<boolean> {
   try {
     const db = await openDatabase();
@@ -72,6 +86,11 @@ export async function hasStoredPrivateKey(): Promise<boolean> {
   }
 }
 
+/**
+ * Removes the organization private key from IndexedDB.
+ *
+ * @throws {CryptoError} with code `STORAGE_DELETE_FAILED`
+ */
 export async function deleteStoredPrivateKey(): Promise<void> {
   try {
     const db = await openDatabase();
