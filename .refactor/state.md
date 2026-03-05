@@ -2,9 +2,9 @@
 
 ## Last session: 2026-03-05
 
-What was done: Extracted `GetPatientRecord` GraphQL query to `apps/frontend/src/features/patient-records/queries.ts`. Removed 7 duplicate local definitions across route files. Removed stale `graphql` imports where no longer needed (examination, evaluation, documentation, documentation.report, print-examination, print-anamnesis). `anamnesis.tsx` retains `graphql` import for `UPDATE_VIEWED`.
+What was done: Extracted examination route navigation boilerplate into `useExaminationRouteNavigation` hook (`apps/frontend/src/features/examination/hooks/use-examination-route-navigation.ts`). Shared `examinationStepSearchSchema` replaces 5 identical Zod schemas. All 10 route files (E1–E10) refactored from ~40-65 lines to ~15-25 lines each. Net: -88 lines, single source of truth for section ordering and navigation logic.
 What was deferred: All remaining backlog items.
-Next recommended: [DRY] Examination route boilerplate (e1–e10): near-identical navigateToStep / handleComplete / handleBack pattern 10×.
+Next recommended: [DRY] `get()` path traversal helper duplicated in criterion-data-display.ts and PrintableBefundbericht.tsx.
 Open questions: None.
 
 ## Backlog
@@ -12,7 +12,7 @@ Open questions: None.
 <!-- Ordered by priority. Tag each: SSOT, DRY, Coupling, Consistency, Dependency, TypeSafety, DeadCode -->
 
 - ~~[SSOT] `GetPatientRecord` GraphQL query duplicated 7× across routes~~ — **done 2026-03-05**
-- [DRY] Examination route boilerplate (e1–e10): near-identical navigateToStep / handleComplete / handleBack pattern 10× — scope M — `apps/frontend/src/routes/cases_.$id.examination.e*.tsx`
+- ~~[DRY] Examination route boilerplate (e1–e10): near-identical navigateToStep / handleComplete / handleBack pattern 10×~~ — **done 2026-03-05**
 - [DRY] `get()` path traversal helper duplicated in criterion-data-display.ts and PrintableBefundbericht.tsx (also exists as `getValueAtPath` in dc-tmd/src/utils.ts) — scope S — `apps/frontend/src/features/evaluation/`
 - [DeadCode] `apps/frontend/src/queries/queries.ts` — legacy file with prototype queries and patient-frontend mutations, only partially used by patient.tsx — scope S — `apps/frontend/src/queries/`
 - [DeadCode] Debug form values panel hardcoded in ExaminationForm.tsx:99–104 — scope S — `apps/frontend/src/features/examination/components/ExaminationForm.tsx`
