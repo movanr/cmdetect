@@ -19,11 +19,12 @@ Documentation state from previous sessions:
 
 $ARGUMENTS
 
-If no focus area was given and this is a fresh start: scan the codebase for documentation health — public APIs without docs, missing READMEs, stale instructions, undocumented architecture. Build a coverage map. Present your findings and ask what to focus on. Do not write any documentation in the first session — analysis only. Create `.docs/state.md` and `.docs/GUIDE.md` (copy from the guide above).
+If no focus area was given and this is a fresh start: scan the codebase for documentation health — public APIs without docs, missing READMEs, stale instructions, undocumented architecture. Build a coverage map. Present your findings and ask what to focus on. Do not write any documentation in the first session — analysis only. Create `.docs/state.md` with initial backlog and coverage map.
 
 If no focus area was given but state exists: pick up the highest-priority item from the backlog or the "next recommended" item. Confirm with the user before proceeding.
 
 When writing documentation:
+
 1. State what you'll document and where it will live
 2. Confirm scope with the user before writing
 3. Match the existing documentation style in the codebase

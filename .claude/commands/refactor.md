@@ -19,11 +19,12 @@ Refactor state from previous sessions:
 
 $ARGUMENTS
 
-If no focus area was given and this is a fresh start: scan the codebase, identify the highest-value refactoring opportunities using the guide's diagnostic lens, present your findings, and ask what to focus on. Do not make changes in the first session — analysis and state initialization only. Create `.refactor/state.md` and `.refactor/GUIDE.md` (copy from the guide above).
+If no focus area was given and this is a fresh start: scan the codebase, identify the highest-value refactoring opportunities using the guide's diagnostic lens, present your findings, and ask what to focus on. Do not make changes in the first session — analysis and state initialization only. Create `.refactor/state.md` with initial backlog.
 
 If no focus area was given but state exists: pick up the highest-priority item from the backlog, or the "next recommended" item. Confirm with the user before proceeding.
 
 When executing a refactoring change:
+
 1. State what will change and what behavior must remain unchanged
 2. Confirm scope with the user before editing files
 3. Make changes incrementally — commit after each logical unit
