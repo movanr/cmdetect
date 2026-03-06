@@ -1,4 +1,4 @@
-import type { ProcedureFlowStep } from "@/features/examination/content/types";
+import type { ProcedureFlowStep } from "@/types/procedure-flow";
 import type { SQSectionId } from "@cmdetect/questionnaires";
 
 /** Interview instruction for a single SQ wizard section */
