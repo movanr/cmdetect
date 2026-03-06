@@ -34,7 +34,7 @@ import {
   Search,
   XCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { PractitionerDecision } from "../types";
 import { getDisplayRows } from "../utils/criterion-data-display";
 
@@ -296,11 +296,14 @@ export function CriteriaChecklist({
     [evalResult.anamnesisResult]
   );
 
-  // Pre-select first item; reset states when diagnosis/side/region changes
-  useEffect(() => {
+  // Reset selection and user states when diagnosis/side/region changes
+  const resetKey = `${diagnosis.id}-${side}-${region}`;
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
     setSelectedItem(anamnesisItems[0] ?? null);
     setUserStates({});
-  }, [diagnosis.id, side, region]); // eslint-disable-line react-hooks/exhaustive-deps
+  }
 
   const sidedAnamnesisItems = useMemo(() => {
     if (!locationResult?.sidedAnamnesisResult) return null;

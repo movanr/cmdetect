@@ -66,13 +66,12 @@ function ReportSubPage() {
 
   // Parse examination data
   const examResponse = examData?.examination_response?.[0];
+  const responseData = examResponse?.response_data;
   const examinationData = useMemo((): FormValues => {
-    if (!examResponse?.response_data) return {} as FormValues;
-    const validated = migrateAndParseExaminationData(
-      examResponse.response_data
-    );
+    if (!responseData) return {} as FormValues;
+    const validated = migrateAndParseExaminationData(responseData);
     return (validated ?? {}) as FormValues;
-  }, [examResponse?.response_data]);
+  }, [responseData]);
 
   const examinationDate = examResponse?.completed_at
     ? formatDate(new Date(examResponse.completed_at))

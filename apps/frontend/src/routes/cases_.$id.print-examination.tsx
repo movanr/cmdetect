@@ -9,7 +9,7 @@
  * Does NOT nest under examination.tsx (no CaseLayout sidebar)
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FormProvider, useForm } from "react-hook-form";
@@ -31,9 +31,6 @@ function PrintExaminationPage() {
   const { id } = Route.useParams();
   const [hasPrinted, setHasPrinted] = useState(false);
 
-  // Create examination form (provides FormContext to E*Summary components)
-  const form = useForm(examinationFormConfig);
-
   // Fetch patient record
   const { data: recordData, isLoading: isRecordLoading } = useQuery({
     queryKey: ["patient-record", id],
@@ -48,26 +45,23 @@ function PrintExaminationPage() {
     queryFn: () => execute(GET_EXAMINATION_RESPONSE, { patient_record_id: id }),
   });
 
-  // Hydrate form with examination data
-  const [isFormReady, setIsFormReady] = useState(false);
-  useEffect(() => {
-    if (isExamLoading || isFormReady) return;
+  // Parse examination data — react-hook-form's `values` handles hydration reactively
+  const examResponseData = examData?.examination_response?.[0]?.response_data;
+  const parsedExamData = useMemo(() => {
+    if (!examResponseData) return undefined;
+    return migrateAndParseExaminationData(examResponseData) ?? undefined;
+  }, [examResponseData]);
 
-    const response = examData?.examination_response?.[0];
-    if (response?.response_data) {
-      const validatedData = migrateAndParseExaminationData(response.response_data);
-      if (validatedData) {
-        form.reset(validatedData);
-      }
-    }
-
-    setIsFormReady(true);
-  }, [isExamLoading, examData, form, isFormReady]);
+  // Create examination form (provides FormContext to E*Summary components)
+  const form = useForm({
+    ...examinationFormConfig,
+    values: parsedExamData,
+  });
 
   const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
   // Auto-trigger print after everything is ready
-  const isReady = !isRecordLoading && !isExamLoading && !isDecrypting && isFormReady;
+  const isReady = !isRecordLoading && !isExamLoading && !isDecrypting;
 
   useEffect(() => {
     if (!isReady || hasPrinted) return;
