@@ -2,9 +2,9 @@
 
 ## Last session: 2026-03-06
 
-What was done: Extracted `ProcedureFlowStep` interface from `examination/content/types.ts` to `apps/frontend/src/types/procedure-flow.ts`, breaking the cross-feature coupling between examination and questionnaire-viewer. The examination module re-exports `ProcedureFlowStep` for backwards compatibility with internal consumers. Questionnaire-viewer now imports from the shared location directly.
-What was deferred: Nothing — clean extraction, no loose ends.
-Next recommended: **#4 Barrel file bypass** — fix deep imports from examination feature in route files. Quick S-effort win.
+What was done: Fixed barrel file bypass (#4). Added 4 missing exports to examination barrel (`GET_EXAMINATION_RESPONSE`, `migrateAndParseExaminationData`, `getLocalExamCompletion`, `PrintableExamination`). Updated 5 route files and 1 cross-feature import (evaluation/SummaryDiagrams) to use the barrel instead of deep paths. Zero remaining deep imports from outside examination.
+What was deferred: Nothing.
+Next recommended: **#5 Patient-frontend ProgressHeader × 3** — unify three near-identical progress bar implementations. S-effort, medium impact.
 Open questions: None.
 
 ## Backlog
@@ -19,7 +19,7 @@ Open questions: None.
 
 3. ~~[Coupling] **Cross-feature type dependency**~~ ✅ Done — `ProcedureFlowStep` extracted to `apps/frontend/src/types/procedure-flow.ts`. Examination re-exports for internal consumers.
 
-4. [Consistency] **Barrel file bypass** — Several routes import deep paths from examination feature (`hooks/use-examination-local-completion`, `hooks/validate-persistence`, `form/use-examination-form`, `components/summary/PrintableExamination`, `queries`) instead of using the barrel `index.ts`. The barrel exports ~150 symbols but many consumers go around it. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/frontend/src/routes/cases_.$id.*.tsx`
+4. ~~[Consistency] **Barrel file bypass**~~ ✅ Done — added 4 missing exports to barrel, updated 5 route files + 1 cross-feature import. Zero remaining deep imports from outside examination.
 
 ### Structural
 
