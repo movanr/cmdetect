@@ -2,9 +2,9 @@
 
 ## Last session: 2026-03-06
 
-What was done: Extracted crypto contract types (`EncryptedPayload`, `PatientPII`, `CryptoError`, `CRYPTO_CONSTANTS`) into `packages/config/src/index.ts` as single source of truth. Both frontends' `crypto/types.ts` now re-export from `@cmdetect/config`. Added `@cmdetect/config` dependency to patient-frontend. All type-checks, lints, and crypto tests pass.
-What was deferred: Encryption implementation still duplicated in both frontends (intentional — rarely changes, types guarantee wire format compatibility). Patient-frontend `CRYPTO_CONSTANTS` gained `ECDSA_PRIVATE_KEY_SIZE` and `SEED_PHRASE_LENGTH` fields it didn't have before (harmless — unused by patient-frontend, but now consistent).
-Next recommended: **#3 Cross-feature type dependency** — move `ProcedureFlowStep` out of examination into a shared location. Quick S-effort win.
+What was done: Extracted `ProcedureFlowStep` interface from `examination/content/types.ts` to `apps/frontend/src/types/procedure-flow.ts`, breaking the cross-feature coupling between examination and questionnaire-viewer. The examination module re-exports `ProcedureFlowStep` for backwards compatibility with internal consumers. Questionnaire-viewer now imports from the shared location directly.
+What was deferred: Nothing — clean extraction, no loose ends.
+Next recommended: **#4 Barrel file bypass** — fix deep imports from examination feature in route files. Quick S-effort win.
 Open questions: None.
 
 ## Backlog
@@ -17,7 +17,7 @@ Open questions: None.
 
 2. [Coupling] **God file: patient-frontend route index** — `apps/patient-frontend/src/routes/index.tsx` is 946 lines handling 12+ responsibilities: token validation, consent flow, personal data encryption, questionnaire routing, form submission, error translation, mutation management. Contains large inline constants (`CONSENT_TEXT`, `translations`), 10+ `useState` calls, 4 mutations, and wrapper component definitions. Impact 3 × Risk 2 ÷ Effort L = **high**. — area `apps/patient-frontend/src/routes/index.tsx`
 
-3. [Coupling] **Cross-feature type dependency** — `questionnaire-viewer/content/types.ts` imports `ProcedureFlowStep` from `examination/content/types.ts`. Couples two independent features via a generic instruction type. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/frontend/src/features/*/content/types.ts`
+3. ~~[Coupling] **Cross-feature type dependency**~~ ✅ Done — `ProcedureFlowStep` extracted to `apps/frontend/src/types/procedure-flow.ts`. Examination re-exports for internal consumers.
 
 4. [Consistency] **Barrel file bypass** — Several routes import deep paths from examination feature (`hooks/use-examination-local-completion`, `hooks/validate-persistence`, `form/use-examination-form`, `components/summary/PrintableExamination`, `queries`) instead of using the barrel `index.ts`. The barrel exports ~150 symbols but many consumers go around it. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/frontend/src/routes/cases_.$id.*.tsx`
 
