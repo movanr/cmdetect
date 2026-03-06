@@ -42,10 +42,6 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
     onComplete?.(values);
   });
 
-  // Watch values for debug display
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const allValues = form.watch();
-
   return (
     <FormProvider {...form}>
       <div className="space-y-6">
@@ -94,14 +90,6 @@ export function ExaminationForm({ onComplete }: ExaminationFormProps) {
         <div className="flex justify-end pt-4 border-t">
           <Button onClick={handleSubmit}>Untersuchung abschließen</Button>
         </div>
-
-        {/* Debug: Current Values */}
-        <details className="border rounded">
-          <summary className="p-2 cursor-pointer font-medium text-sm">Debug: Form Values</summary>
-          <pre className="text-xs bg-muted p-2 rounded overflow-auto max-h-64">
-            {JSON.stringify(allValues, null, 2)}
-          </pre>
-        </details>
       </div>
     </FormProvider>
   );
