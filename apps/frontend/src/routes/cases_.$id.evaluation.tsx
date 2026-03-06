@@ -17,8 +17,7 @@ import { execute } from "@/graphql/execute";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { useExaminationResponse, type FormValues } from "../features/examination";
-import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
+import { useExaminationResponse, getLocalExamCompletion, type FormValues } from "../features/examination";
 import { EvaluationView, useDiagnosisSync } from "../features/evaluation";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 

@@ -16,10 +16,12 @@ import { FormProvider, useForm } from "react-hook-form";
 import { execute } from "@/graphql/execute";
 import { formatDate } from "@/lib/date-utils";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
-import { GET_EXAMINATION_RESPONSE } from "../features/examination/queries";
-import { examinationFormConfig } from "../features/examination/form/use-examination-form";
-import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
-import { PrintableExamination } from "../features/examination/components/summary/PrintableExamination";
+import {
+  GET_EXAMINATION_RESPONSE,
+  examinationFormConfig,
+  migrateAndParseExaminationData,
+  PrintableExamination,
+} from "../features/examination";
 import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 

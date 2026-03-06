@@ -33,9 +33,13 @@ import {
   useStepGating,
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { examinationFormConfig } from "../features/examination/form/use-examination-form";
-import { ExaminationPersistenceProvider, useExaminationPersistenceContext, useExaminationResponse } from "../features/examination";
-import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
+import {
+  examinationFormConfig,
+  ExaminationPersistenceProvider,
+  useExaminationPersistenceContext,
+  useExaminationResponse,
+  getLocalExamCompletion,
+} from "../features/examination";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/examination")({
