@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Hard Rules
 
+- Always state which model you are at the start of each response
 - Never modify database schema, migrations, or Hasura metadata.
 - Never edit generated files directly (e.g. codegen output).
 - Shared packages must not import from app packages.

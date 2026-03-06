@@ -91,7 +91,7 @@ export const TMJ_NOISE_SIDED_ANAMNESIS: Criterion = or(
   ],
   {
     id: "tmjNoiseSidedAnamnesis",
-    label: "KG-Geräusch auf dieser Seite",
+    label: "KG-Geräusch",
     sources: ["SF8", "U6", "U7"],
   }
 );
@@ -107,12 +107,18 @@ export const TMJ_NOISE_SIDED_ANAMNESIS: Criterion = or(
  */
 export const DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS: Criterion = and(
   [
-    field(sqSide("SQ9"), { equals: true }),
-    field(sqSide("SQ10"), { equals: true }),
+    field(sqSide("SQ9"), { equals: true }, {
+      label: "KG-Blockade",
+      sources: ["SF9"],
+    }),
+    field(sqSide("SQ10"), { equals: true }, {
+      label: "Einschränkung beim Essen",
+      sources: ["SF10"],
+    }),
   ],
   {
     id: "ddWithoutReductionSidedAnamnesis",
-    label: "Kieferklemme auf dieser Seite",
+    label: "Kieferklemme",
     sources: ["SF9", "SF10"],
   }
 );
@@ -211,11 +217,14 @@ const DD_WITH_REDUCTION_INTERMITTENT_LOCKING_EXAMINATION: LocationCriterion = {
 const DD_WITH_REDUCTION_IL_SIDED_ANAMNESIS: Criterion = and(
   [
     TMJ_NOISE_SIDED_ANAMNESIS,
-    field(sqSide("SQ11"), { equals: true }),
+    field(sqSide("SQ11"), { equals: true }, {
+      label: "Intermittierende Kieferklemme",
+      sources: ["SF11"],
+    }),
   ],
   {
     id: "ddWithReductionILSidedAnamnesis",
-    label: "KG-Geräusch und intermittierende Kieferklemme auf dieser Seite",
+    label: "KG-Geräusch und intermittierende Kieferklemme",
   }
 );
 

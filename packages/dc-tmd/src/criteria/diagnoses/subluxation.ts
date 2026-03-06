@@ -58,12 +58,18 @@ export const SUBLUXATION_ANAMNESIS: Criterion = and(
  */
 export const SUBLUXATION_SIDED_ANAMNESIS: Criterion = and(
   [
-    field(sqSide("SQ13"), { equals: true }),
-    field(sqSide("SQ14"), { equals: true }),
+    field(sqSide("SQ13"), { equals: true }, {
+      label: "KG-Arretierung bei weit geöffneter Position",
+      sources: ["SF13"],
+    }),
+    field(sqSide("SQ14"), { equals: true }, {
+      label: "Unfähigkeit den Mund ohne Umlenken zu schließen",
+      sources: ["SF14"],
+    }),
   ],
   {
     id: "subluxationSidedAnamnesis",
-    label: "Subluxation auf dieser Seite",
+    label: "Subluxation",
     sources: ["SF13", "SF14"],
   }
 );

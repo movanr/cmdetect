@@ -306,7 +306,7 @@ export function CriteriaChecklist({
     if (!locationResult?.sidedAnamnesisResult) return null;
     return extractChecklistItems(
       locationResult.sidedAnamnesisResult,
-      "Seitenspezifische Anamnese",
+      "Anamnese",
       "sided-anamnesis"
     );
   }, [locationResult]);
@@ -380,7 +380,7 @@ export function CriteriaChecklist({
         {/* Left: checklist list */}
         <div className={listClass}>
           <div className="divide-y">
-            {/* Anamnesis section */}
+            {/* Anamnesis section (includes sided anamnesis items) */}
             <div>
               <SectionHeader label="Anamnese" />
               {anamnesisItems.map((item) => (
@@ -392,23 +392,16 @@ export function CriteriaChecklist({
                   onClick={() => setSelectedItem(item)}
                 />
               ))}
+              {sidedAnamnesisItemsWithDetail?.map((item) => (
+                <ChecklistRow
+                  key={item.key}
+                  item={item}
+                  isSelected={selectedItem?.key === item.key}
+                  userState={userStates[item.key]}
+                  onClick={() => setSelectedItem(item)}
+                />
+              ))}
             </div>
-
-            {/* Sided anamnesis section (optional) */}
-            {sidedAnamnesisItemsWithDetail && (
-              <div>
-                <SectionHeader label="Seitenspezifische Anamnese" />
-                {sidedAnamnesisItemsWithDetail.map((item) => (
-                  <ChecklistRow
-                    key={item.key}
-                    item={item}
-                    isSelected={selectedItem?.key === item.key}
-                    userState={userStates[item.key]}
-                    onClick={() => setSelectedItem(item)}
-                  />
-                ))}
-              </div>
-            )}
 
             {/* Examination section */}
             <div>
