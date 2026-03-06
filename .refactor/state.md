@@ -2,9 +2,9 @@
 
 ## Last session: 2026-03-06
 
-What was done: Removed debug form values panel from ExaminationForm.tsx (lines 45–47 and 98–104: `allValues = form.watch()` and `<details>` JSON dump). Accepted divergence for `sideLabel()` in PrintableBefundbericht.tsx — lowercase labels ("links"/"rechts") are intentionally different from `SIDES` ("Linke Seite"/"Rechte Seite") for grammatical correctness in German compound phrases.
-What was deferred: Nothing — backlog is now empty.
-Next recommended: No refactor items remain. Run `pnpm type-check && pnpm lint` to confirm clean state.
+What was done: Extracted `useDecryptedPatientData` hook (`apps/frontend/src/hooks/use-decrypted-patient-data.ts`). Removed identical decrypt useEffect blocks from 7 route files (anamnesis, examination, documentation, evaluation, print-anamnesis, print-examination, documentation.report). Type-check clean. Removed ~160 lines of duplicated code.
+What was deferred: Two lint errors newly exposed in print-examination.tsx and documentation.report.tsx (pre-existing code issues that the React compiler was previously skipping due to async setState in useEffect; now visible). Added to backlog below.
+Next recommended: [DRY] `SIDES` + `yn()` duplicated in E6Summary, E7Summary, E8Summary — move to summary-helpers.ts (S scope, simple).
 Open questions: None.
 
 ## Backlog
@@ -17,6 +17,10 @@ Open questions: None.
 - ~~[DeadCode] `apps/frontend/src/queries/` directory and prototype `/patient` route~~ — **done 2026-03-05**
 - ~~[DeadCode] Debug form values panel hardcoded in ExaminationForm.tsx~~ — **done 2026-03-06**
 - ~~[DRY] `sideLabel()` in PrintableBefundbericht.tsx diverges from `SIDES`~~ — **accepted divergence 2026-03-06** (grammatically correct in German; no code change needed)
+- ~~[DRY] Decrypt useEffect duplicated 7× across case routes~~ — **done 2026-03-06** (`useDecryptedPatientData` hook)
+- [Consistency] `setIsFormReady(true)` called synchronously in useEffect in `print-examination.tsx:64` — newly exposed by React compiler; pre-existing — S
+- [Consistency] React compiler can't optimize `useMemo` in `documentation.report.tsx:69` — newly exposed; pre-existing — S
+- [DRY] `SIDES` + `yn()` duplicated in E6Summary, E7Summary, E8Summary — move to `summary-helpers.ts` — S
 
 ## Decisions
 
