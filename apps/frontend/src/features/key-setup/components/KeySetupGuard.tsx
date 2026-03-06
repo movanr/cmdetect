@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "@tanstack/react-router";
 import { useSession } from "../../../lib/auth";
-import { useKeySetupContext } from "../../../contexts/KeySetupContext";
+import { useKeySetupContext } from "../../../contexts/useKeySetupContext";
 import { LoadingStep } from "./steps/LoadingStep";
 
 interface KeySetupGuardProps {

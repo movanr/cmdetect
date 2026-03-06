@@ -1,4 +1,4 @@
-import { useKeySetupContext } from '../../../contexts/KeySetupContext';
+import { useKeySetupContext } from '../../../contexts/useKeySetupContext';
 import { LoadingStep } from './steps/LoadingStep';
 import { AdminSetupStep } from './steps/AdminSetupStep';
 import { AdminGeneratingStep } from './steps/AdminGeneratingStep';
