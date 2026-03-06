@@ -13,9 +13,8 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
-import { decryptPatientData, loadPrivateKey } from "@/crypto";
-import type { PatientPII } from "@/crypto/types";
 import { formatDate } from "@/lib/date-utils";
+import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { PrintableAnamnesis } from "../features/questionnaire-viewer/components/dashboard/PrintableAnamnesis";
 import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
@@ -27,8 +26,6 @@ export const Route = createFileRoute("/cases_/$id/print-anamnesis")({
 
 function PrintAnamnesisPage() {
   const { id } = Route.useParams();
-  const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
-  const [isDecrypting, setIsDecrypting] = useState(true);
   const [hasPrinted, setHasPrinted] = useState(false);
 
   // Fetch patient record (shares TanStack Query cache with other routes)
@@ -42,33 +39,7 @@ function PrintAnamnesisPage() {
   // Fetch questionnaire responses (shares cache)
   const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
 
-  // Decrypt patient data
-  useEffect(() => {
-    async function decrypt() {
-      if (!record?.first_name_encrypted) {
-        setIsDecrypting(false);
-        return;
-      }
-
-      try {
-        const privateKeyPem = await loadPrivateKey();
-        if (!privateKeyPem) {
-          console.warn("No private key found");
-          setIsDecrypting(false);
-          return;
-        }
-
-        const patientData = await decryptPatientData(record.first_name_encrypted, privateKeyPem);
-        setDecryptedData(patientData);
-      } catch (error) {
-        console.error("Failed to decrypt patient data:", error);
-      } finally {
-        setIsDecrypting(false);
-      }
-    }
-
-    decrypt();
-  }, [record?.first_name_encrypted]);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
   // Auto-trigger print after everything is ready
   const isReady = !isRecordLoading && !isResponsesLoading && !isDecrypting && responses;

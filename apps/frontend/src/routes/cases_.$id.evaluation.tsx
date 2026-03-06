@@ -6,16 +6,15 @@
  * then evaluates all diagnoses and displays results.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
 import { useSession } from "@/lib/auth";
-import { decryptPatientData, loadPrivateKey } from "@/crypto";
-import type { PatientPII } from "@/crypto/types";
 import { execute } from "@/graphql/execute";
+import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse, type FormValues } from "../features/examination";
@@ -31,8 +30,6 @@ function EvaluationPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { data: session } = useSession();
-  const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
-  const [isDecrypting, setIsDecrypting] = useState(false);
 
   // Fetch patient record
   const { data, isLoading: isRecordLoading } = useQuery({
@@ -93,30 +90,7 @@ function EvaluationPage() {
     id,
   ]);
 
-  // Decrypt patient data
-  useEffect(() => {
-    async function decrypt() {
-      if (!record?.first_name_encrypted) return;
-
-      setIsDecrypting(true);
-      try {
-        const privateKeyPem = await loadPrivateKey();
-        if (!privateKeyPem) {
-          console.warn("No private key found");
-          return;
-        }
-
-        const patientData = await decryptPatientData(record.first_name_encrypted, privateKeyPem);
-        setDecryptedData(patientData);
-      } catch (error) {
-        console.error("Failed to decrypt patient data:", error);
-      } finally {
-        setIsDecrypting(false);
-      }
-    }
-
-    decrypt();
-  }, [record?.first_name_encrypted]);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
   // Format patient display data
   const patientName =

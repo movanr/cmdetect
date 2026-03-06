@@ -8,14 +8,13 @@
  * Parent: cases_.$id.documentation.tsx (provides CaseLayout + SubStepTabs)
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { execute } from "@/graphql/execute";
-import { decryptPatientData, loadPrivateKey } from "@/crypto";
-import type { PatientPII } from "@/crypto/types";
 import { formatDate } from "@/lib/date-utils";
+import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { GET_EXAMINATION_RESPONSE } from "../features/examination/queries";
 import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
 import { useDiagnosisResults } from "../features/evaluation/hooks/use-diagnosis-evaluation";
@@ -34,8 +33,6 @@ export const Route = createFileRoute("/cases_/$id/documentation/report")({
 
 function ReportSubPage() {
   const { id } = Route.useParams();
-  const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
-  const [isDecrypting, setIsDecrypting] = useState(true);
 
   // ── Data fetching ──────────────────────────────────────────────────
 
@@ -55,37 +52,7 @@ function ReportSubPage() {
 
   const { data: evalData, isLoading: isEvalLoading } = useDiagnosisResults(id);
 
-  // ── Decrypt patient data (for print header) ──────────────────────
-
-  useEffect(() => {
-    async function decrypt() {
-      if (!record?.first_name_encrypted) {
-        setIsDecrypting(false);
-        return;
-      }
-
-      try {
-        const privateKeyPem = await loadPrivateKey();
-        if (!privateKeyPem) {
-          console.warn("No private key found");
-          setIsDecrypting(false);
-          return;
-        }
-
-        const patientData = await decryptPatientData(
-          record.first_name_encrypted,
-          privateKeyPem
-        );
-        setDecryptedData(patientData);
-      } catch (error) {
-        console.error("Failed to decrypt patient data:", error);
-      } finally {
-        setIsDecrypting(false);
-      }
-    }
-
-    decrypt();
-  }, [record?.first_name_encrypted]);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
   // ── Derive data ────────────────────────────────────────────────────
 

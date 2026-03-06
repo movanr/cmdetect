@@ -14,9 +14,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { FormProvider, useForm } from "react-hook-form";
 import { execute } from "@/graphql/execute";
-import { decryptPatientData, loadPrivateKey } from "@/crypto";
-import type { PatientPII } from "@/crypto/types";
 import { formatDate } from "@/lib/date-utils";
+import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { GET_EXAMINATION_RESPONSE } from "../features/examination/queries";
 import { examinationFormConfig } from "../features/examination/form/use-examination-form";
 import { migrateAndParseExaminationData } from "../features/examination/hooks/validate-persistence";
@@ -30,8 +29,6 @@ export const Route = createFileRoute("/cases_/$id/print-examination")({
 
 function PrintExaminationPage() {
   const { id } = Route.useParams();
-  const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
-  const [isDecrypting, setIsDecrypting] = useState(true);
   const [hasPrinted, setHasPrinted] = useState(false);
 
   // Create examination form (provides FormContext to E*Summary components)
@@ -67,33 +64,7 @@ function PrintExaminationPage() {
     setIsFormReady(true);
   }, [isExamLoading, examData, form, isFormReady]);
 
-  // Decrypt patient data
-  useEffect(() => {
-    async function decrypt() {
-      if (!record?.first_name_encrypted) {
-        setIsDecrypting(false);
-        return;
-      }
-
-      try {
-        const privateKeyPem = await loadPrivateKey();
-        if (!privateKeyPem) {
-          console.warn("No private key found");
-          setIsDecrypting(false);
-          return;
-        }
-
-        const patientData = await decryptPatientData(record.first_name_encrypted, privateKeyPem);
-        setDecryptedData(patientData);
-      } catch (error) {
-        console.error("Failed to decrypt patient data:", error);
-      } finally {
-        setIsDecrypting(false);
-      }
-    }
-
-    decrypt();
-  }, [record?.first_name_encrypted]);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
   // Auto-trigger print after everything is ready
   const isReady = !isRecordLoading && !isExamLoading && !isDecrypting && isFormReady;

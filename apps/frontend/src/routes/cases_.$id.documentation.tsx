@@ -8,14 +8,13 @@
  * Parent: cases_.$id.tsx (gets KeySetupGuard + CaseWorkflowProvider)
  */
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
-import { decryptPatientData, loadPrivateKey } from "@/crypto";
-import type { PatientPII } from "@/crypto/types";
 import { execute } from "@/graphql/execute";
+import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import {
   getStepDefinition,
   SubStepTabs,
@@ -35,8 +34,6 @@ export const Route = createFileRoute("/cases_/$id/documentation")({
 function DocumentationLayout() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
-  const [isDecrypting, setIsDecrypting] = useState(false);
 
   // Fetch patient record
   const { data, isLoading: isRecordLoading } = useQuery({
@@ -93,30 +90,7 @@ function DocumentationLayout() {
     }
   }, [isRecordLoading, isResponsesLoading, isExamLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
 
-  // Decrypt patient data
-  useEffect(() => {
-    async function decrypt() {
-      if (!record?.first_name_encrypted) return;
-
-      setIsDecrypting(true);
-      try {
-        const privateKeyPem = await loadPrivateKey();
-        if (!privateKeyPem) {
-          console.warn("No private key found");
-          return;
-        }
-
-        const patientData = await decryptPatientData(record.first_name_encrypted, privateKeyPem);
-        setDecryptedData(patientData);
-      } catch (error) {
-        console.error("Failed to decrypt patient data:", error);
-      } finally {
-        setIsDecrypting(false);
-      }
-    }
-
-    decrypt();
-  }, [record?.first_name_encrypted]);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
   // Get documentation step definition for sub-steps
   const documentationStep = getStepDefinition("documentation");
