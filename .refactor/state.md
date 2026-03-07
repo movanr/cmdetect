@@ -1,10 +1,10 @@
 # Refactor State
 
-## Last session: 2026-03-06
+## Last session: 2026-03-07
 
-What was done: Fixed barrel file bypass (#4). Added 4 missing exports to examination barrel (`GET_EXAMINATION_RESPONSE`, `migrateAndParseExaminationData`, `getLocalExamCompletion`, `PrintableExamination`). Updated 5 route files and 1 cross-feature import (evaluation/SummaryDiagrams) to use the barrel instead of deep paths. Zero remaining deep imports from outside examination.
+What was done: Unified ProgressHeader × 3 (#5). Extracted shared `ProgressBar` component to `apps/patient-frontend/src/components/ProgressBar.tsx` with `TransitionPhase` type, animation timing, and phase transition logic. Both `ProgressHeader` wrappers and `PainDrawingWizard` now compose `ProgressBar` with their own status text. Removed duplicated `TransitionPhase` alias in route file. Net -78 lines.
 What was deferred: Nothing.
-Next recommended: **#5 Patient-frontend ProgressHeader × 3** — unify three near-identical progress bar implementations. S-effort, medium impact.
+Next recommended: **#6 Patient-frontend navigation hooks** — extract shared base navigation logic from `useLinearNavigation` and `useSQNavigation`. S-effort, medium impact.
 Open questions: None.
 
 ## Backlog
@@ -23,7 +23,7 @@ Open questions: None.
 
 ### Structural
 
-5. [DRY] **Patient-frontend ProgressHeader × 3** — Three near-identical progress bar implementations: `questionnaire-engine/components/ProgressHeader.tsx` (123 lines), `sq/components/ProgressHeader.tsx` (141 lines), and inline in `PainDrawingWizard.tsx`. Same `TransitionPhase` type, identical animation timing (280ms/560ms), 95% identical logic. Only display labels differ. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/patient-frontend/src/features/*/`
+5. ~~[DRY] **Patient-frontend ProgressHeader × 3**~~ ✅ Done — extracted shared `ProgressBar` component with `TransitionPhase` type. Three consumers now compose it with their own status text. Net -78 lines.
 
 6. [DRY] **Patient-frontend navigation hooks** — `useLinearNavigation` (53 lines) and `useSQNavigation` (160 lines) share identical base navigation logic (historyRef, currentIndex, goNext/goBack). SQ adds section tracking + enableWhen conditionals on top. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/patient-frontend/src/features/*/hooks/`
 
