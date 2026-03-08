@@ -1,9 +1,9 @@
 /**
- * criterion-data-display — Direct source-label lookup for the Befunde panel.
+ * criterion-data-display — Structured source-label lookup for the Befunde panel.
  *
- * Maps DC/TMD source labels (SF1–SF14, U1–U10) directly to raw data rows
- * from criteriaData. No criterion tree walking — the `sources` array on each
- * criterion item is used as a key to look up what the data says.
+ * Maps DC/TMD source labels (SF1–SF14, U1–U10) to structured display groups
+ * from criteriaData. Each examination source becomes a group with a headline
+ * (the step/procedure) and cards (localization + findings).
  */
 
 import {
@@ -25,10 +25,22 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────────
 
-export interface DisplayRow {
-  badge?: string;
+export interface DisplayEntry {
   label: string;
   value: string;
+}
+
+export interface DisplayCard {
+  title: string;
+  entries: DisplayEntry[];
+}
+
+export interface DisplayGroup {
+  badge: string;
+  headline: string;
+  cards: DisplayCard[];
+  /** Standalone value when no cards are needed (SF items, U2 measurement) */
+  value?: string;
 }
 
 function translateValue(value: unknown): string {
@@ -46,7 +58,6 @@ function translateValue(value: unknown): string {
 
 const SF_TO_SQ: Record<string, SQQuestionId[]> = {};
 for (const [sqId, sfId] of Object.entries(SQ_DISPLAY_IDS)) {
-  // Index both the exact display ID (SF4a) and the base (SF4)
   for (const key of [sfId, sfId.replace(/[a-z]$/, "")]) {
     if (!SF_TO_SQ[key]) SF_TO_SQ[key] = [];
     if (!SF_TO_SQ[key].includes(sqId as SQQuestionId)) {
@@ -55,53 +66,75 @@ for (const [sqId, sfId] of Object.entries(SQ_DISPLAY_IDS)) {
   }
 }
 
-// ── Per-source row builders ───────────────────────────────────────────
+// ── Per-source group builders ───────────────────────────────────────
 
-function sqRows(source: string, criteriaData: Record<string, unknown>): DisplayRow[] {
+function sqGroups(source: string, criteriaData: Record<string, unknown>): DisplayGroup[] {
   const sqIds = SF_TO_SQ[source];
   if (!sqIds) return [];
   const sqData = criteriaData["sq"] as Record<string, unknown> | undefined;
   return sqIds.map((sqId) => ({
     badge: SQ_DISPLAY_IDS[sqId],
-    label: SQ_QUESTION_SHORT_LABELS[sqId],
+    headline: SQ_QUESTION_SHORT_LABELS[sqId],
+    cards: [],
     value: translateValue(sqData?.[sqId]),
   }));
 }
 
-function u1Rows(criteriaData: Record<string, unknown>, side: Side, region: Region): DisplayRow[] {
-  const rows: DisplayRow[] = [];
-  const sideLabel = SIDES[side];
-  const regionLabel = REGIONS[region];
-
+function u1aGroup(
+  criteriaData: Record<string, unknown>,
+  side: Side,
+  region: Region
+): DisplayGroup {
   const painLocs = get(criteriaData, `e1.painLocation.${side}`) as Region[] | undefined;
-  rows.push({
+  return {
     badge: "U1A",
-    label: `Schmerzlokalisation (letzte 30 Tage), ${regionLabel}, ${sideLabel}`,
-    value: painLocs === undefined ? "—" : painLocs.includes(region) ? "Ja" : "Nein",
-  });
-
-  if (region === "temporalis") {
-    const headacheLocs = get(criteriaData, `e1.headacheLocation.${side}`) as Region[] | undefined;
-    rows.push({
-      badge: "U1B",
-      label: `Kopfschmerzlokalisation (letzte 30 Tage), Temporalis, ${sideLabel}`,
-      value:
-        headacheLocs === undefined ? "—" : headacheLocs.includes("temporalis") ? "Ja" : "Nein",
-    });
-  }
-
-  return rows;
+    headline: "Schmerzlokalisation (letzte 30 Tage)",
+    cards: [
+      {
+        title: `${REGIONS[region]}, ${SIDES[side]}`,
+        entries: [
+          {
+            label: "Vorhanden",
+            value: painLocs === undefined ? "—" : painLocs.includes(region) ? "Ja" : "Nein",
+          },
+        ],
+      },
+    ],
+  };
 }
 
-function u2Rows(criteriaData: Record<string, unknown>): DisplayRow[] {
+function u1bGroup(criteriaData: Record<string, unknown>, side: Side): DisplayGroup {
+  const headacheLocs = get(criteriaData, `e1.headacheLocation.${side}`) as Region[] | undefined;
+  return {
+    badge: "U1B",
+    headline: "Kopfschmerzlokalisation (letzte 30 Tage)",
+    cards: [
+      {
+        title: `Temporalis, ${SIDES[side]}`,
+        entries: [
+          {
+            label: "Vorhanden",
+            value:
+              headacheLocs === undefined
+                ? "—"
+                : headacheLocs.includes("temporalis")
+                  ? "Ja"
+                  : "Nein",
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function u2Group(criteriaData: Record<string, unknown>): DisplayGroup {
   const val = get(criteriaData, "e2.verticalOverlap");
-  return [
-    {
-      badge: "U2",
-      label: "Vertikaler Überbiss",
-      value: val == null ? "—" : `${val} mm`,
-    },
-  ];
+  return {
+    badge: "U2",
+    headline: "Vertikaler Überbiss",
+    cards: [],
+    value: val == null ? "—" : `${val} mm`,
+  };
 }
 
 const OPENING_STEPS = [
@@ -109,27 +142,30 @@ const OPENING_STEPS = [
   { key: "maxAssisted", badge: "U4C", label: "Max. passive Mundöffnung" },
 ] as const;
 
-function u4Rows(criteriaData: Record<string, unknown>, side: Side, region: Region): DisplayRow[] {
-  const rows: DisplayRow[] = [];
-  const regionLabel = REGIONS[region];
-  const sideLabel = SIDES[side];
-
-  for (const { key, badge, label } of OPENING_STEPS) {
-    rows.push({
-      badge,
-      label: `${label}, ${PAIN_TYPES.familiarPain}, ${regionLabel}, ${sideLabel}`,
+function u4StepGroup(
+  stepIndex: number,
+  criteriaData: Record<string, unknown>,
+  side: Side,
+  region: Region
+): DisplayGroup {
+  const { key, badge, label } = OPENING_STEPS[stepIndex];
+  const entries: DisplayEntry[] = [
+    {
+      label: PAIN_TYPES.familiarPain,
       value: translateValue(get(criteriaData, `e4.${key}.${side}.${region}.familiarPain`)),
+    },
+  ];
+  if (region === "temporalis") {
+    entries.push({
+      label: PAIN_TYPES.familiarHeadache,
+      value: translateValue(get(criteriaData, `e4.${key}.${side}.${region}.familiarHeadache`)),
     });
-    if (region === "temporalis") {
-      rows.push({
-        badge,
-        label: `${label}, ${PAIN_TYPES.familiarHeadache}, Temporalis, ${sideLabel}`,
-        value: translateValue(get(criteriaData, `e4.${key}.${side}.${region}.familiarHeadache`)),
-      });
-    }
   }
-
-  return rows;
+  return {
+    badge,
+    headline: label,
+    cards: [{ title: `${REGIONS[region]}, ${SIDES[side]}`, entries }],
+  };
 }
 
 const LATERAL_STEPS = [
@@ -138,124 +174,162 @@ const LATERAL_STEPS = [
   { key: "protrusive", badge: "U5C", label: "Protrusion" },
 ] as const;
 
-function u5Rows(criteriaData: Record<string, unknown>, side: Side, region: Region): DisplayRow[] {
-  const rows: DisplayRow[] = [];
-  const regionLabel = REGIONS[region];
-  const sideLabel = SIDES[side];
-
-  for (const { key, badge, label } of LATERAL_STEPS) {
-    rows.push({
-      badge,
-      label: `${label}, ${PAIN_TYPES.familiarPain}, ${regionLabel}, ${sideLabel}`,
+function u5StepGroup(
+  stepIndex: number,
+  criteriaData: Record<string, unknown>,
+  side: Side,
+  region: Region
+): DisplayGroup {
+  const { key, badge, label } = LATERAL_STEPS[stepIndex];
+  const entries: DisplayEntry[] = [
+    {
+      label: PAIN_TYPES.familiarPain,
       value: translateValue(get(criteriaData, `e5.${key}.${side}.${region}.familiarPain`)),
+    },
+  ];
+  if (region === "temporalis") {
+    entries.push({
+      label: PAIN_TYPES.familiarHeadache,
+      value: translateValue(get(criteriaData, `e5.${key}.${side}.${region}.familiarHeadache`)),
     });
-    if (region === "temporalis") {
-      rows.push({
-        badge,
-        label: `${label}, ${PAIN_TYPES.familiarHeadache}, Temporalis, ${sideLabel}`,
-        value: translateValue(get(criteriaData, `e5.${key}.${side}.${region}.familiarHeadache`)),
-      });
-    }
   }
-
-  return rows;
+  return {
+    badge,
+    headline: label,
+    cards: [{ title: `${REGIONS[region]}, ${SIDES[side]}`, entries }],
+  };
 }
 
-function u6Rows(criteriaData: Record<string, unknown>, side: Side): DisplayRow[] {
-  const sideLabel = SIDES[side];
-  const fields: { sub: string; label: string }[] = [
-    { sub: "click.examinerOpen", label: "Knacken bei Öffnung (Untersucher)" },
-    { sub: "click.examinerClose", label: "Knacken bei Schließung (Untersucher)" },
-    { sub: "click.patient", label: "Knacken (Patient)" },
-    { sub: "crepitus.examinerOpen", label: "Reiben bei Öffnung (Untersucher)" },
-    { sub: "crepitus.examinerClose", label: "Reiben bei Schließung (Untersucher)" },
-    { sub: "crepitus.patient", label: "Reiben (Patient)" },
+function u6Group(criteriaData: Record<string, unknown>, side: Side): DisplayGroup {
+  const entries: DisplayEntry[] = [
+    {
+      label: "Knacken bei Öffnung (Untersucher)",
+      value: translateValue(get(criteriaData, `e6.${side}.click.examinerOpen`)),
+    },
+    {
+      label: "Knacken bei Schließung (Untersucher)",
+      value: translateValue(get(criteriaData, `e6.${side}.click.examinerClose`)),
+    },
+    {
+      label: "Knacken (Patient)",
+      value: translateValue(get(criteriaData, `e6.${side}.click.patient`)),
+    },
+    {
+      label: "Reiben bei Öffnung (Untersucher)",
+      value: translateValue(get(criteriaData, `e6.${side}.crepitus.examinerOpen`)),
+    },
+    {
+      label: "Reiben bei Schließung (Untersucher)",
+      value: translateValue(get(criteriaData, `e6.${side}.crepitus.examinerClose`)),
+    },
+    {
+      label: "Reiben (Patient)",
+      value: translateValue(get(criteriaData, `e6.${side}.crepitus.patient`)),
+    },
   ];
-  return fields.map(({ sub, label }) => ({
+  return {
     badge: "U6",
-    label: `${label}, ${sideLabel}`,
-    value: translateValue(get(criteriaData, `e6.${side}.${sub}`)),
-  }));
+    headline: "Gelenkgeräusche bei Öffnung/Schließung",
+    cards: [{ title: SIDES[side], entries }],
+  };
 }
 
-function u7Rows(criteriaData: Record<string, unknown>, side: Side): DisplayRow[] {
-  const sideLabel = SIDES[side];
-  const fields: { sub: string; label: string }[] = [
-    { sub: "click.examiner", label: "Knacken bei Lateral-/Protrusionsbewegung (Untersucher)" },
-    { sub: "click.patient", label: "Knacken bei Lateral-/Protrusionsbewegung (Patient)" },
-    { sub: "crepitus.examiner", label: "Reiben bei Lateral-/Protrusionsbewegung (Untersucher)" },
-    { sub: "crepitus.patient", label: "Reiben bei Lateral-/Protrusionsbewegung (Patient)" },
+function u7Group(criteriaData: Record<string, unknown>, side: Side): DisplayGroup {
+  const entries: DisplayEntry[] = [
+    {
+      label: "Knacken (Untersucher)",
+      value: translateValue(get(criteriaData, `e7.${side}.click.examiner`)),
+    },
+    {
+      label: "Knacken (Patient)",
+      value: translateValue(get(criteriaData, `e7.${side}.click.patient`)),
+    },
+    {
+      label: "Reiben (Untersucher)",
+      value: translateValue(get(criteriaData, `e7.${side}.crepitus.examiner`)),
+    },
+    {
+      label: "Reiben (Patient)",
+      value: translateValue(get(criteriaData, `e7.${side}.crepitus.patient`)),
+    },
   ];
-  return fields.map(({ sub, label }) => ({
+  return {
     badge: "U7",
-    label: `${label}, ${sideLabel}`,
-    value: translateValue(get(criteriaData, `e7.${side}.${sub}`)),
-  }));
+    headline: "Gelenkgeräusche bei Laterotrusion/Protrusion",
+    cards: [{ title: SIDES[side], entries }],
+  };
 }
 
-function palpationRows(
+function palpationGroup(
   section: "e9" | "e10",
   badge: string,
   criteriaData: Record<string, unknown>,
   side: Side,
   region: Region
-): DisplayRow[] {
-  const sideLabel = SIDES[side];
-  const rows: DisplayRow[] = [];
-
+): DisplayGroup {
+  const cards: DisplayCard[] = [];
   for (const site of SITES_BY_GROUP[region] ?? []) {
     if (SITE_CONFIG[site].section !== section) continue;
-    const siteName = PALPATION_SITES[site];
-
-    rows.push({
-      badge,
-      label: `${siteName}, ${PAIN_TYPES.familiarPain}, ${sideLabel}`,
-      value: translateValue(get(criteriaData, `${section}.${side}.${site}.familiarPain`)),
-    });
-
+    const entries: DisplayEntry[] = [
+      {
+        label: PAIN_TYPES.familiarPain,
+        value: translateValue(get(criteriaData, `${section}.${side}.${site}.familiarPain`)),
+      },
+    ];
     if (section === "e9" && SITE_CONFIG[site].hasHeadache) {
-      rows.push({
-        badge,
-        label: `${siteName}, ${PAIN_TYPES.familiarHeadache}, ${sideLabel}`,
+      entries.push({
+        label: PAIN_TYPES.familiarHeadache,
         value: translateValue(get(criteriaData, `${section}.${side}.${site}.familiarHeadache`)),
       });
     }
+    cards.push({ title: `${PALPATION_SITES[site]}, ${SIDES[side]}`, entries });
   }
-
-  return rows;
+  return {
+    badge,
+    headline: section === "e9" ? "Palpation" : "Ergänzende Palpation",
+    cards,
+  };
 }
 
 // ── Main entry point ──────────────────────────────────────────────────
 
-export function getDisplayRows(
+export function getDisplayGroups(
   sources: string[],
   criteriaData: Record<string, unknown>,
   side: Side,
   region: Region
-): DisplayRow[] {
-  const rows: DisplayRow[] = [];
+): DisplayGroup[] {
+  const groups: DisplayGroup[] = [];
 
   for (const source of sources) {
     if (source.startsWith("SF")) {
-      rows.push(...sqRows(source, criteriaData));
-    } else if (source === "U1") {
-      rows.push(...u1Rows(criteriaData, side, region));
+      groups.push(...sqGroups(source, criteriaData));
+    } else if (source === "U1A") {
+      groups.push(u1aGroup(criteriaData, side, region));
+    } else if (source === "U1B") {
+      groups.push(u1bGroup(criteriaData, side));
     } else if (source === "U2") {
-      rows.push(...u2Rows(criteriaData));
-    } else if (source === "U4") {
-      rows.push(...u4Rows(criteriaData, side, region));
-    } else if (source === "U5") {
-      rows.push(...u5Rows(criteriaData, side, region));
+      groups.push(u2Group(criteriaData));
+    } else if (source === "U4B") {
+      groups.push(u4StepGroup(0, criteriaData, side, region));
+    } else if (source === "U4C") {
+      groups.push(u4StepGroup(1, criteriaData, side, region));
+    } else if (source === "U5A") {
+      groups.push(u5StepGroup(0, criteriaData, side, region));
+    } else if (source === "U5B") {
+      groups.push(u5StepGroup(1, criteriaData, side, region));
+    } else if (source === "U5C") {
+      groups.push(u5StepGroup(2, criteriaData, side, region));
     } else if (source === "U6") {
-      rows.push(...u6Rows(criteriaData, side));
+      groups.push(u6Group(criteriaData, side));
     } else if (source === "U7") {
-      rows.push(...u7Rows(criteriaData, side));
+      groups.push(u7Group(criteriaData, side));
     } else if (source === "U9") {
-      rows.push(...palpationRows("e9", "U9", criteriaData, side, region));
+      groups.push(palpationGroup("e9", "U9", criteriaData, side, region));
     } else if (source === "U10") {
-      rows.push(...palpationRows("e10", "U10", criteriaData, side, region));
+      groups.push(palpationGroup("e10", "U10", criteriaData, side, region));
     }
   }
 
-  return rows;
+  return groups;
 }

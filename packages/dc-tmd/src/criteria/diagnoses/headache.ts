@@ -77,7 +77,7 @@ export const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.$
 }, {
   id: "headacheLocationConfirmed",
   label: "Bestätigung von Kopfschmerzen im M. temporalis",
-  sources: ["U1"],
+  sources: ["U1B"],
 });
 
 /**
@@ -91,12 +91,12 @@ export const familiarHeadacheProvoked: Criterion = or(
     familiarHeadacheDuringOpening("${side}", "temporalis", {
       id: "openingFamiliarHeadache",
       label: "Bekannter Kopfschmerz bei Mundöffnung",
-      sources: ["U4"],
+      sources: ["U4B", "U4C"],
     }),
     familiarHeadacheDuringMovement("${side}", "temporalis", {
       id: "movementFamiliarHeadache",
       label: "Bekannter Kopfschmerz bei Lateral-/Protrusionsbewegung",
-      sources: ["U5"],
+      sources: ["U5A", "U5B", "U5C"],
     }),
     any(getSiteRefsTemplate("temporalis", "familiarHeadache"), { equals: "yes" }, {
       id: "temporalisPalpationFamiliarHeadache",
@@ -107,7 +107,7 @@ export const familiarHeadacheProvoked: Criterion = or(
   {
     id: "familiarHeadache",
     label: "Angabe von bekanntem Kopfschmerz in der Temporalisregion durch Palpation des M. temporalis oder Kieferbewegungen",
-    sources: ["U4", "U5", "U9"],
+    sources: ["U4B", "U4C", "U5A", "U5B", "U5C", "U9"],
   }
 );
 

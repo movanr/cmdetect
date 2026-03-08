@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import type { PractitionerDecision } from "../types";
-import { getDisplayRows } from "../utils/criterion-data-display";
+import { getDisplayGroups } from "../utils/criterion-data-display";
 
 type CriterionUserState = "positive" | "negative" | "pending";
 
@@ -181,27 +181,49 @@ function CriterionDataDisplay({
   side: Side;
   region: Region;
 }) {
-  const rows = useMemo(
-    () => getDisplayRows(sources, criteriaData, side, region),
+  const groups = useMemo(
+    () => getDisplayGroups(sources, criteriaData, side, region),
     [sources, criteriaData, side, region]
   );
 
-  if (rows.length === 0)
+  if (groups.length === 0)
     return <p className="text-xs text-muted-foreground">Keine Daten verfügbar.</p>;
 
   return (
-    <div className="space-y-0.5">
-      {rows.map((row, i) => (
-        <div key={i} className="flex items-baseline gap-1.5 text-xs">
-          {row.badge && (
+    <div className="space-y-3">
+      {groups.map((group, i) =>
+        group.cards.length === 0 ? (
+          <div key={i} className="flex items-baseline gap-1.5 text-xs">
             <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
-              {row.badge}
+              {group.badge}
             </Badge>
-          )}
-          <span className="text-muted-foreground">{row.label}:</span>
-          <span className="font-medium whitespace-nowrap">{row.value}</span>
-        </div>
-      ))}
+            <span className="text-muted-foreground">{group.headline}:</span>
+            <span className="font-medium whitespace-nowrap">{group.value}</span>
+          </div>
+        ) : (
+          <div key={i}>
+            <div className="flex items-center gap-1.5 text-xs mb-1.5">
+              <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
+                {group.badge}
+              </Badge>
+              <span className="font-medium">{group.headline}</span>
+            </div>
+            <div className="space-y-1.5 ml-1">
+              {group.cards.map((card, j) => (
+                <div key={j} className="border rounded-md px-3 py-2 bg-muted/30">
+                  <div className="text-xs font-medium mb-1">{card.title}</div>
+                  {card.entries.map((entry, k) => (
+                    <div key={k} className="flex items-baseline gap-1.5 text-xs">
+                      <span className="text-muted-foreground">{entry.label}:</span>
+                      <span className="font-medium whitespace-nowrap">{entry.value}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      )}
     </div>
   );
 }
@@ -224,7 +246,12 @@ function CriteriaItemDetail({
   const { result } = item;
   return (
     <div className="p-4 space-y-4 text-sm">
-      <h4 className="font-semibold">{item.label}</h4>
+      <h4 className="font-semibold">
+        {item.label}
+        {item.detail && (
+          <span className="font-normal text-muted-foreground"> ({item.detail})</span>
+        )}
+      </h4>
 
       {/* State toggle */}
       <div className="flex gap-2">
@@ -277,7 +304,7 @@ export function CriteriaChecklist({
   readOnly,
   requirementMet,
 }: CriteriaChecklistProps) {
-  const [selectedItem, setSelectedItem] = useState<ChecklistItem | null>(null);
+  const [selectedByLocation, setSelectedByLocation] = useState<Record<string, string>>({});
   const [userStates, setUserStates] = useState<Record<string, CriterionUserState>>({});
 
   const evalResult = useMemo(
@@ -296,12 +323,12 @@ export function CriteriaChecklist({
     [evalResult.anamnesisResult]
   );
 
-  // Reset selection and user states when diagnosis/side/region changes
-  const resetKey = `${diagnosis.id}-${side}-${region}`;
+  // Reset selection and user states only when diagnosis changes
+  const resetKey = diagnosis.id;
   const [prevResetKey, setPrevResetKey] = useState(resetKey);
   if (resetKey !== prevResetKey) {
     setPrevResetKey(resetKey);
-    setSelectedItem(anamnesisItems[0] ?? null);
+    setSelectedByLocation({});
     setUserStates({});
   }
 
@@ -310,18 +337,18 @@ export function CriteriaChecklist({
     return extractChecklistItems(
       locationResult.sidedAnamnesisResult,
       "Anamnese",
-      "sided-anamnesis"
+      `sided-anamnesis:${side}`
     );
-  }, [locationResult]);
+  }, [locationResult, side]);
 
   const examinationItems = useMemo(() => {
     if (!locationResult) return [];
     return extractChecklistItems(
       locationResult.examinationResult,
       "Untersuchungsbefund",
-      "examination"
+      `examination:${side}:${region}`
     );
-  }, [locationResult]);
+  }, [locationResult, side, region]);
 
   // Add localisation details to items
   const sideDetail = SIDES[side];
@@ -337,10 +364,31 @@ export function CriteriaChecklist({
     [examinationItems, locationLabel, sideDetail]
   );
 
+  // Derive selectedItem from per-location key + current items
+  const locationKey = `${side}-${region}`;
+  const allItems = [
+    ...anamnesisItems,
+    ...(sidedAnamnesisItemsWithDetail ?? []),
+    ...examinationItemsWithDetail,
+  ];
+  const savedKey = selectedByLocation[locationKey];
+  const selectedItem = savedKey
+    ? (allItems.find((i) => i.key === savedKey) ?? null)
+    : (allItems.find((i) => !userStates[i.key] || isMismatch(userStates[i.key], i.result))
+        ?? allItems[0] ?? null);
+
+  function selectItem(item: ChecklistItem) {
+    setSelectedByLocation((prev) => ({ ...prev, [locationKey]: item.key }));
+  }
+
   const isConfirmed = practitionerDecision === "confirmed";
   const hasRequiresConstraint = !!diagnosis.requires;
 
   function handleStateChange(key: string, state: CriterionUserState) {
+    // Pin the current item so the default rule doesn't auto-navigate
+    if (!selectedByLocation[locationKey]) {
+      setSelectedByLocation((prev) => ({ ...prev, [locationKey]: key }));
+    }
     setUserStates((prev) => {
       if (prev[key] === state) {
         const next = { ...prev };
@@ -392,7 +440,7 @@ export function CriteriaChecklist({
                   item={item}
                   isSelected={selectedItem?.key === item.key}
                   userState={userStates[item.key]}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => selectItem(item)}
                 />
               ))}
               {sidedAnamnesisItemsWithDetail?.map((item) => (
@@ -401,7 +449,7 @@ export function CriteriaChecklist({
                   item={item}
                   isSelected={selectedItem?.key === item.key}
                   userState={userStates[item.key]}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => selectItem(item)}
                 />
               ))}
             </div>
@@ -415,7 +463,7 @@ export function CriteriaChecklist({
                   item={item}
                   isSelected={selectedItem?.key === item.key}
                   userState={userStates[item.key]}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => selectItem(item)}
                 />
               ))}
             </div>

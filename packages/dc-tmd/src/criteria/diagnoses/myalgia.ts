@@ -117,7 +117,7 @@ export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}",
 }, {
   id: "painLocationConfirmed",
   label: "Bestätigung von Schmerzen in Kaumuskel(n)",
-  sources: ["U1"],
+  sources: ["U1A"],
 });
 
 /**
@@ -136,7 +136,7 @@ export const familiarPainProvoked: Criterion = forEachRegion(
         familiarPainDuringOpening("${side}", region, {
           id: "openingFamiliarPain",
           label: "Bekannter Schmerz bei Mundöffnung",
-          sources: ["U4"],
+          sources: ["U4B", "U4C"],
         }),
         // E9/E10: Familiar pain during palpation of any site in the muscle group
         any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
@@ -154,7 +154,7 @@ export const familiarPainProvoked: Criterion = forEachRegion(
   {
     id: "familiarPain",
     label: "Bekannter Schmerz in Kaumuskel(n) bei Muskelpalpation oder maximaler Öffnung",
-    sources: ["U4", "U9", "U10"],
+    sources: ["U4B", "U4C", "U9", "U10"],
   }
 );
 

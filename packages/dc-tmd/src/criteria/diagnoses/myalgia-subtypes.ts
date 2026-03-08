@@ -54,7 +54,7 @@ const painLocationConfirmed: Criterion = field(
   {
     id: "painLocationConfirmed",
     label: "Bestätigung der Schmerzen in den Kaumuskel(n)",
-    sources: ["U1"],
+    sources: ["U1A"],
   }
 );
 

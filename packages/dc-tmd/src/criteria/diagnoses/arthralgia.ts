@@ -50,7 +50,7 @@ export const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side
 }, {
   id: "painLocationConfirmedTmj",
   label: "Bestätigung von Schmerzen in Kiefergelenk(en)",
-  sources: ["U1"],
+  sources: ["U1A"],
 });
 
 /**
@@ -64,12 +64,12 @@ export const familiarPainProvokedTmj: Criterion = or(
     familiarPainDuringOpening("${side}", "tmj", {
       id: "openingFamiliarPainTmj",
       label: "Bekannter Schmerz bei Mundöffnung (KG)",
-      sources: ["U4"],
+      sources: ["U4B", "U4C"],
     }),
     familiarPainDuringMovement("${side}", "tmj", {
       id: "movementFamiliarPainTmj",
       label: "Bekannter Schmerz bei Lateral-/Protrusionsbewegung (KG)",
-      sources: ["U5"],
+      sources: ["U5A", "U5B", "U5C"],
     }),
     any(getSiteRefsTemplate("tmj", "familiarPain"), { equals: "yes" }, {
       id: "tmjPalpationFamiliarPain",
@@ -80,7 +80,7 @@ export const familiarPainProvokedTmj: Criterion = or(
   {
     id: "familiarPainTmj",
     label: "Bekannte Schmerzen des Kiefergelenks bei Palpation oder Kieferbewegungen",
-    sources: ["U4", "U5", "U9"],
+    sources: ["U4B", "U4C", "U5A", "U5B", "U5C", "U9"],
   }
 );
 
