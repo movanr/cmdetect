@@ -77,6 +77,13 @@ export {
 } from "./form/use-examination-form";
 export { createStepValidator, getStepPaths } from "./form/use-step-validation";
 
+// Queries
+export { GET_EXAMINATION_RESPONSE } from "./queries";
+
+// Data validation and migration
+export { migrateAndParseExaminationData } from "./hooks/validate-persistence";
+export { getLocalExamCompletion } from "./hooks/use-examination-local-completion";
+
 // Persistence hooks and context
 export {
   useExaminationResponse,
@@ -135,6 +142,7 @@ export { E7Section } from "./components/sections/E7Section";
 export { E8Section } from "./components/sections/E8Section";
 export { E9Section } from "./components/sections/E9Section";
 export { E10Section } from "./components/sections/E10Section";
+export { PrintableExamination } from "./components/summary/PrintableExamination";
 export { SectionFooter, type SectionFooterProps } from "./components/ui/SectionFooter";
 
 // Labels

@@ -6,13 +6,9 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
-import { useEffect } from "react";
+import { ProgressBar, type TransitionPhase } from "@/components/ProgressBar";
 
-export type TransitionPhase =
-  | "active" // Normal questionnaire interaction
-  | "completing" // Progress bar filling to 100%
-  | "success" // Green bar + checkmark animation
-  | "exiting"; // Transitioning to next questionnaire
+export type { TransitionPhase };
 
 type ProgressHeaderProps = {
   sectionIndex: number;
@@ -22,12 +18,6 @@ type ProgressHeaderProps = {
   totalInSection: number;
   transitionPhase?: TransitionPhase;
   onTransitionPhaseComplete?: (phase: TransitionPhase) => void;
-};
-
-// Animation timing (ms)
-const TIMING = {
-  fillProgress: 280,
-  successPause: 560,
 };
 
 export function ProgressHeader({
@@ -43,65 +33,20 @@ export function ProgressHeader({
   // Add partial progress for current section based on question position
   const sectionProgress = (sectionIndex / totalSections) * 100;
   const questionProgress = ((questionInSection - 1) / totalInSection) * (100 / totalSections);
-  const basePercentage = Math.round(sectionProgress + questionProgress);
-
-  // During transition, show 100%
-  const targetPercentage = transitionPhase === "active" ? basePercentage : 100;
+  const progress = Math.round(sectionProgress + questionProgress);
 
   // Only show sub-question counter if section has more than 1 question
   const showSubCounter = totalInSection > 1;
 
-  // Trigger phase transitions based on timing
-  useEffect(() => {
-    if (!onTransitionPhaseComplete) return;
-
-    if (transitionPhase === "completing") {
-      const timer = setTimeout(() => {
-        onTransitionPhaseComplete("completing");
-      }, TIMING.fillProgress);
-      return () => clearTimeout(timer);
-    }
-
-    if (transitionPhase === "success") {
-      const timer = setTimeout(() => {
-        onTransitionPhaseComplete("success");
-      }, TIMING.successPause);
-      return () => clearTimeout(timer);
-    }
-  }, [transitionPhase, onTransitionPhaseComplete]);
-
   const isSuccess = transitionPhase === "success" || transitionPhase === "exiting";
-  const isAnimating = transitionPhase === "completing" || transitionPhase === "success";
 
   return (
     <div className="space-y-2">
-      {/* Progress bar */}
-      <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
-        <motion.div
-          className={`h-full rounded-full ${isSuccess ? "bg-green-500" : "bg-primary"}`}
-          initial={{ width: `${basePercentage}%` }}
-          animate={{
-            width: `${targetPercentage}%`,
-          }}
-          transition={{
-            duration: isAnimating ? TIMING.fillProgress / 1000 : 0.2,
-            ease: "easeOut",
-          }}
-        />
-
-        {/* Success pulse overlay */}
-        <AnimatePresence>
-          {transitionPhase === "success" && (
-            <motion.div
-              className="absolute inset-0 rounded-full bg-green-400"
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+      <ProgressBar
+        progress={progress}
+        transitionPhase={transitionPhase}
+        onTransitionPhaseComplete={onTransitionPhaseComplete}
+      />
 
       {/* Status text */}
       <div className="text-center">

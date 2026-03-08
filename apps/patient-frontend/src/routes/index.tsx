@@ -35,7 +35,7 @@ import type { SQAnswers } from "../features/sq";
 
 // Pain Drawing - canvas-based drawing wizard
 import { PainDrawingWizard } from "../features/pain-drawing";
-import type { PainDrawingData, TransitionPhase as PainDrawingTransitionPhase } from "../features/pain-drawing";
+import type { PainDrawingData } from "../features/pain-drawing";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 
 // Form components
@@ -938,8 +938,8 @@ function PainDrawingWrapper({
 
   return (
     <PainDrawingWizard
-      transitionPhase={transitionPhase as PainDrawingTransitionPhase}
-      onTransitionPhaseComplete={onTransitionPhaseComplete as (phase: PainDrawingTransitionPhase) => void}
+      transitionPhase={transitionPhase}
+      onTransitionPhaseComplete={onTransitionPhaseComplete}
       onComplete={handleComplete}
     />
   );

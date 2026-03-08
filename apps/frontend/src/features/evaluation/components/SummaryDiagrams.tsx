@@ -8,10 +8,7 @@
 
 import { useCallback } from "react";
 import { SIDE_KEYS, type Region, type Side } from "@cmdetect/dc-tmd";
-import {
-  EMPTY_REGION_STATUS,
-  HeadDiagram,
-} from "../../examination/components/HeadDiagram";
+import { EMPTY_REGION_STATUS, HeadDiagram } from "../../examination";
 
 interface SummaryDiagramsProps {
   regions: readonly Region[];

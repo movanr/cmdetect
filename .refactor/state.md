@@ -1,10 +1,10 @@
 # Refactor State
 
-## Last session: 2026-03-06
+## Last session: 2026-03-07
 
-What was done: Extracted crypto contract types (`EncryptedPayload`, `PatientPII`, `CryptoError`, `CRYPTO_CONSTANTS`) into `packages/config/src/index.ts` as single source of truth. Both frontends' `crypto/types.ts` now re-export from `@cmdetect/config`. Added `@cmdetect/config` dependency to patient-frontend. All type-checks, lints, and crypto tests pass.
-What was deferred: Encryption implementation still duplicated in both frontends (intentional — rarely changes, types guarantee wire format compatibility). Patient-frontend `CRYPTO_CONSTANTS` gained `ECDSA_PRIVATE_KEY_SIZE` and `SEED_PHRASE_LENGTH` fields it didn't have before (harmless — unused by patient-frontend, but now consistent).
-Next recommended: **#3 Cross-feature type dependency** — move `ProcedureFlowStep` out of examination into a shared location. Quick S-effort win.
+What was done: Unified ProgressHeader × 3 (#5). Extracted shared `ProgressBar` component to `apps/patient-frontend/src/components/ProgressBar.tsx` with `TransitionPhase` type, animation timing, and phase transition logic. Both `ProgressHeader` wrappers and `PainDrawingWizard` now compose `ProgressBar` with their own status text. Removed duplicated `TransitionPhase` alias in route file. Net -78 lines.
+What was deferred: Nothing.
+Next recommended: **#6 Patient-frontend navigation hooks** — extract shared base navigation logic from `useLinearNavigation` and `useSQNavigation`. S-effort, medium impact.
 Open questions: None.
 
 ## Backlog
@@ -17,13 +17,13 @@ Open questions: None.
 
 2. [Coupling] **God file: patient-frontend route index** — `apps/patient-frontend/src/routes/index.tsx` is 946 lines handling 12+ responsibilities: token validation, consent flow, personal data encryption, questionnaire routing, form submission, error translation, mutation management. Contains large inline constants (`CONSENT_TEXT`, `translations`), 10+ `useState` calls, 4 mutations, and wrapper component definitions. Impact 3 × Risk 2 ÷ Effort L = **high**. — area `apps/patient-frontend/src/routes/index.tsx`
 
-3. [Coupling] **Cross-feature type dependency** — `questionnaire-viewer/content/types.ts` imports `ProcedureFlowStep` from `examination/content/types.ts`. Couples two independent features via a generic instruction type. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/frontend/src/features/*/content/types.ts`
+3. ~~[Coupling] **Cross-feature type dependency**~~ ✅ Done — `ProcedureFlowStep` extracted to `apps/frontend/src/types/procedure-flow.ts`. Examination re-exports for internal consumers.
 
-4. [Consistency] **Barrel file bypass** — Several routes import deep paths from examination feature (`hooks/use-examination-local-completion`, `hooks/validate-persistence`, `form/use-examination-form`, `components/summary/PrintableExamination`, `queries`) instead of using the barrel `index.ts`. The barrel exports ~150 symbols but many consumers go around it. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/frontend/src/routes/cases_.$id.*.tsx`
+4. ~~[Consistency] **Barrel file bypass**~~ ✅ Done — added 4 missing exports to barrel, updated 5 route files + 1 cross-feature import. Zero remaining deep imports from outside examination.
 
 ### Structural
 
-5. [DRY] **Patient-frontend ProgressHeader × 3** — Three near-identical progress bar implementations: `questionnaire-engine/components/ProgressHeader.tsx` (123 lines), `sq/components/ProgressHeader.tsx` (141 lines), and inline in `PainDrawingWizard.tsx`. Same `TransitionPhase` type, identical animation timing (280ms/560ms), 95% identical logic. Only display labels differ. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/patient-frontend/src/features/*/`
+5. ~~[DRY] **Patient-frontend ProgressHeader × 3**~~ ✅ Done — extracted shared `ProgressBar` component with `TransitionPhase` type. Three consumers now compose it with their own status text. Net -78 lines.
 
 6. [DRY] **Patient-frontend navigation hooks** — `useLinearNavigation` (53 lines) and `useSQNavigation` (160 lines) share identical base navigation logic (historyRef, currentIndex, goNext/goBack). SQ adds section tracking + enableWhen conditionals on top. Impact 2 × Risk 1 ÷ Effort S = **medium**. — area `apps/patient-frontend/src/features/*/hooks/`
 

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type Konva from 'konva';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ProgressBar, type TransitionPhase } from '@/components/ProgressBar';
 import type { DrawingTool, DrawingElement, PainDrawingData, HistoryState } from './types';
 import { WIZARD_STEPS, IMAGE_CONFIGS, INSTRUCTION_TEXT } from './constants';
 import { PainDrawingCanvas } from './PainDrawingCanvas';
@@ -11,17 +12,7 @@ import { ReviewStep } from './ReviewStep';
 import { usePainDrawing } from './hooks/usePainDrawing';
 import { useDrawingHistory } from './hooks/useDrawingHistory';
 
-export type TransitionPhase =
-  | "active"     // Normal interaction
-  | "completing" // Progress bar filling to 100%
-  | "success"    // Green bar + checkmark animation
-  | "exiting";   // Transitioning to next questionnaire
-
-// Animation timing (ms)
-const TIMING = {
-  fillProgress: 280,
-  successPause: 560,
-};
+export type { TransitionPhase };
 
 interface PainDrawingWizardProps {
   onComplete: (data: PainDrawingData) => void;
@@ -45,26 +36,6 @@ export function PainDrawingWizard({
   // Transition phase tracking
   const isTransitioning = transitionPhase !== "active";
   const isSuccess = transitionPhase === "success" || transitionPhase === "exiting";
-  const isAnimating = transitionPhase === "completing" || transitionPhase === "success";
-
-  // Handle transition phase timing
-  useEffect(() => {
-    if (!onTransitionPhaseComplete) return;
-
-    if (transitionPhase === "completing") {
-      const timer = setTimeout(() => {
-        onTransitionPhaseComplete("completing");
-      }, TIMING.fillProgress);
-      return () => clearTimeout(timer);
-    }
-
-    if (transitionPhase === "success") {
-      const timer = setTimeout(() => {
-        onTransitionPhaseComplete("success");
-      }, TIMING.successPause);
-      return () => clearTimeout(timer);
-    }
-  }, [transitionPhase, onTransitionPhaseComplete]);
 
   const {
     drawings,
@@ -78,9 +49,7 @@ export function PainDrawingWizard({
   const isFirstStep = currentStep === 0;
   const isReviewStep = step.type === 'review';
   const isDrawingStep = step.type === 'drawing';
-  const baseProgress = ((currentStep + 1) / totalSteps) * 100;
-  // During transition, show 100%
-  const progress = isTransitioning ? 100 : baseProgress;
+  const progress = Math.round(((currentStep + 1) / totalSteps) * 100);
 
   // Get current image config for drawing steps
   const currentImageId = step.imageId;
@@ -300,29 +269,11 @@ export function PainDrawingWizard({
           )}
         </div>
         {/* Animated progress bar */}
-        <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/20">
-          <motion.div
-            className={`h-full rounded-full ${isSuccess ? "bg-green-500" : "bg-primary"}`}
-            initial={{ width: `${baseProgress}%` }}
-            animate={{ width: `${progress}%` }}
-            transition={{
-              duration: isAnimating ? TIMING.fillProgress / 1000 : 0.2,
-              ease: "easeOut",
-            }}
-          />
-          {/* Success pulse overlay */}
-          <AnimatePresence>
-            {transitionPhase === "success" && (
-              <motion.div
-                className="absolute inset-0 rounded-full bg-green-400"
-                initial={{ opacity: 0.6 }}
-                animate={{ opacity: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              />
-            )}
-          </AnimatePresence>
-        </div>
+        <ProgressBar
+          progress={progress}
+          transitionPhase={transitionPhase}
+          onTransitionPhaseComplete={onTransitionPhaseComplete}
+        />
       </div>
 
       {/* Content area - fills remaining space */}

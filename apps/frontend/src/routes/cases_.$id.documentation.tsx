@@ -22,8 +22,7 @@ import {
   useStepGating,
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { useExaminationResponse } from "../features/examination";
-import { getLocalExamCompletion } from "../features/examination/hooks/use-examination-local-completion";
+import { useExaminationResponse, getLocalExamCompletion } from "../features/examination";
 import { useNavigate } from "@tanstack/react-router";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
