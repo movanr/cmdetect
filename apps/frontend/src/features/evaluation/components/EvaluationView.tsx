@@ -11,7 +11,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -204,99 +203,90 @@ export function EvaluationView({
           <CardTitle>Diagnose dokumentieren</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            {/* Left: localisation selection */}
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Lokalisation auswählen
-              </p>
-              <div className="rounded-lg border border-border/50 bg-muted/20 p-4 flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <SummaryDiagrams
-                  regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
-                  selectedSide={confirmSide}
-                  selectedRegion={activeRegion === "otherMast" ? null : activeRegion}
-                  onRegionClick={handleRegionClick}
+          {/* Localisation selection — full-width parent context */}
+          <div className="space-y-4">
+            <SummaryDiagrams
+              regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
+              selectedSide={confirmSide}
+              selectedRegion={activeRegion === "otherMast" ? null : activeRegion}
+              onRegionClick={handleRegionClick}
+            />
+
+            <div className="flex flex-col gap-3">
+              {/* Side tabs */}
+              <ToggleGroup
+                type="single"
+                value={confirmSide}
+                onValueChange={(v) => {
+                  if (v) setConfirmSide(v as Side);
+                }}
+                variant="outline"
+                className="justify-start"
+              >
+                <ToggleGroupItem value="right" className="text-sm">
+                  Rechte Seite
+                </ToggleGroupItem>
+                <ToggleGroupItem value="left" className="text-sm">
+                  Linke Seite
+                </ToggleGroupItem>
+              </ToggleGroup>
+
+              {/* Region tabs */}
+              <ToggleGroup
+                type="single"
+                value={confirmSite ?? confirmRegion}
+                onValueChange={(v) => {
+                  if (!v) return;
+                  if ((E10_SITE_KEYS as readonly string[]).includes(v)) {
+                    const site = v as PalpationSite;
+                    setConfirmSite(site);
+                    setConfirmRegion(SITE_CONFIG[site].region);
+                  } else {
+                    setConfirmSite(null);
+                    setConfirmRegion(v as Region);
+                  }
+                }}
+                variant="outline"
+                className="justify-start flex-wrap"
+              >
+                {(["temporalis", "masseter", "tmj"] as const).map((r) => (
+                  <ToggleGroupItem key={r} value={r} className="text-sm">
+                    {REGIONS[r]}
+                  </ToggleGroupItem>
+                ))}
+                {confirmShowAllRegions &&
+                  E10_SITE_KEYS.map((site) => (
+                    <ToggleGroupItem key={site} value={site} className="text-sm">
+                      {PALPATION_SITES[site]}
+                    </ToggleGroupItem>
+                  ))}
+              </ToggleGroup>
+
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="confirm-all-regions"
+                  checked={confirmShowAllRegions}
+                  onCheckedChange={(checked) => {
+                    setConfirmShowAllRegions(checked === true);
+                    if (!checked) {
+                      if (EXTRA_REGIONS.includes(confirmRegion)) setConfirmRegion("temporalis");
+                      setConfirmSite(null);
+                    }
+                  }}
                 />
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="confirm-all-regions"
-                    checked={confirmShowAllRegions}
-                    onCheckedChange={(checked) => {
-                      setConfirmShowAllRegions(checked === true);
-                      if (!checked) {
-                        if (EXTRA_REGIONS.includes(confirmRegion)) setConfirmRegion("temporalis");
-                        setConfirmSite(null);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="confirm-all-regions"
-                    className="text-xs text-muted-foreground cursor-pointer select-none"
-                  >
-                    Ergänzende Palpationsgebiete anzeigen
-                  </label>
-                </div>
-              </div>
-              <div className="flex gap-8">
-                <div className="space-y-1.5">
-                  <RadioGroup
-                    value={confirmSite ?? confirmRegion}
-                    onValueChange={(v) => {
-                      if ((E10_SITE_KEYS as readonly string[]).includes(v)) {
-                        const site = v as PalpationSite;
-                        setConfirmSite(site);
-                        setConfirmRegion(SITE_CONFIG[site].region);
-                      } else {
-                        setConfirmSite(null);
-                        setConfirmRegion(v as Region);
-                      }
-                    }}
-                  >
-                    {(["temporalis", "masseter", "tmj"] as const).map((r) => (
-                      <div key={r} className="flex items-center gap-2">
-                        <RadioGroupItem value={r} id={`loc-${r}`} />
-                        <label htmlFor={`loc-${r}`} className="text-sm cursor-pointer">
-                          {REGIONS[r]}
-                        </label>
-                      </div>
-                    ))}
-                    {confirmShowAllRegions &&
-                      E10_SITE_KEYS.map((site) => (
-                        <div key={site} className="flex items-center gap-2">
-                          <RadioGroupItem value={site} id={`loc-${site}`} />
-                          <label htmlFor={`loc-${site}`} className="text-sm cursor-pointer">
-                            {PALPATION_SITES[site]}
-                          </label>
-                        </div>
-                      ))}
-                  </RadioGroup>
-                </div>
-
-                <div className="space-y-1.5">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Seite
-                  </p>
-                  <RadioGroup value={confirmSide} onValueChange={(v) => setConfirmSide(v as Side)}>
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="right" id="side-right" />
-                      <label htmlFor="side-right" className="text-sm cursor-pointer">
-                        Rechte Seite
-                      </label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="left" id="side-left" />
-                      <label htmlFor="side-left" className="text-sm cursor-pointer">
-                        Linke Seite
-                      </label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                <label
+                  htmlFor="confirm-all-regions"
+                  className="text-xs text-muted-foreground cursor-pointer select-none"
+                >
+                  Ergänzende Palpationsgebiete anzeigen
+                </label>
               </div>
             </div>
-            </div>
+          </div>
 
-            {/* Right: "In Befundbericht übernehmen" checklist */}
+          {/* Dependent sections — visually nested under localisation */}
+          <div className="border-l-2 border-primary/15 pl-5 space-y-6">
+            {/* "In Befundbericht übernehmen" checklist */}
             {confirmApplicableDiagnoses.length > 0 ? (
               <div className="space-y-2">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -384,74 +374,74 @@ export function EvaluationView({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground self-center text-center">
+              <p className="text-sm text-muted-foreground">
                 Keine Diagnosen für die gewählte Region verfügbar.
               </p>
             )}
-          </div>
 
-          {/* Criteria lookup section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">
-                DC/TMD-Kriterien prüfen
-              </p>
-              <ToggleGroup
-                type="single"
-                value={refView}
-                onValueChange={(v) => {
-                  if (v) setRefView(v as "checklist" | "tree");
-                }}
-                variant="outline"
-                size="sm"
-              >
-                <ToggleGroupItem value="checklist" aria-label="Checkliste">
-                  <ListChecks className="h-4 w-4" />
-                </ToggleGroupItem>
-                <ToggleGroupItem value="tree" aria-label="Entscheidungsbaum">
-                  <Network className="h-4 w-4" />
-                </ToggleGroupItem>
-              </ToggleGroup>
+            {/* Criteria lookup section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">
+                  DC/TMD-Kriterien prüfen
+                </p>
+                <ToggleGroup
+                  type="single"
+                  value={refView}
+                  onValueChange={(v) => {
+                    if (v) setRefView(v as "checklist" | "tree");
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ToggleGroupItem value="checklist" aria-label="Checkliste">
+                    <ListChecks className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="tree" aria-label="Entscheidungsbaum">
+                    <Network className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              {refDiagnosis && refView === "checklist" && (
+                <CriteriaChecklist
+                  diagnosis={refDiagnosis}
+                  criteriaData={criteriaData}
+                  side={confirmSide}
+                  region={activeRegion}
+                  site={confirmSite ?? undefined}
+                  titleSlot={
+                    <Select value={refDiagnosis.id} onValueChange={setRefDiagnosisId}>
+                      <SelectTrigger className="w-56 h-7 text-sm font-semibold bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {confirmApplicableDiagnoses.map((d) => (
+                          <SelectItem key={d.id} value={d.id}>
+                            {d.nameDE}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  }
+                />
+              )}
+
+              {refDiagnosis &&
+                refView === "tree" &&
+                (() => {
+                  const tree = getTreeForDiagnosis(refDiagnosis, confirmSide, activeRegion);
+                  return tree ? (
+                    <div className="overflow-x-auto">
+                      <DecisionTreeView tree={tree} data={criteriaData} />
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Kein Entscheidungsbaum für diese Diagnose verfügbar.
+                    </p>
+                  );
+                })()}
             </div>
-
-            {refDiagnosis && refView === "checklist" && (
-              <CriteriaChecklist
-                diagnosis={refDiagnosis}
-                criteriaData={criteriaData}
-                side={confirmSide}
-                region={activeRegion}
-                site={confirmSite ?? undefined}
-                titleSlot={
-                  <Select value={refDiagnosis.id} onValueChange={setRefDiagnosisId}>
-                    <SelectTrigger className="w-56 h-7 text-sm font-semibold bg-background">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {confirmApplicableDiagnoses.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.nameDE}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                }
-              />
-            )}
-
-            {refDiagnosis &&
-              refView === "tree" &&
-              (() => {
-                const tree = getTreeForDiagnosis(refDiagnosis, confirmSide, activeRegion);
-                return tree ? (
-                  <div className="overflow-x-auto">
-                    <DecisionTreeView tree={tree} data={criteriaData} />
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Kein Entscheidungsbaum für diese Diagnose verfügbar.
-                  </p>
-                );
-              })()}
           </div>
         </CardContent>
       </Card>
