@@ -6,10 +6,11 @@
  * then renders the evaluation view for documenting diagnoses.
  */
 
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import type { PalpationSite, Region, Side } from "@cmdetect/dc-tmd";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
 import { useSession } from "@/lib/auth";
@@ -19,16 +20,38 @@ import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse, getLocalExamCompletion, type FormValues } from "../features/examination";
 import { EvaluationView } from "../features/evaluation";
+import { evaluationSearchSchema } from "../features/evaluation/search-schema";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/evaluation")({
+  validateSearch: (search) => evaluationSearchSchema.parse(search),
   component: EvaluationPage,
 });
 
 function EvaluationPage() {
   const { id } = Route.useParams();
+  const search = Route.useSearch();
   const navigate = useNavigate();
   const { data: session } = useSession();
+
+  const handleLocalisationChange = useCallback(
+    (updates: Partial<{ side: Side; region: Region; site: PalpationSite | undefined; showAllRegions: boolean }>) => {
+      navigate({
+        to: "/cases/$id/evaluation",
+        params: { id },
+        search: (prev) => {
+          const next = { ...prev, ...updates };
+          // Strip undefined values so they don't appear as "undefined" in URL
+          if (next.site === undefined) delete (next as Record<string, unknown>).site;
+          if (next.showAllRegions === undefined || next.showAllRegions === false)
+            delete (next as Record<string, unknown>).showAllRegions;
+          return next;
+        },
+        replace: true,
+      });
+    },
+    [navigate, id],
+  );
 
   // Fetch patient record
   const { data, isLoading: isRecordLoading } = useQuery({
@@ -152,6 +175,11 @@ function EvaluationPage() {
         userId={userId}
         readOnly={isReadOnly}
         caseId={id}
+        selectedSide={search.side}
+        selectedRegion={search.region as Region | undefined}
+        selectedSite={search.site as PalpationSite | undefined}
+        showAllRegions={search.showAllRegions}
+        onLocalisationChange={handleLocalisationChange}
       />
     </CaseLayout>
   );

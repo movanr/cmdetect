@@ -64,6 +64,18 @@ interface EvaluationViewProps {
   userId: string;
   readOnly?: boolean;
   caseId?: string;
+  selectedSide?: Side;
+  selectedRegion?: Region;
+  selectedSite?: PalpationSite;
+  showAllRegions?: boolean;
+  onLocalisationChange: (
+    updates: Partial<{
+      side: Side;
+      region: Region;
+      site: PalpationSite | undefined;
+      showAllRegions: boolean;
+    }>,
+  ) => void;
 }
 
 const MYALGIA_IDS: readonly DiagnosisId[] = [
@@ -119,16 +131,22 @@ export function EvaluationView({
   userId,
   readOnly,
   caseId,
+  selectedSide,
+  selectedRegion,
+  selectedSite,
+  showAllRegions: showAllRegionsProp,
+  onLocalisationChange,
 }: EvaluationViewProps) {
-  // ── Reference panel state (Card 1) ─────────────────────────────────
+  // ── Reference panel state ─────────────────────────────────────────
   const [refDiagnosisId, setRefDiagnosisId] = useState<string | null>(null);
   const [refView, setRefView] = useState<"checklist" | "tree">("checklist");
 
-  // ── Document panel state (Card 2) ──────────────────────────────────
-  const [confirmSide, setConfirmSide] = useState<Side>("right");
-  const [confirmRegion, setConfirmRegion] = useState<Region>("temporalis");
-  const [confirmSite, setConfirmSite] = useState<PalpationSite | null>(null);
-  const [confirmShowAllRegions, setConfirmShowAllRegions] = useState(false);
+  // ── Localisation derived from URL search params ───────────────────
+  const confirmSide = selectedSide;
+  const confirmRegion = selectedRegion;
+  const confirmSite = selectedSite ?? null;
+  const confirmShowAllRegions = showAllRegionsProp ?? false;
+  const hasLocalisation = confirmSide !== undefined && confirmRegion !== undefined;
 
   // ── Backend persistence ─────────────────────────────────────────────
   const { data: documentedDiagnoses } = useDocumentedDiagnoses(patientRecordId);
@@ -163,11 +181,14 @@ export function EvaluationView({
     [sqAnswers, examinationData]
   );
 
-  const activeRegion: Region = confirmSite ? SITE_CONFIG[confirmSite].region : confirmRegion;
+  const activeRegion: Region | undefined = confirmSite
+    ? SITE_CONFIG[confirmSite].region
+    : confirmRegion;
 
   const confirmApplicableDiagnoses = useMemo(
-    () => ALL_DIAGNOSES.filter((d) => d.examination.regions.includes(activeRegion)),
-    [activeRegion]
+    () =>
+      activeRegion ? ALL_DIAGNOSES.filter((d) => d.examination.regions.includes(activeRegion)) : [],
+    [activeRegion],
   );
 
   const refDiagnosis = useMemo((): DiagnosisDefinition | null => {
@@ -193,13 +214,18 @@ export function EvaluationView({
 
   // ── Handlers ───────────────────────────────────────────────────────
 
-  const handleRegionClick = useCallback((side: Side, region: Region) => {
-    setConfirmSide(side);
-    setConfirmRegion(region);
-    setConfirmSite(null);
-  }, []);
+  const handleRegionClick = useCallback(
+    (side: Side, region: Region) => {
+      onLocalisationChange({ side, region, site: undefined });
+    },
+    [onLocalisationChange],
+  );
 
-  const currentLocKey = locationKey(confirmSide, confirmSite, confirmRegion);
+  // These helpers are only invoked inside the hasLocalisation-gated block,
+  // so confirmSide / activeRegion are guaranteed to be defined at call time.
+  const currentLocKey = hasLocalisation
+    ? locationKey(confirmSide!, confirmSite, confirmRegion!)
+    : "";
 
   function isChecked(diagnosisId: string) {
     return documentedMap.has(`${diagnosisId}:${currentLocKey}`);
@@ -220,8 +246,8 @@ export function EvaluationView({
       documentMutation.mutate({
         patientRecordId,
         diagnosisId: diagnosisId as DiagnosisId,
-        side: confirmSide,
-        region: activeRegion,
+        side: confirmSide!,
+        region: activeRegion!,
         site: confirmSite,
         userId,
       });
@@ -233,26 +259,23 @@ export function EvaluationView({
     const existing = documentedMyalgiaMap.get(currentLocKey);
 
     if (existing) {
-      // Deselect current
       undocumentMutation.mutate(existing.rowId);
-      // If selecting a different myalgia type, also insert the new one
       if (existing.diagnosisId !== diagnosisId) {
         documentMutation.mutate({
           patientRecordId,
           diagnosisId: diagnosisId as DiagnosisId,
-          side: confirmSide,
-          region: activeRegion,
+          side: confirmSide!,
+          region: activeRegion!,
           site: confirmSite,
           userId,
         });
       }
     } else {
-      // Nothing selected, insert new
       documentMutation.mutate({
         patientRecordId,
         diagnosisId: diagnosisId as DiagnosisId,
-        side: confirmSide,
-        region: activeRegion,
+        side: confirmSide!,
+        region: activeRegion!,
         site: confirmSite,
         userId,
       });
@@ -274,7 +297,9 @@ export function EvaluationView({
             <SummaryDiagrams
               regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
               selectedSide={confirmSide}
-              selectedRegion={activeRegion === "otherMast" ? null : activeRegion}
+              selectedRegion={
+                activeRegion === "otherMast" || activeRegion === undefined ? null : activeRegion
+              }
               onRegionClick={handleRegionClick}
             />
 
@@ -282,9 +307,9 @@ export function EvaluationView({
               {/* Side tabs */}
               <ToggleGroup
                 type="single"
-                value={confirmSide}
+                value={confirmSide ?? ""}
                 onValueChange={(v) => {
-                  if (v) setConfirmSide(v as Side);
+                  if (v) onLocalisationChange({ side: v as Side });
                 }}
                 variant="outline"
                 className="justify-start"
@@ -300,16 +325,14 @@ export function EvaluationView({
               {/* Region tabs */}
               <ToggleGroup
                 type="single"
-                value={confirmSite ?? confirmRegion}
+                value={confirmSite ?? confirmRegion ?? ""}
                 onValueChange={(v) => {
                   if (!v) return;
                   if ((E10_SITE_KEYS as readonly string[]).includes(v)) {
                     const site = v as PalpationSite;
-                    setConfirmSite(site);
-                    setConfirmRegion(SITE_CONFIG[site].region);
+                    onLocalisationChange({ site, region: SITE_CONFIG[site].region });
                   } else {
-                    setConfirmSite(null);
-                    setConfirmRegion(v as Region);
+                    onLocalisationChange({ region: v as Region, site: undefined });
                   }
                 }}
                 variant="outline"
@@ -333,10 +356,18 @@ export function EvaluationView({
                   id="confirm-all-regions"
                   checked={confirmShowAllRegions}
                   onCheckedChange={(checked) => {
-                    setConfirmShowAllRegions(checked === true);
-                    if (!checked) {
-                      if (EXTRA_REGIONS.includes(confirmRegion)) setConfirmRegion("temporalis");
-                      setConfirmSite(null);
+                    if (checked) {
+                      onLocalisationChange({ showAllRegions: true });
+                    } else {
+                      const resetRegion =
+                        confirmRegion && EXTRA_REGIONS.includes(confirmRegion)
+                          ? "temporalis"
+                          : confirmRegion;
+                      onLocalisationChange({
+                        showAllRegions: false,
+                        region: resetRegion as Region,
+                        site: undefined,
+                      });
                     }
                   }}
                 />
@@ -350,8 +381,8 @@ export function EvaluationView({
             </div>
           </div>
 
-          {/* Dependent sections — visually nested under localisation */}
-          <div className="border-l-2 border-primary/15 pl-5 space-y-6">
+          {/* Dependent sections — only visible when both side + region are selected */}
+          {hasLocalisation && <div className="border-l-2 border-primary/15 pl-5 space-y-6">
             {/* "In Befundbericht übernehmen" checklist */}
             {confirmApplicableDiagnoses.length > 0 ? (
               <div className="space-y-2">
@@ -371,7 +402,7 @@ export function EvaluationView({
                   return (
                     <div className="gap-0">
                       {myalgiaDiagnoses.map((d) => {
-                        const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion]}, ${sideLabel}`;
+                        const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion!]}, ${sideLabel}`;
                         return (
                           <div
                             key={d.id}
@@ -405,7 +436,7 @@ export function EvaluationView({
                     const checked = isChecked(d.id);
                     const reqMet = requirementMetMap[d.id];
                     const sideLabel = confirmSide === "right" ? "rechte Seite" : "linke Seite";
-                    const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion]}, ${sideLabel}`;
+                    const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion!]}, ${sideLabel}`;
                     return (
                       <div key={d.id}>
                         <div
@@ -473,8 +504,8 @@ export function EvaluationView({
                 <CriteriaChecklist
                   diagnosis={refDiagnosis}
                   criteriaData={criteriaData}
-                  side={confirmSide}
-                  region={activeRegion}
+                  side={confirmSide!}
+                  region={activeRegion!}
                   site={confirmSite ?? undefined}
                   titleSlot={
                     <Select value={refDiagnosis.id} onValueChange={setRefDiagnosisId}>
@@ -496,7 +527,7 @@ export function EvaluationView({
               {refDiagnosis &&
                 refView === "tree" &&
                 (() => {
-                  const tree = getTreeForDiagnosis(refDiagnosis, confirmSide, activeRegion);
+                  const tree = getTreeForDiagnosis(refDiagnosis, confirmSide!, activeRegion!);
                   return tree ? (
                     <div className="overflow-x-auto">
                       <DecisionTreeView tree={tree} data={criteriaData} />
@@ -508,7 +539,7 @@ export function EvaluationView({
                   );
                 })()}
             </div>
-          </div>
+          </div>}
         </CardContent>
       </Card>
 
