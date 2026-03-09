@@ -14,13 +14,12 @@ import {
 } from "@/components/ui/popover";
 import { getDiagnosisById, REGIONS, SIDES, type Region, type Side } from "@cmdetect/dc-tmd";
 import { CircleMinus } from "lucide-react";
-import type { PractitionerDecision } from "../../evaluation/types";
 
 interface EndNodePopoverProps {
   diagnosisId: string;
   side: Side;
   region: Region;
-  decision: PractitionerDecision;
+  isDocumented: boolean;
   onConfirm: (diagnosisId: string, note: string | null) => void;
   readOnly?: boolean;
 }
@@ -29,7 +28,7 @@ export function EndNodePopover({
   diagnosisId,
   side,
   region,
-  decision,
+  isDocumented,
   onConfirm,
   readOnly,
 }: EndNodePopoverProps) {
@@ -37,7 +36,7 @@ export function EndNodePopover({
   const nameDE = definition?.nameDE ?? diagnosisId;
   const regionLabel = REGIONS[region] ?? region;
   const sideLabel = SIDES[side] ?? side;
-  const isConfirmed = decision === "confirmed";
+  const isConfirmed = isDocumented;
 
   return (
     <PopoverContent className="w-80" onClick={(e) => e.stopPropagation()}>

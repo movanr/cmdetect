@@ -3,7 +3,7 @@
  *
  * Displays DC/TMD diagnosis evaluation results for a case.
  * Fetches SQ questionnaire answers and examination data,
- * then evaluates all diagnoses and displays results.
+ * then renders the evaluation view for documenting diagnoses.
  */
 
 import { useEffect, useMemo } from "react";
@@ -18,7 +18,7 @@ import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse, getLocalExamCompletion, type FormValues } from "../features/examination";
-import { EvaluationView, useDiagnosisSync } from "../features/evaluation";
+import { EvaluationView } from "../features/evaluation";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/evaluation")({
@@ -108,29 +108,17 @@ function EvaluationPage() {
   // Get examination data (default to empty object if not available)
   const examinationData = (examination?.responseData ?? {}) as FormValues;
 
-  // Diagnosis sync: compute client-side, persist to backend
-  // Must be called unconditionally (React hooks rule)
   const userId = session?.user?.id ?? "";
-  const isDataReady = !isRecordLoading && !isResponsesLoading && !isExaminationLoading;
-  const {
-    results: diagnosisResults,
-    isSyncing,
-    updateDecision,
-  } = useDiagnosisSync({
-    patientRecordId: id,
-    sqAnswers,
-    examinationData,
-    userId,
-    enabled: isDataReady,
-  });
 
-  // Receptionist role is read-only for decisions
+  // Receptionist role is read-only
   const activeRole = (session?.user as Record<string, unknown> | undefined)?.activeRole as
     | string
     | undefined;
   const isReadOnly = activeRole === "receptionist";
 
   const completedStepsArray = useMemo(() => Array.from(completedSteps), [completedSteps]);
+
+  const isDataReady = !isRecordLoading && !isResponsesLoading && !isExaminationLoading;
 
   // Loading or gating redirect in progress
   if (!isDataReady || !isCurrentStepAccessible) {
@@ -160,9 +148,9 @@ function EvaluationPage() {
       <EvaluationView
         sqAnswers={sqAnswers}
         examinationData={examinationData}
-        results={diagnosisResults}
-        onUpdateDecision={updateDecision}
-        readOnly={isReadOnly || isSyncing}
+        patientRecordId={id}
+        userId={userId}
+        readOnly={isReadOnly}
         caseId={id}
       />
     </CaseLayout>

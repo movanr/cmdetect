@@ -16,7 +16,7 @@ import { execute } from "@/graphql/execute";
 import { formatDate } from "@/lib/date-utils";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { GET_EXAMINATION_RESPONSE, migrateAndParseExaminationData } from "../features/examination";
-import { useDiagnosisResults } from "../features/evaluation/hooks/use-diagnosis-evaluation";
+import { useDocumentedDiagnoses } from "../features/evaluation/hooks/use-diagnosis-evaluation";
 import { mapToCriteriaData } from "../features/evaluation/utils/map-to-criteria-data";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import type { FormValues } from "../features/examination";
@@ -49,7 +49,7 @@ function ReportSubPage() {
     queryFn: () => execute(GET_EXAMINATION_RESPONSE, { patient_record_id: id }),
   });
 
-  const { data: evalData, isLoading: isEvalLoading } = useDiagnosisResults(id);
+  const { data: evalData, isLoading: isEvalLoading } = useDocumentedDiagnoses(id);
 
   const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
@@ -90,17 +90,16 @@ function ReportSubPage() {
     [sqAnswers, examinationData]
   );
 
-  // Extract confirmed diagnoses from evaluation
+  // All rows in documented_diagnosis are confirmed — row existence = documented
   const confirmedDiagnoses = useMemo(() => {
     if (!evalData) return [];
 
-    return evalData
-      .filter((r) => r.practitionerDecision === "confirmed")
-      .map((r) => ({
-        diagnosisId: r.diagnosisId,
-        side: r.side,
-        region: r.region,
-      }));
+    return evalData.map((r) => ({
+      diagnosisId: r.diagnosisId,
+      side: r.side,
+      region: r.region,
+      site: r.site,
+    }));
   }, [evalData]);
 
   // Set PDF filename for browser print dialog

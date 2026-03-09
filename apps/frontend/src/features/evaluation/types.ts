@@ -1,21 +1,19 @@
 /**
  * Diagnosis Evaluation Types
  *
- * Frontend types for persisted diagnosis results and practitioner decisions.
+ * Frontend types for documented diagnoses (persisted to documented_diagnosis table).
+ * Row existence = practitioner documented this diagnosis for the report.
  */
 
-import type { CriterionStatus, DiagnosisId, Region, Side } from "@cmdetect/dc-tmd";
+import type { DiagnosisId, PalpationSite, Region, Side } from "@cmdetect/dc-tmd";
 
-export type PractitionerDecision = "confirmed" | null;
-
-export interface PersistedDiagnosisResult {
+export interface DocumentedDiagnosis {
   id: string;
   diagnosisId: DiagnosisId;
   side: Side;
   region: Region;
-  computedStatus: CriterionStatus;
-  practitionerDecision: PractitionerDecision;
-  decidedBy: string | null;
-  decidedAt: string | null;
+  site: PalpationSite | null;
+  documentedBy: string | null;
+  documentedAt: string | null;
   note: string | null;
 }

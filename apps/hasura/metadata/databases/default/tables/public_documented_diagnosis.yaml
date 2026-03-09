@@ -1,10 +1,10 @@
 table:
-  name: diagnosis_result
+  name: documented_diagnosis
   schema: public
 object_relationships:
-  - name: decider
+  - name: documenter
     using:
-      foreign_key_constraint_on: decided_by
+      foreign_key_constraint_on: documented_by
   - name: organization
     using:
       foreign_key_constraint_on: organization_id
@@ -22,7 +22,9 @@ insert_permissions:
         - diagnosis_id
         - side
         - region
-        - computed_status
+        - site
+        - documented_by
+        - documented_at
     comment: ""
   - role: physician
     permission:
@@ -34,7 +36,9 @@ insert_permissions:
         - diagnosis_id
         - side
         - region
-        - computed_status
+        - site
+        - documented_by
+        - documented_at
     comment: ""
 select_permissions:
   - role: org_admin
@@ -46,10 +50,9 @@ select_permissions:
         - diagnosis_id
         - side
         - region
-        - computed_status
-        - practitioner_decision
-        - decided_by
-        - decided_at
+        - site
+        - documented_by
+        - documented_at
         - note
         - created_at
         - updated_at
@@ -66,10 +69,9 @@ select_permissions:
         - diagnosis_id
         - side
         - region
-        - computed_status
-        - practitioner_decision
-        - decided_by
-        - decided_at
+        - site
+        - documented_by
+        - documented_at
         - note
         - created_at
         - updated_at
@@ -86,10 +88,9 @@ select_permissions:
         - diagnosis_id
         - side
         - region
-        - computed_status
-        - practitioner_decision
-        - decided_by
-        - decided_at
+        - site
+        - documented_by
+        - documented_at
         - note
         - created_at
         - updated_at
@@ -97,32 +98,16 @@ select_permissions:
         organization_id:
           _eq: X-Hasura-Organization-Id
     comment: ""
-update_permissions:
+delete_permissions:
   - role: org_admin
     permission:
-      columns:
-        - practitioner_decision
-        - decided_by
-        - decided_at
-        - note
       filter:
         organization_id:
           _eq: X-Hasura-Organization-Id
-      check: {}
-      set:
-        updated_at: now()
     comment: ""
   - role: physician
     permission:
-      columns:
-        - practitioner_decision
-        - decided_by
-        - decided_at
-        - note
       filter:
         organization_id:
           _eq: X-Hasura-Organization-Id
-      check: null
-      set:
-        updated_at: now()
     comment: ""

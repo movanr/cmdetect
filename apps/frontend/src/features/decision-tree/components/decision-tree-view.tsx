@@ -10,7 +10,6 @@ import type {
   TransitionProps,
   TreeNodeDef,
 } from "../types";
-import type { PractitionerDecision } from "../../evaluation/types";
 import TreeNode from "./tree-node";
 import Transition from "./transition";
 import { EndNodePopover } from "./end-node-popover";
@@ -19,8 +18,8 @@ interface DecisionTreeViewProps {
   tree: DecisionTreeDef;
   data: unknown;
   onLinkedNodeClick?: (treeId: string) => void;
-  /** Map of diagnosisId → practitioner decision for end nodes in this tree's (side, region) */
-  endNodeDecisions?: Record<string, PractitionerDecision>;
+  /** Map of diagnosisId → whether documented for end nodes in this tree's (side, region) */
+  endNodeDocumented?: Record<string, boolean>;
   /** Callback when practitioner confirms/removes a diagnosis via end node popover */
   onEndNodeConfirm?: (diagnosisId: string, note: string | null) => void;
   /** Whether the current user can only view */
@@ -179,7 +178,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
   tree,
   data,
   onLinkedNodeClick,
-  endNodeDecisions,
+  endNodeDocumented,
   onEndNodeConfirm,
   readOnly,
 }) => {
@@ -225,9 +224,9 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
         }}
       >
         {resolvedNodes.map((node) => {
-          const decision = node.diagnosisId
-            ? endNodeDecisions?.[node.diagnosisId] ?? null
-            : undefined;
+          const isDocumented = node.diagnosisId
+            ? endNodeDocumented?.[node.diagnosisId] ?? false
+            : false;
           return (
             <TreeNode
               key={node.id}
@@ -243,14 +242,14 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({
               onLinkedNodeClick={onLinkedNodeClick}
               imagingNote={node.imagingNote}
               diagnosisId={node.diagnosisId}
-              practitionerDecision={decision ?? undefined}
+              isDocumented={isDocumented}
               popoverContent={
                 node.diagnosisId && onEndNodeConfirm ? (
                   <EndNodePopover
                     diagnosisId={node.diagnosisId}
                     side={tree.side}
                     region={tree.region}
-                    decision={decision ?? null}
+                    isDocumented={isDocumented}
                     onConfirm={onEndNodeConfirm}
                     readOnly={readOnly}
                   />

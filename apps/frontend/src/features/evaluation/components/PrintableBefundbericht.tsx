@@ -10,9 +10,10 @@
  * Follows the same print styling patterns as PrintableExamination.
  */
 
-import type { DiagnosisId } from "@cmdetect/dc-tmd";
+import type { DiagnosisId, PalpationSite } from "@cmdetect/dc-tmd";
 import {
   ALL_DIAGNOSES,
+  PALPATION_SITES,
   REGIONS,
   SIDE_KEYS,
   extractClinicalFindings,
@@ -33,6 +34,7 @@ interface ConfirmedDiagnosis {
   diagnosisId: DiagnosisId;
   side: Side;
   region: Region;
+  site: PalpationSite | null;
 }
 
 interface PrintableBefundberichtProps {
@@ -304,6 +306,7 @@ function groupFindingsByLocation(
 
 interface DiagnosisWithLabel extends ConfirmedDiagnosis {
   label: string;
+  siteLabel: string | null;
 }
 
 interface DiagnosisLocationGroup {
@@ -399,7 +402,11 @@ export function PrintableBefundbericht({
   // Resolve diagnosis German labels and group
   const diagnosesWithLabels: DiagnosisWithLabel[] = confirmedDiagnoses.map((d) => {
     const def = ALL_DIAGNOSES.find((diag) => diag.id === d.diagnosisId);
-    return { ...d, label: def?.nameDE ?? d.diagnosisId };
+    return {
+      ...d,
+      label: def?.nameDE ?? d.diagnosisId,
+      siteLabel: d.site ? PALPATION_SITES[d.site] : null,
+    };
   });
   const diagnosisGroups = groupDiagnosesByLocation(diagnosesWithLabels);
 
@@ -556,6 +563,9 @@ export function PrintableBefundbericht({
                   {group.diagnoses.map((d, di) => (
                     <li key={di} className="ml-4 list-disc">
                       <span className="font-medium">{d.label}</span>
+                      {d.siteLabel && (
+                        <span className="text-gray-500"> ({d.siteLabel})</span>
+                      )}
                     </li>
                   ))}
                 </ul>

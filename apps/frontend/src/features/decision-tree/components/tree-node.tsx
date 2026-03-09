@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { CircleCheck } from "lucide-react";
 import React from "react";
-import type { PractitionerDecision } from "../../evaluation/types";
 import type { Position } from "../types";
 
 /** Inline badges for data source references */
@@ -41,8 +40,8 @@ interface TreeNodeProps {
   imagingNote?: string;
   /** DC/TMD diagnosis ID for blue end nodes */
   diagnosisId?: string;
-  /** Practitioner decision for this end node's diagnosis */
-  practitionerDecision?: PractitionerDecision;
+  /** Whether this end node's diagnosis is documented */
+  isDocumented?: boolean;
   /** Popover content rendered by parent (EndNodePopover) */
   popoverContent?: React.ReactNode;
   position: Position;
@@ -73,13 +72,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   onLinkedNodeClick,
   imagingNote,
   diagnosisId,
-  practitionerDecision,
+  isDocumented,
   popoverContent,
   position,
   width,
   height,
 }) => {
-  const isConfirmed = practitionerDecision === "confirmed";
+  const isConfirmed = isDocumented === true;
 
   const endNodeColors = {
     borderColor: "border-gray-400",

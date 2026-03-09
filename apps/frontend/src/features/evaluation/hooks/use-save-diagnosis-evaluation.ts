@@ -1,109 +1,96 @@
 /**
- * Mutation hooks for saving/updating diagnosis evaluations.
+ * Mutation hooks for documenting/undocumenting diagnoses.
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
-import { UPSERT_DIAGNOSIS_RESULTS, UPDATE_DIAGNOSIS_RESULT_DECISION } from "../queries";
-import { DIAGNOSIS_RESULTS_QUERY_KEY } from "./use-diagnosis-evaluation";
-import type { PractitionerDecision, PersistedDiagnosisResult } from "../types";
-import type { CriterionStatus, DiagnosisId, Region, Side } from "@cmdetect/dc-tmd";
+import { DOCUMENT_DIAGNOSIS, UNDOCUMENT_DIAGNOSIS } from "../queries";
+import { DOCUMENTED_DIAGNOSES_QUERY_KEY } from "./use-diagnosis-evaluation";
+import type { DocumentedDiagnosis } from "../types";
+import type { DiagnosisId, PalpationSite, Region, Side } from "@cmdetect/dc-tmd";
 
-interface DiagnosisResultInput {
-  patient_record_id: string;
-  diagnosis_id: DiagnosisId;
+interface DocumentParams {
+  patientRecordId: string;
+  diagnosisId: DiagnosisId;
   side: Side;
   region: Region;
-  computed_status: CriterionStatus;
+  site: PalpationSite | null;
+  userId: string;
 }
 
 /**
- * Upserts diagnosis result rows — only updates computed_status on conflict,
- * preserving practitioner decisions.
+ * Insert a documented diagnosis row with optimistic cache update.
  */
-export function useUpsertDiagnosisResults(patientRecordId: string) {
+export function useDocumentDiagnosis(patientRecordId: string) {
   const queryClient = useQueryClient();
-  const queryKey = [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId];
+  const queryKey = [DOCUMENTED_DIAGNOSES_QUERY_KEY, patientRecordId];
 
   return useMutation({
-    mutationFn: async (results: DiagnosisResultInput[]) => {
-      return execute(UPSERT_DIAGNOSIS_RESULTS, { results });
+    mutationFn: async (params: DocumentParams) => {
+      return execute(DOCUMENT_DIAGNOSIS, {
+        object: {
+          patient_record_id: params.patientRecordId,
+          diagnosis_id: params.diagnosisId,
+          side: params.side,
+          region: params.region,
+          site: params.site,
+          documented_by: params.userId,
+          documented_at: new Date().toISOString(),
+        },
+      });
     },
-    onSuccess: (data) => {
-      // Populate cache immediately from the mutation's returning data.
-      // This avoids a race window where isSyncing becomes false but results
-      // is still [] (waiting for a background refetch after invalidation).
-      const returning = data?.insert_diagnosis_result?.returning ?? [];
-      if (returning.length > 0) {
-        const mapped: PersistedDiagnosisResult[] = returning.map((row) => ({
-          id: row.id,
-          diagnosisId: row.diagnosis_id as DiagnosisId,
-          side: row.side as Side,
-          region: row.region as Region,
-          computedStatus: row.computed_status as CriterionStatus,
-          practitionerDecision: (row.practitioner_decision ?? null) as PractitionerDecision,
-          decidedBy: row.decided_by ?? null,
-          decidedAt: row.decided_at ?? null,
-          note: row.note ?? null,
-        }));
-        queryClient.setQueryData<PersistedDiagnosisResult[]>(queryKey, mapped);
-      } else {
-        queryClient.invalidateQueries({ queryKey });
+    onMutate: async (params) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<DocumentedDiagnosis[]>(queryKey);
+
+      const optimistic: DocumentedDiagnosis = {
+        id: `optimistic-${Date.now()}`,
+        diagnosisId: params.diagnosisId,
+        side: params.side,
+        region: params.region,
+        site: params.site,
+        documentedBy: params.userId,
+        documentedAt: new Date().toISOString(),
+        note: null,
+      };
+
+      queryClient.setQueryData<DocumentedDiagnosis[]>(queryKey, [
+        ...(previous ?? []),
+        optimistic,
+      ]);
+
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(queryKey, context.previous);
       }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 }
 
-interface UpdateDecisionParams {
-  resultId: string;
-  practitionerDecision: PractitionerDecision;
-  userId: string;
-  note: string | null;
-}
-
 /**
- * Updates practitioner decision on a single diagnosis result row.
- * Uses optimistic update for instant UI feedback.
+ * Delete a documented diagnosis row by PK with optimistic cache update.
  */
-export function useUpdateDiagnosisDecision(patientRecordId: string) {
+export function useUndocumentDiagnosis(patientRecordId: string) {
   const queryClient = useQueryClient();
-  const queryKey = [DIAGNOSIS_RESULTS_QUERY_KEY, patientRecordId];
+  const queryKey = [DOCUMENTED_DIAGNOSES_QUERY_KEY, patientRecordId];
 
   return useMutation({
-    mutationFn: async ({
-      resultId,
-      practitionerDecision,
-      userId,
-      note,
-    }: UpdateDecisionParams) => {
-      return execute(UPDATE_DIAGNOSIS_RESULT_DECISION, {
-        id: resultId,
-        practitioner_decision: practitionerDecision,
-        decided_by: practitionerDecision ? userId : null,
-        decided_at: practitionerDecision ? new Date().toISOString() : null,
-        note,
-      });
+    mutationFn: async (id: string) => {
+      return execute(UNDOCUMENT_DIAGNOSIS, { id });
     },
-    onMutate: async ({ resultId, practitionerDecision, userId, note }) => {
+    onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData<PersistedDiagnosisResult[]>(queryKey);
+      const previous = queryClient.getQueryData<DocumentedDiagnosis[]>(queryKey);
 
-      if (previous) {
-        queryClient.setQueryData<PersistedDiagnosisResult[]>(
-          queryKey,
-          previous.map((r) =>
-            r.id === resultId
-              ? {
-                  ...r,
-                  practitionerDecision,
-                  decidedBy: practitionerDecision ? userId : null,
-                  decidedAt: practitionerDecision ? new Date().toISOString() : null,
-                  note,
-                }
-              : r
-          )
-        );
-      }
+      queryClient.setQueryData<DocumentedDiagnosis[]>(
+        queryKey,
+        (previous ?? []).filter((d) => d.id !== id)
+      );
 
       return { previous };
     },

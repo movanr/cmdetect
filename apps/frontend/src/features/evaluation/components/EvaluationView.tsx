@@ -6,6 +6,7 @@
  * - Bottom: DC/TMD criteria lookup driven by localisation selection
  *
  * Evaluates all DC/TMD diagnoses against SQ + examination data.
+ * Persists documented diagnoses to documented_diagnosis table.
  */
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import {
   REGIONS,
   SITE_CONFIG,
   type DiagnosisDefinition,
+  type DiagnosisId,
   type PalpationSite,
   type Region,
   type Side,
@@ -46,7 +48,11 @@ import {
   type DecisionTreeDef,
 } from "../../decision-tree";
 import type { FormValues } from "../../examination";
-import type { PersistedDiagnosisResult, PractitionerDecision } from "../types";
+import { useDocumentedDiagnoses } from "../hooks/use-diagnosis-evaluation";
+import {
+  useDocumentDiagnosis,
+  useUndocumentDiagnosis,
+} from "../hooks/use-save-diagnosis-evaluation";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
 import { CriteriaChecklist } from "./CriteriaChecklist";
 import { SummaryDiagrams } from "./SummaryDiagrams";
@@ -54,22 +60,18 @@ import { SummaryDiagrams } from "./SummaryDiagrams";
 interface EvaluationViewProps {
   sqAnswers: Record<string, unknown>;
   examinationData: FormValues;
-  results: PersistedDiagnosisResult[];
-  onUpdateDecision?: (params: {
-    resultId: string;
-    practitionerDecision: PractitionerDecision;
-    note: string | null;
-  }) => void;
+  patientRecordId: string;
+  userId: string;
   readOnly?: boolean;
   caseId?: string;
 }
 
-const MYALGIA_IDS = [
+const MYALGIA_IDS: readonly DiagnosisId[] = [
   "myalgia",
   "localMyalgia",
   "myofascialPainWithSpreading",
   "myofascialPainWithReferral",
-] as const;
+];
 
 const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
 const DIAGRAM_REGIONS_ALL: readonly Region[] = ["temporalis", "masseter", "tmj", "nonMast"];
@@ -103,9 +105,16 @@ function getTreeForDiagnosis(
   }
 }
 
+/** Build a location key matching the format used for documented diagnosis lookups. */
+function locationKey(side: Side, site: PalpationSite | null, region: Region): string {
+  return `${side}:${site ?? region}`;
+}
+
 export function EvaluationView({
   sqAnswers,
   examinationData,
+  patientRecordId,
+  userId,
   readOnly,
   caseId,
 }: EvaluationViewProps) {
@@ -118,10 +127,32 @@ export function EvaluationView({
   const [confirmRegion, setConfirmRegion] = useState<Region>("temporalis");
   const [confirmSite, setConfirmSite] = useState<PalpationSite | null>(null);
   const [confirmShowAllRegions, setConfirmShowAllRegions] = useState(false);
-  // Local confirmed diagnoses: key = "diagnosisId:side:site-or-region"
-  const [confirmed, setConfirmed] = useState<Record<string, boolean>>({});
-  // Selected myalgia type (radio): key = "side:site-or-region" → diagnosisId or ""
-  const [selectedMyalgia, setSelectedMyalgia] = useState<Record<string, string>>({});
+
+  // ── Backend persistence ─────────────────────────────────────────────
+  const { data: documentedDiagnoses } = useDocumentedDiagnoses(patientRecordId);
+  const documentMutation = useDocumentDiagnosis(patientRecordId);
+  const undocumentMutation = useUndocumentDiagnosis(patientRecordId);
+
+  // ── Derived state from documented diagnoses ─────────────────────────
+  const documentedMap = useMemo(() => {
+    const map = new Map<string, string>(); // locationKey → row id
+    for (const d of documentedDiagnoses ?? []) {
+      const key = `${d.diagnosisId}:${locationKey(d.side, d.site, d.region)}`;
+      map.set(key, d.id);
+    }
+    return map;
+  }, [documentedDiagnoses]);
+
+  const documentedMyalgiaMap = useMemo(() => {
+    const map = new Map<string, { diagnosisId: DiagnosisId; rowId: string }>(); // "side:site-or-region" → { diagnosisId, rowId }
+    for (const d of documentedDiagnoses ?? []) {
+      if ((MYALGIA_IDS as readonly string[]).includes(d.diagnosisId)) {
+        const locKey = locationKey(d.side, d.site, d.region);
+        map.set(locKey, { diagnosisId: d.diagnosisId, rowId: d.id });
+      }
+    }
+    return map;
+  }, [documentedDiagnoses]);
 
   // ── Memos ──────────────────────────────────────────────────────────
 
@@ -166,31 +197,64 @@ export function EvaluationView({
     setConfirmSite(null);
   }, []);
 
-  function locationKey() {
-    return `${confirmSide}:${confirmSite ?? confirmRegion}`;
+  const currentLocKey = locationKey(confirmSide, confirmSite, confirmRegion);
+
+  function isChecked(diagnosisId: string) {
+    return documentedMap.has(`${diagnosisId}:${currentLocKey}`);
+  }
+
+  function selectedMyalgiaId() {
+    return documentedMyalgiaMap.get(currentLocKey)?.diagnosisId ?? "";
   }
 
   function handleToggle(diagnosisId: string) {
     if (readOnly) return;
-    const key = `${diagnosisId}:${locationKey()}`;
-    setConfirmed((prev) => ({ ...prev, [key]: !prev[key] }));
-  }
+    const key = `${diagnosisId}:${currentLocKey}`;
+    const existingRowId = documentedMap.get(key);
 
-  function isChecked(diagnosisId: string) {
-    return confirmed[`${diagnosisId}:${locationKey()}`] === true;
-  }
-
-  function selectedMyalgiaId() {
-    return selectedMyalgia[locationKey()] ?? "";
+    if (existingRowId) {
+      undocumentMutation.mutate(existingRowId);
+    } else {
+      documentMutation.mutate({
+        patientRecordId,
+        diagnosisId: diagnosisId as DiagnosisId,
+        side: confirmSide,
+        region: activeRegion,
+        site: confirmSite,
+        userId,
+      });
+    }
   }
 
   function handleMyalgiaSelect(diagnosisId: string) {
     if (readOnly) return;
-    const loc = locationKey();
-    setSelectedMyalgia((prev) => ({
-      ...prev,
-      [loc]: prev[loc] === diagnosisId ? "" : diagnosisId,
-    }));
+    const existing = documentedMyalgiaMap.get(currentLocKey);
+
+    if (existing) {
+      // Deselect current
+      undocumentMutation.mutate(existing.rowId);
+      // If selecting a different myalgia type, also insert the new one
+      if (existing.diagnosisId !== diagnosisId) {
+        documentMutation.mutate({
+          patientRecordId,
+          diagnosisId: diagnosisId as DiagnosisId,
+          side: confirmSide,
+          region: activeRegion,
+          site: confirmSite,
+          userId,
+        });
+      }
+    } else {
+      // Nothing selected, insert new
+      documentMutation.mutate({
+        patientRecordId,
+        diagnosisId: diagnosisId as DiagnosisId,
+        side: confirmSide,
+        region: activeRegion,
+        site: confirmSite,
+        userId,
+      });
+    }
   }
 
   // ── Render ─────────────────────────────────────────────────────────

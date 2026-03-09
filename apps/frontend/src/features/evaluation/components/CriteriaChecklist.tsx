@@ -35,7 +35,6 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
-import type { PractitionerDecision } from "../types";
 import { getDisplayGroups } from "../utils/criterion-data-display";
 
 type CriterionUserState = "positive" | "negative" | "pending";
@@ -54,7 +53,7 @@ interface CriteriaChecklistProps {
   region: Region;
   site?: PalpationSite;
   titleSlot?: ReactNode;
-  practitionerDecision?: PractitionerDecision;
+  isDocumented?: boolean;
   onConfirm?: (diagnosisId: string, note: string | null) => void;
   readOnly?: boolean;
   /** Whether cross-diagnosis requirement is met (for headache) */
@@ -299,7 +298,7 @@ export function CriteriaChecklist({
   region,
   site,
   titleSlot,
-  practitionerDecision,
+  isDocumented,
   onConfirm,
   readOnly,
   requirementMet,
@@ -381,7 +380,7 @@ export function CriteriaChecklist({
     setSelectedByLocation((prev) => ({ ...prev, [locationKey]: item.key }));
   }
 
-  const isConfirmed = practitionerDecision === "confirmed";
+  const isConfirmed = isDocumented === true;
   const hasRequiresConstraint = !!diagnosis.requires;
 
   function handleStateChange(key: string, state: CriterionUserState) {
