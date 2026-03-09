@@ -27,37 +27,59 @@ export function evaluateDiagnosis(
   const anamnesisMet = anamnesisResult.status === "positive";
   const anamnesisStatus = anamnesisResult.status;
 
-  // 2. Evaluate examination per location (side × region)
+  // 2. Evaluate examination per location (side × region, with site expansion)
   const locationResults: CriteriaLocationResult[] = [];
 
   for (const side of SIDE_KEYS) {
     for (const region of diagnosis.examination.regions) {
-      // Evaluate sided anamnesis if defined (per-location with ${side} context)
-      const sidedAnamnesisResult = diagnosis.sidedAnamnesis
-        ? evaluate(diagnosis.sidedAnamnesis, data, { side, region })
-        : null;
+      const sites = diagnosis.examination.siteExpansion?.[region];
 
-      const examinationResult = evaluate(diagnosis.examination.criterion, data, {
-        side,
-        region,
-      });
+      if (sites) {
+        // Per-site evaluation for expanded regions (E10)
+        for (const site of sites) {
+          const context = { side, region, site };
+          const sidedAnamnesisResult = diagnosis.sidedAnamnesis
+            ? evaluate(diagnosis.sidedAnamnesis, data, context)
+            : null;
+          const examinationResult = evaluate(diagnosis.examination.criterion, data, context);
 
-      // Location is positive only if sided anamnesis (when present) AND examination are both positive
-      const sidedAnamnesisMet = !sidedAnamnesisResult || sidedAnamnesisResult.status === "positive";
-      const examinationMet = examinationResult.status === "positive";
-      const isPositive = sidedAnamnesisMet && examinationMet;
+          const sidedAnamnesisMet = !sidedAnamnesisResult || sidedAnamnesisResult.status === "positive";
+          const examinationMet = examinationResult.status === "positive";
+          const isPositive = sidedAnamnesisMet && examinationMet;
+          const status = deriveLocationStatus(sidedAnamnesisResult, examinationResult);
 
-      // Derive location status considering both sided anamnesis and examination
-      const status = deriveLocationStatus(sidedAnamnesisResult, examinationResult);
+          locationResults.push({
+            side,
+            region,
+            site,
+            isPositive,
+            status,
+            ...(sidedAnamnesisResult ? { sidedAnamnesisResult } : {}),
+            examinationResult,
+          });
+        }
+      } else {
+        // Per-region evaluation (E9 — existing behavior)
+        const context = { side, region };
+        const sidedAnamnesisResult = diagnosis.sidedAnamnesis
+          ? evaluate(diagnosis.sidedAnamnesis, data, context)
+          : null;
+        const examinationResult = evaluate(diagnosis.examination.criterion, data, context);
 
-      locationResults.push({
-        side,
-        region,
-        isPositive,
-        status,
-        ...(sidedAnamnesisResult ? { sidedAnamnesisResult } : {}),
-        examinationResult,
-      });
+        const sidedAnamnesisMet = !sidedAnamnesisResult || sidedAnamnesisResult.status === "positive";
+        const examinationMet = examinationResult.status === "positive";
+        const isPositive = sidedAnamnesisMet && examinationMet;
+        const status = deriveLocationStatus(sidedAnamnesisResult, examinationResult);
+
+        locationResults.push({
+          side,
+          region,
+          isPositive,
+          status,
+          ...(sidedAnamnesisResult ? { sidedAnamnesisResult } : {}),
+          examinationResult,
+        });
+      }
     }
   }
 
@@ -70,7 +92,7 @@ export function evaluateDiagnosis(
 
   const positiveLocations = locationResults
     .filter((loc) => loc.isPositive)
-    .map(({ side, region }) => ({ side, region }));
+    .map(({ side, region, site }) => ({ side, region, ...(site ? { site } : {}) }));
 
   return {
     diagnosisId: diagnosis.id,

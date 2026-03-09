@@ -14,7 +14,7 @@
  * D. Familiar pain on palpation or movement (E4, E9)
  */
 
-import { SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../ids/anatomy";
+import { E10_PALPATION_REGIONS, SITES_BY_GROUP, SITE_CONFIG, type PainType, type Region } from "../../ids/anatomy";
 import { and, any, familiarPainDuringOpening, field, match, or } from "../builders";
 import { sq } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
@@ -78,6 +78,12 @@ export const MYALGIA_ANAMNESIS: Criterion = and(
  * Section prefix (e9/e10) is determined automatically from SITE_CONFIG.
  */
 export function siteRefs(region: Region, painType: PainType): string[] {
+  // E10 regions: use ${site} template for per-site evaluation
+  if (E10_PALPATION_REGIONS.includes(region)) {
+    const section = SITE_CONFIG[SITES_BY_GROUP[region][0]].section;
+    return [`${section}.\${side}.\${site}.${painType}`];
+  }
+  // E9 regions: expand all sites in the group
   return SITES_BY_GROUP[region].map(
     (site) => `${SITE_CONFIG[site].section}.\${side}.${site}.${painType}`
   );
@@ -173,6 +179,10 @@ export const MYALGIA_EXAMINATION: LocationCriterion = {
     id: "myalgiaExam",
     label: "Myalgie-Untersuchungsbefund",
   }),
+  siteExpansion: {
+    otherMast: SITES_BY_GROUP.otherMast,
+    nonMast: SITES_BY_GROUP.nonMast,
+  },
 };
 
 // ============================================================================

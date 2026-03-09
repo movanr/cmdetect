@@ -174,15 +174,17 @@ function CriterionDataDisplay({
   criteriaData,
   side,
   region,
+  site,
 }: {
   sources: string[];
   criteriaData: Record<string, unknown>;
   side: Side;
   region: Region;
+  site?: PalpationSite;
 }) {
   const groups = useMemo(
-    () => getDisplayGroups(sources, criteriaData, side, region),
-    [sources, criteriaData, side, region]
+    () => getDisplayGroups(sources, criteriaData, side, region, site),
+    [sources, criteriaData, side, region, site]
   );
 
   if (groups.length === 0)
@@ -234,6 +236,7 @@ function CriteriaItemDetail({
   criteriaData,
   side,
   region,
+  site,
 }: {
   item: ChecklistItem;
   userState: CriterionUserState | undefined;
@@ -241,6 +244,7 @@ function CriteriaItemDetail({
   criteriaData: Record<string, unknown>;
   side: Side;
   region: Region;
+  site?: PalpationSite;
 }) {
   const { result } = item;
   return (
@@ -286,6 +290,7 @@ function CriteriaItemDetail({
         criteriaData={criteriaData}
         side={side}
         region={region}
+        site={site}
       />
     </div>
   );
@@ -312,8 +317,8 @@ export function CriteriaChecklist({
   );
 
   const locationResult = useMemo(
-    () => getLocationResult(evalResult, side, region),
-    [evalResult, side, region]
+    () => getLocationResult(evalResult, side, region, site),
+    [evalResult, side, region, site]
   );
 
   // Extract checklist items
@@ -526,6 +531,7 @@ export function CriteriaChecklist({
               criteriaData={criteriaData}
               side={side}
               region={region}
+              site={site}
             />
           </div>
         )}

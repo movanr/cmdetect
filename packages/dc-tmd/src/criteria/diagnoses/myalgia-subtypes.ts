@@ -30,7 +30,7 @@
  * Journal of Oral & Facial Pain and Headache, 28:6-27
  */
 
-import { GROUP_CONFIG, type Region } from "../../ids/anatomy";
+import { GROUP_CONFIG, SITES_BY_GROUP, type Region } from "../../ids/anatomy";
 import { and, any, field, not } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import type { Criterion } from "../types";
@@ -125,6 +125,10 @@ const localMyalgiaExamCriterion: Criterion = and(
 export const LOCAL_MYALGIA_EXAMINATION: LocationCriterion = {
   regions: MYALGIA_REGIONS,
   criterion: localMyalgiaExamCriterion,
+  siteExpansion: {
+    otherMast: SITES_BY_GROUP.otherMast,
+    nonMast: SITES_BY_GROUP.nonMast,
+  },
 };
 
 export const LOCAL_MYALGIA: DiagnosisDefinition = {
@@ -196,6 +200,10 @@ const spreadingMyalgiaExamCriterion: Criterion = and(
 export const MYOFASCIAL_SPREADING_EXAMINATION: LocationCriterion = {
   regions: MYALGIA_REGIONS,
   criterion: spreadingMyalgiaExamCriterion,
+  siteExpansion: {
+    otherMast: SITES_BY_GROUP.otherMast,
+    nonMast: SITES_BY_GROUP.nonMast,
+  },
 };
 
 export const MYOFASCIAL_PAIN_WITH_SPREADING: DiagnosisDefinition = {
@@ -259,6 +267,10 @@ const referralMyalgiaExamCriterion: Criterion = and(
 export const MYOFASCIAL_REFERRAL_EXAMINATION: LocationCriterion = {
   regions: MYALGIA_REGIONS,
   criterion: referralMyalgiaExamCriterion,
+  siteExpansion: {
+    otherMast: SITES_BY_GROUP.otherMast,
+    nonMast: SITES_BY_GROUP.nonMast,
+  },
 };
 
 export const MYOFASCIAL_PAIN_WITH_REFERRAL: DiagnosisDefinition = {

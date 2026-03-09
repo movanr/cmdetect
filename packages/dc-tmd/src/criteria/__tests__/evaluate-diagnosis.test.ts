@@ -103,23 +103,29 @@ describe("evaluateDiagnosis", () => {
       expect(result.anamnesisStatus).toBe("pending");
     });
 
-    it("evaluates correct number of locations (2 sides × 4 regions)", () => {
+    it("evaluates correct number of locations (2 sides × 2 regions + 2 sides × 4 E10 sites)", () => {
       const result = evaluateDiagnosis(MYALGIA, positivePatient);
 
-      // Myalgia has regions: temporalis, masseter, otherMast, nonMast
+      // Myalgia has regions: temporalis, masseter (per-region), otherMast (2 sites), nonMast (2 sites)
       // Sides: left, right
-      // Total: 2 × 4 = 8 locations
-      expect(result.locationResults).toHaveLength(8);
+      // Total: 2 × 2 + 2 × 4 = 12 locations
+      expect(result.locationResults).toHaveLength(12);
 
-      const locations = result.locationResults.map((l) => `${l.side}-${l.region}`);
+      const locations = result.locationResults.map(
+        (l) => `${l.side}-${l.region}${l.site ? `-${l.site}` : ""}`
+      );
       expect(locations).toContain("left-temporalis");
       expect(locations).toContain("left-masseter");
-      expect(locations).toContain("left-otherMast");
-      expect(locations).toContain("left-nonMast");
+      expect(locations).toContain("left-otherMast-lateralPterygoid");
+      expect(locations).toContain("left-otherMast-temporalisTendon");
+      expect(locations).toContain("left-nonMast-posteriorMandibular");
+      expect(locations).toContain("left-nonMast-submandibular");
       expect(locations).toContain("right-temporalis");
       expect(locations).toContain("right-masseter");
-      expect(locations).toContain("right-otherMast");
-      expect(locations).toContain("right-nonMast");
+      expect(locations).toContain("right-otherMast-lateralPterygoid");
+      expect(locations).toContain("right-otherMast-temporalisTendon");
+      expect(locations).toContain("right-nonMast-posteriorMandibular");
+      expect(locations).toContain("right-nonMast-submandibular");
     });
 
     it("identifies correct positive locations", () => {
@@ -213,6 +219,157 @@ describe("evaluateDiagnosis", () => {
 
       const result = evaluateDiagnosis(MYALGIA, data);
       expect(result.status).toBe("negative");
+    });
+  });
+
+  describe("E10 per-site evaluation", () => {
+    it("posteriorMandibular positive does NOT make submandibular positive", () => {
+      const data = {
+        ...positiveAnamnesis,
+        e1: { painLocation: { left: ["nonMast"] } },
+        e10: {
+          left: {
+            posteriorMandibular: { familiarPain: "yes" },
+            submandibular: { familiarPain: "no" },
+          },
+        },
+      };
+
+      const result = evaluateDiagnosis(MYALGIA, data);
+
+      // posteriorMandibular should be positive
+      const pmResult = result.locationResults.find(
+        (l) => l.side === "left" && l.region === "nonMast" && l.site === "posteriorMandibular"
+      );
+      expect(pmResult?.isPositive).toBe(true);
+
+      // submandibular should be negative
+      const smResult = result.locationResults.find(
+        (l) => l.side === "left" && l.region === "nonMast" && l.site === "submandibular"
+      );
+      expect(smResult?.isPositive).toBe(false);
+    });
+
+    it("lateralPterygoid positive does NOT make temporalisTendon positive", () => {
+      const data = {
+        ...positiveAnamnesis,
+        e1: { painLocation: { right: ["otherMast"] } },
+        e10: {
+          right: {
+            lateralPterygoid: { familiarPain: "yes" },
+            temporalisTendon: { familiarPain: "no" },
+          },
+        },
+      };
+
+      const result = evaluateDiagnosis(MYALGIA, data);
+
+      const lpResult = result.locationResults.find(
+        (l) => l.side === "right" && l.region === "otherMast" && l.site === "lateralPterygoid"
+      );
+      expect(lpResult?.isPositive).toBe(true);
+
+      const ttResult = result.locationResults.find(
+        (l) => l.side === "right" && l.region === "otherMast" && l.site === "temporalisTendon"
+      );
+      expect(ttResult?.isPositive).toBe(false);
+    });
+
+    it("E10 positive location includes site in positiveLocations", () => {
+      const data = {
+        ...positiveAnamnesis,
+        e1: { painLocation: { left: ["nonMast"] } },
+        e10: {
+          left: {
+            posteriorMandibular: { familiarPain: "yes" },
+            submandibular: { familiarPain: "no" },
+          },
+        },
+      };
+
+      const result = evaluateDiagnosis(MYALGIA, data);
+
+      expect(result.positiveLocations).toContainEqual({
+        side: "left",
+        region: "nonMast",
+        site: "posteriorMandibular",
+      });
+      // submandibular should NOT be in positive locations
+      expect(result.positiveLocations).not.toContainEqual(
+        expect.objectContaining({ site: "submandibular" })
+      );
+    });
+
+    it("E9 regions still evaluate at region level (no site field)", () => {
+      const data = {
+        ...positiveAnamnesis,
+        e1: { painLocation: { left: ["temporalis"] } },
+        e9: {
+          left: {
+            temporalisPosterior: { familiarPain: "yes" },
+          },
+        },
+      };
+
+      const result = evaluateDiagnosis(MYALGIA, data);
+
+      const temporalisResult = result.locationResults.find(
+        (l) => l.side === "left" && l.region === "temporalis"
+      );
+      expect(temporalisResult?.site).toBeUndefined();
+      expect(temporalisResult?.isPositive).toBe(true);
+    });
+  });
+
+  describe("E10 per-site evaluation for myalgia subtypes", () => {
+    it("local myalgia: per-site evaluation for E10 nonMast", () => {
+      const data = {
+        ...positiveAnamnesis,
+        e1: { painLocation: { left: ["nonMast"] } },
+        e10: {
+          left: {
+            posteriorMandibular: { familiarPain: "yes", referredPain: "no" },
+            submandibular: { familiarPain: "no", referredPain: "no" },
+          },
+        },
+      };
+
+      const result = evaluateDiagnosis(LOCAL_MYALGIA, data);
+
+      const pmResult = result.locationResults.find(
+        (l) => l.side === "left" && l.region === "nonMast" && l.site === "posteriorMandibular"
+      );
+      expect(pmResult?.isPositive).toBe(true);
+
+      const smResult = result.locationResults.find(
+        (l) => l.side === "left" && l.region === "nonMast" && l.site === "submandibular"
+      );
+      expect(smResult?.isPositive).toBe(false);
+    });
+
+    it("referral myalgia: per-site evaluation for E10 otherMast", () => {
+      const data = {
+        ...positiveAnamnesis,
+        e1: { painLocation: { right: ["otherMast"] } },
+        e10: {
+          right: {
+            lateralPterygoid: { familiarPain: "yes", referredPain: "yes" },
+            temporalisTendon: { familiarPain: "yes", referredPain: "no" },
+          },
+        },
+      };
+
+      const result = evaluateDiagnosis(MYOFASCIAL_PAIN_WITH_REFERRAL, data);
+
+      const lpResult = result.locationResults.find(
+        (l) => l.side === "right" && l.region === "otherMast" && l.site === "lateralPterygoid"
+      );
+      expect(lpResult?.isPositive).toBe(true);
+
+      const ttResult = result.locationResults.find(
+        (l) => l.side === "right" && l.region === "otherMast" && l.site === "temporalisTendon"
+      );
+      expect(ttResult?.isPositive).toBe(false);
     });
   });
 });

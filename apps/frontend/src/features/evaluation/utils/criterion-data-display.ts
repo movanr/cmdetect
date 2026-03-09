@@ -14,6 +14,7 @@ import {
   SITE_CONFIG,
   SITES_BY_GROUP,
   getValueAtPath as get,
+  type PalpationSite,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
@@ -265,10 +266,12 @@ function palpationGroup(
   badge: string,
   criteriaData: Record<string, unknown>,
   side: Side,
-  region: Region
+  region: Region,
+  siteFilter?: PalpationSite
 ): DisplayGroup {
   const cards: DisplayCard[] = [];
-  for (const site of SITES_BY_GROUP[region] ?? []) {
+  const sitesToShow = siteFilter ? [siteFilter] : (SITES_BY_GROUP[region] ?? []);
+  for (const site of sitesToShow) {
     if (SITE_CONFIG[site].section !== section) continue;
     const entries: DisplayEntry[] = [
       {
@@ -297,7 +300,8 @@ export function getDisplayGroups(
   sources: string[],
   criteriaData: Record<string, unknown>,
   side: Side,
-  region: Region
+  region: Region,
+  site?: PalpationSite
 ): DisplayGroup[] {
   const groups: DisplayGroup[] = [];
 
@@ -325,9 +329,9 @@ export function getDisplayGroups(
     } else if (source === "U7") {
       groups.push(u7Group(criteriaData, side));
     } else if (source === "U9") {
-      groups.push(palpationGroup("e9", "U9", criteriaData, side, region));
+      groups.push(palpationGroup("e9", "U9", criteriaData, side, region, site));
     } else if (source === "U10") {
-      groups.push(palpationGroup("e10", "U10", criteriaData, side, region));
+      groups.push(palpationGroup("e10", "U10", criteriaData, side, region, site));
     }
   }
 

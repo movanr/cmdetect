@@ -5,7 +5,7 @@
  * Examination criteria are evaluated for each side × region combination.
  */
 
-import type { Side, Region } from "../ids/anatomy";
+import type { Side, Region, PalpationSite } from "../ids/anatomy";
 import type { DiagnosisId } from "../ids/diagnosis";
 import type { Criterion, CriterionResult, CriterionStatus } from "./types";
 
@@ -26,6 +26,9 @@ export interface LocationCriterion {
 
   /** Criterion template with ${side} and ${region} placeholders */
   criterion: Criterion;
+
+  /** Regions to expand into per-site evaluation (each site gets its own result) */
+  siteExpansion?: Partial<Record<Region, readonly PalpationSite[]>>;
 }
 
 /**
@@ -101,6 +104,9 @@ export interface CriteriaLocationResult {
   /** Anatomical region */
   region: Region;
 
+  /** Specific palpation site (for per-site E10 evaluation) */
+  site?: PalpationSite;
+
   /** Whether criteria are met at this location */
   isPositive: boolean;
 
@@ -143,7 +149,7 @@ export interface DiagnosisEvaluationResult {
   locationResults: CriteriaLocationResult[];
 
   /** Positive locations (convenience accessor) */
-  positiveLocations: Array<{ side: Side; region: Region }>;
+  positiveLocations: Array<{ side: Side; region: Region; site?: PalpationSite }>;
 }
 
 /**
@@ -151,10 +157,10 @@ export interface DiagnosisEvaluationResult {
  */
 export function getPositiveLocations(
   result: DiagnosisEvaluationResult
-): Array<{ side: Side; region: Region }> {
+): Array<{ side: Side; region: Region; site?: PalpationSite }> {
   return result.locationResults
     .filter((loc) => loc.isPositive)
-    .map(({ side, region }) => ({ side, region }));
+    .map(({ side, region, site }) => ({ side, region, ...(site ? { site } : {}) }));
 }
 
 /**
@@ -170,9 +176,12 @@ export function hasAnyPositiveLocation(result: DiagnosisEvaluationResult): boole
 export function isLocationPositive(
   result: DiagnosisEvaluationResult,
   side: Side,
-  region: Region
+  region: Region,
+  site?: PalpationSite
 ): boolean {
-  const loc = result.locationResults.find((l) => l.side === side && l.region === region);
+  const loc = result.locationResults.find(
+    (l) => l.side === side && l.region === region && l.site === site
+  );
   return loc?.isPositive ?? false;
 }
 
@@ -182,7 +191,10 @@ export function isLocationPositive(
 export function getLocationResult(
   result: DiagnosisEvaluationResult,
   side: Side,
-  region: Region
+  region: Region,
+  site?: PalpationSite
 ): CriteriaLocationResult | undefined {
-  return result.locationResults.find((l) => l.side === side && l.region === region);
+  return result.locationResults.find(
+    (l) => l.side === side && l.region === region && l.site === site
+  );
 }
