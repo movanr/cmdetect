@@ -95,6 +95,8 @@ function getTreeForDiagnosis(
       return createHeadacheTree(side);
     case "discDisplacementWithReduction":
     case "discDisplacementWithReductionIntermittentLocking":
+    case "discDisplacementWithoutReductionLimitedOpening":
+    case "discDisplacementWithoutReductionWithoutLimitedOpening":
       return createDdWithReductionTree(side);
     case "degenerativeJointDisease":
       return createDjdTree(side);
