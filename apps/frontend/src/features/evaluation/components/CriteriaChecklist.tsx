@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   evaluateDiagnosis,
+  getCriterionId,
   getCriterionLabel,
   getCriterionSources,
   getLocationResult,
@@ -35,6 +36,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
+import { assessmentKey } from "../hooks/use-criteria-assessments";
+import type { CriteriaAssessment } from "../types";
 import { getDisplayGroups } from "../utils/criterion-data-display";
 
 type CriterionUserState = "positive" | "negative" | "pending";
@@ -58,10 +61,18 @@ interface CriteriaChecklistProps {
   readOnly?: boolean;
   /** Whether cross-diagnosis requirement is met (for headache) */
   requirementMet?: boolean;
+  /** Persisted assessment map — when provided, state is derived from it instead of local useState */
+  assessmentMap?: Map<string, CriteriaAssessment>;
+  onAssessmentChange?: (item: ChecklistItem, state: CriterionUserState) => void;
+  onAssessmentClear?: (item: ChecklistItem) => void;
 }
 
 interface ChecklistItem {
   key: string;
+  criterionId: string;
+  assessmentSide: Side | null;
+  assessmentRegion: Region | null;
+  assessmentSite: PalpationSite | null;
   label: string;
   detail?: string;
   sources?: string[];
@@ -70,22 +81,41 @@ interface ChecklistItem {
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
+interface ChecklistItemScope {
+  side: Side | null;
+  region: Region | null;
+  site: PalpationSite | null;
+}
+
 function extractChecklistItems(
   result: CriterionResult,
   fallbackLabel: string,
-  prefix: string
+  prefix: string,
+  scope: ChecklistItemScope,
 ): ChecklistItem[] {
   if (isCompositeResult(result) && result.criterion.type === "and") {
-    return result.children.map((child, i) => ({
-      key: `${prefix}-${i}`,
-      label: getCriterionLabel(child.criterion) ?? fallbackLabel,
-      sources: getCriterionSources(child.criterion),
-      result: child,
-    }));
+    return result.children.map((child, i) => {
+      const id = getCriterionId(child.criterion) ?? `${prefix}-${i}`;
+      return {
+        key: assessmentKey(id, scope.side, scope.region, scope.site),
+        criterionId: id,
+        assessmentSide: scope.side,
+        assessmentRegion: scope.region,
+        assessmentSite: scope.site,
+        label: getCriterionLabel(child.criterion) ?? fallbackLabel,
+        sources: getCriterionSources(child.criterion),
+        result: child,
+      };
+    });
   }
+  const id = getCriterionId(result.criterion) ?? prefix;
   return [
     {
-      key: prefix,
+      key: assessmentKey(id, scope.side, scope.region, scope.site),
+      criterionId: id,
+      assessmentSide: scope.side,
+      assessmentRegion: scope.region,
+      assessmentSite: scope.site,
       label: getCriterionLabel(result.criterion) ?? fallbackLabel,
       sources: getCriterionSources(result.criterion),
       result,
@@ -307,9 +337,13 @@ export function CriteriaChecklist({
   onConfirm,
   readOnly,
   requirementMet,
+  assessmentMap,
+  onAssessmentChange,
+  onAssessmentClear,
 }: CriteriaChecklistProps) {
-  const [selectedByLocation, setSelectedByLocation] = useState<Record<string, string>>({});
-  const [userStates, setUserStates] = useState<Record<string, CriterionUserState>>({});
+  const isPersisted = !!assessmentMap;
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [localUserStates, setLocalUserStates] = useState<Record<string, CriterionUserState>>({});
 
   const evalResult = useMemo(
     () => evaluateDiagnosis(diagnosis, criteriaData),
@@ -321,19 +355,23 @@ export function CriteriaChecklist({
     [evalResult, side, region, site]
   );
 
-  // Extract checklist items
+  // Extract checklist items with scope for assessment key generation
   const anamnesisItems = useMemo(
-    () => extractChecklistItems(evalResult.anamnesisResult, "Anamnese", "anamnesis"),
+    () =>
+      extractChecklistItems(evalResult.anamnesisResult, "Anamnese", "anamnesis", {
+        side: null,
+        region: null,
+        site: null,
+      }),
     [evalResult.anamnesisResult]
   );
 
-  // Reset selection and user states only when diagnosis changes
+  // Reset local user states (not selection) on diagnosis change when not persisted
   const resetKey = diagnosis.id;
   const [prevResetKey, setPrevResetKey] = useState(resetKey);
   if (resetKey !== prevResetKey) {
     setPrevResetKey(resetKey);
-    setSelectedByLocation({});
-    setUserStates({});
+    if (!isPersisted) setLocalUserStates({});
   }
 
   const sidedAnamnesisItems = useMemo(() => {
@@ -341,7 +379,8 @@ export function CriteriaChecklist({
     return extractChecklistItems(
       locationResult.sidedAnamnesisResult,
       "Anamnese",
-      `sided-anamnesis:${side}`
+      `sided-anamnesis:${side}`,
+      { side, region: null, site: null },
     );
   }, [locationResult, side]);
 
@@ -350,9 +389,10 @@ export function CriteriaChecklist({
     return extractChecklistItems(
       locationResult.examinationResult,
       "Untersuchungsbefund",
-      `examination:${side}:${region}`
+      `examination:${side}:${region}`,
+      { side, region, site: site ?? null },
     );
-  }, [locationResult, side, region]);
+  }, [locationResult, side, region, site]);
 
   // Add localisation details to items
   const sideDetail = SIDES[side];
@@ -368,39 +408,52 @@ export function CriteriaChecklist({
     [examinationItems, locationLabel, sideDetail]
   );
 
-  // Derive selectedItem from per-location key + current items
-  const locationKey = `${side}-${region}`;
+  // Derive userStates from persisted assessmentMap or local state
+  const userStates = useMemo(() => {
+    if (!assessmentMap) return localUserStates;
+    const states: Record<string, CriterionUserState> = {};
+    for (const [key, assessment] of assessmentMap) {
+      states[key] = assessment.state;
+    }
+    return states;
+  }, [assessmentMap, localUserStates]);
+
+  // Derive selectedItem — keep selection stable across localisation/diagnosis changes
+  // if the same item key still exists in the current list
   const allItems = [
     ...anamnesisItems,
     ...(sidedAnamnesisItemsWithDetail ?? []),
     ...examinationItemsWithDetail,
   ];
-  const savedKey = selectedByLocation[locationKey];
-  const selectedItem = savedKey
-    ? (allItems.find((i) => i.key === savedKey) ?? null)
-    : (allItems.find((i) => !userStates[i.key] || isMismatch(userStates[i.key], i.result))
-        ?? allItems[0] ?? null);
+  const selectedItem = (selectedKey ? allItems.find((i) => i.key === selectedKey) : null)
+    ?? allItems[0] ?? null;
 
   function selectItem(item: ChecklistItem) {
-    setSelectedByLocation((prev) => ({ ...prev, [locationKey]: item.key }));
+    setSelectedKey(item.key);
   }
 
   const isConfirmed = isDocumented === true;
   const hasRequiresConstraint = !!diagnosis.requires;
 
   function handleStateChange(key: string, state: CriterionUserState) {
-    // Pin the current item so the default rule doesn't auto-navigate
-    if (!selectedByLocation[locationKey]) {
-      setSelectedByLocation((prev) => ({ ...prev, [locationKey]: key }));
-    }
-    setUserStates((prev) => {
-      if (prev[key] === state) {
-        const next = { ...prev };
-        delete next[key];
-        return next;
+    if (onAssessmentChange && onAssessmentClear) {
+      const item = allItems.find((i) => i.key === key);
+      if (!item) return;
+      if (userStates[key] === state) {
+        onAssessmentClear(item);
+      } else {
+        onAssessmentChange(item, state);
       }
-      return { ...prev, [key]: state };
-    });
+    } else {
+      setLocalUserStates((prev) => {
+        if (prev[key] === state) {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        }
+        return { ...prev, [key]: state };
+      });
+    }
   }
 
   const listClass = selectedItem ? "w-[28rem] shrink-0" : "flex-1";

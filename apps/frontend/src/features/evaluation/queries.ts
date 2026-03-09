@@ -52,3 +52,56 @@ export const UNDOCUMENT_DIAGNOSIS = graphql(`
     }
   }
 `);
+
+/**
+ * Fetch all criteria assessments for a patient record.
+ */
+export const GET_CRITERIA_ASSESSMENTS = graphql(`
+  query GetCriteriaAssessments($patient_record_id: String!) {
+    criteria_assessment(where: { patient_record_id: { _eq: $patient_record_id } }) {
+      id
+      criterion_id
+      side
+      region
+      site
+      state
+      assessed_by
+      assessed_at
+    }
+  }
+`);
+
+/**
+ * Upsert a criteria assessment (insert or update on conflict).
+ */
+export const UPSERT_CRITERIA_ASSESSMENT = graphql(`
+  mutation UpsertCriteriaAssessment($object: criteria_assessment_insert_input!) {
+    insert_criteria_assessment_one(
+      object: $object
+      on_conflict: {
+        constraint: criteria_assessment_unique
+        update_columns: [state, assessed_by, assessed_at]
+      }
+    ) {
+      id
+      criterion_id
+      side
+      region
+      site
+      state
+      assessed_by
+      assessed_at
+    }
+  }
+`);
+
+/**
+ * Delete a criteria assessment by PK (return to auto-computed state).
+ */
+export const DELETE_CRITERIA_ASSESSMENT = graphql(`
+  mutation DeleteCriteriaAssessment($id: String!) {
+    delete_criteria_assessment_by_pk(id: $id) {
+      id
+    }
+  }
+`);

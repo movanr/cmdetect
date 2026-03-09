@@ -48,7 +48,12 @@ import {
   type DecisionTreeDef,
 } from "../../decision-tree";
 import type { FormValues } from "../../examination";
+import { useCriteriaAssessmentMap } from "../hooks/use-criteria-assessments";
 import { useDocumentedDiagnoses } from "../hooks/use-diagnosis-evaluation";
+import {
+  useDeleteCriteriaAssessment,
+  useUpsertCriteriaAssessment,
+} from "../hooks/use-save-criteria-assessment";
 import {
   useDocumentDiagnosis,
   useUndocumentDiagnosis,
@@ -152,6 +157,9 @@ export function EvaluationView({
   const { data: documentedDiagnoses } = useDocumentedDiagnoses(patientRecordId);
   const documentMutation = useDocumentDiagnosis(patientRecordId);
   const undocumentMutation = useUndocumentDiagnosis(patientRecordId);
+  const { data: criteriaAssessmentMap } = useCriteriaAssessmentMap(patientRecordId);
+  const upsertAssessment = useUpsertCriteriaAssessment(patientRecordId);
+  const deleteAssessment = useDeleteCriteriaAssessment(patientRecordId);
 
   // ── Derived state from documented diagnoses ─────────────────────────
   const documentedMap = useMemo(() => {
@@ -281,6 +289,32 @@ export function EvaluationView({
       });
     }
   }
+
+  // ── Criteria assessment callbacks ────────────────────────────────────
+  const handleAssessmentChange = useCallback(
+    (item: { criterionId: string; assessmentSide: Side | null; assessmentRegion: Region | null; assessmentSite: PalpationSite | null }, state: "positive" | "negative" | "pending") => {
+      upsertAssessment.mutate({
+        patientRecordId,
+        criterionId: item.criterionId,
+        side: item.assessmentSide,
+        region: item.assessmentRegion,
+        site: item.assessmentSite,
+        state,
+        userId,
+      });
+    },
+    [upsertAssessment, patientRecordId, userId],
+  );
+
+  const handleAssessmentClear = useCallback(
+    (item: { criterionId: string; assessmentSide: Side | null; assessmentRegion: Region | null; assessmentSite: PalpationSite | null; key: string }) => {
+      const assessment = criteriaAssessmentMap.get(item.key);
+      if (assessment) {
+        deleteAssessment.mutate(assessment.id);
+      }
+    },
+    [deleteAssessment, criteriaAssessmentMap],
+  );
 
   // ── Render ─────────────────────────────────────────────────────────
 
@@ -507,6 +541,9 @@ export function EvaluationView({
                   side={confirmSide!}
                   region={activeRegion!}
                   site={confirmSite ?? undefined}
+                  assessmentMap={criteriaAssessmentMap}
+                  onAssessmentChange={handleAssessmentChange}
+                  onAssessmentClear={handleAssessmentClear}
                   titleSlot={
                     <Select value={refDiagnosis.id} onValueChange={setRefDiagnosisId}>
                       <SelectTrigger className="w-56 h-7 text-sm font-semibold bg-background">

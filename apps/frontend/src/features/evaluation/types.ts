@@ -17,3 +17,14 @@ export interface DocumentedDiagnosis {
   documentedAt: string | null;
   note: string | null;
 }
+
+export interface CriteriaAssessment {
+  id: string;
+  criterionId: string;
+  side: Side | null;
+  region: Region | null;
+  site: PalpationSite | null;
+  state: "positive" | "negative" | "pending";
+  assessedBy: string | null;
+  assessedAt: string | null;
+}
