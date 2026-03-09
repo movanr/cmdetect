@@ -2,7 +2,10 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 import { config as dotenvConfig } from "dotenv";
 import fs from "fs";
 
-// Load secrets from server config if it exists (production deployment)
+// Load root .env for local development (HASURA_GRAPHQL_ADMIN_SECRET)
+dotenvConfig({ path: "../../.env" });
+
+// Load secrets from server config if it exists (production deployment, overrides local)
 if (fs.existsSync("/var/www/cmdetect/secrets.env")) {
   dotenvConfig({ path: "/var/www/cmdetect/secrets.env" });
 }
