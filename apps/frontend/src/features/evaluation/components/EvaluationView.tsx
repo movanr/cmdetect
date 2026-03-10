@@ -58,8 +58,9 @@ import {
   useDocumentDiagnosis,
   useUndocumentDiagnosis,
 } from "../hooks/use-save-diagnosis-evaluation";
+import type { CriterionUserState } from "../types";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
-import { CriteriaChecklist } from "./CriteriaChecklist";
+import { CriteriaChecklist, type ChecklistItem } from "./CriteriaChecklist";
 import { SummaryDiagrams } from "./SummaryDiagrams";
 
 interface EvaluationViewProps {
@@ -292,7 +293,7 @@ export function EvaluationView({
 
   // ── Criteria assessment callbacks ────────────────────────────────────
   const handleAssessmentChange = useCallback(
-    (item: { criterionId: string; assessmentSide: Side | null; assessmentRegion: Region | null; assessmentSite: PalpationSite | null }, state: "positive" | "negative" | "pending") => {
+    (item: ChecklistItem, state: CriterionUserState) => {
       upsertAssessment.mutate({
         patientRecordId,
         criterionId: item.criterionId,
@@ -307,7 +308,7 @@ export function EvaluationView({
   );
 
   const handleAssessmentClear = useCallback(
-    (item: { criterionId: string; assessmentSide: Side | null; assessmentRegion: Region | null; assessmentSite: PalpationSite | null; key: string }) => {
+    (item: ChecklistItem) => {
       const assessment = criteriaAssessmentMap.get(item.key);
       if (assessment) {
         deleteAssessment.mutate(assessment.id);

@@ -18,6 +18,8 @@ export interface DocumentedDiagnosis {
   note: string | null;
 }
 
+export type CriterionUserState = CriteriaAssessment["state"];
+
 export interface CriteriaAssessment {
   id: string;
   criterionId: string;

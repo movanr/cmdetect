@@ -5,7 +5,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
 import { UPSERT_CRITERIA_ASSESSMENT, DELETE_CRITERIA_ASSESSMENT } from "../queries";
-import { CRITERIA_ASSESSMENTS_QUERY_KEY, assessmentKey } from "./use-criteria-assessments";
+import { CRITERIA_ASSESSMENTS_QUERY_KEY } from "./use-criteria-assessments";
+import { assessmentKey } from "../utils/assessment-key";
 import type { CriteriaAssessment } from "../types";
 import type { PalpationSite, Region, Side } from "@cmdetect/dc-tmd";
 

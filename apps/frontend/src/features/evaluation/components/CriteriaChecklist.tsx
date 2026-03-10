@@ -36,11 +36,9 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
-import { assessmentKey } from "../hooks/use-criteria-assessments";
-import type { CriteriaAssessment } from "../types";
+import type { CriteriaAssessment, CriterionUserState } from "../types";
+import { assessmentKey } from "../utils/assessment-key";
 import { getDisplayGroups } from "../utils/criterion-data-display";
-
-type CriterionUserState = "positive" | "negative" | "pending";
 
 function isMismatch(
   userState: CriterionUserState | undefined,
@@ -61,13 +59,12 @@ interface CriteriaChecklistProps {
   readOnly?: boolean;
   /** Whether cross-diagnosis requirement is met (for headache) */
   requirementMet?: boolean;
-  /** Persisted assessment map — when provided, state is derived from it instead of local useState */
-  assessmentMap?: Map<string, CriteriaAssessment>;
-  onAssessmentChange?: (item: ChecklistItem, state: CriterionUserState) => void;
-  onAssessmentClear?: (item: ChecklistItem) => void;
+  assessmentMap: Map<string, CriteriaAssessment>;
+  onAssessmentChange: (item: ChecklistItem, state: CriterionUserState) => void;
+  onAssessmentClear: (item: ChecklistItem) => void;
 }
 
-interface ChecklistItem {
+export interface ChecklistItem {
   key: string;
   criterionId: string;
   assessmentSide: Side | null;
@@ -341,9 +338,7 @@ export function CriteriaChecklist({
   onAssessmentChange,
   onAssessmentClear,
 }: CriteriaChecklistProps) {
-  const isPersisted = !!assessmentMap;
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [localUserStates, setLocalUserStates] = useState<Record<string, CriterionUserState>>({});
 
   const evalResult = useMemo(
     () => evaluateDiagnosis(diagnosis, criteriaData),
@@ -365,14 +360,6 @@ export function CriteriaChecklist({
       }),
     [evalResult.anamnesisResult]
   );
-
-  // Reset local user states (not selection) on diagnosis change when not persisted
-  const resetKey = diagnosis.id;
-  const [prevResetKey, setPrevResetKey] = useState(resetKey);
-  if (resetKey !== prevResetKey) {
-    setPrevResetKey(resetKey);
-    if (!isPersisted) setLocalUserStates({});
-  }
 
   const sidedAnamnesisItems = useMemo(() => {
     if (!locationResult?.sidedAnamnesisResult) return null;
@@ -408,15 +395,13 @@ export function CriteriaChecklist({
     [examinationItems, locationLabel, sideDetail]
   );
 
-  // Derive userStates from persisted assessmentMap or local state
   const userStates = useMemo(() => {
-    if (!assessmentMap) return localUserStates;
     const states: Record<string, CriterionUserState> = {};
     for (const [key, assessment] of assessmentMap) {
       states[key] = assessment.state;
     }
     return states;
-  }, [assessmentMap, localUserStates]);
+  }, [assessmentMap]);
 
   // Derive selectedItem — keep selection stable across localisation/diagnosis changes
   // if the same item key still exists in the current list
@@ -436,23 +421,12 @@ export function CriteriaChecklist({
   const hasRequiresConstraint = !!diagnosis.requires;
 
   function handleStateChange(key: string, state: CriterionUserState) {
-    if (onAssessmentChange && onAssessmentClear) {
-      const item = allItems.find((i) => i.key === key);
-      if (!item) return;
-      if (userStates[key] === state) {
-        onAssessmentClear(item);
-      } else {
-        onAssessmentChange(item, state);
-      }
+    const item = allItems.find((i) => i.key === key);
+    if (!item) return;
+    if (userStates[key] === state) {
+      onAssessmentClear(item);
     } else {
-      setLocalUserStates((prev) => {
-        if (prev[key] === state) {
-          const next = { ...prev };
-          delete next[key];
-          return next;
-        }
-        return { ...prev, [key]: state };
-      });
+      onAssessmentChange(item, state);
     }
   }
 
