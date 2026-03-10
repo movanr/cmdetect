@@ -3,6 +3,7 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { execute } from "@/graphql/execute";
 import { UPSERT_CRITERIA_ASSESSMENT, DELETE_CRITERIA_ASSESSMENT } from "../queries";
 import { CRITERIA_ASSESSMENTS_QUERY_KEY } from "./use-criteria-assessments";
@@ -80,6 +81,7 @@ export function useUpsertCriteriaAssessment(patientRecordId: string) {
       if (context?.previous !== undefined) {
         queryClient.setQueryData(queryKey, context.previous);
       }
+      toast.error("Fehler beim Speichern der Bewertung");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey });
@@ -113,6 +115,7 @@ export function useDeleteCriteriaAssessment(patientRecordId: string) {
       if (context?.previous !== undefined) {
         queryClient.setQueryData(queryKey, context.previous);
       }
+      toast.error("Fehler beim Löschen der Bewertung");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey });
