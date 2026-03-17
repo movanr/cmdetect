@@ -30,97 +30,19 @@
  * Journal of Oral & Facial Pain and Headache, 28:6-27
  */
 
-import { GROUP_CONFIG, SITES_BY_GROUP, type Region } from "../../ids/anatomy";
-import { and, any, field, not } from "../builders";
+import { SITES_BY_GROUP } from "../../ids/anatomy";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion } from "../types";
-import { MYALGIA_ANAMNESIS, MYALGIA_REGIONS, siteRefs, regionGated, forEachRegion } from "./myalgia";
-
-// ============================================================================
-// SHARED HELPERS
-// ============================================================================
-
-/**
- * Criterion C: Confirmation of pain location in temporalis or masseter muscle
- * E1 pain location on ${side} includes ${region}
- *
- * Same as base myalgia — uses template variables resolved during evaluation.
- */
-const painLocationConfirmed: Criterion = field(
-  "e1.painLocation.${side}",
-  {
-    includes: "${region}",
-  },
-  {
-    id: "painLocationConfirmed",
-    label: "Bestätigung der Schmerzen in den Kaumuskel(n)",
-    sources: ["U1A"],
-  }
-);
-
-/**
- * Generate spreading site refs, returning empty array for regions without spreading.
- *
- * For regions where GROUP_CONFIG.hasSpreading is false (tmj, otherMast, nonMast),
- * returns [] so that any([], ...) evaluates to negative (no matching refs possible).
- * This makes "no spreading" auto-pass and "spreading present" auto-fail for these regions.
- */
-function spreadingSiteRefs(region: Region): string[] {
-  if (!GROUP_CONFIG[region].hasSpreading) return [];
-  return siteRefs(region, "spreadingPain");
-}
+import { MYALGIA_ANAMNESIS } from "./anamnesis-criteria";
+import {
+  MYALGIA_REGIONS,
+  localMyalgiaExamCriterion,
+  spreadingMyalgiaExamCriterion,
+  referralMyalgiaExamCriterion,
+} from "./examination-criteria";
 
 // ============================================================================
 // LOCAL MYALGIA
 // ============================================================================
-
-/**
- * Local Myalgia Examination Criteria:
- * C. Pain location confirmed in muscle (E1)
- * D. Familiar pain from palpation (E9 only, NOT E4 opening)
- * E. Pain remains local: no spreading AND no referred pain
- *
- * Sensitivity/Specificity: Not established
- */
-const localMyalgiaExamCriterion: Criterion = and(
-  [
-    painLocationConfirmed,
-    forEachRegion(
-      (region) => [
-        // D: Familiar pain from palpation of any site in the muscle group
-        any(
-          siteRefs(region, "familiarPain"),
-          { equals: "yes" },
-          {
-            id: `${region}PalpationFamiliar`,
-            label: "Bekannter Schmerz bei Muskelpalpation",
-          }
-        ),
-        // E: No spreading pain at any site in the muscle group
-        // For regions without spreading (otherMast/nonMast), spreadingSiteRefs returns []
-        // → any([], ...) evaluates to negative → not(negative) = positive (auto-pass)
-        not(any(spreadingSiteRefs(region), { equals: "yes" }), {
-          id: `${region}NoSpreading`,
-          label: "Kein ausbreitender Schmerz",
-        }),
-        // E: No referred pain at any site in the muscle group
-        not(any(siteRefs(region, "referredPain"), { equals: "yes" }), {
-          id: `${region}NoReferred`,
-          label: "Kein übertragener Schmerz",
-        }),
-      ],
-      {
-        id: "localMyalgiaPalpation",
-        label: "Palpation: bekannter Schmerz, ohne Ausbreitung, ohne Übertragung",
-        sources: ["U9", "U10"],
-      }
-    ),
-  ],
-  {
-    id: "localMyalgiaExam",
-    label: "Lokale Myalgie-Untersuchungsbefund",
-  }
-);
 
 export const LOCAL_MYALGIA_EXAMINATION: LocationCriterion = {
   regions: MYALGIA_REGIONS,
@@ -144,59 +66,6 @@ export const LOCAL_MYALGIA: DiagnosisDefinition = {
 // MYOFASCIAL PAIN WITH SPREADING
 // ============================================================================
 
-/**
- * Myofascial Pain with Spreading Examination Criteria:
- * C. Pain location confirmed in muscle (E1)
- * D. Familiar pain from palpation (E9 only)
- * E. Spreading pain present (within muscle boundary)
- * F. No referred pain (beyond muscle boundary)
- *
- * Sensitivity/Specificity: Not established
- */
-const spreadingMyalgiaExamCriterion: Criterion = and(
-  [
-    painLocationConfirmed,
-    forEachRegion(
-      (region) => [
-        // D: Familiar pain from palpation
-        any(
-          siteRefs(region, "familiarPain"),
-          { equals: "yes" },
-          {
-            id: `${region}PalpationFamiliar`,
-            label: "Bekannter Schmerz bei Muskelpalpation",
-          }
-        ),
-        // E: Spreading pain present at any site in the muscle group
-        // For regions without spreading, spreadingSiteRefs returns []
-        // → any([], ...) evaluates to negative → diagnosis impossible
-        any(
-          spreadingSiteRefs(region),
-          { equals: "yes" },
-          {
-            id: `${region}SpreadingPain`,
-            label: "Ausbreitender Schmerz bei Muskelpalpation",
-          }
-        ),
-        // F: No referred pain at any site in the muscle group
-        not(any(siteRefs(region, "referredPain"), { equals: "yes" }), {
-          id: `${region}NoReferred`,
-          label: "Kein übertragener Schmerz",
-        }),
-      ],
-      {
-        id: "spreadingMyalgiaPalpation",
-        label: "Palpation: bekannter Schmerz mit Ausbreitung, ohne Übertragung",
-        sources: ["U9", "U10"],
-      }
-    ),
-  ],
-  {
-    id: "spreadingMyalgiaExam",
-    label: "Myofaszialer Schmerz-Untersuchungsbefund",
-  }
-);
-
 export const MYOFASCIAL_SPREADING_EXAMINATION: LocationCriterion = {
   regions: MYALGIA_REGIONS,
   criterion: spreadingMyalgiaExamCriterion,
@@ -219,51 +88,6 @@ export const MYOFASCIAL_PAIN_WITH_SPREADING: DiagnosisDefinition = {
 // MYOFASCIAL PAIN WITH REFERRAL
 // ============================================================================
 
-/**
- * Myofascial Pain with Referral Examination Criteria:
- * C. Pain location confirmed in muscle (E1)
- * D. Familiar pain from palpation (E9 only)
- * E. Referred pain present (beyond muscle boundary)
- *
- * Sensitivity: 0.86 / Specificity: 0.98
- */
-const referralMyalgiaExamCriterion: Criterion = and(
-  [
-    painLocationConfirmed,
-    forEachRegion(
-      (region) => [
-        // D: Familiar pain from palpation
-        any(
-          siteRefs(region, "familiarPain"),
-          { equals: "yes" },
-          {
-            id: `${region}PalpationFamiliar`,
-            label: "Bekannter Schmerz bei Muskelpalpation",
-          }
-        ),
-        // E: Referred pain present at any site in the muscle group
-        any(
-          siteRefs(region, "referredPain"),
-          { equals: "yes" },
-          {
-            id: `${region}ReferredPain`,
-            label: "Übertragener Schmerz bei Muskelpalpation",
-          }
-        ),
-      ],
-      {
-        id: "referralMyalgiaPalpation",
-        label: "Palpation: bekannter Schmerz mit Übertragung",
-        sources: ["U9", "U10"],
-      }
-    ),
-  ],
-  {
-    id: "referralMyalgiaExam",
-    label: "Myofaszialer Schmerz mit Übertragung-Untersuchungsbefund",
-  }
-);
-
 export const MYOFASCIAL_REFERRAL_EXAMINATION: LocationCriterion = {
   regions: MYALGIA_REGIONS,
   criterion: referralMyalgiaExamCriterion,
@@ -273,6 +97,9 @@ export const MYOFASCIAL_REFERRAL_EXAMINATION: LocationCriterion = {
   },
 };
 
+/**
+ * Sensitivity: 0.86 / Specificity: 0.98
+ */
 export const MYOFASCIAL_PAIN_WITH_REFERRAL: DiagnosisDefinition = {
   id: "myofascialPainWithReferral",
   name: "Myofascial Pain with Referral",

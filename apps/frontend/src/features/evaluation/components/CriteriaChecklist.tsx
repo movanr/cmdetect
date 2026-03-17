@@ -86,26 +86,24 @@ interface ChecklistItemScope {
 
 function extractChecklistItems(
   result: CriterionResult,
-  fallbackLabel: string,
-  prefix: string,
   scope: ChecklistItemScope,
 ): ChecklistItem[] {
   if (isCompositeResult(result) && result.criterion.type === "and") {
-    return result.children.map((child, i) => {
-      const id = getCriterionId(child.criterion) ?? `${prefix}-${i}`;
+    return result.children.map((child) => {
+      const id = getCriterionId(child.criterion)!;
       return {
         key: assessmentKey(id, scope.side, scope.region, scope.site),
         criterionId: id,
         assessmentSide: scope.side,
         assessmentRegion: scope.region,
         assessmentSite: scope.site,
-        label: getCriterionLabel(child.criterion) ?? fallbackLabel,
+        label: getCriterionLabel(child.criterion)!,
         sources: getCriterionSources(child.criterion),
         result: child,
       };
     });
   }
-  const id = getCriterionId(result.criterion) ?? prefix;
+  const id = getCriterionId(result.criterion)!;
   return [
     {
       key: assessmentKey(id, scope.side, scope.region, scope.site),
@@ -113,7 +111,7 @@ function extractChecklistItems(
       assessmentSide: scope.side,
       assessmentRegion: scope.region,
       assessmentSite: scope.site,
-      label: getCriterionLabel(result.criterion) ?? fallbackLabel,
+      label: getCriterionLabel(result.criterion)!,
       sources: getCriterionSources(result.criterion),
       result,
     },
@@ -353,7 +351,7 @@ export function CriteriaChecklist({
   // Extract checklist items with scope for assessment key generation
   const anamnesisItems = useMemo(
     () =>
-      extractChecklistItems(evalResult.anamnesisResult, "Anamnese", "anamnesis", {
+      extractChecklistItems(evalResult.anamnesisResult, {
         side: null,
         region: null,
         site: null,
@@ -365,8 +363,6 @@ export function CriteriaChecklist({
     if (!locationResult?.sidedAnamnesisResult) return null;
     return extractChecklistItems(
       locationResult.sidedAnamnesisResult,
-      "Anamnese",
-      `sided-anamnesis:${side}`,
       { side, region: null, site: null },
     );
   }, [locationResult, side]);
@@ -375,8 +371,6 @@ export function CriteriaChecklist({
     if (!locationResult) return [];
     return extractChecklistItems(
       locationResult.examinationResult,
-      "Untersuchungsbefund",
-      `examination:${side}:${region}`,
       { side, region, site: site ?? null },
     );
   }, [locationResult, side, region, site]);

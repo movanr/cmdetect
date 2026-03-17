@@ -12,77 +12,18 @@
  * Sensitivity: 0.89 / Specificity: 0.98
  */
 
-import {
-  and,
-  any,
-  familiarPainDuringMovement,
-  familiarPainDuringOpening,
-  field,
-  getSiteRefsTemplate,
-  or,
-} from "../builders";
+import { and } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion } from "../types";
-import { painInMasticatoryStructure, painModifiedByFunction } from "./myalgia";
+import { ARTHRALGIA_ANAMNESIS } from "./anamnesis-criteria";
+import { familiarPainProvokedTmj, painLocationConfirmedTmj } from "./examination-criteria";
+
+// Re-export for backwards compatibility
+export { ARTHRALGIA_ANAMNESIS } from "./anamnesis-criteria";
+export { painLocationConfirmedTmj, familiarPainProvokedTmj } from "./examination-criteria";
 
 // ============================================================================
-// ANAMNESIS CRITERIA — same as myalgia (A+B)
+// EXAMINATION (per-location, region = tmj)
 // ============================================================================
-
-export const ARTHRALGIA_ANAMNESIS: Criterion = and(
-  [painInMasticatoryStructure, painModifiedByFunction],
-  {
-    id: "arthralgiaHistory",
-    label: "Arthralgie-Anamnese",
-  }
-);
-
-// ============================================================================
-// EXAMINATION CRITERIA (per-location, region = tmj)
-// ============================================================================
-
-/**
- * Criterion C: Confirmation of pain location in TMJ
- * E1 pain location on ${side} includes "tmj"
- */
-export const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side}", {
-  includes: "tmj",
-}, {
-  id: "painLocationConfirmedTmj",
-  label: "Bestätigung von Schmerzen in Kiefergelenk(en)",
-  sources: ["U1A"],
-});
-
-/**
- * Criterion D: Familiar pain in TMJ provoked by ONE of:
- * - E4 opening (maxUnassisted or maxAssisted)
- * - E5 lateral/protrusive movements
- * - E9 TMJ palpation (lateral pole or around lateral pole)
- */
-export const familiarPainProvokedTmj: Criterion = or(
-  [
-    familiarPainDuringOpening("${side}", "tmj", {
-      id: "openingFamiliarPainTmj",
-      label: "Bekannter Schmerz bei Mundöffnung (KG)",
-      sources: ["U4B", "U4C"],
-    }),
-    familiarPainDuringMovement("${side}", "tmj", {
-      id: "movementFamiliarPainTmj",
-      label: "Bekannter Schmerz bei Lateral-/Protrusionsbewegung (KG)",
-      sources: ["U5A", "U5B", "U5C"],
-    }),
-    any(getSiteRefsTemplate("tmj", "familiarPain"), { equals: "yes" }, {
-      id: "tmjPalpationFamiliarPain",
-      label: "Bekannter Schmerz bei Palpation (KG)",
-      sources: ["U9"],
-    }),
-  ],
-  {
-    id: "familiarPainTmj",
-    label: "Bekannte Schmerzen des Kiefergelenks bei Palpation oder Kieferbewegungen",
-    sources: ["U4B", "U4C", "U5A", "U5B", "U5C", "U9"],
-  }
-);
 
 export const ARTHRALGIA_EXAMINATION: LocationCriterion = {
   regions: ["tmj"],

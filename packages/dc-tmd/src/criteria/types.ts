@@ -50,6 +50,12 @@ export interface CriterionMetadata {
   sources?: string[];
 }
 
+/**
+ * Strict metadata requiring id, label, and sources — used for building-block criteria
+ * that appear in the criteria checklist UI.
+ */
+export type ChecklistCriterionMetadata = Required<Pick<CriterionMetadata, "id" | "label" | "sources">>;
+
 // ============================================================================
 // LEAF CRITERIA (reference data directly)
 // ============================================================================

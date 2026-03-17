@@ -10,42 +10,13 @@
  * Sensitivity: 0.55 / Specificity: 0.61
  */
 
-import { any, or } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import { TMJ_NOISE_ANAMNESIS, TMJ_NOISE_SIDED_ANAMNESIS } from "./disc-displacement";
+import { TMJ_NOISE_ANAMNESIS, TMJ_NOISE_SIDED_ANAMNESIS } from "./anamnesis-criteria";
+import { crepitusByExaminer } from "./examination-criteria";
 
 // ============================================================================
 // EXAMINATION CRITERIA
 // ============================================================================
-
-/**
- * Crepitus detected by examiner during opening/closing (E6) or
- * lateral/protrusive movements (E7)
- */
-const crepitusByExaminer = or(
-  [
-    any(
-      [
-        "e6.${side}.crepitus.examinerOpen",
-        "e6.${side}.crepitus.examinerClose",
-      ],
-      { equals: "yes" },
-      { id: "e6Crepitus", label: "Reiben bei Öffnung/Schließung" }
-    ),
-    any(
-      [
-        "e7.${side}.crepitus.examiner",
-      ],
-      { equals: "yes" },
-      { id: "e7Crepitus", label: "Reiben bei Lateralbewegung" }
-    ),
-  ],
-  {
-    id: "crepitusByExaminer",
-    label: "Reiben bei Kieferbewegungen",
-    sources: ["U6", "U7"],
-  }
-);
 
 const DJD_EXAMINATION: LocationCriterion = {
   regions: ["tmj"],

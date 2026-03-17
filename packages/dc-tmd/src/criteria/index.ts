@@ -26,6 +26,7 @@ export {
   type NumericOperator,
   type FieldCondition,
   type CriterionMetadata,
+  type ChecklistCriterionMetadata,
   type FieldCriterion,
   type ThresholdCriterion,
   type ComputedCriterion,
@@ -105,16 +106,55 @@ export {
   getDiagnosisClinicalContext,
 } from "./clinical-context";
 
-// Diagnoses — Pain disorders
+// Anamnesis building blocks
 export {
-  MYALGIA,
-  MYALGIA_ANAMNESIS,
-  MYALGIA_EXAMINATION,
   painInMasticatoryStructure,
   painModifiedByFunction,
+  headacheInTemporalRegion,
+  headacheModifiedByFunction,
+  TMJ_NOISE_ANAMNESIS,
+  intermittentLockingAnamnesis,
+  jawLockingAnamnesis,
+  lockingAffectsEatingAnamnesis,
+  jawLockingOpenPositionAnamnesis,
+  unableToCloseWithoutManeuverAnamnesis,
+  MYALGIA_ANAMNESIS,
+  ARTHRALGIA_ANAMNESIS,
+  HEADACHE_ANAMNESIS,
+  DD_WITH_REDUCTION_IL_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_ANAMNESIS,
+  SUBLUXATION_ANAMNESIS,
+  TMJ_NOISE_SIDED_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
+  DD_WITH_REDUCTION_IL_SIDED_ANAMNESIS,
+  SUBLUXATION_SIDED_ANAMNESIS,
+} from "./diagnoses/anamnesis-criteria";
+
+// Examination building blocks
+export {
+  MYALGIA_REGIONS,
+  siteRefs,
+  regionGated,
+  forEachRegion,
+  spreadingSiteRefs,
   painLocationConfirmed,
   familiarPainProvoked,
-} from "./diagnoses/myalgia";
+  painLocationConfirmedTmj,
+  familiarPainProvokedTmj,
+  headacheLocationConfirmed,
+  familiarHeadacheProvoked,
+  ddWithReductionExam,
+  passiveStretchLimited,
+  passiveStretchNotLimited,
+  crepitusByExaminer,
+  subluxationExam,
+  localMyalgiaExamCriterion,
+  spreadingMyalgiaExamCriterion,
+  referralMyalgiaExamCriterion,
+} from "./diagnoses/examination-criteria";
+
+// Diagnoses — Pain disorders
+export { MYALGIA, MYALGIA_EXAMINATION } from "./diagnoses/myalgia";
 export {
   LOCAL_MYALGIA,
   LOCAL_MYALGIA_EXAMINATION,
@@ -123,45 +163,18 @@ export {
   MYOFASCIAL_PAIN_WITH_REFERRAL,
   MYOFASCIAL_REFERRAL_EXAMINATION,
 } from "./diagnoses/myalgia-subtypes";
-export {
-  ARTHRALGIA,
-  ARTHRALGIA_ANAMNESIS,
-  ARTHRALGIA_EXAMINATION,
-  painLocationConfirmedTmj,
-  familiarPainProvokedTmj,
-} from "./diagnoses/arthralgia";
-export {
-  HEADACHE_ATTRIBUTED_TO_TMD,
-  HEADACHE_ANAMNESIS,
-  HEADACHE_EXAMINATION,
-  headacheInTemporalRegion,
-  headacheModifiedByFunction,
-  headacheLocationConfirmed,
-  familiarHeadacheProvoked,
-} from "./diagnoses/headache";
+export { ARTHRALGIA, ARTHRALGIA_EXAMINATION } from "./diagnoses/arthralgia";
+export { HEADACHE_ATTRIBUTED_TO_TMD, HEADACHE_EXAMINATION } from "./diagnoses/headache";
 
 // Diagnoses — Joint disorders
 export {
-  TMJ_NOISE_ANAMNESIS,
-  TMJ_NOISE_SIDED_ANAMNESIS,
-  DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
-  DD_WITHOUT_REDUCTION_ANAMNESIS,
-  jawLockingAnamnesis,
-  lockingAffectsEatingAnamnesis,
-  intermittentLockingAnamnesis,
   DISC_DISPLACEMENT_WITH_REDUCTION,
   DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
   DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING,
   DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING,
 } from "./diagnoses/disc-displacement";
 export { DEGENERATIVE_JOINT_DISEASE } from "./diagnoses/degenerative-joint-disease";
-export {
-  SUBLUXATION,
-  SUBLUXATION_ANAMNESIS,
-  SUBLUXATION_SIDED_ANAMNESIS,
-  jawLockingOpenPositionAnamnesis,
-  unableToCloseWithoutManeuverAnamnesis,
-} from "./diagnoses/subluxation";
+export { SUBLUXATION } from "./diagnoses/subluxation";
 
 // All diagnoses (for iteration)
 import { MYALGIA } from "./diagnoses/myalgia";

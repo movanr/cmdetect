@@ -14,81 +14,25 @@
  * Sensitivity: 0.98 / Specificity: 1.0
  */
 
-import { and, field, match } from "../builders";
-import { sq, sqSide } from "../field-refs";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion } from "../types";
+import { SUBLUXATION_ANAMNESIS, SUBLUXATION_SIDED_ANAMNESIS } from "./anamnesis-criteria";
+import { subluxationExam } from "./examination-criteria";
 
-// ============================================================================
-// ANAMNESIS CRITERIA
-// ============================================================================
-
-/**
- * SQ13: Jaw locking or catching in wide-open position.
- */
-export const jawLockingOpenPositionAnamnesis: Criterion = field(sq("SQ13"), { equals: "yes" }, {
-  id: "jawLockingOpenPosition",
-  label: "KG-Arretierung oder Hängen bleiben bei weit geöffneter Kieferposition",
-  sources: ["SF13"],
-});
-
-/**
- * SQ14: Inability to close mouth without special maneuver.
- */
-export const unableToCloseWithoutManeuverAnamnesis: Criterion = field(sq("SQ14"), { equals: "yes" }, {
-  id: "unableToCloseWithoutManeuver",
-  label: "Unfähigkeit den Mund ohne spezielles Umlenken zu schließen",
-  sources: ["SF14"],
-});
-
-export const SUBLUXATION_ANAMNESIS: Criterion = and(
-  [jawLockingOpenPositionAnamnesis, unableToCloseWithoutManeuverAnamnesis],
-  {
-    id: "subluxationHistory",
-    label: "Subluxation-Anamnese",
-  }
-);
-
-// ============================================================================
-// SIDED ANAMNESIS (per-side gate)
-// ============================================================================
-
-/**
- * Per-side gate for Subluxation: both SQ13 and SQ14 office-use must match this side.
- */
-export const SUBLUXATION_SIDED_ANAMNESIS: Criterion = and(
-  [
-    field(sqSide("SQ13"), { equals: true }, {
-      label: "KG-Arretierung bei weit geöffneter Position",
-      sources: ["SF13"],
-    }),
-    field(sqSide("SQ14"), { equals: true }, {
-      label: "Unfähigkeit den Mund ohne Umlenken zu schließen",
-      sources: ["SF14"],
-    }),
-  ],
-  {
-    id: "subluxationSidedAnamnesis",
-    label: "Subluxation",
-    sources: ["SF13", "SF14"],
-  }
-);
+// Re-export for backwards compatibility
+export {
+  jawLockingOpenPositionAnamnesis,
+  unableToCloseWithoutManeuverAnamnesis,
+  SUBLUXATION_ANAMNESIS,
+  SUBLUXATION_SIDED_ANAMNESIS,
+} from "./anamnesis-criteria";
 
 // ============================================================================
 // EXAMINATION CRITERIA
 // ============================================================================
 
-/**
- * Examination is optional per DC/TMD: "if disorder occurs clinically, redirect
- * to close mouth required (E8 optional)". Since anamnesis is sufficient and
- * exam is optional, we use a trivial match on the TMJ region.
- */
 const SUBLUXATION_EXAMINATION: LocationCriterion = {
   regions: ["tmj"],
-  criterion: match("${region}", "tmj", {
-    id: "subluxationExam",
-    label: "Umlenken zum Mundschluss erforderlich (optional)",
-  }),
+  criterion: subluxationExam,
 };
 
 // ============================================================================

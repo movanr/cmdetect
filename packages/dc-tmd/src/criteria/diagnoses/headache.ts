@@ -15,101 +15,22 @@
  * Sensitivity: 0.89 / Specificity: 0.87
  */
 
-import {
-  and,
-  any,
-  familiarHeadacheDuringMovement,
-  familiarHeadacheDuringOpening,
-  field,
-  getSiteRefsTemplate,
-  or,
-} from "../builders";
-import { sq } from "../field-refs";
+import { and } from "../builders";
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
-import type { Criterion } from "../types";
+import { HEADACHE_ANAMNESIS } from "./anamnesis-criteria";
+import { familiarHeadacheProvoked, headacheLocationConfirmed } from "./examination-criteria";
+
+// Re-export for backwards compatibility
+export {
+  headacheInTemporalRegion,
+  headacheModifiedByFunction,
+  HEADACHE_ANAMNESIS,
+} from "./anamnesis-criteria";
+export { headacheLocationConfirmed, familiarHeadacheProvoked } from "./examination-criteria";
 
 // ============================================================================
-// ANAMNESIS CRITERIA
+// EXAMINATION (per-location, region = temporalis)
 // ============================================================================
-
-/**
- * Criterion A: Headache of any type in the temporal region
- * SQ5 = "yes"
- */
-export const headacheInTemporalRegion: Criterion = field(sq("SQ5"), { equals: "yes" }, {
-  id: "headacheInTemporalRegion",
-  label: "Kopfschmerzen jeglicher Art in der Temporalregion",
-  sources: ["SF5"],
-});
-
-/**
- * Criterion B: Headache modified by jaw movement, function, or parafunction
- * Any of SQ7_A, SQ7_B, SQ7_C, SQ7_D = "yes"
- */
-export const headacheModifiedByFunction: Criterion = any(
-  [sq("SQ7_A"), sq("SQ7_B"), sq("SQ7_C"), sq("SQ7_D")],
-  { equals: "yes" },
-  {
-    id: "headacheModified",
-    label: "Kopfschmerzen, die durch Kieferbewegungen, Funktion oder Parafunktion beeinflusst werden",
-    sources: ["SF7"],
-  }
-);
-
-export const HEADACHE_ANAMNESIS: Criterion = and(
-  [headacheInTemporalRegion, headacheModifiedByFunction],
-  {
-    id: "headacheHistory",
-    label: "Kopfschmerz-Anamnese",
-  }
-);
-
-// ============================================================================
-// EXAMINATION CRITERIA (per-location, region = temporalis)
-// ============================================================================
-
-/**
- * Criterion C: Confirmation of headache location in temporalis
- * E1b headache location on ${side} includes "temporalis"
- */
-export const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.${side}", {
-  includes: "temporalis",
-}, {
-  id: "headacheLocationConfirmed",
-  label: "Bestätigung von Kopfschmerzen im M. temporalis",
-  sources: ["U1B"],
-});
-
-/**
- * Criterion D: Familiar headache in temporalis provoked by ONE of:
- * - E4 opening (familiar headache)
- * - E5 lateral/protrusive movements (familiar headache)
- * - E9 temporalis palpation (familiar headache)
- */
-export const familiarHeadacheProvoked: Criterion = or(
-  [
-    familiarHeadacheDuringOpening("${side}", "temporalis", {
-      id: "openingFamiliarHeadache",
-      label: "Bekannter Kopfschmerz bei Mundöffnung",
-      sources: ["U4B", "U4C"],
-    }),
-    familiarHeadacheDuringMovement("${side}", "temporalis", {
-      id: "movementFamiliarHeadache",
-      label: "Bekannter Kopfschmerz bei Lateral-/Protrusionsbewegung",
-      sources: ["U5A", "U5B", "U5C"],
-    }),
-    any(getSiteRefsTemplate("temporalis", "familiarHeadache"), { equals: "yes" }, {
-      id: "temporalisPalpationFamiliarHeadache",
-      label: "Bekannter Kopfschmerz bei Palpation",
-      sources: ["U9"],
-    }),
-  ],
-  {
-    id: "familiarHeadache",
-    label: "Angabe von bekanntem Kopfschmerz in der Temporalisregion durch Palpation des M. temporalis oder Kieferbewegungen",
-    sources: ["U4B", "U4C", "U5A", "U5B", "U5C", "U9"],
-  }
-);
 
 export const HEADACHE_EXAMINATION: LocationCriterion = {
   regions: ["temporalis"],
