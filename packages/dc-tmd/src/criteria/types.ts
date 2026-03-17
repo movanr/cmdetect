@@ -56,6 +56,12 @@ export interface CriterionMetadata {
  */
 export type ChecklistCriterionMetadata = Required<Pick<CriterionMetadata, "id" | "label" | "sources">>;
 
+/**
+ * A criterion with guaranteed display metadata.
+ * Used for building-block criteria that appear as checklist rows.
+ */
+export type NamedCriterion = Criterion & ChecklistCriterionMetadata;
+
 // ============================================================================
 // LEAF CRITERIA (reference data directly)
 // ============================================================================

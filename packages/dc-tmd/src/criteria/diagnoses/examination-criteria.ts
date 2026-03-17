@@ -27,7 +27,7 @@ import {
   not,
   or,
 } from "../builders";
-import type { Criterion, CriterionMetadata } from "../types";
+import type { ChecklistCriterionMetadata, Criterion, CriterionMetadata, NamedCriterion } from "../types";
 
 // ============================================================================
 // MYALGIA HELPERS
@@ -69,6 +69,14 @@ export function regionGated(region: Region, criteria: Criterion[]): Criterion {
  */
 export function forEachRegion(
   buildCriteria: (region: Region) => Criterion[],
+  metadata: ChecklistCriterionMetadata
+): NamedCriterion;
+export function forEachRegion(
+  buildCriteria: (region: Region) => Criterion[],
+  metadata?: CriterionMetadata
+): Criterion;
+export function forEachRegion(
+  buildCriteria: (region: Region) => Criterion[],
   metadata?: CriterionMetadata
 ): Criterion {
   return or(
@@ -96,7 +104,7 @@ export function spreadingSiteRefs(region: Region): string[] {
  * Criterion C: Confirmation of pain location in temporalis or masseter muscle
  * E1 pain location on ${side} includes ${region}
  */
-export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}", {
+export const painLocationConfirmed: NamedCriterion = field("e1.painLocation.${side}", {
   includes: "${region}",
 }, {
   id: "painLocationConfirmed",
@@ -111,7 +119,7 @@ export const painLocationConfirmed: Criterion = field("e1.painLocation.${side}",
  *
  * Region-gated: only evaluates sites matching the current evaluation region.
  */
-export const familiarPainProvoked: Criterion = forEachRegion(
+export const familiarPainProvoked: NamedCriterion = forEachRegion(
   (region) => [
     or(
       [
@@ -149,7 +157,7 @@ export const familiarPainProvoked: Criterion = forEachRegion(
  * Criterion C: Confirmation of pain location in TMJ
  * E1 pain location on ${side} includes "tmj"
  */
-export const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side}", {
+export const painLocationConfirmedTmj: NamedCriterion = field("e1.painLocation.${side}", {
   includes: "tmj",
 }, {
   id: "painLocationConfirmedTmj",
@@ -163,7 +171,7 @@ export const painLocationConfirmedTmj: Criterion = field("e1.painLocation.${side
  * - E5 lateral/protrusive movements
  * - E9 TMJ palpation (lateral pole or around lateral pole)
  */
-export const familiarPainProvokedTmj: Criterion = or(
+export const familiarPainProvokedTmj: NamedCriterion = or(
   [
     familiarPainDuringOpening("${side}", "tmj", {
       id: "openingFamiliarPainTmj",
@@ -196,7 +204,7 @@ export const familiarPainProvokedTmj: Criterion = or(
  * Criterion C: Confirmation of headache location in temporalis
  * E1b headache location on ${side} includes "temporalis"
  */
-export const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.${side}", {
+export const headacheLocationConfirmed: NamedCriterion = field("e1.headacheLocation.${side}", {
   includes: "temporalis",
 }, {
   id: "headacheLocationConfirmed",
@@ -210,7 +218,7 @@ export const headacheLocationConfirmed: Criterion = field("e1.headacheLocation.$
  * - E5 lateral/protrusive movements (familiar headache)
  * - E9 temporalis palpation (familiar headache)
  */
-export const familiarHeadacheProvoked: Criterion = or(
+export const familiarHeadacheProvoked: NamedCriterion = or(
   [
     familiarHeadacheDuringOpening("${side}", "temporalis", {
       id: "openingFamiliarHeadache",
@@ -246,7 +254,7 @@ export const familiarHeadacheProvoked: Criterion = or(
  * OR
  * b) E6 click on opening OR closing AND E7 click (same side)
  */
-export const ddWithReductionExam: Criterion = or(
+export const ddWithReductionExam: NamedCriterion = or(
   [
     // a) Click during both opening AND closing
     and([
@@ -272,7 +280,7 @@ export const ddWithReductionExam: Criterion = or(
 /**
  * Examination: maxAssisted opening + vertical overlap < 40mm
  */
-export const passiveStretchLimited: Criterion = computed(
+export const passiveStretchLimited: NamedCriterion = computed(
   ["e4.maxAssisted.measurement", "e2.verticalOverlap"],
   (v) =>
     ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
@@ -290,7 +298,7 @@ export const passiveStretchLimited: Criterion = computed(
 /**
  * Examination: maxAssisted opening + vertical overlap >= 40mm
  */
-export const passiveStretchNotLimited: Criterion = computed(
+export const passiveStretchNotLimited: NamedCriterion = computed(
   ["e4.maxAssisted.measurement", "e2.verticalOverlap"],
   (v) =>
     ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
@@ -313,7 +321,7 @@ export const passiveStretchNotLimited: Criterion = computed(
  * Crepitus detected by examiner during opening/closing (E6) or
  * lateral/protrusive movements (E7)
  */
-export const crepitusByExaminer: Criterion = or(
+export const crepitusByExaminer: NamedCriterion = or(
   [
     any(
       [
@@ -346,9 +354,10 @@ export const crepitusByExaminer: Criterion = or(
  * Examination is optional per DC/TMD: "if disorder occurs clinically, redirect
  * to close mouth required (E8 optional)". Trivial match on TMJ region.
  */
-export const subluxationExam: Criterion = match("${region}", "tmj", {
+export const subluxationExam: NamedCriterion = match("${region}", "tmj", {
   id: "subluxationExam",
   label: "Umlenken zum Mundschluss erforderlich (optional)",
+  sources: ["U8"],
 });
 
 // ============================================================================

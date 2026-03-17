@@ -7,6 +7,7 @@
 
 import { SITES_BY_GROUP, SITE_CONFIG, type Region, type PainType } from "../ids/anatomy";
 import type {
+  ChecklistCriterionMetadata,
   Criterion,
   FieldCondition,
   FieldCriterion,
@@ -33,6 +34,8 @@ import type {
  * field("sq.SQ1", { equals: "yes" })
  * field("e1.painLocation.${side}", { includes: "${region}" })
  */
+export function field(ref: string, condition: FieldCondition, metadata: ChecklistCriterionMetadata): FieldCriterion & ChecklistCriterionMetadata;
+export function field(ref: string, condition: FieldCondition, metadata?: CriterionMetadata): FieldCriterion;
 export function field(ref: string, condition: FieldCondition, metadata?: CriterionMetadata): FieldCriterion {
   return {
     type: "field",
@@ -70,6 +73,8 @@ export function threshold(ref: string, operator: NumericOperator, value: number,
  *   40
  * )
  */
+export function computed(refs: string[], compute: (values: Record<string, unknown>) => number, operator: NumericOperator, value: number, metadata: ChecklistCriterionMetadata & { defaults?: Record<string, number> }): ComputedCriterion & ChecklistCriterionMetadata;
+export function computed(refs: string[], compute: (values: Record<string, unknown>) => number, operator: NumericOperator, value: number, metadata?: CriterionMetadata & { defaults?: Record<string, number> }): ComputedCriterion;
 export function computed(
   refs: string[],
   compute: (values: Record<string, unknown>) => number,
@@ -102,6 +107,8 @@ export function computed(
  * // Only activates for the left side
  * match("${side}", "left")
  */
+export function match(ref: string, value: string, metadata: ChecklistCriterionMetadata): MatchCriterion & ChecklistCriterionMetadata;
+export function match(ref: string, value: string, metadata?: CriterionMetadata): MatchCriterion;
 export function match(ref: string, value: string, metadata?: CriterionMetadata): MatchCriterion {
   return {
     type: "match",
@@ -130,6 +137,8 @@ export function match(ref: string, value: string, metadata?: CriterionMetadata):
  *   { id: "painInMasticatory", label: "Schmerz in Kaumuskulatur" }
  * )
  */
+export function and(criteria: Criterion[], metadata: ChecklistCriterionMetadata): AndCriterion & ChecklistCriterionMetadata;
+export function and(criteria: Criterion[], metadata?: CriterionMetadata): AndCriterion;
 export function and(criteria: Criterion[], metadata?: CriterionMetadata): AndCriterion {
   return {
     type: "and",
@@ -147,6 +156,8 @@ export function and(criteria: Criterion[], metadata?: CriterionMetadata): AndCri
  *   field("sq.SQ3", { equals: "continuous" }),
  * ])
  */
+export function or(criteria: Criterion[], metadata: ChecklistCriterionMetadata): OrCriterion & ChecklistCriterionMetadata;
+export function or(criteria: Criterion[], metadata?: CriterionMetadata): OrCriterion;
 export function or(criteria: Criterion[], metadata?: CriterionMetadata): OrCriterion {
   return {
     type: "or",
@@ -189,6 +200,8 @@ export function not(criterion: Criterion, metadata?: CriterionMetadata): NotCrit
  * // Require minimum count
  * any(refs, { equals: "yes" }, { minCount: 2 })
  */
+export function any(refs: string[], condition: FieldCondition, options: ChecklistCriterionMetadata & { minCount?: number }): AnyCriterion & ChecklistCriterionMetadata;
+export function any(refs: string[], condition: FieldCondition, options?: CriterionMetadata & { minCount?: number }): AnyCriterion;
 export function any(
   refs: string[],
   condition: FieldCondition,

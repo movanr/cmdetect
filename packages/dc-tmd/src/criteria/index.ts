@@ -27,6 +27,7 @@ export {
   type FieldCondition,
   type CriterionMetadata,
   type ChecklistCriterionMetadata,
+  type NamedCriterion,
   type FieldCriterion,
   type ThresholdCriterion,
   type ComputedCriterion,

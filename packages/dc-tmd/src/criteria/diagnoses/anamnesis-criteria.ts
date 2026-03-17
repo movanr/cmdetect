@@ -7,7 +7,7 @@
 
 import { and, any, field, or } from "../builders";
 import { sq, sqSide } from "../field-refs";
-import type { Criterion } from "../types";
+import type { Criterion, NamedCriterion } from "../types";
 
 // ============================================================================
 // INDIVIDUAL BUILDING BLOCKS
@@ -17,7 +17,7 @@ import type { Criterion } from "../types";
  * Criterion A (Myalgia/Arthralgia): Pain in jaw, temple, in ear, or in front of ear
  * SQ1 = "yes" AND SQ3 ∈ ["intermittent", "continuous"]
  */
-export const painInMasticatoryStructure: Criterion = and(
+export const painInMasticatoryStructure: NamedCriterion = and(
   [
     field(sq("SQ1"), { equals: "yes" }),
     or([field(sq("SQ3"), { equals: "intermittent" }), field(sq("SQ3"), { equals: "continuous" })]),
@@ -33,7 +33,7 @@ export const painInMasticatoryStructure: Criterion = and(
  * Criterion B (Myalgia/Arthralgia): Pain modified by jaw movement, function, or parafunction
  * Any of SQ4_A, SQ4_B, SQ4_C, SQ4_D = "yes"
  */
-export const painModifiedByFunction: Criterion = any(
+export const painModifiedByFunction: NamedCriterion = any(
   [sq("SQ4_A"), sq("SQ4_B"), sq("SQ4_C"), sq("SQ4_D")],
   { equals: "yes" },
   {
@@ -47,7 +47,7 @@ export const painModifiedByFunction: Criterion = any(
  * Criterion A (Headache): Headache of any type in the temporal region
  * SQ5 = "yes"
  */
-export const headacheInTemporalRegion: Criterion = field(sq("SQ5"), { equals: "yes" }, {
+export const headacheInTemporalRegion: NamedCriterion = field(sq("SQ5"), { equals: "yes" }, {
   id: "headacheInTemporalRegion",
   label: "Kopfschmerzen jeglicher Art in der Temporalregion",
   sources: ["SF5"],
@@ -57,7 +57,7 @@ export const headacheInTemporalRegion: Criterion = field(sq("SQ5"), { equals: "y
  * Criterion B (Headache): Headache modified by jaw movement, function, or parafunction
  * Any of SQ7_A, SQ7_B, SQ7_C, SQ7_D = "yes"
  */
-export const headacheModifiedByFunction: Criterion = any(
+export const headacheModifiedByFunction: NamedCriterion = any(
   [sq("SQ7_A"), sq("SQ7_B"), sq("SQ7_C"), sq("SQ7_D")],
   { equals: "yes" },
   {
@@ -75,7 +75,7 @@ export const headacheModifiedByFunction: Criterion = any(
  *
  * SQ8 = "yes" OR any patient-reported noise during E6/E7
  */
-export const TMJ_NOISE_ANAMNESIS: Criterion = or(
+export const TMJ_NOISE_ANAMNESIS: NamedCriterion = or(
   [
     field(sq("SQ8"), { equals: "yes" }),
     // Patient reports noise during E6 (opening/closing)
@@ -112,7 +112,7 @@ export const TMJ_NOISE_ANAMNESIS: Criterion = or(
  * SQ11 + SQ12: Intermittent locking — locking occurred in last 30 days (SQ11=yes)
  * AND not currently locked, i.e. the locking resolved (SQ12=no).
  */
-export const intermittentLockingAnamnesis: Criterion = and([
+export const intermittentLockingAnamnesis: NamedCriterion = and([
   field(sq("SQ11"), { equals: "yes" }),
   field(sq("SQ12"), { equals: "no" }),
 ], {
@@ -124,7 +124,7 @@ export const intermittentLockingAnamnesis: Criterion = and([
 /**
  * SQ9: Jaw ever locked/caught with limited opening.
  */
-export const jawLockingAnamnesis: Criterion = field(sq("SQ9"), { equals: "yes" }, {
+export const jawLockingAnamnesis: NamedCriterion = field(sq("SQ9"), { equals: "yes" }, {
   id: "jawLocking",
   label: "Aktuell KG-Blockade mit eingeschränkter Mundöffnung",
   sources: ["SF9"],
@@ -133,7 +133,7 @@ export const jawLockingAnamnesis: Criterion = field(sq("SQ9"), { equals: "yes" }
 /**
  * SQ10: Limitation severe enough to affect eating.
  */
-export const lockingAffectsEatingAnamnesis: Criterion = field(sq("SQ10"), { equals: "yes" }, {
+export const lockingAffectsEatingAnamnesis: NamedCriterion = field(sq("SQ10"), { equals: "yes" }, {
   id: "lockingAffectsEating",
   label: "Einschränkung schwer genug, um die Fähigkeit zu Essen zu beeinträchtigen",
   sources: ["SF10"],
@@ -142,7 +142,7 @@ export const lockingAffectsEatingAnamnesis: Criterion = field(sq("SQ10"), { equa
 /**
  * SQ13: Jaw locking or catching in wide-open position.
  */
-export const jawLockingOpenPositionAnamnesis: Criterion = field(sq("SQ13"), { equals: "yes" }, {
+export const jawLockingOpenPositionAnamnesis: NamedCriterion = field(sq("SQ13"), { equals: "yes" }, {
   id: "jawLockingOpenPosition",
   label: "KG-Arretierung oder Hängen bleiben bei weit geöffneter Kieferposition",
   sources: ["SF13"],
@@ -151,7 +151,7 @@ export const jawLockingOpenPositionAnamnesis: Criterion = field(sq("SQ13"), { eq
 /**
  * SQ14: Inability to close mouth without special maneuver.
  */
-export const unableToCloseWithoutManeuverAnamnesis: Criterion = field(sq("SQ14"), { equals: "yes" }, {
+export const unableToCloseWithoutManeuverAnamnesis: NamedCriterion = field(sq("SQ14"), { equals: "yes" }, {
   id: "unableToCloseWithoutManeuver",
   label: "Unfähigkeit den Mund ohne spezielles Umlenken zu schließen",
   sources: ["SF14"],
@@ -242,7 +242,7 @@ export const SUBLUXATION_ANAMNESIS: Criterion = and(
  * - SQ8 office-use marks this side, OR
  * - Patient reported noise on this side during E6/E7
  */
-export const TMJ_NOISE_SIDED_ANAMNESIS: Criterion = or(
+export const TMJ_NOISE_SIDED_ANAMNESIS: NamedCriterion = or(
   [
     field(sqSide("SQ8"), { equals: true }),
     any(
