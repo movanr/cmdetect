@@ -78,3 +78,7 @@ infra/.terraform.lock.hcl
 
 # infra
 infra/
+
+
+.refactor/tasks/criteria-source-display.md
+.refactor/tasks/mdr-usability-strategy.md
