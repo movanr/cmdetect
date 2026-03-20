@@ -8,13 +8,17 @@
 
 import { useCallback } from "react";
 import { SIDE_KEYS, type Region, type Side } from "@cmdetect/dc-tmd";
-import { EMPTY_REGION_STATUS, HeadDiagram } from "../../examination";
+import { EMPTY_REGION_STATUS, HeadDiagram, type RegionStatus } from "../../examination";
 
 interface SummaryDiagramsProps {
   regions: readonly Region[];
   selectedSide?: Side;
   selectedRegion?: Region | null;
   onRegionClick?: (side: Side, region: Region) => void;
+  regionStatuses?: {
+    left: Partial<Record<Region, RegionStatus>>;
+    right: Partial<Record<Region, RegionStatus>>;
+  };
 }
 
 export function SummaryDiagrams({
@@ -22,6 +26,7 @@ export function SummaryDiagrams({
   selectedSide,
   selectedRegion,
   onRegionClick,
+  regionStatuses: regionStatusesProp,
 }: SummaryDiagramsProps) {
   // Uniform neutral statuses — only the selection highlight matters here
   const emptyStatuses: Partial<Record<Region, typeof EMPTY_REGION_STATUS>> = {};
@@ -44,7 +49,7 @@ export function SummaryDiagrams({
             <HeadDiagram
               side={side}
               regions={regions}
-              regionStatuses={emptyStatuses}
+              regionStatuses={regionStatusesProp?.[side] ?? emptyStatuses}
               selectedRegion={selectedSide === side ? selectedRegion : null}
               onRegionClick={handleRegionClick(side)}
               hideBackgroundImages

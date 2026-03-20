@@ -31,7 +31,7 @@ export interface DisplayGroup {
   value: string;
 }
 
-function translateValue(value: unknown): string {
+export function translateValue(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (value === "yes" || value === true) return "Ja";
   if (value === "no" || value === false) return "Nein";
