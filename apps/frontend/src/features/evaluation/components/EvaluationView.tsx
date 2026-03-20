@@ -1,52 +1,28 @@
 /**
  * EvaluationView — Main evaluation page component.
  *
- * Single card "Diagnose dokumentieren":
- * - Top: localisation selection + "In Befundbericht übernehmen" checklist
- * - Bottom: DC/TMD criteria lookup driven by localisation selection
- *
- * Evaluates all DC/TMD diagnoses against SQ + examination data.
- * Persists documented diagnoses to documented_diagnosis table.
+ * Thin orchestrator: localisation UI → DiagnosisList → navigation button.
+ * All diagnosis rendering and criteria evaluation delegated to DiagnosisList.
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ALL_DIAGNOSES,
   E10_SITE_KEYS,
-  evaluateAllDiagnoses,
   PALPATION_SITES,
   REGIONS,
   SITE_CONFIG,
-  type DiagnosisDefinition,
   type DiagnosisId,
   type PalpationSite,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, ListChecks, Network } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import {
-  createArthalgiaTree,
-  createDdWithReductionTree,
-  createDjdTree,
-  createHeadacheTree,
-  createMyalgiaSubtypesTree,
-  createMyalgiaTree,
-  createSubluxationTree,
-  DecisionTreeView,
-  type DecisionTreeDef,
-} from "../../decision-tree";
+import { ArrowRight } from "lucide-react";
+import { useCallback, useMemo } from "react";
 import type { FormValues } from "../../examination";
 import { useCriteriaAssessmentMap } from "../hooks/use-criteria-assessments";
 import { useDocumentedDiagnoses } from "../hooks/use-diagnosis-evaluation";
@@ -59,8 +35,9 @@ import {
   useUndocumentDiagnosis,
 } from "../hooks/use-save-diagnosis-evaluation";
 import type { CriterionUserState } from "../types";
+import type { ChecklistItem } from "../utils/extract-criteria-items";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
-import { CriteriaChecklist, type ChecklistItem } from "./CriteriaChecklist";
+import { DiagnosisList } from "./DiagnosisList";
 import { SummaryDiagrams } from "./SummaryDiagrams";
 
 interface EvaluationViewProps {
@@ -84,51 +61,9 @@ interface EvaluationViewProps {
   ) => void;
 }
 
-const MYALGIA_IDS: readonly DiagnosisId[] = [
-  "myalgia",
-  "localMyalgia",
-  "myofascialPainWithSpreading",
-  "myofascialPainWithReferral",
-];
-
 const DIAGRAM_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
 const DIAGRAM_REGIONS_ALL: readonly Region[] = ["temporalis", "masseter", "tmj", "nonMast"];
 const EXTRA_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
-
-function getTreeForDiagnosis(
-  diagnosis: DiagnosisDefinition,
-  side: Side,
-  region: Region
-): DecisionTreeDef | null {
-  switch (diagnosis.id) {
-    case "myalgia":
-      return createMyalgiaTree(side, region);
-    case "localMyalgia":
-    case "myofascialPainWithSpreading":
-    case "myofascialPainWithReferral":
-      return createMyalgiaSubtypesTree(side, region);
-    case "arthralgia":
-      return createArthalgiaTree(side);
-    case "headacheAttributedToTmd":
-      return createHeadacheTree(side);
-    case "discDisplacementWithReduction":
-    case "discDisplacementWithReductionIntermittentLocking":
-    case "discDisplacementWithoutReductionLimitedOpening":
-    case "discDisplacementWithoutReductionWithoutLimitedOpening":
-      return createDdWithReductionTree(side);
-    case "degenerativeJointDisease":
-      return createDjdTree(side);
-    case "subluxation":
-      return createSubluxationTree(side);
-    default:
-      return null;
-  }
-}
-
-/** Build a location key matching the format used for documented diagnosis lookups. */
-function locationKey(side: Side, site: PalpationSite | null, region: Region): string {
-  return `${side}:${site ?? region}`;
-}
 
 export function EvaluationView({
   sqAnswers,
@@ -143,16 +78,16 @@ export function EvaluationView({
   showAllRegions: showAllRegionsProp,
   onLocalisationChange,
 }: EvaluationViewProps) {
-  // ── Reference panel state ─────────────────────────────────────────
-  const [refDiagnosisId, setRefDiagnosisId] = useState<string | null>(null);
-  const [refView, setRefView] = useState<"checklist" | "tree">("checklist");
-
   // ── Localisation derived from URL search params ───────────────────
   const confirmSide = selectedSide;
   const confirmRegion = selectedRegion;
   const confirmSite = selectedSite ?? null;
   const confirmShowAllRegions = showAllRegionsProp ?? false;
   const hasLocalisation = confirmSide !== undefined && confirmRegion !== undefined;
+
+  const activeRegion: Region | undefined = confirmSite
+    ? SITE_CONFIG[confirmSite].region
+    : confirmRegion;
 
   // ── Backend persistence ─────────────────────────────────────────────
   const { data: documentedDiagnoses } = useDocumentedDiagnoses(patientRecordId);
@@ -162,64 +97,17 @@ export function EvaluationView({
   const upsertAssessment = useUpsertCriteriaAssessment(patientRecordId);
   const deleteAssessment = useDeleteCriteriaAssessment(patientRecordId);
 
-  // ── Derived state from documented diagnoses ─────────────────────────
-  const documentedMap = useMemo(() => {
-    const map = new Map<string, string>(); // locationKey → row id
-    for (const d of documentedDiagnoses ?? []) {
-      const key = `${d.diagnosisId}:${locationKey(d.side, d.site, d.region)}`;
-      map.set(key, d.id);
-    }
-    return map;
-  }, [documentedDiagnoses]);
-
-  const documentedMyalgiaMap = useMemo(() => {
-    const map = new Map<string, { diagnosisId: DiagnosisId; rowId: string }>(); // "side:site-or-region" → { diagnosisId, rowId }
-    for (const d of documentedDiagnoses ?? []) {
-      if ((MYALGIA_IDS as readonly string[]).includes(d.diagnosisId)) {
-        const locKey = locationKey(d.side, d.site, d.region);
-        map.set(locKey, { diagnosisId: d.diagnosisId, rowId: d.id });
-      }
-    }
-    return map;
-  }, [documentedDiagnoses]);
-
   // ── Memos ──────────────────────────────────────────────────────────
-
   const criteriaData = useMemo(
     () => mapToCriteriaData(sqAnswers, examinationData),
-    [sqAnswers, examinationData]
+    [sqAnswers, examinationData],
   );
-
-  const activeRegion: Region | undefined = confirmSite
-    ? SITE_CONFIG[confirmSite].region
-    : confirmRegion;
 
   const confirmApplicableDiagnoses = useMemo(
     () =>
       activeRegion ? ALL_DIAGNOSES.filter((d) => d.examination.regions.includes(activeRegion)) : [],
     [activeRegion],
   );
-
-  const refDiagnosis = useMemo((): DiagnosisDefinition | null => {
-    if (refDiagnosisId && confirmApplicableDiagnoses.some((d) => d.id === refDiagnosisId)) {
-      return ALL_DIAGNOSES.find((d) => d.id === refDiagnosisId) ?? null;
-    }
-    return confirmApplicableDiagnoses[0] ?? null;
-  }, [refDiagnosisId, confirmApplicableDiagnoses]);
-
-  const requirementMetMap = useMemo(() => {
-    const hasRequires = confirmApplicableDiagnoses.some((d) => d.requires);
-    if (!hasRequires) return {} as Record<string, boolean>;
-    const allResults = evaluateAllDiagnoses(ALL_DIAGNOSES, criteriaData);
-    const map: Record<string, boolean> = {};
-    for (const d of confirmApplicableDiagnoses) {
-      if (!d.requires) continue;
-      map[d.id] = d.requires.anyOf.some((reqId) =>
-        allResults.some((r) => r.diagnosisId === reqId && r.isPositive)
-      );
-    }
-    return map;
-  }, [confirmApplicableDiagnoses, criteriaData]);
 
   // ── Handlers ───────────────────────────────────────────────────────
 
@@ -230,68 +118,32 @@ export function EvaluationView({
     [onLocalisationChange],
   );
 
-  // These helpers are only invoked inside the hasLocalisation-gated block,
-  // so confirmSide / activeRegion are guaranteed to be defined at call time.
-  const currentLocKey = hasLocalisation
-    ? locationKey(confirmSide!, confirmSite, confirmRegion!)
-    : "";
-
-  function isChecked(diagnosisId: string) {
-    return documentedMap.has(`${diagnosisId}:${currentLocKey}`);
-  }
-
-  function selectedMyalgiaId() {
-    return documentedMyalgiaMap.get(currentLocKey)?.diagnosisId ?? "";
-  }
-
-  function handleToggle(diagnosisId: string) {
-    if (readOnly) return;
-    const key = `${diagnosisId}:${currentLocKey}`;
-    const existingRowId = documentedMap.get(key);
-
-    if (existingRowId) {
-      undocumentMutation.mutate(existingRowId);
-    } else {
+  const handleDocument = useCallback(
+    (params: {
+      diagnosisId: DiagnosisId;
+      side: Side;
+      region: Region;
+      site: PalpationSite | null;
+    }) => {
       documentMutation.mutate({
         patientRecordId,
-        diagnosisId: diagnosisId as DiagnosisId,
-        side: confirmSide!,
-        region: activeRegion!,
-        site: confirmSite,
+        diagnosisId: params.diagnosisId,
+        side: params.side,
+        region: params.region,
+        site: params.site,
         userId,
       });
-    }
-  }
+    },
+    [documentMutation, patientRecordId, userId],
+  );
 
-  function handleMyalgiaSelect(diagnosisId: string) {
-    if (readOnly) return;
-    const existing = documentedMyalgiaMap.get(currentLocKey);
+  const handleUndocument = useCallback(
+    (rowId: string) => {
+      undocumentMutation.mutate(rowId);
+    },
+    [undocumentMutation],
+  );
 
-    if (existing) {
-      undocumentMutation.mutate(existing.rowId);
-      if (existing.diagnosisId !== diagnosisId) {
-        documentMutation.mutate({
-          patientRecordId,
-          diagnosisId: diagnosisId as DiagnosisId,
-          side: confirmSide!,
-          region: activeRegion!,
-          site: confirmSite,
-          userId,
-        });
-      }
-    } else {
-      documentMutation.mutate({
-        patientRecordId,
-        diagnosisId: diagnosisId as DiagnosisId,
-        side: confirmSide!,
-        region: activeRegion!,
-        site: confirmSite,
-        userId,
-      });
-    }
-  }
-
-  // ── Criteria assessment callbacks ────────────────────────────────────
   const handleAssessmentChange = useCallback(
     (item: ChecklistItem, state: CriterionUserState) => {
       upsertAssessment.mutate({
@@ -321,13 +173,12 @@ export function EvaluationView({
 
   return (
     <div className="space-y-6">
-      {/* Single card: Documentation + Criteria lookup */}
       <Card>
         <CardHeader>
           <CardTitle>Diagnose dokumentieren</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Localisation selection — full-width parent context */}
+          {/* Localisation selection */}
           <div className="space-y-4">
             <SummaryDiagrams
               regions={confirmShowAllRegions ? DIAGRAM_REGIONS_ALL : DIAGRAM_REGIONS}
@@ -416,168 +267,23 @@ export function EvaluationView({
             </div>
           </div>
 
-          {/* Dependent sections — only visible when both side + region are selected */}
-          {hasLocalisation && <div className="border-l-2 border-primary/15 pl-5 space-y-6">
-            {/* "In Befundbericht übernehmen" checklist */}
-            {confirmApplicableDiagnoses.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  In Befundbericht übernehmen
-                </p>
-                <div className="rounded-lg border border-border/50 bg-muted/20 p-4 space-y-1">
-
-                {/* Myalgia group — radio buttons, only one selectable */}
-                {(() => {
-                  const myalgiaDiagnoses = confirmApplicableDiagnoses.filter((d) =>
-                    (MYALGIA_IDS as readonly string[]).includes(d.id)
-                  );
-                  if (myalgiaDiagnoses.length === 0) return null;
-                  const currentMyalgia = selectedMyalgiaId();
-                  const sideLabel = confirmSide === "right" ? "rechte Seite" : "linke Seite";
-                  return (
-                    <div className="gap-0">
-                      {myalgiaDiagnoses.map((d) => {
-                        const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion!]}, ${sideLabel}`;
-                        return (
-                          <div
-                            key={d.id}
-                            className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 cursor-pointer"
-                            onClick={() => !readOnly && handleMyalgiaSelect(d.id)}
-                          >
-                            <Checkbox
-                              checked={currentMyalgia === d.id}
-                              disabled={readOnly}
-                              onCheckedChange={() => handleMyalgiaSelect(d.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="shrink-0"
-                            />
-                            <span className="text-sm font-medium flex-1">
-                              {d.nameDE}{" "}
-                              <span className="font-normal text-muted-foreground">
-                                ({localisationLabel})
-                              </span>
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-
-                {/* Remaining diagnoses — checkboxes */}
-                {confirmApplicableDiagnoses
-                  .filter((d) => !(MYALGIA_IDS as readonly string[]).includes(d.id))
-                  .map((d) => {
-                    const checked = isChecked(d.id);
-                    const reqMet = requirementMetMap[d.id];
-                    const sideLabel = confirmSide === "right" ? "rechte Seite" : "linke Seite";
-                    const localisationLabel = `${confirmSite ? PALPATION_SITES[confirmSite] : REGIONS[activeRegion!]}, ${sideLabel}`;
-                    return (
-                      <div key={d.id}>
-                        <div
-                          className="flex items-center gap-3 py-2 px-3 rounded-md hover:bg-muted/50 cursor-pointer"
-                          onClick={() => handleToggle(d.id)}
-                        >
-                          <Checkbox
-                            checked={checked}
-                            disabled={readOnly}
-                            onCheckedChange={() => handleToggle(d.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="shrink-0"
-                          />
-                          <span className="text-sm font-medium flex-1">
-                            {d.nameDE}{" "}
-                            <span className="font-normal text-muted-foreground">
-                              ({localisationLabel})
-                            </span>
-                          </span>
-                          {reqMet === false && (
-                            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                          )}
-                        </div>
-                        {reqMet === false && (
-                          <p className="text-xs text-amber-700 ml-10 mb-1">
-                            Voraussetzung: Myalgie oder Arthralgie muss ebenfalls positiv sein.
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Keine Diagnosen für die gewählte Region verfügbar.
-              </p>
-            )}
-
-            {/* Criteria lookup section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex-1">
-                  DC/TMD-Kriterien prüfen
-                </p>
-                <ToggleGroup
-                  type="single"
-                  value={refView}
-                  onValueChange={(v) => {
-                    if (v) setRefView(v as "checklist" | "tree");
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  <ToggleGroupItem value="checklist" aria-label="Checkliste">
-                    <ListChecks className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="tree" aria-label="Entscheidungsbaum">
-                    <Network className="h-4 w-4" />
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-
-              {refDiagnosis && refView === "checklist" && (
-                <CriteriaChecklist
-                  diagnosis={refDiagnosis}
-                  criteriaData={criteriaData}
-                  side={confirmSide!}
-                  region={activeRegion!}
-                  site={confirmSite ?? undefined}
-                  assessmentMap={criteriaAssessmentMap}
-                  onAssessmentChange={handleAssessmentChange}
-                  onAssessmentClear={handleAssessmentClear}
-                  titleSlot={
-                    <Select value={refDiagnosis.id} onValueChange={setRefDiagnosisId}>
-                      <SelectTrigger className="w-56 h-7 text-sm font-semibold bg-background">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {confirmApplicableDiagnoses.map((d) => (
-                          <SelectItem key={d.id} value={d.id}>
-                            {d.nameDE}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  }
-                />
-              )}
-
-              {refDiagnosis &&
-                refView === "tree" &&
-                (() => {
-                  const tree = getTreeForDiagnosis(refDiagnosis, confirmSide!, activeRegion!);
-                  return tree ? (
-                    <div className="overflow-x-auto">
-                      <DecisionTreeView tree={tree} data={criteriaData} />
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Kein Entscheidungsbaum für diese Diagnose verfügbar.
-                    </p>
-                  );
-                })()}
-            </div>
-          </div>}
+          {/* Unified diagnosis list */}
+          {hasLocalisation && (
+            <DiagnosisList
+              applicableDiagnoses={confirmApplicableDiagnoses}
+              side={confirmSide!}
+              region={activeRegion!}
+              site={confirmSite}
+              criteriaData={criteriaData}
+              documentedDiagnoses={documentedDiagnoses ?? []}
+              assessmentMap={criteriaAssessmentMap}
+              onDocument={handleDocument}
+              onUndocument={handleUndocument}
+              onAssessmentChange={handleAssessmentChange}
+              onAssessmentClear={handleAssessmentClear}
+              readOnly={readOnly}
+            />
+          )}
         </CardContent>
       </Card>
 
