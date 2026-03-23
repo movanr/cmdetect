@@ -104,36 +104,36 @@ export function getRegionVisualState(status: RegionStatus): RegionVisualState {
  */
 export const REGION_STATE_COLORS = {
   [REGION_VISUAL_STATES.PENDING]: {
-    // Light gray = no data
+    // Light gray = no data yet (neutral during examination)
     text: "text-muted-foreground",
     bg: "bg-muted",
     border: "border-border",
-    fill: "rgba(228, 228, 231, 0.3)", // zinc-200 @ 30%
+    fill: "rgba(228, 228, 231, 0.4)", // zinc-200 @ 40%
     stroke: "#d4d4d8", // zinc-300
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
-    // Light gray = pain=yes but familiar not yet answered
-    text: "text-muted-foreground",
-    bg: "bg-muted",
-    border: "border-border",
-    fill: "rgba(228, 228, 231, 0.3)", // zinc-200 @ 30%
-    stroke: "#d4d4d8", // zinc-300
+    // Amber-tinted = pain=yes but familiar not yet answered
+    text: "text-amber-700",
+    bg: "bg-amber-50",
+    border: "border-amber-400",
+    fill: "rgba(212, 212, 216, 0.45)", // zinc-300 @ 45%
+    stroke: "#fbbf24", // amber-400
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
-    // Light gray = complete, no significant findings (subtle when unselected)
+    // Medium gray = complete, no significant findings
     text: "text-zinc-600",
     bg: "bg-zinc-200",
     border: "border-zinc-400",
-    fill: "rgba(212, 212, 216, 0.35)", // zinc-300 @ 35% - more subtle
-    stroke: "#d4d4d8", // zinc-300 - subtle border
+    fill: "rgba(212, 212, 216, 0.5)", // zinc-300 @ 50%
+    stroke: "#a1a1aa", // zinc-400
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
-    // Blue = significant finding (familiar pain positive) - subtle for status indication
+    // Blue = significant finding (familiar pain positive)
     text: "text-blue-700",
     bg: "bg-blue-100",
     border: "border-blue-500",
-    fill: "rgba(191, 219, 254, 0.35)", // blue-200 @ 35% - more subtle for findings
-    stroke: "#d4d4d8", // zinc-300 - same as pending for subtle border
+    fill: "rgba(147, 197, 253, 0.55)", // blue-300 @ 55%
+    stroke: "#3b82f6", // blue-500
   },
 } as const;
 
@@ -152,25 +152,25 @@ export const REGION_STROKE_WIDTH = {
  */
 export const REGION_STATE_COLORS_SELECTED = {
   [REGION_VISUAL_STATES.PENDING]: {
-    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40% opacity
+    fill: "rgba(161, 161, 170, 0.5)", // zinc-400 @ 50%
     stroke: "#71717a", // zinc-500
     bgClass: "bg-zinc-100",
     ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
-    fill: "rgba(161, 161, 170, 0.4)", // zinc-400 @ 40% opacity
-    stroke: "#71717a", // zinc-500
-    bgClass: "bg-zinc-100",
-    ringClass: "ring-1 ring-zinc-400",
+    fill: "rgba(217, 119, 6, 0.3)", // amber-600 @ 30%
+    stroke: "#d97706", // amber-600
+    bgClass: "bg-amber-50",
+    ringClass: "ring-1 ring-amber-500",
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
-    fill: "rgba(113, 113, 122, 0.4)", // zinc-500 @ 40% opacity
+    fill: "rgba(113, 113, 122, 0.5)", // zinc-500 @ 50%
     stroke: "#52525b", // zinc-600
     bgClass: "bg-zinc-200",
     ringClass: "ring-1 ring-zinc-500",
   },
   [REGION_VISUAL_STATES.POSITIVE]: {
-    fill: "rgba(96, 165, 250, 0.4)", // blue-400 @ 40% opacity
+    fill: "rgba(59, 130, 246, 0.45)", // blue-500 @ 45%
     stroke: "#2563eb", // blue-600
     bgClass: "bg-blue-100",
     ringClass: "ring-1 ring-blue-600",

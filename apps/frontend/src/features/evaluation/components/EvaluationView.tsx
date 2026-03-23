@@ -38,9 +38,8 @@ import type { CriterionUserState } from "../types";
 import type { ChecklistItem } from "../utils/extract-criteria-items";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
 import { DiagnosisList } from "./DiagnosisList";
-import { PainFindingsSummary } from "./PainFindingsSummary";
+import { FindingsSummary } from "./FindingsSummary";
 import { SummaryDiagrams } from "./SummaryDiagrams";
-import { SymptomQuestionnaireReference } from "./SymptomQuestionnaireReference";
 
 interface EvaluationViewProps {
   sqAnswers: Record<string, unknown>;
@@ -287,9 +286,8 @@ export function EvaluationView({
             />
           )}
 
-          {/* Full SQ reference */}
-          <SymptomQuestionnaireReference criteriaData={criteriaData} />
-          <PainFindingsSummary criteriaData={criteriaData} />
+          {/* Findings reference (SQ answers + examination data by category) */}
+          <FindingsSummary criteriaData={criteriaData} />
         </CardContent>
       </Card>
 
