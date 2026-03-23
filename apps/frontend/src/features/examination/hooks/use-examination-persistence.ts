@@ -256,6 +256,14 @@ export function useExaminationPersistence({
     []
   );
 
+  // Reopen a completed examination (must be called before upserting edits)
+  const ensureReopenedIfCompleted = useCallback(async () => {
+    if (backendResponse?.status === "completed" && backendResponse?.id) {
+      await reopenMutation.mutateAsync({ id: backendResponse.id });
+      clearLocalExamCompletion(patientRecordId);
+    }
+  }, [backendResponse, reopenMutation, patientRecordId]);
+
   // Save current form data to backend as draft (no section completion).
   // Used for auto-save on navigation, unmount, and periodic inactivity.
   const saveDraft = useCallback(async () => {
@@ -272,6 +280,8 @@ export function useExaminationPersistence({
       const formValues = form.getValues();
       const status = computeStatus(completedSections);
 
+      await ensureReopenedIfCompleted();
+
       await execute(UPSERT_EXAMINATION_RESPONSE, {
         patient_record_id: patientRecordId,
         response_data: { _modelVersion: CURRENT_MODEL_VERSION, ...formValues },
@@ -287,7 +297,7 @@ export function useExaminationPersistence({
     } finally {
       isAutoSavingRef.current = false;
     }
-  }, [form, completedSections, computeStatus, patientRecordId, removeDraft, upsertMutation.isPending]);
+  }, [form, completedSections, computeStatus, patientRecordId, removeDraft, upsertMutation.isPending, ensureReopenedIfCompleted]);
 
   // Keep ref in sync so timers/cleanup always call the latest version
   saveDraftRef.current = saveDraft;
@@ -305,6 +315,8 @@ export function useExaminationPersistence({
       const status = computeStatus(newCompletedSections);
 
       try {
+        await ensureReopenedIfCompleted();
+
         await upsertMutation.mutateAsync({
           patientRecordId,
           responseData: formValues,
@@ -342,6 +354,7 @@ export function useExaminationPersistence({
       patientRecordId,
       removeDraft,
       setDraft,
+      ensureReopenedIfCompleted,
     ]
   );
 
@@ -402,18 +415,13 @@ export function useExaminationPersistence({
     removeDraft,
   ]);
 
-  // Reopen a completed examination
+  // Reopen a completed examination (explicit action)
   const reopenExaminationFn = useCallback(async () => {
-    const examId = backendResponse?.id;
-    if (!examId) {
+    if (!backendResponse?.id) {
       throw new Error("Could not determine examination ID for reopening");
     }
-
-    await reopenMutation.mutateAsync({ id: examId });
-
-    // Clear local completion marker when reopening for editing
-    clearLocalExamCompletion(patientRecordId);
-  }, [backendResponse, reopenMutation, patientRecordId]);
+    await ensureReopenedIfCompleted();
+  }, [backendResponse, ensureReopenedIfCompleted]);
 
   return {
     saveSection,
