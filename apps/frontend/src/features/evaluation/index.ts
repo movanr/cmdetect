@@ -7,8 +7,6 @@
 
 export { EvaluationView } from "./components/EvaluationView";
 export { SummaryDiagrams } from "./components/SummaryDiagrams";
-export { evaluationSearchSchema } from "./search-schema";
-export type { EvaluationSearch } from "./search-schema";
 export { mapToCriteriaData } from "./utils/map-to-criteria-data";
 
 // Backend persistence
