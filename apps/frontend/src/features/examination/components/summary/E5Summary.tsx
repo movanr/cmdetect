@@ -1,4 +1,4 @@
-import { MOVEMENT_TYPES, REGION_KEYS, type PainType } from "@cmdetect/dc-tmd";
+import { MOVEMENT_TYPE_LABELS, MOVEMENT_TYPES, REGION_KEYS, type PainType } from "@cmdetect/dc-tmd";
 import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import type { FormValues } from "../../form/use-examination-form";
@@ -6,9 +6,9 @@ import { MovementPainTable, type MovementGroup } from "./MovementPainTable";
 import { SummarySection } from "./SummarySection";
 
 const E5_ROW_LABELS: Record<string, string> = {
-  [MOVEMENT_TYPES.lateralRight]: "Laterotrusion nach rechts",
-  [MOVEMENT_TYPES.lateralLeft]: "Laterotrusion nach links",
-  [MOVEMENT_TYPES.protrusive]: "Protrusion",
+  [MOVEMENT_TYPES.lateralRight]: MOVEMENT_TYPE_LABELS.lateralRight,
+  [MOVEMENT_TYPES.lateralLeft]: MOVEMENT_TYPE_LABELS.lateralLeft,
+  [MOVEMENT_TYPES.protrusive]: MOVEMENT_TYPE_LABELS.protrusive,
 };
 
 const PAIN_TYPES_E5: PainType[] = ["pain", "familiarPain", "familiarHeadache"];

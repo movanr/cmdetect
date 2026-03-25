@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { MOVEMENT_TYPE_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -41,9 +41,9 @@ type E5StepId = ExaminationStepId;
 const E5_STEP_ORDER: E5StepId[] = ["e5a-measure", "e5b-measure", "e5c-measure"];
 
 const E5_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
-  "e5a-measure": { badge: "U5A", title: "Laterotrusion rechts" },
-  "e5b-measure": { badge: "U5B", title: "Laterotrusion links" },
-  "e5c-measure": { badge: "U5C", title: "Protrusion" },
+  "e5a-measure": { badge: "U5A", title: MOVEMENT_TYPE_LABELS.lateralRight },
+  "e5b-measure": { badge: "U5B", title: MOVEMENT_TYPE_LABELS.lateralLeft },
+  "e5c-measure": { badge: "U5C", title: MOVEMENT_TYPE_LABELS.protrusive },
 };
 
 // Maps each measurement step to its paired interview step (stored in form data)

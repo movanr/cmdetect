@@ -158,8 +158,8 @@ export const MOVEMENT_TYPE_KEYS = Object.keys(MOVEMENT_TYPES) as MovementType[];
 
 // === E5 MOVEMENT TYPE LABELS (German) ===
 export const MOVEMENT_TYPE_LABELS = {
-  lateralRight: "Laterotrusion rechts",
-  lateralLeft: "Laterotrusion links",
+  lateralRight: "Laterotrusion nach rechts",
+  lateralLeft: "Laterotrusion nach links",
   protrusive: "Protrusion",
 } as const satisfies Record<MovementType, string>;
 

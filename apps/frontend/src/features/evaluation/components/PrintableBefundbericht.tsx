@@ -10,7 +10,7 @@
  * Follows the same print styling patterns as PrintableExamination.
  */
 
-import type { DiagnosisId, PalpationSite } from "@cmdetect/dc-tmd";
+import { E3_OPENING_PATTERNS, JOINT_SOUND_LABELS, MOVEMENT_TYPE_LABELS, OPENING_TYPE_LABELS, type DiagnosisId, type PalpationSite } from "@cmdetect/dc-tmd";
 import {
   ALL_DIAGNOSES,
   PALPATION_SITES,
@@ -140,7 +140,7 @@ function extractJointSoundDetails(
       }
       results.push({
         type: "click",
-        label: "Knacken",
+        label: JOINT_SOUND_LABELS.click,
         detail: movements.length > 0 ? `bei ${movements.join(", ")}` : undefined,
         side: s.side,
       });
@@ -157,7 +157,7 @@ function extractJointSoundDetails(
       }
       results.push({
         type: "crepitus",
-        label: "Reiben",
+        label: JOINT_SOUND_LABELS.crepitus,
         detail: movements.length > 0 ? `bei ${movements.join(", ")}` : undefined,
         side: s.side,
       });
@@ -192,9 +192,9 @@ function formatMeasurements(signs: SignFinding[]): FormattedMeasurement[] {
   const measurements: FormattedMeasurement[] = [];
 
   const openingLabels: Record<string, string> = {
-    "painFree.measurement": "Schmerzfreie Mundöffnung",
-    "maxUnassisted.measurement": "Maximale aktive Mundöffnung",
-    "maxAssisted.measurement": "Maximale passive Mundöffnung",
+    "painFree.measurement": OPENING_TYPE_LABELS.painFree,
+    "maxUnassisted.measurement": OPENING_TYPE_LABELS.maxUnassisted,
+    "maxAssisted.measurement": OPENING_TYPE_LABELS.maxAssisted,
   };
   for (const sign of signs.filter((s) => s.section === "e4")) {
     const label = openingLabels[sign.field];
@@ -204,9 +204,9 @@ function formatMeasurements(signs: SignFinding[]): FormattedMeasurement[] {
   }
 
   const movementLabels: Record<string, string> = {
-    "lateralLeft.measurement": "Laterotrusion nach links",
-    "lateralRight.measurement": "Laterotrusion nach rechts",
-    "protrusive.measurement": "Protrusion",
+    "lateralLeft.measurement": MOVEMENT_TYPE_LABELS.lateralLeft,
+    "lateralRight.measurement": MOVEMENT_TYPE_LABELS.lateralRight,
+    "protrusive.measurement": MOVEMENT_TYPE_LABELS.protrusive,
   };
   for (const sign of signs.filter((s) => s.section === "e5")) {
     const label = movementLabels[sign.field];
@@ -215,12 +215,7 @@ function formatMeasurements(signs: SignFinding[]): FormattedMeasurement[] {
     }
   }
 
-  const openingPatternLabels: Record<string, string> = {
-    straight: "Gerade",
-    correctedDeviation: "Korrigierte Deviation",
-    uncorrectedRight: "Unkorrigierte Deviation nach rechts",
-    uncorrectedLeft: "Unkorrigierte Deviation nach links",
-  };
+  const openingPatternLabels: Record<string, string> = { ...E3_OPENING_PATTERNS };
   for (const sign of signs.filter((s) => s.section === "e3")) {
     if (sign.field === "openingPattern" && typeof sign.value === "string") {
       measurements.push({

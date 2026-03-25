@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { OPENING_TYPE_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -42,9 +42,9 @@ type E4StepId = ExaminationStepId;
 const E4_STEP_ORDER: E4StepId[] = ["e4a", "e4b-measure", "e4c-measure"];
 
 const E4_STEP_CONFIG: Record<string, { badge: string; title: string }> = {
-  e4a: { badge: "U4A", title: "Schmerzfreie Mundöffnung" },
-  "e4b-measure": { badge: "U4B", title: "Maximale aktive Mundöffnung" },
-  "e4c-measure": { badge: "U4C", title: "Maximale passive Mundöffnung" },
+  e4a: { badge: "U4A", title: OPENING_TYPE_LABELS.painFree },
+  "e4b-measure": { badge: "U4B", title: OPENING_TYPE_LABELS.maxUnassisted },
+  "e4c-measure": { badge: "U4C", title: OPENING_TYPE_LABELS.maxAssisted },
 };
 
 // Maps each measurement step to its paired interview step (stored in form data)

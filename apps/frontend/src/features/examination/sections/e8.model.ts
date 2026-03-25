@@ -8,17 +8,12 @@
  * Locking events are only documented if observed during the examination.
  */
 
+import { E8_REDUCTION_LABELS } from "@cmdetect/dc-tmd";
 import { M } from "../model/nodes";
 import { Q } from "../model/primitives";
 
 /** Reduction options after locking is observed */
 const REDUCTION_OPTIONS = ["patient", "examiner", "notReduced"] as const;
-
-const REDUCTION_LABELS: Record<(typeof REDUCTION_OPTIONS)[number], string> = {
-  patient: "Patient",
-  examiner: "Untersucher",
-  notReduced: "Nicht reponiert",
-};
 
 /** Locking group: observed yes/no + conditional reduction */
 function lockingGroup() {
@@ -27,7 +22,7 @@ function lockingGroup() {
     reduction: M.question(
       Q.enum({
         options: REDUCTION_OPTIONS,
-        labels: REDUCTION_LABELS,
+        labels: E8_REDUCTION_LABELS,
         required: true,
         enableWhen: { sibling: "locking", equals: "yes" },
       })

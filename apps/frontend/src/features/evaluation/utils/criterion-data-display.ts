@@ -10,6 +10,8 @@ import {
   E2_REFERENCE_TEETH,
   E3_OPENING_PATTERNS,
   E8_REDUCTION_LABELS,
+  MOVEMENT_TYPE_LABELS,
+  OPENING_TYPE_LABELS,
   PAIN_TYPES,
   PALPATION_SITES,
   REGIONS,
@@ -120,8 +122,8 @@ function u2Lines(criteriaData: Record<string, unknown>): DisplayGroup[] {
 }
 
 const OPENING_STEPS = [
-  { key: "maxUnassisted", badge: "U4B", label: "max. aktiver Mundöffnung" },
-  { key: "maxAssisted", badge: "U4C", label: "max. passiver Mundöffnung" },
+  { key: "maxUnassisted", badge: "U4B", label: OPENING_TYPE_LABELS.maxUnassisted },
+  { key: "maxAssisted", badge: "U4C", label: OPENING_TYPE_LABELS.maxAssisted },
 ] as const;
 
 function u4StepLines(
@@ -150,9 +152,9 @@ function u4StepLines(
 }
 
 const LATERAL_STEPS = [
-  { key: "lateralRight", badge: "U5A", label: "Laterotrusion rechts" },
-  { key: "lateralLeft", badge: "U5B", label: "Laterotrusion links" },
-  { key: "protrusive", badge: "U5C", label: "Protrusion" },
+  { key: "lateralRight", badge: "U5A", label: MOVEMENT_TYPE_LABELS.lateralRight },
+  { key: "lateralLeft", badge: "U5B", label: MOVEMENT_TYPE_LABELS.lateralLeft },
+  { key: "protrusive", badge: "U5C", label: MOVEMENT_TYPE_LABELS.protrusive },
 ] as const;
 
 function u5StepLines(

@@ -10,7 +10,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { E7_OBSERVER_LABELS, JOINT_SOUND_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
 import type { FieldPath } from "react-hook-form";
@@ -94,14 +94,14 @@ export function E7Section({ onComplete, onBack, isFirstSection }: SectionProps) 
                 <thead>
                   <tr className="bg-muted/50">
                     <th className="text-left text-sm font-medium p-3 w-28" />
-                    <th className="text-center text-sm font-medium p-3">Untersucher</th>
-                    <th className="text-center text-sm font-medium p-3">Patient</th>
+                    <th className="text-center text-sm font-medium p-3">{E7_OBSERVER_LABELS.examiner}</th>
+                    <th className="text-center text-sm font-medium p-3">{E7_OBSERVER_LABELS.patient}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {/* Click row */}
                   <tr className="border-t">
-                    <td className="p-3 text-sm font-medium">Knacken</td>
+                    <td className="p-3 text-sm font-medium">{JOINT_SOUND_LABELS.click}</td>
                     <td className="p-3 text-center">
                       <div className="flex justify-center">
                         <YesNoField name={`e7.${side}.click.examiner`} />
@@ -115,7 +115,7 @@ export function E7Section({ onComplete, onBack, isFirstSection }: SectionProps) 
                   </tr>
                   {/* Crepitus row */}
                   <tr className="border-t">
-                    <td className="p-3 text-sm font-medium">Reiben</td>
+                    <td className="p-3 text-sm font-medium">{JOINT_SOUND_LABELS.crepitus}</td>
                     <td className="p-3 text-center">
                       <div className="flex justify-center">
                         <YesNoField name={`e7.${side}.crepitus.examiner`} />

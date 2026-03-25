@@ -10,7 +10,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { E8_LOCKING_TYPE_DESCRIPTIONS, E8_LOCKING_TYPE_LABELS, SECTIONS, type E8LockingType } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
 import type { FieldPath } from "react-hook-form";
@@ -29,10 +29,10 @@ const SIDES = [
   { key: "left", label: "Linkes Kiefergelenk" },
 ] as const;
 
-const LOCKING_TYPES = [
-  { key: "closedLocking", label: "Geschlossene Arretierung", reductionLabel: "Reposition (geschl.)" },
-  { key: "openLocking", label: "Geöffnete Arretierung", reductionLabel: "Reposition (geöffnet)" },
-] as const;
+const LOCKING_TYPES: { key: E8LockingType; label: string; reductionLabel: string }[] = [
+  { key: "closedLocking", label: `${E8_LOCKING_TYPE_LABELS.closedLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.closedLocking}`, reductionLabel: `Lösbar (${E8_LOCKING_TYPE_LABELS.closedLocking})` },
+  { key: "openLocking", label: `${E8_LOCKING_TYPE_LABELS.openLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.openLocking}`, reductionLabel: `Lösbar (${E8_LOCKING_TYPE_LABELS.openLocking})` },
+];
 
 export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) {
   const { form, getInstancesForStep, validateStep } = useExaminationForm();

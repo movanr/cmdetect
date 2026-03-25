@@ -6,6 +6,7 @@
  * Patient scripts are quotable prompts for communication.
  */
 
+import { E8_LOCKING_TYPE_DESCRIPTIONS, E8_LOCKING_TYPE_LABELS, MOVEMENT_TYPE_LABELS, OPENING_TYPE_LABELS } from "@cmdetect/dc-tmd";
 import type { PalpationMode } from "@cmdetect/dc-tmd";
 import type {
   ProcedureFlowStep,
@@ -310,7 +311,7 @@ export const E4_RICH_INSTRUCTIONS = {
   /** U4A - Pain-free opening (step-based flow) */
   painFreeOpening: {
     stepId: "U4A",
-    title: "Schmerzfreie Mundöffnung",
+    title: OPENING_TYPE_LABELS.painFree,
     flow: E4A_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
@@ -323,7 +324,7 @@ export const E4_RICH_INSTRUCTIONS = {
   /** U4B - Maximum unassisted opening (step-based flow) */
   maxUnassistedOpening: {
     stepId: "U4B",
-    title: "Maximale aktive Mundöffnung",
+    title: OPENING_TYPE_LABELS.maxUnassisted,
     flow: E4B_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
@@ -336,7 +337,7 @@ export const E4_RICH_INSTRUCTIONS = {
   /** U4C - Maximum assisted opening (step-based flow with safety warning) */
   maxAssistedOpening: {
     stepId: "U4C",
-    title: "Maximale passive Mundöffnung",
+    title: OPENING_TYPE_LABELS.maxAssisted,
     flow: E4C_MEASUREMENT_FLOW,
     warnings: [E4C_SAFETY_WARNING],
     protocolRefs: [
@@ -521,7 +522,7 @@ export const E5_RICH_INSTRUCTIONS = {
   /** U5A - Right laterotrusion measurement */
   lateralRightMeasurement: {
     stepId: "U5A",
-    title: "Laterotrusion rechts",
+    title: MOVEMENT_TYPE_LABELS.lateralRight,
     flow: E5A_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
@@ -534,7 +535,7 @@ export const E5_RICH_INSTRUCTIONS = {
   /** U5B - Left laterotrusion measurement */
   lateralLeftMeasurement: {
     stepId: "U5B",
-    title: "Laterotrusion links",
+    title: MOVEMENT_TYPE_LABELS.lateralLeft,
     flow: E5B_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
@@ -547,7 +548,7 @@ export const E5_RICH_INSTRUCTIONS = {
   /** U5C - Protrusive movement measurement */
   protrusiveMeasurement: {
     stepId: "U5C",
-    title: "Protrusion",
+    title: MOVEMENT_TYPE_LABELS.protrusive,
     flow: E5C_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
@@ -1134,7 +1135,7 @@ function createE9TmjLateralPoleFlow(mode: PalpationMode): ProcedureFlowStep[] {
     },
     {
       id: "protrude",
-      label: "Protrusion",
+      label: MOVEMENT_TYPE_LABELS.protrusive,
       patientScript:
         "Bitte öffnen Sie leicht, schieben Sie Ihren Unterkiefer nach vorn und bewegen Sie dann Ihren Kiefer wieder zurück in seine normale Position ohne, dass Ihre Zähne sich berühren.",
       figureRef: ["31", "32"],
@@ -1373,7 +1374,7 @@ const E7_JOINT_SOUNDS_FLOW: ProcedureFlowStep[] = [
   },
   {
     id: "lateral-right",
-    label: "Laterotrusion rechts",
+    label: MOVEMENT_TYPE_LABELS.lateralRight,
     patientScript:
       "Bitte legen Sie Ihre Backenzähne vollständig aufeinander. Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach rechts, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne wieder vollständig aufeinander.",
     examinerInstruction: "3x wiederholen.",
@@ -1381,7 +1382,7 @@ const E7_JOINT_SOUNDS_FLOW: ProcedureFlowStep[] = [
   },
   {
     id: "lateral-left",
-    label: "Laterotrusion links",
+    label: MOVEMENT_TYPE_LABELS.lateralLeft,
     patientScript:
       "Bitte legen Sie Ihre Backenzähne vollständig aufeinander. Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach links, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne wieder vollständig aufeinander.",
     examinerInstruction: "3x wiederholen.",
@@ -1389,7 +1390,7 @@ const E7_JOINT_SOUNDS_FLOW: ProcedureFlowStep[] = [
   },
   {
     id: "protrusion",
-    label: "Protrusion",
+    label: MOVEMENT_TYPE_LABELS.protrusive,
     patientScript:
       "Bitte legen Sie Ihre Backenzähne vollständig aufeinander. Öffnen Sie leicht und bewegen Sie den Unterkiefer so weit wie möglich nach vorn, auch wenn es schmerzhaft ist. Bewegen Sie Ihren Kiefer zurück und legen Sie Ihre Backenzähne wieder vollständig aufeinander.",
     examinerInstruction: "3x wiederholen.",
@@ -1464,7 +1465,7 @@ const E8_JOINT_LOCKING_FLOW: ProcedureFlowStep[] = [
   },
   {
     id: "closed",
-    label: "Geschlossene Arretierung",
+    label: `${E8_LOCKING_TYPE_LABELS.closedLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.closedLocking}`,
     condition: "Falls bei Öffnung beobachtet",
     patientScript: "Können Sie Ihre Kieferblockade lösen?",
     examinerInstruction:
@@ -1473,7 +1474,7 @@ const E8_JOINT_LOCKING_FLOW: ProcedureFlowStep[] = [
   },
   {
     id: "open",
-    label: "Geöffnete Arretierung",
+    label: `${E8_LOCKING_TYPE_LABELS.openLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.openLocking}`,
     condition: "Falls bei weit geöffnetem Mund beobachtet",
     patientScript: "Können Sie Ihre Kieferblockade lösen?",
     examinerInstruction:

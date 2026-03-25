@@ -8,7 +8,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SECTIONS } from "@cmdetect/dc-tmd";
+import { E6_OBSERVER_LABELS, JOINT_SOUND_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
 import type { FieldPath } from "react-hook-form";
@@ -100,10 +100,10 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
                   <tr className="bg-muted/30 border-t">
                     <th className="text-left text-sm font-normal text-muted-foreground p-3" />
                     <th className="text-center text-sm font-normal text-muted-foreground p-3">
-                      Öffnen
+                      {E6_OBSERVER_LABELS.examinerOpen}
                     </th>
                     <th className="text-center text-sm font-normal text-muted-foreground p-3">
-                      Schließen
+                      {E6_OBSERVER_LABELS.examinerClose}
                     </th>
                     <th className="text-center text-sm font-normal text-muted-foreground p-3" />
                   </tr>
@@ -111,7 +111,7 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
                 <tbody>
                   {/* Click row */}
                   <tr className="border-t">
-                    <td className="p-3 text-sm font-medium">Knacken</td>
+                    <td className="p-3 text-sm font-medium">{JOINT_SOUND_LABELS.click}</td>
                     <td className="p-3 text-center">
                       <div className="flex justify-center">
                         <YesNoField name={`e6.${side}.click.examinerOpen`} />
@@ -130,7 +130,7 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
                   </tr>
                   {/* Crepitus row */}
                   <tr className="border-t">
-                    <td className="p-3 text-sm font-medium">Reiben</td>
+                    <td className="p-3 text-sm font-medium">{JOINT_SOUND_LABELS.crepitus}</td>
                     <td className="p-3 text-center">
                       <div className="flex justify-center">
                         <YesNoField name={`e6.${side}.crepitus.examinerOpen`} />
