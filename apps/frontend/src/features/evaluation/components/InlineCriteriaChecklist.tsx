@@ -134,28 +134,38 @@ function InlineCriterionRow({
 
   return (
     <div>
-      <div className="flex items-center gap-2 py-2 px-3">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span className="text-sm font-medium shrink-0">{item.label}</span>
+      <div className="flex items-start gap-2 py-2 px-3">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 flex-1 min-w-0">
+          <span className="text-sm font-medium">{item.label}</span>
 
-          {/* Source badges — each independently toggleable */}
+          {/* Source badges */}
           {hasSources && (
             <span className="flex items-center gap-1 shrink-0">
-              {allSources.map((s) => (
-                <button key={s} type="button" onClick={() => toggleBadge(s)}>
+              {allSources.map((s) =>
+                readOnly ? (
                   <Badge
+                    key={s}
                     variant="outline"
-                    className={cn(
-                      "text-xs px-1.5 py-0 font-mono transition-colors",
-                      activeBadge === s
-                        ? "bg-primary/10 border-primary/50 text-primary"
-                        : "hover:bg-muted/50"
-                    )}
+                    className="text-xs px-1.5 py-0 font-mono"
                   >
                     {s}
                   </Badge>
-                </button>
-              ))}
+                ) : (
+                  <button key={s} type="button" onClick={() => toggleBadge(s)}>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-xs px-1.5 py-0 font-mono transition-colors",
+                        activeBadge === s
+                          ? "bg-primary/10 border-primary/50 text-primary"
+                          : "hover:bg-muted/50"
+                      )}
+                    >
+                      {s}
+                    </Badge>
+                  </button>
+                )
+              )}
             </span>
           )}
         </div>

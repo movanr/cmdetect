@@ -223,12 +223,7 @@ export function EvaluationView({
             <CardTitle>Diagnosekriterien</CardTitle>
           </CardHeader>
           <CardContent>
-            <DiagnosisReference
-              criteriaData={criteriaData}
-              selectedDiagnosisId={diagnosisId}
-              selectedSide={side}
-              selectedRegion={region}
-            />
+            <DiagnosisReference criteriaData={criteriaData} />
           </CardContent>
         </Card>
 

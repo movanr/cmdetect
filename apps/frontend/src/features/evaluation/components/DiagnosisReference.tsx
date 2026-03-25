@@ -4,28 +4,17 @@
  *
  * Each diagnosis expands to show its criteria checklist in read-only mode.
  * Accordion behaviour: only one diagnosis expanded at a time.
- *
- * When a diagnosis is selected via the selector, it auto-expands with
- * the chosen side/region context for accurate criteria evaluation.
+ * Completely independent of the diagnosis selector — pure reference UI.
  */
 
-import {
-  ALL_DIAGNOSES,
-  type DiagnosisDefinition,
-  type DiagnosisId,
-  type Region,
-  type Side,
-} from "@cmdetect/dc-tmd";
+import { ALL_DIAGNOSES, type DiagnosisDefinition, type Region, type Side } from "@cmdetect/dc-tmd";
 import { ChevronRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { InlineCriteriaChecklist } from "./InlineCriteriaChecklist";
 
 interface DiagnosisReferenceProps {
   criteriaData: Record<string, unknown>;
-  selectedDiagnosisId?: DiagnosisId | null;
-  selectedSide?: Side | null;
-  selectedRegion?: Region | null;
 }
 
 const CATEGORIES = [
@@ -36,20 +25,8 @@ const CATEGORIES = [
 const EMPTY_MAP = new Map();
 const noop = () => {};
 
-export function DiagnosisReference({
-  criteriaData,
-  selectedDiagnosisId,
-  selectedSide,
-  selectedRegion,
-}: DiagnosisReferenceProps) {
+export function DiagnosisReference({ criteriaData }: DiagnosisReferenceProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  // Auto-expand when selector completes a selection
-  useEffect(() => {
-    if (selectedDiagnosisId) {
-      setExpandedId(selectedDiagnosisId);
-    }
-  }, [selectedDiagnosisId, selectedSide, selectedRegion]);
 
   const grouped = useMemo(() => {
     const pain = ALL_DIAGNOSES.filter((d) => d.category === "pain");
@@ -69,26 +46,15 @@ export function DiagnosisReference({
             {label}
           </div>
           <div className="rounded-md border divide-y">
-            {grouped[key].map((diagnosis) => {
-              const isExpanded = expandedId === diagnosis.id;
-              // Use selector values when this diagnosis is the selected one, otherwise defaults
-              const isSelected = selectedDiagnosisId === diagnosis.id;
-              const side = isSelected && selectedSide ? selectedSide : "right";
-              const region =
-                isSelected && selectedRegion ? selectedRegion : diagnosis.examination.regions[0];
-
-              return (
-                <DiagnosisRow
-                  key={diagnosis.id}
-                  diagnosis={diagnosis}
-                  expanded={isExpanded}
-                  onToggle={() => toggle(diagnosis.id)}
-                  criteriaData={criteriaData}
-                  side={side}
-                  region={region}
-                />
-              );
-            })}
+            {grouped[key].map((diagnosis) => (
+              <DiagnosisRow
+                key={diagnosis.id}
+                diagnosis={diagnosis}
+                expanded={expandedId === diagnosis.id}
+                onToggle={() => toggle(diagnosis.id)}
+                criteriaData={criteriaData}
+              />
+            ))}
           </div>
         </div>
       ))}
@@ -101,38 +67,45 @@ function DiagnosisRow({
   expanded,
   onToggle,
   criteriaData,
-  side,
-  region,
 }: {
   diagnosis: DiagnosisDefinition;
   expanded: boolean;
   onToggle: () => void;
   criteriaData: Record<string, unknown>;
-  side: Side;
-  region: Region;
 }) {
+  const defaultSide: Side = "right";
+  const defaultRegion: Region = diagnosis.examination.regions[0];
+
   return (
-    <div>
+    <div
+      className={cn(
+        "transition-colors",
+        expanded && "border-l-2 border-l-primary bg-muted/10",
+      )}
+    >
       <button
         type="button"
         onClick={onToggle}
-        className="flex items-center gap-2 w-full px-3 py-2.5 text-left hover:bg-muted/50 transition-colors"
+        className={cn(
+          "flex items-center gap-2 w-full px-3 py-2.5 text-left transition-colors",
+          expanded ? "bg-muted/30" : "hover:bg-muted/50",
+        )}
       >
         <ChevronRight
           className={cn(
-            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
-            expanded && "rotate-90",
+            "h-4 w-4 shrink-0 transition-transform",
+            expanded ? "rotate-90 text-primary" : "text-muted-foreground",
           )}
         />
         <span className="text-sm font-medium">{diagnosis.nameDE}</span>
       </button>
       {expanded && (
-        <div className="border-t bg-muted/20">
+        <div className="pl-[calc(1rem+0.5rem)]">
           <InlineCriteriaChecklist
             diagnosis={diagnosis}
             criteriaData={criteriaData}
-            side={side}
-            region={region}
+            side={defaultSide}
+            region={defaultRegion}
             assessmentMap={EMPTY_MAP}
             onAssessmentChange={noop}
             onAssessmentClear={noop}
