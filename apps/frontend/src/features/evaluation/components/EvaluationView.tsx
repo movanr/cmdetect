@@ -166,6 +166,17 @@ export function EvaluationView({
 
   return (
     <div className="space-y-6">
+      {caseId && (
+        <div className="flex justify-end">
+          <Button asChild>
+            <Link to="/cases/$id/documentation" params={{ id: caseId }}>
+              Weiter zur Dokumentation
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
+
       {/* Diagnosis documentation: selector + documented list in one card */}
       <Card>
         <CardHeader>
@@ -236,17 +247,6 @@ export function EvaluationView({
           </CardContent>
         </Card>
       </div>
-
-      {caseId && (
-        <div className="flex justify-end pt-2">
-          <Button asChild>
-            <Link to="/cases/$id/documentation" params={{ id: caseId }}>
-              Weiter zur Dokumentation
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      )}
 
       {/* Myalgia conflict confirmation dialog */}
       <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
