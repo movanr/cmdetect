@@ -132,6 +132,13 @@ export const OPENING_TYPES = {
 export type OpeningType = keyof typeof OPENING_TYPES;
 export const OPENING_TYPE_KEYS = Object.keys(OPENING_TYPES) as OpeningType[];
 
+// === E4 OPENING TYPE LABELS (German) ===
+export const OPENING_TYPE_LABELS = {
+  painFree: "Schmerzfreie Mundöffnung",
+  maxUnassisted: "Maximale aktive Mundöffnung",
+  maxAssisted: "Maximale passive Mundöffnung",
+} as const satisfies Record<OpeningType, string>;
+
 // === MEASUREMENT FIELDS ===
 export const MEASUREMENT_FIELDS = {
   measurement: "measurement",
@@ -149,6 +156,13 @@ export const MOVEMENT_TYPES = {
 export type MovementType = keyof typeof MOVEMENT_TYPES;
 export const MOVEMENT_TYPE_KEYS = Object.keys(MOVEMENT_TYPES) as MovementType[];
 
+// === E5 MOVEMENT TYPE LABELS (German) ===
+export const MOVEMENT_TYPE_LABELS = {
+  lateralRight: "Laterotrusion rechts",
+  lateralLeft: "Laterotrusion links",
+  protrusive: "Protrusion",
+} as const satisfies Record<MovementType, string>;
+
 // === E8 JOINT LOCKING ===
 export const E8_LOCKING_TYPES = {
   closedLocking: "closedLocking",
@@ -162,6 +176,27 @@ export const E8_LOCKING_FIELDS = {
 } as const;
 export type E8LockingField = keyof typeof E8_LOCKING_FIELDS;
 
+// === E8 LOCKING TYPE LABELS (German) ===
+export const E8_LOCKING_TYPE_LABELS = {
+  closedLocking: "Kieferklemme",
+  openLocking: "Kiefersperre",
+} as const satisfies Record<E8LockingType, string>;
+
+// Form descriptions for E8 locking types
+export const E8_LOCKING_TYPE_DESCRIPTIONS = {
+  closedLocking: "Während der Öffnung",
+  openLocking: "Bei weiter Mundöffnung",
+} as const satisfies Record<E8LockingType, string>;
+
+// === E8 REDUCTION LABELS (German) ===
+// Form: "Lösbar durch Patient" / "Lösbar durch Untersucher"
+export const E8_REDUCTION_LABELS = {
+  patient: "Patient",
+  examiner: "Untersucher",
+  notReduced: "Nicht lösbar",
+} as const;
+export type E8Reduction = keyof typeof E8_REDUCTION_LABELS;
+
 // === E6-E8 JOINT SOUNDS ===
 export const JOINT_SOUNDS = {
   click: "click",
@@ -169,3 +204,30 @@ export const JOINT_SOUNDS = {
 } as const;
 export type JointSound = keyof typeof JOINT_SOUNDS;
 export const JOINT_SOUND_KEYS = Object.keys(JOINT_SOUNDS) as JointSound[];
+
+// === JOINT SOUND LABELS (German, E6 & E7) ===
+export const JOINT_SOUND_LABELS = {
+  click: "Knacken",
+  crepitus: "Reiben",
+} as const satisfies Record<JointSound, string>;
+
+// === E6 OBSERVER LABELS (opening/closing distinction) ===
+// Form header: "Untersucher: Öffnen | Schließen" + "Patient"
+export const E6_OBSERVER_LABELS = {
+  examinerOpen: "Unt. Öffnen",
+  examinerClose: "Unt. Schließen",
+  patient: "Patient",
+} as const;
+
+// === E7 OBSERVER LABELS (single examiner field) ===
+export const E7_OBSERVER_LABELS = {
+  examiner: "Untersucher",
+  patient: "Patient",
+} as const;
+
+// === CLICK PAIN LABELS (E6, E7 — conditional fields for click) ===
+// Form: "Schmerzhaftes Knacken" + "Bekannter Schmerz"
+export const CLICK_PAIN_LABELS = {
+  painWithClick: "Schmerzh. Knacken",
+  familiarPain: "Bekannter Schmerz",
+} as const;

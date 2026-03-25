@@ -12,12 +12,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
-  getValueAtPath as get,
+  E6_OBSERVER_LABELS,
+  E7_OBSERVER_LABELS,
+  CLICK_PAIN_LABELS,
+  E8_LOCKING_TYPE_DESCRIPTIONS,
+  JOINT_SOUND_KEYS,
+  JOINT_SOUND_LABELS,
   PALPATION_SITES,
   REGIONS,
   SIDE_KEYS,
+  SIDES,
   SITE_CONFIG,
   SITES_BY_GROUP,
+  getValueAtPath as get,
+  type JointSound,
   type Region,
   type Side,
 } from "@cmdetect/dc-tmd";
@@ -34,6 +42,22 @@ import { ChevronDown, ChevronRight, Stethoscope } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { EMPTY_REGION_STATUS, HeadDiagram, type RegionStatus } from "../../examination";
 import { translateValue } from "../utils/criterion-data-display";
+import { BilateralLayout, FindingRow, InlineField } from "./findings-primitives";
+
+// ── Step configs (badge → criteriaData key mapping) ─────────────────
+
+const OPENING_STEPS = [
+  { key: "maxUnassisted", badge: "U4B" },
+  { key: "maxAssisted", badge: "U4C" },
+] as const;
+
+const LATERAL_STEPS = [
+  { key: "lateralRight", badge: "U5A" },
+  { key: "lateralLeft", badge: "U5B" },
+  { key: "protrusive", badge: "U5C" },
+] as const;
+
+// ── Main component ──────────────────────────────────────────────────
 
 interface FindingsSummaryProps {
   criteriaData: Record<string, unknown>;
@@ -47,7 +71,7 @@ export function FindingsSummary({ criteriaData, className, alwaysOpen }: Finding
 
   const sqData = useMemo(
     () => (criteriaData["sq"] as Record<string, unknown> | undefined) ?? {},
-    [criteriaData]
+    [criteriaData],
   );
 
   const content = (
@@ -64,6 +88,24 @@ export function FindingsSummary({ criteriaData, className, alwaysOpen }: Finding
         <TabsContent key={section.id} value={section.id}>
           <SQSectionQuestions section={section} sqData={sqData} />
           {section.id === "pain" && <PainFindingsContent criteriaData={criteriaData} />}
+          {section.id === "headache" && <HeadacheFindingsContent criteriaData={criteriaData} />}
+          {section.id === "joint_noises" && (
+            <JointSoundFindingsContent criteriaData={criteriaData} />
+          )}
+          {section.id === "closed_locking" && (
+            <LockingFindingsContent
+              criteriaData={criteriaData}
+              lockingType="closedLocking"
+              title="Kieferklemme (während der Öffnung)"
+            />
+          )}
+          {section.id === "open_locking" && (
+            <LockingFindingsContent
+              criteriaData={criteriaData}
+              lockingType="openLocking"
+              title="Kiefersperre (bei weiter Mundöffnung)"
+            />
+          )}
         </TabsContent>
       ))}
     </Tabs>
@@ -94,7 +136,7 @@ export function FindingsSummary({ criteriaData, className, alwaysOpen }: Finding
   );
 }
 
-// ── SQ question rendering (absorbed from SymptomQuestionnaireReference) ──
+// ── SQ question rendering ───────────────────────────────────────────
 
 function formatDuration(value: unknown): string {
   if (value == null || typeof value !== "object") return "—";
@@ -146,21 +188,10 @@ function SQSectionQuestions({
   );
 }
 
-// ── Pain findings content (unchanged from PainFindingsSummary) ──────────
+// ── Pain findings ───────────────────────────────────────────────────
 
 const CORE_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj"];
 const EXTRA_REGIONS: readonly Region[] = ["otherMast", "nonMast"];
-
-const OPENING_STEPS = [
-  { key: "maxUnassisted", badge: "U4B", label: "max. aktiver Mundöffnung" },
-  { key: "maxAssisted", badge: "U4C", label: "max. passiver Mundöffnung" },
-] as const;
-
-const LATERAL_STEPS = [
-  { key: "lateralRight", badge: "U5A", label: "Laterotrusion rechts" },
-  { key: "lateralLeft", badge: "U5B", label: "Laterotrusion links" },
-  { key: "protrusive", badge: "U5C", label: "Protrusion" },
-] as const;
 
 function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, unknown> }) {
   const [expanded, setExpanded] = useState<{ side: Side; region: Region } | null>(null);
@@ -168,13 +199,11 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
 
   const toggleRegion = useCallback((side: Side, region: Region) => {
     setExpanded((prev) =>
-      prev?.side === side && prev?.region === region ? null : { side, region }
+      prev?.side === side && prev?.region === region ? null : { side, region },
     );
   }, []);
 
   const painLocations = useMemo(() => {
-    // Treat empty arrays as undefined — E1 has an explicit "keine" option,
-    // so [] means skipped/not examined, not "no pain".
     const toRegions = (v: unknown): Region[] | undefined => {
       if (!Array.isArray(v) || v.length === 0) return undefined;
       return v as Region[];
@@ -195,10 +224,8 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
       const locs = painLocations[side];
       for (const r of regions) {
         if (locs === undefined) {
-          // E1 skipped / not examined → UNDEFINED (amber in diagram)
           result[side][r] = { ...EMPTY_REGION_STATUS, hasData: true, isPainPositive: true };
         } else if (locs.includes(r)) {
-          // E1 completed, region has pain → POSITIVE
           result[side][r] = {
             ...EMPTY_REGION_STATUS,
             hasData: true,
@@ -207,7 +234,6 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
             isComplete: true,
           };
         } else {
-          // E1 completed, region has no pain → NEGATIVE
           result[side][r] = { ...EMPTY_REGION_STATUS, hasData: true, isComplete: true };
         }
       }
@@ -238,14 +264,16 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
               regions={diagramRegions}
               regionStatuses={regionStatuses[side]}
               selectedRegion={
-                expanded?.side === side && expanded.region !== "otherMast" ? expanded.region : null
+                expanded?.side === side && expanded.region !== "otherMast"
+                  ? expanded.region
+                  : null
               }
               onRegionClick={(region) => toggleRegion(side, region)}
               hideBackgroundImages
               className="w-full max-w-[180px]"
             />
-            {/* Vertical region list */}
             <div className="w-full space-y-1 pt-1">
+              <div className="text-xs font-medium">{SIDES[side]}</div>
               {visibleRegions.map((region) => {
                 const isPainPositive = painLocations[side]?.includes(region) ?? false;
                 const isExpanded = expanded?.side === side && expanded?.region === region;
@@ -276,25 +304,26 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
                         <span className={cn(isPainPositive && "font-semibold")}>
                           {REGIONS[region]}
                         </span>
-                        <div className="flex items-baseline gap-1.5 mt-0.5">
-                          <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
-                            U1A
-                          </Badge>
-                          <span className="text-muted-foreground">
-                            Schmerzlokalisation bestätigt:
-                          </span>
-                          <span className="font-medium">
-                            {painLocations[side] === undefined
+                        <FindingRow
+                          badge="U1A"
+                          label="Schmerzlokalisation bestätigt"
+                          value={
+                            painLocations[side] === undefined
                               ? "—"
                               : isPainPositive
                                 ? "Ja"
-                                : "Nein"}
-                          </span>
-                        </div>
+                                : "Nein"
+                          }
+                          className="mt-0.5"
+                        />
                       </div>
                     </button>
                     {isExpanded && (
-                      <PainRegionDetail criteriaData={criteriaData} side={side} region={region} />
+                      <PainRegionDetail
+                        criteriaData={criteriaData}
+                        side={side}
+                        region={region}
+                      />
                     )}
                   </div>
                 );
@@ -330,7 +359,7 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
   );
 }
 
-// ── Detail sub-component ──────────────────────────────────────────────
+// ── Pain region detail ──────────────────────────────────────────────
 
 function PainRegionDetail({
   criteriaData,
@@ -353,94 +382,78 @@ function PainRegionDetail({
   const palpationBadge = isSupplemental ? "U10" : "U9";
 
   const showSpreading = !isSupplemental && palpationSites.some((s) => SITE_CONFIG[s].hasSpreading);
-  const showReferred = true;
 
   return (
     <div className="space-y-1.5 pl-[26px] pr-2 pb-2">
-      {/* U4B/U4C rows — only for core regions */}
+      {/* U4B/U4C — opening pain */}
       {!isSupplemental &&
         OPENING_STEPS.map(({ key, badge }) => (
           <div key={key} className="flex items-baseline gap-1.5 text-xs flex-wrap">
             <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
               {badge}
             </Badge>
-            <span className="text-muted-foreground">Schmerz:</span>
-            <span className="font-medium">
-              {translateValue(get(criteriaData, `e4.${key}.${side}.${region}.pain`))}
-            </span>
-            <span className="text-muted-foreground ml-1">Bek. Schmerz:</span>
-            <span className="font-medium">
-              {translateValue(get(criteriaData, `e4.${key}.${side}.${region}.familiarPain`))}
-            </span>
+            <InlineField
+              label="Schmerz"
+              value={translateValue(get(criteriaData, `e4.${key}.${side}.${region}.pain`))}
+            />
+            <InlineField
+              label="Bek. Schmerz"
+              value={translateValue(get(criteriaData, `e4.${key}.${side}.${region}.familiarPain`))}
+            />
           </div>
         ))}
 
-      {/* U5A/U5B/U5C rows — only for core regions */}
+      {/* U5A/U5B/U5C — lateral/protrusive pain */}
       {!isSupplemental &&
         LATERAL_STEPS.map(({ key, badge }) => (
           <div key={key} className="flex items-baseline gap-1.5 text-xs flex-wrap">
             <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
               {badge}
             </Badge>
-            <span className="text-muted-foreground">Schmerz:</span>
-            <span className="font-medium">
-              {translateValue(get(criteriaData, `e5.${key}.${side}.${region}.pain`))}
-            </span>
-            <span className="text-muted-foreground ml-1">Bek. Schmerz:</span>
-            <span className="font-medium">
-              {translateValue(get(criteriaData, `e5.${key}.${side}.${region}.familiarPain`))}
-            </span>
+            <InlineField
+              label="Schmerz"
+              value={translateValue(get(criteriaData, `e5.${key}.${side}.${region}.pain`))}
+            />
+            <InlineField
+              label="Bek. Schmerz"
+              value={translateValue(get(criteriaData, `e5.${key}.${side}.${region}.familiarPain`))}
+            />
           </div>
         ))}
 
-      {/* Palpation — stacked cards */}
+      {/* Palpation cards */}
       {palpationSites.length > 0 && (
         <div className="space-y-1">
-          <div className="flex items-baseline gap-1.5 text-xs">
-            <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
-              {palpationBadge}
-            </Badge>
-            <span className="text-muted-foreground">Palpation</span>
-          </div>
+          <FindingRow badge={palpationBadge} label="Palpation" value="" />
           <div className="space-y-1">
             {palpationSites.map((s) => (
               <div key={s} className="border rounded p-1.5 text-xs space-y-0.5">
                 <div className="font-medium text-muted-foreground">{PALPATION_SITES[s]}</div>
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                  <span>
-                    <span className="text-muted-foreground">Schmerz: </span>
-                    <span className="font-medium">
-                      {translateValue(get(criteriaData, `${palpationSection}.${side}.${s}.pain`))}
-                    </span>
-                  </span>
-                  <span>
-                    <span className="text-muted-foreground">Bek. Schmerz: </span>
-                    <span className="font-medium">
-                      {translateValue(
-                        get(criteriaData, `${palpationSection}.${side}.${s}.familiarPain`)
-                      )}
-                    </span>
-                  </span>
+                  <InlineField
+                    label="Schmerz"
+                    value={translateValue(get(criteriaData, `${palpationSection}.${side}.${s}.pain`))}
+                  />
+                  <InlineField
+                    label="Bek. Schmerz"
+                    value={translateValue(
+                      get(criteriaData, `${palpationSection}.${side}.${s}.familiarPain`),
+                    )}
+                  />
                   {showSpreading && SITE_CONFIG[s].hasSpreading && (
-                    <span>
-                      <span className="text-muted-foreground">Ausbr. Schmerz: </span>
-                      <span className="font-medium">
-                        {translateValue(
-                          get(criteriaData, `${palpationSection}.${side}.${s}.spreadingPain`)
-                        )}
-                      </span>
-                    </span>
+                    <InlineField
+                      label="Ausbr. Schmerz"
+                      value={translateValue(
+                        get(criteriaData, `${palpationSection}.${side}.${s}.spreadingPain`),
+                      )}
+                    />
                   )}
-                  {showReferred && (
-                    <span>
-                      <span className="text-muted-foreground">Übertr. Schmerz: </span>
-                      <span className="font-medium">
-                        {translateValue(
-                          get(criteriaData, `${palpationSection}.${side}.${s}.referredPain`)
-                        )}
-                      </span>
-                    </span>
-                  )}
+                  <InlineField
+                    label="Übertr. Schmerz"
+                    value={translateValue(
+                      get(criteriaData, `${palpationSection}.${side}.${s}.referredPain`),
+                    )}
+                  />
                 </div>
               </div>
             ))}
@@ -448,5 +461,196 @@ function PainRegionDetail({
         </div>
       )}
     </div>
+  );
+}
+
+// ── Headache findings ───────────────────────────────────────────────
+
+const TEMPORALIS_SITES = SITES_BY_GROUP["temporalis"];
+
+function HeadacheFindingsContent({ criteriaData }: { criteriaData: Record<string, unknown> }) {
+  const headacheLocations = useMemo(() => {
+    const toRegions = (v: unknown): Region[] | undefined => {
+      if (!Array.isArray(v) || v.length === 0) return undefined;
+      return v as Region[];
+    };
+    return {
+      right: toRegions(get(criteriaData, "e1.headacheLocation.right")),
+      left: toRegions(get(criteriaData, "e1.headacheLocation.left")),
+    };
+  }, [criteriaData]);
+
+  return (
+    <BilateralLayout title="Untersuchungsbefunde Kopfschmerz">
+      {(side) => {
+        const hasHeadache = headacheLocations[side]?.includes("temporalis") ?? false;
+        return (
+          <div className="space-y-1.5">
+            <FindingRow
+              badge="U1B"
+              label="Kopfschmerzlokalisation Temporalis"
+              value={headacheLocations[side] === undefined ? "—" : hasHeadache ? "Ja" : "Nein"}
+            />
+            {OPENING_STEPS.map(({ key, badge }) => (
+              <FindingRow
+                key={key}
+                badge={badge}
+                label="Bek. Kopfschmerz"
+                value={translateValue(
+                  get(criteriaData, `e4.${key}.${side}.temporalis.familiarHeadache`),
+                )}
+              />
+            ))}
+            {LATERAL_STEPS.map(({ key, badge }) => (
+              <FindingRow
+                key={key}
+                badge={badge}
+                label="Bek. Kopfschmerz"
+                value={translateValue(
+                  get(criteriaData, `e5.${key}.${side}.temporalis.familiarHeadache`),
+                )}
+              />
+            ))}
+            <div className="space-y-1">
+              <FindingRow badge="U9" label="Palpation — Bek. Kopfschmerz" value="" />
+              {TEMPORALIS_SITES.map((s) => (
+                <div key={s} className="border rounded p-1.5 text-xs">
+                  <div className="font-medium text-muted-foreground">{PALPATION_SITES[s]}</div>
+                  <span className="font-medium">
+                    {translateValue(get(criteriaData, `e9.${side}.${s}.familiarHeadache`))}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }}
+    </BilateralLayout>
+  );
+}
+
+// ── Joint sound findings ────────────────────────────────────────────
+
+function JointSoundCard({
+  badge,
+  soundType,
+  fields,
+  criteriaData,
+  side,
+}: {
+  badge: string;
+  soundType: JointSound;
+  fields: { key: string; label: string }[];
+  criteriaData: Record<string, unknown>;
+  side: Side;
+}) {
+  const section = badge === "U6" ? "e6" : "e7";
+  return (
+    <div className="border rounded p-1.5 text-xs space-y-0.5">
+      <FindingRow badge={badge} label={JOINT_SOUND_LABELS[soundType]} value="" />
+      <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+        {fields.map(({ key, label }) => (
+          <InlineField
+            key={key}
+            label={label}
+            value={translateValue(get(criteriaData, `${section}.${side}.${soundType}.${key}`))}
+          />
+        ))}
+      </div>
+      {soundType === "click" && (
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 pt-0.5">
+          <InlineField
+            label={CLICK_PAIN_LABELS.painWithClick}
+            value={translateValue(get(criteriaData, `${section}.${side}.click.painWithClick`))}
+          />
+          <InlineField
+            label={CLICK_PAIN_LABELS.familiarPain}
+            value={translateValue(get(criteriaData, `${section}.${side}.click.familiarPain`))}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+const E6_FIELDS = (Object.keys(E6_OBSERVER_LABELS) as (keyof typeof E6_OBSERVER_LABELS)[]).map(
+  (key) => ({ key, label: E6_OBSERVER_LABELS[key] }),
+);
+const E7_FIELDS = (Object.keys(E7_OBSERVER_LABELS) as (keyof typeof E7_OBSERVER_LABELS)[]).map(
+  (key) => ({ key, label: E7_OBSERVER_LABELS[key] }),
+);
+
+function JointSoundFindingsContent({ criteriaData }: { criteriaData: Record<string, unknown> }) {
+  return (
+    <BilateralLayout title="Untersuchungsbefunde Gelenkgeräusche">
+      {(side) => (
+        <div className="space-y-1">
+          {JOINT_SOUND_KEYS.map((st) => (
+            <JointSoundCard
+              key={`u6-${st}`}
+              badge="U6"
+              soundType={st}
+              fields={E6_FIELDS}
+              criteriaData={criteriaData}
+              side={side}
+            />
+          ))}
+          {JOINT_SOUND_KEYS.map((st) => (
+            <JointSoundCard
+              key={`u7-${st}`}
+              badge="U7"
+              soundType={st}
+              fields={E7_FIELDS}
+              criteriaData={criteriaData}
+              side={side}
+            />
+          ))}
+        </div>
+      )}
+    </BilateralLayout>
+  );
+}
+
+// ── Locking findings ────────────────────────────────────────────────
+
+function LockingFindingsContent({
+  criteriaData,
+  lockingType,
+  title,
+}: {
+  criteriaData: Record<string, unknown>;
+  lockingType: "closedLocking" | "openLocking";
+  title: string;
+}) {
+  return (
+    <BilateralLayout title={title}>
+      {(side) => (
+        <div className="border rounded p-1.5 text-xs space-y-0.5">
+          <FindingRow badge="U8" label={E8_LOCKING_TYPE_DESCRIPTIONS[lockingType]} value="" />
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+            <InlineField
+              label="Blockade"
+              value={translateValue(get(criteriaData, `e8.${side}.${lockingType}.locking`))}
+            />
+            {(() => {
+              const reduction = get(criteriaData, `e8.${side}.${lockingType}.reduction`);
+              const noData = reduction == null;
+              return (
+                <>
+                  <InlineField
+                    label="Lösbar durch Patient"
+                    value={noData ? "—" : reduction === "patient" ? "Ja" : "Nein"}
+                  />
+                  <InlineField
+                    label="Lösbar durch Untersucher"
+                    value={noData ? "—" : reduction === "examiner" ? "Ja" : "Nein"}
+                  />
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+    </BilateralLayout>
   );
 }

@@ -6,6 +6,10 @@
  */
 
 import {
+  E2_MIDLINE_DIRECTIONS,
+  E2_REFERENCE_TEETH,
+  E3_OPENING_PATTERNS,
+  E8_REDUCTION_LABELS,
   PAIN_TYPES,
   PALPATION_SITES,
   REGIONS,
@@ -31,6 +35,15 @@ export interface DisplayGroup {
   value: string;
 }
 
+// Merged enum→label lookup from dc-tmd exports.
+// Only includes maps whose keys appear as leaf VALUES (not path segments).
+const ENUM_LABELS: Record<string, string> = {
+  ...E3_OPENING_PATTERNS,
+  ...E2_MIDLINE_DIRECTIONS,
+  ...E2_REFERENCE_TEETH,
+  ...E8_REDUCTION_LABELS,
+};
+
 export function translateValue(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (value === "yes" || value === true) return "Ja";
@@ -39,7 +52,8 @@ export function translateValue(value: unknown): string {
   if (value === "intermittent") return "Kommen und gehen";
   if (value === "continuous") return "Dauerhaft";
   if (typeof value === "number") return `${value} mm`;
-  return String(value);
+  const strVal = String(value);
+  return ENUM_LABELS[strVal] ?? strVal;
 }
 
 // ── SQ reverse map: "SF4" → [SQ4_A, SQ4_B, SQ4_C, SQ4_D] ───────────
