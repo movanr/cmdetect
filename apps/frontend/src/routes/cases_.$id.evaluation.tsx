@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
+import { useSession } from "@/lib/auth";
 import { execute } from "@/graphql/execute";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
@@ -27,6 +28,8 @@ export const Route = createFileRoute("/cases_/$id/evaluation")({
 function EvaluationPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { data: session } = useSession();
+
   // Fetch patient record
   const { data, isLoading: isRecordLoading } = useQuery({
     queryKey: ["patient-record", id],
@@ -105,6 +108,12 @@ function EvaluationPage() {
   // Get examination data (default to empty object if not available)
   const examinationData = (examination?.responseData ?? {}) as FormValues;
 
+  const userId = session?.user?.id ?? "";
+  const activeRole = (session?.user as Record<string, unknown> | undefined)?.activeRole as
+    | string
+    | undefined;
+  const isReadOnly = activeRole === "receptionist";
+
   const completedStepsArray = useMemo(() => Array.from(completedSteps), [completedSteps]);
 
   const isDataReady = !isRecordLoading && !isResponsesLoading && !isExaminationLoading;
@@ -137,6 +146,9 @@ function EvaluationPage() {
       <EvaluationView
         sqAnswers={sqAnswers}
         examinationData={examinationData}
+        patientRecordId={id}
+        userId={userId}
+        readOnly={isReadOnly}
         caseId={id}
       />
     </CaseLayout>

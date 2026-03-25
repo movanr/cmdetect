@@ -4,16 +4,28 @@
  *
  * Each diagnosis expands to show its criteria checklist in read-only mode.
  * Accordion behaviour: only one diagnosis expanded at a time.
+ *
+ * When a diagnosis is selected via the selector, it auto-expands with
+ * the chosen side/region context for accurate criteria evaluation.
  */
 
-import { ALL_DIAGNOSES, type DiagnosisDefinition } from "@cmdetect/dc-tmd";
+import {
+  ALL_DIAGNOSES,
+  type DiagnosisDefinition,
+  type DiagnosisId,
+  type Region,
+  type Side,
+} from "@cmdetect/dc-tmd";
 import { ChevronRight } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { InlineCriteriaChecklist } from "./InlineCriteriaChecklist";
 
 interface DiagnosisReferenceProps {
   criteriaData: Record<string, unknown>;
+  selectedDiagnosisId?: DiagnosisId | null;
+  selectedSide?: Side | null;
+  selectedRegion?: Region | null;
 }
 
 const CATEGORIES = [
@@ -24,8 +36,20 @@ const CATEGORIES = [
 const EMPTY_MAP = new Map();
 const noop = () => {};
 
-export function DiagnosisReference({ criteriaData }: DiagnosisReferenceProps) {
+export function DiagnosisReference({
+  criteriaData,
+  selectedDiagnosisId,
+  selectedSide,
+  selectedRegion,
+}: DiagnosisReferenceProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Auto-expand when selector completes a selection
+  useEffect(() => {
+    if (selectedDiagnosisId) {
+      setExpandedId(selectedDiagnosisId);
+    }
+  }, [selectedDiagnosisId, selectedSide, selectedRegion]);
 
   const grouped = useMemo(() => {
     const pain = ALL_DIAGNOSES.filter((d) => d.category === "pain");
@@ -45,15 +69,26 @@ export function DiagnosisReference({ criteriaData }: DiagnosisReferenceProps) {
             {label}
           </div>
           <div className="rounded-md border divide-y">
-            {grouped[key].map((diagnosis) => (
-              <DiagnosisRow
-                key={diagnosis.id}
-                diagnosis={diagnosis}
-                expanded={expandedId === diagnosis.id}
-                onToggle={() => toggle(diagnosis.id)}
-                criteriaData={criteriaData}
-              />
-            ))}
+            {grouped[key].map((diagnosis) => {
+              const isExpanded = expandedId === diagnosis.id;
+              // Use selector values when this diagnosis is the selected one, otherwise defaults
+              const isSelected = selectedDiagnosisId === diagnosis.id;
+              const side = isSelected && selectedSide ? selectedSide : "right";
+              const region =
+                isSelected && selectedRegion ? selectedRegion : diagnosis.examination.regions[0];
+
+              return (
+                <DiagnosisRow
+                  key={diagnosis.id}
+                  diagnosis={diagnosis}
+                  expanded={isExpanded}
+                  onToggle={() => toggle(diagnosis.id)}
+                  criteriaData={criteriaData}
+                  side={side}
+                  region={region}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
@@ -66,14 +101,16 @@ function DiagnosisRow({
   expanded,
   onToggle,
   criteriaData,
+  side,
+  region,
 }: {
   diagnosis: DiagnosisDefinition;
   expanded: boolean;
   onToggle: () => void;
   criteriaData: Record<string, unknown>;
+  side: Side;
+  region: Region;
 }) {
-  const defaultRegion = diagnosis.examination.regions[0];
-
   return (
     <div>
       <button
@@ -94,8 +131,8 @@ function DiagnosisRow({
           <InlineCriteriaChecklist
             diagnosis={diagnosis}
             criteriaData={criteriaData}
-            side="right"
-            region={defaultRegion}
+            side={side}
+            region={region}
             assessmentMap={EMPTY_MAP}
             onAssessmentChange={noop}
             onAssessmentClear={noop}
