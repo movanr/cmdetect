@@ -9,7 +9,10 @@ import {
   E2_MIDLINE_DIRECTIONS,
   E2_REFERENCE_TEETH,
   E3_OPENING_PATTERNS,
+  E6_OBSERVER_LABELS,
+  E7_OBSERVER_LABELS,
   E8_REDUCTION_LABELS,
+  JOINT_SOUND_LABELS,
   MOVEMENT_TYPE_LABELS,
   OPENING_TYPE_LABELS,
   PAIN_TYPES,
@@ -184,64 +187,32 @@ function u5StepLines(
 
 function u6Lines(criteriaData: Record<string, unknown>, side: Side): DisplayGroup[] {
   const s = SIDES[side];
-  return [
-    {
-      badge: "U6",
-      headline: `Knacken bei Öffnung (Untersucher), ${s}`,
-      value: translateValue(get(criteriaData, `e6.${side}.click.examinerOpen`)),
-    },
-    {
-      badge: "U6",
-      headline: `Knacken bei Schließung (Untersucher), ${s}`,
-      value: translateValue(get(criteriaData, `e6.${side}.click.examinerClose`)),
-    },
-    {
-      badge: "U6",
-      headline: `Knacken (Patient), ${s}`,
-      value: translateValue(get(criteriaData, `e6.${side}.click.patient`)),
-    },
-    {
-      badge: "U6",
-      headline: `Reiben bei Öffnung (Untersucher), ${s}`,
-      value: translateValue(get(criteriaData, `e6.${side}.crepitus.examinerOpen`)),
-    },
-    {
-      badge: "U6",
-      headline: `Reiben bei Schließung (Untersucher), ${s}`,
-      value: translateValue(get(criteriaData, `e6.${side}.crepitus.examinerClose`)),
-    },
-    {
-      badge: "U6",
-      headline: `Reiben (Patient), ${s}`,
-      value: translateValue(get(criteriaData, `e6.${side}.crepitus.patient`)),
-    },
-  ];
+  const lines: DisplayGroup[] = [];
+  for (const [soundKey, soundLabel] of Object.entries(JOINT_SOUND_LABELS)) {
+    for (const [obsKey, obsLabel] of Object.entries(E6_OBSERVER_LABELS)) {
+      lines.push({
+        badge: "U6",
+        headline: `${soundLabel} (${obsLabel}), ${s}`,
+        value: translateValue(get(criteriaData, `e6.${side}.${soundKey}.${obsKey}`)),
+      });
+    }
+  }
+  return lines;
 }
 
 function u7Lines(criteriaData: Record<string, unknown>, side: Side): DisplayGroup[] {
   const s = SIDES[side];
-  return [
-    {
-      badge: "U7",
-      headline: `Knacken (Untersucher), ${s}`,
-      value: translateValue(get(criteriaData, `e7.${side}.click.examiner`)),
-    },
-    {
-      badge: "U7",
-      headline: `Knacken (Patient), ${s}`,
-      value: translateValue(get(criteriaData, `e7.${side}.click.patient`)),
-    },
-    {
-      badge: "U7",
-      headline: `Reiben (Untersucher), ${s}`,
-      value: translateValue(get(criteriaData, `e7.${side}.crepitus.examiner`)),
-    },
-    {
-      badge: "U7",
-      headline: `Reiben (Patient), ${s}`,
-      value: translateValue(get(criteriaData, `e7.${side}.crepitus.patient`)),
-    },
-  ];
+  const lines: DisplayGroup[] = [];
+  for (const [soundKey, soundLabel] of Object.entries(JOINT_SOUND_LABELS)) {
+    for (const [obsKey, obsLabel] of Object.entries(E7_OBSERVER_LABELS)) {
+      lines.push({
+        badge: "U7",
+        headline: `${soundLabel} (${obsLabel}), ${s}`,
+        value: translateValue(get(criteriaData, `e7.${side}.${soundKey}.${obsKey}`)),
+      });
+    }
+  }
+  return lines;
 }
 
 function palpationLines(
