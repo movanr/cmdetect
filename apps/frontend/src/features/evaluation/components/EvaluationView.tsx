@@ -166,15 +166,15 @@ export function EvaluationView({
 
   return (
     <div className="space-y-6">
-      {/* Top row: selector + documented diagnoses side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
-        {!readOnly && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Diagnose dokumentieren</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap items-end gap-3">
+      {/* Diagnosis documentation: selector + documented list in one card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Diagnose dokumentieren</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+            {!readOnly && (
+              <div className="space-y-3">
                 <DiagnosisSelector
                   diagnosisId={diagnosisId}
                   side={side}
@@ -202,40 +202,45 @@ export function EvaluationView({
                   )}
                 </Tooltip>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
 
-        <Card className="lg:sticky lg:top-4">
+            <div>
+              <div className="text-sm font-medium pb-2">Dokumentierte Diagnosen</div>
+              <DocumentedDiagnosesList
+                diagnoses={documentedDiagnoses ?? []}
+                onRemove={handleRemove}
+                readOnly={readOnly}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Side by side: diagnosis criteria + findings summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-base">Dokumentierte Diagnosen</CardTitle>
+            <CardTitle>Diagnosekriterien</CardTitle>
           </CardHeader>
           <CardContent>
-            <DocumentedDiagnosesList
-              diagnoses={documentedDiagnoses ?? []}
-              onRemove={handleRemove}
-              readOnly={readOnly}
+            <DiagnosisReference
+              criteriaData={criteriaData}
+              selectedDiagnosisId={diagnosisId}
+              selectedSide={side}
+              selectedRegion={region}
             />
           </CardContent>
         </Card>
+
+        <Card className="lg:sticky lg:top-4">
+          <CardHeader>
+            <CardTitle>Befundübersicht</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FindingsSummary criteriaData={criteriaData} alwaysOpen />
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Full-width: reference list + findings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Diagnosekriterien</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <DiagnosisReference
-            criteriaData={criteriaData}
-            selectedDiagnosisId={diagnosisId}
-            selectedSide={side}
-            selectedRegion={region}
-          />
-
-          <FindingsSummary criteriaData={criteriaData} />
-        </CardContent>
-      </Card>
 
       {caseId && (
         <div className="flex justify-end pt-2">

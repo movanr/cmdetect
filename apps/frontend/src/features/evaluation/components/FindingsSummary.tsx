@@ -38,15 +38,40 @@ import { translateValue } from "../utils/criterion-data-display";
 interface FindingsSummaryProps {
   criteriaData: Record<string, unknown>;
   className?: string;
+  alwaysOpen?: boolean;
 }
 
-export function FindingsSummary({ criteriaData, className }: FindingsSummaryProps) {
+export function FindingsSummary({ criteriaData, className, alwaysOpen }: FindingsSummaryProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const expanded = alwaysOpen || isOpen;
 
   const sqData = useMemo(
     () => (criteriaData["sq"] as Record<string, unknown> | undefined) ?? {},
     [criteriaData]
   );
+
+  const content = (
+    <Tabs defaultValue="pain">
+      <TabsList className="flex-wrap h-auto">
+        {SQ_SECTIONS.map((section) => (
+          <TabsTrigger key={section.id} value={section.id}>
+            {section.name}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      {SQ_SECTIONS.map((section) => (
+        <TabsContent key={section.id} value={section.id}>
+          <SQSectionQuestions section={section} sqData={sqData} />
+          {section.id === "pain" && <PainFindingsContent criteriaData={criteriaData} />}
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+
+  if (alwaysOpen) {
+    return <div className={className}>{content}</div>;
+  }
 
   return (
     <div className={cn("border rounded-lg overflow-hidden", className)}>
@@ -57,33 +82,14 @@ export function FindingsSummary({ criteriaData, className }: FindingsSummaryProp
       >
         <Stethoscope className="h-4 w-4 text-muted-foreground shrink-0" />
         <span className="text-sm font-medium flex-1">Befundübersicht</span>
-        {isOpen ? (
+        {expanded ? (
           <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
         ) : (
           <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
         )}
       </button>
 
-      {isOpen && (
-        <div className="border-t px-3 py-3">
-          <Tabs defaultValue="pain">
-            <TabsList className="flex-wrap h-auto">
-              {SQ_SECTIONS.map((section) => (
-                <TabsTrigger key={section.id} value={section.id}>
-                  {section.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {SQ_SECTIONS.map((section) => (
-              <TabsContent key={section.id} value={section.id}>
-                <SQSectionQuestions section={section} sqData={sqData} />
-                {section.id === "pain" && <PainFindingsContent criteriaData={criteriaData} />}
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
-      )}
+      {expanded && <div className="border-t px-3 py-3">{content}</div>}
     </div>
   );
 }
