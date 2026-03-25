@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ALL_DIAGNOSES, type DiagnosisId, type PalpationSite, type Region, type Side } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, List, Network, Plus } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FormValues } from "../../examination";
 import { useDocumentedDiagnoses } from "../hooks/use-diagnosis-evaluation";
@@ -32,6 +32,7 @@ import {
 import type { DocumentedDiagnosis } from "../types";
 import { mapToCriteriaData } from "../utils/map-to-criteria-data";
 import { DiagnosisReference } from "./DiagnosisReference";
+import { DiagnosisTreeView } from "./DiagnosisTreeView";
 import { DiagnosisSelector, type DiagnosisSelection } from "./DiagnosisSelector";
 import { DocumentedDiagnosesList } from "./DocumentedDiagnosesList";
 import { FindingsSummary } from "./FindingsSummary";
@@ -65,6 +66,8 @@ export function EvaluationView({
   readOnly,
   caseId,
 }: EvaluationViewProps) {
+  const [criteriaViewMode, setCriteriaViewMode] = useState<"list" | "tree">("list");
+
   const criteriaData = useMemo(
     () => mapToCriteriaData(sqAnswers, examinationData),
     [sqAnswers, examinationData],
@@ -230,11 +233,33 @@ export function EvaluationView({
       {/* Side by side: diagnosis criteria + findings summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle>Diagnosekriterien</CardTitle>
+            <div className="flex gap-1">
+              <Button
+                variant={criteriaViewMode === "list" ? "default" : "ghost"}
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCriteriaViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={criteriaViewMode === "tree" ? "default" : "ghost"}
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCriteriaViewMode("tree")}
+              >
+                <Network className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <DiagnosisReference criteriaData={criteriaData} />
+            {criteriaViewMode === "list" ? (
+              <DiagnosisReference criteriaData={criteriaData} />
+            ) : (
+              <DiagnosisTreeView criteriaData={criteriaData} />
+            )}
           </CardContent>
         </Card>
 
