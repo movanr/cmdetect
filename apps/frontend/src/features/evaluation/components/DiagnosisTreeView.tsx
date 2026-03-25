@@ -27,10 +27,6 @@ import {
   createSubluxationTree,
 } from "../../decision-tree";
 
-interface DiagnosisTreeViewProps {
-  criteriaData: Record<string, unknown>;
-}
-
 const GROUPED = {
   pain: ALL_DIAGNOSES.filter((d) => d.category === "pain"),
   joint: ALL_DIAGNOSES.filter((d) => d.category === "joint"),
@@ -62,7 +58,7 @@ function createTree(diagnosisId: DiagnosisId) {
   }
 }
 
-export function DiagnosisTreeView({ criteriaData }: DiagnosisTreeViewProps) {
+export function DiagnosisTreeView() {
   const [selectedId, setSelectedId] = useState<DiagnosisId | null>(null);
 
   const tree = useMemo(() => (selectedId ? createTree(selectedId) : null), [selectedId]);
@@ -98,7 +94,7 @@ export function DiagnosisTreeView({ criteriaData }: DiagnosisTreeViewProps) {
 
       {tree && (
         <div className="overflow-x-auto">
-          <DecisionTreeView tree={tree} data={criteriaData} readOnly />
+          <DecisionTreeView tree={tree} />
         </div>
       )}
 

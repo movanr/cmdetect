@@ -1,4 +1,4 @@
-import type { Criterion, CriterionStatus, Region, Side, TemplateContext } from "@cmdetect/dc-tmd";
+import type { Criterion, Region, Side, TemplateContext } from "@cmdetect/dc-tmd";
 
 // ============================================================================
 // GEOMETRY
@@ -74,11 +74,6 @@ export interface DecisionTreeDef {
 
 export type TransitionType = "positive" | "negative" | "unconditional";
 
-/** Evaluated state of a node (never "unconditional") */
-export type NodeEvaluatedState = "positive" | "negative";
-
-export type NodeStateMap = Record<string, NodeEvaluatedState>;
-
 export interface TransitionFromIds {
   from: string;
   to: string;
@@ -112,5 +107,4 @@ export interface ArrowProps {
   direction: Direction;
 }
 
-/** Status of a node as evaluated by dc-tmd */
-export { type CriterionStatus, type Region, type Side };
+export { type Region, type Side };
