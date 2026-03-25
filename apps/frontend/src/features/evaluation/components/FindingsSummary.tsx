@@ -12,15 +12,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
+  E2_MIDLINE_DIRECTIONS,
+  E3_OPENING_PATTERNS,
   E4_PAIN_STEPS,
   E5_STEPS,
   E6_OBSERVER_LABELS,
+  EXAMINATION_PROTOCOL,
   E7_OBSERVER_LABELS,
   CLICK_PAIN_LABELS,
   E8_LOCKING_TYPE_DESCRIPTIONS,
   JOINT_SOUND_KEYS,
   JOINT_SOUND_LABELS,
+  getSectionBadge,
   PALPATION_SITES,
+  SECTION_LABELS,
   REGIONS,
   SIDE_KEYS,
   SIDES,
@@ -71,6 +76,7 @@ export function FindingsSummary({ criteriaData, className, alwaysOpen }: Finding
             {section.name}
           </TabsTrigger>
         ))}
+        <TabsTrigger value="measurements">Messungen</TabsTrigger>
       </TabsList>
 
       {SQ_SECTIONS.map((section) => (
@@ -97,6 +103,10 @@ export function FindingsSummary({ criteriaData, className, alwaysOpen }: Finding
           )}
         </TabsContent>
       ))}
+
+      <TabsContent value="measurements">
+        <MeasurementsFindingsContent criteriaData={criteriaData} />
+      </TabsContent>
     </Tabs>
   );
 
@@ -655,5 +665,101 @@ function LockingFindingsContent({
         </div>
       )}
     </BilateralLayout>
+  );
+}
+
+// ── Measurements findings content ─────────────────────────────────────
+
+function formatMm(value: unknown): string {
+  if (value == null) return "—";
+  return `${value} mm`;
+}
+
+function MeasurementsFindingsContent({ criteriaData }: { criteriaData: Record<string, unknown> }) {
+  return (
+    <div className="space-y-4 pt-2">
+      {/* U2 — Schneidekantenverhältnisse */}
+      <div className="space-y-1.5">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          {getSectionBadge("e2")} — {SECTION_LABELS.e2.full}
+        </div>
+        <FindingRow
+          badge={getSectionBadge("e2")}
+          label="Referenzzahn"
+          value={translateValue(get(criteriaData, "e2.referenceTooth.selection"))}
+        />
+        <FindingRow
+          badge={getSectionBadge("e2")}
+          label="Horizontaler Überbiss"
+          value={formatMm(get(criteriaData, "e2.horizontalOverjet"))}
+        />
+        <FindingRow
+          badge={getSectionBadge("e2")}
+          label="Vertikaler Überbiss"
+          value={formatMm(get(criteriaData, "e2.verticalOverlap"))}
+        />
+        <FindingRow
+          badge={getSectionBadge("e2")}
+          label="Mittellinienabweichung"
+          value={(() => {
+            const dir = get(criteriaData, "e2.midlineDeviation.direction") as string | undefined;
+            const mm = get(criteriaData, "e2.midlineDeviation.mm");
+            if (!dir || dir === "na") return dir ? (E2_MIDLINE_DIRECTIONS as Record<string, string>)[dir] ?? "—" : "—";
+            const dirLabel = (E2_MIDLINE_DIRECTIONS as Record<string, string>)[dir] ?? dir;
+            return mm != null ? `${dirLabel}, ${mm} mm` : dirLabel;
+          })()}
+        />
+      </div>
+
+      {/* U3 — Öffnungsmuster */}
+      <div className="space-y-1.5">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          {getSectionBadge("e3")} — {SECTION_LABELS.e3.full}
+        </div>
+        <FindingRow
+          badge={getSectionBadge("e3")}
+          label="Öffnungsmuster"
+          value={(() => {
+            const pattern = get(criteriaData, "e3.pattern") as string | undefined;
+            if (!pattern) return "—";
+            return (E3_OPENING_PATTERNS as Record<string, string>)[pattern] ?? pattern;
+          })()}
+        />
+      </div>
+
+      {/* U4 — Öffnungsbewegungen */}
+      <div className="space-y-1.5">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          {getSectionBadge("e4")} — {SECTION_LABELS.e4.full}
+        </div>
+        {EXAMINATION_PROTOCOL.e4.steps.map((step) => {
+          const measurement = get(criteriaData, `e4.${step.key}.measurement`);
+          const terminated = step.key === "maxAssisted" && get(criteriaData, "e4.maxAssisted.terminated") === true;
+          return (
+            <FindingRow
+              key={step.key}
+              badge={step.badge}
+              label={step.label}
+              value={terminated ? `${formatMm(measurement)} (abgebrochen)` : formatMm(measurement)}
+            />
+          );
+        })}
+      </div>
+
+      {/* U5 — Lateralbewegungen */}
+      <div className="space-y-1.5">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          {getSectionBadge("e5")} — {SECTION_LABELS.e5.full}
+        </div>
+        {EXAMINATION_PROTOCOL.e5.steps.map((step) => (
+          <FindingRow
+            key={step.key}
+            badge={step.badge}
+            label={step.label}
+            value={formatMm(get(criteriaData, `e5.${step.key}.measurement`))}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
