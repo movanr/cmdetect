@@ -50,6 +50,8 @@ export {
   isQuantifierResult,
   getCriterionId,
   getCriterionLabel,
+  getCriterionHint,
+  getCriterionReferenceLabel,
   getCriterionSources,
 } from "./types";
 
@@ -115,7 +117,8 @@ export {
   headacheModifiedByFunction,
   TMJ_NOISE_ANAMNESIS,
   intermittentLockingAnamnesis,
-  jawLockingAnamnesis,
+  jawLockingCurrentAnamnesis,
+  jawLockingPastAnamnesis,
   lockingAffectsEatingAnamnesis,
   jawLockingOpenPositionAnamnesis,
   unableToCloseWithoutManeuverAnamnesis,
@@ -123,7 +126,8 @@ export {
   ARTHRALGIA_ANAMNESIS,
   HEADACHE_ANAMNESIS,
   DD_WITH_REDUCTION_IL_ANAMNESIS,
-  DD_WITHOUT_REDUCTION_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS,
   SUBLUXATION_ANAMNESIS,
   TMJ_NOISE_SIDED_ANAMNESIS,
   DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,

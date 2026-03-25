@@ -143,6 +143,16 @@ function formatAnswer(id: SQQuestionId, value: unknown): string {
   return translateValue(value);
 }
 
+function formatSideLabel(office: unknown): string | null {
+  if (!office || typeof office !== "object") return null;
+  const o = office as { R?: boolean; L?: boolean; DNK?: boolean };
+  if (o.DNK) return "Seite unbestimmt";
+  const sides: string[] = [];
+  if (o.R) sides.push("Rechte Seite");
+  if (o.L) sides.push("Linke Seite");
+  return sides.length > 0 ? sides.join(", ") : null;
+}
+
 function SQSectionQuestions({
   section,
   sqData,
@@ -157,6 +167,7 @@ function SQSectionQuestions({
         const value = sqData[qId];
         const displayId = SQ_DISPLAY_IDS[qId];
         const label = SQ_QUESTION_SHORT_LABELS[qId];
+        const sideLabel = enabled && value === "yes" ? formatSideLabel(sqData[`${qId}_office`]) : null;
 
         return (
           <div
@@ -170,6 +181,9 @@ function SQSectionQuestions({
             <span className="font-medium whitespace-nowrap">
               {enabled ? formatAnswer(qId, value) : "—"}
             </span>
+            {sideLabel && (
+              <span className="text-muted-foreground whitespace-nowrap">({sideLabel})</span>
+            )}
           </div>
         );
       })}

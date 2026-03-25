@@ -1,7 +1,8 @@
 import {
   and,
   computed,
-  DD_WITHOUT_REDUCTION_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS,
   DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   DISC_DISPLACEMENT_WITH_REDUCTION,
   DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING,
@@ -134,7 +135,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       isEndNode: true,
       diagnosisId: "discDisplacementWithoutReductionWithoutLimitedOpening",
       criterion: and([
-        DD_WITHOUT_REDUCTION_ANAMNESIS,
+        DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS,
         DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING.examination.criterion,
       ]),
       context: ctx,
@@ -202,7 +203,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
       isEndNode: true,
       diagnosisId: "discDisplacementWithoutReductionLimitedOpening",
       criterion: and([
-        DD_WITHOUT_REDUCTION_ANAMNESIS,
+        DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS,
         DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING.examination.criterion,
       ]),
       context: ctx,

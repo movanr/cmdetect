@@ -62,6 +62,16 @@ function SectionHeader({ label }: { label: string }) {
   );
 }
 
+function AlternativeSeparator() {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1">
+      <div className="flex-1 border-t border-dashed" />
+      <span className="text-xs font-medium text-muted-foreground">ODER</span>
+      <div className="flex-1 border-t border-dashed" />
+    </div>
+  );
+}
+
 /** Render flat source data lines for all source types (SF + U). */
 function SourceDataLines({
   sources,
@@ -217,6 +227,13 @@ function InlineCriterionRow({
         {mismatch && <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
       </div>
 
+      {/* Hint (e.g. DC/TMD footnote) */}
+      {item.hint && (
+        <div className="px-3 pb-1">
+          <p className="text-xs text-muted-foreground italic">{item.hint}</p>
+        </div>
+      )}
+
       {/* Mismatch description */}
       {mismatch && (
         <div className="px-3 pb-1">
@@ -291,15 +308,6 @@ export function InlineCriteriaChecklist({
     [evalResult.anamnesisResult]
   );
 
-  const sidedAnamnesisItems = useMemo(() => {
-    if (!locationResult?.sidedAnamnesisResult) return null;
-    return extractChecklistItems(locationResult.sidedAnamnesisResult, {
-      side,
-      region: null,
-      site: null,
-    });
-  }, [locationResult, side]);
-
   const examinationItems = useMemo(() => {
     if (!locationResult) return [];
     return extractChecklistItems(locationResult.examinationResult, {
@@ -319,7 +327,7 @@ export function InlineCriteriaChecklist({
   }, [assessmentMap]);
 
   // ── Handlers ───────────────────────────────────────────────────
-  const allItems = [...anamnesisItems, ...(sidedAnamnesisItems ?? []), ...examinationItems];
+  const allItems = [...anamnesisItems, ...examinationItems];
 
   function handleStateChange(key: string, state: CriterionUserState) {
     const item = allItems.find((i) => i.key === key);
@@ -333,55 +341,36 @@ export function InlineCriteriaChecklist({
 
   const hasRequiresConstraint = !!diagnosis.requires;
 
+  function renderItemsWithSeparators(items: ChecklistItem[]) {
+    return items.map((item, i) => (
+      <div key={item.key}>
+        {item.isAlternative && i > 0 && items[i - 1]?.isAlternative && <AlternativeSeparator />}
+        <InlineCriterionRow
+          item={item}
+          userState={userStates[item.key]}
+          onStateChange={handleStateChange}
+          criteriaData={criteriaData}
+          side={side}
+          region={region}
+          site={site}
+          readOnly={readOnly}
+        />
+      </div>
+    ));
+  }
+
   return (
     <div className="divide-y">
       {/* Anamnesis section */}
       <div>
         <SectionHeader label="Anamnese" />
-        {anamnesisItems.map((item) => (
-          <InlineCriterionRow
-            key={item.key}
-            item={item}
-            userState={userStates[item.key]}
-            onStateChange={handleStateChange}
-            criteriaData={criteriaData}
-            side={side}
-            region={region}
-            site={site}
-            readOnly={readOnly}
-          />
-        ))}
-        {sidedAnamnesisItems?.map((item) => (
-          <InlineCriterionRow
-            key={item.key}
-            item={item}
-            userState={userStates[item.key]}
-            onStateChange={handleStateChange}
-            criteriaData={criteriaData}
-            side={side}
-            region={region}
-            site={site}
-            readOnly={readOnly}
-          />
-        ))}
+        {renderItemsWithSeparators(anamnesisItems)}
       </div>
 
       {/* Examination section */}
       <div>
         <SectionHeader label="Untersuchung" />
-        {examinationItems.map((item) => (
-          <InlineCriterionRow
-            key={item.key}
-            item={item}
-            userState={userStates[item.key]}
-            onStateChange={handleStateChange}
-            criteriaData={criteriaData}
-            side={side}
-            region={region}
-            site={site}
-            readOnly={readOnly}
-          />
-        ))}
+        {renderItemsWithSeparators(examinationItems)}
       </div>
 
       {/* Cross-diagnosis requirement alert */}

@@ -27,14 +27,24 @@ import {
   not,
   or,
 } from "../builders";
-import type { ChecklistCriterionMetadata, Criterion, CriterionMetadata, NamedCriterion } from "../types";
+import type {
+  ChecklistCriterionMetadata,
+  Criterion,
+  CriterionMetadata,
+  NamedCriterion,
+} from "../types";
 
 // ============================================================================
 // MYALGIA HELPERS
 // ============================================================================
 
 /** Regions applicable to myalgia (temporalis, masseter, otherMast, nonMast) */
-export const MYALGIA_REGIONS: readonly Region[] = ["temporalis", "masseter", "otherMast", "nonMast"];
+export const MYALGIA_REGIONS: readonly Region[] = [
+  "temporalis",
+  "masseter",
+  "otherMast",
+  "nonMast",
+];
 
 /**
  * Generate palpation site refs for a specific region with ${side} template.
@@ -104,13 +114,17 @@ export function spreadingSiteRefs(region: Region): string[] {
  * Criterion C: Confirmation of pain location in temporalis or masseter muscle
  * E1 pain location on ${side} includes ${region}
  */
-export const painLocationConfirmed: NamedCriterion = field("e1.painLocation.${side}", {
-  includes: "${region}",
-}, {
-  id: "painLocationConfirmed",
-  label: "Bestätigung von Schmerzen in Kaumuskel(n)",
-  sources: ["U1A"],
-});
+export const painLocationConfirmed: NamedCriterion = field(
+  "e1.painLocation.${side}",
+  {
+    includes: "${region}",
+  },
+  {
+    id: "painLocationConfirmed",
+    label: "Bestätigung von Schmerzen in Kaumuskel(n)",
+    sources: ["U1A"],
+  }
+);
 
 /**
  * Criterion D: Familiar pain provoked by ONE of:
@@ -130,11 +144,15 @@ export const familiarPainProvoked: NamedCriterion = forEachRegion(
           sources: ["U4B", "U4C"],
         }),
         // E9/E10: Familiar pain during palpation of any site in the muscle group
-        any(siteRefs(region, "familiarPain"), { equals: "yes" }, {
-          id: `${region}PalpationFamiliar`,
-          label: "Bekannter Schmerz bei Palpation",
-          sources: ["U9", "U10"],
-        }),
+        any(
+          siteRefs(region, "familiarPain"),
+          { equals: "yes" },
+          {
+            id: `${region}PalpationFamiliar`,
+            label: "Bekannter Schmerz bei Palpation",
+            sources: ["U9", "U10"],
+          }
+        ),
       ],
       {
         id: "familiarPainOr",
@@ -157,13 +175,17 @@ export const familiarPainProvoked: NamedCriterion = forEachRegion(
  * Criterion C: Confirmation of pain location in TMJ
  * E1 pain location on ${side} includes "tmj"
  */
-export const painLocationConfirmedTmj: NamedCriterion = field("e1.painLocation.${side}", {
-  includes: "tmj",
-}, {
-  id: "painLocationConfirmedTmj",
-  label: "Bestätigung von Schmerzen in Kiefergelenk(en)",
-  sources: ["U1A"],
-});
+export const painLocationConfirmedTmj: NamedCriterion = field(
+  "e1.painLocation.${side}",
+  {
+    includes: "tmj",
+  },
+  {
+    id: "painLocationConfirmedTmj",
+    label: "Bestätigung von Schmerzen in Kiefergelenk(en)",
+    sources: ["U1A"],
+  }
+);
 
 /**
  * Criterion D: Familiar pain in TMJ provoked by ONE of:
@@ -183,11 +205,15 @@ export const familiarPainProvokedTmj: NamedCriterion = or(
       label: "Bekannter Schmerz bei Lateral-/Protrusionsbewegung (KG)",
       sources: ["U5A", "U5B", "U5C"],
     }),
-    any(getSiteRefsTemplate("tmj", "familiarPain"), { equals: "yes" }, {
-      id: "tmjPalpationFamiliarPain",
-      label: "Bekannter Schmerz bei Palpation (KG)",
-      sources: ["U9"],
-    }),
+    any(
+      getSiteRefsTemplate("tmj", "familiarPain"),
+      { equals: "yes" },
+      {
+        id: "tmjPalpationFamiliarPain",
+        label: "Bekannter Schmerz bei Palpation (KG)",
+        sources: ["U9"],
+      }
+    ),
   ],
   {
     id: "familiarPainTmj",
@@ -204,13 +230,17 @@ export const familiarPainProvokedTmj: NamedCriterion = or(
  * Criterion C: Confirmation of headache location in temporalis
  * E1b headache location on ${side} includes "temporalis"
  */
-export const headacheLocationConfirmed: NamedCriterion = field("e1.headacheLocation.${side}", {
-  includes: "temporalis",
-}, {
-  id: "headacheLocationConfirmed",
-  label: "Bestätigung von Kopfschmerzen im M. temporalis",
-  sources: ["U1B"],
-});
+export const headacheLocationConfirmed: NamedCriterion = field(
+  "e1.headacheLocation.${side}",
+  {
+    includes: "temporalis",
+  },
+  {
+    id: "headacheLocationConfirmed",
+    label: "Bestätigung von Kopfschmerzen im M. temporalis",
+    sources: ["U1B"],
+  }
+);
 
 /**
  * Criterion D: Familiar headache in temporalis provoked by ONE of:
@@ -230,15 +260,20 @@ export const familiarHeadacheProvoked: NamedCriterion = or(
       label: "Bekannter Kopfschmerz bei Lateral-/Protrusionsbewegung",
       sources: ["U5A", "U5B", "U5C"],
     }),
-    any(getSiteRefsTemplate("temporalis", "familiarHeadache"), { equals: "yes" }, {
-      id: "temporalisPalpationFamiliarHeadache",
-      label: "Bekannter Kopfschmerz bei Palpation",
-      sources: ["U9"],
-    }),
+    any(
+      getSiteRefsTemplate("temporalis", "familiarHeadache"),
+      { equals: "yes" },
+      {
+        id: "temporalisPalpationFamiliarHeadache",
+        label: "Bekannter Kopfschmerz bei Palpation",
+        sources: ["U9"],
+      }
+    ),
   ],
   {
     id: "familiarHeadache",
-    label: "Angabe von bekanntem Kopfschmerz in der Temporalisregion durch Palpation des M. temporalis oder Kieferbewegungen",
+    label:
+      "Angabe von bekanntem Kopfschmerz in der Temporalisregion durch Palpation des M. temporalis oder Kieferbewegungen",
     sources: ["U4B", "U4C", "U5A", "U5B", "U5C", "U9"],
   }
 );
@@ -257,18 +292,28 @@ export const familiarHeadacheProvoked: NamedCriterion = or(
 export const ddWithReductionExam: NamedCriterion = or(
   [
     // a) Click during both opening AND closing
-    and([
-      field("e6.${side}.click.examinerOpen", { equals: "yes" }),
-      field("e6.${side}.click.examinerClose", { equals: "yes" }),
-    ], { id: "openCloseClick", label: "Knacken beim Öffnen und Schließen", sources: ["U6"] }),
-    // b) Click during opening or closing AND click during lateral/protrusive
-    and([
-      or([
+    and(
+      [
         field("e6.${side}.click.examinerOpen", { equals: "yes" }),
         field("e6.${side}.click.examinerClose", { equals: "yes" }),
-      ]),
-      field("e7.${side}.click.examiner", { equals: "yes" }),
-    ], { id: "openOrCloseAndLateralClick", label: "Knacken beim Öffnen oder Schließen und Knacken bei Laterotrusion oder Protrusion", sources: ["U6", "U7"] }),
+      ],
+      { id: "openCloseClick", label: "Knacken beim Öffnen und Schließen", sources: ["U6"] }
+    ),
+    // b) Click during opening or closing AND click during lateral/protrusive
+    and(
+      [
+        or([
+          field("e6.${side}.click.examinerOpen", { equals: "yes" }),
+          field("e6.${side}.click.examinerClose", { equals: "yes" }),
+        ]),
+        field("e7.${side}.click.examiner", { equals: "yes" }),
+      ],
+      {
+        id: "openOrCloseAndLateralClick",
+        label: "Knacken beim Öffnen oder Schließen und Knacken bei Laterotrusion oder Protrusion",
+        sources: ["U6", "U7"],
+      }
+    ),
   ],
   {
     id: "ddWithReductionExam",
@@ -283,14 +328,14 @@ export const ddWithReductionExam: NamedCriterion = or(
 export const passiveStretchLimited: NamedCriterion = computed(
   ["e4.maxAssisted.measurement", "e2.verticalOverlap"],
   (v) =>
-    ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
-    ((v["e2.verticalOverlap"] as number) ?? 0),
+    ((v["e4.maxAssisted.measurement"] as number) ?? 0) + ((v["e2.verticalOverlap"] as number) ?? 0),
   "<",
   40,
   {
     id: "passiveStretchLimited",
     label: "Passive Dehnung (maximale passive Mundöffnung) < 40mm",
-    sources: ["U2", "U4C"],
+    sources: ["U4C", "U2"],
+    hint: "< 40mm inklusiv vertikalem Überbiss",
     defaults: { "e2.verticalOverlap": 0 },
   }
 );
@@ -301,14 +346,14 @@ export const passiveStretchLimited: NamedCriterion = computed(
 export const passiveStretchNotLimited: NamedCriterion = computed(
   ["e4.maxAssisted.measurement", "e2.verticalOverlap"],
   (v) =>
-    ((v["e4.maxAssisted.measurement"] as number) ?? 0) +
-    ((v["e2.verticalOverlap"] as number) ?? 0),
+    ((v["e4.maxAssisted.measurement"] as number) ?? 0) + ((v["e2.verticalOverlap"] as number) ?? 0),
   ">=",
   40,
   {
     id: "passiveStretchNotLimited",
-    label: "Passive Dehnung (maximale passive Mundöffnung) \u2265 40mm",
-    sources: ["U2", "U4C"],
+    label: "Passive Dehnung (maximale passive Mundöffnung) ≥ 40mm",
+    sources: ["U4C", "U2"],
+    hint: "≥ 40mm inklusiv vertikalem Überbiss",
     defaults: { "e2.verticalOverlap": 0 },
   }
 );
@@ -323,25 +368,14 @@ export const passiveStretchNotLimited: NamedCriterion = computed(
  */
 export const crepitusByExaminer: NamedCriterion = or(
   [
-    any(
-      [
-        "e6.${side}.crepitus.examinerOpen",
-        "e6.${side}.crepitus.examinerClose",
-      ],
-      { equals: "yes" },
-      { id: "e6Crepitus", label: "Reiben bei Öffnung/Schließung" }
-    ),
-    any(
-      [
-        "e7.${side}.crepitus.examiner",
-      ],
-      { equals: "yes" },
-      { id: "e7Crepitus", label: "Reiben bei Lateralbewegung" }
-    ),
+    any(["e6.${side}.crepitus.examinerOpen", "e6.${side}.crepitus.examinerClose"], {
+      equals: "yes",
+    }),
+    any(["e7.${side}.crepitus.examiner"], { equals: "yes" }),
   ],
   {
     id: "crepitusByExaminer",
-    label: "Reiben bei Kieferbewegungen",
+    label: "Reiben bei Kieferbewegungen (vom Untersucher festgestellt)",
     sources: ["U6", "U7"],
   }
 );
@@ -356,7 +390,7 @@ export const crepitusByExaminer: NamedCriterion = or(
  */
 export const subluxationExam: NamedCriterion = match("${region}", "tmj", {
   id: "subluxationExam",
-  label: "Umlenken zum Mundschluss erforderlich (optional)",
+  label: "Wenn die Störung klinisch auftritt: Umlenken zum Mundschluss erforderlich (optional)",
   sources: ["U8"],
 });
 

@@ -77,33 +77,45 @@ export const headacheModifiedByFunction: NamedCriterion = any(
  */
 export const TMJ_NOISE_ANAMNESIS: NamedCriterion = or(
   [
-    field(sq("SQ8"), { equals: "yes" }),
-    // Patient reports noise during E6 (opening/closing)
-    any(
+    field(sq("SQ8"), { equals: "yes" }, {
+      id: "tmjNoiseQuestionnaire",
+      label: "Anamnestisch aktuell vorhandenes KG-Geräusch",
+      sources: ["SF8"],
+    }),
+    // Patient reports noise during examination (U6/U7)
+    or(
       [
-        "e6.left.click.patient",
-        "e6.right.click.patient",
-        "e6.left.crepitus.patient",
-        "e6.right.crepitus.patient",
+        any(
+          [
+            "e6.left.click.patient",
+            "e6.right.click.patient",
+            "e6.left.crepitus.patient",
+            "e6.right.crepitus.patient",
+          ],
+          { equals: "yes" },
+          { id: "e6PatientNoise" }
+        ),
+        any(
+          [
+            "e7.left.click.patient",
+            "e7.right.click.patient",
+            "e7.left.crepitus.patient",
+            "e7.right.crepitus.patient",
+          ],
+          { equals: "yes" },
+          { id: "e7PatientNoise" }
+        ),
       ],
-      { equals: "yes" },
-      { id: "e6PatientNoise" }
-    ),
-    // Patient reports noise during E7 (lateral/protrusive)
-    any(
-      [
-        "e7.left.click.patient",
-        "e7.right.click.patient",
-        "e7.left.crepitus.patient",
-        "e7.right.crepitus.patient",
-      ],
-      { equals: "yes" },
-      { id: "e7PatientNoise" }
+      {
+        id: "tmjNoisePatientExam",
+        label: "Patient gibt während der Untersuchung Geräusche an",
+        sources: ["U6", "U7"],
+      }
     ),
   ],
   {
     id: "tmjNoiseAnamnesis",
-    label: "Anamnestisch aktuell vorhandenes KG-Geräusch, oder Patient gibt während der Untersuchung Geräusche an",
+    label: "KG-Geräusch in Anamnese oder Untersuchung",
     sources: ["SF8", "U6", "U7"],
   }
 );
@@ -118,16 +130,29 @@ export const intermittentLockingAnamnesis: NamedCriterion = and([
 ], {
   id: "intermittentLocking",
   label: "Aktuell intermittierende Blockade mit eingeschränkter Mundöffnung",
-  sources: ["SF11", "SF12"],
+  sources: ["SF11=Ja", "SF12=Nein"],
 });
 
 /**
  * SQ9: Jaw ever locked/caught with limited opening.
  */
-export const jawLockingAnamnesis: NamedCriterion = field(sq("SQ9"), { equals: "yes" }, {
-  id: "jawLocking",
+const SF9_NOTE =
+  "‚Aktuell' und ‚Früher' werden (basierend auf SF9), in Hinblick auf die Varianten ‚mit Einschränkung' bzw. ‚ohne Einschränkung' der Diskusverlagerung ohne Reposition zu differenzieren, auf der Grundlage einer Veränderung über die Zeit interpretiert, die durch die Anamnese festgestellt und durch die klinische Untersuchung des Bewegungsspielraums des Kiefers bestätigt wird.";
+
+/** SF9 for DD without Reduction WITH limited opening ("Aktuell" interpretation) */
+export const jawLockingCurrentAnamnesis: NamedCriterion = field(sq("SQ9"), { equals: "yes" }, {
+  id: "jawLockingCurrent",
   label: "Aktuell KG-Blockade mit eingeschränkter Mundöffnung",
   sources: ["SF9"],
+  hint: SF9_NOTE,
+});
+
+/** SF9 for DD without Reduction WITHOUT limited opening ("Früher" interpretation) */
+export const jawLockingPastAnamnesis: NamedCriterion = field(sq("SQ9"), { equals: "yes" }, {
+  id: "jawLockingPast",
+  label: "Frühere KG-Blockade mit eingeschränkter Mundöffnung",
+  sources: ["SF9"],
+  hint: SF9_NOTE,
 });
 
 /**
@@ -199,7 +224,7 @@ export const HEADACHE_ANAMNESIS: Criterion = and(
  */
 export const DD_WITH_REDUCTION_IL_ANAMNESIS: Criterion = and(
   [
-    TMJ_NOISE_ANAMNESIS,
+    { ...TMJ_NOISE_ANAMNESIS, referenceLabel: "Dasselbe wie für Diskusverlagerung mit Reposition" },
     intermittentLockingAnamnesis,
   ],
   {
@@ -209,13 +234,24 @@ export const DD_WITH_REDUCTION_IL_ANAMNESIS: Criterion = and(
 );
 
 /**
- * DD without Reduction anamnesis (both variants): SQ9 + SQ10
+ * DD without Reduction, WITH limited opening anamnesis: SQ9 ("Aktuell") + SQ10
  */
-export const DD_WITHOUT_REDUCTION_ANAMNESIS: Criterion = and(
-  [jawLockingAnamnesis, lockingAffectsEatingAnamnesis],
+export const DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS: Criterion = and(
+  [jawLockingCurrentAnamnesis, lockingAffectsEatingAnamnesis],
   {
-    id: "ddWithoutReductionHistory",
-    label: "DV ohne Reposition-Anamnese",
+    id: "ddWithoutReductionLimitedHistory",
+    label: "DV ohne Reposition (mit Einschränkung)-Anamnese",
+  }
+);
+
+/**
+ * DD without Reduction, WITHOUT limited opening anamnesis: SQ9 ("Früher") + SQ10
+ */
+export const DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS: Criterion = and(
+  [jawLockingPastAnamnesis, lockingAffectsEatingAnamnesis],
+  {
+    id: "ddWithoutReductionNoLimitedHistory",
+    label: "DV ohne Reposition (ohne Einschränkung)-Anamnese",
   }
 );
 
@@ -244,7 +280,11 @@ export const SUBLUXATION_ANAMNESIS: Criterion = and(
  */
 export const TMJ_NOISE_SIDED_ANAMNESIS: NamedCriterion = or(
   [
-    field(sqSide("SQ8"), { equals: true }),
+    field(sqSide("SQ8"), { equals: true }, {
+      id: "tmjNoiseQuestionnaireSided",
+      label: "Anamnestisch aktuell vorhandenes KG-Geräusch",
+      sources: ["SF8"],
+    }),
     any(
       [
         "e6.${side}.click.patient",
@@ -253,12 +293,16 @@ export const TMJ_NOISE_SIDED_ANAMNESIS: NamedCriterion = or(
         "e7.${side}.crepitus.patient",
       ],
       { equals: "yes" },
-      { id: "patientNoiseSided" }
+      {
+        id: "tmjNoisePatientExamSided",
+        label: "Patient gibt während der Untersuchung Geräusche an",
+        sources: ["U6", "U7"],
+      }
     ),
   ],
   {
     id: "tmjNoiseSidedAnamnesis",
-    label: "KG-Geräusch",
+    label: "KG-Geräusch in Anamnese oder Untersuchung",
     sources: ["SF8", "U6", "U7"],
   }
 );

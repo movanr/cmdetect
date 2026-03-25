@@ -6,8 +6,10 @@
  */
 
 import {
+  getCriterionHint,
   getCriterionId,
   getCriterionLabel,
+  getCriterionReferenceLabel,
   getCriterionSources,
   isCompositeResult,
   PALPATION_SITES,
@@ -29,10 +31,13 @@ export interface StaticChecklistItem {
   label: string;
   detail?: string;
   sources?: string[];
+  hint?: string;
 }
 
 export interface ChecklistItem extends StaticChecklistItem {
   result: CriterionResult;
+  /** True when this item is one of several OR-alternatives (show "ODER" separator between them) */
+  isAlternative?: boolean;
 }
 
 interface ChecklistItemScope {
@@ -49,20 +54,57 @@ export function extractChecklistItems(
   result: CriterionResult,
   scope: ChecklistItemScope,
 ): ChecklistItem[] {
-  if (isCompositeResult(result) && result.criterion.type === "and") {
-    return result.children.map((child) => {
-      const id = getCriterionId(child.criterion)!;
-      return {
+  // Reference label: show as a single item with the reference text, don't expand
+  const refLabel = getCriterionReferenceLabel(result.criterion);
+  if (refLabel) {
+    const id = getCriterionId(result.criterion) ?? "ref";
+    return [
+      {
         key: assessmentKey(id, scope.side, scope.region, scope.site),
         criterionId: id,
         assessmentSide: scope.side,
         assessmentRegion: scope.region,
         assessmentSite: scope.site,
-        label: getCriterionLabel(child.criterion)!,
-        sources: getCriterionSources(child.criterion),
-        result: child,
-      };
-    });
+        label: refLabel,
+        sources: getCriterionSources(result.criterion),
+        hint: getCriterionHint(result.criterion),
+        result,
+      },
+    ];
+  }
+
+  if (isCompositeResult(result)) {
+    // AND: flatten children that have their own metadata into separate rows.
+    // If all children have ids, recurse into each. Otherwise treat the AND
+    // as a single item (its own id/label covers the grouped children).
+    if (result.criterion.type === "and") {
+      const allChildrenNamed = result.children.every((c) => getCriterionId(c.criterion));
+      if (allChildrenNamed) {
+        return result.children.flatMap((child) => extractChecklistItems(child, scope));
+      }
+    }
+    // OR with named children: show each alternative with "ODER" separator
+    if (
+      result.criterion.type === "or" &&
+      result.children.length > 1 &&
+      result.children.every((c) => getCriterionId(c.criterion))
+    ) {
+      return result.children.map((child) => {
+        const id = getCriterionId(child.criterion)!;
+        return {
+          key: assessmentKey(id, scope.side, scope.region, scope.site),
+          criterionId: id,
+          assessmentSide: scope.side,
+          assessmentRegion: scope.region,
+          assessmentSite: scope.site,
+          label: getCriterionLabel(child.criterion)!,
+          sources: getCriterionSources(child.criterion),
+          hint: getCriterionHint(child.criterion),
+          result: child,
+          isAlternative: true,
+        };
+      });
+    }
   }
   const id = getCriterionId(result.criterion)!;
   return [
@@ -74,6 +116,7 @@ export function extractChecklistItems(
       assessmentSite: scope.site,
       label: getCriterionLabel(result.criterion)!,
       sources: getCriterionSources(result.criterion),
+      hint: getCriterionHint(result.criterion),
       result,
     },
   ];

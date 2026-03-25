@@ -48,13 +48,18 @@ export interface CriterionMetadata {
   pendingAs?: CriterionStatus;
   /** Data source references for UI display (e.g. ["SF1", "U4"]) */
   sources?: string[];
+  /** When set, UI shows this as a reference text (e.g. "Dasselbe wie für Diskusverlagerung mit Reposition") instead of expanding the criterion */
+  referenceLabel?: string;
+  /** Explanatory hint displayed below the criterion label (e.g. DC/TMD footnotes) */
+  hint?: string;
 }
 
 /**
  * Strict metadata requiring id, label, and sources — used for building-block criteria
  * that appear in the criteria checklist UI.
  */
-export type ChecklistCriterionMetadata = Required<Pick<CriterionMetadata, "id" | "label" | "sources">>;
+export type ChecklistCriterionMetadata = Required<Pick<CriterionMetadata, "id" | "label" | "sources">> &
+  Pick<CriterionMetadata, "hint" | "referenceLabel">;
 
 /**
  * A criterion with guaranteed display metadata.
@@ -334,4 +339,25 @@ export function getCriterionLabel(criterion: Criterion): string | undefined {
  */
 export function getCriterionSources(criterion: Criterion): string[] | undefined {
   return criterion.sources;
+}
+
+/**
+ * Extracts the reference label from a criterion (if present).
+ * When set, the UI should show this text instead of expanding the criterion.
+ */
+/**
+ * Extracts the hint from a criterion (if present).
+ */
+export function getCriterionHint(criterion: Criterion): string | undefined {
+  if ("hint" in criterion) {
+    return criterion.hint as string;
+  }
+  return undefined;
+}
+
+export function getCriterionReferenceLabel(criterion: Criterion): string | undefined {
+  if ("referenceLabel" in criterion) {
+    return criterion.referenceLabel as string;
+  }
+  return undefined;
 }

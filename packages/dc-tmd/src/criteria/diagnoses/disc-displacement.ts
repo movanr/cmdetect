@@ -11,7 +11,8 @@
 import type { DiagnosisDefinition, LocationCriterion } from "../location";
 import {
   DD_WITH_REDUCTION_IL_ANAMNESIS,
-  DD_WITHOUT_REDUCTION_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS,
   DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   DD_WITH_REDUCTION_IL_SIDED_ANAMNESIS,
   TMJ_NOISE_ANAMNESIS,
@@ -30,9 +31,11 @@ export {
   DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   DD_WITH_REDUCTION_IL_SIDED_ANAMNESIS,
   DD_WITH_REDUCTION_IL_ANAMNESIS,
-  DD_WITHOUT_REDUCTION_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS,
+  DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS,
   intermittentLockingAnamnesis,
-  jawLockingAnamnesis,
+  jawLockingCurrentAnamnesis,
+  jawLockingPastAnamnesis,
   lockingAffectsEatingAnamnesis,
 } from "./anamnesis-criteria";
 
@@ -61,7 +64,7 @@ export const DISC_DISPLACEMENT_WITH_REDUCTION: DiagnosisDefinition = {
 
 const DD_WITH_REDUCTION_INTERMITTENT_LOCKING_EXAMINATION: LocationCriterion = {
   regions: ["tmj"],
-  criterion: ddWithReductionExam,
+  criterion: { ...ddWithReductionExam, referenceLabel: "Dasselbe wie für Diskusverlagerung mit Reposition" },
 };
 
 export const DISC_DISPLACEMENT_WITH_REDUCTION_INTERMITTENT_LOCKING: DiagnosisDefinition = {
@@ -88,7 +91,7 @@ export const DISC_DISPLACEMENT_WITHOUT_REDUCTION_LIMITED_OPENING: DiagnosisDefin
   name: "Disc Displacement without Reduction, with Limited Opening",
   nameDE: "Diskusverlagerung ohne Reposition, mit Mundöffnungseinschränkung",
   category: "joint",
-  anamnesis: DD_WITHOUT_REDUCTION_ANAMNESIS,
+  anamnesis: DD_WITHOUT_REDUCTION_LIMITED_ANAMNESIS,
   sidedAnamnesis: DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   examination: DD_WITHOUT_REDUCTION_LIMITED_EXAMINATION,
 };
@@ -107,7 +110,7 @@ export const DISC_DISPLACEMENT_WITHOUT_REDUCTION_NO_LIMITED_OPENING: DiagnosisDe
   name: "Disc Displacement without Reduction, without Limited Opening",
   nameDE: "Diskusverlagerung ohne Reposition, ohne Mundöffnungseinschränkung",
   category: "joint",
-  anamnesis: DD_WITHOUT_REDUCTION_ANAMNESIS,
+  anamnesis: DD_WITHOUT_REDUCTION_NO_LIMITED_ANAMNESIS,
   sidedAnamnesis: DD_WITHOUT_REDUCTION_SIDED_ANAMNESIS,
   examination: DD_WITHOUT_REDUCTION_NO_LIMITED_EXAMINATION,
 };
