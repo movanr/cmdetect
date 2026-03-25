@@ -7,7 +7,7 @@
  * Completely independent of the diagnosis selector — pure reference UI.
  */
 
-import { ALL_DIAGNOSES, type DiagnosisDefinition, type Region, type Side } from "@cmdetect/dc-tmd";
+import { ALL_DIAGNOSES, type DiagnosisDefinition, type DiagnosisId, type Region, type Side } from "@cmdetect/dc-tmd";
 import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ import { InlineCriteriaChecklist } from "./InlineCriteriaChecklist";
 
 interface DiagnosisReferenceProps {
   criteriaData: Record<string, unknown>;
+  selectedDiagnosisId?: DiagnosisId | null;
+  onDiagnosisChange?: (id: DiagnosisId | null) => void;
 }
 
 const CATEGORIES = [
@@ -25,8 +27,13 @@ const CATEGORIES = [
 const EMPTY_MAP = new Map();
 const noop = () => {};
 
-export function DiagnosisReference({ criteriaData }: DiagnosisReferenceProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+export function DiagnosisReference({
+  criteriaData,
+  selectedDiagnosisId,
+  onDiagnosisChange,
+}: DiagnosisReferenceProps) {
+  const [localExpandedId, setLocalExpandedId] = useState<string | null>(null);
+  const expandedId = selectedDiagnosisId ?? localExpandedId;
 
   const grouped = useMemo(() => {
     const pain = ALL_DIAGNOSES.filter((d) => d.category === "pain");
@@ -35,7 +42,9 @@ export function DiagnosisReference({ criteriaData }: DiagnosisReferenceProps) {
   }, []);
 
   function toggle(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
+    const next = expandedId === id ? null : id;
+    setLocalExpandedId(next);
+    onDiagnosisChange?.(next as DiagnosisId | null);
   }
 
   return (

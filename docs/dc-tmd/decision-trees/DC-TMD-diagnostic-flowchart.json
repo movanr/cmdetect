@@ -1,0 +1,318 @@
+{
+  "title": "Diagnostic Criteria for Temporomandibular Disorders (DC/TMD): Diagnostisches Flußdiagramm",
+  "subtitle": "Schmerzbezogene CMD-Diagnosen und Kopfschmerzen",
+  "version": "12/18",
+  "instruction": "Beginnen Sie an jeder blau umrahmten Box",
+  "phases": ["ANAMNESE", "UNTERSUCHUNG", "DIAGNOSE"],
+  "flowchart": {
+    "nodes": {
+      "START_SCHMERZ": {
+        "id": "START_SCHMERZ",
+        "phase": "ANAMNESE",
+        "type": "decision",
+        "label": "Regionaler Schmerz [SF3] UND Schmerz wird durch funktionelle oder parafunktionelle Kieferbewegungen modifiziert [SF4]",
+        "references": ["SF3", "SF4"],
+        "style": "blue_border",
+        "edges": {
+          "Ja": "BESTAETIGUNG_LOKALISATION",
+          "Nein": "DIAGNOSE_MYALGIE_ARTHRALGIE_VORHANDEN"
+        }
+      },
+      "BESTAETIGUNG_LOKALISATION": {
+        "id": "BESTAETIGUNG_LOKALISATION",
+        "phase": "ANAMNESE",
+        "type": "decision",
+        "label": "Bestätigung der Schmerzlokalisation durch den Untersucher [U1a]",
+        "references": ["U1a"],
+        "edges": {
+          "Ja_Kaumuskeln": "MUSKEL_PRUEFUNG",
+          "Ja_Kiefergelenk": "GELENK_PRUEFUNG",
+          "Nein": "WEITERE_SCHMERZDIAGNOSEN_1"
+        }
+      },
+      "WEITERE_SCHMERZDIAGNOSEN_1": {
+        "id": "WEITERE_SCHMERZDIAGNOSEN_1",
+        "phase": "UNTERSUCHUNG",
+        "type": "action",
+        "label": "Weitere Schmerzdiagnosen untersuchen"
+      },
+      "MUSKEL_PRUEFUNG": {
+        "id": "MUSKEL_PRUEFUNG",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "(1) Bekannter Schmerz durch: Mundöffnung [Muskel, U4] ODER 2s Palpation der Kaumuskulatur [Muskel, U9]; UND (2) Bestätigung der Lokalisation [U1a]",
+        "references": ["U4", "U9", "U1a"],
+        "edges": {
+          "Ja": "MYALGIE_SPEZIFIZIERUNG",
+          "Nein": "WEITERE_SCHMERZDIAGNOSEN_2"
+        }
+      },
+      "WEITERE_SCHMERZDIAGNOSEN_2": {
+        "id": "WEITERE_SCHMERZDIAGNOSEN_2",
+        "phase": "UNTERSUCHUNG",
+        "type": "action",
+        "label": "Weitere Schmerzdiagnosen untersuchen",
+        "note": "Um falsch negative auszuschließen"
+      },
+      "MYALGIE_SPEZIFIZIERUNG": {
+        "id": "MYALGIE_SPEZIFIZIERUNG",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Bekannter Schmerz, 5s Palpation der Kaumuskulatur [Muskel, U9]",
+        "note": "Um Myalgie zu spezifizieren",
+        "references": ["U9"],
+        "edges": {
+          "Ja": "AUSBREITUNG_PALPATION",
+          "Nein": "DIAGNOSE_MYALGIE"
+        }
+      },
+      "AUSBREITUNG_PALPATION": {
+        "id": "AUSBREITUNG_PALPATION",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Schmerzausbreitung jenseits der palpierten Stelle [Muskel, U9]",
+        "references": ["U9"],
+        "edges": {
+          "Ja": "AUSBREITUNG_MUSKELGRENZEN",
+          "Nein": "DIAGNOSE_LOKALE_MYALGIE"
+        }
+      },
+      "AUSBREITUNG_MUSKELGRENZEN": {
+        "id": "AUSBREITUNG_MUSKELGRENZEN",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Schmerzausbreitung jenseits d. Muskelgrenzen [Muskel, U9]",
+        "references": ["U9"],
+        "edges": {
+          "Ja": "DIAGNOSE_MYOFASZIAL_UEBERTRAGUNG",
+          "Nein": "DIAGNOSE_MYOFASZIAL"
+        }
+      },
+      "GELENK_PRUEFUNG": {
+        "id": "GELENK_PRUEFUNG",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "(1) Bekannter Schmerz durch: Mundöffnung [Gelenk, U4] ODER excursive Kieferbewegungen [Gelenk, U5] ODER Palpation des KG [Gelenk, U9]; UND (2) Bestätigung der Lokalisation [U1a]",
+        "references": ["U4", "U5", "U9", "U1a"],
+        "edges": {
+          "Ja": "DIAGNOSE_ARTHRALGIE",
+          "Nein": "WEITERE_SCHMERZDIAGNOSEN_1"
+        }
+      },
+      "DIAGNOSE_MYALGIE_ARTHRALGIE_VORHANDEN": {
+        "id": "DIAGNOSE_MYALGIE_ARTHRALGIE_VORHANDEN",
+        "phase": "ANAMNESE",
+        "type": "decision",
+        "label": "Diagnose einer Myalgie oder Arthralgie",
+        "style": "blue_border",
+        "edges": {
+          "Ja": "KOPFSCHMERZ_ANAMNESE",
+          "Nein": null
+        }
+      },
+      "KOPFSCHMERZ_ANAMNESE": {
+        "id": "KOPFSCHMERZ_ANAMNESE",
+        "phase": "ANAMNESE",
+        "type": "decision",
+        "label": "Schläfenkopfschmerz jeglicher Art [SF5] UND Kopfschmerz wird durch funktionelle oder parafunktionelle Kieferbewegungen modifiziert [SF7]",
+        "references": ["SF5", "SF7"],
+        "edges": {
+          "Ja": "KOPFSCHMERZ_LOKALISATION",
+          "Nein": "WEITERE_SCHMERZDIAGNOSEN_1"
+        }
+      },
+      "KOPFSCHMERZ_LOKALISATION": {
+        "id": "KOPFSCHMERZ_LOKALISATION",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Bestätigung der Kopfschmerzlokalisation durch den Untersucher [U1b]",
+        "references": ["U1b"],
+        "edges": {
+          "Ja": "KOPFSCHMERZ_UNTERSUCHUNG",
+          "Nein": null
+        }
+      },
+      "KOPFSCHMERZ_UNTERSUCHUNG": {
+        "id": "KOPFSCHMERZ_UNTERSUCHUNG",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Bekannter Kopfschmerz durch: Mundöffnung ODER excursive Kieferbewegungen ODER Palpation des M. temporalis [Temporalis in U4, U5, ODER U9]",
+        "references": ["U4", "U5", "U9"],
+        "edges": {
+          "Ja": "KOPFSCHMERZ_AUSSCHLUSS",
+          "Nein": null
+        }
+      },
+      "KOPFSCHMERZ_AUSSCHLUSS": {
+        "id": "KOPFSCHMERZ_AUSSCHLUSS",
+        "phase": "UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Kopfschmerzen, die nicht besser durch eine andere Diagnose erklärt werden können",
+        "edges": {
+          "Ja": "DIAGNOSE_CMD_KOPFSCHMERZEN",
+          "Nein": null
+        }
+      },
+      "DIAGNOSE_MYALGIE": {
+        "id": "DIAGNOSE_MYALGIE",
+        "phase": "DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Myalgie",
+        "style": "dark_blue_oval"
+      },
+      "DIAGNOSE_LOKALE_MYALGIE": {
+        "id": "DIAGNOSE_LOKALE_MYALGIE",
+        "phase": "DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Lokale Myalgie",
+        "style": "dark_blue_oval"
+      },
+      "DIAGNOSE_MYOFASZIAL": {
+        "id": "DIAGNOSE_MYOFASZIAL",
+        "phase": "DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Myofaszialer Schmerz",
+        "style": "medium_blue_oval"
+      },
+      "DIAGNOSE_MYOFASZIAL_UEBERTRAGUNG": {
+        "id": "DIAGNOSE_MYOFASZIAL_UEBERTRAGUNG",
+        "phase": "DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Myofaszialer Schmerz mit Übertragung",
+        "style": "medium_blue_oval"
+      },
+      "DIAGNOSE_ARTHRALGIE": {
+        "id": "DIAGNOSE_ARTHRALGIE",
+        "phase": "DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Arthralgie",
+        "style": "dark_blue_oval"
+      },
+      "DIAGNOSE_CMD_KOPFSCHMERZEN": {
+        "id": "DIAGNOSE_CMD_KOPFSCHMERZEN",
+        "phase": "DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Auf CMD zurückgeführte Kopfschmerzen",
+        "style": "dark_blue_oval"
+      }
+    },
+    "pathways": {
+      "myalgia_pathway": {
+        "description": "Muscle pain diagnostic pathway (Kaumuskulatur)",
+        "entry": "START_SCHMERZ",
+        "steps": [
+          {
+            "node": "START_SCHMERZ",
+            "question": "Regional pain AND pain modified by jaw function/parafunction?",
+            "if_ja": "BESTAETIGUNG_LOKALISATION",
+            "if_nein": "DIAGNOSE_MYALGIE_ARTHRALGIE_VORHANDEN"
+          },
+          {
+            "node": "BESTAETIGUNG_LOKALISATION",
+            "question": "Examiner confirms pain location?",
+            "if_ja_kaumuskeln": "MUSKEL_PRUEFUNG",
+            "if_ja_kiefergelenk": "GELENK_PRUEFUNG",
+            "if_nein": "WEITERE_SCHMERZDIAGNOSEN_1"
+          },
+          {
+            "node": "MUSKEL_PRUEFUNG",
+            "question": "Familiar pain with jaw opening or 2s muscle palpation AND confirmed location?",
+            "if_ja": "MYALGIE_SPEZIFIZIERUNG",
+            "if_nein": "WEITERE_SCHMERZDIAGNOSEN_2"
+          },
+          {
+            "node": "MYALGIE_SPEZIFIZIERUNG",
+            "question": "Familiar pain with 5s muscle palpation?",
+            "if_ja": "AUSBREITUNG_PALPATION",
+            "if_nein": "DIAGNOSE_MYALGIE"
+          },
+          {
+            "node": "AUSBREITUNG_PALPATION",
+            "question": "Pain spreads beyond palpation site?",
+            "if_ja": "AUSBREITUNG_MUSKELGRENZEN",
+            "if_nein": "DIAGNOSE_LOKALE_MYALGIE"
+          },
+          {
+            "node": "AUSBREITUNG_MUSKELGRENZEN",
+            "question": "Pain spreads beyond muscle boundaries?",
+            "if_ja": "DIAGNOSE_MYOFASZIAL_UEBERTRAGUNG",
+            "if_nein": "DIAGNOSE_MYOFASZIAL"
+          }
+        ],
+        "possible_diagnoses": [
+          "Myalgie",
+          "Lokale Myalgie",
+          "Myofaszialer Schmerz",
+          "Myofaszialer Schmerz mit Übertragung"
+        ]
+      },
+      "arthralgia_pathway": {
+        "description": "Joint pain diagnostic pathway (Kiefergelenk)",
+        "entry": "BESTAETIGUNG_LOKALISATION",
+        "steps": [
+          {
+            "node": "GELENK_PRUEFUNG",
+            "question": "Familiar pain with jaw opening OR excursive movements OR TMJ palpation AND confirmed location?",
+            "if_ja": "DIAGNOSE_ARTHRALGIE",
+            "if_nein": "WEITERE_SCHMERZDIAGNOSEN_1"
+          }
+        ],
+        "possible_diagnoses": [
+          "Arthralgie"
+        ]
+      },
+      "headache_pathway": {
+        "description": "TMD-attributed headache diagnostic pathway",
+        "entry": "DIAGNOSE_MYALGIE_ARTHRALGIE_VORHANDEN",
+        "prerequisite": "Existing diagnosis of Myalgie or Arthralgie",
+        "steps": [
+          {
+            "node": "DIAGNOSE_MYALGIE_ARTHRALGIE_VORHANDEN",
+            "question": "Diagnosis of myalgia or arthralgia exists?",
+            "if_ja": "KOPFSCHMERZ_ANAMNESE",
+            "if_nein": null
+          },
+          {
+            "node": "KOPFSCHMERZ_ANAMNESE",
+            "question": "Temple headache of any kind AND headache modified by jaw function/parafunction?",
+            "if_ja": "KOPFSCHMERZ_LOKALISATION",
+            "if_nein": "WEITERE_SCHMERZDIAGNOSEN_1"
+          },
+          {
+            "node": "KOPFSCHMERZ_LOKALISATION",
+            "question": "Examiner confirms headache location?",
+            "if_ja": "KOPFSCHMERZ_UNTERSUCHUNG",
+            "if_nein": null
+          },
+          {
+            "node": "KOPFSCHMERZ_UNTERSUCHUNG",
+            "question": "Familiar headache with jaw opening OR excursive movements OR temporalis palpation?",
+            "if_ja": "KOPFSCHMERZ_AUSSCHLUSS",
+            "if_nein": null
+          },
+          {
+            "node": "KOPFSCHMERZ_AUSSCHLUSS",
+            "question": "Headache not better explained by another diagnosis?",
+            "if_ja": "DIAGNOSE_CMD_KOPFSCHMERZEN",
+            "if_nein": null
+          }
+        ],
+        "possible_diagnoses": [
+          "Auf CMD zurückgeführte Kopfschmerzen"
+        ]
+      }
+    },
+    "reference_key": {
+      "SF3": "Schmerzfragebogen Frage 3 (Regionaler Schmerz)",
+      "SF4": "Schmerzfragebogen Frage 4 (Modifikation durch Kieferbewegungen)",
+      "SF5": "Schmerzfragebogen Frage 5 (Schläfenkopfschmerz)",
+      "SF7": "Schmerzfragebogen Frage 7 (Kopfschmerz-Modifikation durch Kieferbewegungen)",
+      "U1a": "Untersuchung 1a (Schmerzlokalisation)",
+      "U1b": "Untersuchung 1b (Kopfschmerzlokalisation)",
+      "U4": "Untersuchung 4 (Öffnungs- und Schließbewegungen)",
+      "U5": "Untersuchung 5 (Laterotrusion und Protrusion)",
+      "U9": "Untersuchung 9 (Muskel- & Kiefergelenkschmerzen bei Palpation)"
+    }
+  },
+  "copyright": "Copyright International RDC/TMD Consortium Network. Deutsche Übersetzung: Asendorf A, Eberhard L, Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig. Version 12/2018."
+}

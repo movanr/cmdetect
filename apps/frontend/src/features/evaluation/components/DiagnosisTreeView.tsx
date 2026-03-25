@@ -27,6 +27,11 @@ import {
   createSubluxationTree,
 } from "../../decision-tree";
 
+interface DiagnosisTreeViewProps {
+  selectedDiagnosisId?: DiagnosisId | null;
+  onDiagnosisChange?: (id: DiagnosisId | null) => void;
+}
+
 const GROUPED = {
   pain: ALL_DIAGNOSES.filter((d) => d.category === "pain"),
   joint: ALL_DIAGNOSES.filter((d) => d.category === "joint"),
@@ -58,8 +63,14 @@ function createTree(diagnosisId: DiagnosisId) {
   }
 }
 
-export function DiagnosisTreeView() {
-  const [selectedId, setSelectedId] = useState<DiagnosisId | null>(null);
+export function DiagnosisTreeView({ selectedDiagnosisId, onDiagnosisChange }: DiagnosisTreeViewProps) {
+  const [localSelectedId, setLocalSelectedId] = useState<DiagnosisId | null>(null);
+  const selectedId = selectedDiagnosisId ?? localSelectedId;
+
+  function handleChange(id: DiagnosisId) {
+    setLocalSelectedId(id);
+    onDiagnosisChange?.(id);
+  }
 
   const tree = useMemo(() => (selectedId ? createTree(selectedId) : null), [selectedId]);
 
@@ -67,7 +78,7 @@ export function DiagnosisTreeView() {
     <div className="space-y-4">
       <Select
         value={selectedId ?? ""}
-        onValueChange={(v) => setSelectedId(v as DiagnosisId)}
+        onValueChange={(v) => handleChange(v as DiagnosisId)}
       >
         <SelectTrigger className="w-auto min-w-[280px]">
           <SelectValue placeholder="Diagnose wählen..." />

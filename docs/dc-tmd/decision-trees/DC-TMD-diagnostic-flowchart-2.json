@@ -1,0 +1,278 @@
+{
+  "title": "Diagnostic Criteria for Temporomandibular Disorders (DC/TMD): Diagnostisches Flußdiagramm",
+  "subtitle": "Intra-articuläre Dysfunktionen und Degenerative Dysfunktionen",
+  "version": "12/18",
+  "instruction": "Beginnen Sie an jeder blau umrahmten Box!",
+  "phases": ["ANAMNESE & UNTERSUCHUNG", "KLINISCHE DIAGNOSE", "BILDGEBUNG"],
+  "flowchart": {
+    "nodes": {
+      "ENTRY_INTRAARTICULAER": {
+        "id": "ENTRY_INTRAARTICULAER",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "style": "blue_border",
+        "label": "Aktuelle gelenkbezogene Diagnose (anamnestisch) [SF8] ODER Angabe von Kiefergelenkgeräuschen durch den Pat. während Untersuchung [U6 ODER U7]",
+        "references": ["SF8", "U6", "U7"],
+        "edges": {
+          "Ja": "KNACKEN_PRUEFUNG",
+          "Nein": "WEITERE_DIAGNOSEN_1"
+        }
+      },
+      "KNACKEN_PRUEFUNG": {
+        "id": "KNACKEN_PRUEFUNG",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Öffnungs- und Schließknacken [U6] ODER (Öffnungs- oder Schließknacken [U6] UND Exkursives o. protrusives Knacken [U7])",
+        "references": ["U6", "U7"],
+        "edges": {
+          "Ja": "INTERMITTIERENDE_KIEFERKLEMME",
+          "Nein": "WEITERE_DIAGNOSEN_1"
+        }
+      },
+      "INTERMITTIERENDE_KIEFERKLEMME": {
+        "id": "INTERMITTIERENDE_KIEFERKLEMME",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Aktuell intermittierende Kieferklemmen mit Mundöffnungseinschränkung [SF11=ja & SF12=nein]",
+        "references": ["SF11", "SF12"],
+        "edges": {
+          "Ja": "MANEUVER_REPONIERBAR",
+          "Nein": "DIAGNOSE_DV_MIT_REPOSITION"
+        }
+      },
+      "MANEUVER_REPONIERBAR": {
+        "id": "MANEUVER_REPONIERBAR",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Wenn klinisch feststellbar: Durch Maneuver reponierbar? [U8], sonst \"Ja\"",
+        "references": ["U8"],
+        "note": "Falls klinisch nicht feststellbar, wird standardmäßig 'Ja' angenommen",
+        "edges": {
+          "Ja": "DIAGNOSE_DV_MIT_REPOSITION_KIEFERKLEMME",
+          "Nein": "MPMO_CHECK"
+        }
+      },
+      "ENTRY_KIEFERKLEMME_HISTORIE": {
+        "id": "ENTRY_KIEFERKLEMME_HISTORIE",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "style": "blue_border",
+        "label": "Vorrausgehende Kieferklemme [SF9] UND Störungen beim Kauen [SF10]",
+        "references": ["SF9", "SF10"],
+        "edges": {
+          "Ja": "MPMO_CHECK",
+          "Nein": "MPMO_CHECK"
+        }
+      },
+      "MPMO_CHECK": {
+        "id": "MPMO_CHECK",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "label": "MPMÖ ≥ 40mm (inkl. Overbite) [U4C]",
+        "description": "Maximale passive Mundöffnung einschließlich vertikalem Überbiss",
+        "references": ["U4C"],
+        "incoming_from": ["MANEUVER_REPONIERBAR (Nein)", "ENTRY_KIEFERKLEMME_HISTORIE (Ja/Nein)"],
+        "edges": {
+          "Ja": "DIAGNOSE_DV_OHNE_REPOSITION_OHNE_MOE",
+          "Nein": "DIAGNOSE_DV_OHNE_REPOSITION_MIT_MOE"
+        }
+      },
+      "ENTRY_DEGENERATIV": {
+        "id": "ENTRY_DEGENERATIV",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "style": "blue_border",
+        "label": "Aktuelle Kiefergelenkgeräusche (anamnestisch) [SF8] ODER Angabe von Kiefergelenkgeräuschen durch den Pat. während Untersuchung [U6 ODER U7]",
+        "references": ["SF8", "U6", "U7"],
+        "edges": {
+          "Ja": "REIBEGERAEUSCH_PRUEFUNG",
+          "Nein": "WEITERE_DIAGNOSEN_3"
+        }
+      },
+      "REIBEGERAEUSCH_PRUEFUNG": {
+        "id": "REIBEGERAEUSCH_PRUEFUNG",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "decision",
+        "label": "Reibegeräusch durch Untersucher ermittelt [U6 ODER U7]",
+        "references": ["U6", "U7"],
+        "edges": {
+          "Ja": "DIAGNOSE_DEGENERATIVE_GELENKERKRANKUNG",
+          "Nein": "WEITERE_DIAGNOSEN_3"
+        }
+      },
+      "WEITERE_DIAGNOSEN_1": {
+        "id": "WEITERE_DIAGNOSEN_1",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "action",
+        "label": "Weitere Diagnosen untersuchen",
+        "style": "red_oval"
+      },
+      "WEITERE_DIAGNOSEN_3": {
+        "id": "WEITERE_DIAGNOSEN_3",
+        "phase": "ANAMNESE & UNTERSUCHUNG",
+        "type": "action",
+        "label": "Weitere Diagnosen untersuchen",
+        "style": "red_oval"
+      },
+      "DIAGNOSE_DV_MIT_REPOSITION": {
+        "id": "DIAGNOSE_DV_MIT_REPOSITION",
+        "phase": "KLINISCHE DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Diskusverlagerung mit Reposition",
+        "style": "blue_oval",
+        "imaging": "MRT_BESTAETIGUNG"
+      },
+      "DIAGNOSE_DV_MIT_REPOSITION_KIEFERKLEMME": {
+        "id": "DIAGNOSE_DV_MIT_REPOSITION_KIEFERKLEMME",
+        "phase": "KLINISCHE DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Diskusverlagerung mit Reposition mit intermittierender Kieferklemme",
+        "style": "blue_oval",
+        "imaging": "MRT_BESTAETIGUNG"
+      },
+      "DIAGNOSE_DV_OHNE_REPOSITION_MIT_MOE": {
+        "id": "DIAGNOSE_DV_OHNE_REPOSITION_MIT_MOE",
+        "phase": "KLINISCHE DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Diskusverlagerung ohne Reposition, mit Mundöffnungseinschränkung",
+        "style": "blue_oval",
+        "imaging": "MRT_BESTAETIGUNG"
+      },
+      "DIAGNOSE_DV_OHNE_REPOSITION_OHNE_MOE": {
+        "id": "DIAGNOSE_DV_OHNE_REPOSITION_OHNE_MOE",
+        "phase": "KLINISCHE DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Diskusverlagerung ohne Reposition, ohne Mundöffnungseinschränkung",
+        "style": "blue_oval",
+        "imaging": "MRT_BESTAETIGUNG"
+      },
+      "DIAGNOSE_DEGENERATIVE_GELENKERKRANKUNG": {
+        "id": "DIAGNOSE_DEGENERATIVE_GELENKERKRANKUNG",
+        "phase": "KLINISCHE DIAGNOSE",
+        "type": "diagnosis",
+        "label": "Degenerative Gelenkerkrankung",
+        "style": "green_oval",
+        "imaging": "CT_BESTAETIGUNG"
+      },
+      "MRT_BESTAETIGUNG": {
+        "id": "MRT_BESTAETIGUNG",
+        "phase": "BILDGEBUNG",
+        "type": "imaging",
+        "label": "Durch MRT bestätigen, wenn indiziert",
+        "style": "green_oval",
+        "applies_to": [
+          "DIAGNOSE_DV_MIT_REPOSITION",
+          "DIAGNOSE_DV_MIT_REPOSITION_KIEFERKLEMME",
+          "DIAGNOSE_DV_OHNE_REPOSITION_MIT_MOE",
+          "DIAGNOSE_DV_OHNE_REPOSITION_OHNE_MOE"
+        ]
+      },
+      "CT_BESTAETIGUNG": {
+        "id": "CT_BESTAETIGUNG",
+        "phase": "BILDGEBUNG",
+        "type": "imaging",
+        "label": "Durch CT bestätigen, wenn indiziert",
+        "style": "green_oval",
+        "applies_to": [
+          "DIAGNOSE_DEGENERATIVE_GELENKERKRANKUNG"
+        ]
+      }
+    },
+    "pathways": {
+      "intraarticulaer_mit_reposition": {
+        "description": "Disc displacement with reduction pathway",
+        "entry": "ENTRY_INTRAARTICULAER",
+        "steps": [
+          {
+            "node": "ENTRY_INTRAARTICULAER",
+            "question": "Current joint-related diagnosis (history) OR patient reports TMJ sounds during examination?",
+            "if_ja": "KNACKEN_PRUEFUNG",
+            "if_nein": "WEITERE_DIAGNOSEN_1"
+          },
+          {
+            "node": "KNACKEN_PRUEFUNG",
+            "question": "Opening AND closing click OR (opening OR closing click AND excursive/protrusive click)?",
+            "if_ja": "INTERMITTIERENDE_KIEFERKLEMME",
+            "if_nein": "WEITERE_DIAGNOSEN_1"
+          },
+          {
+            "node": "INTERMITTIERENDE_KIEFERKLEMME",
+            "question": "Currently intermittent jaw locking with limited opening?",
+            "if_ja": "MANEUVER_REPONIERBAR",
+            "if_nein": "DIAGNOSE_DV_MIT_REPOSITION"
+          },
+          {
+            "node": "MANEUVER_REPONIERBAR",
+            "question": "Reducible by maneuver? (if not clinically determinable, assume Yes)",
+            "if_ja": "DIAGNOSE_DV_MIT_REPOSITION_KIEFERKLEMME",
+            "if_nein": "MPMO_CHECK"
+          }
+        ],
+        "possible_diagnoses": [
+          "Diskusverlagerung mit Reposition",
+          "Diskusverlagerung mit Reposition mit intermittierender Kieferklemme"
+        ]
+      },
+      "intraarticulaer_ohne_reposition": {
+        "description": "Disc displacement without reduction pathway",
+        "entry": "ENTRY_KIEFERKLEMME_HISTORIE",
+        "also_reachable_from": "MANEUVER_REPONIERBAR (Nein)",
+        "steps": [
+          {
+            "node": "ENTRY_KIEFERKLEMME_HISTORIE",
+            "question": "Previous jaw locking AND chewing difficulties?",
+            "if_ja": "MPMO_CHECK",
+            "if_nein": "MPMO_CHECK"
+          },
+          {
+            "node": "MPMO_CHECK",
+            "question": "Maximum passive mouth opening ≥ 40mm (including overbite)?",
+            "if_ja": "DIAGNOSE_DV_OHNE_REPOSITION_OHNE_MOE",
+            "if_nein": "DIAGNOSE_DV_OHNE_REPOSITION_MIT_MOE"
+          }
+        ],
+        "possible_diagnoses": [
+          "Diskusverlagerung ohne Reposition, mit Mundöffnungseinschränkung",
+          "Diskusverlagerung ohne Reposition, ohne Mundöffnungseinschränkung"
+        ]
+      },
+      "degenerativ": {
+        "description": "Degenerative joint disease pathway",
+        "entry": "ENTRY_DEGENERATIV",
+        "steps": [
+          {
+            "node": "ENTRY_DEGENERATIV",
+            "question": "Current TMJ sounds (history) OR patient reports TMJ sounds during examination?",
+            "if_ja": "REIBEGERAEUSCH_PRUEFUNG",
+            "if_nein": "WEITERE_DIAGNOSEN_3"
+          },
+          {
+            "node": "REIBEGERAEUSCH_PRUEFUNG",
+            "question": "Crepitus detected by examiner?",
+            "if_ja": "DIAGNOSE_DEGENERATIVE_GELENKERKRANKUNG",
+            "if_nein": "WEITERE_DIAGNOSEN_3"
+          }
+        ],
+        "possible_diagnoses": [
+          "Degenerative Gelenkerkrankung"
+        ]
+      }
+    },
+    "reference_key": {
+      "SF8": "Schmerzfragebogen Frage 8 (Gelenkbezogene Diagnose / Kiefergelenkgeräusche)",
+      "SF9": "Schmerzfragebogen Frage 9 (Vorrausgehende Kieferklemme)",
+      "SF10": "Schmerzfragebogen Frage 10 (Störungen beim Kauen)",
+      "SF11": "Schmerzfragebogen Frage 11 (Intermittierende Kieferklemme vorhanden)",
+      "SF12": "Schmerzfragebogen Frage 12 (Kieferklemme dauerhaft / nicht mehr intermittierend)",
+      "U4C": "Untersuchung 4C (Maximale passive Mundöffnung)",
+      "U6": "Untersuchung 6 (Kiefergelenkgeräusche bei Öffnungs- und Schließbewegungen)",
+      "U7": "Untersuchung 7 (Kiefergelenkgeräusche bei Laterotrusion und Protrusion)",
+      "U8": "Untersuchung 8 (Kieferklemme/-sperre – Reponierbarkeit durch Maneuver)"
+    },
+    "imaging_notes": {
+      "MRT": "MRT (Magnetresonanztomographie) zur Bestätigung aller Diskusverlagerungsdiagnosen, wenn indiziert",
+      "CT": "CT (Computertomographie) zur Bestätigung der degenerativen Gelenkerkrankung, wenn indiziert"
+    }
+  },
+  "copyright": "Copyright International RDC/TMD Consortium Network. Deutsche Übersetzung: Asendorf A, Eberhard L, Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig. Version 12/2018."
+}

@@ -67,6 +67,7 @@ export function EvaluationView({
   caseId,
 }: EvaluationViewProps) {
   const [criteriaViewMode, setCriteriaViewMode] = useState<"list" | "tree">("list");
+  const [criteriaDiagnosisId, setCriteriaDiagnosisId] = useState<DiagnosisId | null>(null);
 
   const criteriaData = useMemo(
     () => mapToCriteriaData(sqAnswers, examinationData),
@@ -256,9 +257,16 @@ export function EvaluationView({
           </CardHeader>
           <CardContent>
             {criteriaViewMode === "list" ? (
-              <DiagnosisReference criteriaData={criteriaData} />
+              <DiagnosisReference
+                criteriaData={criteriaData}
+                selectedDiagnosisId={criteriaDiagnosisId}
+                onDiagnosisChange={setCriteriaDiagnosisId}
+              />
             ) : (
-              <DiagnosisTreeView />
+              <DiagnosisTreeView
+                selectedDiagnosisId={criteriaDiagnosisId}
+                onDiagnosisChange={setCriteriaDiagnosisId}
+              />
             )}
           </CardContent>
         </Card>
