@@ -1,0 +1,609 @@
+{
+  "formTitle": "DC/TMD Untersuchungsbogen",
+  "metadata": {
+    "untersuchungsdatum": {
+      "label": "Untersuchungsdatum",
+      "format": "Tag-Monat-Jahr",
+      "value": null
+    },
+    "patient": null,
+    "untersucher": null
+  },
+  "sections": {
+    "1a_schmerzlokalisation": {
+      "label": "Schmerzlokalisation: letzte 30 Tage",
+      "instruction": "Alle zutreffenden ankreuzen",
+      "rechtsseitige_schmerzen": {
+        "keine": false,
+        "temporalis": false,
+        "andere_kaumuskulatur": false,
+        "masseter": false,
+        "kiefergelenk": false,
+        "nicht_mastikatorische_muskeln": false
+      },
+      "linksseitige_schmerzen": {
+        "keine": false,
+        "temporalis": false,
+        "andere_kaumuskulatur": false,
+        "masseter": false,
+        "kiefergelenk": false,
+        "nicht_mastikatorische_muskeln": false
+      }
+    },
+    "1b_kopfschmerzlokalisation": {
+      "label": "Kopfschmerzlokalisation: letzten 30 Tage",
+      "instruction": "Wähle alle zutreffenden",
+      "rechte_seite": {
+        "keine": false,
+        "temporalis": false,
+        "andere": false
+      },
+      "linke_seite": {
+        "keine": false,
+        "temporalis": false,
+        "andere": false
+      }
+    },
+    "2_schneidekantenverhaeltnisse": {
+      "label": "Schneidekantenverhältnisse",
+      "referenzzahn": {
+        "options": [11, 21, "Anderer"],
+        "value": null
+      },
+      "horizontaler_inzisaler_ueberbiss": {
+        "mm": null,
+        "falls_negativ": false
+      },
+      "vertikaler_inzisaler_ueberbiss": {
+        "mm": null,
+        "falls_negativ": false
+      },
+      "mittellinien_abweichung": {
+        "richtung": {
+          "options": ["Re", "Li", "N/A"],
+          "value": null
+        },
+        "mm": null
+      }
+    },
+    "3_oeffnungs_und_schliessmuster": {
+      "label": "Öffnungs- und Schließmuster",
+      "instruction": "Wähle eins aus",
+      "options": ["Gerade", "korrigierte Deviation", "Unkorrigierte Deviation nach rechts", "Unkorrigierte Deviation nach links"],
+      "value": null
+    },
+    "4_oeffnungs_und_schliessbewegungen": {
+      "label": "Öffnungs- und Schließbewegungen",
+      "A_schmerzfreie_MOe": {
+        "label": "Schmerzfreie MÖ",
+        "mm": null
+      },
+      "B_maximale_aktive_MOe": {
+        "label": "Maximale aktive MÖ",
+        "mm": null,
+        "rechte_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        },
+        "linke_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        }
+      },
+      "C_maximale_passive_MOe": {
+        "label": "Maximale passive MÖ",
+        "mm": null,
+        "rechte_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        },
+        "linke_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        }
+      },
+      "D_abgebrochen_durch_patient": null
+    },
+    "5_laterotrusion_und_protrusion": {
+      "label": "Laterotrusion und Protrusion",
+      "A_laterotrusion_nach_rechts": {
+        "label": "Laterotrusion nach rechts",
+        "mm": null,
+        "rechte_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        },
+        "linke_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        }
+      },
+      "B_laterotrusion_nach_links": {
+        "label": "Laterotrusion nach links",
+        "mm": null,
+        "rechte_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        },
+        "linke_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        }
+      },
+      "C_protrusion": {
+        "label": "Protrusion",
+        "mm": null,
+        "falls_negativ": false,
+        "rechte_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        },
+        "linke_seite": {
+          "schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_schmerz": {
+            "temporalis": null,
+            "masseter": null,
+            "gelenk": null,
+            "andere_kaumuskulatur": null,
+            "nicht_kaumuskulatur": null
+          },
+          "bekannter_kopfschmerz": {
+            "temporalis": null
+          }
+        }
+      }
+    },
+    "6_kiefergelenkgeraeusche_oeffnung_schliessung": {
+      "label": "Kiefergelenkgeräusche bei Öffnungs- und Schließbewegungen",
+      "rechtes_kiefergelenk": {
+        "knacken": {
+          "untersucher_oeffnen": null,
+          "untersucher_schliessen": null,
+          "patient": null,
+          "schmerzhaftes_knacken": null,
+          "bekannter_schmerz": null
+        },
+        "reiben": {
+          "untersucher_oeffnen": null,
+          "untersucher_schliessen": null,
+          "patient": null
+        }
+      },
+      "linkes_kiefergelenk": {
+        "knacken": {
+          "untersucher_oeffnen": null,
+          "untersucher_schliessen": null,
+          "patient": null,
+          "schmerzhaftes_knacken": null,
+          "bekannter_schmerz": null
+        },
+        "reiben": {
+          "untersucher_oeffnen": null,
+          "untersucher_schliessen": null,
+          "patient": null
+        }
+      }
+    },
+    "7_kiefergelenkgeraeusche_laterotrusion_protrusion": {
+      "label": "Kiefergelenkgeräusche bei Laterotrusion und Protrusion",
+      "A_laterotrusion_nach_rechts": {
+        "label": "Laterotrusion nach rechts",
+        "rechtes_kiefergelenk": {
+          "knacken": {
+            "untersucher": null,
+            "patient": null,
+            "schmerzhaftes_knacken": null,
+            "bekannter_schmerz": null
+          },
+          "reiben": {
+            "untersucher": null,
+            "patient": null
+          }
+        },
+        "linkes_kiefergelenk": {
+          "knacken": {
+            "untersucher": null,
+            "patient": null,
+            "schmerzhaftes_knacken": null,
+            "bekannter_schmerz": null
+          },
+          "reiben": {
+            "untersucher": null,
+            "patient": null
+          }
+        }
+      },
+      "B_laterotrusion_nach_links": {
+        "label": "Laterotrusion nach links",
+        "rechtes_kiefergelenk": {
+          "knacken": {
+            "untersucher": null,
+            "patient": null,
+            "schmerzhaftes_knacken": null,
+            "bekannter_schmerz": null
+          },
+          "reiben": {
+            "untersucher": null,
+            "patient": null
+          }
+        },
+        "linkes_kiefergelenk": {
+          "knacken": {
+            "untersucher": null,
+            "patient": null,
+            "schmerzhaftes_knacken": null,
+            "bekannter_schmerz": null
+          },
+          "reiben": {
+            "untersucher": null,
+            "patient": null
+          }
+        }
+      },
+      "C_protrusion": {
+        "label": "Protrusion",
+        "rechtes_kiefergelenk": {
+          "knacken": {
+            "untersucher": null,
+            "patient": null,
+            "schmerzhaftes_knacken": null,
+            "bekannter_schmerz": null
+          },
+          "reiben": {
+            "untersucher": null,
+            "patient": null
+          }
+        },
+        "linkes_kiefergelenk": {
+          "knacken": {
+            "untersucher": null,
+            "patient": null,
+            "schmerzhaftes_knacken": null,
+            "bekannter_schmerz": null
+          },
+          "reiben": {
+            "untersucher": null,
+            "patient": null
+          }
+        }
+      }
+    },
+    "8_kieferklemme_sperre": {
+      "label": "Kieferklemme/-sperre",
+      "rechtes_kiefergelenk": {
+        "waehrend_der_oeffnung": {
+          "blockade": null,
+          "loesbar_durch_patient": null,
+          "loesbar_durch_untersucher": null
+        },
+        "bei_weiter_mundoeffnung": {
+          "blockade": null,
+          "loesbar_durch_patient": null,
+          "loesbar_durch_untersucher": null
+        }
+      },
+      "linkes_kiefergelenk": {
+        "waehrend_der_oeffnung": {
+          "blockade": null,
+          "loesbar_durch_patient": null,
+          "loesbar_durch_untersucher": null
+        },
+        "bei_weiter_mundoeffnung": {
+          "blockade": null,
+          "loesbar_durch_patient": null,
+          "loesbar_durch_untersucher": null
+        }
+      }
+    },
+    "9_muskel_und_kiefergelenkschmerzen_bei_palpation": {
+      "label": "Muskel- & Kiefergelenkschmerzen bei Palpation",
+      "rechte_seite": {
+        "palpation_1kg": {
+          "temporalis_posterior": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "bekannter_kopfschmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "temporalis_media": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "bekannter_kopfschmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "temporalis_anterior": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "bekannter_kopfschmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "masseter_ursprung": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "masseter_koerper": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "masseter_ansatz": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          }
+        },
+        "kiefergelenk": {
+          "lateraler_pol_05kg": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "um_den_lateralen_pol_1kg": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "uebertragener_schmerz": null
+          }
+        }
+      },
+      "linke_seite": {
+        "palpation_1kg": {
+          "temporalis_posterior": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "bekannter_kopfschmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "temporalis_media": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "bekannter_kopfschmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "temporalis_anterior": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "bekannter_kopfschmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "masseter_ursprung": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "masseter_koerper": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "masseter_ansatz": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "ausbreitender_schmerz": null,
+            "uebertragener_schmerz": null
+          }
+        },
+        "kiefergelenk": {
+          "lateraler_pol_05kg": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "uebertragener_schmerz": null
+          },
+          "um_den_lateralen_pol_1kg": {
+            "schmerz": null,
+            "bekannter_schmerz": null,
+            "uebertragener_schmerz": null
+          }
+        }
+      }
+    },
+    "10_ergaenzende_muskelschmerzen_bei_palpation": {
+      "label": "Ergänzende Muskelschmerzen bei Palpation",
+      "druck": "0,5 kg",
+      "rechte_seite": {
+        "regio_retromandibularis": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        },
+        "regio_submandibularis": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        },
+        "bereich_m_pterygoideus_lateralis": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        },
+        "temporalissehne": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        }
+      },
+      "linke_seite": {
+        "regio_retromandibularis": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        },
+        "regio_submandibularis": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        },
+        "bereich_m_pterygoideus_lateralis": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        },
+        "temporalissehne": {
+          "schmerz": null,
+          "bekannter_schmerz": null,
+          "uebertragener_schmerz": null
+        }
+      }
+    },
+    "11_kommentare": {
+      "label": "Kommentare",
+      "value": null
+    }
+  },
+  "copyright": "Copyright International RDC/TMD Consortium Network. Deutsche Übersetzung: Asendorf A, Eberhard L, Universitätsklinikum Heidelberg & Schierz O, Universitätsmedizin Leipzig. Version 12/2018.",
+  "valueFormat": {
+    "description": "All null values represent empty form fields. Boolean fields (N/J) represent Nein/Ja (No/Yes). Measurement fields expect numeric values in mm."
+  }
+}

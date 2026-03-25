@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
+  E4_PAIN_STEPS,
+  E5_STEPS,
   E6_OBSERVER_LABELS,
   E7_OBSERVER_LABELS,
   CLICK_PAIN_LABELS,
@@ -43,19 +45,6 @@ import { useCallback, useMemo, useState } from "react";
 import { EMPTY_REGION_STATUS, HeadDiagram, type RegionStatus } from "../../examination";
 import { translateValue } from "../utils/criterion-data-display";
 import { BilateralLayout, FindingRow, InlineField } from "./findings-primitives";
-
-// ── Step configs (badge → criteriaData key mapping) ─────────────────
-
-const OPENING_STEPS = [
-  { key: "maxUnassisted", badge: "U4B" },
-  { key: "maxAssisted", badge: "U4C" },
-] as const;
-
-const LATERAL_STEPS = [
-  { key: "lateralRight", badge: "U5A" },
-  { key: "lateralLeft", badge: "U5B" },
-  { key: "protrusive", badge: "U5C" },
-] as const;
 
 // ── Main component ──────────────────────────────────────────────────
 
@@ -387,7 +376,7 @@ function PainRegionDetail({
     <div className="space-y-1.5 pl-[26px] pr-2 pb-2">
       {/* U4B/U4C — opening pain */}
       {!isSupplemental &&
-        OPENING_STEPS.map(({ key, badge }) => (
+        E4_PAIN_STEPS.map(({ key, badge }) => (
           <div key={key} className="flex items-baseline gap-1.5 text-xs flex-wrap">
             <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
               {badge}
@@ -405,7 +394,7 @@ function PainRegionDetail({
 
       {/* U5A/U5B/U5C — lateral/protrusive pain */}
       {!isSupplemental &&
-        LATERAL_STEPS.map(({ key, badge }) => (
+        E5_STEPS.map(({ key, badge }) => (
           <div key={key} className="flex items-baseline gap-1.5 text-xs flex-wrap">
             <Badge variant="outline" className="text-xs font-mono px-1 py-0 shrink-0">
               {badge}
@@ -491,7 +480,7 @@ function HeadacheFindingsContent({ criteriaData }: { criteriaData: Record<string
               label="Kopfschmerzlokalisation Temporalis"
               value={headacheLocations[side] === undefined ? "—" : hasHeadache ? "Ja" : "Nein"}
             />
-            {OPENING_STEPS.map(({ key, badge }) => (
+            {E4_PAIN_STEPS.map(({ key, badge }) => (
               <FindingRow
                 key={key}
                 badge={badge}
@@ -501,7 +490,7 @@ function HeadacheFindingsContent({ criteriaData }: { criteriaData: Record<string
                 )}
               />
             ))}
-            {LATERAL_STEPS.map(({ key, badge }) => (
+            {E5_STEPS.map(({ key, badge }) => (
               <FindingRow
                 key={key}
                 badge={badge}

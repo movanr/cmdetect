@@ -11,10 +11,10 @@ import {
   E3_OPENING_PATTERNS,
   E6_OBSERVER_LABELS,
   E7_OBSERVER_LABELS,
+  E4_PAIN_STEPS,
+  E5_STEPS,
   E8_REDUCTION_LABELS,
   JOINT_SOUND_LABELS,
-  MOVEMENT_TYPE_LABELS,
-  OPENING_TYPE_LABELS,
   PAIN_TYPES,
   PALPATION_SITES,
   REGIONS,
@@ -124,18 +124,13 @@ function u2Lines(criteriaData: Record<string, unknown>): DisplayGroup[] {
   ];
 }
 
-const OPENING_STEPS = [
-  { key: "maxUnassisted", badge: "U4B", label: OPENING_TYPE_LABELS.maxUnassisted },
-  { key: "maxAssisted", badge: "U4C", label: OPENING_TYPE_LABELS.maxAssisted },
-] as const;
-
 function u4StepLines(
   stepIndex: number,
   criteriaData: Record<string, unknown>,
   side: Side,
   region: Region,
 ): DisplayGroup[] {
-  const { key, badge, label } = OPENING_STEPS[stepIndex];
+  const { key, badge, label } = E4_PAIN_STEPS[stepIndex];
   const loc = `${REGIONS[region]}, ${SIDES[side]}`;
   const lines: DisplayGroup[] = [
     {
@@ -154,19 +149,13 @@ function u4StepLines(
   return lines;
 }
 
-const LATERAL_STEPS = [
-  { key: "lateralRight", badge: "U5A", label: MOVEMENT_TYPE_LABELS.lateralRight },
-  { key: "lateralLeft", badge: "U5B", label: MOVEMENT_TYPE_LABELS.lateralLeft },
-  { key: "protrusive", badge: "U5C", label: MOVEMENT_TYPE_LABELS.protrusive },
-] as const;
-
 function u5StepLines(
   stepIndex: number,
   criteriaData: Record<string, unknown>,
   side: Side,
   region: Region,
 ): DisplayGroup[] {
-  const { key, badge, label } = LATERAL_STEPS[stepIndex];
+  const { key, badge, label } = E5_STEPS[stepIndex];
   const loc = `${REGIONS[region]}, ${SIDES[side]}`;
   const lines: DisplayGroup[] = [
     {

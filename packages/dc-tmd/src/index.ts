@@ -11,6 +11,7 @@
 export * from "./ids/anatomy";
 export * from "./ids/diagnosis";
 export * from "./ids/examination";
+export * from "./ids/examination-protocol";
 
 // Types
 export * from "./types/results";
