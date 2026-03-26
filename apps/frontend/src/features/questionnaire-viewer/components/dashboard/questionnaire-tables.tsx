@@ -123,7 +123,7 @@ export function ScoresOverviewTable({
     const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
     rows.push({
       instrument: "GCPS-1M",
-      score: `CPI ${s.cpi}, ${s.totalDisabilityPoints} BP`,
+      score: `CSI ${s.cpi}, ${s.totalDisabilityPoints} BP`,
     });
   }
 
@@ -378,7 +378,7 @@ export function GCPSAnswersTable({
             Auswertung
           </td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
-            CPI {s.cpi}, {s.totalDisabilityPoints} BP
+            CSI {s.cpi}, {s.totalDisabilityPoints} BP
           </td>
         </tr>
       </tbody>

@@ -5,10 +5,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "@tanstack/react-router";
 import type {
   GCPS1MAnswers,
-  GCPSGrade,
   JFLS20Answers,
   JFLS20LimitationLevel,
   JFLS20SubscaleScore,
@@ -28,6 +26,7 @@ import {
   JFLS20_SUBSCALE_LABELS,
   QUESTIONNAIRE_ID,
 } from "@cmdetect/questionnaires";
+import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -43,26 +42,25 @@ import {
 // PHQ-4 Severity scale segments
 // eslint-disable-next-line react-refresh/only-export-components
 export const PHQ4_SEVERITY_SEGMENTS = [
-  { label: "0–2", range: "0-2", min: 0, max: 2, color: "bg-green-500" },
-  { label: "3–5", range: "3-5", min: 3, max: 5, color: "bg-yellow-500" },
-  { label: "6–8", range: "6-8", min: 6, max: 8, color: "bg-orange-500", sublabel: "Cutoff ≥6" },
-  { label: "9–12", range: "9-12", min: 9, max: 12, color: "bg-red-500" },
+  { label: "0–2", range: "0-2", min: 0, max: 2, color: "bg-gray-300" },
+  { label: "3–5", range: "3-5", min: 3, max: 5, color: "bg-gray-400" },
+  { label: "6–8", range: "6-8", min: 6, max: 8, color: "bg-gray-600", sublabel: "Cutoff ≥6" },
+  { label: "9–12", range: "9-12", min: 9, max: 12, color: "bg-gray-700" },
 ] as const;
 
-// GCPS Grade scale segments (0-IV) - German labels per DC/TMD manual
-// eslint-disable-next-line react-refresh/only-export-components
-export const GCPS_GRADE_SEGMENTS: Array<{
-  grade: GCPSGrade;
-  label: string;
-  sublabel: string;
-  color: string;
-}> = [
-  { grade: 0, label: "0", sublabel: "CPI = 0", color: "bg-green-500" },
-  { grade: 1, label: "I", sublabel: "CPI < 50", color: "bg-yellow-400" },
-  { grade: 2, label: "II", sublabel: "CPI ≥ 50", color: "bg-yellow-500" },
-  { grade: 3, label: "III", sublabel: "3–4 BP", color: "bg-orange-500" },
-  { grade: 4, label: "IV", sublabel: "5–6 BP", color: "bg-red-500" },
-];
+// GCPS CSI (Charakteristische Schmerzintensität) scale segments
+const GCPS_CSI_SEGMENTS = [
+  { label: "0", range: "0", color: "bg-gray-300" },
+  { label: "1–49", range: "1–49", color: "bg-gray-500" },
+  { label: "50–100", range: "50–100", color: "bg-gray-700" },
+] as const;
+
+// GCPS BP (Beeinträchtigungspunkte) scale segments
+const GCPS_BP_SEGMENTS = [
+  { label: "0–2", range: "0–2", color: "bg-gray-300" },
+  { label: "3–4", range: "3–4", color: "bg-gray-500" },
+  { label: "5–6", range: "5–6", color: "bg-gray-700" },
+] as const;
 
 // OBC Risk level segments based on TMD prevalence comparison
 // eslint-disable-next-line react-refresh/only-export-components
@@ -82,7 +80,7 @@ export const OBC_RISK_SEGMENTS: Array<{
     range: "0-16",
     min: 0,
     max: 16,
-    color: "bg-green-500",
+    color: "bg-gray-300",
   },
   {
     level: "elevated",
@@ -91,7 +89,7 @@ export const OBC_RISK_SEGMENTS: Array<{
     range: "17-24",
     min: 17,
     max: 24,
-    color: "bg-yellow-500",
+    color: "bg-gray-500",
   },
   {
     level: "high",
@@ -100,7 +98,7 @@ export const OBC_RISK_SEGMENTS: Array<{
     range: "25+",
     min: 25,
     max: 84,
-    color: "bg-red-500",
+    color: "bg-gray-700",
   },
 ];
 
@@ -123,7 +121,7 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
     range: "<0.5",
     min: 0,
     max: 0.5,
-    color: "bg-green-500",
+    color: "bg-gray-300",
   },
   {
     level: "mild",
@@ -132,7 +130,7 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
     range: "0.5-1.5",
     min: 0.5,
     max: 1.5,
-    color: "bg-yellow-500",
+    color: "bg-gray-500",
   },
   {
     level: "significant",
@@ -141,7 +139,7 @@ export const JFLS8_LIMITATION_SEGMENTS: Array<{
     range: "≥1.5",
     min: 1.5,
     max: 10,
-    color: "bg-red-500",
+    color: "bg-gray-700",
   },
 ];
 
@@ -163,7 +161,7 @@ export const JFLS20_LIMITATION_SEGMENTS: Array<{
     range: "<0.5",
     min: 0,
     max: 0.5,
-    color: "bg-green-500",
+    color: "bg-gray-300",
   },
   {
     level: "mild",
@@ -172,7 +170,7 @@ export const JFLS20_LIMITATION_SEGMENTS: Array<{
     range: "0.5-1.5",
     min: 0.5,
     max: 1.5,
-    color: "bg-yellow-500",
+    color: "bg-gray-500",
   },
   {
     level: "significant",
@@ -181,7 +179,7 @@ export const JFLS20_LIMITATION_SEGMENTS: Array<{
     range: "≥1.5",
     min: 1.5,
     max: 10,
-    color: "bg-red-500",
+    color: "bg-gray-700",
   },
 ];
 
@@ -251,6 +249,8 @@ interface HorizontalScoreLayoutProps {
   subtitle?: string;
   /** Scoring manual heading anchor — renders a link when provided */
   manualAnchor?: string;
+  /** Small description text rendered below the Scoring-Anleitung link */
+  description?: ReactNode;
   scaleLabel: string;
   scaleBar: ReactNode;
   scoreDisplay: ReactNode;
@@ -264,6 +264,7 @@ function HorizontalScoreLayout({
   title,
   subtitle,
   manualAnchor,
+  description,
   scaleLabel,
   scaleBar,
   scoreDisplay,
@@ -287,12 +288,20 @@ function HorizontalScoreLayout({
               <Link
                 to="/docs/scoring-manual"
                 hash={manualAnchor}
-                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sessionStorage.setItem("docs-return-url", window.location.pathname);
+                }}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
               >
                 <BookOpen className="h-3 w-3" />
                 Scoring-Anleitung
               </Link>
+            )}
+            {description && (
+              <div className="text-[10px] text-muted-foreground/60 leading-snug mt-0.5">
+                {description}
+              </div>
             )}
           </div>
 
@@ -312,7 +321,10 @@ function HorizontalScoreLayout({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleExpand();
+                }}
                 className="text-muted-foreground h-7 px-2 text-xs shrink-0"
               >
                 {isExpanded ? (
@@ -362,6 +374,7 @@ export function ScaleBar({
       <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
         {segments.map((segment, index) => {
           const isActive = index === activeIndex;
+          const isLightBg = segment.color.includes("-200") || segment.color.includes("-300");
           return (
             <div
               key={index}
@@ -372,7 +385,7 @@ export function ScaleBar({
               } flex items-center justify-center transition-all`}
             >
               <span
-                className={`text-[9px] font-medium ${isActive ? "text-white drop-shadow-sm" : "text-gray-400"}`}
+                className={`text-[9px] font-medium ${isActive ? (isLightBg ? "text-gray-600" : "text-white drop-shadow-sm") : "text-gray-400"}`}
               >
                 {segment.range ?? segment.label}
               </span>
@@ -455,90 +468,86 @@ export function Axis2ScoreCard({
   // GCPS-1M Scoring
   if (questionnaireId === QUESTIONNAIRE_ID.GCPS_1M) {
     const gcpsScore = calculateGCPS1MScore(answers as GCPS1MAnswers);
-    const activeGradeIndex = gcpsScore.grade;
+    const activeCsiIndex = gcpsScore.cpi === 0 ? 0 : gcpsScore.cpi < 50 ? 1 : 2;
+    const activeBpIndex =
+      gcpsScore.totalDisabilityPoints <= 2 ? 0 : gcpsScore.totalDisabilityPoints <= 4 ? 1 : 2;
 
     return (
       <HorizontalScoreLayout
         title={title}
         subtitle={subtitle}
         manualAnchor={manualAnchor}
-        scaleLabel="Chronifizierungsgrad"
+        description="Grad 0: kein Schmerz (CSI = 0). Grad I: geringe Intensität (CSI < 50, BP < 3). Grad II: hohe Intensität (CSI ≥ 50, BP < 3). Grad III: mäßige Einschränkung (BP 3–4). Grad IV: hochgradige Einschränkung (BP 5–6)."
+        scaleLabel=""
         scaleBar={
-          <>
-            <ScaleBar
-              segments={GCPS_GRADE_SEGMENTS.map((s) => ({
-                label: s.label,
-                color: s.color,
-              }))}
-              activeIndex={activeGradeIndex}
-            />
-            <ScaleLabels
-              labels={GCPS_GRADE_SEGMENTS.map((s) => ({ label: s.sublabel, key: s.grade }))}
-              activeIndex={activeGradeIndex}
-            />
-          </>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">
+                CSI <span className="font-semibold text-foreground">{gcpsScore.cpi}</span>
+                <span className="text-muted-foreground/50">/100</span>
+              </p>
+              <ScaleBar segments={[...GCPS_CSI_SEGMENTS]} activeIndex={activeCsiIndex} />
+              <div className="text-[10px] text-muted-foreground/60 mt-1 flex items-center gap-0.5">
+                <span>CSI =</span>
+                <span className="inline-flex flex-col items-center leading-[1.1]">
+                  <span>Frage 2 + 3 + 4</span>
+                  <span className="border-t border-current w-full text-center">3</span>
+                </span>
+                <span>× 10</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">
+                BP Gesamt{" "}
+                <span className="font-semibold text-foreground">
+                  {gcpsScore.totalDisabilityPoints}
+                </span>
+                <span className="text-muted-foreground/50">/6</span>
+              </p>
+              <ScaleBar segments={[...GCPS_BP_SEGMENTS]} activeIndex={activeBpIndex} />
+              <div className="text-[10px] text-muted-foreground/60 mt-1 space-y-0.5">
+                <div>BP Gesamt = BP subj. Beeinträchtigung + BP Beeinträchtigungstage</div>
+                <div className="flex items-center gap-0.5 text-muted-foreground/40">
+                  <span>BP subj. Beeinträchtigung =</span>
+                  <span className="inline-flex flex-col items-center leading-[1.1]">
+                    <span>Frage 6 + 7 + 8</span>
+                    <span className="border-t border-current w-full text-center">3</span>
+                  </span>
+                  <span>× 10</span>
+                </div>
+                <div className="text-muted-foreground/40">
+                  BP Beeinträchtigungstage = BP aus Frage 5 (0–1 → 0 BP, 2 → 1 BP, 3–5 → 2 BP, ≥6 →
+                  3 BP)
+                </div>
+              </div>
+            </div>
+          </div>
         }
         scoreDisplay={
-          <div className="text-left">
-            <div className="text-xl font-bold leading-tight">
-              {gcpsScore.cpi}
-              <span className="text-sm text-muted-foreground font-normal"> CPI</span>
+          <div className="text-left space-y-1">
+            <div>
+              <div className="text-base font-bold leading-tight">
+                {gcpsScore.cpi}
+                <span className="text-sm text-muted-foreground font-normal">/100</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground leading-tight">
+                CSI (Charakteristische Schmerzintensität)
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground">{gcpsScore.totalDisabilityPoints} BP</div>
+            <div>
+              <div className="text-base font-bold leading-tight">
+                {gcpsScore.totalDisabilityPoints}
+                <span className="text-sm text-muted-foreground font-normal">/6</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground leading-tight">
+                BP (Beeinträchtigungspunkte)
+              </div>
+            </div>
           </div>
         }
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
-        expandedContent={
-          <div className="space-y-3">
-            {/* Scoring breakdown — stat cells */}
-            <div className="grid grid-cols-4 divide-x rounded-md border text-center">
-              {/* CPI */}
-              <div className="px-3 py-2">
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  Schmerzintensität
-                </div>
-                <div className="text-lg font-semibold leading-tight mt-0.5">{gcpsScore.cpi}</div>
-                <div className="text-[10px] text-muted-foreground">CPI</div>
-              </div>
-              {/* Interference score → BP */}
-              <div className="px-3 py-2">
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  Beeinträchtigung
-                </div>
-                <div className="text-lg font-semibold leading-tight mt-0.5">
-                  {gcpsScore.interferenceScore}
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  → {gcpsScore.interferencePoints} BP
-                </div>
-              </div>
-              {/* Disability days → BP */}
-              <div className="px-3 py-2">
-                <div className="text-[10px] text-muted-foreground leading-tight">Beeintr.-Tage</div>
-                <div className="text-lg font-semibold leading-tight mt-0.5">
-                  {gcpsScore.disabilityDays}
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  → {gcpsScore.disabilityDaysPoints} BP
-                </div>
-              </div>
-              {/* Total BP */}
-              <div className="px-3 py-2 bg-muted/40">
-                <div className="text-[10px] text-muted-foreground leading-tight">Gesamt</div>
-                <div className="text-lg font-semibold leading-tight mt-0.5">
-                  {gcpsScore.totalDisabilityPoints}
-                </div>
-                <div className="text-[10px] text-muted-foreground">BP</div>
-              </div>
-            </div>
-
-            {/* Original answers */}
-            <div className="pt-2 border-t">
-              <GCPSAnswersTable answers={answers as GCPS1MAnswers} showPips />
-            </div>
-          </div>
-        }
+        expandedContent={<GCPSAnswersTable answers={answers as GCPS1MAnswers} showPips />}
       />
     );
   }
@@ -557,6 +566,7 @@ export function Axis2ScoreCard({
         title={title}
         subtitle={subtitle}
         manualAnchor={manualAnchor}
+        description="Gesunde Population: ⌀ 0,16 — Chronische CMD: ⌀ 1,74 (max. 2 fehlende Fragen)"
         scaleLabel="Kieferfunktions-Einschränkung"
         scaleBar={
           <ScaleBar segments={JFLS8_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
@@ -566,6 +576,7 @@ export function Axis2ScoreCard({
             {jflsScore.isValid && jflsScore.globalScore !== null ? (
               <>
                 <div className="text-xl font-bold leading-tight">
+                  <span className="text-sm text-muted-foreground font-normal">⌀ </span>
                   {jflsScore.globalScore.toFixed(2)}
                   <span className="text-sm text-muted-foreground font-normal">
                     /{jflsScore.maxScore}
@@ -600,6 +611,7 @@ export function Axis2ScoreCard({
         title={title}
         subtitle={subtitle}
         manualAnchor={manualAnchor}
+        description="Gesunde Population: ⌀ 0,16 — Chronische CMD: ⌀ 1,74 (max. 2 fehlend)"
         scaleLabel="Kieferfunktions-Einschränkung (erweitert)"
         scaleBar={
           <ScaleBar segments={JFLS20_LIMITATION_SEGMENTS} activeIndex={activeLimitationIndex} />
@@ -609,6 +621,7 @@ export function Axis2ScoreCard({
             {jflsScore.isValid && jflsScore.globalScore !== null ? (
               <>
                 <div className="text-xl font-bold leading-tight">
+                  <span className="text-sm text-muted-foreground font-normal">⌀ </span>
                   {jflsScore.globalScore.toFixed(2)}
                   <span className="text-sm text-muted-foreground font-normal">
                     /{jflsScore.maxScore}
@@ -661,10 +674,9 @@ export function Axis2ScoreCard({
         title={title}
         subtitle={subtitle}
         manualAnchor={manualAnchor}
+        description="Gesamtpunktzahl = Summe aller Fragen (Bereich 0–84). Risikostufen: 0–16 Normal, 17–24 Erhöht (2× häufiger bei CMD), ≥25 Hoch (17× häufiger bei CMD, trägt zur Entstehung bei)."
         scaleLabel="Orale Verhaltensweisen - CMD-Risiko"
-        scaleBar={
-          <ScaleBar segments={OBC_RISK_SEGMENTS} activeIndex={activeRiskIndex} />
-        }
+        scaleBar={<ScaleBar segments={OBC_RISK_SEGMENTS} activeIndex={activeRiskIndex} />}
         scoreDisplay={
           <div className="text-left">
             <div className="text-xl font-bold leading-tight">
@@ -704,6 +716,7 @@ export function Axis2ScoreCard({
       title={title}
       subtitle={subtitle}
       manualAnchor={manualAnchor}
+      description="0–2 Normal, 3–5 Mild, 6–8 Moderat, 9–12 Schwer. Cutoff ≥ 6. Subskalen für Angst und Depression ≥ 3 auffällig."
       scaleLabel="Schweregrad"
       scaleBar={
         <ScaleBar

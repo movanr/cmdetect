@@ -79,6 +79,9 @@ export function PainDrawingScoreCard({
                 <BookOpen className="h-3 w-3" />
                 Scoring-Anleitung
               </Link>
+              <p className="text-[10px] text-muted-foreground/60 leading-snug mt-0.5">
+                Jedes markierte Schmerzgebiet erhöht das Risiko für weitere Schmerzerkrankungen sowie für chronische Schmerzen.
+              </p>
               {isWidespread && (
                 <div className="flex items-center gap-1.5 text-red-600 mt-1.5">
                   <AlertTriangle className="size-3.5 shrink-0" />
