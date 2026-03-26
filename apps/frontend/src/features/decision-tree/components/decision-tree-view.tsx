@@ -112,7 +112,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({ tree }) => {
   return (
     <div className="flex justify-center">
       <div
-        className="relative"
+        className="relative overflow-visible"
         style={{
           height: `${treeDims.height}px`,
           width: `${treeDims.width}px`,
@@ -135,9 +135,15 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({ tree }) => {
           />
         ))}
 
-        {transitions.map((transition, idx) => (
-          <Transition key={idx} {...resolveTransition(transition, resolvedNodes)} />
-        ))}
+        <svg
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          overflow="visible"
+          style={{ zIndex: 30 }}
+        >
+          {transitions.map((transition, idx) => (
+            <Transition key={idx} {...resolveTransition(transition, resolvedNodes)} />
+          ))}
+        </svg>
       </div>
     </div>
   );

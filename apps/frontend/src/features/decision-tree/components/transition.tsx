@@ -41,10 +41,10 @@ const Transition: React.FC<TransitionProps> = ({
   const arrowColor = getArrowColor(type);
 
   return (
-    <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+    <g>
       <Arrow path={path} direction={endDirection} color={arrowColor} />
       {label && <Label text={label} position={labelPosition} />}
-    </svg>
+    </g>
   );
 };
 

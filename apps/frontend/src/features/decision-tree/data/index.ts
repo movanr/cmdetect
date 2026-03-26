@@ -1,4 +1,5 @@
 export { createMyalgiaTree } from "./myalgia-tree";
+export { createMyalgiaCombinedTree } from "./myalgia-combined-tree";
 export { createMyalgiaSubtypesTree } from "./myalgia-subtypes";
 export { createArthalgiaTree } from "./arthralgia-tree";
 export { createHeadacheTree } from "./headache-tree";

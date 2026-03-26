@@ -22,8 +22,7 @@ import {
   createDdWithReductionTree,
   createDjdTree,
   createHeadacheTree,
-  createMyalgiaSubtypesTree,
-  createMyalgiaTree,
+  createMyalgiaCombinedTree,
   createSubluxationTree,
 } from "../../decision-tree";
 
@@ -40,11 +39,10 @@ const GROUPED = {
 function createTree(diagnosisId: DiagnosisId) {
   switch (diagnosisId) {
     case "myalgia":
-      return createMyalgiaTree("right", "temporalis");
     case "localMyalgia":
     case "myofascialPainWithSpreading":
     case "myofascialPainWithReferral":
-      return createMyalgiaSubtypesTree("right", "temporalis");
+      return createMyalgiaCombinedTree("right", "temporalis");
     case "arthralgia":
       return createArthalgiaTree("right");
     case "headacheAttributedToTmd":
@@ -104,7 +102,7 @@ export function DiagnosisTreeView({ selectedDiagnosisId, onDiagnosisChange }: Di
       </Select>
 
       {tree && (
-        <div className="overflow-x-auto">
+        <div className="overflow-auto">
           <DecisionTreeView tree={tree} />
         </div>
       )}
