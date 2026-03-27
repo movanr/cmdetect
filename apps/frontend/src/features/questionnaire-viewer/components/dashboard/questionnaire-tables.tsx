@@ -88,11 +88,7 @@ export function ScalePips({ value, max }: { value: number; max: number }) {
 
 // ─── Scores Overview ───────────────────────────────────────────────────
 
-export function ScoresOverviewTable({
-  responses,
-}: {
-  responses: QuestionnaireResponse[];
-}) {
+export function ScoresOverviewTable({ responses }: { responses: QuestionnaireResponse[] }) {
   const phq4 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
   const gcps = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
   const jfls8 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
@@ -142,7 +138,7 @@ export function ScoresOverviewTable({
     const s = calculatePHQ4Score(phq4.answers as Record<string, string>);
     rows.push({
       instrument: "PHQ-4",
-      score: `${s.total} / ${s.maxTotal} (Angst ${s.anxiety}/${s.maxAnxiety}, Depr. ${s.depression}/${s.maxDepression})`,
+      score: `${s.total} / ${s.maxTotal}`,
     });
   }
 
@@ -425,7 +421,9 @@ export function PHQ4AnswersTable({
           );
         })}
         <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>Gesamt</td>
+          <td colSpan={2} className={`${tdClass} font-semibold`}>
+            Gesamt
+          </td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
             {s.total} / {s.maxTotal}
           </td>
@@ -637,7 +635,9 @@ export function OBCAnswersTable({
         {renderSection("Schlaf-Aktivitäten", sleepQuestions)}
         {renderSection("Wach-Aktivitäten", wakingQuestions)}
         <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>Gesamt</td>
+          <td colSpan={2} className={`${tdClass} font-semibold`}>
+            Gesamt
+          </td>
           <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
             {s.totalScore} / {s.maxScore}
           </td>
