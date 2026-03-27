@@ -212,6 +212,9 @@ export interface I18nStrings {
     successMessage: string;
     failedToCreate: string;
     copy: string;
+    copyEmailText: string;
+    emailTemplateLabel: string;
+    emailTemplate: string;
     backToInvites: string;
     createAnother: string;
   };
@@ -413,6 +416,10 @@ export const translations: Record<Language, I18nStrings> = {
       successMessage: "Invite created successfully",
       failedToCreate: "Failed to create invite",
       copy: "Copy",
+      copyEmailText: "Copy Email Text",
+      emailTemplateLabel: "Email text for patient",
+      emailTemplate:
+        "Sehr geehrte Patientin, sehr geehrter Patient,\n\nim Rahmen Ihres Termins in unserer Praxis bitten wir Sie, vorab einen Online-Fragebogen auszufüllen. Bitte klicken Sie dazu auf den folgenden Link:\n\n{url}\n\nBitte füllen Sie den Fragebogen möglichst vor Ihrem Termin aus. Ihre Angaben werden verschlüsselt übertragen und vertraulich behandelt.\n\nBei Fragen wenden Sie sich gerne an unser Praxisteam.\n\nMit freundlichen Grüßen\nIhr Praxisteam",
       backToInvites: "Back to Invites",
       createAnother: "Create Another",
     },
@@ -615,6 +622,10 @@ export const translations: Record<Language, I18nStrings> = {
       successMessage: "Einladung erfolgreich erstellt",
       failedToCreate: "Einladung konnte nicht erstellt werden",
       copy: "Kopieren",
+      copyEmailText: "E-Mail-Text kopieren",
+      emailTemplateLabel: "E-Mail-Text für Patient/in",
+      emailTemplate:
+        "Sehr geehrte Patientin, sehr geehrter Patient,\n\nim Rahmen Ihres Termins in unserer Praxis bitten wir Sie, vorab einen Online-Fragebogen auszufüllen. Bitte klicken Sie dazu auf den folgenden Link:\n\n{url}\n\nBitte füllen Sie den Fragebogen möglichst vor Ihrem Termin aus. Ihre Angaben werden verschlüsselt übertragen und vertraulich behandelt.\n\nBei Fragen wenden Sie sich gerne an unser Praxisteam.\n\nMit freundlichen Grüßen\nIhr Praxisteam",
       backToInvites: "Zurück zu Einladungen",
       createAnother: "Weitere erstellen",
     },

@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCreatePatientRecord } from "@/features/patient-records";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "@/config/i18n";
-import { Copy, CheckCircle2 } from "lucide-react";
+import { Copy, CheckCircle2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 function buildInviteUrl(token: string) {
@@ -50,6 +50,14 @@ export function CreateInviteForm() {
     }
   };
 
+  const handleCopyEmail = () => {
+    if (inviteUrl) {
+      const emailText = t.createInvite.emailTemplate.replace("{url}", inviteUrl);
+      navigator.clipboard.writeText(emailText);
+      toast.success(t.messages.copiedToClipboard);
+    }
+  };
+
   const handleCancel = () => {
     navigate({ to: "/invites" });
   };
@@ -81,6 +89,24 @@ export function CreateInviteForm() {
               {t.createInvite.copy}
             </Button>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">
+            <Mail className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+            {t.createInvite.emailTemplateLabel}
+          </label>
+          <textarea
+            readOnly
+            value={t.createInvite.emailTemplate.replace("{url}", inviteUrl)}
+            rows={12}
+            className="w-full px-3 py-2 border rounded-md bg-muted text-sm resize-none"
+            onFocus={(e) => e.target.select()}
+          />
+          <Button type="button" variant="outline" size="sm" onClick={handleCopyEmail}>
+            <Copy className="h-4 w-4 mr-2" />
+            {t.createInvite.copyEmailText}
+          </Button>
         </div>
 
         <div className="flex gap-3">
