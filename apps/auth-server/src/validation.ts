@@ -117,44 +117,6 @@ export function isSQComplete(answers: unknown): {
 }
 
 /**
- * Consent data validation schema
- */
-const ConsentDataSchema = z.object({
-  consent_given: z.boolean({
-    required_error: "consent_given must be a boolean",
-    invalid_type_error: "consent_given must be a boolean",
-  }),
-  consent_text: z.string({
-    required_error: "consent_text is required and must be a string",
-    invalid_type_error: "consent_text is required and must be a string",
-  }).min(1, "consent_text is required and must be a string"),
-  consent_version: z.string({
-    required_error: "consent_version is required and must be a string",
-    invalid_type_error: "consent_version is required and must be a string",
-  }).min(1, "consent_version is required and must be a string"),
-});
-
-/**
- * Validates patient consent data structure
- */
-export function validateConsentData(consent_data: unknown): ValidationResult {
-  if (
-    consent_data === undefined ||
-    consent_data === null ||
-    typeof consent_data !== "object" ||
-    Array.isArray(consent_data)
-  ) {
-    return { valid: false, error: "Invalid consent data" };
-  }
-  const result = ConsentDataSchema.safeParse(consent_data);
-  if (!result.success) {
-    const issue = result.error.issues[0];
-    return { valid: false, error: issue?.message ?? "Invalid consent data" };
-  }
-  return { valid: true };
-}
-
-/**
  * Generic response data schema (minimal validation)
  */
 const ResponseDataSchema = z.object({}).passthrough();

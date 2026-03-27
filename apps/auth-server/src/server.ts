@@ -45,9 +45,6 @@ app.use("/actions/*", async (c, next) => {
 });
 
 // Hasura Actions
-app.post("/actions/submit-patient-consent", (c) =>
-  actionHandlers.submitPatientConsent(c)
-);
 app.post("/actions/submit-questionnaire-response", (c) =>
   actionHandlers.submitQuestionnaireResponse(c)
 );

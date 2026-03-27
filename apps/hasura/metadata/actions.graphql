@@ -5,13 +5,6 @@ type Query {
 }
 
 type Mutation {
-  submitPatientConsent(
-    invite_token: String!
-    consent_data: ConsentInput!
-  ): ConsentResponse!
-}
-
-type Mutation {
   submitPatientPersonalData(
     invite_token: String!
     patient_data: PatientPersonalDataInput!
@@ -31,14 +24,6 @@ type Mutation {
   ): ValidateInviteTokenResponse!
 }
 
-input ConsentInput {
-  consent_given: Boolean!
-  consent_text: String!
-  consent_version: String!
-  ip_address: String
-  user_agent: String
-}
-
 input QuestionnaireResponseInput {
   questionnaire_id: String!
   questionnaire_version: String!
@@ -53,12 +38,6 @@ input PatientPersonalDataInput {
   first_name_encrypted: String!
   last_name_encrypted: String!
   date_of_birth_encrypted: String!
-}
-
-type ConsentResponse {
-  success: Boolean!
-  patient_consent_id: uuid
-  error: String
 }
 
 type QuestionnaireResponseResponse {
@@ -85,8 +64,6 @@ type PatientPersonalDataResponse {
 
 type PatientProgressResponse {
   valid: Boolean!
-  has_consent: Boolean!
-  consent_given: Boolean!
   has_personal_data: Boolean!
   submitted_questionnaires: [String!]!
   error_message: String

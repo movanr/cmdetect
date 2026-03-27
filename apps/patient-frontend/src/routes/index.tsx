@@ -3,12 +3,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { FormProvider } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, CheckCircle2, AlertTriangle, Lock, ClipboardList, Check } from "lucide-react";
+import { AlertCircle, CheckCircle2, Lock, Check } from "lucide-react";
 import { CMDetectLogo } from "../components/CMDetectLogo";
 import { execute } from "../graphql/execute";
 import {
   validateInviteToken,
-  submitPatientConsent,
   submitPatientPersonalData,
   submitQuestionnaireResponse,
   getPatientProgress,
@@ -58,11 +57,6 @@ function translateServerError(error: string | null | undefined): string | null {
   return translations[error] ?? error;
 }
 
-// Consent constants
-const CONSENT_TEXT =
-  "Ich willige in die Erhebung und Verarbeitung meiner persönlichen Gesundheitsdaten zum Zweck der medizinischen Versorgung ein. Ich verstehe, dass meine Daten verschlüsselt und sicher gespeichert werden.";
-const CONSENT_VERSION = "1.0";
-
 interface PatientSearch {
   token?: string;
 }
@@ -79,11 +73,9 @@ export const Route = createFileRoute("/")({
 // Flow steps - generated from config
 type FlowStep =
   | "validate"
-  | "consent"
   | "personal-data"
   | "questionnaire"
-  | "complete"
-  | "declined";
+  | "complete";
 
 function PatientFlowPage() {
   const { token } = Route.useSearch();
@@ -135,11 +127,7 @@ function PatientFlowPage() {
         if (progressResult?.getPatientProgress) {
           const progress = progressResult.getPatientProgress;
 
-          if (!progress.has_consent) {
-            setStep("consent");
-          } else if (!progress.consent_given) {
-            setStep("declined");
-          } else if (!progress.has_personal_data) {
+          if (!progress.has_personal_data) {
             setStep("personal-data");
           } else {
             // Find first incomplete questionnaire using flow config
@@ -155,7 +143,7 @@ function PatientFlowPage() {
             }
           }
         } else {
-          setStep("consent");
+          setStep("personal-data");
         }
       } else {
         setError(
@@ -168,36 +156,6 @@ function PatientFlowPage() {
         err instanceof Error
           ? err.message
           : "Einladungslink konnte nicht überprüft werden"
-      );
-    },
-  });
-
-  // Consent mutation
-  const consentMutation = useMutation({
-    mutationFn: (consentData: {
-      invite_token: string;
-      consent_data: {
-        consent_given: boolean;
-        consent_text: string;
-        consent_version: string;
-      };
-    }) => execute(submitPatientConsent, consentData),
-    onSuccess: (data) => {
-      if (data.submitPatientConsent.success) {
-        setStep("personal-data");
-        setError("");
-      } else {
-        setError(
-          translateServerError(data.submitPatientConsent.error) ||
-            "Einwilligung konnte nicht übermittelt werden"
-        );
-      }
-    },
-    onError: (err) => {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Einwilligung konnte nicht übermittelt werden"
       );
     },
   });
@@ -269,24 +227,6 @@ function PatientFlowPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]); // Only depend on token - validateTokenMutation.mutate is stable
-
-  // Handle consent submission
-  const handleConsent = async (consentGiven: boolean) => {
-    if (!token) return;
-
-    await consentMutation.mutateAsync({
-      invite_token: token,
-      consent_data: {
-        consent_given: consentGiven,
-        consent_text: CONSENT_TEXT,
-        consent_version: CONSENT_VERSION,
-      },
-    });
-
-    if (!consentGiven) {
-      setStep("declined");
-    }
-  };
 
   // Handle personal data submission
   const handlePersonalData = async (data: PersonalDataFormValues) => {
@@ -570,19 +510,12 @@ function PatientFlowPage() {
         <Card>
           <CardContent className="pt-6">
             {/* Dynamic Header based on step */}
-            {step === "consent" && (
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold mb-1">Willkommen</h1>
-                {organizationName && (
-                  <p className="text-muted-foreground mb-1">{organizationName}</p>
-                )}
-                <p className="text-sm text-muted-foreground">Schritt 1 von 3</p>
-              </div>
-            )}
             {step === "personal-data" && (
               <div className="mb-6">
                 <h1 className="text-2xl font-bold mb-1">Persönliche Daten</h1>
-                <p className="text-sm text-muted-foreground">Schritt 2 von 3</p>
+                {organizationName && (
+                  <p className="text-muted-foreground mb-1">{organizationName}</p>
+                )}
               </div>
             )}
             {step === "validate" && (
@@ -607,75 +540,6 @@ function PatientFlowPage() {
               </div>
             )}
 
-            {/* Consent Step */}
-            {step === "consent" && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold">Bevor wir beginnen</h2>
-
-                {/* Card 1: Encrypted Identity Data */}
-                <div className="bg-muted/30 border rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="font-medium">Ihre Identität (verschlüsselt)</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Ihr Name und Geburtsdatum werden mit Ende-zu-Ende-Verschlüsselung geschützt.
-                        Die Daten werden bereits auf Ihrem Gerät verschlüsselt – nur Ihre Praxis kann sie entschlüsseln.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 2: Questionnaire Data */}
-                <div className="bg-muted/30 border rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <ClipboardList className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="font-medium">Ihre Fragebogen-Antworten</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Die medizinischen Angaben aus den Fragebögen werden sicher an Ihre Praxis übermittelt,
-                        um Ihr Arztgespräch vorzubereiten.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-sm text-muted-foreground text-center">
-                  Mit dem Fortfahren erklären Sie sich mit der Datenübermittlung einverstanden.
-                </p>
-
-                <div className="space-y-3">
-                  <Button
-                    onClick={() => handleConsent(true)}
-                    disabled={consentMutation.isPending}
-                    className="w-full"
-                  >
-                    {consentMutation.isPending
-                      ? "Wird übermittelt..."
-                      : "Ich stimme zu und fortfahren"}
-                  </Button>
-                  <Button
-                    onClick={() => handleConsent(false)}
-                    disabled={consentMutation.isPending}
-                    variant="ghost"
-                    className="w-full text-muted-foreground"
-                  >
-                    Ich möchte nicht teilnehmen
-                  </Button>
-                </div>
-
-                {/* CMDetect Branding Footer */}
-                <div className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <CMDetectLogo size={16} />
-                  <span>Powered by CMDetect</span>
-                </div>
-              </div>
-            )}
-
             {/* Personal Data Step */}
             {step === "personal-data" && (
               <div className="space-y-6">
@@ -694,76 +558,6 @@ function PatientFlowPage() {
                   <CMDetectLogo size={16} />
                   <span>Powered by CMDetect</span>
                 </div>
-              </div>
-            )}
-
-            {/* Declined Step */}
-            {step === "declined" && (
-              <div className="text-center py-6 space-y-6">
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 20,
-                    delay: 0.1,
-                  }}
-                >
-                  <div className="w-20 h-20 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
-                    <AlertTriangle className="w-10 h-10 text-amber-600" />
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="space-y-2"
-                >
-                  <h2 className="text-2xl font-bold text-amber-700">
-                    Einwilligung abgelehnt
-                  </h2>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="space-y-4"
-                >
-                  <p className="text-muted-foreground">
-                    Sie haben die Einwilligung zur Datenübermittlung abgelehnt.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Ohne Einwilligung können wir den Patientenfragebogen nicht fortsetzen.
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Wenn Sie Ihre Meinung ändern, können Sie über denselben Link
-                    zurückkehren und Ihre Einwilligung erteilen.
-                  </p>
-                  <Button onClick={() => setStep("consent")} variant="outline">
-                    Zurück zur Einwilligung
-                  </Button>
-                </motion.div>
-
-                {/* CMDetect Branding Footer */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground"
-                >
-                  <CMDetectLogo size={16} />
-                  <span>Powered by CMDetect</span>
-                </motion.div>
               </div>
             )}
 

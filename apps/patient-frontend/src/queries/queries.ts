@@ -14,23 +14,6 @@ export const validateInviteToken = graphql(`
   }
 `);
 
-// Submit patient consent
-export const submitPatientConsent = graphql(`
-  mutation SubmitPatientConsent(
-    $invite_token: String!
-    $consent_data: ConsentInput!
-  ) {
-    submitPatientConsent(
-      invite_token: $invite_token
-      consent_data: $consent_data
-    ) {
-      success
-      patient_consent_id
-      error
-    }
-  }
-`);
-
 // Submit encrypted patient personal data
 export const submitPatientPersonalData = graphql(`
   mutation SubmitPatientPersonalData(
@@ -77,8 +60,6 @@ export const getPatientProgress = graphql(`
   query GetPatientProgress($invite_token: String!) {
     getPatientProgress(invite_token: $invite_token) {
       valid
-      has_consent
-      consent_given
       has_personal_data
       submitted_questionnaires
       error_message

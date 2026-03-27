@@ -6,13 +6,6 @@ actions:
       forward_client_headers: true
     permissions:
       - role: public
-  - name: submitPatientConsent
-    definition:
-      kind: synchronous
-      handler: http://auth-server:3001/actions/submit-patient-consent
-      forward_client_headers: true
-    permissions:
-      - role: public
   - name: submitPatientPersonalData
     definition:
       kind: synchronous
@@ -37,12 +30,10 @@ actions:
 custom_types:
   enums: []
   input_objects:
-    - name: ConsentInput
     - name: QuestionnaireResponseInput
     - name: ValidateInviteTokenInput
     - name: PatientPersonalDataInput
   objects:
-    - name: ConsentResponse
     - name: QuestionnaireResponseResponse
     - name: ValidateInviteTokenResponse
     - name: PatientPersonalDataResponse

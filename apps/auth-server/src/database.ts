@@ -12,19 +12,9 @@ export interface PatientRecord {
   patient_data_completed_at?: Date;
 }
 
-export interface PatientConsent {
-  id: string;
-  patient_record_id: string;
-  organization_id: string;
-  consent_given: boolean;
-  consent_text: string;
-  consent_version: string;
-}
-
 export interface QuestionnaireResponse {
   id: string;
   patient_record_id: string;
-  patient_consent_id: string;
   organization_id: string;
   response_data: unknown;
 }
@@ -63,74 +53,23 @@ export class DatabaseService {
   }
 
   /**
-   * Creates or updates patient consent
-   */
-  async upsertPatientConsent(
-    patientRecordId: string,
-    organizationId: string,
-    consentGiven: boolean,
-    consentText: string,
-    consentVersion: string
-  ): Promise<string> {
-    const query = `
-      INSERT INTO patient_consent (
-        patient_record_id, organization_id, consent_given, 
-        consent_text, consent_version, consented_at
-      ) VALUES ($1, $2, $3, $4, $5, NOW()) 
-      ON CONFLICT (patient_record_id) 
-      DO UPDATE SET 
-        consent_given = EXCLUDED.consent_given,
-        consent_text = EXCLUDED.consent_text,
-        consent_version = EXCLUDED.consent_version,
-        consented_at = EXCLUDED.consented_at,
-        updated_at = NOW()
-      RETURNING id
-    `;
-
-    const result = await this.db.query(query, [
-      patientRecordId,
-      organizationId,
-      consentGiven,
-      consentText,
-      consentVersion,
-    ]);
-
-    return result.rows[0].id;
-  }
-
-  /**
-   * Retrieves patient consent by patient record ID
-   */
-  async getPatientConsentByRecordId(patientRecordId: string): Promise<{ id: string } | null> {
-    const query = `
-      SELECT id FROM patient_consent 
-      WHERE patient_record_id = $1
-    `;
-
-    const result = await this.db.query(query, [patientRecordId]);
-    return result.rows.length > 0 ? result.rows[0] : null;
-  }
-
-  /**
    * Creates a new questionnaire response
    */
   async createQuestionnaireResponse(
     patientRecordId: string,
-    patientConsentId: string,
     organizationId: string,
     responseData: unknown
   ): Promise<string> {
     const query = `
       INSERT INTO questionnaire_response (
-        patient_record_id, patient_consent_id, organization_id,
+        patient_record_id, organization_id,
         response_data, submitted_at
-      ) VALUES ($1, $2, $3, $4, NOW())
+      ) VALUES ($1, $2, $3, NOW())
       RETURNING id
     `;
 
     const result = await this.db.query(query, [
       patientRecordId,
-      patientConsentId,
       organizationId,
       responseData,
     ]);
@@ -295,8 +234,6 @@ export class DatabaseService {
    */
   async getPatientProgress(inviteToken: string): Promise<{
     valid: boolean;
-    has_consent: boolean;
-    consent_given: boolean;
     has_personal_data: boolean;
     submitted_questionnaires: string[];
     error_message?: string;
@@ -307,11 +244,8 @@ export class DatabaseService {
           pr.id as patient_record_id,
           pr.invite_expires_at,
           pr.submission_completed_at,
-          pr.patient_data_completed_at,
-          pc.id as consent_id,
-          pc.consent_given
+          pr.patient_data_completed_at
         FROM patient_record pr
-        LEFT JOIN patient_consent pc ON pr.id = pc.patient_record_id
         WHERE pr.invite_token = $1
           AND pr.deleted_at IS NULL
       `;
@@ -321,8 +255,6 @@ export class DatabaseService {
       if (result.rows.length === 0) {
         return {
           valid: false,
-          has_consent: false,
-          consent_given: false,
           has_personal_data: false,
           submitted_questionnaires: [],
           error_message: "Invalid invite link"
@@ -335,8 +267,6 @@ export class DatabaseService {
       if (new Date(row.invite_expires_at) <= new Date()) {
         return {
           valid: false,
-          has_consent: false,
-          consent_given: false,
           has_personal_data: false,
           submitted_questionnaires: [],
           error_message: "Invite link has expired"
@@ -347,8 +277,6 @@ export class DatabaseService {
       if (row.submission_completed_at) {
         return {
           valid: false,
-          has_consent: true,
-          consent_given: true,
           has_personal_data: true,
           submitted_questionnaires: [],
           error_message: "This invite has already been used. All questionnaires have been submitted."
@@ -360,8 +288,6 @@ export class DatabaseService {
 
       return {
         valid: true,
-        has_consent: !!row.consent_id,
-        consent_given: row.consent_given ?? false,
         has_personal_data: !!row.patient_data_completed_at,
         submitted_questionnaires: submittedQuestionnaires
       };
@@ -370,8 +296,6 @@ export class DatabaseService {
       console.error('Database error during progress check:', error);
       return {
         valid: false,
-        has_consent: false,
-        consent_given: false,
         has_personal_data: false,
         submitted_questionnaires: [],
         error_message: "Database error occurred"

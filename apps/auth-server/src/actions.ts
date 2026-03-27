@@ -8,7 +8,6 @@ import { ENABLED_QUESTIONNAIRES } from "@cmdetect/questionnaires";
 import { DatabaseService } from "./database.js";
 import { sendActionError, sendActionSuccess } from "./errors.js";
 import {
-  validateConsentData,
   validateInviteToken,
   validatePatientPersonalData,
   validateQuestionnaireResponseData,
@@ -30,44 +29,6 @@ export class ActionHandlers {
     const raw = await c.req.json(); // global handler catches SyntaxError → 400
     const result = HasuraBodySchema.safeParse(raw);
     return result.success ? result.data : null;
-  }
-
-  /**
-   * Handles patient consent submission
-   */
-  async submitPatientConsent(c: Context): Promise<Response> {
-    const body = await this.parseBody(c);
-    if (!body) return sendActionError(c, "Invalid request body");
-    const { invite_token, consent_data } = body.input;
-
-    // Validate invite token
-    const tokenValidation = validateInviteToken(invite_token);
-    if (!tokenValidation.valid) {
-      return sendActionError(c, tokenValidation.error ?? "Validation error");
-    }
-
-    // Validate consent data
-    const consentValidation = validateConsentData(consent_data);
-    if (!consentValidation.valid) {
-      return sendActionError(c, consentValidation.error ?? "Validation error");
-    }
-
-    // Get patient record
-    const patientRecord = await this.db.getPatientRecordByInviteToken(invite_token);
-    if (!patientRecord) {
-      return sendActionError(c, "Invalid or expired invite token");
-    }
-
-    // Upsert patient consent
-    const consentId = await this.db.upsertPatientConsent(
-      patientRecord.id,
-      patientRecord.organization_id,
-      consent_data.consent_given,
-      consent_data.consent_text,
-      consent_data.consent_version
-    );
-
-    return sendActionSuccess(c, { patient_consent_id: consentId });
   }
 
   /**
@@ -96,15 +57,6 @@ export class ActionHandlers {
       return sendActionError(c, "Invalid or expired invite token");
     }
 
-    // Check if consent exists
-    const consent = await this.db.getPatientConsentByRecordId(patientRecord.id);
-    if (!consent) {
-      return sendActionError(
-        c,
-        "No consent found for this patient record. Please submit consent first."
-      );
-    }
-
     // Build the response payload to store
     const responsePayload = {
       questionnaire_id: response_data.questionnaire_id,
@@ -116,7 +68,6 @@ export class ActionHandlers {
     // Create questionnaire response
     const responseId = await this.db.createQuestionnaireResponse(
       patientRecord.id,
-      consent.id,
       patientRecord.organization_id,
       responsePayload
     );
@@ -216,7 +167,7 @@ export class ActionHandlers {
    */
   async getPatientProgress(c: Context): Promise<Response> {
     const body = await this.parseBody(c);
-    if (!body) return c.json({ valid: false, has_consent: false, consent_given: false, has_personal_data: false, submitted_questionnaires: [], error_message: "Invalid request body" });
+    if (!body) return c.json({ valid: false, has_personal_data: false, submitted_questionnaires: [], error_message: "Invalid request body" });
     const { invite_token } = body.input;
 
     // Basic token format validation
@@ -224,8 +175,6 @@ export class ActionHandlers {
     if (!tokenValidation.valid) {
       return c.json({
         valid: false,
-        has_consent: false,
-        consent_given: false,
         has_personal_data: false,
         submitted_questionnaires: [],
         error_message: tokenValidation.error,
