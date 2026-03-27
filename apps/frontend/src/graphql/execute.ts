@@ -1,5 +1,5 @@
 import type { TypedDocumentString } from "./graphql";
-import { getJWTToken, refreshJWTToken } from "../lib/auth";
+import { getJWTToken, refreshJWTToken, handleSessionExpired } from "../lib/auth";
 
 export async function execute<TResult, TVariables>(
   query: TypedDocumentString<TResult, TVariables>,
@@ -14,9 +14,12 @@ export async function execute<TResult, TVariables>(
   // Try to get JWT token for authenticated requests
   const jwtToken = await getJWTToken();
 
-  if (jwtToken) {
-    headers["Authorization"] = `Bearer ${jwtToken}`;
+  if (!jwtToken) {
+    handleSessionExpired();
+    throw new Error("Session expired");
   }
+
+  headers["Authorization"] = `Bearer ${jwtToken}`;
 
   // Extract operation name for network tab visibility
   const operationName = String(query).match(/(?:query|mutation|subscription)\s+(\w+)/)?.[1];
@@ -36,7 +39,11 @@ export async function execute<TResult, TVariables>(
   if (response.status === 401 && !refreshed) {
     const errorBody = await response.json().catch(() => ({}));
     if (typeof errorBody?.message === "string" && errorBody.message.includes("JWTExpired")) {
-      await refreshJWTToken();
+      const newToken = await refreshJWTToken();
+      if (!newToken) {
+        handleSessionExpired();
+        throw new Error("Session expired");
+      }
       return execute(query, variables, true);
     }
     throw new Error(errorBody?.message || "Unauthorized");
@@ -51,7 +58,11 @@ export async function execute<TResult, TVariables>(
       firstError?.extensions?.code === "invalid-jwt" ||
       firstError?.message?.includes("JWTExpired");
     if (isJwtError && !refreshed) {
-      await refreshJWTToken();
+      const newToken = await refreshJWTToken();
+      if (!newToken) {
+        handleSessionExpired();
+        throw new Error("Session expired");
+      }
       return execute(query, variables, true);
     }
     throw new Error(firstError?.message || "GraphQL Error");

@@ -52,6 +52,21 @@ export const refreshJWTToken = async (): Promise<string | null> => {
   return refreshPromise;
 };
 
+let sessionExpiredRedirecting = false;
+
+/**
+ * Handle expired session by clearing auth state and redirecting to login.
+ * Deduplicated so concurrent failing requests only trigger one redirect.
+ * Uses hard navigation to clear all stale React state and module-level caches.
+ */
+export function handleSessionExpired(): void {
+  if (sessionExpiredRedirecting) return;
+  sessionExpiredRedirecting = true;
+  token = null;
+  signOut().catch(() => {});
+  window.location.href = "/login";
+}
+
 // Helper to switch user role
 export async function switchUserRole(role: string): Promise<{ success: boolean; error?: string }> {
   try {

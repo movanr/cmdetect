@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useSession } from "../../lib/auth";
+import { useSession, authClient } from "../../lib/auth";
 import { Header } from "../navigation/Header";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +13,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       navigate({ to: "/login" });
     }
   }, [session, navigate]);
+
+  // Revalidate session when tab regains focus (detects expired sessions after inactivity)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        authClient.getSession();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
   if (!session) {
     return null;
