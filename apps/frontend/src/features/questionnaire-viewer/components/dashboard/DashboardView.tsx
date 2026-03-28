@@ -191,7 +191,7 @@ export function DashboardView({
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && (
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.GCPS_1M}
-                title="GCPS - Graduierung chronischer Schmerzen"
+                title="GCS - Graduierung chronischer Schmerzen"
                 subtitle="30-Tage-Version"
                 answers={
                   gcps1mResponse

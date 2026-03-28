@@ -79,7 +79,7 @@ export function PainDrawingScoreCard({
                 <BookOpen className="h-3 w-3" />
                 Scoring-Anleitung
               </Link>
-              <p className="text-[10px] text-muted-foreground/60 leading-snug mt-0.5">
+              <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">
                 Jedes markierte Schmerzgebiet erhöht das Risiko für weitere Schmerzerkrankungen sowie für chronische Schmerzen.
               </p>
               {isWidespread && (
@@ -118,12 +118,6 @@ export function PainDrawingScoreCard({
                   })}
                 </div>
               </div>
-              {/* Risk interpretation - only shown when pain is marked */}
-              {score.regionCount >= 1 && (
-                <p className="text-[9px] text-muted-foreground mt-1">
-                  Jedes Schmerzgebiet erhöht das Risiko für weitere Schmerzerkrankungen.
-                </p>
-              )}
             </div>
 
             {/* RIGHT: Region count + expand */}

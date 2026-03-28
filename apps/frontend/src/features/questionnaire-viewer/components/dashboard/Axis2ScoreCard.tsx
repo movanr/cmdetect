@@ -27,7 +27,8 @@ import {
   QUESTIONNAIRE_ID,
 } from "@cmdetect/questionnaires";
 import { Link } from "@tanstack/react-router";
-import { BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
@@ -299,7 +300,7 @@ function HorizontalScoreLayout({
               </Link>
             )}
             {description && (
-              <div className="text-[10px] text-muted-foreground/60 leading-snug mt-0.5">
+              <div className="text-[10px] text-muted-foreground leading-snug mt-0.5">
                 {description}
               </div>
             )}
@@ -482,69 +483,70 @@ export function Axis2ScoreCard({
         scaleBar={
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">
-                CSI <span className="font-semibold text-foreground">{gcpsScore.cpi}</span>
-                <span className="text-muted-foreground/50">/100</span>
+              <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <span>
+                  CSI (Charakteristische Schmerzintensität){" "}
+                  <span className="font-semibold text-foreground">{gcpsScore.cpi}</span>
+                  <span className="text-muted-foreground/50">/100</span>
+                </span>
+                <Popover>
+                  <PopoverTrigger
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                  >
+                    <Info className="h-3 w-3" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto text-[11px] text-muted-foreground p-3">
+                    <div className="flex items-center gap-0.5">
+                      <span>CSI =</span>
+                      <span className="inline-flex flex-col items-center leading-[1.1]">
+                        <span>Frage 2 + 3 + 4</span>
+                        <span className="border-t border-current w-full text-center">3</span>
+                      </span>
+                      <span>× 10</span>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </p>
               <ScaleBar segments={[...GCPS_CSI_SEGMENTS]} activeIndex={activeCsiIndex} />
-              <div className="text-[10px] text-muted-foreground/60 mt-1 flex items-center gap-0.5">
-                <span>CSI =</span>
-                <span className="inline-flex flex-col items-center leading-[1.1]">
-                  <span>Frage 2 + 3 + 4</span>
-                  <span className="border-t border-current w-full text-center">3</span>
-                </span>
-                <span>× 10</span>
-              </div>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">
-                BP Gesamt{" "}
-                <span className="font-semibold text-foreground">
-                  {gcpsScore.totalDisabilityPoints}
+              <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <span>
+                  BP (Beeinträchtigungspunkte){" "}
+                  <span className="font-semibold text-foreground">
+                    {gcpsScore.totalDisabilityPoints}
+                  </span>
+                  <span className="text-muted-foreground/50">/6</span>
                 </span>
-                <span className="text-muted-foreground/50">/6</span>
+                <Popover>
+                  <PopoverTrigger
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                  >
+                    <Info className="h-3 w-3" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto text-[11px] text-muted-foreground p-3 space-y-1">
+                    <div>BP Gesamt = BP subj. Beeinträchtigung + BP Beeinträchtigungstage</div>
+                    <div className="flex items-center gap-0.5">
+                      <span>BP subj. Beeinträchtigung =</span>
+                      <span className="inline-flex flex-col items-center leading-[1.1]">
+                        <span>Frage 6 + 7 + 8</span>
+                        <span className="border-t border-current w-full text-center">3</span>
+                      </span>
+                      <span>× 10</span>
+                    </div>
+                    <div>
+                      BP Beeinträchtigungstage = BP aus Frage 5 (0–1 → 0, 2 → 1, 3–5 → 2, ≥6 → 3 BP)
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </p>
               <ScaleBar segments={[...GCPS_BP_SEGMENTS]} activeIndex={activeBpIndex} />
-              <div className="text-[10px] text-muted-foreground/60 mt-1 space-y-0.5">
-                <div>BP Gesamt = BP subj. Beeinträchtigung + BP Beeinträchtigungstage</div>
-                <div className="flex items-center gap-0.5 text-muted-foreground/40">
-                  <span>BP subj. Beeinträchtigung =</span>
-                  <span className="inline-flex flex-col items-center leading-[1.1]">
-                    <span>Frage 6 + 7 + 8</span>
-                    <span className="border-t border-current w-full text-center">3</span>
-                  </span>
-                  <span>× 10</span>
-                </div>
-                <div className="text-muted-foreground/40">
-                  BP Beeinträchtigungstage = BP aus Frage 5 (0–1 → 0 BP, 2 → 1 BP, 3–5 → 2 BP, ≥6 →
-                  3 BP)
-                </div>
-              </div>
             </div>
           </div>
         }
-        scoreDisplay={
-          <div className="text-left space-y-1">
-            <div>
-              <div className="text-base font-bold leading-tight">
-                {gcpsScore.cpi}
-                <span className="text-sm text-muted-foreground font-normal">/100</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground leading-tight">
-                CSI (Charakteristische Schmerzintensität)
-              </div>
-            </div>
-            <div>
-              <div className="text-base font-bold leading-tight">
-                {gcpsScore.totalDisabilityPoints}
-                <span className="text-sm text-muted-foreground font-normal">/6</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground leading-tight">
-                BP (Beeinträchtigungspunkte)
-              </div>
-            </div>
-          </div>
-        }
+        scoreDisplay={<></>}
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded(!isExpanded)}
         expandedContent={<GCPSAnswersTable answers={answers as GCPS1MAnswers} showPips />}

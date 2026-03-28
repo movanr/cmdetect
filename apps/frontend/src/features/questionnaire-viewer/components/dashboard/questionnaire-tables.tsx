@@ -118,7 +118,7 @@ export function ScoresOverviewTable({ responses }: { responses: QuestionnaireRes
   if (gcps && Object.keys(gcps.answers).length > 0) {
     const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
     rows.push({
-      instrument: "GCPS-1M",
+      instrument: "GCS",
       score: `CSI ${s.cpi}, ${s.totalDisabilityPoints} BP`,
     });
   }

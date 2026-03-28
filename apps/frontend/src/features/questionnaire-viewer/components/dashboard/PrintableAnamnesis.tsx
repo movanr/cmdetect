@@ -153,7 +153,7 @@ export function PrintableAnamnesis({
       {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && hasAnswers(gcps1mResponse) && (
         <section className="mb-6 print:break-inside-avoid">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            GCPS-1M — Graduierung chronischer Schmerzen
+            GCS — Graduierung chronischer Schmerzen
           </h2>
           <GCPSAnswersTable answers={gcps1mResponse?.answers as GCPS1MAnswers} />
         </section>

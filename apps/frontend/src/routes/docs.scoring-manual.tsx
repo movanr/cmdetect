@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
   { id: "tmd-pain-screener", label: "TMD Pain Screener", indent: true },
   { id: "dctmd-symptom-questionnaire", label: "Symptom Questionnaire (SQ)", indent: true },
   { id: "pain-drawing", label: "Pain Drawing", indent: true },
-  { id: "gcps-graded-chronic-pain-scale", label: "GCPS", indent: true },
+  { id: "gcps-graded-chronic-pain-scale", label: "GCS", indent: true },
   { id: "jfls-jaw-functional-limitation-scale", label: "JFLS", indent: true },
   { id: "phq-9-depression", label: "PHQ-9 Depression", indent: true },
   { id: "gad-7-anxiety", label: "GAD-7 Anxiety", indent: true },
