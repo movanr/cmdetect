@@ -11,7 +11,19 @@
 import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import {
+  calculateGCPS1MScore,
+  calculateJFLS8Score,
+  calculateJFLS20Score,
+  calculateOBCScore,
+  calculatePHQ4Score,
+  JFLS20_SUBSCALE_LABELS,
+  QUESTIONNAIRE_ID,
+  type GCPS1MAnswers,
+  type JFLS8Answers,
+  type JFLS20Answers,
+  type OBCAnswers,
+} from "@cmdetect/questionnaires";
 import { execute } from "@/graphql/execute";
 import { formatDate } from "@/lib/date-utils";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
@@ -21,7 +33,8 @@ import { mapToCriteriaData } from "../features/evaluation/utils/map-to-criteria-
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import type { FormValues } from "../features/examination";
 import { PrintableBefundbericht } from "../features/evaluation/components/PrintableBefundbericht";
-import { Printer } from "lucide-react";
+import { downloadBefundberichtDocx } from "../features/evaluation/utils/generate-befundbericht-docx";
+import { FileText, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
@@ -102,6 +115,68 @@ function ReportSubPage() {
     }));
   }, [evalData]);
 
+  // Compute questionnaire scores for DOCX Achse 2 section
+  const questionnaireScores = useMemo(() => {
+    if (!responses) return [];
+    const scores: { instrument: string; score: string }[] = [];
+
+    const gcps = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
+    if (gcps && Object.keys(gcps.answers).length > 0) {
+      const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
+      scores.push({ instrument: "GCS", score: `CSI ${s.cpi}, ${s.totalDisabilityPoints} BP` });
+    }
+
+    const phq4 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
+    if (phq4 && Object.keys(phq4.answers).length > 0) {
+      const s = calculatePHQ4Score(phq4.answers as Record<string, string>);
+      scores.push({ instrument: "PHQ-4", score: `${s.total} / ${s.maxTotal}` });
+    }
+
+    const jfls8 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
+    if (jfls8 && Object.keys(jfls8.answers).length > 0) {
+      const s = calculateJFLS8Score(jfls8.answers as JFLS8Answers);
+      scores.push({
+        instrument: "JFLS-8",
+        score:
+          s.isValid && s.globalScore !== null
+            ? `${s.globalScore.toFixed(2)} / ${s.maxScore}`
+            : `Ungültig (${s.missingCount} fehlend)`,
+      });
+    }
+
+    const jfls20 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20);
+    if (jfls20 && Object.keys(jfls20.answers).length > 0) {
+      const s = calculateJFLS20Score(jfls20.answers as JFLS20Answers);
+      let subscaleStr = "";
+      if (s.isValid) {
+        const parts = (["mastication", "mobility", "communication"] as const)
+          .map((k) => {
+            const sub = s.subscales[k];
+            return sub.isValid && sub.score !== null
+              ? `${JFLS20_SUBSCALE_LABELS[k].label} ${sub.score.toFixed(1)}`
+              : null;
+          })
+          .filter(Boolean);
+        subscaleStr = parts.length > 0 ? ` (${parts.join(", ")})` : "";
+      }
+      scores.push({
+        instrument: "JFLS-20",
+        score:
+          s.isValid && s.globalScore !== null
+            ? `${s.globalScore.toFixed(2)} / ${s.maxScore}${subscaleStr}`
+            : `Ungültig (${s.missingCount} fehlend)`,
+      });
+    }
+
+    const obc = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.OBC);
+    if (obc && Object.keys(obc.answers).length > 0) {
+      const s = calculateOBCScore(obc.answers as OBCAnswers);
+      scores.push({ instrument: "OBC", score: `${s.totalScore} / ${s.maxScore}` });
+    }
+
+    return scores;
+  }, [responses]);
+
   // Set PDF filename for browser print dialog
   const pdfTitle = patientName
     ? formatFilename(
@@ -147,12 +222,42 @@ function ReportSubPage() {
     });
   };
 
+  // ── DOCX download handler ────────────────────────────────────────
+
+  const handleDocxDownload = () => {
+    const filename = patientName
+      ? formatFilename("Befundbericht", patientName, examinationDate ?? formatDate(new Date()))
+      : formatFilename("Befundbericht", record?.clinic_internal_id ?? id);
+
+    downloadBefundberichtDocx(
+      {
+        patientName,
+        patientDob,
+        clinicInternalId: record?.clinic_internal_id ?? undefined,
+        examinationDate,
+        criteriaData,
+        confirmedDiagnoses,
+        questionnaireScores,
+      },
+      filename,
+    );
+  };
+
   // ── Render ─────────────────────────────────────────────────────────
 
   return (
     <>
-      {/* Print button — hidden in print */}
-      <div className="print:hidden flex justify-end mb-4">
+      {/* Export buttons — hidden in print */}
+      <div className="print:hidden flex justify-end gap-2 mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDocxDownload}
+          className="gap-1.5"
+        >
+          <FileText className="size-4" />
+          DOCX
+        </Button>
         <Button
           variant="outline"
           size="sm"
@@ -171,6 +276,7 @@ function ReportSubPage() {
         examinationDate={examinationDate}
         criteriaData={criteriaData}
         confirmedDiagnoses={confirmedDiagnoses}
+        questionnaireScores={questionnaireScores}
       />
     </>
   );

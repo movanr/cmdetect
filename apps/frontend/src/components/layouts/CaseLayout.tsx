@@ -146,13 +146,15 @@ export function CaseLayout({
   );
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <Header />
+    <div className="flex flex-col h-screen bg-background print:h-auto">
+      {/* Header — hidden in print */}
+      <div className="print:hidden">
+        <Header />
+      </div>
 
-      {/* Patient info top bar */}
+      {/* Patient info top bar — hidden in print */}
       {hasPatientInfo && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b bg-muted/40 px-4 py-2 xl:px-6 shrink-0">
+        <div className="print:hidden flex flex-wrap items-center gap-x-4 gap-y-1 border-b bg-muted/40 px-4 py-2 xl:px-6 shrink-0">
           {patientInternalId && (
             <div className="flex items-center gap-1.5 text-sm min-w-0">
               <span className="text-muted-foreground shrink-0">{t.caseSteps.patientIdLabel}:</span>
@@ -184,8 +186,8 @@ export function CaseLayout({
         </div>
       )}
 
-      {/* Horizontal step nav — mobile/tablet only (< xl) */}
-      <div className="xl:hidden border-b bg-background shrink-0">
+      {/* Horizontal step nav — mobile/tablet only (< xl), hidden in print */}
+      <div className="xl:hidden border-b bg-background shrink-0 print:hidden">
         <nav className="flex" aria-label="Schritte">
           {steps.map((step) => {
             const completed = isStepCompleted(step.id);
@@ -246,14 +248,14 @@ export function CaseLayout({
 
       {/* Content area */}
       <div className="flex flex-1 min-h-0">
-        {/* Static sidebar — desktop only (xl+) */}
-        <aside className="hidden xl:block w-56 border-r bg-background flex-shrink-0 overflow-y-auto">
+        {/* Static sidebar — desktop only (xl+), hidden in print */}
+        <aside className="hidden xl:block print:!hidden w-56 border-r bg-background flex-shrink-0 overflow-y-auto">
           {sidebarContent}
         </aside>
 
         {/* Main content */}
-        <main id="main-scroll-container" className="flex-1 overflow-auto">
-          <div className="px-4 py-6 xl:px-8 xl:py-8">{children}</div>
+        <main id="main-scroll-container" className="flex-1 overflow-auto print:overflow-visible">
+          <div className="px-4 py-6 xl:px-8 xl:py-8 print:p-0">{children}</div>
         </main>
       </div>
     </div>

@@ -132,12 +132,12 @@ function DocumentationLayout() {
       isDecrypting={isDecrypting}
     >
       <div className="space-y-4">
-        {/* Sub-step navigation tabs */}
+        {/* Sub-step navigation tabs — hidden in print */}
         <SubStepTabs
           caseId={id}
           parentStep="documentation"
           subSteps={subSteps}
-          className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6"
+          className="rounded-t-lg -mx-4 lg:-mx-8 -mt-6 lg:-mt-8 mb-6 print:hidden"
         />
 
         {/* Child route content */}

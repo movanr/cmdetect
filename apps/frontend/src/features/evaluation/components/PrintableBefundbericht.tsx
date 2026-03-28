@@ -10,15 +10,19 @@
  * Follows the same print styling patterns as PrintableExamination.
  */
 
-import { E3_OPENING_PATTERNS, JOINT_SOUND_LABELS, MOVEMENT_TYPE_LABELS, OPENING_TYPE_LABELS, type DiagnosisId, type PalpationSite } from "@cmdetect/dc-tmd";
 import {
   ALL_DIAGNOSES,
+  E3_OPENING_PATTERNS,
+  JOINT_SOUND_LABELS,
+  MOVEMENT_TYPE_LABELS,
+  OPENING_TYPE_LABELS,
   PALPATION_SITES,
   REGIONS,
-  SIDE_KEYS,
   extractClinicalFindings,
   generateAnamnesisText,
   getValueAtPath as get,
+  type DiagnosisId,
+  type PalpationSite,
   type Region,
   type Side,
   type SignFinding,
@@ -37,6 +41,11 @@ interface ConfirmedDiagnosis {
   site: PalpationSite | null;
 }
 
+interface QuestionnaireScore {
+  instrument: string;
+  score: string;
+}
+
 interface PrintableBefundberichtProps {
   patientName?: string;
   patientDob?: string;
@@ -45,6 +54,7 @@ interface PrintableBefundberichtProps {
   examinerName?: string;
   criteriaData: unknown;
   confirmedDiagnoses: ConfirmedDiagnosis[];
+  questionnaireScores?: QuestionnaireScore[];
 }
 
 // ============================================================================
@@ -55,57 +65,10 @@ function sideLabel(side: Side): string {
   return side === "left" ? "links" : "rechts";
 }
 
-/** Human-readable region group heading */
-function regionGroupHeading(region: Region, side: Side): string {
-  if (region === "tmj") return `Kiefergelenk ${sideLabel(side)}`;
-  return `${REGIONS[region]} ${sideLabel(side)}`;
-}
-
-// ============================================================================
-// COLLAPSING LOGIC
-// ============================================================================
-
-interface CollapsedFinding {
-  label: string;
-  side: Side;
-  region?: Region;
-}
-
-const PAIN_DOMAINS: SymptomDomain[] = [
-  "painLocation",
-  "familiarPainPalpation",
-  "familiarPainOpening",
-  "familiarPainMovement",
-];
-
-const HEADACHE_DOMAINS: SymptomDomain[] = [
-  "headacheLocation",
-  "familiarHeadachePalpation",
-  "familiarHeadacheOpening",
-  "familiarHeadacheMovement",
-];
-
-function collapseByLocation(
-  symptoms: SymptomFinding[],
-  domains: SymptomDomain[],
-  prefix: string
-): CollapsedFinding[] {
-  const domainSet = new Set(domains);
-  const matched = symptoms.filter((s) => domainSet.has(s.domain));
-
-  const groups = new Map<string, CollapsedFinding>();
-  for (const s of matched) {
-    const key = `${s.region ?? "none"}-${s.side}`;
-    if (!groups.has(key)) {
-      groups.set(key, {
-        label: prefix,
-        side: s.side,
-        region: s.region,
-      });
-    }
-  }
-
-  return [...groups.values()];
+function locationSuffix(region: Region | undefined, side: Side): string {
+  if (!region) return `(${sideLabel(side)})`;
+  const regionName = region === "tmj" ? "Kiefergelenk" : REGIONS[region];
+  return `(${regionName}, ${sideLabel(side)})`;
 }
 
 // ============================================================================
@@ -130,10 +93,10 @@ function extractJointSoundDetails(
       // Determine which movements had click
       const movements: string[] = [];
       if (get(criteriaData, `e6.${s.side}.click.examinerOpen`) === "yes") {
-        movements.push("Öffnung");
+        movements.push("Öffnen");
       }
       if (get(criteriaData, `e6.${s.side}.click.examinerClose`) === "yes") {
-        movements.push("Schließung");
+        movements.push("Schließen");
       }
       if (get(criteriaData, `e7.${s.side}.click.examiner`) === "yes") {
         movements.push("Lateralbewegung/Protrusion");
@@ -141,7 +104,7 @@ function extractJointSoundDetails(
       results.push({
         type: "click",
         label: JOINT_SOUND_LABELS.click,
-        detail: movements.length > 0 ? `bei ${movements.join(", ")}` : undefined,
+        detail: movements.length > 0 ? `beim ${movements.join(", ")}` : undefined,
         side: s.side,
       });
     } else if (s.domain === "tmjCrepitus") {
@@ -158,7 +121,7 @@ function extractJointSoundDetails(
       results.push({
         type: "crepitus",
         label: JOINT_SOUND_LABELS.crepitus,
-        detail: movements.length > 0 ? `bei ${movements.join(", ")}` : undefined,
+        detail: movements.length > 0 ? `beim ${movements.join(", ")}` : undefined,
         side: s.side,
       });
     } else if (s.domain === "closedLocking") {
@@ -229,74 +192,7 @@ function formatMeasurements(signs: SignFinding[]): FormattedMeasurement[] {
 }
 
 // ============================================================================
-// REGION-GROUPED FINDINGS
-// ============================================================================
-
-/** All findings for a single (region, side) location */
-interface LocationGroup {
-  region: Region;
-  side: Side;
-  painFindings: string[];
-  headacheFindings: string[];
-  examSigns: string[];
-}
-
-/** Group pain/headache/exam findings by (region, side) */
-function groupFindingsByLocation(
-  painFindings: CollapsedFinding[],
-  headacheFindings: CollapsedFinding[],
-  examSigns: SignFinding[]
-): LocationGroup[] {
-  const groupMap = new Map<string, LocationGroup>();
-
-  function ensureGroup(region: Region, side: Side): LocationGroup {
-    const key = `${region}-${side}`;
-    if (!groupMap.has(key)) {
-      groupMap.set(key, {
-        region,
-        side,
-        painFindings: [],
-        headacheFindings: [],
-        examSigns: [],
-      });
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return groupMap.get(key)!;
-  }
-
-  for (const f of painFindings) {
-    if (f.region) {
-      ensureGroup(f.region, f.side).painFindings.push(f.label);
-    }
-  }
-
-  for (const f of headacheFindings) {
-    if (f.region) {
-      ensureGroup(f.region, f.side).headacheFindings.push(f.label);
-    }
-  }
-
-  // E9 + E6 exam-only signs grouped by region
-  for (const sign of examSigns.filter((s) => s.section === "e9" || s.section === "e6")) {
-    if (sign.side && sign.region) {
-      ensureGroup(sign.region, sign.side).examSigns.push(sign.label);
-    }
-  }
-
-  // Sort: tmj first, then temporalis, then masseter — right before left
-  const regionOrder: Region[] = ["tmj", "temporalis", "masseter", "otherMast", "nonMast"];
-  const sideOrder: Side[] = ["right", "left"];
-
-  return [...groupMap.values()].sort((a, b) => {
-    const rA = regionOrder.indexOf(a.region);
-    const rB = regionOrder.indexOf(b.region);
-    if (rA !== rB) return rA - rB;
-    return sideOrder.indexOf(a.side) - sideOrder.indexOf(b.side);
-  });
-}
-
-// ============================================================================
-// GROUPED DIAGNOSES
+// TYPES
 // ============================================================================
 
 interface DiagnosisWithLabel extends ConfirmedDiagnosis {
@@ -304,63 +200,49 @@ interface DiagnosisWithLabel extends ConfirmedDiagnosis {
   siteLabel: string | null;
 }
 
-interface DiagnosisLocationGroup {
-  heading: string;
-  diagnoses: DiagnosisWithLabel[];
+// ============================================================================
+// FLAT FINDING FORMATTERS
+// ============================================================================
+
+const PAIN_EXAM_DOMAINS: SymptomDomain[] = [
+  "familiarPainPalpation",
+  "familiarPainOpening",
+  "familiarPainMovement",
+];
+
+const HEADACHE_EXAM_DOMAINS: SymptomDomain[] = [
+  "familiarHeadachePalpation",
+  "familiarHeadacheOpening",
+  "familiarHeadacheMovement",
+];
+
+function formatSymptomLines(symptoms: SymptomFinding[]): string[] {
+  const painDomains = new Set<SymptomDomain>(PAIN_EXAM_DOMAINS);
+  const headacheDomains = new Set<SymptomDomain>(HEADACHE_EXAM_DOMAINS);
+
+  const seen = new Set<string>();
+  const lines: string[] = [];
+
+  for (const s of symptoms) {
+    let prefix: string | null = null;
+    if (painDomains.has(s.domain)) prefix = "Bekannter Schmerz";
+    else if (headacheDomains.has(s.domain)) prefix = "Bekannter Kopfschmerz";
+    if (!prefix) continue;
+
+    const key = `${prefix}-${s.region ?? "none"}-${s.side}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    lines.push(`${prefix} ${locationSuffix(s.region, s.side)}`);
+  }
+  return lines;
 }
 
-function groupDiagnosesByLocation(diagnoses: DiagnosisWithLabel[]): DiagnosisLocationGroup[] {
-  const groupMap = new Map<string, DiagnosisLocationGroup>();
-
-  for (const d of diagnoses) {
-    const key = `${d.region}-${d.side}`;
-    if (!groupMap.has(key)) {
-      groupMap.set(key, {
-        heading: regionGroupHeading(d.region, d.side),
-        diagnoses: [],
-      });
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    groupMap.get(key)!.diagnoses.push(d);
-  }
-
-  // Sort: tmj first, then temporalis, then masseter — right before left
-  const regionOrder: Region[] = ["tmj", "temporalis", "masseter", "otherMast", "nonMast"];
-  const sideOrder: Side[] = ["right", "left"];
-
-  return [...groupMap.values()].sort((a, b) => {
-    const dA = a.diagnoses[0];
-    const dB = b.diagnoses[0];
-    const rA = regionOrder.indexOf(dA.region);
-    const rB = regionOrder.indexOf(dB.region);
-    if (rA !== rB) return rA - rB;
-    return sideOrder.indexOf(dA.side) - sideOrder.indexOf(dB.side);
+function formatJointSoundLines(sounds: JointSoundFinding[]): string[] {
+  return sounds.map((f) => {
+    const detail = f.detail ? ` ${f.detail}` : "";
+    return `${f.label} (${sideLabel(f.side)})${detail}`;
   });
-}
-
-// ============================================================================
-// JOINT SOUNDS GROUPED BY SIDE
-// ============================================================================
-
-interface JointSoundSideGroup {
-  heading: string;
-  findings: JointSoundFinding[];
-}
-
-function groupJointSoundsBySide(sounds: JointSoundFinding[]): JointSoundSideGroup[] {
-  const groups: JointSoundSideGroup[] = [];
-
-  for (const side of SIDE_KEYS) {
-    const sideSounds = sounds.filter((s) => s.side === side);
-    if (sideSounds.length > 0) {
-      groups.push({
-        heading: `Kiefergelenk ${sideLabel(side)}`,
-        findings: sideSounds,
-      });
-    }
-  }
-
-  return groups;
 }
 
 // ============================================================================
@@ -375,6 +257,7 @@ export function PrintableBefundbericht({
   examinerName,
   criteriaData,
   confirmedDiagnoses,
+  questionnaireScores,
 }: PrintableBefundberichtProps) {
   const exportDate = new Date().toLocaleDateString("de-DE", {
     day: "2-digit",
@@ -387,14 +270,14 @@ export function PrintableBefundbericht({
 
   // Extract clinical findings
   const findings = extractClinicalFindings(criteriaData);
-  const painFindings = collapseByLocation(findings.symptoms, PAIN_DOMAINS, "Schmerz");
-  const headacheFindings = collapseByLocation(findings.symptoms, HEADACHE_DOMAINS, "Kopfschmerz");
   const jointSounds = extractJointSoundDetails(findings.symptoms, criteriaData);
-  const jointSoundGroups = groupJointSoundsBySide(jointSounds);
   const measurements = formatMeasurements(findings.signs);
-  const locationGroups = groupFindingsByLocation(painFindings, headacheFindings, findings.signs);
 
-  // Resolve diagnosis German labels and group
+  // Flat finding lines with location suffix (same as DOCX)
+  const symptomLines = formatSymptomLines(findings.symptoms);
+  const jointSoundLines = formatJointSoundLines(jointSounds);
+
+  // Resolve diagnosis German labels (flat, no grouping)
   const diagnosesWithLabels: DiagnosisWithLabel[] = confirmedDiagnoses.map((d) => {
     const def = ALL_DIAGNOSES.find((diag) => diag.id === d.diagnosisId);
     return {
@@ -403,9 +286,6 @@ export function PrintableBefundbericht({
       siteLabel: d.site ? PALPATION_SITES[d.site] : null,
     };
   });
-  const diagnosisGroups = groupDiagnosesByLocation(diagnosesWithLabels);
-
-  const hasLocationFindings = locationGroups.length > 0;
 
   return (
     <div className="max-w-[210mm] mx-auto px-8 py-6 bg-white text-black print:p-0 print:max-w-none">
@@ -454,10 +334,32 @@ export function PrintableBefundbericht({
         </div>
       </div>
 
-      {/* ── Anamnese ──────────────────────────────────────── */}
+      {/* ── Diagnosen (first, flat list) ───────────────── */}
+      {diagnosesWithLabels.length > 0 && (
+        <section className="mb-5 print:break-inside-avoid">
+          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
+            Aktuelle Diagnosen (DC/TMD)
+          </h2>
+          <div className="text-sm space-y-0.5">
+            {diagnosesWithLabels.map((d, i) => (
+              <p key={i}>
+                {d.label}{" "}
+                <span className="text-gray-500">
+                  ({d.siteLabel ? `${d.siteLabel}, ` : ""}
+                  {d.region === "tmj" ? "Kiefergelenk" : REGIONS[d.region]}, {sideLabel(d.side)})
+                </span>
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Anamnese (Achse I) ───────────────────────────── */}
       {anamnesisParagraphs.length > 0 && (
         <section className="mb-5 print:break-inside-avoid">
-          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">Anamnese</h2>
+          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
+            Anamnese (DC/TMD Achse I)
+          </h2>
           <div className="space-y-1.5 text-sm leading-relaxed">
             {anamnesisParagraphs.map((p, i) => (
               <p key={i}>{p}</p>
@@ -466,109 +368,51 @@ export function PrintableBefundbericht({
         </section>
       )}
 
-      {/* ── Klinischer Befund ─────────────────────────────── */}
+      {/* ── Fragebogeninstrumente (Achse II) ──────────────── */}
+      {questionnaireScores && questionnaireScores.length > 0 && (
+        <section className="mb-5 print:break-inside-avoid">
+          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
+            Fragebogeninstrumente (DC/TMD Achse II)
+          </h2>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-0.5 text-sm">
+            {questionnaireScores.map((qs, i) => (
+              <ScoreRow key={i} instrument={qs.instrument} score={qs.score} />
+            ))}
+          </dl>
+        </section>
+      )}
+
+      {/* ── DC/TMD-Untersuchung (flat) ────────────────── */}
       <section className="mb-5">
         <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
-          Klinischer Befund
+          DC/TMD-Untersuchung
         </h2>
 
-        {/* Mundöffnung und Kieferbewegungen */}
+        {/* Measurements */}
         {measurements.length > 0 && (
-          <div className="mb-3 print:break-inside-avoid">
-            <h3 className="text-sm font-semibold mb-1">Mundöffnung und Kieferbewegungen</h3>
-            <dl className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-0.5 text-sm">
-              {measurements.map((m, i) => (
-                <MeasurementRow key={i} label={m.label} value={m.value} />
-              ))}
-            </dl>
+          <dl className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-0.5 text-sm mb-3">
+            {measurements.map((m, i) => (
+              <MeasurementRow key={i} label={m.label} value={m.value} />
+            ))}
+          </dl>
+        )}
+
+        {/* Findings as flat text lines with location suffix */}
+        {(symptomLines.length > 0 || jointSoundLines.length > 0) && (
+          <div className="text-sm space-y-0.5">
+            {symptomLines.map((line, i) => (
+              <p key={`s-${i}`}>{line}</p>
+            ))}
+            {jointSoundLines.map((line, i) => (
+              <p key={`j-${i}`}>{line}</p>
+            ))}
           </div>
         )}
 
-        {/* Gelenkgeräusche — grouped by side with movement detail */}
-        {jointSoundGroups.length > 0 && (
-          <div className="mb-3 print:break-inside-avoid">
-            <h3 className="text-sm font-semibold mb-1">Gelenkgeräusche und Gelenkbefunde</h3>
-            <div className="space-y-1.5">
-              {jointSoundGroups.map((group, gi) => (
-                <div key={gi}>
-                  <h4 className="text-xs font-medium text-gray-500">{group.heading}</h4>
-                  <ul className="text-sm space-y-0.5">
-                    {group.findings.map((f, fi) => (
-                      <li key={fi} className="ml-4 list-disc">
-                        {f.label}
-                        {f.detail && <span className="text-gray-500"> ({f.detail})</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Schmerzlokalisation und Palpationsbefunde — grouped by region */}
-        {hasLocationFindings && (
-          <div className="mb-3 print:break-inside-avoid">
-            <h3 className="text-sm font-semibold mb-1">
-              Schmerzlokalisation und Palpationsbefunde
-            </h3>
-            <div className="space-y-1.5">
-              {locationGroups.map((group, gi) => (
-                <div key={gi}>
-                  <h4 className="text-xs font-medium text-gray-500">
-                    {regionGroupHeading(group.region, group.side)}
-                  </h4>
-                  <ul className="text-sm space-y-0.5">
-                    {group.painFindings.map((f, fi) => (
-                      <li key={`p-${fi}`} className="ml-4 list-disc">
-                        {f}
-                      </li>
-                    ))}
-                    {group.headacheFindings.map((f, fi) => (
-                      <li key={`h-${fi}`} className="ml-4 list-disc">
-                        {f}
-                      </li>
-                    ))}
-                    {group.examSigns.map((s, si) => (
-                      <li key={`s-${si}`} className="ml-4 list-disc text-gray-600">
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {!hasLocationFindings && measurements.length === 0 && jointSoundGroups.length === 0 && (
+        {measurements.length === 0 && symptomLines.length === 0 && jointSoundLines.length === 0 && (
           <p className="text-sm text-gray-500 italic">Keine klinischen Befunde vorhanden.</p>
         )}
       </section>
-
-      {/* ── Diagnosen — grouped by location ───────────────── */}
-      {diagnosisGroups.length > 0 && (
-        <section className="mb-5 print:break-inside-avoid">
-          <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">Diagnosen</h2>
-          <div className="space-y-2">
-            {diagnosisGroups.map((group, gi) => (
-              <div key={gi}>
-                <h3 className="text-xs font-medium text-gray-500">{group.heading}</h3>
-                <ul className="text-sm space-y-0.5">
-                  {group.diagnoses.map((d, di) => (
-                    <li key={di} className="ml-4 list-disc">
-                      <span className="font-medium">{d.label}</span>
-                      {d.siteLabel && (
-                        <span className="text-gray-500"> ({d.siteLabel})</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* ── Footer ────────────────────────────────────────── */}
       <footer className="border-t border-gray-300 pt-2 mt-6 text-xs text-gray-400">
@@ -587,6 +431,15 @@ function MeasurementRow({ label, value }: { label: string; value: string }) {
     <>
       <dt className="text-gray-600">{label}</dt>
       <dd className="font-medium text-right">{value}</dd>
+    </>
+  );
+}
+
+function ScoreRow({ instrument, score }: { instrument: string; score: string }) {
+  return (
+    <>
+      <dt className="text-gray-600">{instrument}</dt>
+      <dd>{score}</dd>
     </>
   );
 }
