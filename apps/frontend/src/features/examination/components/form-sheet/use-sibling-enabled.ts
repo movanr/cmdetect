@@ -5,7 +5,7 @@
  * but takes path + condition directly rather than requiring a QuestionInstance.
  */
 
-import { useFormContext } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 
 /**
  * Returns true if the sibling field matches the expected value.
@@ -15,7 +15,7 @@ import { useFormContext } from "react-hook-form";
  * @param equals - Value the sibling must equal for this field to be enabled, e.g. "yes"
  */
 export function useSiblingEnabled(fieldPath: string, sibling: string, equals: unknown): boolean {
-  const { watch } = useFormContext();
   const siblingPath = fieldPath.replace(/\.[^.]+$/, `.${sibling}`);
-  return watch(siblingPath) === equals;
+  const siblingValue = useWatch({ name: siblingPath });
+  return siblingValue === equals;
 }

@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useFormSheet } from "../use-form-sheet";
 
 interface FsYesNoProps {
@@ -7,9 +7,9 @@ interface FsYesNoProps {
 }
 
 export function FsYesNo({ name, disabled }: FsYesNoProps) {
-  const { watch, setValue } = useFormContext();
+  const { setValue } = useFormContext();
   const { readOnly } = useFormSheet();
-  const value: "yes" | "no" | null = watch(name);
+  const value = useWatch({ name }) as "yes" | "no" | null;
   const inactive = readOnly || disabled;
 
   const set = (v: "yes" | "no") => {

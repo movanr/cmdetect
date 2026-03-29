@@ -12,7 +12,7 @@ import { E8_LOCKING_TYPE_DESCRIPTIONS } from "@cmdetect/dc-tmd";
 import type { Side } from "../../../model/regions";
 import { FsYesNo } from "../primitives/FsYesNo";
 import { useFormSheet } from "../use-form-sheet";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 const DISPLAY_SIDES: Side[] = ["right", "left"];
 const LOCKING_TYPES = ["closedLocking", "openLocking"] as const;
@@ -77,11 +77,11 @@ function ReductionNJ({
   lockingType: "closedLocking" | "openLocking";
   option: "patient" | "examiner";
 }) {
-  const { watch, setValue } = useFormContext();
+  const { setValue } = useFormContext();
   const { readOnly } = useFormSheet();
   const basePath = `e8.${side}.${lockingType}`;
-  const locking = watch(`${basePath}.locking`);
-  const reduction = watch(`${basePath}.reduction`);
+  const locking = useWatch({ name: `${basePath}.locking` }) as string | null;
+  const reduction = useWatch({ name: `${basePath}.reduction` }) as string | null;
 
   // Only show values when locking is "yes"
   const value: "yes" | "no" | null =
