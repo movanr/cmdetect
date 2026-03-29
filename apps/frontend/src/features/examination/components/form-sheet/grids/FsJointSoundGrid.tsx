@@ -21,8 +21,8 @@ export function FsJointSoundGrid() {
         const p = `e7.${side}`;
         return (
           <div key={side}>
-            <div className="text-xs font-semibold text-slate-500 mb-0.5 print:text-[6pt]">
-              {side === "right" ? "Rechtes KG" : "Linkes KG"}
+            <div className="text-xs font-semibold text-slate-500 mb-0.5 uppercase tracking-wider print:text-[6pt]">
+              {side === "right" ? "Rechtes Kiefergelenk" : "Linkes Kiefergelenk"}
             </div>
             <table className="w-full text-xs print:text-[6pt]">
               <thead>

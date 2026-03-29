@@ -1,10 +1,5 @@
-import { createContext, useContext, type ReactNode } from "react";
-
-interface FormSheetContextValue {
-  readOnly: boolean;
-}
-
-const FormSheetContext = createContext<FormSheetContextValue>({ readOnly: false });
+import type { ReactNode } from "react";
+import { FormSheetContext } from "./use-form-sheet";
 
 export function FormSheetProvider({
   readOnly,
@@ -14,8 +9,4 @@ export function FormSheetProvider({
   children: ReactNode;
 }) {
   return <FormSheetContext.Provider value={{ readOnly }}>{children}</FormSheetContext.Provider>;
-}
-
-export function useFormSheet() {
-  return useContext(FormSheetContext);
 }

@@ -4,7 +4,8 @@
  * Renders all 8 sites grouped by region (temporalis, masseter, TMJ),
  * with variable pain question columns per group.
  *
- * Always renders in "detailed + standard" mode for maximum information density.
+ * Sides are stacked vertically (right, then left) to give each side
+ * the full container width — needed for 5 pain columns.
  */
 
 import {
@@ -29,10 +30,7 @@ const E9_GROUPS: {
   {
     label: "Muskelschmerzen",
     sublabel: "(1 kg)",
-    sites: [
-      ...SITES_BY_GROUP.temporalis,
-      ...SITES_BY_GROUP.masseter,
-    ],
+    sites: [...SITES_BY_GROUP.temporalis, ...SITES_BY_GROUP.masseter],
     columns: ["pain", "familiarPain", "familiarHeadache", "spreadingPain", "referredPain"],
   },
   {
@@ -54,60 +52,66 @@ function siteHasColumn(site: PalpationSite, column: PainType): boolean {
   const config = SITE_CONFIG[site];
   if (column === "familiarHeadache") return config.hasHeadache;
   if (column === "spreadingPain") return config.hasSpreading;
-  return true; // pain, familiarPain, referredPain always present
+  return true;
 }
 
 export function FsPalpationGrid() {
   return (
-    <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
+    <div className="space-y-4 mt-1 print:space-y-2 print:mt-0.5">
       {SIDE_KEYS.map((side) => (
         <div key={side}>
-          <div className="text-xs font-semibold text-slate-500 mb-0.5 uppercase tracking-wider print:text-[6pt]">
+          <div className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider print:text-[6pt]">
             {SIDE_LABELS[side]}
           </div>
 
-          {E9_GROUPS.map((group) => (
-            <div key={group.label} className="mb-2 print:mb-1">
-              <div className="text-xs text-slate-400 mb-0.5 font-medium print:text-[5pt]">
-                {group.label} {group.sublabel}
-              </div>
-              <table className="w-full text-xs print:text-[6pt]">
-                <thead>
-                  <tr className="text-slate-400">
-                    <th className="text-left font-normal py-0 w-24 print:w-16"></th>
-                    {group.columns.map((col) => (
-                      <th key={col} className="font-normal py-0 w-12 print:w-9 leading-tight whitespace-pre-line">
-                        {COL_LABELS[col]}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {group.sites.map((site) => (
-                    <tr key={site} className="border-t border-slate-100">
-                      <td className="text-slate-600 py-0.5 pr-0.5 truncate max-w-[6rem] print:max-w-[4rem]">
-                        {PALPATION_SITES[site]
-                          .replace("Kiefergelenk ", "")
-                          .replace("(lateraler Pol)", "Lat. Pol (0,5 kg)")
-                          .replace("(um den lateralen Pol)", "Um lat. Pol (1 kg)")}
-                      </td>
-                      {group.columns.map((col) =>
-                        siteHasColumn(site, col) ? (
-                          <td key={col} className="text-center py-0.5">
-                            <FsYesNo name={`e9.${side}.${site}.${col}`} />
-                          </td>
-                        ) : (
-                          <td key={col} className="text-center py-0.5">
-                            <span className="text-slate-200">—</span>
-                          </td>
-                        )
-                      )}
+          <div className="flex gap-6 print:gap-3">
+            {/* Muscle sites (left) + TMJ sites (right) side by side */}
+            {E9_GROUPS.map((group) => (
+              <div key={group.label}>
+                <div className="text-xs text-slate-400 mb-0.5 font-medium print:text-[5pt]">
+                  {group.label} {group.sublabel}
+                </div>
+                <table className="text-xs print:text-[6pt]">
+                  <thead>
+                    <tr className="text-slate-400">
+                      <th className="text-left font-normal py-0 pr-2 min-w-[7rem] print:min-w-[5rem]"></th>
+                      {group.columns.map((col) => (
+                        <th
+                          key={col}
+                          className="font-normal py-0 px-1 leading-tight whitespace-pre-line text-center"
+                        >
+                          {COL_LABELS[col]}
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+                  </thead>
+                  <tbody>
+                    {group.sites.map((site) => (
+                      <tr key={site} className="border-t border-slate-100">
+                        <td className="text-slate-600 py-0.5 pr-2 whitespace-nowrap">
+                          {PALPATION_SITES[site]
+                            .replace("Kiefergelenk ", "")
+                            .replace("(lateraler Pol)", "Lat. Pol (0,5 kg)")
+                            .replace("(um den lateralen Pol)", "Um lat. Pol (1 kg)")}
+                        </td>
+                        {group.columns.map((col) =>
+                          siteHasColumn(site, col) ? (
+                            <td key={col} className="text-center py-0.5 px-1">
+                              <FsYesNo name={`e9.${side}.${site}.${col}`} />
+                            </td>
+                          ) : (
+                            <td key={col} className="text-center py-0.5 px-1">
+                              <span className="text-slate-200">—</span>
+                            </td>
+                          )
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>

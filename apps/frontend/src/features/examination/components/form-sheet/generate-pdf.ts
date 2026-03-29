@@ -5,7 +5,7 @@
  * the nested FormValues structure. Layout mirrors the React form sheet.
  */
 
-import { jsPDF } from "jspdf";
+import type { jsPDF as JsPDFType } from "jspdf";
 import {
   E1_PAIN_LOCATIONS,
   E1_PAIN_LOCATION_KEYS,
@@ -92,9 +92,10 @@ const MOVEMENT_REGIONS = [
 
 // === PDF Generator ===
 
-export function generateFormSheetPDF(options: PdfOptions): void {
+export async function generateFormSheetPDF(options: PdfOptions): Promise<void> {
+  const { jsPDF } = await import("jspdf");
   const { formValues: d, patientName, patientDob, clinicInternalId, examDate } = options;
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const doc: JsPDFType = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
 
   // --- Drawing primitives ---
