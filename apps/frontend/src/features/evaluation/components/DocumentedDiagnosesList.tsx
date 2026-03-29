@@ -5,9 +5,11 @@
  * This list mirrors what appears in the printed report.
  */
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ALL_DIAGNOSES,
+  getDiagnosisClinicalContext,
   PALPATION_SITES,
   REGIONS,
   type PalpationSite,
@@ -77,7 +79,12 @@ export function DocumentedDiagnosesList({
                 key={d.id}
                 className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
               >
-                <span>{diagnosisName(d.diagnosisId)}</span>
+                <span className="flex items-center gap-2">
+                  <span>{diagnosisName(d.diagnosisId)}</span>
+                  <Badge variant="outline" className="text-[10px] font-mono px-1 py-0 text-muted-foreground shrink-0">
+                    {getDiagnosisClinicalContext(d.diagnosisId).icd10}
+                  </Badge>
+                </span>
                 {!readOnly && (
                   <Button
                     variant="ghost"

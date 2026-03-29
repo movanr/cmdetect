@@ -11,6 +11,7 @@ import { ALL_DIAGNOSES, type DiagnosisDefinition, type DiagnosisId, type Region,
 import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
+import { DiagnosisClinicalContextBlock } from "./DiagnosisClinicalContextBlock";
 import { InlineCriteriaChecklist } from "./InlineCriteriaChecklist";
 
 interface DiagnosisReferenceProps {
@@ -110,6 +111,7 @@ function DiagnosisRow({
       </button>
       {expanded && (
         <div className="pl-[calc(1rem+0.5rem)]">
+          <DiagnosisClinicalContextBlock diagnosisId={diagnosis.id} />
           <InlineCriteriaChecklist
             diagnosis={diagnosis}
             criteriaData={criteriaData}

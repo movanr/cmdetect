@@ -363,13 +363,13 @@ export function InlineCriteriaChecklist({
     <div className="divide-y">
       {/* Anamnesis section */}
       <div>
-        <SectionHeader label="Anamnese" />
+        <SectionHeader label="Anamnesekriterien" />
         {renderItemsWithSeparators(anamnesisItems)}
       </div>
 
       {/* Examination section */}
       <div>
-        <SectionHeader label="Untersuchung" />
+        <SectionHeader label="Untersuchungskriterien" />
         {renderItemsWithSeparators(examinationItems)}
       </div>
 

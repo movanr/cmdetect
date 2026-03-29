@@ -15,6 +15,7 @@ import {
   REGIONS,
   extractClinicalFindings,
   generateAnamnesisText,
+  getDiagnosisClinicalContext,
   getValueAtPath as get,
   type DiagnosisId,
   type PalpationSite,
@@ -302,9 +303,10 @@ function buildDocument(data: BefundberichtData): Document {
   const diagnoses = data.confirmedDiagnoses.map((d) => {
     const def = ALL_DIAGNOSES.find((diag) => diag.id === d.diagnosisId);
     const label = def?.nameDE ?? d.diagnosisId;
+    const icd10 = getDiagnosisClinicalContext(d.diagnosisId).icd10;
     const site = d.site ? PALPATION_SITES[d.site] : null;
     const suffix = site ? `(${site}, ${sideLabel(d.side)})` : locationSuffix(d.region, d.side);
-    return `${label} ${suffix}`;
+    return `${label} [${icd10}] ${suffix}`;
   });
 
   const p: Paragraph[] = [];

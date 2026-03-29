@@ -76,7 +76,7 @@ export function FindingsSummary({ criteriaData, className, alwaysOpen }: Finding
             {section.name}
           </TabsTrigger>
         ))}
-        <TabsTrigger value="measurements">Messungen</TabsTrigger>
+        <TabsTrigger value="measurements">Funktionsanalyse</TabsTrigger>
       </TabsList>
 
       {SQ_SECTIONS.map((section) => (

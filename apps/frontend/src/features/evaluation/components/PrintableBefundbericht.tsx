@@ -20,6 +20,7 @@ import {
   REGIONS,
   extractClinicalFindings,
   generateAnamnesisText,
+  getDiagnosisClinicalContext,
   getValueAtPath as get,
   type DiagnosisId,
   type PalpationSite,
@@ -344,6 +345,9 @@ export function PrintableBefundbericht({
             {diagnosesWithLabels.map((d, i) => (
               <p key={i}>
                 {d.label}{" "}
+                <span className="text-gray-500 font-mono text-xs">
+                  [{getDiagnosisClinicalContext(d.diagnosisId).icd10}]
+                </span>{" "}
                 <span className="text-gray-500">
                   ({d.siteLabel ? `${d.siteLabel}, ` : ""}
                   {d.region === "tmj" ? "Kiefergelenk" : REGIONS[d.region]}, {sideLabel(d.side)})

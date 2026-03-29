@@ -268,6 +268,15 @@ export function EvaluationView({
                 onDiagnosisChange={setCriteriaDiagnosisId}
               />
             )}
+            <p className="mt-4 text-[10px] text-muted-foreground/70 leading-relaxed">
+              Quelle: Schiffman E, Ohrbach R, Truelove E, et al. Diagnostic
+              Criteria for Temporomandibular Disorders (DC/TMD) for Clinical and
+              Research Applications. <em>J Oral Facial Pain Headache.</em>{" "}
+              2014;28(1):6–27. doi:10.11607/ofph.1151.{" "}
+              {criteriaViewMode === "list"
+                ? "Diagnostic Criteria Table Version: 23. Oktober 2015."
+                : "Diagnostic Decision Trees Version: 24. Januar 2014."}
+            </p>
           </CardContent>
         </Card>
 
