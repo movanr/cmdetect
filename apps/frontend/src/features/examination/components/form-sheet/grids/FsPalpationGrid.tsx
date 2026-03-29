@@ -42,12 +42,12 @@ const E9_GROUPS: {
   },
 ];
 
-const COL_ABBREVIATIONS: Record<PainType, string> = {
+const COL_LABELS: Record<PainType, string> = {
   pain: "Schmerz",
-  familiarPain: "Bek.S.",
-  familiarHeadache: "Bek.K.",
-  spreadingPain: "Ausb.",
-  referredPain: "Übertr.",
+  familiarPain: "Bekannter\nSchmerz",
+  familiarHeadache: "Bekannter\nKopfschmerz",
+  spreadingPain: "Ausbreitender\nSchmerz",
+  referredPain: "Übertragener\nSchmerz",
 };
 
 function siteHasColumn(site: PalpationSite, column: PainType): boolean {
@@ -76,8 +76,8 @@ export function FsPalpationGrid() {
                   <tr className="text-slate-400">
                     <th className="text-left font-normal py-0 w-24 print:w-16"></th>
                     {group.columns.map((col) => (
-                      <th key={col} className="font-normal py-0 w-9 print:w-7">
-                        {COL_ABBREVIATIONS[col]}
+                      <th key={col} className="font-normal py-0 w-12 print:w-9 leading-tight whitespace-pre-line">
+                        {COL_LABELS[col]}
                       </th>
                     ))}
                   </tr>

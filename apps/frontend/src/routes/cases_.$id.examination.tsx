@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useBackgroundPrint } from "@/hooks/use-background-print";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
@@ -37,6 +37,7 @@ import {
   DCTMDFormSheet,
   examinationFormConfig,
   ExaminationPersistenceProvider,
+  generateFormSheetPDF,
   useExaminationPersistenceContext,
   useExaminationResponse,
 } from "../features/examination";
@@ -174,6 +175,7 @@ function ExaminationContent({
   clinicInternalId?: string;
 }) {
   const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
+  const { getValues } = useFormContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { print, isPrinting } = useBackgroundPrint();
@@ -187,6 +189,21 @@ function ExaminationContent({
       print(`/cases/${caseId}/print-examination`);
     }
   }, [viewMode, caseId, print]);
+
+  const handleExportPDF = useCallback(() => {
+    const examDate = new Date().toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    generateFormSheetPDF({
+      formValues: getValues() as Record<string, unknown>,
+      patientName,
+      patientDob,
+      clinicInternalId,
+      examDate,
+    });
+  }, [getValues, patientName, patientDob, clinicInternalId]);
 
   // Warn on browser tab close / page refresh (SPA navigation is handled by unmount flush)
   useEffect(() => {
@@ -261,6 +278,12 @@ function ExaminationContent({
             Formularbogen
           </button>
         </div>
+
+        {viewMode === "formSheet" && (
+          <Button variant="outline" size="sm" onClick={handleExportPDF}>
+            PDF Export
+          </Button>
+        )}
 
         {status === "completed" ? (
           <>

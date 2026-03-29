@@ -15,10 +15,10 @@ import { FsYesNo } from "../primitives/FsYesNo";
 
 const SIDE_KEYS = ["right", "left"] as const;
 
-const COL_ABBREVIATIONS: Record<string, string> = {
+const COL_LABELS: Record<string, string> = {
   pain: "Schmerz",
-  familiarPain: "Bek.Schm.",
-  referredPain: "Übertr.",
+  familiarPain: "Bekannter\nSchmerz",
+  referredPain: "Übertragener\nSchmerz",
 };
 
 export function FsSupplPalpGrid() {
@@ -34,8 +34,8 @@ export function FsSupplPalpGrid() {
               <tr className="text-slate-400">
                 <th className="text-left font-normal py-0 w-32 print:w-20"></th>
                 {E10_PAIN_QUESTIONS.map((col) => (
-                  <th key={col} className="font-normal py-0 w-11 print:w-8">
-                    {COL_ABBREVIATIONS[col]}
+                  <th key={col} className="font-normal py-0 w-14 print:w-10 leading-tight whitespace-pre-line">
+                    {COL_LABELS[col]}
                   </th>
                 ))}
               </tr>

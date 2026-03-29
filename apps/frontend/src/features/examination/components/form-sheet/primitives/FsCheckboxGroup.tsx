@@ -22,8 +22,11 @@ export function FsCheckboxGroup({ name, options }: FsCheckboxGroupProps) {
       {options.map(({ key, label }) => {
         const checked = value.includes(key);
         return (
-          <label
+          <button
+            type="button"
             key={key}
+            onClick={() => toggle(key)}
+            disabled={readOnly}
             className={`inline-flex items-center gap-1 select-none group ${readOnly ? "cursor-default" : "cursor-pointer"}`}
           >
             <span
@@ -32,15 +35,11 @@ export function FsCheckboxGroup({ name, options }: FsCheckboxGroupProps) {
                   ? "bg-blue-600 border-blue-600"
                   : "bg-white border-slate-300 group-hover:border-slate-400"
               }`}
-              onClick={(e) => {
-                e.preventDefault();
-                toggle(key);
-              }}
             >
               {checked && "✓"}
             </span>
             <span className="text-xs text-slate-600 print:text-[7pt]">{label}</span>
-          </label>
+          </button>
         );
       })}
     </div>

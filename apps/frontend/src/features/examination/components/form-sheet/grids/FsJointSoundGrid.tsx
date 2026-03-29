@@ -8,16 +8,16 @@
 
 import {
   JOINT_SOUND_LABELS,
-  E7_OBSERVER_LABELS,
-  CLICK_PAIN_LABELS,
 } from "@cmdetect/dc-tmd";
-import { SIDE_KEYS, type Side } from "../../../model/regions";
+import type { Side } from "../../../model/regions";
+
+const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FsYesNo } from "../primitives/FsYesNo";
 
 export function FsJointSoundGrid() {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
-      {SIDE_KEYS.map((side: Side) => {
+      {DISPLAY_SIDES.map((side) => {
         const p = `e7.${side}`;
         return (
           <div key={side}>
@@ -28,10 +28,10 @@ export function FsJointSoundGrid() {
               <thead>
                 <tr className="text-slate-400">
                   <th className="text-left font-normal py-0 w-14 print:w-10"></th>
-                  <th className="font-normal py-0">{E7_OBSERVER_LABELS.examiner}</th>
-                  <th className="font-normal py-0">{E7_OBSERVER_LABELS.patient}</th>
-                  <th className="font-normal py-0">{CLICK_PAIN_LABELS.painWithClick}</th>
-                  <th className="font-normal py-0">{CLICK_PAIN_LABELS.familiarPain}</th>
+                  <th className="font-normal py-0">Untersucher</th>
+                  <th className="font-normal py-0">Patient</th>
+                  <th className="font-normal py-0 leading-tight">Schmerzhaftes<br />Knacken</th>
+                  <th className="font-normal py-0 leading-tight">Bekannter<br />Schmerz</th>
                 </tr>
               </thead>
               <tbody>

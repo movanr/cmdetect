@@ -9,7 +9,9 @@ import {
   E8_REDUCTION_LABELS,
   type E8Reduction,
 } from "@cmdetect/dc-tmd";
-import { SIDE_KEYS, type Side } from "../../../model/regions";
+import type { Side } from "../../../model/regions";
+
+const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FsYesNo } from "../primitives/FsYesNo";
 import { useFormSheet } from "../FormSheetContext";
 import { useFormContext } from "react-hook-form";
@@ -20,7 +22,7 @@ const REDUCTION_OPTIONS = ["patient", "examiner", "notReduced"] as const;
 export function FsLockGrid() {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
-      {SIDE_KEYS.map((side: Side) => (
+      {DISPLAY_SIDES.map((side) => (
         <div key={side}>
           <div className="text-xs font-semibold text-slate-500 mb-0.5 uppercase tracking-wider print:text-[6pt]">
             {side === "right" ? "Rechtes Kiefergelenk" : "Linkes Kiefergelenk"}

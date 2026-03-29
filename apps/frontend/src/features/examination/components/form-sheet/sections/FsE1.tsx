@@ -4,8 +4,10 @@ import {
   E1_HEADACHE_LOCATIONS,
   E1_HEADACHE_LOCATION_KEYS,
   SIDES,
-  SIDE_KEYS,
+  type Side,
 } from "../../../model/regions";
+
+const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FormSheetSection } from "../FormSheetSection";
 import { FsCheckboxGroup } from "../primitives/FsCheckboxGroup";
 
@@ -24,7 +26,7 @@ export function FsE1() {
     <>
       <FormSheetSection number="1a" title="Schmerzlokalisation: letzte 30 Tage">
         <div className="grid grid-cols-2 gap-2">
-          {SIDE_KEYS.map((side) => (
+          {DISPLAY_SIDES.map((side) => (
             <div key={side}>
               <span className="text-xs font-semibold text-slate-500 print:text-[6pt]">
                 {SIDES[side]}
@@ -37,7 +39,7 @@ export function FsE1() {
 
       <FormSheetSection number="1b" title="Kopfschmerzlokalisation: letzte 30 Tage">
         <div className="grid grid-cols-2 gap-2">
-          {SIDE_KEYS.map((side) => (
+          {DISPLAY_SIDES.map((side) => (
             <div key={side}>
               <span className="text-xs font-semibold text-slate-500 print:text-[6pt]">
                 {SIDES[side]}
