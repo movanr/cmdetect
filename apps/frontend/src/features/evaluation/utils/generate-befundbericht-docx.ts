@@ -224,8 +224,8 @@ function formatJointSoundLines(sounds: JointSoundFinding[]): string[] {
 // DOCX PRIMITIVES — one font, two sizes, plain paragraphs
 // ============================================================================
 
-const FONT = "Calibri";
-const SIZE = 22; // half-points → 11pt (body + headings)
+const FONT = "Arial";
+const SIZE = 20; // half-points → 10pt (body + headings)
 const SIZE_SMALL = 18; // half-points → 9pt (footer only)
 
 // Tab stops in twips (1 inch = 1440 twips, 1cm ≈ 567 twips)
