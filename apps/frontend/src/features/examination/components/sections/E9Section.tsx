@@ -753,7 +753,7 @@ export function E9Section({
               value={palpationMode}
               onChange={(mode) => setValue("e9.palpationMode", mode)}
             />
-            <SectionCommentButton sectionId="e9" />
+            <SectionCommentButton />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e9" }}>
                 <BookOpen className="h-4 w-4 mr-1" />

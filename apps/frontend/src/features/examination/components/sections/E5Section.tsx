@@ -476,7 +476,7 @@ export function E5Section({
                 Alle Regionen
               </Label>
             </div>
-            <SectionCommentButton sectionId="e5" />
+            <SectionCommentButton />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e5" }}>
                 <BookOpen className="h-4 w-4 mr-1" />

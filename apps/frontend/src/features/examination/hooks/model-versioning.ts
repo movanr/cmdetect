@@ -19,7 +19,7 @@
 export type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 
 /** Current model version — bump when FormValues model changes. */
-export const CURRENT_MODEL_VERSION = 3;
+export const CURRENT_MODEL_VERSION = 4;
 
 /**
  * Ordered migration functions. Each transforms data from version N to N+1.
@@ -64,6 +64,29 @@ export const migrations: Migration[] = [
         e10: null,
       };
     }
+    return data;
+  },
+  // v3→v4: Collapse per-section e11 comments into single comment field
+  (data) => {
+    const e11 = data.e11 as Record<string, unknown> | undefined;
+    if (!e11) {
+      data.e11 = { comment: null };
+      return data;
+    }
+
+    const sectionIds = ["e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10"];
+    const parts: string[] = [];
+    for (const id of sectionIds) {
+      const val = e11[id];
+      if (typeof val === "string" && val.trim().length > 0) {
+        const num = id.slice(1);
+        parts.push(`[U${num}] ${val.trim()}`);
+      }
+    }
+
+    data.e11 = {
+      comment: parts.length > 0 ? parts.join("\n\n") : null,
+    };
     return data;
   },
 ];

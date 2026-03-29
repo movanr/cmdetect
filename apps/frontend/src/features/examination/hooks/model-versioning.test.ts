@@ -62,4 +62,48 @@ describe("model-versioning", () => {
       }
     });
   });
+
+  describe("v3→v4 migration (collapse e11 per-section to single comment)", () => {
+    it("collapses non-empty section comments with section badges", () => {
+      const v3Data: Record<string, unknown> = {
+        e1: { painLocation: { none: false } },
+        e11: {
+          e1: "Pain on left",
+          e2: null,
+          e3: "",
+          e4: "Restricted opening",
+          e5: null,
+          e6: null,
+          e7: null,
+          e8: null,
+          e9: null,
+          e10: null,
+        },
+      };
+      const result = migrateExaminationData(v3Data, 3);
+      expect(result.e11).toEqual({
+        comment: "[U1] Pain on left\n\n[U4] Restricted opening",
+      });
+    });
+
+    it("sets comment to null when all section comments are empty", () => {
+      const v3Data: Record<string, unknown> = {
+        e1: { painLocation: { none: false } },
+        e11: {
+          e1: null, e2: null, e3: null, e4: null, e5: null,
+          e6: null, e7: null, e8: null, e9: null, e10: null,
+        },
+      };
+      const result = migrateExaminationData(v3Data, 3);
+      expect(result.e11).toEqual({ comment: null });
+    });
+
+    it("handles missing e11 key", () => {
+      const v3Data: Record<string, unknown> = {
+        e1: { painLocation: { none: false } },
+      };
+      const result = migrateExaminationData(v3Data, 3);
+      expect(result.e11).toEqual({ comment: null });
+    });
+  });
 });

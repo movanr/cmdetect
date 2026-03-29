@@ -1,8 +1,8 @@
 /**
  * SectionCommentButton
  *
- * Floating comment button for each examination section (E1-E10).
- * Opens a popover with a textarea bound to e11.<sectionId> in the form.
+ * Floating comment button available in each examination section (E1-E10).
+ * Opens a popover with a textarea bound to the single e11.comment field.
  */
 
 import { Button } from "@/components/ui/button";
@@ -17,16 +17,12 @@ import type { FieldPath } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 import type { FormValues } from "../../form/use-examination-form";
 
-interface SectionCommentButtonProps {
-  sectionId: string;
-}
+const COMMENT_PATH = "e11.comment" as FieldPath<FormValues>;
 
-export function SectionCommentButton({ sectionId }: SectionCommentButtonProps) {
+export function SectionCommentButton() {
   const { register, watch } = useFormContext<FormValues>();
-  const fieldPath = `e11.${sectionId}` as FieldPath<FormValues>;
 
-  // Watch comment value to show indicator dot
-  const value = watch(fieldPath) as unknown as string | null;
+  const value = watch(COMMENT_PATH) as unknown as string | null;
   const hasComment = typeof value === "string" && value.trim().length > 0;
 
   return (
@@ -43,7 +39,7 @@ export function SectionCommentButton({ sectionId }: SectionCommentButtonProps) {
         <div className="space-y-2">
           <p className="text-sm font-medium">Kommentar</p>
           <Textarea
-            {...register(fieldPath as never)}
+            {...register(COMMENT_PATH as never)}
             placeholder="Kommentar hinzufügen..."
             rows={4}
             className="resize-y"

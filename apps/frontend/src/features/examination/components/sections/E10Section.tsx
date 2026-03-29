@@ -229,7 +229,7 @@ export function E10Section({
         <div className="flex items-center justify-between">
           <CardTitle>{getSectionCardTitle(SECTIONS.e10)}</CardTitle>
           <div className="flex items-center gap-1">
-            <SectionCommentButton sectionId="e10" />
+            <SectionCommentButton />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e10" }}>
                 <BookOpen className="h-4 w-4 mr-1" />

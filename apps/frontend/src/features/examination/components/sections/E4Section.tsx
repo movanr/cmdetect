@@ -534,7 +534,7 @@ export function E4Section({
                 Alle Regionen
               </Label>
             </div>
-            <SectionCommentButton sectionId="e4" />
+            <SectionCommentButton />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e4" }}>
                 <BookOpen className="h-4 w-4 mr-1" />

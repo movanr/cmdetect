@@ -71,7 +71,7 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{getSectionCardTitle(SECTIONS.e8)}</CardTitle>
         <div className="flex items-center gap-1">
-          <SectionCommentButton sectionId="e8" />
+          <SectionCommentButton />
           <Button variant="ghost" size="sm" asChild>
             <Link to="/protocol/$section" params={{ section: "e8" }}>
               <BookOpen className="h-4 w-4 mr-1" />

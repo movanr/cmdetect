@@ -43,7 +43,7 @@ export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           <Badge variant="secondary">Zusatz</Badge>
         </div>
         <div className="flex items-center gap-1">
-          <SectionCommentButton sectionId="e3" />
+          <SectionCommentButton />
           <Button variant="ghost" size="sm" asChild>
             <Link to="/protocol/$section" params={{ section: "e3" }}>
               <BookOpen className="h-4 w-4 mr-1" />
