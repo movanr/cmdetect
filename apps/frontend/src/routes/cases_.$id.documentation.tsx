@@ -22,7 +22,7 @@ import {
   useStepGating,
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { useExaminationResponse, getLocalExamCompletion } from "../features/examination";
+import { useExaminationResponse } from "../features/examination";
 import { useNavigate } from "@tanstack/react-router";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
@@ -48,13 +48,7 @@ function DocumentationLayout() {
   // Fetch examination response for workflow progress
   const { data: examination, isLoading: isExamLoading } = useExaminationResponse(id);
 
-  // Combine backend completedAt with localStorage fallback to avoid race conditions:
-  // - Backend data present → use backend (authoritative)
-  // - Query still loading → undefined (don't compute progress yet)
-  // - Query done, no data → check localStorage marker written on completion
-  const examinationCompletedAt =
-    examination?.completedAt ??
-    (isExamLoading ? undefined : getLocalExamCompletion(id));
+  const examinationCompletedAt = examination?.completedAt ?? null;
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({

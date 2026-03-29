@@ -17,7 +17,7 @@ import { execute } from "@/graphql/execute";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useCaseProgress, useStepGating } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
-import { useExaminationResponse, getLocalExamCompletion, type FormValues } from "../features/examination";
+import { useExaminationResponse, type FormValues } from "../features/examination";
 import { EvaluationView } from "../features/evaluation";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
@@ -44,10 +44,7 @@ function EvaluationPage() {
   // Fetch examination data
   const { data: examination, isLoading: isExaminationLoading } = useExaminationResponse(id);
 
-  // Combine backend completedAt with localStorage fallback to avoid race conditions
-  const examinationCompletedAt =
-    examination?.completedAt ??
-    (isExaminationLoading ? undefined : getLocalExamCompletion(id));
+  const examinationCompletedAt = examination?.completedAt ?? null;
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({

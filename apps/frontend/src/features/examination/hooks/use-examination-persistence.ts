@@ -1,41 +1,25 @@
 /**
  * Examination Persistence Orchestration Hook
  *
- * Coordinates backend persistence and localStorage draft support:
- * - Hydrates form from backend (primary) or localStorage (fallback if newer)
- * - Auto-saves to localStorage on form changes (debounced)
- * - Saves to backend on section completion
- * - Clears localStorage draft after successful backend save
+ * Coordinates backend persistence via debounced auto-save:
+ * - Hydrates form from backend on mount
+ * - Auto-saves to backend on form changes (debounced 3s)
+ * - Flushes pending save on unmount (SPA navigation keeps fetch alive)
+ * - Saves immediately on section completion, examination completion, or blocker "save and leave"
+ *
+ * Status model: once an examination is completed, its status stays "completed".
+ * Subsequent edits update the data in place without changing the status.
+ * This avoids the reopen/re-complete dance and its associated race conditions.
  */
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useFormContext } from "react-hook-form";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { execute } from "@/graphql/execute";
 import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
-import { useUpsertExamination, useCompleteExamination, useReopenExamination } from "./use-save-examination";
+import { useUpsertExamination, useCompleteExamination } from "./use-save-examination";
 import { SECTION_IDS, type SectionId } from "../sections/registry";
 import type { FormValues } from "../form/use-examination-form";
-import {
-  migrateAndParseExaminationData,
-  parseCompletedSections,
-} from "./validate-persistence";
-import { CURRENT_MODEL_VERSION } from "./model-versioning";
-import { UPSERT_EXAMINATION_RESPONSE } from "../queries";
-import {
-  setLocalExamCompletion,
-  clearLocalExamCompletion,
-} from "./use-examination-local-completion";
 
-const STORAGE_KEY_PREFIX = "cmdetect_exam_draft_";
-const AUTO_SAVE_DEBOUNCE_MS = 2000;
-const BACKEND_PERIODIC_SAVE_MS = 30_000;
-
-interface DraftData {
-  formValues: Record<string, unknown>;
-  completedSections: SectionId[];
-  savedAt: string;
-}
+const AUTO_SAVE_DELAY_MS = 3000;
 
 interface UseExaminationPersistenceOptions {
   patientRecordId: string;
@@ -44,12 +28,8 @@ interface UseExaminationPersistenceOptions {
 export interface UseExaminationPersistenceResult {
   /** Save a section to backend and mark it completed */
   saveSection: (sectionId: SectionId) => Promise<void>;
-  /** Save current form data to backend as draft (no section completion) */
-  saveDraft: () => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
-  /** Reopen a completed examination for editing */
-  reopenExamination: () => Promise<void>;
   /** Whether a save operation is in progress */
   isSaving: boolean;
   /** List of completed section IDs */
@@ -68,298 +48,132 @@ export function useExaminationPersistence({
   const form = useFormContext<FormValues>();
   const [isHydrated, setIsHydrated] = useState(false);
   const [completedSections, setCompletedSections] = useState<SectionId[]>([]);
-  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasUnsavedBackendChangesRef = useRef(false);
-  const backendPeriodicTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isAutoSavingRef = useRef(false);
-  const saveDraftRef = useRef<() => Promise<void>>(async () => {});
-
-  // LocalStorage for draft
-  const storageKey = `${STORAGE_KEY_PREFIX}${patientRecordId}`;
-  const [draft, setDraft, removeDraft] = useLocalStorage<DraftData | null>(
-    storageKey,
-    null
-  );
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ref mirrors to avoid stale closures in watch/timer callbacks
+  const completedSectionsRef = useRef<SectionId[]>([]);
+  const backendStatusRef = useRef<ExaminationStatus | null>(null);
 
   // Backend queries
-  const {
-    data: backendResponse,
-    isFetched,
-  } = useExaminationResponse(patientRecordId);
+  const { data: backendResponse, isFetched } = useExaminationResponse(patientRecordId);
 
   const upsertMutation = useUpsertExamination(patientRecordId);
   const completeMutation = useCompleteExamination(patientRecordId);
-  const reopenMutation = useReopenExamination(patientRecordId);
 
-  const isSaving = upsertMutation.isPending || completeMutation.isPending || reopenMutation.isPending;
+  const isSaving = upsertMutation.isPending || completeMutation.isPending;
 
-  // Hydration: backend primary, localStorage fallback if newer
+  // Hydration: load form data from backend (one-time initialization)
   useEffect(() => {
     if (isHydrated || !isFetched) return;
 
-    const backendData = backendResponse?.responseData;
-    const backendUpdatedAt = backendResponse?.updatedAt;
-    const draftSavedAt = draft?.savedAt;
-
-    // Determine which data source to use
-    let dataSource: "backend" | "draft" | "none" = "none";
-    let formData: FormValues | null = null;
-    let sections: SectionId[] = [];
-
-    if (backendData && Object.keys(backendData).length > 0) {
-      // Backend has data (already validated by useExaminationResponse)
-      if (draftSavedAt && backendUpdatedAt) {
-        // Both exist - compare timestamps
-        const backendTime = new Date(backendUpdatedAt).getTime();
-        const draftTime = new Date(draftSavedAt).getTime();
-
-        if (draftTime > backendTime) {
-          // Draft is newer — validate before using (may be stale after model changes)
-          const validatedDraft = migrateAndParseExaminationData(draft?.formValues);
-          if (validatedDraft) {
-            dataSource = "draft";
-            formData = validatedDraft;
-            sections = parseCompletedSections(draft?.completedSections);
-          } else {
-            // Draft is invalid — discard it and use backend
-            dataSource = "backend";
-            formData = backendData;
-            sections = backendResponse?.completedSections ?? [];
-            removeDraft();
-          }
-        } else {
-          // Backend is newer or same - use it, clear draft
-          dataSource = "backend";
-          formData = backendData;
-          sections = backendResponse?.completedSections ?? [];
-          removeDraft();
-        }
-      } else {
-        // Only backend exists
-        dataSource = "backend";
-        formData = backendData;
-        sections = backendResponse?.completedSections ?? [];
-      }
-    } else if (draft?.formValues) {
-      // Only draft exists — validate before using
-      const validatedDraft = migrateAndParseExaminationData(draft.formValues);
-      if (validatedDraft) {
-        dataSource = "draft";
-        formData = validatedDraft;
-        sections = parseCompletedSections(draft.completedSections);
-      } else {
-        // Draft is invalid — discard it
-        removeDraft();
-      }
-    }
-
-    // Apply data to form
-    if (formData && dataSource !== "none") {
-      form.reset(formData);
-      setCompletedSections(sections);
+    if (backendResponse?.responseData) {
+      form.reset(backendResponse.responseData);
+      const sections = backendResponse.completedSections;
+      setCompletedSections(sections); // eslint-disable-line react-hooks/set-state-in-effect -- one-time hydration
+      completedSectionsRef.current = sections;
     }
 
     setIsHydrated(true);
-  }, [
-    isFetched,
-    isHydrated,
-    backendResponse,
-    draft,
-    form,
-    removeDraft,
-  ]);
+  }, [isFetched, isHydrated, backendResponse, form]);
 
-  // Track latest form values for save-on-unmount
-  // RHF watch returns DeepPartial<FormValues> but since all fields have defaults
-  // from the model, values are always fully populated at runtime.
-  const latestValuesRef = useRef<FormValues | null>(null);
+  // Build upsert params from current state, preserving backend status
+  const buildUpsertParams = useCallback(() => {
+    const formValues = form.getValues();
+    const sections = completedSectionsRef.current;
+    // Preserve backend status (e.g. "completed") — only compute if no backend record yet
+    const status: ExaminationStatus =
+      backendStatusRef.current ?? (sections.length === 0 ? "draft" : "in_progress");
+    return {
+      patientRecordId,
+      responseData: formValues,
+      status,
+      completedSections: sections,
+    };
+  }, [form, patientRecordId]);
 
-  // Auto-save to localStorage on form changes (debounced) + periodic backend save
+  // Cancel any pending debounce timer
+  const cancelDebounce = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  }, []);
+
+  // Refs for latest values — lets the auto-save effect access current
+  // callbacks without re-subscribing on every cache update.
+  const buildUpsertParamsRef = useRef(buildUpsertParams);
+  const upsertMutationRef = useRef(upsertMutation);
+
+  // Sync refs in effect (react-hooks/rules-of-hooks forbids ref writes during render)
+  useEffect(() => {
+    backendStatusRef.current = backendResponse?.status ?? null;
+    buildUpsertParamsRef.current = buildUpsertParams;
+    upsertMutationRef.current = upsertMutation;
+  }, [backendResponse?.status, buildUpsertParams, upsertMutation]);
+
+  // Auto-save to backend on form changes (debounced).
+  // Effect only re-runs when isHydrated changes (once), not on cache updates.
   useEffect(() => {
     if (!isHydrated) return;
 
-    const subscription = form.watch((values) => {
-      // Track latest values for save-on-unmount
-      latestValuesRef.current = values as FormValues;
-
-      // Mark as having unsaved backend changes
+    const subscription = form.watch(() => {
       hasUnsavedBackendChangesRef.current = true;
 
-      // Clear existing localStorage debounce timer
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
+      cancelDebounce();
 
-      // Set new debounced localStorage save
-      autoSaveTimerRef.current = setTimeout(() => {
-        setDraft({
-          formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...values as FormValues },
-          completedSections,
-          savedAt: new Date().toISOString(),
-        });
-        latestValuesRef.current = null; // Mark as saved to localStorage
-      }, AUTO_SAVE_DEBOUNCE_MS);
-
-      // Reset periodic backend save timer (fires after 30s of inactivity)
-      if (backendPeriodicTimerRef.current) {
-        clearTimeout(backendPeriodicTimerRef.current);
-      }
-      backendPeriodicTimerRef.current = setTimeout(() => {
-        saveDraftRef.current();
-      }, BACKEND_PERIODIC_SAVE_MS);
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          await upsertMutationRef.current.mutateAsync(buildUpsertParamsRef.current());
+          hasUnsavedBackendChangesRef.current = false;
+        } catch (error) {
+          console.warn("Auto-save failed:", error);
+        }
+      }, AUTO_SAVE_DELAY_MS);
     });
 
     return () => {
       subscription.unsubscribe();
-      // Cancel pending localStorage timer
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-      // Cancel pending backend periodic timer
-      if (backendPeriodicTimerRef.current) {
-        clearTimeout(backendPeriodicTimerRef.current);
-      }
-      // Save immediately if there are unsaved changes
-      if (latestValuesRef.current) {
-        // Use localStorage directly to avoid React state update during unmount
-        try {
-          localStorage.setItem(
-            storageKey,
-            JSON.stringify({
-              formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...latestValuesRef.current },
-              completedSections,
-              savedAt: new Date().toISOString(),
-            } satisfies DraftData)
-          );
-        } catch (e) {
-          console.error("Failed to save draft on unmount:", e);
-        }
+      cancelDebounce();
+      // Flush: if there are unsaved changes, fire an immediate save.
+      // SPA navigation keeps the fetch alive so this reliably completes.
+      if (hasUnsavedBackendChangesRef.current) {
+        upsertMutationRef.current.mutate(buildUpsertParamsRef.current());
       }
     };
-  }, [isHydrated, form, setDraft, completedSections, storageKey]);
+  }, [isHydrated, form, cancelDebounce]);
 
-  // Fire-and-forget backend save on unmount only.
-  // Separate effect with [] deps so it doesn't fire when form.watch effect
-  // re-runs due to unstable setDraft identity from useLocalStorage.
-  useEffect(() => {
-    return () => {
-      saveDraftRef.current();
-    };
-  }, []);
-
-  // Compute status based on completed sections
-  const computeStatus = useCallback(
-    (sections: SectionId[]): ExaminationStatus => {
-      if (sections.length === 0) return "draft";
-      return "in_progress";
-    },
-    []
-  );
-
-  // Reopen a completed examination (must be called before upserting edits)
-  const ensureReopenedIfCompleted = useCallback(async () => {
-    if (backendResponse?.status === "completed" && backendResponse?.id) {
-      await reopenMutation.mutateAsync({ id: backendResponse.id });
-      clearLocalExamCompletion(patientRecordId);
-    }
-  }, [backendResponse, reopenMutation, patientRecordId]);
-
-  // Save current form data to backend as draft (no section completion).
-  // Used for auto-save on navigation, unmount, and periodic inactivity.
-  const saveDraft = useCallback(async () => {
-    if (
-      !hasUnsavedBackendChangesRef.current ||
-      upsertMutation.isPending ||
-      isAutoSavingRef.current
-    ) {
-      return;
-    }
-
-    isAutoSavingRef.current = true;
-    try {
-      const formValues = form.getValues();
-      const status = computeStatus(completedSections);
-
-      await ensureReopenedIfCompleted();
-
-      await execute(UPSERT_EXAMINATION_RESPONSE, {
-        patient_record_id: patientRecordId,
-        response_data: { _modelVersion: CURRENT_MODEL_VERSION, ...formValues },
-        status,
-        completed_sections: completedSections,
-      });
-
-      removeDraft();
-      hasUnsavedBackendChangesRef.current = false;
-      latestValuesRef.current = null;
-    } catch (error) {
-      console.warn("Auto-save to backend failed:", error);
-    } finally {
-      isAutoSavingRef.current = false;
-    }
-  }, [form, completedSections, computeStatus, patientRecordId, removeDraft, upsertMutation.isPending, ensureReopenedIfCompleted]);
-
-  // Keep ref in sync so timers/cleanup always call the latest version
-  saveDraftRef.current = saveDraft;
-
-  // Save section to backend
+  // Save section to backend and mark it completed
   const saveSection = useCallback(
     async (sectionId: SectionId) => {
-      const formValues = form.getValues();
+      cancelDebounce();
 
-      // Add section to completed list if not already there
+      const formValues = form.getValues();
       const newCompletedSections = completedSections.includes(sectionId)
         ? completedSections
         : [...completedSections, sectionId];
 
-      const status = computeStatus(newCompletedSections);
+      // Preserve backend status (e.g. "completed")
+      const status: ExaminationStatus =
+        backendStatusRef.current ?? (newCompletedSections.length === 0 ? "draft" : "in_progress");
 
-      try {
-        await ensureReopenedIfCompleted();
+      await upsertMutation.mutateAsync({
+        patientRecordId,
+        responseData: formValues,
+        status,
+        completedSections: newCompletedSections,
+      });
 
-        await upsertMutation.mutateAsync({
-          patientRecordId,
-          responseData: formValues,
-          status,
-          completedSections: newCompletedSections,
-        });
-
-        // Update local state
-        setCompletedSections(newCompletedSections);
-
-        // Clear localStorage draft after successful backend save
-        removeDraft();
-
-        // Clear backend auto-save tracking
-        hasUnsavedBackendChangesRef.current = false;
-        if (backendPeriodicTimerRef.current) {
-          clearTimeout(backendPeriodicTimerRef.current);
-          backendPeriodicTimerRef.current = null;
-        }
-      } catch (error) {
-        // On error, ensure draft is saved to localStorage as safety net
-        setDraft({
-          formValues: { _modelVersion: CURRENT_MODEL_VERSION, ...formValues },
-          completedSections: newCompletedSections,
-          savedAt: new Date().toISOString(),
-        });
-        throw error;
-      }
+      setCompletedSections(newCompletedSections);
+      completedSectionsRef.current = newCompletedSections;
+      hasUnsavedBackendChangesRef.current = false;
     },
-    [
-      form,
-      completedSections,
-      computeStatus,
-      upsertMutation,
-      patientRecordId,
-      removeDraft,
-      setDraft,
-      ensureReopenedIfCompleted,
-    ]
+    [form, completedSections, upsertMutation, patientRecordId, cancelDebounce]
   );
 
-  // Complete examination
+  // Complete the entire examination
   const completeExaminationFn = useCallback(async () => {
+    cancelDebounce();
+
     const formValues = form.getValues();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const lastSectionId = SECTION_IDS.at(-1)!;
@@ -375,7 +189,7 @@ export function useExaminationPersistence({
       completedSections: finalCompletedSections,
     });
 
-    // Get the examination ID (either from existing response or upsert result)
+    // Get the examination ID
     const examId =
       backendResponse?.id ??
       upsertResult.insert_examination_response_one?.id;
@@ -384,27 +198,15 @@ export function useExaminationPersistence({
       throw new Error("Could not determine examination ID for completion");
     }
 
-    // Mark as completed
+    // Mark as completed (sets status="completed" and completed_at)
     await completeMutation.mutateAsync({
       id: examId,
       completedSections: finalCompletedSections,
     });
 
-    // Update local state
     setCompletedSections(finalCompletedSections);
-
-    // Clear localStorage draft
-    removeDraft();
-
-    // Persist completion marker for offline/race-condition fallback
-    setLocalExamCompletion(patientRecordId, new Date().toISOString());
-
-    // Clear backend auto-save tracking
+    completedSectionsRef.current = finalCompletedSections;
     hasUnsavedBackendChangesRef.current = false;
-    if (backendPeriodicTimerRef.current) {
-      clearTimeout(backendPeriodicTimerRef.current);
-      backendPeriodicTimerRef.current = null;
-    }
   }, [
     form,
     completedSections,
@@ -412,22 +214,12 @@ export function useExaminationPersistence({
     completeMutation,
     patientRecordId,
     backendResponse,
-    removeDraft,
+    cancelDebounce,
   ]);
-
-  // Reopen a completed examination (explicit action)
-  const reopenExaminationFn = useCallback(async () => {
-    if (!backendResponse?.id) {
-      throw new Error("Could not determine examination ID for reopening");
-    }
-    await ensureReopenedIfCompleted();
-  }, [backendResponse, ensureReopenedIfCompleted]);
 
   return {
     saveSection,
-    saveDraft,
     completeExamination: completeExaminationFn,
-    reopenExamination: reopenExaminationFn,
     isSaving,
     completedSections,
     isHydrated,

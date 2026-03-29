@@ -6,8 +6,8 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createFileRoute, Outlet, useBlocker, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +38,6 @@ import {
   ExaminationPersistenceProvider,
   useExaminationPersistenceContext,
   useExaminationResponse,
-  getLocalExamCompletion,
 } from "../features/examination";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
@@ -67,10 +66,7 @@ function ExaminationLayout() {
   // Fetch examination response for workflow progress (shares cache with persistence provider)
   const { data: examination, isLoading: isExamLoading } = useExaminationResponse(id);
 
-  // Combine backend completedAt with localStorage fallback to avoid race conditions
-  const examinationCompletedAt =
-    examination?.completedAt ??
-    (isExamLoading ? undefined : getLocalExamCompletion(id));
+  const examinationCompletedAt = examination?.completedAt ?? null;
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
@@ -162,57 +158,28 @@ function ExaminationContent({
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
 }) {
-  const { isHydrated, status, saveDraft, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
+  const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { print, isPrinting } = useBackgroundPrint();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [isSavingBeforeLeave, setIsSavingBeforeLeave] = useState(false);
 
-  const blocker = useBlocker({
-    shouldBlockFn: ({ next }) => {
-      if (status === "completed") return false;
-      const isLeavingCase = !next.fullPath.startsWith(`/cases/${caseId}`);
-      return isLeavingCase && hasUnsavedBackendChangesRef.current;
-    },
-    withResolver: true,
-  });
-
-  const handleSaveAndLeave = async () => {
-    setIsSavingBeforeLeave(true);
-    try {
-      await saveDraft();
-    } finally {
-      setIsSavingBeforeLeave(false);
-    }
-    blocker.proceed?.();
-  };
-
-  // Warn on browser tab close / page refresh
+  // Warn on browser tab close / page refresh (SPA navigation is handled by unmount flush)
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedBackendChangesRef.current && status !== "completed") {
+      if (hasUnsavedBackendChangesRef.current) {
         e.preventDefault();
       }
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [hasUnsavedBackendChangesRef, status]);
+  }, [hasUnsavedBackendChangesRef]);
 
   const handleCompleteExamination = async () => {
     setShowCompleteDialog(false);
     await completeExamination();
     navigate({ to: "/cases/$id/evaluation", params: { id: caseId } });
   };
-
-  // Save draft to backend when navigating between examination sections
-  const prevPathRef = useRef(pathname);
-  useEffect(() => {
-    if (prevPathRef.current !== pathname) {
-      prevPathRef.current = pathname;
-      saveDraft();
-    }
-  }, [pathname, saveDraft]);
 
   // Scroll main container to top when navigating between examination sections
   useLayoutEffect(() => {
@@ -288,27 +255,6 @@ function ExaminationContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={blocker.status === "blocked"}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Untersuchung speichern?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Sie verlassen die Untersuchung. Möchten Sie den aktuellen Stand speichern?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex flex-col gap-2 pt-2">
-            <Button onClick={handleSaveAndLeave} disabled={isSavingBeforeLeave || isSaving}>
-              {isSavingBeforeLeave ? "Wird gespeichert…" : "Speichern und verlassen"}
-            </Button>
-            <Button variant="ghost" onClick={() => blocker.proceed?.()}>
-              Ohne Speichern verlassen
-            </Button>
-            <Button variant="outline" onClick={() => blocker.reset?.()}>
-              Abbrechen
-            </Button>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

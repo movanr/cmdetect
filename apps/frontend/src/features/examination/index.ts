@@ -82,7 +82,7 @@ export { GET_EXAMINATION_RESPONSE } from "./queries";
 
 // Data validation and migration
 export { migrateAndParseExaminationData } from "./hooks/validate-persistence";
-export { getLocalExamCompletion } from "./hooks/use-examination-local-completion";
+
 
 // Persistence hooks and context
 export {
@@ -93,7 +93,6 @@ export {
 export {
   useUpsertExamination,
   useCompleteExamination,
-  useReopenExamination,
 } from "./hooks/use-save-examination";
 export {
   useExaminationPersistence,
