@@ -19,7 +19,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useBackgroundPrint } from "@/hooks/use-background-print";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
@@ -178,17 +177,16 @@ function ExaminationContent({
   const { getValues } = useFormContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { print, isPrinting } = useBackgroundPrint();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("wizard");
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const stored = sessionStorage.getItem("examination-view-mode");
+    return stored === "formSheet" ? "formSheet" : "wizard";
+  });
 
-  const handlePrint = useCallback(() => {
-    if (viewMode === "formSheet") {
-      window.print();
-    } else {
-      print(`/cases/${caseId}/print-examination`);
-    }
-  }, [viewMode, caseId, print]);
+  const setViewModeAndPersist = (mode: ViewMode) => {
+    setViewMode(mode);
+    sessionStorage.setItem("examination-view-mode", mode);
+  };
 
   const handleExportPDF = useCallback(() => {
     const examDate = new Date().toLocaleDateString("de-DE", {
@@ -257,7 +255,7 @@ function ExaminationContent({
         <div className="mr-auto flex rounded-md border border-input overflow-hidden">
           <button
             type="button"
-            onClick={() => setViewMode("wizard")}
+            onClick={() => setViewModeAndPersist("wizard")}
             className={`px-3 py-1 text-xs font-medium transition-colors ${
               viewMode === "wizard"
                 ? "bg-primary text-primary-foreground"
@@ -268,7 +266,7 @@ function ExaminationContent({
           </button>
           <button
             type="button"
-            onClick={() => setViewMode("formSheet")}
+            onClick={() => setViewModeAndPersist("formSheet")}
             className={`px-3 py-1 text-xs font-medium transition-colors ${
               viewMode === "formSheet"
                 ? "bg-primary text-primary-foreground"
@@ -279,29 +277,17 @@ function ExaminationContent({
           </button>
         </div>
 
-        {viewMode === "formSheet" && (
-          <Button variant="outline" size="sm" onClick={handleExportPDF}>
-            PDF Export
-          </Button>
-        )}
+        <Button variant="outline" size="sm" onClick={handleExportPDF}>
+          PDF Export
+        </Button>
 
         {status === "completed" ? (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              disabled={isPrinting}
-            >
-              {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => navigate({ to: "/cases/$id/evaluation", params: { id: caseId } })}
-            >
-              Zur Auswertung
-            </Button>
-          </>
+          <Button
+            size="sm"
+            onClick={() => navigate({ to: "/cases/$id/evaluation", params: { id: caseId } })}
+          >
+            Zur Auswertung
+          </Button>
         ) : (
           <Button variant="outline" size="sm" onClick={() => setShowCompleteDialog(true)}>
             Untersuchung abschließen
