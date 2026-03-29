@@ -13,8 +13,13 @@ export function FsCheckboxGroup({ name, options }: FsCheckboxGroupProps) {
 
   const toggle = (key: string) => {
     if (readOnly) return;
-    const next = value.includes(key) ? value.filter((v) => v !== key) : [...value, key];
-    setValue(name, next, { shouldDirty: true });
+    if (value.includes(key)) {
+      setValue(name, value.filter((v) => v !== key), { shouldDirty: true });
+    } else if (key === "none") {
+      setValue(name, ["none"], { shouldDirty: true });
+    } else {
+      setValue(name, [...value.filter((v) => v !== "none"), key], { shouldDirty: true });
+    }
   };
 
   return (

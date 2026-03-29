@@ -12,6 +12,7 @@ import type { Side } from "../../../model/regions";
 
 const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FsYesNo } from "../primitives/FsYesNo";
+import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
 
 export function FsJointSound6Grid() {
   return (
@@ -48,10 +49,10 @@ export function FsJointSound6Grid() {
                     <FsYesNo name={`${p}.click.patient`} />
                   </td>
                   <td className="text-center py-0.5">
-                    <FsYesNo name={`${p}.click.painWithClick`} />
+                    <FsConditionalYesNo name={`${p}.click.painWithClick`} sibling="patient" equals="yes" />
                   </td>
                   <td className="text-center py-0.5">
-                    <FsYesNo name={`${p}.click.familiarPain`} />
+                    <FsConditionalYesNo name={`${p}.click.familiarPain`} sibling="painWithClick" equals="yes" />
                   </td>
                 </tr>
                 {/* Crepitus row */}

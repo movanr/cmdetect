@@ -3,41 +3,43 @@ import { useFormSheet } from "../use-form-sheet";
 
 interface FsYesNoProps {
   name: string;
+  disabled?: boolean;
 }
 
-export function FsYesNo({ name }: FsYesNoProps) {
+export function FsYesNo({ name, disabled }: FsYesNoProps) {
   const { watch, setValue } = useFormContext();
   const { readOnly } = useFormSheet();
   const value: "yes" | "no" | null = watch(name);
+  const inactive = readOnly || disabled;
 
   const set = (v: "yes" | "no") => {
-    if (readOnly) return;
+    if (inactive) return;
     setValue(name, value === v ? null : v, { shouldDirty: true });
   };
 
   return (
-    <span className="inline-flex gap-0.5">
+    <span className={`inline-flex gap-0.5${disabled ? " opacity-30" : ""}`}>
       <button
         type="button"
         onClick={() => set("no")}
-        disabled={readOnly}
+        disabled={inactive}
         className={`w-5 h-5 rounded text-xs font-bold transition-all print:w-3.5 print:h-3.5 print:text-[6pt] ${
           value === "no"
             ? "bg-slate-700 text-white"
             : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-        } ${readOnly ? "cursor-default" : ""}`}
+        } ${inactive ? "cursor-default" : ""}`}
       >
         N
       </button>
       <button
         type="button"
         onClick={() => set("yes")}
-        disabled={readOnly}
+        disabled={inactive}
         className={`w-5 h-5 rounded text-xs font-bold transition-all print:w-3.5 print:h-3.5 print:text-[6pt] ${
           value === "yes"
             ? "bg-blue-600 text-white"
             : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-        } ${readOnly ? "cursor-default" : ""}`}
+        } ${inactive ? "cursor-default" : ""}`}
       >
         J
       </button>

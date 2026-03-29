@@ -17,6 +17,7 @@ import {
 /** Display order: right first */
 const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FsYesNo } from "../primitives/FsYesNo";
+import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
 
 interface FsPainGridProps {
   /** RHF path prefix, e.g. "e4.maxUnassisted" */
@@ -52,17 +53,25 @@ export function FsPainGrid({ prefix }: FsPainGridProps) {
                 return (
                   <tr key={region} className="border-t border-slate-100">
                     <td className="text-slate-600 py-0.5 pr-1">{REGIONS[region]}</td>
-                    {(["pain", "familiarPain", "familiarHeadache"] as const).map((q) =>
-                      questions.includes(q) ? (
+                    {(["pain", "familiarPain", "familiarHeadache"] as const).map((q) => {
+                      if (!questions.includes(q)) {
+                        return (
+                          <td key={q} className="text-center py-0.5">
+                            <span className="text-slate-200">—</span>
+                          </td>
+                        );
+                      }
+                      const path = `${prefix}.${side}.${region}.${q}`;
+                      return (
                         <td key={q} className="text-center py-0.5">
-                          <FsYesNo name={`${prefix}.${side}.${region}.${q}`} />
+                          {q === "pain" ? (
+                            <FsYesNo name={path} />
+                          ) : (
+                            <FsConditionalYesNo name={path} sibling="pain" equals="yes" />
+                          )}
                         </td>
-                      ) : (
-                        <td key={q} className="text-center py-0.5">
-                          <span className="text-slate-200">—</span>
-                        </td>
-                      )
-                    )}
+                      );
+                    })}
                   </tr>
                 );
               })}

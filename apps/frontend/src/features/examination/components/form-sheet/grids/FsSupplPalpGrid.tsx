@@ -12,6 +12,7 @@ import {
   type PainType,
 } from "../../../model/regions";
 import { FsYesNo } from "../primitives/FsYesNo";
+import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
 
 const SIDE_KEYS = ["right", "left"] as const;
 
@@ -46,7 +47,11 @@ export function FsSupplPalpGrid() {
                   <td className="text-slate-600 py-0.5">{PALPATION_SITES[site]}</td>
                   {E10_PAIN_QUESTIONS.map((col: PainType) => (
                     <td key={col} className="text-center py-0.5">
-                      <FsYesNo name={`e10.${side}.${site}.${col}`} />
+                      {col === "pain" ? (
+                        <FsYesNo name={`e10.${side}.${site}.${col}`} />
+                      ) : (
+                        <FsConditionalYesNo name={`e10.${side}.${site}.${col}`} sibling="pain" equals="yes" />
+                      )}
                     </td>
                   ))}
                 </tr>
