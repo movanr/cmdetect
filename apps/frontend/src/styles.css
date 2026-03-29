@@ -133,3 +133,10 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  @page {
+    margin: 8mm;
+    size: A4;
+  }
+}

@@ -142,6 +142,7 @@ export { E8Section } from "./components/sections/E8Section";
 export { E9Section } from "./components/sections/E9Section";
 export { E10Section } from "./components/sections/E10Section";
 export { PrintableExamination } from "./components/summary/PrintableExamination";
+export { DCTMDFormSheet, type DCTMDFormSheetProps } from "./components/form-sheet";
 export { SectionFooter, type SectionFooterProps } from "./components/ui/SectionFooter";
 
 // Labels

@@ -6,7 +6,7 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   AlertDialog,
@@ -34,6 +34,7 @@ import {
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import {
+  DCTMDFormSheet,
   examinationFormConfig,
   ExaminationPersistenceProvider,
   useExaminationPersistenceContext,
@@ -140,7 +141,13 @@ function ExaminationLayout() {
     >
       <FormProvider {...form}>
         <ExaminationPersistenceProvider patientRecordId={id}>
-          <ExaminationContent caseId={id} subSteps={subSteps} />
+          <ExaminationContent
+            caseId={id}
+            subSteps={subSteps}
+            patientName={patientName}
+            patientDob={patientDob}
+            clinicInternalId={record?.clinic_internal_id ?? undefined}
+          />
         </ExaminationPersistenceProvider>
       </FormProvider>
     </CaseLayout>
@@ -151,18 +158,35 @@ function ExaminationLayout() {
  * Inner component that handles hydration loading state.
  * Separated to access persistence context after provider is mounted.
  */
+type ViewMode = "wizard" | "formSheet";
+
 function ExaminationContent({
   caseId,
   subSteps,
+  patientName,
+  patientDob,
+  clinicInternalId,
 }: {
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
+  patientName?: string;
+  patientDob?: string;
+  clinicInternalId?: string;
 }) {
   const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { print, isPrinting } = useBackgroundPrint();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("wizard");
+
+  const handlePrint = useCallback(() => {
+    if (viewMode === "formSheet") {
+      window.print();
+    } else {
+      print(`/cases/${caseId}/print-examination`);
+    }
+  }, [viewMode, caseId, print]);
 
   // Warn on browser tab close / page refresh (SPA navigation is handled by unmount flush)
   useEffect(() => {
@@ -199,23 +223,51 @@ function ExaminationContent({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Sub-step navigation tabs — sticky within the scroll container */}
-      <SubStepTabs
-        caseId={caseId}
-        parentStep="examination"
-        subSteps={subSteps}
-        className="-mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8 sticky top-0 z-10 bg-background"
-      />
+    <div className="space-y-4 print:space-y-0">
+      {/* Sub-step navigation tabs — only in wizard mode */}
+      {viewMode === "wizard" && (
+        <SubStepTabs
+          caseId={caseId}
+          parentStep="examination"
+          subSteps={subSteps}
+          className="-mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8 sticky top-0 z-10 bg-background print:hidden"
+        />
+      )}
 
       {/* Status-conditional action buttons */}
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 print:hidden">
+        {/* View mode toggle */}
+        <div className="mr-auto flex rounded-md border border-input overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setViewMode("wizard")}
+            className={`px-3 py-1 text-xs font-medium transition-colors ${
+              viewMode === "wizard"
+                ? "bg-primary text-primary-foreground"
+                : "bg-background text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            Schritt-für-Schritt
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("formSheet")}
+            className={`px-3 py-1 text-xs font-medium transition-colors ${
+              viewMode === "formSheet"
+                ? "bg-primary text-primary-foreground"
+                : "bg-background text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            Formularbogen
+          </button>
+        </div>
+
         {status === "completed" ? (
           <>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => print(`/cases/${caseId}/print-examination`)}
+              onClick={handlePrint}
               disabled={isPrinting}
             >
               {isPrinting ? "Wird gedruckt…" : "Drucken / PDF"}
@@ -234,8 +286,16 @@ function ExaminationContent({
         )}
       </div>
 
-      {/* Child route content */}
-      <Outlet />
+      {/* Content — wizard (child routes) or form sheet */}
+      {viewMode === "wizard" ? (
+        <Outlet />
+      ) : (
+        <DCTMDFormSheet
+          patientName={patientName}
+          patientDob={patientDob}
+          clinicInternalId={clinicInternalId}
+        />
+      )}
 
       <AlertDialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
         <AlertDialogContent>
