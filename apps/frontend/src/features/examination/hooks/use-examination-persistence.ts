@@ -48,6 +48,12 @@ export function useExaminationPersistence({
   examinedBy,
 }: UseExaminationPersistenceOptions): UseExaminationPersistenceResult {
   const form = useFormContext<FormValues>();
+  // Ref for form methods — FormProvider spreads methods into a new object on every
+  // parent re-render, making the context reference unstable. The underlying RHF
+  // form state is the same regardless, so a ref avoids effect re-runs.
+  const formRef = useRef(form);
+  formRef.current = form;
+
   const [isHydrated, setIsHydrated] = useState(false);
   const [completedSections, setCompletedSections] = useState<SectionId[]>([]);
   const hasUnsavedBackendChangesRef = useRef(false);
@@ -69,18 +75,19 @@ export function useExaminationPersistence({
     if (isHydrated || !isFetched) return;
 
     if (backendResponse?.responseData) {
-      form.reset(backendResponse.responseData);
+      formRef.current.reset(backendResponse.responseData);
       const sections = backendResponse.completedSections;
       setCompletedSections(sections); // eslint-disable-line react-hooks/set-state-in-effect -- one-time hydration
       completedSectionsRef.current = sections;
     }
 
     setIsHydrated(true);
-  }, [isFetched, isHydrated, backendResponse, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFetched, isHydrated, backendResponse]);
 
   // Build upsert params from current state, preserving backend status
   const buildUpsertParams = useCallback(() => {
-    const formValues = form.getValues();
+    const formValues = formRef.current.getValues();
     const sections = completedSectionsRef.current;
     // Preserve backend status (e.g. "completed") — only compute if no backend record yet
     const status: ExaminationStatus =
@@ -92,7 +99,8 @@ export function useExaminationPersistence({
       status,
       completedSections: sections,
     };
-  }, [form, patientRecordId, examinedBy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientRecordId, examinedBy]);
 
   // Cancel any pending debounce timer
   const cancelDebounce = useCallback(() => {
@@ -129,11 +137,10 @@ export function useExaminationPersistence({
   }, [examinedBy, isHydrated, cancelDebounce]);
 
   // Auto-save to backend on form changes (debounced).
-  // Effect only re-runs when isHydrated changes (once), not on cache updates.
   useEffect(() => {
     if (!isHydrated) return;
 
-    const subscription = form.watch(() => {
+    const subscription = formRef.current.watch(() => {
       hasUnsavedBackendChangesRef.current = true;
 
       cancelDebounce();
@@ -159,14 +166,14 @@ export function useExaminationPersistence({
         upsertMutationRef.current.mutate(buildUpsertParamsRef.current());
       }
     };
-  }, [isHydrated, form, cancelDebounce]);
+  }, [isHydrated, cancelDebounce]);
 
   // Save section to backend and mark it completed
   const saveSection = useCallback(
     async (sectionId: SectionId) => {
       cancelDebounce();
 
-      const formValues = form.getValues();
+      const formValues = formRef.current.getValues();
       const newCompletedSections = completedSections.includes(sectionId)
         ? completedSections
         : [...completedSections, sectionId];
@@ -187,14 +194,14 @@ export function useExaminationPersistence({
       completedSectionsRef.current = newCompletedSections;
       hasUnsavedBackendChangesRef.current = false;
     },
-    [form, completedSections, upsertMutation, patientRecordId, examinedBy, cancelDebounce]
+    [completedSections, upsertMutation, patientRecordId, examinedBy, cancelDebounce]
   );
 
   // Complete the entire examination
   const completeExaminationFn = useCallback(async () => {
     cancelDebounce();
 
-    const formValues = form.getValues();
+    const formValues = formRef.current.getValues();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const lastSectionId = SECTION_IDS.at(-1)!;
     const finalCompletedSections = completedSections.includes(lastSectionId)
@@ -227,7 +234,6 @@ export function useExaminationPersistence({
     completedSectionsRef.current = finalCompletedSections;
     hasUnsavedBackendChangesRef.current = false;
   }, [
-    form,
     completedSections,
     upsertMutation,
     completeMutation,

@@ -139,6 +139,29 @@ function getStepInstancesForExamination(
   });
 }
 
+// Module-level caches — allInstances is a constant, so results for a given
+// stepId/sectionId never change. Returning stable references prevents
+// useWatch from re-subscribing on every render.
+const stepInstanceCache = new Map<ExaminationStepId, QuestionInstance[]>();
+function getCachedStepInstances(stepId: ExaminationStepId): QuestionInstance[] {
+  let result = stepInstanceCache.get(stepId);
+  if (!result) {
+    result = getStepInstancesForExamination(allInstances, stepId);
+    stepInstanceCache.set(stepId, result);
+  }
+  return result;
+}
+
+const sectionInstanceCache = new Map<string, QuestionInstance[]>();
+function getCachedSectionInstances(sectionId: string): QuestionInstance[] {
+  let result = sectionInstanceCache.get(sectionId);
+  if (!result) {
+    result = allInstances.filter((i) => i.path.startsWith(`${sectionId}.`));
+    sectionInstanceCache.set(sectionId, result);
+  }
+  return result;
+}
+
 /**
  * Hook for components that need examination form utilities.
  * Must be used within a FormProvider (provided by ExaminationForm).
@@ -231,15 +254,15 @@ export function useExaminationForm() {
     return result.valid;
   };
 
-  // Get instances for a specific step (memoized — depends only on module-level constants)
+  // Get instances for a specific step (cached — same stepId always returns same array reference)
   const getInstancesForStep = useCallback(
-    (stepId: ExaminationStepId) => getStepInstancesForExamination(allInstances, stepId),
+    (stepId: ExaminationStepId) => getCachedStepInstances(stepId),
     []
   );
 
-  // Get all instances for a specific section (memoized — depends only on module-level constants)
+  // Get all instances for a specific section (cached — same sectionId always returns same array reference)
   const getInstancesForSection = useCallback(
-    (sectionId: SectionId) => allInstances.filter((i) => i.path.startsWith(`${sectionId}.`)),
+    (sectionId: SectionId) => getCachedSectionInstances(sectionId),
     []
   );
 
