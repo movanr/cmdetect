@@ -6,8 +6,9 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,13 +34,13 @@ import {
 } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import {
-  DCTMDFormSheet,
   examinationFormConfig,
   ExaminationPersistenceProvider,
   generateFormSheetPDF,
   useExaminationPersistenceContext,
   useExaminationResponse,
 } from "../features/examination";
+import { ExaminationViewProvider } from "../features/examination/contexts/ExaminationViewContext";
 import { BehandlerSelector } from "../features/examination/components/BehandlerSelector";
 import { getTranslations } from "@/config/i18n";
 import { useSession } from "@/lib/auth";
@@ -178,8 +179,6 @@ function ExaminationLayout() {
  * Inner component that handles hydration loading state.
  * Separated to access persistence context after provider is mounted.
  */
-type ViewMode = "wizard" | "formSheet";
-
 function ExaminationContent({
   caseId,
   subSteps,
@@ -207,15 +206,22 @@ function ExaminationContent({
   const navigate = useNavigate();
   const t = getTranslations();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    const stored = sessionStorage.getItem("examination-view-mode");
-    return stored === "formSheet" ? "formSheet" : "wizard";
-  });
 
-  const setViewModeAndPersist = (mode: ViewMode) => {
-    setViewMode(mode);
-    sessionStorage.setItem("examination-view-mode", mode);
-  };
+  // Detect if we're on a guided section route (e1-e10) vs the form sheet index
+  const isGuidedMode = /\/e\d+/.test(pathname);
+
+  const navigateToFormSheet = useCallback(() => {
+    navigate({ to: "/cases/$id/examination", params: { id: caseId } });
+  }, [navigate, caseId]);
+
+  const navigateToGuidedMode = useCallback(() => {
+    navigate({ to: "/cases/$id/examination/e1", params: { id: caseId } });
+  }, [navigate, caseId]);
+
+  const viewContextValue = useMemo(
+    () => ({ patientName, patientDob, clinicInternalId, navigateToGuidedMode }),
+    [patientName, patientDob, clinicInternalId, navigateToGuidedMode],
+  );
 
   const handleExportPDF = useCallback(() => {
     const examDate = new Date().toLocaleDateString("de-DE", {
@@ -283,101 +289,79 @@ function ExaminationContent({
   }
 
   return (
-    <div className="space-y-4 print:space-y-0">
-      {/* Sub-step navigation tabs — only in wizard mode */}
-      {viewMode === "wizard" && (
-        <SubStepTabs
-          caseId={caseId}
-          parentStep="examination"
-          subSteps={subSteps}
-          className="-mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8 sticky top-0 z-10 bg-background print:hidden"
-        />
-      )}
-
-      {/* Status-conditional action buttons */}
-      <div className="flex items-center justify-end gap-2 print:hidden">
-        {/* Behandler selector — only for non-physicians (assistants) */}
-        {!isPhysician && (
-          <BehandlerSelector
-            value={examinedBy}
-            onChange={onExaminedByChange}
-            disabled={isExaminationCompleted}
+    <ExaminationViewProvider {...viewContextValue}>
+      <div className="space-y-4 print:space-y-0">
+        {/* Sub-step navigation tabs — only in guided mode */}
+        {isGuidedMode && (
+          <SubStepTabs
+            caseId={caseId}
+            parentStep="examination"
+            subSteps={subSteps}
+            className="-mx-4 xl:-mx-8 mb-6 -mt-6 xl:-mt-8 sticky top-0 z-10 bg-background print:hidden"
           />
         )}
 
-        {/* View mode toggle */}
-        <div className="ml-auto flex rounded-md border border-input overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setViewModeAndPersist("wizard")}
-            className={`px-3 py-1 text-xs font-medium transition-colors ${
-              viewMode === "wizard"
-                ? "bg-primary text-primary-foreground"
-                : "bg-background text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            Schritt-für-Schritt
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewModeAndPersist("formSheet")}
-            className={`px-3 py-1 text-xs font-medium transition-colors ${
-              viewMode === "formSheet"
-                ? "bg-primary text-primary-foreground"
-                : "bg-background text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            Formularbogen
-          </button>
+        {/* Status-conditional action buttons */}
+        <div className="flex items-center justify-end gap-2 print:hidden">
+          {/* Back to form sheet — only in guided mode */}
+          {isGuidedMode && (
+            <Button variant="ghost" size="sm" onClick={navigateToFormSheet} className="mr-auto">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Formularbogen
+            </Button>
+          )}
+
+          {/* Behandler selector — only for non-physicians (assistants) */}
+          {!isPhysician && (
+            <BehandlerSelector
+              value={examinedBy}
+              onChange={onExaminedByChange}
+              disabled={isExaminationCompleted}
+            />
+          )}
+
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportPDF}>
+              PDF Export
+            </Button>
+
+            {status === "completed" ? (
+              <Button
+                size="sm"
+                onClick={() => navigate({ to: "/cases/$id/evaluation", params: { id: caseId } })}
+              >
+                Zur Auswertung
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setShowCompleteDialog(true)}>
+                Untersuchung abschließen
+              </Button>
+            )}
+          </div>
         </div>
 
-        <Button variant="outline" size="sm" onClick={handleExportPDF}>
-          PDF Export
-        </Button>
-
-        {status === "completed" ? (
-          <Button
-            size="sm"
-            onClick={() => navigate({ to: "/cases/$id/evaluation", params: { id: caseId } })}
-          >
-            Zur Auswertung
-          </Button>
-        ) : (
-          <Button variant="outline" size="sm" onClick={() => setShowCompleteDialog(true)}>
-            Untersuchung abschließen
-          </Button>
-        )}
-      </div>
-
-      {/* Content — wizard (child routes) or form sheet */}
-      {viewMode === "wizard" ? (
+        {/* Content — always rendered via child routes (index = form sheet, e1-e10 = guided) */}
         <Outlet />
-      ) : (
-        <DCTMDFormSheet
-          patientName={patientName}
-          patientDob={patientDob}
-          clinicInternalId={clinicInternalId}
-        />
-      )}
 
-      <AlertDialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Untersuchung abschließen?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Sie können die Untersuchung jetzt abschließen. Abschnitte, die noch nicht
-              ausgefüllt wurden, bleiben leer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCompleteExamination} disabled={isSaving}>
-              Abschließen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <AlertDialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Untersuchung abschließen?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Sie können die Untersuchung jetzt abschließen. Abschnitte, die noch nicht
+                ausgefüllt wurden, bleiben leer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+              <AlertDialogAction onClick={handleCompleteExamination} disabled={isSaving}>
+                Abschließen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-    </div>
+      </div>
+    </ExaminationViewProvider>
   );
 }

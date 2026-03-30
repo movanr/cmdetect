@@ -103,6 +103,10 @@ export {
   useExaminationPersistenceContext,
 } from "./contexts/ExaminationPersistenceContext";
 export {
+  ExaminationViewProvider,
+  useExaminationView,
+} from "./contexts/ExaminationViewContext";
+export {
   examinationStepSearchSchema,
   useExaminationRouteNavigation,
 } from "./hooks/use-examination-route-navigation";

@@ -16,10 +16,10 @@ export const Route = createFileRoute("/cases_/$id/examination/e10")({
 
 function ExaminationE10Page() {
   const { id } = Route.useParams();
-  const { handleComplete, handleBack, isLastSection } =
+  const { handleComplete, handleBack } =
     useExaminationRouteNavigation({ section: "e10", id });
 
   return (
-    <E10Section onComplete={handleComplete} onBack={handleBack} isLastSection={isLastSection} />
+    <E10Section onComplete={handleComplete} onBack={handleBack} isLastSection={false} />
   );
 }

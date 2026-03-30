@@ -50,7 +50,7 @@ const EXAMINATION_ROUTES: Record<string, string> = {
   e10: "/cases/$id/examination/e10",
 };
 
-const POST_EXAMINATION_ROUTE = "/cases/$id/evaluation";
+const FORM_SHEET_ROUTE = "/cases/$id/examination";
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -70,10 +70,10 @@ interface UseExaminationRouteNavigationOptions {
 interface ExaminationRouteNavigation {
   /** Navigate to a step within this section. 0-indexed input → 1-indexed URL. null = summary view. */
   navigateToStep?: (stepIndex: number | null) => void;
-  /** Save section (unless skipSave) and navigate forward. Last section calls completeExamination. */
+  /** Save section (unless skipSave) and navigate back to the form sheet. */
   handleComplete: () => Promise<void>;
-  /** Navigate to previous section. undefined for the first section. */
-  handleBack?: () => void;
+  /** Navigate back to the form sheet. */
+  handleBack: () => void;
   /** True when this is the first routable section (E1) */
   isFirstSection: boolean;
   /** True when this is the last routable section (E10) */
@@ -87,7 +87,7 @@ export function useExaminationRouteNavigation({
   skipSave = false,
 }: UseExaminationRouteNavigationOptions): ExaminationRouteNavigation {
   const navigate = useNavigate();
-  const { saveSection, completeExamination } = useExaminationPersistenceContext();
+  const { saveSection } = useExaminationPersistenceContext();
 
   const currentIndex = ROUTABLE_SECTIONS.indexOf(section);
   const isFirstSection = currentIndex === 0;
@@ -111,27 +111,18 @@ export function useExaminationRouteNavigation({
       }
     : undefined;
 
-  // --- handleComplete ---
+  // --- handleComplete: save section and return to form sheet ---
   const handleComplete = async () => {
-    if (isLastSection) {
-      await completeExamination();
-      nav({ to: POST_EXAMINATION_ROUTE, params: { id } });
-    } else {
-      if (!skipSave) {
-        await saveSection(section);
-      }
-      const nextSection = ROUTABLE_SECTIONS[currentIndex + 1];
-      nav({ to: EXAMINATION_ROUTES[nextSection], params: { id }, search: {} });
+    if (!skipSave) {
+      await saveSection(section);
     }
+    nav({ to: FORM_SHEET_ROUTE, params: { id } });
   };
 
-  // --- handleBack ---
-  const handleBack = isFirstSection
-    ? undefined
-    : () => {
-        const prevSection = ROUTABLE_SECTIONS[currentIndex - 1];
-        nav({ to: EXAMINATION_ROUTES[prevSection], params: { id }, search: {} });
-      };
+  // --- handleBack: return to form sheet ---
+  const handleBack = () => {
+    nav({ to: FORM_SHEET_ROUTE, params: { id } });
+  };
 
   return {
     navigateToStep,

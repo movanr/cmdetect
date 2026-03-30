@@ -21,7 +21,7 @@ export const Route = createFileRoute("/cases_/$id/examination/e9")({
 function ExaminationE9Page() {
   const { id } = Route.useParams();
   const { step } = Route.useSearch();
-  const { navigateToStep, handleComplete, handleBack, isLastSection } =
+  const { navigateToStep, handleComplete, handleBack } =
     useExaminationRouteNavigation({ section: "e9", id, hasSteps: true, skipSave: true });
 
   return (
@@ -30,7 +30,7 @@ function ExaminationE9Page() {
       onStepChange={navigateToStep}
       onComplete={handleComplete}
       onBack={handleBack}
-      isLastSection={isLastSection}
+      isLastSection={false}
     />
   );
 }

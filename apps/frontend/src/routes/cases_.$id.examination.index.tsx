@@ -1,16 +1,57 @@
 /**
  * Examination Index Route
  *
- * Redirects to the first section (E1) when accessing /cases/$id/examination directly.
+ * Renders the form sheet as the default examination view with an optional
+ * entry point into the guided step-by-step mode.
  */
 
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { createFileRoute } from "@tanstack/react-router";
+import { ClipboardList } from "lucide-react";
+import { DCTMDFormSheet, useExaminationPersistenceContext } from "../features/examination";
+import { useExaminationView } from "../features/examination/contexts/ExaminationViewContext";
 
 export const Route = createFileRoute("/cases_/$id/examination/")({
-  component: ExaminationIndexRedirect,
+  component: ExaminationFormSheetView,
 });
 
-function ExaminationIndexRedirect() {
-  const { id } = Route.useParams();
-  return <Navigate to="/cases/$id/examination/e1" params={{ id }} replace />;
+function ExaminationFormSheetView() {
+  const { patientName, patientDob, clinicInternalId, navigateToGuidedMode } = useExaminationView();
+  const { status } = useExaminationPersistenceContext();
+  const isCompleted = status === "completed";
+
+  return (
+    <div>
+      {/* Guided mode entry point */}
+      <div className="max-w-4xl mx-auto mb-6 flex items-center gap-5 rounded-lg border border-primary/20 bg-primary/5 px-5 py-4 print:hidden">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+          <ClipboardList className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0 space-y-1">
+          <p className="text-sm font-semibold">Schritt-für-Schritt-Untersuchung</p>
+          <p className="text-sm text-muted-foreground">
+            Mit DC/TMD-Untersuchungsprotokoll als integrierte Anweisungen, Erläuterungen und
+            Abbildungen an allen Schritten und in vollständiger Form als Nachschlagewerk.
+          </p>
+          <p className="text-xs text-muted-foreground/70">
+            Eingaben werden automatisch in den Formularbogen übernommen — Werte können auch direkt
+            im Formularbogen eingetragen werden.
+          </p>
+        </div>
+        <Button
+          variant={isCompleted ? "outline" : "default"}
+          className="shrink-0"
+          onClick={navigateToGuidedMode}
+        >
+          {isCompleted ? "Untersuchung erneut öffnen" : "Untersuchung starten"}
+        </Button>
+      </div>
+
+      <DCTMDFormSheet
+        patientName={patientName}
+        patientDob={patientDob}
+        clinicInternalId={clinicInternalId}
+      />
+    </div>
+  );
 }
