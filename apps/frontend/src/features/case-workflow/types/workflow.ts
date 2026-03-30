@@ -5,7 +5,7 @@
  * Steps follow clinical pattern: Anamnesis -> Examination -> Evaluation -> Documentation
  */
 
-import { getSectionTitle, SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
+import { getSectionCardTitle, SECTIONS, type SectionId } from "@cmdetect/dc-tmd";
 import type { QuestionnaireResponse } from "../../questionnaire-viewer/hooks/useQuestionnaireResponses";
 
 // Main workflow steps
@@ -82,16 +82,16 @@ export const MAIN_STEPS: StepDefinition[] = [
     label: "Untersuchung",
     order: 2,
     subSteps: [
-      { id: SECTIONS.e1, label: getSectionTitle(SECTIONS.e1), order: 1, route: SECTIONS.e1 },
-      { id: SECTIONS.e2, label: getSectionTitle(SECTIONS.e2), order: 2, route: SECTIONS.e2 },
-      { id: SECTIONS.e3, label: getSectionTitle(SECTIONS.e3), order: 3, route: SECTIONS.e3 },
-      { id: SECTIONS.e4, label: getSectionTitle(SECTIONS.e4), order: 4, route: SECTIONS.e4 },
-      { id: SECTIONS.e5, label: getSectionTitle(SECTIONS.e5), order: 5, route: SECTIONS.e5 },
-      { id: SECTIONS.e6, label: getSectionTitle(SECTIONS.e6), order: 6, route: SECTIONS.e6 },
-      { id: SECTIONS.e7, label: getSectionTitle(SECTIONS.e7), order: 7, route: SECTIONS.e7 },
-      { id: SECTIONS.e8, label: getSectionTitle(SECTIONS.e8), order: 8, route: SECTIONS.e8 },
-      { id: SECTIONS.e9, label: getSectionTitle(SECTIONS.e9), order: 9, route: SECTIONS.e9 },
-      { id: SECTIONS.e10, label: getSectionTitle(SECTIONS.e10), order: 10, route: SECTIONS.e10 },
+      { id: SECTIONS.e1, label: getSectionCardTitle(SECTIONS.e1), order: 1, route: SECTIONS.e1 },
+      { id: SECTIONS.e2, label: getSectionCardTitle(SECTIONS.e2), order: 2, route: SECTIONS.e2 },
+      { id: SECTIONS.e3, label: getSectionCardTitle(SECTIONS.e3), order: 3, route: SECTIONS.e3 },
+      { id: SECTIONS.e4, label: getSectionCardTitle(SECTIONS.e4), order: 4, route: SECTIONS.e4 },
+      { id: SECTIONS.e5, label: getSectionCardTitle(SECTIONS.e5), order: 5, route: SECTIONS.e5 },
+      { id: SECTIONS.e6, label: getSectionCardTitle(SECTIONS.e6), order: 6, route: SECTIONS.e6 },
+      { id: SECTIONS.e7, label: getSectionCardTitle(SECTIONS.e7), order: 7, route: SECTIONS.e7 },
+      { id: SECTIONS.e8, label: getSectionCardTitle(SECTIONS.e8), order: 8, route: SECTIONS.e8 },
+      { id: SECTIONS.e9, label: getSectionCardTitle(SECTIONS.e9), order: 9, route: SECTIONS.e9 },
+      { id: SECTIONS.e10, label: getSectionCardTitle(SECTIONS.e10), order: 10, route: SECTIONS.e10 },
     ],
   },
   {

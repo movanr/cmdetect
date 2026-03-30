@@ -6,6 +6,7 @@
  */
 
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@tanstack/react-router";
 import type { SubStepDefinition } from "../types/workflow";
 
@@ -35,12 +36,13 @@ export function SubStepTabs({
     >
       <nav className="flex gap-1 px-4" aria-label="Sub-step navigation">
         {subSteps.map((subStep) => {
-          const shortLabel = subStep.label.includes(": ")
-            ? subStep.label.split(": ")[0]
-            : subStep.label;
-          return (
+          const separatorIdx = subStep.label.indexOf(" - ");
+          const [prefix, subtitle] = separatorIdx !== -1
+            ? [subStep.label.slice(0, separatorIdx), subStep.label.slice(separatorIdx + 3)]
+            : [subStep.label, undefined];
+
+          const link = (
             <Link
-              key={subStep.id}
               to={`/cases/$id/${parentStep}/${subStep.route}` as "/cases/$id"}
               params={{ id: caseId }}
               className={cn(
@@ -52,8 +54,17 @@ export function SubStepTabs({
                 className: "!text-primary bg-background font-semibold border-b-2 !border-primary",
               }}
             >
-              {shortLabel}
+              {({ isActive }) => (isActive ? subStep.label : prefix)}
             </Link>
+          );
+
+          if (!subtitle) return <span key={subStep.id}>{link}</span>;
+
+          return (
+            <Tooltip key={subStep.id}>
+              <TooltipTrigger asChild>{link}</TooltipTrigger>
+              <TooltipContent side="bottom">{subtitle}</TooltipContent>
+            </Tooltip>
           );
         })}
       </nav>
