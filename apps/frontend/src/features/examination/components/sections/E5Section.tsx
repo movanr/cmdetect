@@ -1,8 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { MOVEMENT_TYPE_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
@@ -473,19 +471,6 @@ export function E5Section({
         <div className="flex items-center justify-between">
           <CardTitle>{getSectionCardTitle(SECTIONS.e5)}</CardTitle>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="alle-regionen-header-e5"
-                checked={includeAllRegions}
-                onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
-              />
-              <Label
-                htmlFor="alle-regionen-header-e5"
-                className="text-xs text-muted-foreground cursor-pointer"
-              >
-                Alle Regionen
-              </Label>
-            </div>
             <SectionCommentButton />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e5" }}>
@@ -539,70 +524,71 @@ export function E5Section({
                   <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
                 </button>
                 <div className="p-4 space-y-4">
+                  {/* Measurement instruction */}
+                  {renderMeasurementInstruction(stepId)}
 
-                {/* Measurement instruction */}
-                {renderMeasurementInstruction(stepId)}
+                  {/* Measurement content */}
+                  <MeasurementStep instances={stepInstances} />
 
-                {/* Measurement content */}
-                <MeasurementStep instances={stepInstances} />
-
-                {/* Interview section — hidden when measurement refused */}
-                {stepPairedInterviewId && !isMeasurementRefused && (
-                  <>
-                    <div className="border-t pt-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="secondary">{config.badge}</Badge>
-                        <h4 className="font-medium text-sm">Schmerzbefragung</h4>
+                  {/* Interview section — hidden when measurement refused */}
+                  {stepPairedInterviewId && !isMeasurementRefused && (
+                    <>
+                      <div className="pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Badge variant="secondary">{config.badge}</Badge>
+                          <h4 className="font-medium text-sm">Schmerzbefragung</h4>
+                        </div>
                       </div>
-                    </div>
-                    <IntroPanel title="Anweisungen">
-                      <PainInterviewBlock
-                        instruction={E5_RICH_INSTRUCTIONS.painInterview}
-                        showFlow={true}
+                      <IntroPanel title="Anweisungen">
+                        <PainInterviewBlock
+                          instruction={E5_RICH_INSTRUCTIONS.painInterview}
+                          showFlow={true}
+                        />
+                      </IntroPanel>
+                      <InterviewContent
+                        stepInstances={stepInterviewInstances}
+                        regions={regions}
+                        expanded={expanded}
+                        onExpandChange={handleExpandChange}
+                        incompleteRegions={incompleteRegions}
+                        onNoMorePainRegions={handleNoMorePainRegions}
+                        onClearIncompleteRegions={() => setIncompleteRegions([])}
+                        includeAllRegions={includeAllRegions}
+                        onIncludeAllRegionsChange={setIncludeAllRegions}
                       />
-                    </IntroPanel>
-                    <InterviewContent
-                      stepInstances={stepInterviewInstances}
-                      regions={regions}
-                      expanded={expanded}
-                      onExpandChange={handleExpandChange}
-                      incompleteRegions={incompleteRegions}
-                      onNoMorePainRegions={handleNoMorePainRegions}
-                      onClearIncompleteRegions={() => setIncompleteRegions([])}
-                    />
-                  </>
-                )}
+                    </>
+                  )}
 
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleBack}
-                    disabled={isFirstStep && (isFirstSection || !onBack)}
-                    className="text-muted-foreground"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Zurück
-                  </Button>
-
-                  <div className="flex items-center gap-2">
-                    {!isCurrentStepComplete && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={performSkip}
-                        className="text-muted-foreground text-xs"
-                      >
-                        Schritt überspringen
-                      </Button>
-                    )}
-                    <Button type="button" onClick={handleNext}>
-                      {isLastStep ? "Abschließen" : "Weiter"}
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleBack}
+                      disabled={isFirstStep && (isFirstSection || !onBack)}
+                      className="text-muted-foreground"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Zurück
                     </Button>
+
+                    <div className="flex items-center gap-2">
+                      {!isCurrentStepComplete && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={performSkip}
+                          className="text-muted-foreground text-xs"
+                        >
+                          Schritt überspringen
+                        </Button>
+                      )}
+                      <Button type="button" onClick={handleNext}>
+                        {isLastStep ? "Abschließen" : "Weiter"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
             );

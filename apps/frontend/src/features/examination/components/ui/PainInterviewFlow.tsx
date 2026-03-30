@@ -371,7 +371,7 @@ export function IntroPanel({
   title: string;
   children: React.ReactNode;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   return (
     <div className="rounded-lg border border-muted bg-muted/30">
       <button

@@ -30,8 +30,8 @@ function ExaminationFormSheetView() {
         <div className="flex-1 min-w-0 space-y-1">
           <p className="text-sm font-semibold">Schritt-für-Schritt-Untersuchung</p>
           <p className="text-sm text-muted-foreground">
-            Mit DC/TMD-Untersuchungsprotokoll als integrierte Anweisungen, Erläuterungen und
-            Abbildungen an allen Schritten und in vollständiger Form als Nachschlagewerk.
+            DC/TMD-Untersuchungsprotokoll als integrierte Anweisungen, Erläuterungen und Abbildungen
+            an allen Untersuchungsschritten sowie in vollständiger Form als Nachschlagewerk.
           </p>
           <p className="text-xs text-muted-foreground/70">
             Eingaben werden automatisch in den Formularbogen übernommen — Werte können auch direkt

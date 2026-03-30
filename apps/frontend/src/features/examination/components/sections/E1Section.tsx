@@ -93,11 +93,11 @@ function stepHasData(stepId: E1StepId, getValue: (path: string) => unknown): boo
   if (stepId === "e1a") {
     const right = getValue("e1.painLocation.right") as string[] | undefined;
     const left = getValue("e1.painLocation.left") as string[] | undefined;
-    return (right != null && right.length > 0) && (left != null && left.length > 0);
+    return right != null && right.length > 0 && left != null && left.length > 0;
   } else {
     const right = getValue("e1.headacheLocation.right") as string[] | undefined;
     const left = getValue("e1.headacheLocation.left") as string[] | undefined;
-    return (right != null && right.length > 0) && (left != null && left.length > 0);
+    return right != null && right.length > 0 && left != null && left.length > 0;
   }
 }
 
@@ -163,7 +163,9 @@ export function E1Section({
   // Watch values for reactive updates (field-level subscriptions only)
   const painRightValues = useWatch({ name: "e1.painLocation.right" }) as string[] | undefined;
   const painLeftValues = useWatch({ name: "e1.painLocation.left" }) as string[] | undefined;
-  const headacheRightValues = useWatch({ name: "e1.headacheLocation.right" }) as string[] | undefined;
+  const headacheRightValues = useWatch({ name: "e1.headacheLocation.right" }) as
+    | string[]
+    | undefined;
   const headacheLeftValues = useWatch({ name: "e1.headacheLocation.left" }) as string[] | undefined;
 
   // Derived state
@@ -357,6 +359,23 @@ export function E1Section({
               </div>
             </div>
           </div>
+
+          {/* Toggle for additional regions */}
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="e1-alle-regionen"
+                checked={includeAllRegions}
+                onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
+              />
+              <Label
+                htmlFor="e1-alle-regionen"
+                className="text-xs text-muted-foreground cursor-pointer"
+              >
+                Optionale Gebiete anzeigen
+              </Label>
+            </div>
+          </div>
         </div>
       );
     }
@@ -411,19 +430,6 @@ export function E1Section({
         <div className="flex items-center justify-between">
           <CardTitle>{getSectionCardTitle(SECTIONS.e1)}</CardTitle>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="e1-alle-regionen"
-                checked={includeAllRegions}
-                onCheckedChange={(checked) => setIncludeAllRegions(checked === true)}
-              />
-              <Label
-                htmlFor="e1-alle-regionen"
-                className="text-xs text-muted-foreground cursor-pointer"
-              >
-                Alle Regionen
-              </Label>
-            </div>
             <SectionCommentButton />
             <Button variant="ghost" size="sm" asChild>
               <Link to="/protocol/$section" params={{ section: "e1" }}>
@@ -472,42 +478,41 @@ export function E1Section({
                   <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
                 </button>
                 <div className="p-4 space-y-4">
+                  {/* Content */}
+                  {renderStepContent(stepId)}
 
-                {/* Content */}
-                {renderStepContent(stepId)}
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  {/* Left: Back button */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleBack}
-                    disabled={isFirstStep && (isFirstSection || !onBack)}
-                    className="text-muted-foreground"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Zurück
-                  </Button>
-
-                  {/* Right: skip + Next/Abschließen buttons */}
-                  <div className="flex items-center gap-2">
-                    {!isCurrentStepComplete && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={performSkip}
-                        className="text-muted-foreground text-xs"
-                      >
-                        Schritt überspringen
-                      </Button>
-                    )}
-                    <Button type="button" onClick={handleNext}>
-                      {isLastStep ? "Abschließen" : "Weiter"}
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    {/* Left: Back button */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleBack}
+                      disabled={isFirstStep && (isFirstSection || !onBack)}
+                      className="text-muted-foreground"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Zurück
                     </Button>
+
+                    {/* Right: skip + Next/Abschließen buttons */}
+                    <div className="flex items-center gap-2">
+                      {!isCurrentStepComplete && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={performSkip}
+                          className="text-muted-foreground text-xs"
+                        >
+                          Schritt überspringen
+                        </Button>
+                      )}
+                      <Button type="button" onClick={handleNext}>
+                        {isLastStep ? "Abschließen" : "Weiter"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
                 </div>
               </div>
             );
@@ -527,7 +532,7 @@ export function E1Section({
       </CardContent>
 
       {/* Section-level footer */}
-      {(allComplete || sectionIsDone) ? (
+      {allComplete || sectionIsDone ? (
         <SectionFooter onNext={onComplete} onBack={onBack} isFirstStep={isFirstSection} />
       ) : (
         <CardFooter className="flex justify-end border-t pt-4">

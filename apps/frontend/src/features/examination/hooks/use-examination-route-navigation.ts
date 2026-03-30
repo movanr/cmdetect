@@ -111,17 +111,27 @@ export function useExaminationRouteNavigation({
       }
     : undefined;
 
-  // --- handleComplete: save section and return to form sheet ---
+  // --- handleComplete: save section and navigate to next section, or form sheet if last ---
   const handleComplete = async () => {
     if (!skipSave) {
       await saveSection(section);
     }
-    nav({ to: FORM_SHEET_ROUTE, params: { id } });
+    if (isLastSection) {
+      nav({ to: FORM_SHEET_ROUTE, params: { id } });
+    } else {
+      const nextSection = ROUTABLE_SECTIONS[currentIndex + 1];
+      nav({ to: EXAMINATION_ROUTES[nextSection], params: { id }, search: {} });
+    }
   };
 
-  // --- handleBack: return to form sheet ---
+  // --- handleBack: go to previous section, or form sheet if first ---
   const handleBack = () => {
-    nav({ to: FORM_SHEET_ROUTE, params: { id } });
+    if (isFirstSection) {
+      nav({ to: FORM_SHEET_ROUTE, params: { id } });
+    } else {
+      const prevSection = ROUTABLE_SECTIONS[currentIndex - 1];
+      nav({ to: EXAMINATION_ROUTES[prevSection], params: { id }, search: {} });
+    }
   };
 
   return {

@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { AlertTriangle, Circle, MoveRight, PenLine } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertTriangle, Circle, MoveRight, PenLine } from "lucide-react";
+import { useState } from "react";
 import { IMAGE_CONFIGS, REGION_ORDER, SEVERITY_SEGMENTS } from "../constants";
 import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
 import type { ImageId, PainDrawingData } from "../types";
@@ -34,9 +34,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
         <CardContent className="space-y-4">
           {/* Severity Scale */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">
-              Betroffene Regionen
-            </p>
+            <p className="text-sm text-muted-foreground mb-2">Betroffene Regionen</p>
             <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
               {SEVERITY_SEGMENTS.map((segment, index) => {
                 const isActive = index === activeSegmentIndex;
@@ -89,9 +87,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
           {score.patterns.hasWidespreadPain && (
             <div className="flex items-center justify-center gap-2 text-red-600 bg-red-50 py-2 px-4 rounded-md">
               <AlertTriangle className="size-5" />
-              <span className="font-medium">
-                Schmerz in mehreren Körperbereichen
-              </span>
+              <span className="font-medium">Schmerz in mehreren Körperbereichen</span>
             </div>
           )}
 
@@ -111,22 +107,14 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
       {/* Region Viewer Card */}
       <Card>
         <CardContent className="pt-6">
-          <Tabs
-            value={selectedRegion}
-            onValueChange={(v) => setSelectedRegion(v as ImageId)}
-          >
+          <Tabs value={selectedRegion} onValueChange={(v) => setSelectedRegion(v as ImageId)}>
             {/* Tab Navigation */}
             <TabsList className="grid w-full grid-cols-5 mb-4">
               {REGION_ORDER.map((regionId) => {
                 const config = IMAGE_CONFIGS[regionId];
-                const hasElements =
-                  (data.drawings[regionId]?.elements?.length ?? 0) > 0;
+                const hasElements = (data.drawings[regionId]?.elements?.length ?? 0) > 0;
                 return (
-                  <TabsTrigger
-                    key={regionId}
-                    value={regionId}
-                    className="relative text-xs"
-                  >
+                  <TabsTrigger key={regionId} value={regionId} className="relative text-xs">
                     {config.label}
                     {hasElements && (
                       <span className="absolute -top-1 -right-1 size-2 rounded-full bg-red-500" />
@@ -154,9 +142,7 @@ export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
                       <PenLine className="size-4" />
                       <span>
                         {score.elementCounts[regionId].shadings} Schattierung
-                        {score.elementCounts[regionId].shadings !== 1
-                          ? "en"
-                          : ""}
+                        {score.elementCounts[regionId].shadings !== 1 ? "en" : ""}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">

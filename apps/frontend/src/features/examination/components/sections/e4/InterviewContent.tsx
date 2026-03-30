@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { CheckCircle } from "lucide-react";
 import { useCallback } from "react";
 import type { FieldPath } from "react-hook-form";
@@ -24,6 +26,8 @@ export interface InterviewContentProps {
   incompleteRegions: IncompleteRegion[];
   onNoMorePainRegions: () => void;
   onClearIncompleteRegions: () => void;
+  includeAllRegions?: boolean;
+  onIncludeAllRegionsChange?: (value: boolean) => void;
 }
 
 export function InterviewContent({
@@ -34,6 +38,8 @@ export function InterviewContent({
   incompleteRegions,
   onNoMorePainRegions,
   onClearIncompleteRegions,
+  includeAllRegions,
+  onIncludeAllRegionsChange,
 }: InterviewContentProps) {
   const { setValue, watch, clearErrors } = useFormContext<FormValues>();
 
@@ -97,6 +103,23 @@ export function InterviewContent({
         onExpandChange={onExpandChange}
         incompleteRegions={incompleteRegions}
       />
+      {onIncludeAllRegionsChange && (
+        <div className="flex justify-center">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="interview-alle-regionen"
+              checked={includeAllRegions}
+              onCheckedChange={(checked) => onIncludeAllRegionsChange(checked === true)}
+            />
+            <Label
+              htmlFor="interview-alle-regionen"
+              className="text-xs text-muted-foreground cursor-pointer"
+            >
+              Optionale Gebiete anzeigen
+            </Label>
+          </div>
+        </div>
+      )}
       {hasUnansweredPain && (
         <div className="flex justify-center pt-2">
           <Button type="button" variant="outline" onClick={onNoMorePainRegions}>
@@ -106,7 +129,7 @@ export function InterviewContent({
         </div>
       )}
       {interviewRefusedPath && (
-        <div className="pt-4 border-t">
+        <div className="pt-4">
           <RefusalCheckbox<FormValues>
             name={interviewRefusedPath}
             onRefuseChange={handleInterviewRefusalChange}
