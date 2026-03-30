@@ -4,23 +4,31 @@
  *
  * Clears the field value to null when it becomes disabled, matching the
  * wizard mode's QuestionField behavior.
+ *
+ * Values are received via props (from the section-level useWatch) instead of
+ * individual useWatch hooks — keeps per-section subscription count at 1.
  */
 
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
-import { useSiblingEnabled } from "../use-sibling-enabled";
 import { FsYesNo } from "./FsYesNo";
 
 interface FsConditionalYesNoProps {
   name: string;
-  /** Sibling field key that controls enablement */
-  sibling: string;
+  value: "yes" | "no" | null;
+  /** Current value of the sibling field that controls enablement */
+  siblingValue: unknown;
   /** Value the sibling must equal for this field to be enabled */
   equals: unknown;
 }
 
-export function FsConditionalYesNo({ name, sibling, equals }: FsConditionalYesNoProps) {
-  const enabled = useSiblingEnabled(name, sibling, equals);
+export const FsConditionalYesNo = memo(function FsConditionalYesNo({
+  name,
+  value,
+  siblingValue,
+  equals,
+}: FsConditionalYesNoProps) {
+  const enabled = siblingValue === equals;
   const { setValue, getValues } = useFormContext();
   const wasEnabled = useRef(enabled);
 
@@ -31,5 +39,5 @@ export function FsConditionalYesNo({ name, sibling, equals }: FsConditionalYesNo
     wasEnabled.current = enabled;
   }, [enabled, name, setValue, getValues]);
 
-  return <FsYesNo name={name} disabled={!enabled} />;
-}
+  return <FsYesNo name={name} value={value} disabled={!enabled} />;
+});

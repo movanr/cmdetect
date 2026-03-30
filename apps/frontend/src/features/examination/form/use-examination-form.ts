@@ -78,6 +78,24 @@ type FormValues = z.infer<typeof schema>;
 export { schema as examinationSchema };
 export { defaults as examinationDefaults };
 
+/**
+ * Get all field paths for a section prefix (module-level, no hooks).
+ * Used by form sheet sections to set up a single useWatch per section.
+ */
+export function getSectionFieldPaths(sectionId: string): string[] {
+  return allInstances.filter((i) => i.path.startsWith(`${sectionId}.`)).map((i) => i.path);
+}
+
+/**
+ * Pre-compute paths + index map for a section (call at module level).
+ * The index map enables O(1) path → value lookups.
+ */
+export function createSectionPathLookup(sectionId: string) {
+  const paths = getSectionFieldPaths(sectionId);
+  const indexMap = new Map(paths.map((p, i) => [p, i]));
+  return { paths, indexMap } as const;
+}
+
 /** Form configuration for ExaminationForm to use with useForm() */
 export const examinationFormConfig = {
   resolver: zodResolver(schema as z.ZodTypeAny),

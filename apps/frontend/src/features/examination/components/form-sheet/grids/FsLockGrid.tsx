@@ -8,16 +8,22 @@
  * Matches the original DC/TMD form layout with 3 N/J columns.
  */
 
+import { memo } from "react";
 import { E8_LOCKING_TYPE_DESCRIPTIONS } from "@cmdetect/dc-tmd";
 import type { Side } from "../../../model/regions";
 import { FsYesNo } from "../primitives/FsYesNo";
 import { useFormSheet } from "../use-form-sheet";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
+import type { GetValue } from "../use-section-values";
 
 const DISPLAY_SIDES: Side[] = ["right", "left"];
 const LOCKING_TYPES = ["closedLocking", "openLocking"] as const;
 
-export function FsLockGrid() {
+interface FsLockGridProps {
+  getValue: GetValue;
+}
+
+export function FsLockGrid({ getValue }: FsLockGridProps) {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
       {DISPLAY_SIDES.map((side) => (
@@ -42,20 +48,25 @@ export function FsLockGrid() {
               </tr>
             </thead>
             <tbody>
-              {LOCKING_TYPES.map((type) => (
-                <tr key={type} className="border-t border-slate-100">
-                  <td className="text-slate-600 py-0.5">{E8_LOCKING_TYPE_DESCRIPTIONS[type]}</td>
-                  <td className="text-center py-0.5">
-                    <FsYesNo name={`e8.${side}.${type}.locking`} />
-                  </td>
-                  <td className="text-center py-0.5">
-                    <ReductionNJ side={side} lockingType={type} option="patient" />
-                  </td>
-                  <td className="text-center py-0.5">
-                    <ReductionNJ side={side} lockingType={type} option="examiner" />
-                  </td>
-                </tr>
-              ))}
+              {LOCKING_TYPES.map((type) => {
+                const basePath = `e8.${side}.${type}`;
+                const locking = getValue(`${basePath}.locking`) as "yes" | "no" | null;
+                const reduction = getValue(`${basePath}.reduction`) as string | null;
+                return (
+                  <tr key={type} className="border-t border-slate-100">
+                    <td className="text-slate-600 py-0.5">{E8_LOCKING_TYPE_DESCRIPTIONS[type]}</td>
+                    <td className="text-center py-0.5">
+                      <FsYesNo name={`${basePath}.locking`} value={locking} />
+                    </td>
+                    <td className="text-center py-0.5">
+                      <ReductionNJ locking={locking} reduction={reduction} basePath={basePath} option="patient" />
+                    </td>
+                    <td className="text-center py-0.5">
+                      <ReductionNJ locking={locking} reduction={reduction} basePath={basePath} option="examiner" />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -68,20 +79,19 @@ export function FsLockGrid() {
  * Maps the reduction enum to individual N/J toggles for Patient and Untersucher columns.
  * When locking=yes: selecting Patient sets reduction="patient", Untersucher sets "examiner".
  */
-function ReductionNJ({
-  side,
-  lockingType,
+const ReductionNJ = memo(function ReductionNJ({
+  locking,
+  reduction,
+  basePath,
   option,
 }: {
-  side: Side;
-  lockingType: "closedLocking" | "openLocking";
+  locking: string | null;
+  reduction: string | null;
+  basePath: string;
   option: "patient" | "examiner";
 }) {
   const { setValue } = useFormContext();
   const { readOnly } = useFormSheet();
-  const basePath = `e8.${side}.${lockingType}`;
-  const locking = useWatch({ name: `${basePath}.locking` }) as string | null;
-  const reduction = useWatch({ name: `${basePath}.reduction` }) as string | null;
 
   // Only show values when locking is "yes"
   const value: "yes" | "no" | null =
@@ -130,4 +140,4 @@ function ReductionNJ({
       </button>
     </span>
   );
-}
+});

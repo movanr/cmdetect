@@ -1,15 +1,16 @@
-import { useFormContext, useWatch } from "react-hook-form";
+import { memo } from "react";
+import { useFormContext } from "react-hook-form";
 import { useFormSheet } from "../use-form-sheet";
 
 interface FsYesNoProps {
   name: string;
+  value: "yes" | "no" | null;
   disabled?: boolean;
 }
 
-export function FsYesNo({ name, disabled }: FsYesNoProps) {
+export const FsYesNo = memo(function FsYesNo({ name, value, disabled }: FsYesNoProps) {
   const { setValue } = useFormContext();
   const { readOnly } = useFormSheet();
-  const value = useWatch({ name }) as "yes" | "no" | null;
   const inactive = readOnly || disabled;
 
   const set = (v: "yes" | "no") => {
@@ -45,4 +46,4 @@ export function FsYesNo({ name, disabled }: FsYesNoProps) {
       </button>
     </span>
   );
-}
+});

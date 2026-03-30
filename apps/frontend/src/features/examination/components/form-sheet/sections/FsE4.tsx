@@ -1,9 +1,15 @@
 import { OPENING_TYPE_LABELS } from "@cmdetect/dc-tmd";
+import { createSectionPathLookup } from "../../../form/use-examination-form";
 import { FormSheetSection } from "../FormSheetSection";
 import { FsMeasurement } from "../primitives/FsMeasurement";
 import { FsPainGrid } from "../grids/FsPainGrid";
+import { useSectionValues } from "../use-section-values";
+
+const { paths: E4_PATHS, indexMap: E4_INDEX } = createSectionPathLookup("e4");
 
 export function FsE4() {
+  const getValue = useSectionValues(E4_PATHS, E4_INDEX);
+
   return (
     <FormSheetSection number="4" title="Öffnungs- und Schließbewegungen">
       <div className="space-y-3 print:space-y-1.5">
@@ -23,7 +29,7 @@ export function FsE4() {
             </span>
             <FsMeasurement name="e4.maxUnassisted.measurement" />
           </div>
-          <FsPainGrid prefix="e4.maxUnassisted" />
+          <FsPainGrid prefix="e4.maxUnassisted" getValue={getValue} />
         </div>
 
         {/* C. Max assisted (passive) opening */}
@@ -34,7 +40,7 @@ export function FsE4() {
             </span>
             <FsMeasurement name="e4.maxAssisted.measurement" />
           </div>
-          <FsPainGrid prefix="e4.maxAssisted" />
+          <FsPainGrid prefix="e4.maxAssisted" getValue={getValue} />
         </div>
       </div>
     </FormSheetSection>

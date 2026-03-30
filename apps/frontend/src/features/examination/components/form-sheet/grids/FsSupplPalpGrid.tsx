@@ -13,6 +13,7 @@ import {
 } from "../../../model/regions";
 import { FsYesNo } from "../primitives/FsYesNo";
 import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
+import type { GetValue } from "../use-section-values";
 
 const SIDE_KEYS = ["right", "left"] as const;
 
@@ -22,7 +23,11 @@ const COL_LABELS: Record<string, string> = {
   referredPain: "Übertragener\nSchmerz",
 };
 
-export function FsSupplPalpGrid() {
+interface FsSupplPalpGridProps {
+  getValue: GetValue;
+}
+
+export function FsSupplPalpGrid({ getValue }: FsSupplPalpGridProps) {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
       {SIDE_KEYS.map((side) => (
@@ -45,15 +50,23 @@ export function FsSupplPalpGrid() {
               {E10_SITE_KEYS.map((site: PalpationSite) => (
                 <tr key={site} className="border-t border-slate-100">
                   <td className="text-slate-600 py-0.5">{PALPATION_SITES[site]}</td>
-                  {E10_PAIN_QUESTIONS.map((col: PainType) => (
-                    <td key={col} className="text-center py-0.5">
-                      {col === "pain" ? (
-                        <FsYesNo name={`e10.${side}.${site}.${col}`} />
-                      ) : (
-                        <FsConditionalYesNo name={`e10.${side}.${site}.${col}`} sibling="pain" equals="yes" />
-                      )}
-                    </td>
-                  ))}
+                  {E10_PAIN_QUESTIONS.map((col: PainType) => {
+                    const path = `e10.${side}.${site}.${col}`;
+                    return (
+                      <td key={col} className="text-center py-0.5">
+                        {col === "pain" ? (
+                          <FsYesNo name={path} value={getValue(path) as "yes" | "no" | null} />
+                        ) : (
+                          <FsConditionalYesNo
+                            name={path}
+                            value={getValue(path) as "yes" | "no" | null}
+                            siblingValue={getValue(`e10.${side}.${site}.pain`)}
+                            equals="yes"
+                          />
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

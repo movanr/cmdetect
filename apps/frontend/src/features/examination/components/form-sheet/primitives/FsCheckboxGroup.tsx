@@ -1,15 +1,20 @@
-import { useFormContext, useWatch } from "react-hook-form";
+import { memo } from "react";
+import { useFormContext } from "react-hook-form";
 import { useFormSheet } from "../use-form-sheet";
 
 interface FsCheckboxGroupProps {
   name: string;
+  value: string[];
   options: readonly { key: string; label: string }[];
 }
 
-export function FsCheckboxGroup({ name, options }: FsCheckboxGroupProps) {
+export const FsCheckboxGroup = memo(function FsCheckboxGroup({
+  name,
+  value,
+  options,
+}: FsCheckboxGroupProps) {
   const { setValue } = useFormContext();
   const { readOnly } = useFormSheet();
-  const value: string[] = (useWatch({ name }) as string[]) ?? [];
 
   const toggle = (key: string) => {
     if (readOnly) return;
@@ -49,4 +54,4 @@ export function FsCheckboxGroup({ name, options }: FsCheckboxGroupProps) {
       })}
     </div>
   );
-}
+});

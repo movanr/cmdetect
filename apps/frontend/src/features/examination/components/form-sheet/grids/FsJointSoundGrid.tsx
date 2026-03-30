@@ -14,8 +14,13 @@ import type { Side } from "../../../model/regions";
 const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FsYesNo } from "../primitives/FsYesNo";
 import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
+import type { GetValue } from "../use-section-values";
 
-export function FsJointSoundGrid() {
+interface FsJointSoundGridProps {
+  getValue: GetValue;
+}
+
+export function FsJointSoundGrid({ getValue }: FsJointSoundGridProps) {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
       {DISPLAY_SIDES.map((side) => {
@@ -40,26 +45,36 @@ export function FsJointSoundGrid() {
                 <tr className="border-t border-slate-100">
                   <td className="text-slate-600 py-0.5">{JOINT_SOUND_LABELS.click}</td>
                   <td className="text-center py-0.5">
-                    <FsYesNo name={`${p}.click.examiner`} />
+                    <FsYesNo name={`${p}.click.examiner`} value={getValue(`${p}.click.examiner`) as "yes" | "no" | null} />
                   </td>
                   <td className="text-center py-0.5">
-                    <FsYesNo name={`${p}.click.patient`} />
+                    <FsYesNo name={`${p}.click.patient`} value={getValue(`${p}.click.patient`) as "yes" | "no" | null} />
                   </td>
                   <td className="text-center py-0.5">
-                    <FsConditionalYesNo name={`${p}.click.painWithClick`} sibling="patient" equals="yes" />
+                    <FsConditionalYesNo
+                      name={`${p}.click.painWithClick`}
+                      value={getValue(`${p}.click.painWithClick`) as "yes" | "no" | null}
+                      siblingValue={getValue(`${p}.click.patient`)}
+                      equals="yes"
+                    />
                   </td>
                   <td className="text-center py-0.5">
-                    <FsConditionalYesNo name={`${p}.click.familiarPain`} sibling="painWithClick" equals="yes" />
+                    <FsConditionalYesNo
+                      name={`${p}.click.familiarPain`}
+                      value={getValue(`${p}.click.familiarPain`) as "yes" | "no" | null}
+                      siblingValue={getValue(`${p}.click.painWithClick`)}
+                      equals="yes"
+                    />
                   </td>
                 </tr>
                 {/* Crepitus row */}
                 <tr className="border-t border-slate-100">
                   <td className="text-slate-600 py-0.5">{JOINT_SOUND_LABELS.crepitus}</td>
                   <td className="text-center py-0.5">
-                    <FsYesNo name={`${p}.crepitus.examiner`} />
+                    <FsYesNo name={`${p}.crepitus.examiner`} value={getValue(`${p}.crepitus.examiner`) as "yes" | "no" | null} />
                   </td>
                   <td className="text-center py-0.5">
-                    <FsYesNo name={`${p}.crepitus.patient`} />
+                    <FsYesNo name={`${p}.crepitus.patient`} value={getValue(`${p}.crepitus.patient`) as "yes" | "no" | null} />
                   </td>
                   <td className="text-center py-0.5">
                     <span className="text-slate-200">—</span>

@@ -1,15 +1,16 @@
-import { useFormContext, useWatch } from "react-hook-form";
+import { memo } from "react";
+import { useFormContext } from "react-hook-form";
 import { useFormSheet } from "../use-form-sheet";
 
 interface FsEnumRadioProps {
   name: string;
+  value: string | null;
   options: readonly { key: string; label: string }[];
 }
 
-export function FsEnumRadio({ name, options }: FsEnumRadioProps) {
+export const FsEnumRadio = memo(function FsEnumRadio({ name, value, options }: FsEnumRadioProps) {
   const { setValue } = useFormContext();
   const { readOnly } = useFormSheet();
-  const value = useWatch({ name }) as string | null;
 
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-0.5">
@@ -32,4 +33,4 @@ export function FsEnumRadio({ name, options }: FsEnumRadioProps) {
       ))}
     </div>
   );
-}
+});

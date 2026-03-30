@@ -18,10 +18,12 @@ import {
 const DISPLAY_SIDES: Side[] = ["right", "left"];
 import { FsYesNo } from "../primitives/FsYesNo";
 import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
+import type { GetValue } from "../use-section-values";
 
 interface FsPainGridProps {
   /** RHF path prefix, e.g. "e4.maxUnassisted" */
   prefix: string;
+  getValue: GetValue;
 }
 
 const COL_HEADERS = {
@@ -30,7 +32,7 @@ const COL_HEADERS = {
   familiarHeadache: "Bekannter Kopfschmerz",
 };
 
-export function FsPainGrid({ prefix }: FsPainGridProps) {
+export function FsPainGrid({ prefix, getValue }: FsPainGridProps) {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
       {DISPLAY_SIDES.map((side) => (
@@ -65,9 +67,14 @@ export function FsPainGrid({ prefix }: FsPainGridProps) {
                       return (
                         <td key={q} className="text-center py-0.5">
                           {q === "pain" ? (
-                            <FsYesNo name={path} />
+                            <FsYesNo name={path} value={getValue(path) as "yes" | "no" | null} />
                           ) : (
-                            <FsConditionalYesNo name={path} sibling="pain" equals="yes" />
+                            <FsConditionalYesNo
+                              name={path}
+                              value={getValue(path) as "yes" | "no" | null}
+                              siblingValue={getValue(`${prefix}.${side}.${region}.pain`)}
+                              equals="yes"
+                            />
                           )}
                         </td>
                       );

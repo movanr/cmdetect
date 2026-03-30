@@ -17,6 +17,7 @@ import {
 } from "../../../model/regions";
 import { FsYesNo } from "../primitives/FsYesNo";
 import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
+import type { GetValue } from "../use-section-values";
 
 const SIDE_KEYS = ["right", "left"] as const;
 const SIDE_LABELS = { right: "Rechte Seite", left: "Linke Seite" };
@@ -56,7 +57,11 @@ function siteHasColumn(site: PalpationSite, column: PainType): boolean {
   return true;
 }
 
-export function FsPalpationGrid() {
+interface FsPalpationGridProps {
+  getValue: GetValue;
+}
+
+export function FsPalpationGrid({ getValue }: FsPalpationGridProps) {
   return (
     <div className="space-y-4 mt-1 print:space-y-2 print:mt-0.5">
       {SIDE_KEYS.map((side) => (
@@ -95,21 +100,27 @@ export function FsPalpationGrid() {
                             .replace("(lateraler Pol)", "Lat. Pol (0,5 kg)")
                             .replace("(um den lateralen Pol)", "Um lat. Pol (1 kg)")}
                         </td>
-                        {group.columns.map((col) =>
-                          siteHasColumn(site, col) ? (
+                        {group.columns.map((col) => {
+                          const path = `e9.${side}.${site}.${col}`;
+                          return siteHasColumn(site, col) ? (
                             <td key={col} className="text-center py-0.5 px-1">
                               {col === "pain" ? (
-                                <FsYesNo name={`e9.${side}.${site}.${col}`} />
+                                <FsYesNo name={path} value={getValue(path) as "yes" | "no" | null} />
                               ) : (
-                                <FsConditionalYesNo name={`e9.${side}.${site}.${col}`} sibling="pain" equals="yes" />
+                                <FsConditionalYesNo
+                                  name={path}
+                                  value={getValue(path) as "yes" | "no" | null}
+                                  siblingValue={getValue(`e9.${side}.${site}.pain`)}
+                                  equals="yes"
+                                />
                               )}
                             </td>
                           ) : (
                             <td key={col} className="text-center py-0.5 px-1">
                               <span className="text-slate-200">—</span>
                             </td>
-                          )
-                        )}
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>

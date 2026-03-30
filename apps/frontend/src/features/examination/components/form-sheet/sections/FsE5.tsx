@@ -1,9 +1,15 @@
 import { MOVEMENT_TYPE_LABELS } from "@cmdetect/dc-tmd";
+import { createSectionPathLookup } from "../../../form/use-examination-form";
 import { FormSheetSection } from "../FormSheetSection";
 import { FsMeasurement } from "../primitives/FsMeasurement";
 import { FsPainGrid } from "../grids/FsPainGrid";
+import { useSectionValues } from "../use-section-values";
+
+const { paths: E5_PATHS, indexMap: E5_INDEX } = createSectionPathLookup("e5");
 
 export function FsE5() {
+  const getValue = useSectionValues(E5_PATHS, E5_INDEX);
+
   return (
     <FormSheetSection number="5" title="Lateral- und Protrusionsbewegungen">
       <div className="space-y-3 print:space-y-1.5">
@@ -15,7 +21,7 @@ export function FsE5() {
             </span>
             <FsMeasurement name="e5.lateralRight.measurement" />
           </div>
-          <FsPainGrid prefix="e5.lateralRight" />
+          <FsPainGrid prefix="e5.lateralRight" getValue={getValue} />
         </div>
 
         {/* B. Laterotrusion left */}
@@ -26,7 +32,7 @@ export function FsE5() {
             </span>
             <FsMeasurement name="e5.lateralLeft.measurement" />
           </div>
-          <FsPainGrid prefix="e5.lateralLeft" />
+          <FsPainGrid prefix="e5.lateralLeft" getValue={getValue} />
         </div>
 
         {/* C. Protrusion */}
@@ -37,7 +43,7 @@ export function FsE5() {
             </span>
             <FsMeasurement name="e5.protrusive.measurement" />
           </div>
-          <FsPainGrid prefix="e5.protrusive" />
+          <FsPainGrid prefix="e5.protrusive" getValue={getValue} />
         </div>
       </div>
     </FormSheetSection>
