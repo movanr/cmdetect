@@ -27,7 +27,6 @@ import {
   PALPATION_SITES,
   SECTION_LABELS,
   REGIONS,
-  SIDE_KEYS,
   SIDES,
   SITE_CONFIG,
   SITES_BY_GROUP,
@@ -227,38 +226,15 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
     };
   }, [criteriaData]);
 
-  const regionStatuses = useMemo(() => {
-    const result: {
-      left: Partial<Record<Region, RegionStatus>>;
-      right: Partial<Record<Region, RegionStatus>>;
-    } = { left: {}, right: {} };
-    const regions: readonly Region[] = showAllRegions ? [...CORE_REGIONS, "nonMast"] : CORE_REGIONS;
-    for (const side of SIDE_KEYS) {
-      const locs = painLocations[side];
-      for (const r of regions) {
-        if (locs === undefined) {
-          result[side][r] = { ...EMPTY_REGION_STATUS, hasData: true, isPainPositive: true };
-        } else if (locs.includes(r)) {
-          result[side][r] = {
-            ...EMPTY_REGION_STATUS,
-            hasData: true,
-            isPainPositive: true,
-            hasFamiliarPain: true,
-            isComplete: true,
-          };
-        } else {
-          result[side][r] = { ...EMPTY_REGION_STATUS, hasData: true, isComplete: true };
-        }
-      }
-    }
-    return result;
-  }, [painLocations, showAllRegions]);
-
   const visibleRegions: readonly Region[] = showAllRegions
     ? [...CORE_REGIONS, ...EXTRA_REGIONS]
     : CORE_REGIONS;
 
-  const diagramRegions = visibleRegions.filter((r) => r !== "otherMast");
+  // Neutral statuses — no highlighting, diagrams serve as anatomical reference only
+  const neutralStatuses: Partial<Record<Region, RegionStatus>> = {};
+  for (const r of visibleRegions) {
+    if (r !== "otherMast") neutralStatuses[r] = EMPTY_REGION_STATUS;
+  }
 
   return (
     <div className="space-y-3 pt-3 border-t mt-3">
@@ -274,8 +250,8 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
             </span>
             <HeadDiagram
               side={side}
-              regions={diagramRegions}
-              regionStatuses={regionStatuses[side]}
+              regions={visibleRegions.filter((r) => r !== "otherMast")}
+              regionStatuses={neutralStatuses}
               selectedRegion={
                 expanded?.side === side && expanded.region !== "otherMast"
                   ? expanded.region
@@ -294,13 +270,8 @@ function PainFindingsContent({ criteriaData }: { criteriaData: Record<string, un
                   <div
                     key={region}
                     className={cn(
-                      "border rounded border-l-2",
+                      "border rounded border-l-2 border-l-muted-foreground/30",
                       isExpanded && "bg-muted/30",
-                      painLocations[side] === undefined
-                        ? "border-l-amber-400"
-                        : isPainPositive
-                          ? "border-l-blue-500"
-                          : "border-l-muted-foreground/30",
                     )}
                   >
                     <button

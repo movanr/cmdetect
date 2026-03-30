@@ -6,7 +6,6 @@
  */
 
 export { EvaluationView } from "./components/EvaluationView";
-export { SummaryDiagrams } from "./components/SummaryDiagrams";
 export { mapToCriteriaData } from "./utils/map-to-criteria-data";
 
 // Backend persistence

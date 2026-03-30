@@ -112,12 +112,12 @@ export const REGION_STATE_COLORS = {
     stroke: "#d4d4d8", // zinc-300
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
-    // Amber-tinted = pain=yes but familiar not yet answered
-    text: "text-amber-700",
-    bg: "bg-amber-50",
-    border: "border-amber-400",
-    fill: "rgba(212, 212, 216, 0.45)", // zinc-300 @ 45%
-    stroke: "#fbbf24", // amber-400
+    // Light gray = pain=yes but familiar not yet answered (same as PENDING)
+    text: "text-muted-foreground",
+    bg: "bg-muted",
+    border: "border-border",
+    fill: "rgba(228, 228, 231, 0.4)", // zinc-200 @ 40%
+    stroke: "#d4d4d8", // zinc-300
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
     // Medium gray = complete, no significant findings
@@ -158,10 +158,10 @@ export const REGION_STATE_COLORS_SELECTED = {
     ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.UNDEFINED]: {
-    fill: "rgba(217, 119, 6, 0.3)", // amber-600 @ 30%
-    stroke: "#d97706", // amber-600
-    bgClass: "bg-amber-50",
-    ringClass: "ring-1 ring-amber-500",
+    fill: "rgba(161, 161, 170, 0.5)", // zinc-400 @ 50%
+    stroke: "#71717a", // zinc-500
+    bgClass: "bg-zinc-100",
+    ringClass: "ring-1 ring-zinc-400",
   },
   [REGION_VISUAL_STATES.NEGATIVE]: {
     fill: "rgba(113, 113, 122, 0.5)", // zinc-500 @ 50%
