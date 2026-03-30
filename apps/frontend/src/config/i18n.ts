@@ -224,12 +224,6 @@ export interface I18nStrings {
 
   // Demo case
   demoCase: {
-    createButton: string;
-    successMessage: string;
-    linkDescription: string;
-    openLink: string;
-    close: string;
-    error: string;
     badge: string;
   };
 
@@ -449,12 +443,6 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     demoCase: {
-      createButton: "Create Demo Case",
-      successMessage: "Demo case created",
-      linkDescription: "Open this link to go through the patient questionnaire flow:",
-      openLink: "Open patient link",
-      close: "Close",
-      error: "Failed to create demo case",
       badge: "Demo",
     },
 
@@ -674,12 +662,6 @@ export const translations: Record<Language, I18nStrings> = {
     },
 
     demoCase: {
-      createButton: "Beispielfall erstellen",
-      successMessage: "Beispielfall erstellt",
-      linkDescription: "Öffnen Sie diesen Link, um den Patienten-Fragebogen-Workflow zu durchlaufen:",
-      openLink: "Patienten-Link öffnen",
-      close: "Schließen",
-      error: "Beispielfall konnte nicht erstellt werden",
       badge: "Demo",
     },
 
