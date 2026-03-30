@@ -41,6 +41,7 @@ export const GET_ALL_PATIENT_RECORDS = graphql(`
       viewed
       patient_data_completed_at
       submission_completed_at
+      is_demo
       first_name_encrypted
       last_name_encrypted
       date_of_birth_encrypted
@@ -64,9 +65,9 @@ export const GET_ALL_PATIENT_RECORDS = graphql(`
 
 // Mutations
 export const CREATE_PATIENT_RECORD = graphql(`
-  mutation CreatePatientRecord($clinic_internal_id: String!) {
+  mutation CreatePatientRecord($clinic_internal_id: String!, $is_demo: Boolean) {
     insert_patient_record_one(
-      object: { clinic_internal_id: $clinic_internal_id }
+      object: { clinic_internal_id: $clinic_internal_id, is_demo: $is_demo }
     ) {
       id
       clinic_internal_id
@@ -74,6 +75,7 @@ export const CREATE_PATIENT_RECORD = graphql(`
       invite_expires_at
       created_at
       created_by
+      is_demo
     }
   }
 `);

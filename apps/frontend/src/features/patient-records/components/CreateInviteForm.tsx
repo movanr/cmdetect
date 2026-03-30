@@ -28,7 +28,7 @@ export function CreateInviteForm() {
       return;
     }
 
-    createMutation.mutate(clinicInternalId.trim(), {
+    createMutation.mutate({ clinicInternalId: clinicInternalId.trim() }, {
       onSuccess: (data) => {
         const token = data?.insert_patient_record_one?.invite_token;
         if (token) {

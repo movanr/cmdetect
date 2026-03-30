@@ -222,6 +222,17 @@ export interface I18nStrings {
     createAnother: string;
   };
 
+  // Demo case
+  demoCase: {
+    createButton: string;
+    successMessage: string;
+    linkDescription: string;
+    openLink: string;
+    close: string;
+    error: string;
+    badge: string;
+  };
+
   // Examination
   examination: {
     behandlerLabel: string;
@@ -437,6 +448,16 @@ export const translations: Record<Language, I18nStrings> = {
       createAnother: "Create Another",
     },
 
+    demoCase: {
+      createButton: "Create Demo Case",
+      successMessage: "Demo case created",
+      linkDescription: "Open this link to go through the patient questionnaire flow:",
+      openLink: "Open patient link",
+      close: "Close",
+      error: "Failed to create demo case",
+      badge: "Demo",
+    },
+
     examination: {
       behandlerLabel: "Examiner",
       selectBehandler: "Select examiner",
@@ -650,6 +671,16 @@ export const translations: Record<Language, I18nStrings> = {
         "Sehr geehrte Patientin, sehr geehrter Patient,\n\nim Rahmen Ihres Termins in unserer Praxis bitten wir Sie, vorab einen Online-Fragebogen auszufüllen. Bitte klicken Sie dazu auf den folgenden Link:\n\n{url}\n\nBitte füllen Sie den Fragebogen möglichst vor Ihrem Termin aus. Ihre Angaben werden verschlüsselt übertragen und vertraulich behandelt.\n\nBei Fragen wenden Sie sich gerne an unser Praxisteam.\n\nMit freundlichen Grüßen\nIhr Praxisteam",
       backToInvites: "Zurück zu Einladungen",
       createAnother: "Weitere erstellen",
+    },
+
+    demoCase: {
+      createButton: "Beispielfall erstellen",
+      successMessage: "Beispielfall erstellt",
+      linkDescription: "Öffnen Sie diesen Link, um den Patienten-Fragebogen-Workflow zu durchlaufen:",
+      openLink: "Patienten-Link öffnen",
+      close: "Schließen",
+      error: "Beispielfall konnte nicht erstellt werden",
+      badge: "Demo",
     },
 
     examination: {

@@ -48,6 +48,7 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
+        - is_demo
     comment: ""
   - role: org_admin
     permission:
@@ -57,6 +58,7 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
+        - is_demo
     comment: ""
   - role: physician
     permission:
@@ -66,6 +68,7 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
+        - is_demo
     comment: ""
   - role: receptionist
     permission:
@@ -75,6 +78,7 @@ insert_permissions:
         organization_id: x-hasura-Organization-Id
       columns:
         - clinic_internal_id
+        - is_demo
     comment: ""
 select_permissions:
   - role: assistant
@@ -88,6 +92,7 @@ select_permissions:
         - id
         - invite_expires_at
         - invite_token
+        - is_demo
         - last_name_encrypted
         - last_viewed_at
         - last_viewed_by
@@ -114,6 +119,7 @@ select_permissions:
         - id
         - invite_expires_at
         - invite_token
+        - is_demo
         - last_name_encrypted
         - last_viewed_at
         - last_viewed_by
@@ -140,6 +146,7 @@ select_permissions:
         - id
         - invite_expires_at
         - invite_token
+        - is_demo
         - last_name_encrypted
         - last_viewed_at
         - last_viewed_by
@@ -166,6 +173,7 @@ select_permissions:
         - id
         - invite_expires_at
         - invite_token
+        - is_demo
         - last_name_encrypted
         - last_viewed_at
         - last_viewed_by
@@ -188,6 +196,7 @@ update_permissions:
         - clinic_internal_id
         - deleted_at
         - invite_expires_at
+        - is_demo
         - submission_completed_at
         - viewed
       filter:
@@ -208,6 +217,7 @@ update_permissions:
         - deleted_at
         - first_name_encrypted
         - invite_expires_at
+        - is_demo
         - last_name_encrypted
         - submission_completed_at
         - viewed
@@ -229,6 +239,7 @@ update_permissions:
         - clinic_internal_id
         - deleted_at
         - invite_expires_at
+        - is_demo
         - last_viewed_by
         - submission_completed_at
         - viewed
@@ -250,6 +261,7 @@ update_permissions:
         - clinic_internal_id
         - deleted_at
         - invite_expires_at
+        - is_demo
         - submission_completed_at
         - viewed
       filter:

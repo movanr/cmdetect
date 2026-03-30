@@ -10,8 +10,11 @@ export function useCreatePatientRecord() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (clinic_internal_id: string) => {
-      return execute(CREATE_PATIENT_RECORD, { clinic_internal_id });
+    mutationFn: async (params: { clinicInternalId: string; isDemo?: boolean }) => {
+      return execute(CREATE_PATIENT_RECORD, {
+        clinic_internal_id: params.clinicInternalId,
+        is_demo: params.isDemo ?? false,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patient-records"] });

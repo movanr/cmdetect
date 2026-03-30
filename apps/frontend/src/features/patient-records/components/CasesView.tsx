@@ -155,9 +155,14 @@ export function CasesView() {
       header: t.columns.internalId,
       width: "15%",
       hideBelow: "md" as const,
-      render: (value: string) => (
+      render: (value: string, record: PatientRecord) => (
         <span className="truncate block" title={value || undefined}>
           {value || "-"}
+          {record.is_demo && (
+            <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 py-0">
+              {t.demoCase.badge}
+            </Badge>
+          )}
         </span>
       ),
     },

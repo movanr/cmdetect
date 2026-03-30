@@ -1,4 +1,5 @@
 import { InvitesView } from "@/features/patient-records/components/InvitesView";
+import { CreateDemoCaseButton } from "@/features/patient-records/components/CreateDemoCaseButton";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { AppLayout } from "../components/layouts/AppLayout";
@@ -24,12 +25,15 @@ function InvitesPage() {
               <h1 className="text-3xl font-semibold tracking-tight">{t.nav.patients}</h1>
               <p className="text-sm text-muted-foreground mt-1">{t.pageDescriptions.invites}</p>
             </div>
-            <Button asChild>
-              <Link to="/invites/new">
-                <Plus className="h-4 w-4 mr-2" />
-                {t.actions.createNewInvite}
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <CreateDemoCaseButton />
+              <Button asChild>
+                <Link to="/invites/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.actions.createNewInvite}
+                </Link>
+              </Button>
+            </div>
           </div>
 
           {/* View toggle */}
