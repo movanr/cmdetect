@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback } from "react";
 import { useFormContext, type FieldPath } from "react-hook-form";
 import { z } from "zod";
 import { M } from "../model/nodes";
@@ -212,13 +213,17 @@ export function useExaminationForm() {
     return result.valid;
   };
 
-  // Get instances for a specific step
-  const getInstancesForStep = (stepId: ExaminationStepId) =>
-    getStepInstancesForExamination(allInstances, stepId);
+  // Get instances for a specific step (memoized — depends only on module-level constants)
+  const getInstancesForStep = useCallback(
+    (stepId: ExaminationStepId) => getStepInstancesForExamination(allInstances, stepId),
+    []
+  );
 
-  // Get all instances for a specific section
-  const getInstancesForSection = (sectionId: SectionId) =>
-    allInstances.filter((i) => i.path.startsWith(`${sectionId}.`));
+  // Get all instances for a specific section (memoized — depends only on module-level constants)
+  const getInstancesForSection = useCallback(
+    (sectionId: SectionId) => allInstances.filter((i) => i.path.startsWith(`${sectionId}.`)),
+    []
+  );
 
   return {
     form,

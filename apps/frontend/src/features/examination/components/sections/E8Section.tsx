@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { E8_LOCKING_TYPE_DESCRIPTIONS, E8_LOCKING_TYPE_LABELS, SECTIONS, type E8LockingType } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
-import type { FieldPath } from "react-hook-form";
+import { useWatch, type FieldPath } from "react-hook-form";
 import { E8_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { setInstanceValue } from "../../form/form-helpers";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
@@ -45,7 +45,8 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
   const yesNoPaths = instances
     .filter((i) => i.renderType === "yesNo")
     .map((i) => i.path as FieldPath<FormValues>);
-  const hasUnansweredLockings = form.watch(yesNoPaths).some((v) => v == null);
+  const yesNoValues = useWatch({ name: yesNoPaths });
+  const hasUnansweredLockings = yesNoValues.some((v) => v == null);
 
   // Set all unanswered locking questions to "no"
   const handleNoMoreLockings = () => {

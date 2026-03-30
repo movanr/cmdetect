@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
+import { useFormContext, useWatch, type FieldPath, type FieldValues } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { YesNoField } from "../inputs/YesNoField";
 import { YesNoInput } from "../inputs/YesNoInput";
@@ -82,14 +82,25 @@ export function TablePalpationStep({
   palpationMode,
   siteDetailMode,
 }: TablePalpationStepProps) {
-  const { watch, setValue } = useFormContext();
+  const { setValue } = useFormContext();
 
   // Get visible pain questions based on palpation mode
   const visibleQuestions = PALPATION_MODE_QUESTIONS[palpationMode];
 
-  // Watch all instance paths to trigger re-renders on value changes
-  const watchPaths = instances.map((i) => i.path);
-  watch(watchPaths);
+  // Watch all instance paths to trigger re-renders on value changes (field-level only)
+  const watchPaths = useMemo(() => instances.map((i) => i.path), [instances]);
+  const watchedValues = useWatch({ name: watchPaths });
+
+  // Build value lookup from watched results
+  const valueMap = useMemo(() => {
+    const map = new Map<string, unknown>();
+    watchPaths.forEach((path, index) => {
+      map.set(path, watchedValues[index]);
+    });
+    return map;
+  }, [watchPaths, watchedValues]);
+
+  const getValue = useCallback((path: string) => valueMap.get(path), [valueMap]);
 
   // Group instances by site/painType for quick lookup
   const instanceMap = useMemo(() => {
@@ -114,7 +125,7 @@ export function TablePalpationStep({
     const painInstance = getInstance(site, "pain");
     if (!painInstance) return false;
 
-    const painValue = watch(painInstance.path);
+    const painValue = getValue(painInstance.path);
     return painValue === "yes";
   };
 
@@ -127,7 +138,7 @@ export function TablePalpationStep({
     return sites.some((site) => {
       const painInstance = getInstance(site, "pain");
       if (!painInstance) return false;
-      const painValue = watch(painInstance.path);
+      const painValue = getValue(painInstance.path);
       return painValue === "yes";
     });
   };
@@ -158,12 +169,12 @@ export function TablePalpationStep({
         .map((site) => {
           const instance = getInstance(site, painType);
           if (!instance) return null;
-          return watch(instance.path) as string | null;
+          return getValue(instance.path) as string | null;
         });
 
       return aggregateYesNo(values);
     },
-    [getInstance, watch]
+    [getInstance, getValue]
   );
 
   // Set value for all sites in a group

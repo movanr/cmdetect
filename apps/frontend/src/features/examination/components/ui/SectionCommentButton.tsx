@@ -14,15 +14,15 @@ import {
 } from "@/components/ui/popover";
 import { MessageSquare } from "lucide-react";
 import type { FieldPath } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import type { FormValues } from "../../form/use-examination-form";
 
 const COMMENT_PATH = "e11.comment" as FieldPath<FormValues>;
 
 export function SectionCommentButton() {
-  const { register, watch } = useFormContext<FormValues>();
+  const { register } = useFormContext<FormValues>();
 
-  const value = watch(COMMENT_PATH) as unknown as string | null;
+  const value = useWatch({ name: COMMENT_PATH }) as unknown as string | null;
   const hasComment = typeof value === "string" && value.trim().length > 0;
 
   return (

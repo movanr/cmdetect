@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { E7_OBSERVER_LABELS, JOINT_SOUND_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
-import type { FieldPath } from "react-hook-form";
+import { useWatch, type FieldPath } from "react-hook-form";
 import { E7_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { setInstanceValue } from "../../form/form-helpers";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
@@ -47,7 +47,8 @@ export function E7Section({ onComplete, onBack, isFirstSection }: SectionProps) 
   const yesNoPaths = instances
     .filter((i) => i.renderType === "yesNo" && !i.enableWhen)
     .map((i) => i.path as FieldPath<FormValues>);
-  const hasUnansweredSounds = form.watch(yesNoPaths).some((v) => v == null);
+  const yesNoValues = useWatch({ name: yesNoPaths });
+  const hasUnansweredSounds = yesNoValues.some((v) => v == null);
 
   // Set all unanswered top-level sound questions to "no".
   // Excludes conditional fields (painWithClick, familiarPain) identified by enableWhen.

@@ -14,10 +14,10 @@
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useFormContext } from "react-hook-form";
-import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
-import { useUpsertExamination, useCompleteExamination } from "./use-save-examination";
-import { SECTION_IDS, type SectionId } from "../sections/registry";
 import type { FormValues } from "../form/use-examination-form";
+import { SECTION_IDS, type SectionId } from "../sections/registry";
+import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
+import { useCompleteExamination, useUpsertExamination } from "./use-save-examination";
 
 const AUTO_SAVE_DELAY_MS = 3000;
 
@@ -211,9 +211,7 @@ export function useExaminationPersistence({
     });
 
     // Get the examination ID
-    const examId =
-      backendResponse?.id ??
-      upsertResult.insert_examination_response_one?.id;
+    const examId = backendResponse?.id ?? upsertResult.insert_examination_response_one?.id;
 
     if (!examId) {
       throw new Error("Could not determine examination ID for completion");

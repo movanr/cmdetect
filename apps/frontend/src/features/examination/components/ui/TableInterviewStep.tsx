@@ -1,5 +1,5 @@
-import { Fragment, useMemo } from "react";
-import { useFormContext, type FieldPath, type FieldValues } from "react-hook-form";
+import { Fragment, useCallback, useMemo } from "react";
+import { useWatch, type FieldPath, type FieldValues } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { YesNoField } from "../inputs/YesNoField";
 import {
@@ -39,11 +39,20 @@ export function TableInterviewStep({
   incompleteRegions = [],
   regions = BASE_REGIONS,
 }: TableInterviewStepProps) {
-  const { watch } = useFormContext();
+  // Watch all instance paths to trigger re-renders on value changes (field-level only)
+  const watchPaths = useMemo(() => instances.map((i) => i.path), [instances]);
+  const watchedValues = useWatch({ name: watchPaths });
 
-  // Watch all instance paths to trigger re-renders on value changes
-  const watchPaths = instances.map((i) => i.path);
-  watch(watchPaths);
+  // Build value lookup from watched results
+  const valueMap = useMemo(() => {
+    const map = new Map<string, unknown>();
+    watchPaths.forEach((path, index) => {
+      map.set(path, watchedValues[index]);
+    });
+    return map;
+  }, [watchPaths, watchedValues]);
+
+  const getValue = useCallback((path: string) => valueMap.get(path), [valueMap]);
 
   // Group instances by region/side/painType for quick lookup
   const instanceMap = useMemo(() => {
@@ -68,7 +77,7 @@ export function TableInterviewStep({
     const painInstance = getInstance(region, side, "pain");
     if (!painInstance) return false;
 
-    const painValue = watch(painInstance.path);
+    const painValue = getValue(painInstance.path);
     return painValue === "yes";
   };
 

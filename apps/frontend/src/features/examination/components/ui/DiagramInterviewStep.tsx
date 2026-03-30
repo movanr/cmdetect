@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { Separator } from "@/components/ui/separator";
 import { HeadDiagram } from "../HeadDiagram/head-diagram";
 import type { RegionStatus } from "../HeadDiagram/types";
@@ -71,13 +71,13 @@ export function DiagramInterviewStep({
   incompleteRegions = [],
   regions = BASE_REGIONS,
 }: DiagramInterviewStepProps) {
-  const { watch, getValues } = useFormContext();
+  const { getValues } = useFormContext();
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
   const [selectedSide, setSelectedSide] = useState<Side>("right");
 
-  // Watch all instance paths to trigger re-renders on value changes
-  const watchPaths = instances.map((i) => i.path);
-  const watchedValues = watch(watchPaths);
+  // Watch all instance paths to trigger re-renders on value changes (field-level only)
+  const watchPaths = useMemo(() => instances.map((i) => i.path), [instances]);
+  const watchedValues = useWatch({ name: watchPaths });
 
   // Compute region statuses for both sides
   // Include watchedValues in deps to recompute when form values change

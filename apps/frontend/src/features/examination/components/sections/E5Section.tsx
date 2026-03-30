@@ -7,7 +7,7 @@ import { MOVEMENT_TYPE_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { FieldPath } from "react-hook-form";
+import { useWatch, type FieldPath } from "react-hook-form";
 import { E5_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { setInstanceValue } from "../../form/form-helpers";
 import {
@@ -195,9 +195,12 @@ export function E5Section({
   const stepInstances = allComplete ? [] : getInstancesForStep(currentStepId);
   const interviewInstances = pairedInterviewId ? getInstancesForStep(pairedInterviewId) : [];
 
-  // Subscribe to both measurement and interview fields for reactive updates
-  form.watch(stepInstances.map((i) => i.path));
-  form.watch(interviewInstances.map((i) => i.path));
+  // Subscribe to both measurement and interview fields for reactive updates (field-level only)
+  const stepWatchPaths = useMemo(
+    () => [...stepInstances, ...interviewInstances].map((i) => i.path as FieldPath<FormValues>),
+    [stepInstances, interviewInstances]
+  );
+  useWatch({ name: stepWatchPaths });
 
   // Reactively compute whether measurement is refused (controls interview section visibility)
   const measureRefusedInst = stepInstances.find((i) => i.path.endsWith(".refused"));
@@ -231,7 +234,17 @@ export function E5Section({
     return status === "completed" || status === "refused";
   });
 
-  // Reactively clear incomplete regions when interview answers change
+  // Watch interview fields for the current step to reactively clear incomplete regions
+  const currentInterviewPaths = useMemo(() => {
+    if (currentStepIndex < 0 || currentStepIndex >= E5_STEP_ORDER.length) return [];
+    const stepId = E5_STEP_ORDER[currentStepIndex];
+    const interviewId = MEASURE_TO_INTERVIEW[stepId as string];
+    if (!interviewId) return [];
+    return getInstancesForStep(interviewId).map((i) => i.path as FieldPath<FormValues>);
+  }, [currentStepIndex, getInstancesForStep]);
+
+  const interviewValues = useWatch({ name: currentInterviewPaths });
+
   useEffect(() => {
     if (incompleteRegions.length === 0) return;
     if (currentStepIndex < 0 || currentStepIndex >= E5_STEP_ORDER.length) return;
@@ -239,16 +252,13 @@ export function E5Section({
     const interviewId = MEASURE_TO_INTERVIEW[stepId as string];
     if (!interviewId) return;
 
-    const subscription = form.watch(() => {
-      const iInstances = getInstancesForStep(interviewId);
-      const result = validateInterviewCompletion(iInstances, (path) =>
-        form.getValues(path as FieldPath<FormValues>)
-      );
-      setIncompleteRegions(result.incompleteRegions);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [currentStepIndex, incompleteRegions.length, form, getInstancesForStep]);
+    const iInstances = getInstancesForStep(interviewId);
+    const result = validateInterviewCompletion(iInstances, (path) =>
+      form.getValues(path as FieldPath<FormValues>)
+    );
+    setIncompleteRegions(result.incompleteRegions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interviewValues]);
 
   // Determine which regions to show
   const regions = includeAllRegions ? ALL_REGIONS : BASE_REGIONS;

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { FieldPath } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import type { FormValues } from "../../form/use-examination-form";
 import { COMMON, getLabel } from "../../labels";
 import type { QuestionInstance } from "../../projections/to-instances";
@@ -12,7 +12,7 @@ export interface MeasurementStepProps {
 }
 
 export function MeasurementStep({ instances }: MeasurementStepProps) {
-  const { setValue, watch, clearErrors } = useFormContext<FormValues>();
+  const { setValue, clearErrors } = useFormContext<FormValues>();
 
   // Find measurement and refused instances
   const measurementInstance = instances.find((i) => i.renderType === "measurement");
@@ -21,7 +21,10 @@ export function MeasurementStep({ instances }: MeasurementStepProps) {
     (i) => i.renderType !== "measurement" && !i.path.endsWith(".refused")
   );
 
-  const watchedRefused = refusedInstance ? watch(refusedInstance.path as FieldPath<FormValues>) : undefined;
+  const watchedRefused = useWatch({
+    name: (refusedInstance?.path ?? "") as FieldPath<FormValues>,
+    disabled: !refusedInstance,
+  });
   const isRefused = (watchedRefused as unknown as boolean) === true;
 
   // Handle refused toggle - clear measurement value when refusing

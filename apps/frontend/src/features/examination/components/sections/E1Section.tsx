@@ -29,7 +29,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { E1_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
@@ -109,7 +109,7 @@ export function E1Section({
   isFirstSection,
 }: E1SectionProps) {
   const { getInstancesForStep, validateStep } = useExaminationForm();
-  const { watch, getValues, setValue } = useFormContext();
+  const { getValues, setValue } = useFormContext();
   const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   // Keep stepStatuses in state (computed from form on mount)
@@ -160,11 +160,11 @@ export function E1Section({
   const headacheRight = allInstances.find((i) => i.path === "e1.headacheLocation.right");
   const headacheLeft = allInstances.find((i) => i.path === "e1.headacheLocation.left");
 
-  // Watch values for reactive updates
-  const painRightValues = watch("e1.painLocation.right") as string[] | undefined;
-  const painLeftValues = watch("e1.painLocation.left") as string[] | undefined;
-  const headacheRightValues = watch("e1.headacheLocation.right") as string[] | undefined;
-  const headacheLeftValues = watch("e1.headacheLocation.left") as string[] | undefined;
+  // Watch values for reactive updates (field-level subscriptions only)
+  const painRightValues = useWatch({ name: "e1.painLocation.right" }) as string[] | undefined;
+  const painLeftValues = useWatch({ name: "e1.painLocation.left" }) as string[] | undefined;
+  const headacheRightValues = useWatch({ name: "e1.headacheLocation.right" }) as string[] | undefined;
+  const headacheLeftValues = useWatch({ name: "e1.headacheLocation.left" }) as string[] | undefined;
 
   // Derived state
   const allComplete = currentStepIndex === -1;

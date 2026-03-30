@@ -9,7 +9,7 @@ import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle, ChevronDown, ChevronLeft } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import type { FieldPath, FieldValues } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import type { E9RichInstructions } from "../../content/instructions";
 import { createE9RichInstructions, isPainInterviewInstruction } from "../../content/instructions";
 import type { RichMeasurementInstruction } from "../../content/types";
@@ -103,15 +103,15 @@ type ExpandedState = { left: PalpationSite | null; right: PalpationSite | null }
 function computeSiteStatus(
   site: PalpationSite,
   prefix: string,
-  watch: (path: string) => unknown
+  getValue: (path: string) => unknown
 ): SiteStatus {
   const painPath = `${prefix}.${site}.pain`;
   const familiarPainPath = `${prefix}.${site}.familiarPain`;
   const familiarHeadachePath = `${prefix}.${site}.familiarHeadache`;
 
-  const painValue = watch(painPath) as string | null;
-  const familiarPainValue = watch(familiarPainPath) as string | null;
-  const familiarHeadacheValue = watch(familiarHeadachePath) as string | null;
+  const painValue = getValue(painPath) as string | null;
+  const familiarPainValue = getValue(familiarPainPath) as string | null;
+  const familiarHeadacheValue = getValue(familiarHeadachePath) as string | null;
 
   const hasData = painValue === "yes" || painValue === "no";
   const isPainPositive = painValue === "yes";
@@ -199,24 +199,30 @@ function PalpationSubsection({
   palpationMode,
   showDiagram = true,
 }: PalpationSubsectionProps) {
-  const { watch } = useFormContext<FormValues>();
   const sideLabel = side === "right" ? "Rechte Seite" : "Linke Seite";
   const prefix = `e9.${side}`;
 
-  // Watch all instance paths to trigger re-renders
-  const watchPaths = instances.map((i) => i.path);
-  watch(watchPaths);
+  // Watch all instance paths to trigger re-renders (field-level only)
+  const watchPaths = useMemo(() => instances.map((i) => i.path as FieldPath<FormValues>), [instances]);
+  const watchedValues = useWatch({ name: watchPaths });
+
+  // Build value lookup from watched results
+  const getValue = useCallback(
+    (path: string) => {
+      const idx = watchPaths.indexOf(path as FieldPath<FormValues>);
+      return idx >= 0 ? watchedValues[idx] : undefined;
+    },
+    [watchPaths, watchedValues]
+  );
 
   // Compute site statuses for the diagram (only for current step's sites)
-  const computeStatuses = useCallback((): Partial<Record<PalpationSite, SiteStatus>> => {
+  const siteStatuses = useMemo((): Partial<Record<PalpationSite, SiteStatus>> => {
     const statuses: Partial<Record<PalpationSite, SiteStatus>> = {};
     for (const site of sites) {
-      statuses[site] = computeSiteStatus(site, prefix, watch);
+      statuses[site] = computeSiteStatus(site, prefix, getValue);
     }
     return statuses;
-  }, [sites, prefix, watch]);
-
-  const siteStatuses = computeStatuses();
+  }, [sites, prefix, getValue]);
 
   // Get instances for a specific site
   const getSiteInstances = useCallback(
@@ -282,7 +288,7 @@ function PalpationSubsection({
     }
 
     const painInstance = instanceMap.get("pain");
-    const painValue = painInstance ? (watch(painInstance.path) as unknown as string | null) : null;
+    const painValue = painInstance ? (getValue(painInstance.path) as string | null) : null;
     const isQuestionEnabled = (painType: string) => painType === "pain" || painValue === "yes";
     const incomplete = getIncompleteSite(site);
 
@@ -386,12 +392,12 @@ export function E9Section({
   isLastSection = true,
 }: E9SectionProps) {
   const { getInstancesForStep } = useExaminationForm();
-  const { watch, setValue, getValues, clearErrors } = useFormContext<FormValues>();
+  const { setValue, getValues, clearErrors } = useFormContext<FormValues>();
   const activeStepRef = useScrollToActiveStep(step ?? 0);
 
   const rightInstances = getInstancesForStep("e9-right");
   const leftInstances = getInstancesForStep("e9-left");
-  const palpationMode = watch("e9.palpationMode") as PalpationMode;
+  const palpationMode = useWatch({ name: "e9.palpationMode" as FieldPath<FormValues> }) as PalpationMode;
 
   // Build mode-aware instruction content (re-computed when mode changes)
   const e9Instructions = useMemo(() => createE9RichInstructions(palpationMode), [palpationMode]);
@@ -503,8 +509,12 @@ export function E9Section({
     [leftInstances, currentSites]
   );
 
-  // Subscribe to current step's fields for reactive skip button
-  watch([...filteredRight, ...filteredLeft].map((i) => i.path));
+  // Subscribe to current step's fields for reactive skip button (field-level only)
+  const currentStepPaths = useMemo(
+    () => [...filteredRight, ...filteredLeft].map((i) => i.path as FieldPath<FormValues>),
+    [filteredRight, filteredLeft]
+  );
+  useWatch({ name: currentStepPaths });
 
   const isCurrentStepComplete =
     !allComplete &&
