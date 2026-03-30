@@ -6,12 +6,14 @@
 export const roles = {
   ORG_ADMIN: "org_admin",
   PHYSICIAN: "physician",
+  ASSISTANT: "assistant",
   RECEPTIONIST: "receptionist",
   UNVERIFIED: "unverified",
 } as const;
 
 export const roleHierarchy = [
   roles.PHYSICIAN,
+  roles.ASSISTANT,
   roles.RECEPTIONIST,
   roles.ORG_ADMIN,
 ];

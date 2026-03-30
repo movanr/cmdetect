@@ -23,6 +23,7 @@ const testAccounts = [
   { email: "admin@test.com", role: roles.ORG_ADMIN, label: "Admin", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
   { email: "physician@test.com", role: roles.PHYSICIAN, label: "Physician (Multi-role)", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
   { email: "receptionist@test.com", role: roles.RECEPTIONIST, label: "Receptionist", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
+  { email: "assistant@test.com", role: roles.ASSISTANT, label: "MFA", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
 
   // Organization 1 - Integration Tests Only (DO NOT use for manual testing)
   { email: "admin1@test.com", role: roles.ORG_ADMIN, label: "Test Admin One", password: "testPassword123!", org: "Org 1 - Tests Only" },

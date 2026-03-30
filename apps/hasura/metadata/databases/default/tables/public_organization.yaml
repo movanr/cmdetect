@@ -31,6 +31,31 @@ array_relationships:
           name: user
           schema: public
 select_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - address_line1
+        - address_line2
+        - city
+        - country
+        - created_at
+        - email
+        - id
+        - key_created_at
+        - key_fingerprint
+        - name
+        - phone
+        - postal_code
+        - public_key_pem
+        - updated_at
+        - website
+      filter:
+        _and:
+          - id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
   - role: org_admin
     permission:
       columns:

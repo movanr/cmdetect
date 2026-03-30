@@ -20,6 +20,7 @@ import { CURRENT_MODEL_VERSION } from "./model-versioning";
 
 interface UpsertParams {
   patientRecordId: string;
+  examinedBy: string;
   responseData: FormValues;
   status: ExaminationStatus;
   completedSections: SectionId[];
@@ -41,12 +42,14 @@ export function useUpsertExamination(patientRecordId: string) {
   return useMutation({
     mutationFn: async ({
       patientRecordId,
+      examinedBy,
       responseData,
       status,
       completedSections,
     }: UpsertParams) => {
       return execute(UPSERT_EXAMINATION_RESPONSE, {
         patient_record_id: patientRecordId,
+        examined_by: examinedBy,
         response_data: { _modelVersion: CURRENT_MODEL_VERSION, ...responseData },
         status,
         completed_sections: completedSections,

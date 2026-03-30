@@ -40,6 +40,15 @@ array_relationships:
           name: questionnaire_response
           schema: public
 insert_permissions:
+  - role: assistant
+    permission:
+      check: {}
+      set:
+        created_by: x-hasura-User-Id
+        organization_id: x-hasura-Organization-Id
+      columns:
+        - clinic_internal_id
+    comment: ""
   - role: org_admin
     permission:
       check: {}
@@ -68,6 +77,32 @@ insert_permissions:
         - clinic_internal_id
     comment: ""
 select_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - clinic_internal_id
+        - created_at
+        - created_by
+        - date_of_birth_encrypted
+        - first_name_encrypted
+        - id
+        - invite_expires_at
+        - invite_token
+        - last_name_encrypted
+        - last_viewed_at
+        - last_viewed_by
+        - organization_id
+        - patient_data_completed_at
+        - submission_completed_at
+        - updated_at
+        - viewed
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
   - role: org_admin
     permission:
       columns:
@@ -147,6 +182,24 @@ select_permissions:
               _is_null: true
     comment: ""
 update_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - clinic_internal_id
+        - deleted_at
+        - invite_expires_at
+        - submission_completed_at
+        - viewed
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: {}
+      set:
+        updated_at: now()
+    comment: ""
   - role: org_admin
     permission:
       columns:

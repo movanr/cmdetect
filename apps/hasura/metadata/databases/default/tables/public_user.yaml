@@ -34,6 +34,24 @@ insert_permissions:
         - roles
     comment: ""
 select_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - activeRole
+        - email
+        - id
+        - image
+        - isActive
+        - name
+        - organizationId
+        - roles
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - deletedAt:
+              _is_null: true
+    comment: ""
   - role: org_admin
     permission:
       columns:
@@ -111,6 +129,23 @@ update_permissions:
       check: {}
     comment: ""
   - role: physician
+    permission:
+      columns:
+        - email
+        - name
+      filter:
+        _and:
+          - organizationId:
+              _eq: X-Hasura-Organization-Id
+          - id:
+              _eq: X-Hasura-User-Id
+          - deletedAt:
+              _is_null: true
+      check: null
+      set:
+        updatedAt: now()
+    comment: ""
+  - role: assistant
     permission:
       columns:
         - email

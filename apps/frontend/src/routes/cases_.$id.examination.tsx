@@ -40,6 +40,10 @@ import {
   useExaminationPersistenceContext,
   useExaminationResponse,
 } from "../features/examination";
+import { BehandlerSelector } from "../features/examination/components/BehandlerSelector";
+import { getTranslations } from "@/config/i18n";
+import { useSession } from "@/lib/auth";
+import { roles } from "@cmdetect/config";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
 export const Route = createFileRoute("/cases_/$id/examination")({
@@ -49,7 +53,6 @@ export const Route = createFileRoute("/cases_/$id/examination")({
 function ExaminationLayout() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-
   // Create examination form (provides FormContext to children)
   const form = useForm(examinationFormConfig);
 
@@ -68,6 +71,19 @@ function ExaminationLayout() {
   const { data: examination, isLoading: isExamLoading } = useExaminationResponse(id);
 
   const examinationCompletedAt = examination?.completedAt ?? null;
+
+  // Behandler (examiner) state:
+  // - Physician: auto-select self (they ARE the examiner)
+  // - Assistant/other: must select explicitly, hydrate from backend if existing
+  const { data: session } = useSession();
+  const userRoles = (session?.user as Record<string, unknown> | undefined)?.roles as
+    | string[]
+    | undefined;
+  const isPhysician = userRoles?.includes(roles.PHYSICIAN) ?? false;
+
+  const [examinedByOverride, setExaminedBy] = useState<string | null>(null);
+  const autoExaminedBy = isPhysician && session?.user?.id ? session.user.id : null;
+  const examinedBy = examinedByOverride ?? examination?.examinedBy ?? autoExaminedBy;
 
   // Calculate workflow progress
   const { completedSteps } = useCaseProgress({
@@ -140,13 +156,17 @@ function ExaminationLayout() {
       isDecrypting={isDecrypting}
     >
       <FormProvider {...form}>
-        <ExaminationPersistenceProvider patientRecordId={id}>
+        <ExaminationPersistenceProvider patientRecordId={id} examinedBy={examinedBy ?? ""}>
           <ExaminationContent
             caseId={id}
             subSteps={subSteps}
             patientName={patientName}
             patientDob={patientDob}
             clinicInternalId={record?.clinic_internal_id ?? undefined}
+            examinedBy={examinedBy}
+            onExaminedByChange={setExaminedBy}
+            isExaminationCompleted={examinationCompletedAt !== null}
+            isPhysician={isPhysician}
           />
         </ExaminationPersistenceProvider>
       </FormProvider>
@@ -166,17 +186,26 @@ function ExaminationContent({
   patientName,
   patientDob,
   clinicInternalId,
+  examinedBy,
+  onExaminedByChange,
+  isExaminationCompleted,
+  isPhysician,
 }: {
   caseId: string;
   subSteps: { id: string; label: string; order: number; route: string }[];
   patientName?: string;
   patientDob?: string;
   clinicInternalId?: string;
+  examinedBy: string | null;
+  onExaminedByChange: (id: string) => void;
+  isExaminationCompleted: boolean;
+  isPhysician: boolean;
 }) {
   const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
   const { getValues } = useFormContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const t = getTranslations();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const stored = sessionStorage.getItem("examination-view-mode");
@@ -237,6 +266,22 @@ function ExaminationContent({
     );
   }
 
+  // Gate: require Behandler selection before examination access (non-physicians only)
+  if (!examinedBy && !isPhysician) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+        <h2 className="text-lg font-semibold">{t.examination.behandlerLabel}</h2>
+        <p className="text-sm text-muted-foreground text-center max-w-sm">
+          {t.examination.selectBehandlerGate}
+        </p>
+        <BehandlerSelector
+          value={examinedBy}
+          onChange={onExaminedByChange}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 print:space-y-0">
       {/* Sub-step navigation tabs — only in wizard mode */}
@@ -250,9 +295,18 @@ function ExaminationContent({
       )}
 
       {/* Status-conditional action buttons */}
-      <div className="flex justify-end gap-2 print:hidden">
+      <div className="flex items-center justify-end gap-2 print:hidden">
+        {/* Behandler selector — only for non-physicians (assistants) */}
+        {!isPhysician && (
+          <BehandlerSelector
+            value={examinedBy}
+            onChange={onExaminedByChange}
+            disabled={isExaminationCompleted}
+          />
+        )}
+
         {/* View mode toggle */}
-        <div className="mr-auto flex rounded-md border border-input overflow-hidden">
+        <div className="ml-auto flex rounded-md border border-input overflow-hidden">
           <button
             type="button"
             onClick={() => setViewModeAndPersist("wizard")}

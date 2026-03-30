@@ -116,6 +116,13 @@ const TEST_USERS: TestUser[] = [
     roles: [roles.RECEPTIONIST],
     organizationId: TEST_ORGANIZATIONS[2].id,
   },
+  {
+    email: "assistant@test.com",
+    password: "TestPassword123!",
+    name: "MFA Manual",
+    roles: [roles.ASSISTANT],
+    organizationId: TEST_ORGANIZATIONS[2].id,
+  },
 
   // Unverified user (no organization)
   {

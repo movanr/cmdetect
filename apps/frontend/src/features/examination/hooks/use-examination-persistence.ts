@@ -23,6 +23,7 @@ const AUTO_SAVE_DELAY_MS = 3000;
 
 interface UseExaminationPersistenceOptions {
   patientRecordId: string;
+  examinedBy: string;
 }
 
 export interface UseExaminationPersistenceResult {
@@ -44,6 +45,7 @@ export interface UseExaminationPersistenceResult {
 
 export function useExaminationPersistence({
   patientRecordId,
+  examinedBy,
 }: UseExaminationPersistenceOptions): UseExaminationPersistenceResult {
   const form = useFormContext<FormValues>();
   const [isHydrated, setIsHydrated] = useState(false);
@@ -85,11 +87,12 @@ export function useExaminationPersistence({
       backendStatusRef.current ?? (sections.length === 0 ? "draft" : "in_progress");
     return {
       patientRecordId,
+      examinedBy,
       responseData: formValues,
       status,
       completedSections: sections,
     };
-  }, [form, patientRecordId]);
+  }, [form, patientRecordId, examinedBy]);
 
   // Cancel any pending debounce timer
   const cancelDebounce = useCallback(() => {
@@ -103,13 +106,27 @@ export function useExaminationPersistence({
   // callbacks without re-subscribing on every cache update.
   const buildUpsertParamsRef = useRef(buildUpsertParams);
   const upsertMutationRef = useRef(upsertMutation);
+  const examinedByRef = useRef(examinedBy);
 
   // Sync refs in effect (react-hooks/rules-of-hooks forbids ref writes during render)
   useEffect(() => {
     backendStatusRef.current = backendResponse?.status ?? null;
     buildUpsertParamsRef.current = buildUpsertParams;
     upsertMutationRef.current = upsertMutation;
-  }, [backendResponse?.status, buildUpsertParams, upsertMutation]);
+    examinedByRef.current = examinedBy;
+  }, [backendResponse?.status, buildUpsertParams, upsertMutation, examinedBy]);
+
+  // Save immediately when Behandler changes (not debounced)
+  const prevExaminedByRef = useRef(examinedBy);
+  useEffect(() => {
+    if (!isHydrated || !examinedBy) return;
+    if (prevExaminedByRef.current === examinedBy) return;
+    prevExaminedByRef.current = examinedBy;
+
+    cancelDebounce();
+    upsertMutationRef.current.mutate(buildUpsertParamsRef.current());
+    hasUnsavedBackendChangesRef.current = false;
+  }, [examinedBy, isHydrated, cancelDebounce]);
 
   // Auto-save to backend on form changes (debounced).
   // Effect only re-runs when isHydrated changes (once), not on cache updates.
@@ -122,6 +139,8 @@ export function useExaminationPersistence({
       cancelDebounce();
 
       debounceTimerRef.current = setTimeout(async () => {
+        // Skip save if no Behandler selected (required field)
+        if (!examinedByRef.current) return;
         try {
           await upsertMutationRef.current.mutateAsync(buildUpsertParamsRef.current());
           hasUnsavedBackendChangesRef.current = false;
@@ -136,7 +155,7 @@ export function useExaminationPersistence({
       cancelDebounce();
       // Flush: if there are unsaved changes, fire an immediate save.
       // SPA navigation keeps the fetch alive so this reliably completes.
-      if (hasUnsavedBackendChangesRef.current) {
+      if (hasUnsavedBackendChangesRef.current && examinedByRef.current) {
         upsertMutationRef.current.mutate(buildUpsertParamsRef.current());
       }
     };
@@ -158,6 +177,7 @@ export function useExaminationPersistence({
 
       await upsertMutation.mutateAsync({
         patientRecordId,
+        examinedBy,
         responseData: formValues,
         status,
         completedSections: newCompletedSections,
@@ -167,7 +187,7 @@ export function useExaminationPersistence({
       completedSectionsRef.current = newCompletedSections;
       hasUnsavedBackendChangesRef.current = false;
     },
-    [form, completedSections, upsertMutation, patientRecordId, cancelDebounce]
+    [form, completedSections, upsertMutation, patientRecordId, examinedBy, cancelDebounce]
   );
 
   // Complete the entire examination
@@ -184,6 +204,7 @@ export function useExaminationPersistence({
     // Upsert with all data first
     const upsertResult = await upsertMutation.mutateAsync({
       patientRecordId,
+      examinedBy,
       responseData: formValues,
       status: "in_progress",
       completedSections: finalCompletedSections,
@@ -213,6 +234,7 @@ export function useExaminationPersistence({
     upsertMutation,
     completeMutation,
     patientRecordId,
+    examinedBy,
     backendResponse,
     cancelDebounce,
   ]);

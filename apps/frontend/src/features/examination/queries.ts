@@ -5,6 +5,24 @@
 import { graphql } from "@/graphql/gql";
 
 /**
+ * Get active physicians in the organization (for Behandler selector).
+ */
+export const GET_PHYSICIANS = graphql(`
+  query GetPhysicians {
+    user(
+      where: {
+        roles: { _contains: "physician" }
+        isActive: { _eq: true }
+      }
+      order_by: [{ name: asc }]
+    ) {
+      id
+      name
+    }
+  }
+`);
+
+/**
  * Get examination response for a patient record.
  * Returns null or one record (unique constraint on patient_record_id).
  */
@@ -35,6 +53,7 @@ export const GET_EXAMINATION_RESPONSE = graphql(`
 export const UPSERT_EXAMINATION_RESPONSE = graphql(`
   mutation UpsertExaminationResponse(
     $patient_record_id: String!
+    $examined_by: String!
     $response_data: jsonb!
     $status: String!
     $completed_sections: jsonb!
@@ -42,13 +61,14 @@ export const UPSERT_EXAMINATION_RESPONSE = graphql(`
     insert_examination_response_one(
       object: {
         patient_record_id: $patient_record_id
+        examined_by: $examined_by
         response_data: $response_data
         status: $status
         completed_sections: $completed_sections
       }
       on_conflict: {
         constraint: examination_response_patient_record_unique
-        update_columns: [response_data, status, completed_sections]
+        update_columns: [examined_by, response_data, status, completed_sections]
       }
     ) {
       id

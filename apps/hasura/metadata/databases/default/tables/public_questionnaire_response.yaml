@@ -35,6 +35,24 @@ insert_permissions:
         - patient_record_id
     comment: ""
 select_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - created_at
+        - response_data
+        - id
+        - organization_id
+        - patient_consent_id
+        - patient_record_id
+        - submitted_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
   - role: org_admin
     permission:
       columns:

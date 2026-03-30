@@ -3,7 +3,7 @@ import { useSession, switchUserRole } from '../lib/auth';
 import { roles } from '@cmdetect/config';
 
 // Define available roles in the system
-export type UserRole = typeof roles.ORG_ADMIN | typeof roles.PHYSICIAN | typeof roles.RECEPTIONIST | typeof roles.UNVERIFIED;
+export type UserRole = typeof roles.ORG_ADMIN | typeof roles.PHYSICIAN | typeof roles.ASSISTANT | typeof roles.RECEPTIONIST | typeof roles.UNVERIFIED;
 
 export interface RoleContextType {
   // Current state

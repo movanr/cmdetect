@@ -32,14 +32,16 @@ const ExaminationPersistenceContext =
 
 interface ExaminationPersistenceProviderProps {
   patientRecordId: string;
+  examinedBy: string;
   children: ReactNode;
 }
 
 export function ExaminationPersistenceProvider({
   patientRecordId,
+  examinedBy,
   children,
 }: ExaminationPersistenceProviderProps) {
-  const persistence = useExaminationPersistence({ patientRecordId });
+  const persistence = useExaminationPersistence({ patientRecordId, examinedBy });
 
   return (
     <ExaminationPersistenceContext.Provider value={persistence}>

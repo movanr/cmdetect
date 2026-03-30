@@ -32,6 +32,7 @@ export function Header() {
   const roleLabels: Record<UserRole, string> = {
     [roles.ORG_ADMIN]: t.roles[roles.ORG_ADMIN].title,
     [roles.PHYSICIAN]: t.roles[roles.PHYSICIAN].title,
+    [roles.ASSISTANT]: t.roles[roles.ASSISTANT].title,
     [roles.RECEPTIONIST]: t.roles[roles.RECEPTIONIST].title,
     [roles.UNVERIFIED]: t.roles[roles.UNVERIFIED].title,
   };

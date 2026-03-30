@@ -43,6 +43,25 @@ insert_permissions:
         - assessed_at
     comment: ""
 select_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - id
+        - patient_record_id
+        - organization_id
+        - criterion_id
+        - side
+        - region
+        - site
+        - state
+        - assessed_by
+        - assessed_at
+        - created_at
+        - updated_at
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+    comment: ""
   - role: org_admin
     permission:
       columns:

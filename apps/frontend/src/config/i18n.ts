@@ -19,6 +19,9 @@ export interface I18nStrings {
     [roles.PHYSICIAN]: {
       title: string;
     };
+    [roles.ASSISTANT]: {
+      title: string;
+    };
     [roles.RECEPTIONIST]: {
       title: string;
     };
@@ -219,6 +222,13 @@ export interface I18nStrings {
     createAnother: string;
   };
 
+  // Examination
+  examination: {
+    behandlerLabel: string;
+    selectBehandler: string;
+    selectBehandlerGate: string;
+  };
+
   // Case workflow steps
   caseSteps: {
     caseLabel: string;
@@ -251,6 +261,9 @@ export const translations: Record<Language, I18nStrings> = {
       },
       [roles.PHYSICIAN]: {
         title: "Practitioner",
+      },
+      [roles.ASSISTANT]: {
+        title: "Assistant",
       },
       [roles.RECEPTIONIST]: {
         title: "Receptionist",
@@ -424,6 +437,12 @@ export const translations: Record<Language, I18nStrings> = {
       createAnother: "Create Another",
     },
 
+    examination: {
+      behandlerLabel: "Examiner",
+      selectBehandler: "Select examiner",
+      selectBehandlerGate: "Please select the examining practitioner before starting the examination.",
+    },
+
     caseSteps: {
       caseLabel: "Case",
       patientIdLabel: "Patient ID",
@@ -455,8 +474,11 @@ export const translations: Record<Language, I18nStrings> = {
       [roles.PHYSICIAN]: {
         title: "Behandler",
       },
+      [roles.ASSISTANT]: {
+        title: "MFA",
+      },
       [roles.RECEPTIONIST]: {
-        title: "Rezeption",
+        title: "Empfang",
       },
       [roles.UNVERIFIED]: {
         title: "Nicht verifiziert",
@@ -628,6 +650,12 @@ export const translations: Record<Language, I18nStrings> = {
         "Sehr geehrte Patientin, sehr geehrter Patient,\n\nim Rahmen Ihres Termins in unserer Praxis bitten wir Sie, vorab einen Online-Fragebogen auszufüllen. Bitte klicken Sie dazu auf den folgenden Link:\n\n{url}\n\nBitte füllen Sie den Fragebogen möglichst vor Ihrem Termin aus. Ihre Angaben werden verschlüsselt übertragen und vertraulich behandelt.\n\nBei Fragen wenden Sie sich gerne an unser Praxisteam.\n\nMit freundlichen Grüßen\nIhr Praxisteam",
       backToInvites: "Zurück zu Einladungen",
       createAnother: "Weitere erstellen",
+    },
+
+    examination: {
+      behandlerLabel: "Behandler",
+      selectBehandler: "Behandler auswählen",
+      selectBehandlerGate: "Bitte wählen Sie den untersuchenden Behandler aus, bevor Sie mit der Untersuchung beginnen.",
     },
 
     caseSteps: {
