@@ -6,9 +6,6 @@
  * Requires anamnesis to be completed (gating enforced).
  */
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,19 +17,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
-import { CaseLayout } from "../components/layouts/CaseLayout";
-import { formatDate } from "@/lib/date-utils";
+import { getTranslations } from "@/config/i18n";
 import { execute } from "@/graphql/execute";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
+import { useSession } from "@/lib/auth";
+import { formatDate } from "@/lib/date-utils";
+import { roles } from "@cmdetect/config";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { CaseLayout } from "../components/layouts/CaseLayout";
 import {
   getStepDefinition,
   SubStepTabs,
   useCaseProgress,
   useStepGating,
 } from "../features/case-workflow";
-import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import {
   examinationFormConfig,
   ExaminationPersistenceProvider,
@@ -40,12 +42,10 @@ import {
   useExaminationPersistenceContext,
   useExaminationResponse,
 } from "../features/examination";
-import { ExaminationViewProvider } from "../features/examination/contexts/ExaminationViewContext";
 import { BehandlerSelector } from "../features/examination/components/BehandlerSelector";
-import { getTranslations } from "@/config/i18n";
-import { useSession } from "@/lib/auth";
-import { roles } from "@cmdetect/config";
+import { ExaminationViewProvider } from "../features/examination/contexts/ExaminationViewContext";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
+import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 
 export const Route = createFileRoute("/cases_/$id/examination")({
   component: ExaminationLayout,
@@ -103,14 +103,28 @@ function ExaminationLayout() {
 
   // Redirect if step is not accessible
   useEffect(() => {
-    if (!isRecordLoading && !isResponsesLoading && !isExamLoading && !isCurrentStepAccessible && redirectStep) {
+    if (
+      !isRecordLoading &&
+      !isResponsesLoading &&
+      !isExamLoading &&
+      !isCurrentStepAccessible &&
+      redirectStep
+    ) {
       navigate({
         to: `/cases/$id/${redirectStep}`,
         params: { id },
         replace: true,
       });
     }
-  }, [isRecordLoading, isResponsesLoading, isExamLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
+  }, [
+    isRecordLoading,
+    isResponsesLoading,
+    isExamLoading,
+    isCurrentStepAccessible,
+    redirectStep,
+    navigate,
+    id,
+  ]);
 
   const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
 
@@ -134,11 +148,7 @@ function ExaminationLayout() {
   // Loading or gating redirect in progress
   if (isRecordLoading || isResponsesLoading || isExamLoading || !isCurrentStepAccessible) {
     return (
-      <CaseLayout
-        caseId={id}
-        currentStep="examination"
-        completedSteps={completedStepsArray}
-      >
+      <CaseLayout caseId={id} currentStep="examination" completedSteps={completedStepsArray}>
         <div className="flex items-center justify-center p-8">
           <div className="text-muted-foreground">Laden...</div>
         </div>
@@ -200,7 +210,8 @@ function ExaminationContent({
   isExaminationCompleted: boolean;
   isPhysician: boolean;
 }) {
-  const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } = useExaminationPersistenceContext();
+  const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } =
+    useExaminationPersistenceContext();
   const { getValues } = useFormContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -220,7 +231,7 @@ function ExaminationContent({
 
   const viewContextValue = useMemo(
     () => ({ patientName, patientDob, clinicInternalId, navigateToGuidedMode }),
-    [patientName, patientDob, clinicInternalId, navigateToGuidedMode],
+    [patientName, patientDob, clinicInternalId, navigateToGuidedMode]
   );
 
   const handleExportPDF = useCallback(() => {
@@ -280,10 +291,7 @@ function ExaminationContent({
         <p className="text-sm text-muted-foreground text-center max-w-sm">
           {t.examination.selectBehandlerGate}
         </p>
-        <BehandlerSelector
-          value={examinedBy}
-          onChange={onExaminedByChange}
-        />
+        <BehandlerSelector value={examinedBy} onChange={onExaminedByChange} />
       </div>
     );
   }
@@ -348,8 +356,8 @@ function ExaminationContent({
             <AlertDialogHeader>
               <AlertDialogTitle>Untersuchung abschließen?</AlertDialogTitle>
               <AlertDialogDescription>
-                Sie können die Untersuchung jetzt abschließen. Abschnitte, die noch nicht
-                ausgefüllt wurden, bleiben leer.
+                Sie können die Untersuchung jetzt abschließen. Sie können die Untersuchung
+                nachträglich bearbeiten.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -360,7 +368,6 @@ function ExaminationContent({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
       </div>
     </ExaminationViewProvider>
   );
