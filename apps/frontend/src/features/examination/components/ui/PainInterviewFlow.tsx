@@ -15,10 +15,10 @@ import {
   BookOpen,
   ChevronDown,
   ChevronRight,
+  CornerDownRight,
   ExternalLink,
   Image,
   Info,
-  CornerDownRight,
   MousePointerClick,
   Pause,
 } from "lucide-react";
@@ -364,14 +364,8 @@ export function MeasurementFlowBlock({
  * Collapsible info panel for instructions.
  * Used for section introductions and per-step procedure instructions.
  */
-export function IntroPanel({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  const [expanded, setExpanded] = useState(true);
+export function IntroPanel({ title, children }: { title: string; children: React.ReactNode }) {
+  const [expanded, setExpanded] = useState(false);
   return (
     <div className="rounded-lg border border-muted bg-muted/30">
       <button
@@ -387,11 +381,7 @@ export function IntroPanel({
         <Info className="h-4 w-4 shrink-0" />
         <span className="font-medium">{title}</span>
       </button>
-      {expanded && (
-        <div className="px-3 pb-3">
-          {children}
-        </div>
-      )}
+      {expanded && <div className="px-3 pb-3">{children}</div>}
     </div>
   );
 }
