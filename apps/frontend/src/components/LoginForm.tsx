@@ -11,32 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import logoSvg from "../assets/logo.svg";
-import { roles } from "@cmdetect/config";
 
-const testAccounts = [
-  // Organization 3 - Manual Testing (Use these for frontend testing!)
-  { email: "admin@test.com", role: roles.ORG_ADMIN, label: "Admin", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
-  { email: "physician@test.com", role: roles.PHYSICIAN, label: "Physician (Multi-role)", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
-  { email: "receptionist@test.com", role: roles.RECEPTIONIST, label: "Receptionist", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
-  { email: "assistant@test.com", role: roles.ASSISTANT, label: "MFA", password: "TestPassword123!", org: "Org 3 - Manual Testing" },
-
-  // Organization 1 - Integration Tests Only (DO NOT use for manual testing)
-  { email: "admin1@test.com", role: roles.ORG_ADMIN, label: "Test Admin One", password: "testPassword123!", org: "Org 1 - Tests Only" },
-  { email: "doctor1@test.com", role: roles.PHYSICIAN, label: "Dr. One", password: "testPassword123!", org: "Org 1 - Tests Only" },
-  { email: "reception1@test.com", role: roles.RECEPTIONIST, label: "Reception One", password: "testPassword123!", org: "Org 1 - Tests Only" },
-
-  // Organization 2 - Integration Tests Only (DO NOT use for manual testing)
-  { email: "admin2@test.com", role: roles.ORG_ADMIN, label: "Test Admin Two", password: "testPassword123!", org: "Org 2 - Tests Only" },
-  { email: "doctor2@test.com", role: roles.PHYSICIAN, label: "Dr. Two (Multi-role)", password: "testPassword123!", org: "Org 2 - Tests Only" },
-
-  // Unverified user
-  { email: "unverified@test.com", role: roles.UNVERIFIED, label: "Unverified", password: "testPassword123!", org: "No Org" },
-];
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -69,11 +47,6 @@ export function LoginForm() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fillTestAccount = (email: string, password: string) => {
-    setEmail(email);
-    setPassword(password);
   };
 
   return (
@@ -141,45 +114,6 @@ export function LoginForm() {
               </Button>
             </form>
 
-            <Separator />
-
-            <div className="space-y-3">
-              <div className="text-center">
-                <Label className="text-sm font-medium">Test Accounts</Label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Click any account to fill the form
-                </p>
-              </div>
-
-              <div className="grid gap-2">
-                {testAccounts.map((account) => (
-                  <Button
-                    key={account.email}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fillTestAccount(account.email, account.password)}
-                    disabled={isLoading}
-                    className="justify-start h-auto p-3"
-                  >
-                    <div className="flex flex-col items-start w-full">
-                      <div className="flex items-center justify-between w-full gap-2">
-                        <span className="font-medium text-xs truncate">
-                          {account.email}
-                        </span>
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          {account.label}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between w-full mt-1">
-                        <span className="text-xs text-muted-foreground">
-                          {account.org}
-                        </span>
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
