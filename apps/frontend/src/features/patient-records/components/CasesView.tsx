@@ -82,15 +82,15 @@ export function CasesView() {
 
         for (const record of submissions) {
           try {
-            if (record.is_demo) {
-              // Demo cases have no encrypted PII — use hardcoded name
-              decrypted[record.id] = getDemoPatientName(record.clinic_internal_id);
-            } else if (record.first_name_encrypted) {
+            if (record.first_name_encrypted) {
               const patientData = await decryptPatientData(
                 record.first_name_encrypted,
                 privateKeyPem
               );
               decrypted[record.id] = patientData;
+            } else if (record.is_demo) {
+              // Preset demo cases have no encrypted PII — use hardcoded name
+              decrypted[record.id] = getDemoPatientName(record.clinic_internal_id);
             }
           } catch (error) {
             console.error(`Failed to decrypt patient ${record.id}:`, error);

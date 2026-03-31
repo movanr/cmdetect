@@ -22,13 +22,16 @@ export function useDecryptedPatientData(
   const clinicInternalId = options?.clinicInternalId ?? "";
 
   useEffect(() => {
-    // Demo cases: return hardcoded name immediately
-    if (isDemo) {
+    // Try decryption first (works for both real and demo-invite cases)
+    if (firstNameEncrypted) {
+      // fall through to decrypt below
+    } else if (isDemo) {
+      // Preset demo cases have no encrypted PII — use hardcoded name
       setDecryptedData(getDemoPatientName(clinicInternalId));
       return;
+    } else {
+      return;
     }
-
-    if (!firstNameEncrypted) return;
 
     const encryptedValue = firstNameEncrypted;
     setIsDecrypting(true);
