@@ -5,12 +5,10 @@
  * Provides sub-step navigation tabs and renders child routes via Outlet.
  */
 
-import { useEffect } from "react";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
-import { graphql } from "@/graphql";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { execute } from "@/graphql/execute";
 import {
@@ -22,22 +20,12 @@ import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse } from "../features/examination";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 
-const UPDATE_VIEWED = graphql(`
-  mutation UpdateViewed($id: String!) {
-    update_patient_record_by_pk(pk_columns: { id: $id }, _set: { viewed: true }) {
-      id
-      viewed
-    }
-  }
-`);
-
 export const Route = createFileRoute("/cases_/$id/anamnesis")({
   component: AnamnesisLayout,
 });
 
 function AnamnesisLayout() {
   const { id } = Route.useParams();
-  const queryClient = useQueryClient();
 
   // Fetch patient record
   const { data, isLoading: isRecordLoading } = useQuery({
@@ -60,22 +48,6 @@ function AnamnesisLayout() {
     hasPatientData: !!record?.patient_data_completed_at,
     examinationCompletedAt: examination?.completedAt,
   });
-
-  // Update last viewed mutation
-  const updateViewedMutation = useMutation({
-    mutationFn: ({ id }: { id: string }) => execute(UPDATE_VIEWED, { id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["patient-record", id] });
-      queryClient.invalidateQueries({ queryKey: ["patient-records"] });
-    },
-  });
-
-  // Update last_viewed on mount
-  useEffect(() => {
-    if (record?.id && !updateViewedMutation.isPending) {
-      updateViewedMutation.mutate({ id: record.id });
-    }
-  }, [record?.id, updateViewedMutation]);
 
   const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
     isDemo: record?.is_demo ?? false,

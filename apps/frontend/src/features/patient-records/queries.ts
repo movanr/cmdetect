@@ -81,6 +81,15 @@ export const CREATE_PATIENT_RECORD = graphql(`
   }
 `);
 
+export const MARK_VIEWED = graphql(`
+  mutation MarkViewed($id: String!) {
+    update_patient_record_by_pk(pk_columns: { id: $id }, _set: { viewed: true }) {
+      id
+      viewed
+    }
+  }
+`);
+
 export const DELETE_PATIENT_RECORD = graphql(`
   mutation DeletePatientRecord($id: String!) {
     update_patient_record_by_pk(
@@ -112,6 +121,12 @@ export const RESET_DEMO_CASE = graphql(`
     update_examination_response(
       where: { patient_record_id: { _eq: $patient_record_id } }
       _set: { status: "draft", completed_sections: [], completed_at: null, response_data: $empty_response_data }
+    ) {
+      affected_rows
+    }
+    update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_key: { response_data: "_meta" }
     ) {
       affected_rows
     }

@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "../../lib/auth";
 import { Header } from "../navigation/Header";
@@ -9,7 +9,7 @@ import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { execute } from "@/graphql/execute";
-import { RESET_DEMO_CASE } from "@/features/patient-records/queries";
+import { MARK_VIEWED, RESET_DEMO_CASE } from "@/features/patient-records/queries";
 import { examinationDefaults } from "@/features/examination";
 import { canAccessStep, type MainStep } from "../../features/case-workflow";
 import { toast } from "sonner";
@@ -50,15 +50,27 @@ export function CaseLayout({
   const t = getTranslations();
   const queryClient = useQueryClient();
 
+  // Mark case as viewed on first mount
+  const hasMarkedViewed = useRef(false);
+  useEffect(() => {
+    if (caseId && !hasMarkedViewed.current) {
+      hasMarkedViewed.current = true;
+      execute(MARK_VIEWED, { id: caseId }).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["patient-record", caseId] });
+        queryClient.invalidateQueries({ queryKey: ["patient-records"] });
+      });
+    }
+  }, [caseId, queryClient]);
+
   const resetMutation = useMutation({
     mutationFn: () => execute(RESET_DEMO_CASE, {
       patient_record_id: caseId,
       empty_response_data: examinationDefaults,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries();
-      toast.success(t.demoCase.resetSuccess);
-      navigate({ to: "/cases/$id/anamnesis", params: { id: caseId } });
+      // Full page reload to kill all in-memory form state and prevent
+      // the examination auto-save flush from writing stale data back.
+      window.location.href = `/cases/${caseId}/anamnesis`;
     },
     onError: (error) => {
       console.error("Reset demo case failed:", error);
