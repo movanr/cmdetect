@@ -8,8 +8,8 @@ import type { PatientPII } from "@/crypto/types";
  * Must be kept in sync with apps/hasura/seeds/demo-cases/*.json
  */
 export const DEMO_PATIENT_NAMES: Record<string, PatientPII> = {
-  "DEMO-001": { firstName: "Marie", lastName: "Mustermann", dateOfBirth: "1985-07-15" },
-  "DEMO-002": { firstName: "Thomas", lastName: "Beispiel", dateOfBirth: "1972-03-22" },
+  "BEISPIEL-001": { firstName: "Marie", lastName: "Mustermann", dateOfBirth: "1985-07-15" },
+  "BEISPIEL-002": { firstName: "Thomas", lastName: "Beispiel", dateOfBirth: "1972-03-22" },
 };
 
 export const DEMO_PATIENT_FALLBACK: PatientPII = {

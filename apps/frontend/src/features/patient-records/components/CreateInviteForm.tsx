@@ -6,6 +6,8 @@ import { getTranslations } from "@/config/i18n";
 import { Copy, CheckCircle2, Mail } from "lucide-react";
 import { toast } from "sonner";
 
+const DEMO_PREFIX = "DEMO-";
+
 function buildInviteUrl(token: string) {
   return `${window.location.protocol}//${window.location.hostname.replace(/^app\./, "patient.")}?token=${token}`;
 }
@@ -13,11 +15,14 @@ function buildInviteUrl(token: string) {
 export function CreateInviteForm() {
   const navigate = useNavigate();
   const t = getTranslations();
+  const isDemo = true;
   const [clinicInternalId, setClinicInternalId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
 
   const createMutation = useCreatePatientRecord();
+
+  const fullClinicId = isDemo ? `${DEMO_PREFIX}${clinicInternalId.trim()}` : clinicInternalId.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +33,7 @@ export function CreateInviteForm() {
       return;
     }
 
-    createMutation.mutate({ clinicInternalId: clinicInternalId.trim() }, {
+    createMutation.mutate({ clinicInternalId: fullClinicId, isDemo }, {
       onSuccess: (data) => {
         const token = data?.insert_patient_record_one?.invite_token;
         if (token) {
@@ -144,17 +149,26 @@ export function CreateInviteForm() {
           >
             {t.createInvite.patientInternalId} <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
-            id="clinicInternalId"
-            value={clinicInternalId}
-            onChange={(e) => setClinicInternalId(e.target.value)}
-            placeholder={t.createInvite.patientInternalIdPlaceholder}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            autoComplete="off"
-            required
-            disabled={createMutation.isPending}
-          />
+          <div className="flex">
+            {isDemo && (
+              <span className="inline-flex items-center px-3 border border-r-0 rounded-l-md bg-muted text-muted-foreground text-sm font-mono">
+                {DEMO_PREFIX}
+              </span>
+            )}
+            <input
+              type="text"
+              id="clinicInternalId"
+              value={clinicInternalId}
+              onChange={(e) => setClinicInternalId(e.target.value)}
+              placeholder={isDemo ? "001" : t.createInvite.patientInternalIdPlaceholder}
+              className={`w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isDemo ? "rounded-r-md" : "rounded-md"
+              }`}
+              autoComplete="off"
+              required
+              disabled={createMutation.isPending}
+            />
+          </div>
           <p className="text-sm text-muted-foreground">
             {t.createInvite.patientInternalIdHint}
           </p>
