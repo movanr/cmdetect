@@ -277,6 +277,7 @@ export interface I18nStrings {
     waitingTitle: string;
     waitingDescription: string;
     waitingAlert: string;
+    waitingAlertSwitchRole: string;
     waitingAdminInstructions: string;
     waitingAdminStep1: string;
     waitingAdminStep2: string;
@@ -576,6 +577,8 @@ export const translations: Record<Language, I18nStrings> = {
       waitingDescription: "Encryption has not been configured for {org}.",
       waitingAlert:
         "Your organization administrator needs to complete the initial encryption setup before you can access the application. Please contact your administrator.",
+      waitingAlertSwitchRole:
+        "You have administrator privileges. Switch to the administrator role to set up encryption.",
       waitingAdminInstructions: "What your administrator needs to do:",
       waitingAdminStep1: "Log in with admin privileges",
       waitingAdminStep2: "Complete the encryption setup",
@@ -878,6 +881,8 @@ export const translations: Record<Language, I18nStrings> = {
       waitingDescription: "Die Verschlüsselung für {org} wurde noch nicht konfiguriert.",
       waitingAlert:
         "Der Administrator Ihrer Organisation muss die Verschlüsselungseinrichtung abschließen, bevor Sie auf die Anwendung zugreifen können. Bitte kontaktieren Sie Ihren Administrator.",
+      waitingAlertSwitchRole:
+        "Sie haben Administratorrechte. Wechseln Sie zur Administrator-Rolle, um die Verschlüsselung einzurichten.",
       waitingAdminInstructions: "Was Ihr Administrator tun muss:",
       waitingAdminStep1: "Mit Administratorrechten anmelden",
       waitingAdminStep2: "Die Verschlüsselungseinrichtung durchführen",

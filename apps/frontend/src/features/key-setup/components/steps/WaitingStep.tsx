@@ -24,10 +24,11 @@ function renderWithBoldOrg(template: string, orgName: string) {
 
 interface WaitingStepProps {
   organizationName: string;
+  hasAdminRole?: boolean;
   onRefresh: () => void;
 }
 
-export function WaitingStep({ organizationName, onRefresh }: WaitingStepProps) {
+export function WaitingStep({ organizationName, hasAdminRole, onRefresh }: WaitingStepProps) {
   const t = getTranslations();
 
   return (
@@ -43,7 +44,7 @@ export function WaitingStep({ organizationName, onRefresh }: WaitingStepProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          {t.keySetup.waitingAlert}
+          {hasAdminRole ? t.keySetup.waitingAlertSwitchRole : t.keySetup.waitingAlert}
         </p>
         <Button onClick={onRefresh} variant="outline" className="w-full">
           <RefreshCw className="h-4 w-4 mr-2" />

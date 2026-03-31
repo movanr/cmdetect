@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useSession, switchUserRole } from '../lib/auth';
-import { roles } from '@cmdetect/config';
+import { roles, roleHierarchy } from '@cmdetect/config';
 
 // Define available roles in the system
 export type UserRole = typeof roles.ORG_ADMIN | typeof roles.PHYSICIAN | typeof roles.ASSISTANT | typeof roles.RECEPTIONIST | typeof roles.UNVERIFIED;
@@ -47,8 +47,9 @@ export function RoleProvider({ children }: RoleProviderProps) {
       if (currentActiveRole && userRoles.includes(currentActiveRole)) {
         setActiveRole(currentActiveRole);
       } else if (userRoles.length > 0) {
-        // Default to first role if no active role is set
-        setActiveRole(userRoles[0]);
+        // Default to first role in hierarchy (same logic as backend JWT)
+        const defaultRole = roleHierarchy.find((r) => userRoles.includes(r as UserRole)) as UserRole | undefined;
+        setActiveRole(defaultRole ?? userRoles[0]);
       } else {
         setActiveRole(null);
       }
@@ -61,21 +62,6 @@ export function RoleProvider({ children }: RoleProviderProps) {
       setIsLoading(false);
     }
   }, [session, isSessionPending]);
-
-  // Persist active role in localStorage
-  useEffect(() => {
-    if (activeRole) {
-      localStorage.setItem('cmdetect_active_role', activeRole);
-    }
-  }, [activeRole]);
-
-  // Restore active role from localStorage on mount
-  useEffect(() => {
-    const savedRole = localStorage.getItem('cmdetect_active_role') as UserRole;
-    if (savedRole && availableRoles.includes(savedRole)) {
-      setActiveRole(savedRole);
-    }
-  }, [availableRoles]);
 
   const switchRole = async (newRole: UserRole): Promise<boolean> => {
     if (!availableRoles.includes(newRole)) {

@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useKeySetupContext } from '../../../contexts/useKeySetupContext';
+import { useRole } from '../../../contexts/RoleContext';
+import { roles } from '@cmdetect/config';
 import { LoadingStep } from './steps/LoadingStep';
 import { AdminGeneratingStep } from './steps/AdminGeneratingStep';
 import { RecoveryStep } from './steps/RecoveryStep';
@@ -12,6 +14,8 @@ interface KeySetupProps {
 
 export function KeySetup({ onSetupComplete }: KeySetupProps) {
   const { state, actions, context, revalidate } = useKeySetupContext();
+  const { availableRoles } = useRole();
+  const hasAdminRole = availableRoles.includes(roles.ORG_ADMIN);
 
   // Auto-redirect when setup is already complete
   useEffect(() => {
@@ -54,6 +58,7 @@ export function KeySetup({ onSetupComplete }: KeySetupProps) {
         return (
           <WaitingStep
             organizationName={context.organizationName}
+            hasAdminRole={hasAdminRole}
             onRefresh={revalidate}
           />
         );
