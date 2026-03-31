@@ -23,7 +23,7 @@ import { getPainTypeLabel, getSectionCardTitle } from "../../labels";
 import type { PainType, PalpationSite, Side } from "../../model/regions";
 import type { QuestionInstance } from "../../projections/to-instances";
 import { YesNoField } from "../inputs/YesNoField";
-import { SectionFooter } from "../ui";
+import { SectionFooter } from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 

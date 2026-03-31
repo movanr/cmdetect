@@ -18,7 +18,7 @@ import { E3_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { useExaminationForm } from "../../form/use-examination-form";
 import { getSectionCardTitle, SECTION_LABELS } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { IntroPanel, MeasurementFlowBlock, SectionFooter } from "../ui";
+import { IntroPanel, MeasurementFlowBlock, SectionFooter } from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 

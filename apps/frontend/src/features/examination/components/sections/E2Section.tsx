@@ -22,7 +22,7 @@ import { useExaminationForm, type FormValues } from "../../form/use-examination-
 import { useScrollToActiveStep } from "../../hooks/use-scroll-to-active-step";
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
-import { IntroPanel, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from "../ui";
+import { IntroPanel, MeasurementFlowBlock, SectionFooter, StepBar, type StepStatus } from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 

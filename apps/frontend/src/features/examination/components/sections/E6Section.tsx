@@ -18,7 +18,7 @@ import { useExaminationForm, type FormValues } from "../../form/use-examination-
 import { getSectionCardTitle } from "../../labels";
 import { QuestionField } from "../QuestionField";
 import { YesNoField } from "../inputs/YesNoField";
-import { IntroPanel, MeasurementFlowBlock, SectionFooter } from "../ui";
+import { IntroPanel, MeasurementFlowBlock, SectionFooter } from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 

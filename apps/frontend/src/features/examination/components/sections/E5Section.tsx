@@ -26,7 +26,7 @@ import {
   SectionFooter,
   StepBar,
   type StepStatus,
-} from "../ui";
+} from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { InterviewContent } from "./e4/InterviewContent";
 import type { ExpandedState } from "./e4/types";

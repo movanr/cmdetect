@@ -46,7 +46,7 @@ import {
   SectionFooter,
   StepBar,
   type StepStatus,
-} from "../ui";
+} from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import type { SectionProps } from "./types";
 

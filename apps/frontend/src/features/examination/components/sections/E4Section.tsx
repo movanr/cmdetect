@@ -26,7 +26,7 @@ import {
   SectionFooter,
   StepBar,
   type StepStatus,
-} from "../ui";
+} from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
 import { E4AMeasurementContent } from "./e4/E4AMeasurementContent";
 import { InterviewContent } from "./e4/InterviewContent";
