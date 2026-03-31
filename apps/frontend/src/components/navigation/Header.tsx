@@ -1,5 +1,3 @@
-import { useNavigate, Link } from "@tanstack/react-router";
-import { useSession, signOut, clearJWTToken } from "../../lib/auth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,15 +7,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
-import { LogOut, Shield, ChevronDown, Users, Settings } from "lucide-react";
-import { getTranslations, interpolate } from "../../config/i18n";
-import { useRole, type UserRole } from "../../contexts/RoleContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import logoSvg from "../../assets/logo.svg";
 import { roles } from "@cmdetect/config";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ChevronDown, LogOut, MessageSquare, Settings, Shield, Users } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import logoSvg from "../../assets/logo.svg";
+import { getTranslations, interpolate } from "../../config/i18n";
+import { useRole, type UserRole } from "../../contexts/RoleContext";
+import { clearJWTToken, signOut, useSession } from "../../lib/auth";
 
 export function Header() {
   const navigate = useNavigate();
@@ -125,10 +125,7 @@ export function Header() {
       {showPasswordDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={handleCancelPasswordDialog}
-          />
+          <div className="fixed inset-0 bg-black/50" onClick={handleCancelPasswordDialog} />
 
           {/* Modal */}
           <div className="relative z-50 w-full max-w-md bg-background rounded-lg shadow-lg p-6 m-4">
@@ -176,19 +173,28 @@ export function Header() {
         <div className="flex h-16 items-center justify-between px-4 lg:px-8">
           {/* Left side - Logo and Brand */}
           <Link to="/cases" className="flex items-center space-x-3">
-            <img
-              src={logoSvg}
-              className="h-8 w-8"
-              alt={`${t.nav.appName} logo`}
-            />
+            <img src={logoSvg} className="h-8 w-8" alt={`${t.nav.appName} logo`} />
             <span className="text-xl font-semibold">{t.nav.appName}</span>
           </Link>
 
           {/* Right side - User menu */}
           <div className="flex items-center space-x-4">
-            {/* Language switcher - TODO */}
-
-            {/* Notifications - TODO */}
+            {/* Feedback button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSf55NyLBgb1K5M7_QJXuov7PAvWdXdXxz3g0tmikHpqbu77EA/viewform?usp=header"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageSquare className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline text-sm">Feedback</span>
+              </a>
+            </Button>
 
             {/* User dropdown */}
             <DropdownMenu>
@@ -200,9 +206,7 @@ export function Header() {
                   <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     {userName.charAt(0).toUpperCase()}
                   </div>
-                  <span className="hidden md:inline text-sm font-medium">
-                    {userName}
-                  </span>
+                  <span className="hidden md:inline text-sm font-medium">{userName}</span>
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
@@ -265,10 +269,7 @@ export function Header() {
                 )}
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="min-h-[44px] py-3"
-                >
+                <DropdownMenuItem onClick={handleSignOut} className="min-h-[44px] py-3">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{t.nav.signOut}</span>
                 </DropdownMenuItem>
