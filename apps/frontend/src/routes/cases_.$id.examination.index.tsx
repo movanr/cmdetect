@@ -33,10 +33,6 @@ function ExaminationFormSheetView() {
             DC/TMD-Untersuchungsprotokoll als integrierte Anweisungen, Erläuterungen und Abbildungen
             an allen Untersuchungsschritten sowie in vollständiger Form als Nachschlagewerk.
           </p>
-          <p className="text-xs text-muted-foreground/70">
-            Eingaben werden automatisch in den Formularbogen übernommen — Werte können auch direkt
-            im Formularbogen eingetragen werden.
-          </p>
         </div>
         <Button
           variant={isCompleted ? "outline" : "default"}
