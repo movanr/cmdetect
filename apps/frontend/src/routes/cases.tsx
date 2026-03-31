@@ -1,6 +1,8 @@
 import { CasesView } from "@/features/patient-records/components/CasesView";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { AppLayout } from "../components/layouts/AppLayout";
+import { Button } from "../components/ui/button";
 import { getTranslations } from "../config/i18n";
 import { KeySetupGuard } from "../features/key-setup/components/KeySetupGuard";
 import { cn } from "../lib/utils";
@@ -22,6 +24,12 @@ function CasesPage() {
               <h1 className="text-3xl font-semibold tracking-tight">{t.nav.patients}</h1>
               <p className="text-sm text-muted-foreground mt-1">{t.pageDescriptions.cases}</p>
             </div>
+            <Button asChild>
+              <Link to="/invites/new">
+                <Plus className="h-4 w-4 mr-2" />
+                {t.actions.createNewInvite}
+              </Link>
+            </Button>
           </div>
 
           {/* View toggle */}
