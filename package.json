@@ -19,7 +19,8 @@
     "auth:migrate": "pnpm --filter @cmdetect/auth-server migrate",
     "frontend:dev": "pnpm --filter @cmdetect/frontend dev",
     "setup": "pnpm install && pnpm build:deps",
-    "build:deps": "pnpm --filter @cmdetect/config build"
+    "build:deps": "pnpm --filter @cmdetect/config build",
+    "provision": "pnpm --filter @cmdetect/auth-server provision"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
