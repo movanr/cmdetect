@@ -86,7 +86,10 @@ function EvaluationPage() {
     id,
   ]);
 
-  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
+    isDemo: record?.is_demo ?? false,
+    clinicInternalId: record?.clinic_internal_id,
+  });
 
   // Format patient display data
   const patientName =
@@ -139,6 +142,7 @@ function EvaluationPage() {
       patientName={patientName}
       patientDob={patientDob}
       isDecrypting={isDecrypting}
+      isDemo={record?.is_demo ?? false}
     >
       <EvaluationView
         sqAnswers={sqAnswers}

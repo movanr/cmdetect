@@ -1,15 +1,33 @@
 import { useEffect, useState } from "react";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
+import { getDemoPatientName } from "@/features/patient-records/demo-patient-names";
 
-export function useDecryptedPatientData(firstNameEncrypted: string | null | undefined): {
+interface UseDecryptedPatientDataOptions {
+  isDemo?: boolean;
+  clinicInternalId?: string;
+}
+
+export function useDecryptedPatientData(
+  firstNameEncrypted: string | null | undefined,
+  options?: UseDecryptedPatientDataOptions
+): {
   decryptedData: PatientPII | null;
   isDecrypting: boolean;
 } {
   const [decryptedData, setDecryptedData] = useState<PatientPII | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
+  const isDemo = options?.isDemo ?? false;
+  const clinicInternalId = options?.clinicInternalId ?? "";
+
   useEffect(() => {
+    // Demo cases: return hardcoded name immediately
+    if (isDemo) {
+      setDecryptedData(getDemoPatientName(clinicInternalId));
+      return;
+    }
+
     if (!firstNameEncrypted) return;
 
     const encryptedValue = firstNameEncrypted;
@@ -30,7 +48,7 @@ export function useDecryptedPatientData(firstNameEncrypted: string | null | unde
       }
     }
     decrypt();
-  }, [firstNameEncrypted]);
+  }, [firstNameEncrypted, isDemo, clinicInternalId]);
 
   return { decryptedData, isDecrypting };
 }

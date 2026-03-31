@@ -1,0 +1,204 @@
+{
+    "clinic_internal_id": "DEMO-001",
+    "demo_patient_name": {
+        "firstName": "Marie",
+        "lastName": "Mustermann",
+        "dateOfBirth": "1985-07-15"
+    },
+    "source_record_id": "2d3180b5-95b8-4be3-8da5-51b778fb6155",
+    "source_clinic_id": "145",
+    "exported_at": "2026-03-31T08:45:21Z",
+    "questionnaire_responses": [
+        {
+            "response_data": {
+                "_meta": {
+                    "reviewed_at": "2026-03-26T13:00:46.104Z"
+                },
+                "answers": {
+                    "SQ1": "no",
+                    "SQ5": "yes",
+                    "SQ6": {
+                        "years": 1,
+                        "months": 1
+                    },
+                    "SQ8": "yes",
+                    "SQ9": "no",
+                    "SQ13": "no",
+                    "SQ7_A": "yes",
+                    "SQ7_B": "no",
+                    "SQ7_C": "no",
+                    "SQ7_D": "yes",
+                    "SQ8_office": {
+                        "R": true,
+                        "DNK": false
+                    }
+                },
+                "questionnaire_id": "dc-tmd-sq",
+                "questionnaire_version": "1.0"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "version": "1.0",
+                    "drawings": {
+                        "mouth": {
+                            "imageId": "mouth",
+                            "elements": [
+                                {
+                                    "id": "1774529965705-vtyoto3",
+                                    "type": "shade",
+                                    "points": [
+                                        343.8363829965424,
+                                        626.8844621513944,
+                                        343.8363829965424,
+                                        626.8844621513944,
+                                        343.8363829965424,
+                                        625.7569721115538,
+                                        355.1045116829977,
+                                        608.8446215139442,
+                                        376.5139561872629,
+                                        573.8924302788844,
+                                        403.55746503475586,
+                                        527.6653386454183,
+                                        317.91968701769497,
+                                        550.215139442231,
+                                        303.271119725303,
+                                        568.2549800796812,
+                                        296.5102425134298,
+                                        580.6573705179283,
+                                        295.3834296447842,
+                                        587.422310756972,
+                                        301.0174939880119,
+                                        590.804780876494,
+                                        310.0319969371762,
+                                        590.804780876494,
+                                        320.17331275498606,
+                                        591.9322709163346,
+                                        325.80737709821375,
+                                        590.804780876494,
+                                        328.06100283550484,
+                                        590.804780876494,
+                                        328.06100283550484,
+                                        590.804780876494,
+                                        325.80737709821375,
+                                        590.804780876494,
+                                        317.91968701769497,
+                                        596.4422310756971,
+                                        307.7783711998851,
+                                        606.589641434263,
+                                        299.8906811193663,
+                                        614.4820717131473,
+                                        296.5102425134298,
+                                        618.9920318725099,
+                                        301.0174939880119,
+                                        620.1195219123506,
+                                        323.55375136092266,
+                                        612.2270916334661
+                                    ]
+                                }
+                            ]
+                        },
+                        "body-back": {
+                            "imageId": "body-back",
+                            "elements": []
+                        },
+                        "head-left": {
+                            "imageId": "head-left",
+                            "elements": []
+                        },
+                        "body-front": {
+                            "imageId": "body-front",
+                            "elements": []
+                        },
+                        "head-right": {
+                            "imageId": "head-right",
+                            "elements": []
+                        }
+                    },
+                    "completedAt": "2026-03-26T12:59:27.855Z"
+                },
+                "submitted_at": "2026-03-26T12:59:27.886Z",
+                "questionnaire_id": "dc-tmd-pain-drawing",
+                "questionnaire_version": "1.0"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "GCPS1M_1": 1,
+                    "GCPS1M_2": "3",
+                    "GCPS1M_3": "3",
+                    "GCPS1M_4": "2",
+                    "GCPS1M_5": 2,
+                    "GCPS1M_6": "2",
+                    "GCPS1M_7": "1",
+                    "GCPS1M_8": "3"
+                },
+                "submitted_at": "2026-03-26T12:59:38.862Z",
+                "questionnaire_id": "gcps-1m",
+                "questionnaire_version": "12/2018"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "JFLS8_1": "4",
+                    "JFLS8_2": "2",
+                    "JFLS8_3": "2",
+                    "JFLS8_4": "2",
+                    "JFLS8_5": "2",
+                    "JFLS8_6": "2",
+                    "JFLS8_7": "2",
+                    "JFLS8_8": "2"
+                },
+                "submitted_at": "2026-03-26T12:59:43.986Z",
+                "questionnaire_id": "jfls-8",
+                "questionnaire_version": "12/2018"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "PHQ4_A": "0",
+                    "PHQ4_B": "1",
+                    "PHQ4_C": "0",
+                    "PHQ4_D": "1"
+                },
+                "submitted_at": "2026-03-26T12:59:48.386Z",
+                "questionnaire_id": "phq-4",
+                "questionnaire_version": "1.0"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "OBC_1": "2",
+                    "OBC_2": "2",
+                    "OBC_3": "2",
+                    "OBC_4": "2",
+                    "OBC_5": "1",
+                    "OBC_6": "2",
+                    "OBC_7": "2",
+                    "OBC_8": "2",
+                    "OBC_9": "2",
+                    "OBC_10": "0",
+                    "OBC_11": "0",
+                    "OBC_12": "0",
+                    "OBC_13": "1",
+                    "OBC_14": "0",
+                    "OBC_15": "0",
+                    "OBC_16": "1",
+                    "OBC_17": "0",
+                    "OBC_18": "0",
+                    "OBC_19": "1",
+                    "OBC_20": "1",
+                    "OBC_21": "0"
+                },
+                "submitted_at": "2026-03-26T12:59:56.567Z",
+                "questionnaire_id": "obc",
+                "questionnaire_version": "12/2018"
+            }
+        }
+    ]
+}

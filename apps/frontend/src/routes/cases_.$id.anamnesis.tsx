@@ -77,7 +77,10 @@ function AnamnesisLayout() {
     }
   }, [record?.id, updateViewedMutation]);
 
-  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
+    isDemo: record?.is_demo ?? false,
+    clinicInternalId: record?.clinic_internal_id,
+  });
 
   // Get anamnesis step definition for sub-steps
   const anamnesisStep = getStepDefinition("anamnesis");
@@ -120,6 +123,7 @@ function AnamnesisLayout() {
       patientName={patientName}
       patientDob={patientDob}
       isDecrypting={isDecrypting}
+      isDemo={record?.is_demo ?? false}
     >
       <div className="space-y-4">
         {/* Sub-step navigation tabs */}

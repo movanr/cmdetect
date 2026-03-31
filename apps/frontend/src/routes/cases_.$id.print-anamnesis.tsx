@@ -39,7 +39,10 @@ function PrintAnamnesisPage() {
   // Fetch questionnaire responses (shares cache)
   const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
 
-  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
+    isDemo: record?.is_demo ?? false,
+    clinicInternalId: record?.clinic_internal_id,
+  });
 
   // Auto-trigger print after everything is ready
   const isReady = !isRecordLoading && !isResponsesLoading && !isDecrypting && responses;

@@ -10,6 +10,7 @@ export const GET_PATIENT_RECORD = graphql(`
     patient_record_by_pk(id: $id) {
       id
       clinic_internal_id
+      is_demo
       first_name_encrypted
       created_at
       patient_data_completed_at
@@ -102,6 +103,33 @@ export const RESET_INVITE_TOKEN = graphql(`
     ) {
       id
       invite_expires_at
+    }
+  }
+`);
+
+export const RESET_DEMO_CASE = graphql(`
+  mutation ResetDemoCase($patient_record_id: String!, $empty_response_data: jsonb!) {
+    update_examination_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _set: { status: "draft", completed_sections: [], completed_at: null, response_data: $empty_response_data }
+    ) {
+      affected_rows
+    }
+    delete_documented_diagnosis(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+    ) {
+      affected_rows
+    }
+    delete_criteria_assessment(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+    ) {
+      affected_rows
+    }
+    update_patient_record_by_pk(
+      pk_columns: { id: $patient_record_id }
+      _set: { viewed: false }
+    ) {
+      id
     }
   }
 `);

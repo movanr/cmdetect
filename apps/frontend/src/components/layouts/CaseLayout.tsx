@@ -1,12 +1,18 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "../../lib/auth";
 import { Header } from "../navigation/Header";
 import { cn } from "@/lib/utils";
-import { Check, X, Lock } from "lucide-react";
+import { Check, X, Lock, RotateCcw } from "lucide-react";
 import { getTranslations } from "../../config/i18n";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { execute } from "@/graphql/execute";
+import { RESET_DEMO_CASE } from "@/features/patient-records/queries";
+import { examinationDefaults } from "@/features/examination";
 import { canAccessStep, type MainStep } from "../../features/case-workflow";
+import { toast } from "sonner";
 
 export type CaseStep = "anamnesis" | "examination" | "evaluation" | "documentation";
 
@@ -19,6 +25,7 @@ interface CaseLayoutProps {
   patientName?: string;
   patientDob?: string;
   isDecrypting?: boolean;
+  isDemo?: boolean;
 }
 
 interface StepConfig {
@@ -35,11 +42,29 @@ export function CaseLayout({
   completedSteps = [],
   patientName,
   patientDob,
-  isDecrypting = false
+  isDecrypting = false,
+  isDemo = false,
 }: CaseLayoutProps) {
   const navigate = useNavigate();
   const { data: session } = useSession();
   const t = getTranslations();
+  const queryClient = useQueryClient();
+
+  const resetMutation = useMutation({
+    mutationFn: () => execute(RESET_DEMO_CASE, {
+      patient_record_id: caseId,
+      empty_response_data: examinationDefaults,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast.success(t.demoCase.resetSuccess);
+      navigate({ to: "/cases/$id/anamnesis", params: { id: caseId } });
+    },
+    onError: (error) => {
+      console.error("Reset demo case failed:", error);
+      toast.error(error instanceof Error ? error.message : "Reset failed");
+    },
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -155,6 +180,22 @@ export function CaseLayout({
       {/* Patient info top bar — hidden in print */}
       {hasPatientInfo && (
         <div className="print:hidden flex flex-wrap items-center gap-x-4 gap-y-1 border-b bg-muted/40 px-4 py-2 xl:px-6 shrink-0">
+          {isDemo && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => resetMutation.mutate()}
+                  disabled={resetMutation.isPending}
+                  className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                >
+                  <RotateCcw className={cn("h-3.5 w-3.5", resetMutation.isPending && "animate-spin")} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t.demoCase.resetTooltip}</TooltipContent>
+            </Tooltip>
+          )}
           {patientInternalId && (
             <div className="flex items-center gap-1.5 text-sm min-w-0">
               <span className="text-muted-foreground shrink-0">{t.caseSteps.patientIdLabel}:</span>

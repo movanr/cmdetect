@@ -83,7 +83,10 @@ function DocumentationLayout() {
     }
   }, [isRecordLoading, isResponsesLoading, isExamLoading, isCurrentStepAccessible, redirectStep, navigate, id]);
 
-  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
+    isDemo: record?.is_demo ?? false,
+    clinicInternalId: record?.clinic_internal_id,
+  });
 
   // Get documentation step definition for sub-steps
   const documentationStep = getStepDefinition("documentation");
@@ -124,6 +127,7 @@ function DocumentationLayout() {
       patientName={patientName}
       patientDob={patientDob}
       isDecrypting={isDecrypting}
+      isDemo={record?.is_demo ?? false}
     >
       <div className="space-y-4">
         {/* Sub-step navigation tabs — hidden in print */}

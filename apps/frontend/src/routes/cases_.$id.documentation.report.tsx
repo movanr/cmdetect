@@ -64,7 +64,10 @@ function ReportSubPage() {
 
   const { data: evalData, isLoading: isEvalLoading } = useDocumentedDiagnoses(id);
 
-  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted);
+  const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
+    isDemo: record?.is_demo ?? false,
+    clinicInternalId: record?.clinic_internal_id,
+  });
 
   // ── Derive data ────────────────────────────────────────────────────
 

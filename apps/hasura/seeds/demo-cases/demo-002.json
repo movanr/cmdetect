@@ -1,0 +1,160 @@
+{
+    "clinic_internal_id": "DEMO-002",
+    "demo_patient_name": {
+        "firstName": "Thomas",
+        "lastName": "Beispiel",
+        "dateOfBirth": "1972-03-22"
+    },
+    "source_record_id": "1a733af9-7844-4a13-8d5a-10725cc67483",
+    "source_clinic_id": "123",
+    "exported_at": "2026-03-31T08:45:23Z",
+    "questionnaire_responses": [
+        {
+            "response_data": {
+                "_meta": {
+                    "reviewed_at": "2026-03-25T15:54:46.127Z"
+                },
+                "answers": {
+                    "SQ1": "yes",
+                    "SQ2": {
+                        "years": 1,
+                        "months": 1
+                    },
+                    "SQ3": "intermittent",
+                    "SQ5": "yes",
+                    "SQ6": {
+                        "years": 1,
+                        "months": 2
+                    },
+                    "SQ8": "yes",
+                    "SQ9": "no",
+                    "SQ13": "no",
+                    "SQ4_A": "yes",
+                    "SQ4_B": "no",
+                    "SQ4_C": "no",
+                    "SQ4_D": "no",
+                    "SQ7_A": "no",
+                    "SQ7_B": "no",
+                    "SQ7_C": "no",
+                    "SQ7_D": "yes",
+                    "SQ8_office": {
+                        "R": true,
+                        "DNK": false
+                    }
+                },
+                "questionnaire_id": "dc-tmd-sq",
+                "questionnaire_version": "1.0"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "version": "1.0",
+                    "drawings": {
+                        "mouth": {
+                            "imageId": "mouth",
+                            "elements": []
+                        },
+                        "body-back": {
+                            "imageId": "body-back",
+                            "elements": []
+                        },
+                        "head-left": {
+                            "imageId": "head-left",
+                            "elements": []
+                        },
+                        "body-front": {
+                            "imageId": "body-front",
+                            "elements": []
+                        },
+                        "head-right": {
+                            "imageId": "head-right",
+                            "elements": []
+                        }
+                    },
+                    "completedAt": "2026-02-26T21:17:54.206Z"
+                },
+                "submitted_at": "2026-02-26T21:17:54.223Z",
+                "questionnaire_id": "dc-tmd-pain-drawing",
+                "questionnaire_version": "1.0"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "GCPS1M_1": 2,
+                    "GCPS1M_2": "4",
+                    "GCPS1M_3": "4",
+                    "GCPS1M_4": "4",
+                    "GCPS1M_5": 2,
+                    "GCPS1M_6": "1",
+                    "GCPS1M_7": "1",
+                    "GCPS1M_8": "2"
+                },
+                "submitted_at": "2026-02-26T21:18:04.458Z",
+                "questionnaire_id": "gcps-1m",
+                "questionnaire_version": "12/2018"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "JFLS8_1": "3",
+                    "JFLS8_2": "3",
+                    "JFLS8_3": "2",
+                    "JFLS8_4": "2",
+                    "JFLS8_5": "3",
+                    "JFLS8_6": "2",
+                    "JFLS8_7": "2",
+                    "JFLS8_8": "2"
+                },
+                "submitted_at": "2026-02-26T21:18:10.447Z",
+                "questionnaire_id": "jfls-8",
+                "questionnaire_version": "12/2018"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "PHQ4_A": "1",
+                    "PHQ4_B": "1",
+                    "PHQ4_C": "1",
+                    "PHQ4_D": "1"
+                },
+                "submitted_at": "2026-02-26T21:18:13.562Z",
+                "questionnaire_id": "phq-4",
+                "questionnaire_version": "1.0"
+            }
+        },
+        {
+            "response_data": {
+                "answers": {
+                    "OBC_1": "1",
+                    "OBC_2": "1",
+                    "OBC_3": "2",
+                    "OBC_4": "2",
+                    "OBC_5": "1",
+                    "OBC_6": "1",
+                    "OBC_7": "1",
+                    "OBC_8": "2",
+                    "OBC_9": "2",
+                    "OBC_10": "1",
+                    "OBC_11": "1",
+                    "OBC_12": "1",
+                    "OBC_13": "2",
+                    "OBC_14": "1",
+                    "OBC_15": "1",
+                    "OBC_16": "2",
+                    "OBC_17": "1",
+                    "OBC_18": "1",
+                    "OBC_19": "2",
+                    "OBC_20": "2",
+                    "OBC_21": "1"
+                },
+                "submitted_at": "2026-02-26T21:18:20.347Z",
+                "questionnaire_id": "obc",
+                "questionnaire_version": "12/2018"
+            }
+        }
+    ]
+}

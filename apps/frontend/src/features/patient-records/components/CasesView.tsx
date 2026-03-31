@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { SearchField } from "@/components/ui/search-field";
@@ -9,16 +10,22 @@ import {
   useSubmissions,
   getCaseStatus,
   StatusBadge,
+  RESET_DEMO_CASE,
   type PatientRecord,
   type CaseStatus,
 } from "@/features/patient-records";
 import { formatDistanceToNow, formatDate } from "@/lib/date-utils";
-import { FileText } from "lucide-react";
+import { FileText, RotateCcw } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getTranslations, interpolate } from "@/config/i18n";
 import { decryptPatientData, loadPrivateKey } from "@/crypto";
 import type { PatientPII } from "@/crypto/types";
+import { getDemoPatientName } from "@/features/patient-records/demo-patient-names";
+import { examinationDefaults } from "@/features/examination";
+import { execute } from "@/graphql/execute";
 import { useRole } from "@/contexts/RoleContext";
 import { roles } from "@cmdetect/config";
+import { toast } from "sonner";
 
 interface DecryptedPatientData {
   [recordId: string]: PatientPII | null;
@@ -30,8 +37,24 @@ export function CasesView() {
   const { data: submissions, isLoading } = useSubmissions();
   const t = getTranslations();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { activeRole } = useRole();
   const isReceptionist = activeRole === roles.RECEPTIONIST;
+
+  const resetMutation = useMutation({
+    mutationFn: (patientRecordId: string) =>
+      execute(RESET_DEMO_CASE, {
+        patient_record_id: patientRecordId,
+        empty_response_data: examinationDefaults,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast.success(t.demoCase.resetSuccess);
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Reset failed");
+    },
+  });
   const [decryptedData, setDecryptedData] = useState<DecryptedPatientData>({});
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,8 +82,10 @@ export function CasesView() {
 
         for (const record of submissions) {
           try {
-            // Only decrypt if we have encrypted data
-            if (record.first_name_encrypted) {
+            if (record.is_demo) {
+              // Demo cases have no encrypted PII — use hardcoded name
+              decrypted[record.id] = getDemoPatientName(record.clinic_internal_id);
+            } else if (record.first_name_encrypted) {
               const patientData = await decryptPatientData(
                 record.first_name_encrypted,
                 privateKeyPem
@@ -90,6 +115,27 @@ export function CasesView() {
       header: "",
       width: "3%",
       render: (_: unknown, record: PatientRecord) => {
+        if (record.is_demo && getCaseStatus(record) !== "new") {
+          return (
+            <div className="flex items-center justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetMutation.mutate(record.id);
+                    }}
+                    disabled={resetMutation.isPending}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{t.demoCase.resetTooltip}</TooltipContent>
+              </Tooltip>
+            </div>
+          );
+        }
         const status = getCaseStatus(record);
         return status === "new" ? (
           <div className="flex items-center justify-center">
@@ -123,6 +169,11 @@ export function CasesView() {
               title={`${patientData.firstName} ${patientData.lastName}`}
             >
               {patientData.firstName} {patientData.lastName}
+              {record.is_demo && (
+                <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 py-0">
+                  {t.demoCase.badge}
+                </Badge>
+              )}
             </span>
           );
         }
@@ -155,14 +206,9 @@ export function CasesView() {
       header: t.columns.internalId,
       width: "15%",
       hideBelow: "md" as const,
-      render: (value: string, record: PatientRecord) => (
+      render: (value: string) => (
         <span className="truncate block" title={value || undefined}>
           {value || "-"}
-          {record.is_demo && (
-            <Badge variant="secondary" className="ml-1.5 text-[10px] px-1 py-0">
-              {t.demoCase.badge}
-            </Badge>
-          )}
         </span>
       ),
     },

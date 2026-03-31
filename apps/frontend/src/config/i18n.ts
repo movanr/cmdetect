@@ -225,6 +225,8 @@ export interface I18nStrings {
   // Demo case
   demoCase: {
     badge: string;
+    resetTooltip: string;
+    resetSuccess: string;
   };
 
   // Examination
@@ -444,12 +446,15 @@ export const translations: Record<Language, I18nStrings> = {
 
     demoCase: {
       badge: "Demo",
+      resetTooltip: "Reset demo case (delete examination & evaluation data)",
+      resetSuccess: "Demo case reset successfully",
     },
 
     examination: {
       behandlerLabel: "Examiner",
       selectBehandler: "Select examiner",
-      selectBehandlerGate: "Please select the examining practitioner before starting the examination.",
+      selectBehandlerGate:
+        "Please select the examining practitioner before starting the examination.",
     },
 
     caseSteps: {
@@ -663,12 +668,15 @@ export const translations: Record<Language, I18nStrings> = {
 
     demoCase: {
       badge: "Demo",
+      resetTooltip: "Beispielfall zurücksetzen",
+      resetSuccess: "Beispielfall zurückgesetzt",
     },
 
     examination: {
       behandlerLabel: "Behandler",
       selectBehandler: "Behandler auswählen",
-      selectBehandlerGate: "Bitte wählen Sie den untersuchenden Behandler aus, bevor Sie mit der Untersuchung beginnen.",
+      selectBehandlerGate:
+        "Bitte wählen Sie den untersuchenden Behandler aus, bevor Sie mit der Untersuchung beginnen.",
     },
 
     caseSteps: {
