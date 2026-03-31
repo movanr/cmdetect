@@ -25,9 +25,9 @@ This is a **pnpm workspace** with **Turbo v2** for build orchestration:
 
 **Shared Packages:**
 
-- **packages/config**: Shared role constants (single file: `src/index.ts`)
+- **packages/config**: Shared role constants including `assistant` role (single file: `src/index.ts`)
 - **packages/questionnaires**: Questionnaire definitions (GCPS-1M, JFLS-20, JFLS-8, OBC, PHQ-4, SQ) and Zod validation schemas
-- **packages/dc-tmd**: DC/TMD diagnostic criteria evaluation engine with decision tree logic
+- **packages/dc-tmd**: DC/TMD diagnostic criteria evaluation engine, examination protocol IDs, and German label maps
 - **packages/test-utils**: Shared test utilities and helpers for integration tests
 
 **Other Directories:**
@@ -91,24 +91,27 @@ This is a **pnpm workspace** with **Turbo v2** for build orchestration:
    - Better Auth for JWT tokens and session management
    - Built-in middleware: `hono/cors`, `hono/secure-headers`
    - Email verification workflow (optional SMTP)
-   - Hasura action handlers for anonymous operations (consent, questionnaire submission, token validation)
+   - Hasura action handlers for anonymous operations (questionnaire submission, token validation)
    - Custom auth endpoints (role switching)
    - Branded types (`ValidatedRole`, `OrganizationUserId`) for type-safe authorization
    - CORS configured for practitioner frontend
    - Runs in Docker (Node 22 Alpine, multi-stage build)
 
 3. **Practitioner Frontend** (port 3000) - `apps/frontend`
-   - Authenticated application for doctors, reception, and admins
+   - Authenticated application for doctors, assistants, reception, and admins
    - TanStack Router with type-safe routing and auto code-splitting
    - TanStack Query for GraphQL data fetching
    - GraphQL Code Generator for type-safe operations
    - shadcn/ui components with Tailwind CSS v4 and Radix UI primitives
    - Organization key management and patient data decryption
-   - DC/TMD examination workflow (sections E1-E11)
-   - Diagnostic evaluation with decision tree visualization
+   - DC/TMD examination with dual-mode UI: form sheet (default) and guided wizard
+   - Examiner (Behandler) selector for assistant role delegation
+   - Diagnostic evaluation with static decision tree visualization
+   - Diagnosis documentation with selector and persistence (`criteria_assessment`, `documented_diagnosis` tables)
+   - DOCX and PDF export for examination forms and clinical reports (docx, jsPDF)
    - Pain drawing evaluation and scoring
    - Questionnaire viewer with anamnesis dashboard
-   - Print-optimized report generation
+   - Debounced auto-save (3s) for examination persistence
    - Internationalization (EN/DE) via `src/config/i18n.ts`
    - Path aliases: `@` -> `src/`, `@docs` -> `docs/`
 
@@ -118,14 +121,14 @@ This is a **pnpm workspace** with **Turbo v2** for build orchestration:
    - Accesses Hasura via anonymous actions with invite tokens
    - Client-side encryption of patient PII before submission
    - Pain drawing capture with Konva/react-konva
-   - Step-based questionnaire engine with progress tracking
+   - Flow: token validation → personal data → questionnaires → complete (consent step removed)
    - Framer Motion for animations
 
 ### Authentication Flow
 
 - JWT tokens with Better Auth (exposed at `/api/auth/jwks`)
 - Multi-tenant organization isolation via `x-hasura-organization-id` claim
-- Role-based access: `org_admin`, `physician`, `receptionist`, `unverified` with active role switching
+- Role-based access: `org_admin`, `physician`, `assistant`, `receptionist`, `unverified` with active role switching
 - `x-hasura-user-id` contains user ID for identification
 - Email verification required for account activation
 - Anonymous access for patient questionnaire submission via invite tokens
@@ -142,10 +145,12 @@ This is a **pnpm workspace** with **Turbo v2** for build orchestration:
 
 - `organization` - Multi-tenant root with encryption keys (`public_key_pem`, `key_fingerprint`)
 - `patient_record` - Cases with encrypted PII (`first_name_encrypted`, `last_name_encrypted`, `date_of_birth_encrypted`), invite tokens, submission tracking
-- `patient_consent` - GDPR-compliant consent with version tracking
+- `patient_consent` - GDPR-compliant consent with version tracking (consent flow removed from patient frontend but table retained)
 - `questionnaire_response` - Questionnaire answers with unique constraints per patient record
-- `examination_response` - Clinical examination data (E1-E11 sections)
+- `examination_response` - Clinical examination data (E1-E11 sections), includes `examined_by` for examiner tracking
 - `diagnosis_result` - DC/TMD diagnosis evaluation results
+- `documented_diagnosis` - Physician-confirmed diagnoses with side/region/site
+- `criteria_assessment` - Criterion evaluation states tracked per assessment
 
 **Hasura Migrations:** `apps/hasura/migrations/default/`
 
@@ -185,19 +190,14 @@ GraphQL types are generated from the Hasura schema using GraphQL Code Generator:
 All actions are handled by the auth-server. Public actions (anonymous access):
 
 - `validateInviteToken` - Token validation returning organization public key
-- `submitPatientConsent` - Anonymous consent capture
 - `submitPatientPersonalData` - Encrypted PII submission
 - `submitQuestionnaireResponse` - Questionnaire answer submission
-- `getPatientProgress` (query) - Patient's completion status (consent, personal data, questionnaires)
-
-Authenticated actions (require JWT):
-
-- `resetInviteToken` - Reset and extend invite token expiration (organization-scoped)
+- `getPatientProgress` (query) - Patient's completion status (personal data, questionnaires)
 
 ### Key GraphQL Patterns
 
 - **Organization isolation**: All queries automatically filtered by `x-hasura-organization-id`
-- **Role permissions**: Different CRUD access per role (org_admin, physician, receptionist)
+- **Role permissions**: Different CRUD access per role (org_admin, physician, assistant, receptionist)
 - **Frontend queries**: Located in feature-specific `queries.ts` files and `src/queries/`
 
 ## Practitioner Frontend Features
@@ -205,9 +205,9 @@ Authenticated actions (require JWT):
 The frontend is organized by feature modules in `apps/frontend/src/features/`:
 
 - **case-workflow**: Patient case management, navigation, and status tracking
-- **examination**: DC/TMD clinical examination (sections E1-E11) with form validation, version migration, edit mode, and completion workflow
-- **evaluation**: Diagnostic evaluation with interactive decision trees, criteria checklists, and region-based findings
-- **decision-tree**: Visual decision tree rendering for DC/TMD diagnostic criteria
+- **examination**: DC/TMD clinical examination (sections E1-E11) with dual-mode UI (form sheet + guided wizard), debounced auto-save, examiner selection, PDF export, and version migration
+- **evaluation**: Diagnostic evaluation with static decision trees, criteria checklists, findings summary, diagnosis documentation/selector, and DOCX report export
+- **decision-tree**: Static decision tree rendering for DC/TMD diagnostic criteria (display-only, no interaction)
 - **pain-drawing-evaluation**: Pain area scoring and anatomical region analysis
 - **patient-records**: Patient record CRUD, invite management, encrypted data display
 - **questionnaire-viewer**: Anamnesis dashboard with questionnaire score visualization
@@ -409,6 +409,8 @@ format: ["esm", "cjs"];
 - `src/criteria/diagnoses/` - Diagnosis definitions: arthralgia, degenerative joint disease, disc displacement, headache, myalgia, myalgia subtypes, subluxation
 - `src/criteria/evaluate.ts` - Main evaluation entry point
 - `src/categorization/` - Result categorization and anamnesis text generation
+- `src/ids/examination-protocol.ts` - Declarative examination section definitions (E4-E8 structure)
+- `src/ids/examination.ts` - Anatomical IDs and German label maps for UI display
 - Uses field references to extract data from examination and questionnaire responses
 
 **`packages/questionnaires`** - Questionnaire definitions:
@@ -424,7 +426,11 @@ format: ["esm", "cjs"];
 
 ### Examination Sections (E1-E11)
 
-Clinical examination workflow in `apps/frontend/src/features/examination/sections/`:
+Clinical examination has two view modes:
+- **Form sheet** (`components/form-sheet/`): Default view, paper-form-like layout with all sections visible, PDF export via jsPDF
+- **Guided wizard** (`components/sections/`): Step-by-step wizard with instructions and validation per section
+
+Examination sections in `apps/frontend/src/features/examination/sections/`:
 
 - **E1**: Pain location regions
 - **E2**: Incisal measurements (opening, overbite, overjet)
@@ -436,7 +442,7 @@ Clinical examination workflow in `apps/frontend/src/features/examination/section
 - **E8**: Joint locking assessment
 - **E9**: Muscle palpation
 - **E10**: Additional findings
-- **E11**: Comments and notes
+- **E11**: Single unified comment field (simplified from per-section comments)
 
 ## Development Patterns
 
@@ -486,7 +492,12 @@ Each feature in `apps/frontend/src/features/` follows this structure:
 - **Frontend Routes**: `apps/frontend/src/routes/` (TanStack Router file-based routing)
 - **i18n Strings**: `apps/frontend/src/config/i18n.ts`
 - **Shared Config**: `packages/config/src/index.ts`
+- **Examination Form Sheet**: `apps/frontend/src/features/examination/components/form-sheet/`
+- **Examination Persistence**: `apps/frontend/src/features/examination/hooks/use-examination-persistence.ts`
+- **DOCX Export**: `apps/frontend/src/features/evaluation/utils/generate-befundbericht-docx.ts`
+- **Diagnosis Documentation**: `apps/frontend/src/features/evaluation/components/DiagnosisSelector.tsx`, `DocumentedDiagnosesList.tsx`
 - **DC/TMD Criteria**: `packages/dc-tmd/src/criteria/`
+- **DC/TMD Examination Protocol**: `packages/dc-tmd/src/ids/examination-protocol.ts`
 - **Questionnaire Definitions**: `packages/questionnaires/src/`
 - **DC/TMD Reference Docs**: `docs/dc-tmd/`
 - **Deploy Scripts**: `scripts/deploy-app.sh`, `scripts/generate-envs.sh`
