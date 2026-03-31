@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RefreshCw, Upload, FileText, AlertTriangle } from "lucide-react";
 import { useKeyRecovery } from "../../hooks/useKeyRecovery";
+import { getTranslations } from "@/config/i18n";
 
 interface KeyRecoveryFormProps {
   organizationPublicKey?: string;
@@ -18,6 +19,7 @@ export function KeyRecoveryForm({
   showMismatchWarning = false,
   className = "",
 }: KeyRecoveryFormProps) {
+  const t = getTranslations();
   const {
     isLoading,
     recoveryMnemonic,
@@ -54,10 +56,7 @@ export function KeyRecoveryForm({
       {showMismatchWarning && (
         <Alert>
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Your local private key doesn&apos;t match the organization&apos;s public key.
-            Please recover the correct private key.
-          </AlertDescription>
+          <AlertDescription>{t.keySetup.mismatchWarning}</AlertDescription>
         </Alert>
       )}
 
@@ -65,11 +64,11 @@ export function KeyRecoveryForm({
         <div>
           <h4 className="font-medium mb-3 flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Recover from Mnemonic Phrase
+            {t.keySetup.recoverFromMnemonicTitle}
           </h4>
           <div className="space-y-3">
             <textarea
-              placeholder="Enter your 12-word mnemonic phrase"
+              placeholder={t.keySetup.recoverFromMnemonicPlaceholder}
               value={recoveryMnemonic}
               onChange={(e) => setRecoveryMnemonic(e.target.value)}
               className="w-full px-3 py-2 border border-input rounded-md resize-none"
@@ -86,7 +85,7 @@ export function KeyRecoveryForm({
               ) : (
                 <FileText className="h-4 w-4 mr-2" />
               )}
-              Recover from Mnemonic
+              {t.keySetup.recoverFromMnemonicButton}
             </Button>
           </div>
         </div>
@@ -96,14 +95,16 @@ export function KeyRecoveryForm({
             <div className="w-full border-t border-muted" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or</span>
+            <span className="bg-background px-2 text-muted-foreground">
+              {t.keySetup.orDivider}
+            </span>
           </div>
         </div>
 
         <div>
           <h4 className="font-medium mb-3 flex items-center gap-2">
             <Upload className="h-4 w-4" />
-            Recover from Recovery File
+            {t.keySetup.recoverFromFileTitle}
           </h4>
           <div className="space-y-3">
             <input
@@ -114,7 +115,7 @@ export function KeyRecoveryForm({
               disabled={isLoading}
             />
             <p className="text-xs text-muted-foreground">
-              Select the JSON recovery file downloaded during initial setup.
+              {t.keySetup.recoverFromFileHint}
             </p>
           </div>
         </div>

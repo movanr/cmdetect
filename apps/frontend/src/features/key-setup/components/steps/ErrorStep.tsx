@@ -11,6 +11,7 @@ import { AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { deleteStoredPrivateKey } from "@/crypto";
 import { toast } from "sonner";
+import { getTranslations } from "@/config/i18n";
 
 interface ErrorStepProps {
   error: string;
@@ -26,6 +27,7 @@ export function ErrorStep({
   onStartRecovery,
 }: ErrorStepProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const t = getTranslations();
 
   const isOrphanedKeyError = error.includes("Orphaned private key");
   const isKeyMismatchError =
@@ -35,7 +37,7 @@ export function ErrorStep({
     setIsDeleting(true);
     try {
       await deleteStoredPrivateKey();
-      toast.success("Private key deleted successfully");
+      toast.success(t.keySetup.toastKeyDeleted);
       // Force revalidation after deletion instead of just resetting state
       if (onRevalidate) {
         onRevalidate();
@@ -44,7 +46,7 @@ export function ErrorStep({
       }
     } catch (err) {
       console.error("Failed to delete private key:", err);
-      toast.error("Failed to delete private key");
+      toast.error(t.keySetup.toastKeyDeleteFailed);
     } finally {
       setIsDeleting(false);
     }
@@ -55,11 +57,9 @@ export function ErrorStep({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-red-600">
           <AlertTriangle className="h-5 w-5" />
-          Setup Error
+          {t.keySetup.errorTitle}
         </CardTitle>
-        <CardDescription>
-          An error occurred during the encryption setup process.
-        </CardDescription>
+        <CardDescription>{t.keySetup.errorDescription}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Alert variant="destructive">
@@ -78,12 +78,12 @@ export function ErrorStep({
                 {isDeleting ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Deleting Keys...
+                    {t.keySetup.deletingKeyButton}
                   </>
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Private Key
+                    {t.keySetup.deleteKeyButton}
                   </>
                 )}
               </Button>
@@ -93,7 +93,7 @@ export function ErrorStep({
                 className="flex-1"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Revalidate
+                {t.keySetup.revalidateButton}
               </Button>
             </>
           ) : isKeyMismatchError ? (
@@ -105,12 +105,12 @@ export function ErrorStep({
                   className="flex-1"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Start Key Recovery
+                  {t.keySetup.startRecoveryButton}
                 </Button>
               ) : (
                 <Button onClick={onRetry} className="flex-1">
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry Setup
+                  {t.keySetup.retryButton}
                 </Button>
               )}
               {onRevalidate && (
@@ -120,7 +120,7 @@ export function ErrorStep({
                   className="flex-1"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Check Keys Again
+                  {t.keySetup.checkKeysButton}
                 </Button>
               )}
             </>
@@ -128,7 +128,7 @@ export function ErrorStep({
             <>
               <Button onClick={onRetry} className="flex-1">
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Retry Setup
+                {t.keySetup.retryButton}
               </Button>
               {onRevalidate && (
                 <Button
@@ -136,7 +136,7 @@ export function ErrorStep({
                   variant="outline"
                   className="flex-1"
                 >
-                  Revalidate Keys
+                  {t.keySetup.revalidateButton}
                 </Button>
               )}
             </>

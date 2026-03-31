@@ -36,7 +36,7 @@ export function KeySetupGuard({ children }: KeySetupGuardProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
-          <LoadingStep organizationName="your organization" />
+          <LoadingStep />
         </div>
       </div>
     );

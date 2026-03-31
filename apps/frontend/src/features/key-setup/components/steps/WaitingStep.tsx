@@ -1,7 +1,26 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Lock, RefreshCw } from "lucide-react";
+import { getTranslations } from "@/config/i18n";
+
+/** Replaces {org} in a template string with a bold <strong> element */
+function renderWithBoldOrg(template: string, orgName: string) {
+  const parts = template.split("{org}");
+  if (parts.length === 1) return template;
+  return (
+    <>
+      {parts[0]}
+      <strong className="font-semibold text-foreground">{orgName}</strong>
+      {parts[1]}
+    </>
+  );
+}
 
 interface WaitingStepProps {
   organizationName: string;
@@ -9,37 +28,26 @@ interface WaitingStepProps {
 }
 
 export function WaitingStep({ organizationName, onRefresh }: WaitingStepProps) {
+  const t = getTranslations();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-amber-600">
-          <AlertTriangle className="h-5 w-5" />
-          Organization Setup Required
+        <CardTitle className="flex items-center gap-2">
+          <Lock className="h-5 w-5" />
+          {t.keySetup.waitingTitle}
         </CardTitle>
         <CardDescription>
-          Encryption has not been configured for {organizationName}.
+          {renderWithBoldOrg(t.keySetup.waitingDescription, organizationName)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Your organization administrator needs to complete the initial encryption setup
-            before you can access the application. Please contact your administrator to
-            configure organization encryption keys.
-          </AlertDescription>
-        </Alert>
-        <div className="text-sm text-muted-foreground space-y-2">
-          <p><strong>What your administrator needs to do:</strong></p>
-          <ul className="list-disc list-inside space-y-1 ml-4">
-            <li>Log in with admin privileges</li>
-            <li>Complete the organization encryption setup</li>
-            <li>Generate and secure the organization keys</li>
-          </ul>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {t.keySetup.waitingAlert}
+        </p>
         <Button onClick={onRefresh} variant="outline" className="w-full">
           <RefreshCw className="h-4 w-4 mr-2" />
-          Check Again
+          {t.keySetup.checkAgainButton}
         </Button>
       </CardContent>
     </Card>

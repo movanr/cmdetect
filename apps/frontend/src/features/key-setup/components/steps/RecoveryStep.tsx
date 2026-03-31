@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Key } from "lucide-react";
 import { KeyRecoveryForm } from "./KeyRecoveryForm";
+import { getTranslations } from "@/config/i18n";
 
 interface RecoveryStepProps {
   organizationPublicKey?: string;
@@ -19,15 +20,17 @@ export function RecoveryStep({
   isAdmin,
   onSuccess,
 }: RecoveryStepProps) {
+  const t = getTranslations();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Key className="h-5 w-5" />
-          Recover Your Private Key
+          {t.keySetup.recoveryTitle}
         </CardTitle>
         <CardDescription>
-          Restore your private encryption key to access the application.
+          {t.keySetup.recoveryDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>

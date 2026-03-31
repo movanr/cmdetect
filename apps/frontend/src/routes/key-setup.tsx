@@ -1,8 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSession } from "../lib/auth";
 import { KeySetup } from "../features/key-setup/components/KeySetup";
-import { Card, CardContent } from "@/components/ui/card";
-import { Shield } from "lucide-react";
 import { useEffect } from "react";
 import { Header } from "../components/navigation/Header";
 
@@ -35,22 +33,8 @@ function KeySetupPage() {
       <Header />
 
       <div className="flex items-center justify-center p-4 lg:p-8">
-        <div className="w-full max-w-4xl space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Encryption Setup Required
-            </h1>
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Shield className="h-4 w-4" />
-              <span>Complete setup to secure patient data</span>
-            </div>
-          </div>
-
-          <Card>
-            <CardContent className="p-8">
-              <KeySetup onSetupComplete={handleSetupComplete} />
-            </CardContent>
-          </Card>
+        <div className="w-full max-w-2xl">
+          <KeySetup onSetupComplete={handleSetupComplete} />
         </div>
       </div>
     </div>

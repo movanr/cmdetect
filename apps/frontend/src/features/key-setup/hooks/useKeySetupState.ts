@@ -17,7 +17,9 @@ function keySetupReducer(state: KeySetupState, action: KeySetupAction): KeySetup
       }
 
       if (!hasPublicKey && !hasPrivateKey) {
-        return isAdmin ? { type: 'admin-setup-required' } : { type: 'user-waiting-for-admin' };
+        return isAdmin
+          ? { type: 'admin-generating', step: 'generate' }
+          : { type: 'user-waiting-for-admin' };
       }
 
       if (hasPublicKey && !hasPrivateKey) {
@@ -34,9 +36,6 @@ function keySetupReducer(state: KeySetupState, action: KeySetupAction): KeySetup
       return { type: 'error', error: 'Unexpected key setup state. Try reloading.' };
     }
 
-    case 'START_ADMIN_GENERATION':
-      return { type: 'admin-generating', step: 'generate' };
-
     case 'KEYS_GENERATED':
       return {
         type: 'admin-generating',
@@ -50,16 +49,6 @@ function keySetupReducer(state: KeySetupState, action: KeySetupAction): KeySetup
           ...state,
           step: 'mnemonic',
           hasDownloaded: true
-        };
-      }
-      return state;
-
-    case 'MNEMONIC_VIEWED':
-      if (state.type === 'admin-generating') {
-        return {
-          ...state,
-          step: 'finalizing',
-          hasViewedMnemonic: true
         };
       }
       return state;
@@ -88,14 +77,10 @@ export function useKeySetupState() {
     setLoading: () => dispatch({ type: 'SET_LOADING' }),
     setContext: (context: KeySetupContext) =>
       dispatch({ type: 'SET_CONTEXT', context }),
-    startAdminGeneration: () =>
-      dispatch({ type: 'START_ADMIN_GENERATION' }),
     setKeysGenerated: (keys: GeneratedKeys) =>
       dispatch({ type: 'KEYS_GENERATED', keys }),
     setRecoveryFileDownloaded: () =>
       dispatch({ type: 'RECOVERY_FILE_DOWNLOADED' }),
-    setMnemonicViewed: () =>
-      dispatch({ type: 'MNEMONIC_VIEWED' }),
     setSetupComplete: () =>
       dispatch({ type: 'SETUP_COMPLETE' }),
     setRecoverySuccess: () =>

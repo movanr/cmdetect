@@ -1,9 +1,8 @@
+import { useEffect } from 'react';
 import { useKeySetupContext } from '../../../contexts/useKeySetupContext';
 import { LoadingStep } from './steps/LoadingStep';
-import { AdminSetupStep } from './steps/AdminSetupStep';
 import { AdminGeneratingStep } from './steps/AdminGeneratingStep';
 import { RecoveryStep } from './steps/RecoveryStep';
-import { CompletedStep } from './steps/CompletedStep';
 import { ErrorStep } from './steps/ErrorStep';
 import { WaitingStep } from './steps/WaitingStep';
 
@@ -14,18 +13,17 @@ interface KeySetupProps {
 export function KeySetup({ onSetupComplete }: KeySetupProps) {
   const { state, actions, context, revalidate } = useKeySetupContext();
 
+  // Auto-redirect when setup is already complete
+  useEffect(() => {
+    if (state.type === 'setup-complete') {
+      onSetupComplete?.();
+    }
+  }, [state.type, onSetupComplete]);
+
   const renderStep = () => {
     switch (state.type) {
       case 'loading':
-        return <LoadingStep organizationName={context.organizationName} />;
-
-      case 'admin-setup-required':
-        return (
-          <AdminSetupStep
-            organizationName={context.organizationName}
-            onStartGeneration={actions.startAdminGeneration}
-          />
-        );
+        return <LoadingStep />;
 
       case 'admin-generating':
         return (
@@ -50,12 +48,7 @@ export function KeySetup({ onSetupComplete }: KeySetupProps) {
         );
 
       case 'setup-complete':
-        return (
-          <CompletedStep
-            organizationName={context.organizationName}
-            onContinue={onSetupComplete}
-          />
-        );
+        return <LoadingStep />;
 
       case 'user-waiting-for-admin':
         return (

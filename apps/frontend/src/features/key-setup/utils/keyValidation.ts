@@ -4,6 +4,7 @@ import {
   storePrivateKey,
   testKeyCompatibility,
 } from "@/crypto";
+import { getTranslations } from "@/config/i18n";
 
 export interface KeyValidationOptions {
   isAdmin: boolean;
@@ -19,6 +20,7 @@ export async function validateRecoveredKey(
   options: KeyValidationOptions
 ): Promise<boolean> {
   try {
+    const t = getTranslations();
     const { isAdmin, organizationPublicKey } = options;
 
     if (!organizationPublicKey) {
@@ -28,9 +30,7 @@ export async function validateRecoveredKey(
         );
         return true; // Admin can accept the recovered key if no org key exists
       } else {
-        toast.error(
-          "Organization public key not found. Please contact your administrator."
-        );
+        toast.error(t.keySetup.toastOrgKeyMissing);
         return false;
       }
     }
@@ -41,14 +41,15 @@ export async function validateRecoveredKey(
     );
 
     if (!isCompatible) {
-      toast.error("Recovered key does not match the organization's public key");
+      toast.error(t.keySetup.toastKeyMismatch);
       return false;
     }
 
     return true;
   } catch (error) {
+    const t = getTranslations();
     console.error("Error validating recovered key:", error);
-    toast.error("Failed to validate recovered key");
+    toast.error(t.keySetup.toastValidationFailed);
     return false;
   }
 }
@@ -60,8 +61,10 @@ export async function recoverFromMnemonic(
   mnemonic: string,
   options: KeyValidationOptions
 ): Promise<{ privateKey: string; publicKey: string } | null> {
+  const t = getTranslations();
+
   if (!mnemonic.trim()) {
-    toast.error("Please enter a mnemonic phrase");
+    toast.error(t.keySetup.toastEmptyMnemonic);
     return null;
   }
 
@@ -76,7 +79,7 @@ export async function recoverFromMnemonic(
     // Store the recovered private key locally
     await storePrivateKey(recovered.privateKey);
 
-    toast.success("Keys recovered successfully from mnemonic!");
+    toast.success(t.keySetup.toastRecoveredFromMnemonic);
     options.onSuccess?.();
 
     return {
@@ -86,7 +89,7 @@ export async function recoverFromMnemonic(
   } catch (error) {
     console.error("Failed to recover from mnemonic:", error);
     toast.error(
-      `Failed to recover keys: ${
+      `${t.keySetup.toastRecoveryFailed}: ${
         error instanceof Error ? error.message : "Unknown error"
       }`
     );
@@ -101,6 +104,8 @@ export async function recoverFromFile(
   file: File,
   options: KeyValidationOptions
 ): Promise<{ privateKey: string; publicKey: string } | null> {
+  const t = getTranslations();
+
   try {
     // Read the file content
     const fileContent = await new Promise<string>((resolve, reject) => {
@@ -127,7 +132,7 @@ export async function recoverFromFile(
     // Store the recovered private key locally
     await storePrivateKey(recovered.privateKey);
 
-    toast.success("Keys recovered successfully from file!");
+    toast.success(t.keySetup.toastRecoveredFromFile);
     options.onSuccess?.();
 
     return {
@@ -137,7 +142,7 @@ export async function recoverFromFile(
   } catch (error) {
     console.error("Failed to recover from file:", error);
     toast.error(
-      `Failed to recover keys: ${
+      `${t.keySetup.toastRecoveryFailed}: ${
         error instanceof Error ? error.message : "Unknown error"
       }`
     );

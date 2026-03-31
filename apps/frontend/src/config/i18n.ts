@@ -236,6 +236,87 @@ export interface I18nStrings {
     selectBehandlerGate: string;
   };
 
+  // Key setup
+  keySetup: {
+    // Loading
+    loading: string;
+
+    // Admin generate step
+    adminTitle: string;
+    adminDescription: string;
+    generateButton: string;
+    generatingButton: string;
+
+    // Download substep
+    downloadTitle: string;
+    downloadDescription: string;
+    downloadWarning: string;
+    downloadButton: string;
+
+    // Mnemonic substep
+    mnemonicTitle: string;
+    mnemonicDescription: string;
+    mnemonicWarning: string;
+    revealButton: string;
+    copyButton: string;
+    completeSetupButton: string;
+    completingSetupButton: string;
+
+    // Recovery step
+    recoveryTitle: string;
+    recoveryDescription: string;
+    recoverFromMnemonicTitle: string;
+    recoverFromMnemonicPlaceholder: string;
+    recoverFromMnemonicButton: string;
+    recoverFromFileTitle: string;
+    recoverFromFileHint: string;
+    orDivider: string;
+    mismatchWarning: string;
+
+    // Waiting step
+    waitingTitle: string;
+    waitingDescription: string;
+    waitingAlert: string;
+    waitingAdminInstructions: string;
+    waitingAdminStep1: string;
+    waitingAdminStep2: string;
+    waitingAdminStep3: string;
+    checkAgainButton: string;
+
+    // Error step
+    errorTitle: string;
+    errorDescription: string;
+    retryButton: string;
+    revalidateButton: string;
+    deleteKeyButton: string;
+    deletingKeyButton: string;
+    startRecoveryButton: string;
+    checkKeysButton: string;
+
+    // Key overwrite confirmation
+    overwriteWarning: string;
+    overwriteConfirmPrompt: string;
+
+    // Toast messages
+    toastKeysGenerated: string;
+    toastKeysFailed: string;
+    toastRecoveryDownloaded: string;
+    toastRecoveryDownloadFailed: string;
+    toastMnemonicCopied: string;
+    toastMnemonicCopyFailed: string;
+    toastSetupComplete: string;
+    toastSetupFailed: string;
+    toastKeyDeleted: string;
+    toastKeyDeleteFailed: string;
+    toastRecoveredFromMnemonic: string;
+    toastRecoveredFromFile: string;
+    toastRecoveryFailed: string;
+    toastValidationFailed: string;
+    toastKeyMismatch: string;
+    toastOrgKeyMissing: string;
+    toastEmptyMnemonic: string;
+  };
+
   // Case workflow steps
   caseSteps: {
     caseLabel: string;
@@ -455,6 +536,83 @@ export const translations: Record<Language, I18nStrings> = {
       selectBehandler: "Select examiner",
       selectBehandlerGate:
         "Please select the examining practitioner before starting the examination.",
+    },
+
+    keySetup: {
+      loading: "Checking encryption setup…",
+
+      adminTitle: "Encryption Setup",
+      adminDescription: "Generate encryption keys for {org} to protect patient data.",
+      generateButton: "Generate Keys",
+      generatingButton: "Generating keys…",
+
+      downloadTitle: "Download Recovery File",
+      downloadDescription: "Save your encryption keys securely before proceeding.",
+      downloadWarning:
+        "You must download your recovery file before proceeding. This is the only way to recover your keys if you lose access to this device.",
+      downloadButton: "Download Recovery File",
+
+      mnemonicTitle: "Backup Recovery Phrase",
+      mnemonicDescription: "Write down this 12-word phrase and store it securely.",
+      mnemonicWarning:
+        "This recovery phrase can be used to restore your keys. Store it in a secure location separate from your recovery file.",
+      revealButton: "Reveal Recovery Phrase",
+      copyButton: "Copy to Clipboard",
+      completeSetupButton: "Complete Setup",
+      completingSetupButton: "Completing setup…",
+
+      recoveryTitle: "Recover Your Private Key",
+      recoveryDescription: "Restore your private encryption key to access the application.",
+      recoverFromMnemonicTitle: "Recover from Recovery Phrase",
+      recoverFromMnemonicPlaceholder: "Enter your 12-word recovery phrase",
+      recoverFromMnemonicButton: "Recover from Phrase",
+      recoverFromFileTitle: "Recover from Recovery File",
+      recoverFromFileHint: "Select the JSON recovery file downloaded during initial setup.",
+      orDivider: "Or",
+      mismatchWarning:
+        "Your local private key doesn't match the organization's public key. Please recover the correct private key.",
+
+      waitingTitle: "Setup Required by Administrator",
+      waitingDescription: "Encryption has not been configured for {org}.",
+      waitingAlert:
+        "Your organization administrator needs to complete the initial encryption setup before you can access the application. Please contact your administrator.",
+      waitingAdminInstructions: "What your administrator needs to do:",
+      waitingAdminStep1: "Log in with admin privileges",
+      waitingAdminStep2: "Complete the encryption setup",
+      waitingAdminStep3: "Generate and secure the organization keys",
+      checkAgainButton: "Check Again",
+
+      errorTitle: "Setup Error",
+      errorDescription: "An error occurred during the encryption setup process.",
+      retryButton: "Retry Setup",
+      revalidateButton: "Revalidate Keys",
+      deleteKeyButton: "Delete Private Key",
+      deletingKeyButton: "Deleting…",
+      startRecoveryButton: "Start Key Recovery",
+      checkKeysButton: "Check Keys Again",
+
+      overwriteWarning:
+        "This organization already has encryption keys set up.\n\nOverwriting existing keys will:\n• Break key recovery for users on new devices\n• Create encryption inconsistencies for new data\n• Require all users to set up new keys\n• Potentially cause data synchronization issues\n\nAre you sure you want to replace the existing keys?",
+      overwriteConfirmPrompt:
+        'Type "REPLACE" to confirm you want to replace the existing encryption keys:',
+
+      toastKeysGenerated: "Organization keys generated successfully",
+      toastKeysFailed: "Failed to generate keys",
+      toastRecoveryDownloaded: "Recovery file downloaded successfully",
+      toastRecoveryDownloadFailed: "Failed to download recovery file",
+      toastMnemonicCopied: "Recovery phrase copied to clipboard",
+      toastMnemonicCopyFailed: "Failed to copy recovery phrase",
+      toastSetupComplete: "Encryption setup completed",
+      toastSetupFailed: "Failed to complete setup",
+      toastKeyDeleted: "Private key deleted successfully",
+      toastKeyDeleteFailed: "Failed to delete private key",
+      toastRecoveredFromMnemonic: "Keys recovered successfully from phrase",
+      toastRecoveredFromFile: "Keys recovered successfully from file",
+      toastRecoveryFailed: "Failed to recover keys",
+      toastValidationFailed: "Failed to validate recovered key",
+      toastKeyMismatch: "Recovered key does not match the organization's public key",
+      toastOrgKeyMissing: "Organization public key not found. Please contact your administrator.",
+      toastEmptyMnemonic: "Please enter a recovery phrase",
     },
 
     caseSteps: {
@@ -677,6 +835,88 @@ export const translations: Record<Language, I18nStrings> = {
       selectBehandler: "Behandler auswählen",
       selectBehandlerGate:
         "Bitte wählen Sie den untersuchenden Behandler aus, bevor Sie mit der Untersuchung beginnen.",
+    },
+
+    keySetup: {
+      loading: "Verschlüsselung wird überprüft…",
+
+      adminTitle: "Verschlüsselung einrichten",
+      adminDescription:
+        "Erstellen Sie die Verschlüsselungsschlüssel für {org}, um Patientendaten zu schützen.",
+      generateButton: "Schlüssel generieren",
+      generatingButton: "Schlüssel werden generiert…",
+
+      downloadTitle: "Wiederherstellungsdatei herunterladen",
+      downloadDescription: "Sichern Sie Ihre Schlüssel, bevor Sie fortfahren.",
+      downloadWarning:
+        "Sie müssen die Wiederherstellungsdatei herunterladen, bevor Sie fortfahren. Dies ist die einzige Möglichkeit, Ihre Schlüssel wiederherzustellen, wenn Sie den Zugriff auf dieses Gerät verlieren.",
+      downloadButton: "Wiederherstellungsdatei herunterladen",
+
+      mnemonicTitle: "Wiederherstellungsphrase sichern",
+      mnemonicDescription: "Notieren Sie diese 12 Wörter und bewahren Sie sie sicher auf.",
+      mnemonicWarning:
+        "Diese Wiederherstellungsphrase kann zur Wiederherstellung Ihrer Schlüssel verwendet werden. Bewahren Sie sie an einem sicheren Ort getrennt von Ihrer Wiederherstellungsdatei auf.",
+      revealButton: "Wiederherstellungsphrase anzeigen",
+      copyButton: "In Zwischenablage kopieren",
+      completeSetupButton: "Einrichtung abschließen",
+      completingSetupButton: "Einrichtung wird abgeschlossen…",
+
+      recoveryTitle: "Privaten Schlüssel wiederherstellen",
+      recoveryDescription:
+        "Stellen Sie Ihren privaten Schlüssel wieder her, um auf die Anwendung zuzugreifen.",
+      recoverFromMnemonicTitle: "Aus Wiederherstellungsphrase",
+      recoverFromMnemonicPlaceholder: "Geben Sie Ihre 12-Wort-Wiederherstellungsphrase ein",
+      recoverFromMnemonicButton: "Aus Phrase wiederherstellen",
+      recoverFromFileTitle: "Aus Wiederherstellungsdatei",
+      recoverFromFileHint:
+        "Wählen Sie die JSON-Wiederherstellungsdatei aus, die bei der Ersteinrichtung heruntergeladen wurde.",
+      orDivider: "Oder",
+      mismatchWarning:
+        "Ihr lokaler privater Schlüssel stimmt nicht mit dem öffentlichen Schlüssel der Organisation überein. Bitte stellen Sie den richtigen privaten Schlüssel wieder her.",
+
+      waitingTitle: "Einrichtung durch Administrator erforderlich",
+      waitingDescription: "Die Verschlüsselung für {org} wurde noch nicht konfiguriert.",
+      waitingAlert:
+        "Der Administrator Ihrer Organisation muss die Verschlüsselungseinrichtung abschließen, bevor Sie auf die Anwendung zugreifen können. Bitte kontaktieren Sie Ihren Administrator.",
+      waitingAdminInstructions: "Was Ihr Administrator tun muss:",
+      waitingAdminStep1: "Mit Administratorrechten anmelden",
+      waitingAdminStep2: "Die Verschlüsselungseinrichtung durchführen",
+      waitingAdminStep3: "Organisationsschlüssel generieren und sichern",
+      checkAgainButton: "Erneut prüfen",
+
+      errorTitle: "Einrichtungsfehler",
+      errorDescription: "Bei der Verschlüsselungseinrichtung ist ein Fehler aufgetreten.",
+      retryButton: "Erneut versuchen",
+      revalidateButton: "Schlüssel prüfen",
+      deleteKeyButton: "Privaten Schlüssel löschen",
+      deletingKeyButton: "Wird gelöscht…",
+      startRecoveryButton: "Schlüsselwiederherstellung starten",
+      checkKeysButton: "Schlüssel erneut prüfen",
+
+      overwriteWarning:
+        "Für diese Organisation sind bereits Verschlüsselungsschlüssel eingerichtet.\n\nDas Überschreiben bestehender Schlüssel wird:\n• Schlüsselwiederherstellung auf neuen Geräten unmöglich machen\n• Verschlüsselungsinkonsistenzen verursachen\n• Alle Benutzer zwingen, neue Schlüssel einzurichten\n• Möglicherweise Datensynchronisierungsprobleme verursachen\n\nMöchten Sie die bestehenden Schlüssel wirklich ersetzen?",
+      overwriteConfirmPrompt:
+        'Geben Sie "REPLACE" ein, um das Ersetzen der Verschlüsselungsschlüssel zu bestätigen:',
+
+      toastKeysGenerated: "Organisationsschlüssel erfolgreich generiert",
+      toastKeysFailed: "Schlüsselgenerierung fehlgeschlagen",
+      toastRecoveryDownloaded: "Wiederherstellungsdatei erfolgreich heruntergeladen",
+      toastRecoveryDownloadFailed: "Herunterladen der Wiederherstellungsdatei fehlgeschlagen",
+      toastMnemonicCopied: "Wiederherstellungsphrase in Zwischenablage kopiert",
+      toastMnemonicCopyFailed: "Kopieren der Wiederherstellungsphrase fehlgeschlagen",
+      toastSetupComplete: "Verschlüsselungseinrichtung abgeschlossen",
+      toastSetupFailed: "Einrichtung fehlgeschlagen",
+      toastKeyDeleted: "Privater Schlüssel erfolgreich gelöscht",
+      toastKeyDeleteFailed: "Löschen des privaten Schlüssels fehlgeschlagen",
+      toastRecoveredFromMnemonic: "Schlüssel erfolgreich aus Phrase wiederhergestellt",
+      toastRecoveredFromFile: "Schlüssel erfolgreich aus Datei wiederhergestellt",
+      toastRecoveryFailed: "Schlüsselwiederherstellung fehlgeschlagen",
+      toastValidationFailed: "Validierung des wiederhergestellten Schlüssels fehlgeschlagen",
+      toastKeyMismatch:
+        "Wiederhergestellter Schlüssel stimmt nicht mit dem Organisationsschlüssel überein",
+      toastOrgKeyMissing:
+        "Organisationsschlüssel nicht gefunden. Bitte kontaktieren Sie Ihren Administrator.",
+      toastEmptyMnemonic: "Bitte geben Sie eine Wiederherstellungsphrase ein",
     },
 
     caseSteps: {
