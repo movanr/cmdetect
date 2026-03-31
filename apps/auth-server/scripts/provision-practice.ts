@@ -3,10 +3,10 @@
  *
  * Usage:
  *   npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" \
- *     --admin admin@praxis.de \
- *     --physician arzt@praxis.de \
- *     --assistant mfa@praxis.de \
- *     --receptionist rezeption@praxis.de
+ *     --admin admin@praxis.de "Dr. Müller" \
+ *     --physician arzt@praxis.de "Dr. Weber" \
+ *     --assistant mfa@praxis.de "Anna Schmidt" \
+ *     --receptionist rezeption@praxis.de "Frau Meier"
  *
  * Roles:
  *   --admin        org_admin + physician
@@ -53,43 +53,56 @@ const ROLE_FLAGS: Record<string, { roles: string[]; label: string }> = {
 
 interface UserSpec {
   email: string;
+  name: string;
   userRoles: string[];
   label: string;
 }
 
 function parseArgs(args: string[]): { practiceName: string; users: UserSpec[] } {
   if (args.length < 3 || !args[1].startsWith("--")) {
-    console.error("Usage: npx tsx scripts/provision-practice.ts <practice-name> --admin email [--physician email] [--assistant email] [--receptionist email]");
+    console.error('Usage: npx tsx scripts/provision-practice.ts <practice-name> --admin <email> [name] [--physician <email> [name]] ...');
     console.error("\nRoles:");
     console.error("  --admin        org_admin + physician");
     console.error("  --physician    physician");
     console.error("  --assistant    assistant");
     console.error("  --receptionist receptionist");
-    console.error('\nExample: npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de --assistant mfa1@praxis.de');
+    console.error('\nExamples:');
+    console.error('  npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de "Dr. Müller" --assistant mfa@praxis.de "Anna Schmidt"');
+    console.error('  npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de');
     process.exit(1);
   }
 
   const practiceName = args[0];
   const users: UserSpec[] = [];
 
-  for (let i = 1; i < args.length; i += 2) {
+  let i = 1;
+  while (i < args.length) {
     const flag = args[i];
-    const email = args[i + 1];
 
     if (!ROLE_FLAGS[flag]) {
       console.error(`Unknown flag: ${flag}. Use --admin, --physician, --assistant, or --receptionist`);
       process.exit(1);
     }
+
+    const email = args[i + 1];
     if (!email || email.startsWith("--")) {
       console.error(`Missing email after ${flag}`);
       process.exit(1);
     }
 
+    // Next arg is a name if it exists and is not a flag
+    const nextArg = args[i + 2];
+    const hasName = nextArg && !nextArg.startsWith("--");
+    const name = hasName ? nextArg : email.split("@")[0];
+
     users.push({
       email,
+      name,
       userRoles: ROLE_FLAGS[flag].roles,
       label: ROLE_FLAGS[flag].label,
     });
+
+    i += hasName ? 3 : 2;
   }
 
   if (!users.some((u) => u.userRoles.includes(roles.ORG_ADMIN))) {
@@ -118,8 +131,7 @@ async function main() {
     // 2. Create users
     console.log(`\n👥 Creating ${users.length} user(s)...`);
 
-    for (const { email, userRoles, label } of users) {
-      const name = email.split("@")[0];
+    for (const { email, name, userRoles, label } of users) {
 
       console.log(`\n   📧 ${email} (${label})`);
 
@@ -167,8 +179,8 @@ async function main() {
     console.log(`🆔 Organization ID: ${orgId}`);
     console.log(`🔑 Password (all users): ${DEFAULT_PASSWORD}`);
     console.log("\n👥 Users:");
-    users.forEach(({ email, label }) => {
-      console.log(`   👤 ${email} — ${label}`);
+    users.forEach(({ email, name, label }) => {
+      console.log(`   👤 ${name} <${email}> — ${label}`);
     });
     console.log("\n💡 Users should change their password after first login.");
     console.log("💡 The admin user needs to set up the encryption key on first login.");
