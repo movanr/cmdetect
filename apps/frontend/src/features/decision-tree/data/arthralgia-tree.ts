@@ -100,10 +100,6 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
       endDirection: "up",
       type: "negative",
       label: "Nein",
-      joints: [
-        { x: 480, y: 190 },
-        { x: 480, y: 100 },
-      ],
     },
   );
 

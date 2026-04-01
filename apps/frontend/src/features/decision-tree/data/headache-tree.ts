@@ -1,180 +1,226 @@
-import {
-  and,
-  familiarHeadacheProvoked,
-  field,
-  HEADACHE_ANAMNESIS,
-  HEADACHE_EXAMINATION,
-  headacheInTemporalRegion,
-  headacheLocationConfirmed,
-  headacheModifiedByFunction,
-  sq,
-  type Side,
-} from "@cmdetect/dc-tmd";
+/**
+ * Headache Attributed to TMD Decision Tree
+ *
+ * Matches the official DC/TMD diagnostic flowchart:
+ * "Schmerzbezogene CMD-Diagnosen und Kopfschmerzen"
+ *
+ * Headache pathway: prerequisite (myalgia/arthralgia) → anamnesis → location
+ * confirmation → examination → differential exclusion → diagnosis.
+ * Labels use exact German wordings from the official flowchart.
+ */
+
+import type { Side } from "@cmdetect/dc-tmd";
 import type { DecisionTreeDef, TransitionFromIds, TreeNodeDef } from "../types";
 
-/**
- * Generate the headache attributed to TMD decision tree for a specific side.
- *
- * Nodes map to DC/TMD headache criteria:
- * 1. Headache anamnesis (SQ history A+B)
- * 2. Headache location confirmed in temporalis (E1b criterion C)
- * 3. Familiar headache from opening, movement, or palpation (E4/E5/E9 criterion D)
- * 4. Headache attributed to TMD — positive diagnosis end node
- * 5. Investigate other — negative end node
- *
- * Note: This diagnosis additionally requires a primary diagnosis of
- * Myalgia or Arthralgia (enforced by the evaluation system, not the tree).
- */
 export function createHeadacheTree(side: Side): DecisionTreeDef {
-  const ctx = { side, region: "temporalis" as const };
-
   const sideLabel = side === "right" ? "Rechts" : "Links";
 
-  // Layout constants
-  const colCenter = 150;
-  const nodeW = 300;
-  const endW = 200;
-  const endH = 120;
+  // Layout
+  const mainCol = 220;
+  const rightCol = 550;
+  const decisionW = 340;
+  const decisionH = 100;
+  const diagnosisW = 260;
+  const diagnosisH = 80;
+  const redW = 200;
+  const redH = 80;
 
-  const nodes: TreeNodeDef[] = [
-    {
-      id: "headacheInTemporal",
-      label: "Kopfschmerzen jeglicher Art in der Temporalregion",
-      criterion: headacheInTemporalRegion,
-      sources: ["SF5"],
-      center: { x: colCenter, y: 50 },
-      width: nodeW,
-      height: 100,
-    },
-    {
-      id: "headacheModified",
-      label: "Kopfschmerzen, die durch Kieferbewegungen, Funktion oder Parafunktion beeinflusst werden",
-      criterion: headacheModifiedByFunction,
-      sources: ["SF7"],
-      center: { x: colCenter, y: 170 },
-      width: nodeW,
-      height: 100,
-    },
-    {
-      id: "headacheLocation",
-      label: "Kopfschmerzlokalisation bestätigt",
-      subLabel: "Kopfschmerz im Bereich des M. temporalis",
-      criterion: headacheLocationConfirmed,
-      context: ctx,
-      center: { x: colCenter, y: 295 },
-      width: nodeW,
-      height: 120,
-    },
-    {
-      id: "familiarHeadache",
-      label: "Bekannter Kopfschmerz",
-      subItems: {
-        labels: [
-          "Bekannter Kopfschmerz bei Mundöffnung",
-          "Bekannter Kopfschmerz bei Lateral-/Protrusionsbewegung",
-          "Bekannter Kopfschmerz bei Palpation",
-        ],
-        connector: "ODER",
-      },
-      criterion: familiarHeadacheProvoked,
-      context: ctx,
-      center: { x: colCenter, y: 490 },
-      width: nodeW,
-      height: 190,
-    },
-    {
-      id: "headache",
-      label: "Auf CMD zurückgeführte Kopfschmerzen",
-      color: "blue",
-      isEndNode: true,
-      diagnosisId: "headacheAttributedToTmd",
-      criterion: and([HEADACHE_ANAMNESIS, HEADACHE_EXAMINATION.criterion]),
-      context: ctx,
-      center: { x: colCenter, y: 685 },
-      width: endW,
-      height: endH,
-    },
-    {
-      id: "investigateOther",
-      label: "Weitere Schmerzdiagnosen untersuchen",
-      color: "red",
-      isEndNode: true,
-      criterion: and([
-        field(sq("SQ5"), { equals: "yes" }),
-        field(`e1.headacheLocation.${side}`, { includes: "temporalis" }),
-      ]),
-      center: { x: 430, y: 50 },
-      width: 180,
-      height: 80,
-    },
-  ];
+  // Vertical spacing
+  let y = 60;
+  const gap = 130;
 
-  const transitions: TransitionFromIds[] = [
+  const nodes: TreeNodeDef[] = [];
+  const transitions: TransitionFromIds[] = [];
+
+  // ── 0. Prerequisite: existing myalgia or arthralgia ───────────────
+
+  nodes.push({
+    id: "voraussetzung",
+    label: "Diagnose einer Myalgie oder Arthralgie",
+    center: { x: mainCol, y },
+    width: decisionW,
+    height: 80,
+  });
+
+  // ── Red end node: Weitere Schmerzdiagnosen ────────────────────────
+
+  nodes.push({
+    id: "weitere",
+    label: "Weitere Schmerzdiagnosen untersuchen",
+    color: "red",
+    isEndNode: true,
+    center: { x: rightCol, y },
+    width: redW,
+    height: redH,
+  });
+
+  transitions.push(
     {
-      from: "headacheInTemporal",
-      to: "headacheModified",
+      from: "voraussetzung",
+      to: "anamnese",
       startDirection: "down",
       endDirection: "down",
       type: "positive",
       label: "Ja",
     },
     {
-      from: "headacheInTemporal",
-      to: "investigateOther",
+      from: "voraussetzung",
+      to: "weitere",
       startDirection: "right",
       endDirection: "right",
       type: "negative",
       label: "Nein",
     },
+  );
+
+  // ── 1. Anamnesis: SF5 + SF7 ──────────────────────────────────────
+
+  y += gap;
+  nodes.push({
+    id: "anamnese",
+    label:
+      "Schläfenkopfschmerz jeglicher Art [SF5] UND Kopfschmerz wird durch funktionelle oder parafunktionelle Kieferbewegungen modifiziert [SF7]",
+    center: { x: mainCol, y },
+    width: decisionW,
+    height: decisionH + 10,
+  });
+
+  transitions.push(
     {
-      from: "headacheModified",
-      to: "headacheLocation",
+      from: "anamnese",
+      to: "lokalisation",
       startDirection: "down",
       endDirection: "down",
       type: "positive",
       label: "Ja",
     },
     {
-      from: "headacheModified",
-      to: "investigateOther",
+      from: "anamnese",
+      to: "weitere",
       startDirection: "right",
       endDirection: "up",
       type: "negative",
       label: "Nein",
     },
+  );
+
+  // ── 2. U1b: Headache location confirmation ────────────────────────
+
+  y += gap + 10;
+  nodes.push({
+    id: "lokalisation",
+    label: "Bestätigung der Kopfschmerzlokalisation durch den Untersucher [U1b]",
+    center: { x: mainCol, y },
+    width: decisionW,
+    height: decisionH,
+  });
+
+  transitions.push(
     {
-      from: "headacheLocation",
-      to: "familiarHeadache",
+      from: "lokalisation",
+      to: "untersuchung",
       startDirection: "down",
       endDirection: "down",
       type: "positive",
       label: "Ja",
     },
     {
-      from: "headacheLocation",
-      to: "investigateOther",
+      from: "lokalisation",
+      to: "weitere",
       startDirection: "right",
       endDirection: "up",
       type: "negative",
       label: "Nein",
     },
+  );
+
+  // ── 3. Examination: familiar headache ─────────────────────────────
+
+  y += gap + 20;
+  nodes.push({
+    id: "untersuchung",
+    label: "Bekannter Kopfschmerz durch:",
+    subItems: {
+      labels: [
+        "Mundöffnung",
+        "excursive Kieferbewegungen",
+        "Palpation des M. temporalis",
+      ],
+      connector: "ODER",
+      sources: [
+        ["Temporalis", "U4"],
+        ["Temporalis", "U5"],
+        ["Temporalis", "U9"],
+      ],
+    },
+    center: { x: mainCol, y },
+    width: decisionW,
+    height: decisionH + 40,
+  });
+
+  transitions.push(
     {
-      from: "familiarHeadache",
-      to: "headache",
+      from: "untersuchung",
+      to: "ausschluss",
       startDirection: "down",
       endDirection: "down",
       type: "positive",
       label: "Ja",
     },
     {
-      from: "familiarHeadache",
-      to: "investigateOther",
+      from: "untersuchung",
+      to: "weitere",
       startDirection: "right",
       endDirection: "up",
       type: "negative",
       label: "Nein",
     },
-  ];
+  );
+
+  // ── 4. Differential exclusion ─────────────────────────────────────
+
+  y += gap + 10;
+  nodes.push({
+    id: "ausschluss",
+    label:
+      "Kopfschmerzen, die nicht besser durch eine andere Diagnose erklärt werden können",
+    center: { x: mainCol, y },
+    width: decisionW,
+    height: decisionH,
+  });
+
+  transitions.push(
+    {
+      from: "ausschluss",
+      to: "kopfschmerzen",
+      startDirection: "down",
+      endDirection: "down",
+      type: "positive",
+      label: "Ja",
+    },
+    {
+      from: "ausschluss",
+      to: "weitere",
+      startDirection: "right",
+      endDirection: "up",
+      type: "negative",
+      label: "Nein",
+    },
+  );
+
+  // ── 5. Diagnosis ──────────────────────────────────────────────────
+
+  y += gap;
+  nodes.push({
+    id: "kopfschmerzen",
+    label: "Auf CMD zurückgeführte Kopfschmerzen",
+    color: "blue",
+    isEndNode: true,
+    diagnosisId: "headacheAttributedToTmd",
+    center: { x: mainCol, y },
+    width: diagnosisW,
+    height: diagnosisH,
+  });
 
   return {
     id: `headache-${side}-temporalis`,
