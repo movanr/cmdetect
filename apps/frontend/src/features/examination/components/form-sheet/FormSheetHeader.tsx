@@ -3,6 +3,7 @@ interface FormSheetHeaderProps {
   patientDob?: string;
   clinicInternalId?: string;
   examDate?: string;
+  examinerName?: string;
 }
 
 export function FormSheetHeader({
@@ -10,6 +11,7 @@ export function FormSheetHeader({
   patientDob,
   clinicInternalId,
   examDate,
+  examinerName,
 }: FormSheetHeaderProps) {
   return (
     <>
@@ -36,10 +38,10 @@ export function FormSheetHeader({
           )}
         </div>
         <div>
-          {clinicInternalId && patientName && (
+          {examinerName && (
             <>
-              <span className="text-slate-400">ID: </span>
-              <span className="font-medium text-slate-700">{clinicInternalId}</span>
+              <span className="text-slate-400">Behandler: </span>
+              <span className="font-medium text-slate-700">{examinerName}</span>
             </>
           )}
         </div>

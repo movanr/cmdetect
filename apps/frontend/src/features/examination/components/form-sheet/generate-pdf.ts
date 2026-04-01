@@ -39,6 +39,7 @@ interface PdfOptions {
   patientDob?: string;
   clinicInternalId?: string;
   examDate?: string;
+  examinerName?: string;
 }
 
 // === Helpers to read nested paths ===
@@ -94,7 +95,7 @@ const MOVEMENT_REGIONS = [
 
 export async function generateFormSheetPDF(options: PdfOptions): Promise<void> {
   const { jsPDF } = await import("jspdf");
-  const { formValues: d, patientName, patientDob, clinicInternalId, examDate } = options;
+  const { formValues: d, patientName, patientDob, clinicInternalId, examDate, examinerName } = options;
   const doc: JsPDFType = new jsPDF({ unit: "mm", format: "a4" });
   let y = MARGIN;
 
@@ -239,6 +240,14 @@ export async function generateFormSheetPDF(options: PdfOptions): Promise<void> {
     gray();
     doc.setFont("helvetica", "normal");
     doc.text(`(*${patientDob})`, MARGIN + 70 + doc.getTextWidth(displayName) + 2, y + 4.5);
+  }
+  if (examinerName) {
+    gray();
+    doc.setFont("helvetica", "normal");
+    doc.text("Behandler:", MARGIN + 135, y + 4.5);
+    dark();
+    doc.setFont("helvetica", "bold");
+    doc.text(examinerName, MARGIN + 155, y + 4.5);
   }
   y += 10;
 

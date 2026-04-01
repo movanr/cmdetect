@@ -18,6 +18,7 @@ export interface DCTMDFormSheetProps {
   patientDob?: string;
   clinicInternalId?: string;
   examDate?: string;
+  examinerName?: string;
 }
 
 export function DCTMDFormSheet({
@@ -26,6 +27,7 @@ export function DCTMDFormSheet({
   patientDob,
   clinicInternalId,
   examDate,
+  examinerName,
 }: DCTMDFormSheetProps) {
   const displayDate =
     examDate ??
@@ -43,6 +45,7 @@ export function DCTMDFormSheet({
           patientDob={patientDob}
           clinicInternalId={clinicInternalId}
           examDate={displayDate}
+          examinerName={examinerName}
         />
 
         <div className="bg-white border border-t-0 border-slate-200 rounded-b-md p-3 print:border-0 print:p-0 print:rounded-none">

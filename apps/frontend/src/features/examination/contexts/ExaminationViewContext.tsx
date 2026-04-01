@@ -4,6 +4,7 @@ interface ExaminationViewContextValue {
   patientName?: string;
   patientDob?: string;
   clinicInternalId?: string;
+  examinerName?: string;
   navigateToGuidedMode: () => void;
 }
 

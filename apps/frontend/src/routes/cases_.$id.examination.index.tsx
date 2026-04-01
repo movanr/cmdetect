@@ -16,7 +16,7 @@ export const Route = createFileRoute("/cases_/$id/examination/")({
 });
 
 function ExaminationFormSheetView() {
-  const { patientName, patientDob, clinicInternalId, navigateToGuidedMode } = useExaminationView();
+  const { patientName, patientDob, clinicInternalId, examinerName, navigateToGuidedMode } = useExaminationView();
   const { status } = useExaminationPersistenceContext();
   const isCompleted = status === "completed";
 
@@ -47,6 +47,7 @@ function ExaminationFormSheetView() {
         patientName={patientName}
         patientDob={patientDob}
         clinicInternalId={clinicInternalId}
+        examinerName={examinerName}
       />
     </div>
   );

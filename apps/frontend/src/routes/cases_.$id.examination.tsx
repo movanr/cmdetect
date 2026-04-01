@@ -43,6 +43,7 @@ import {
   useExaminationResponse,
 } from "../features/examination";
 import { BehandlerSelector } from "../features/examination/components/BehandlerSelector";
+import { usePhysicians } from "../features/examination/hooks/use-physicians";
 import { ExaminationViewProvider } from "../features/examination/contexts/ExaminationViewContext";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
@@ -221,6 +222,13 @@ function ExaminationContent({
   const navigate = useNavigate();
   const t = getTranslations();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const { data: physicians } = usePhysicians();
+
+  // Resolve examiner ID → name
+  const examinerName = useMemo(() => {
+    if (!examinedBy || !physicians) return undefined;
+    return physicians.find((p) => p.id === examinedBy)?.name;
+  }, [examinedBy, physicians]);
 
   // Detect if we're on a guided section route (e1-e10) vs the form sheet index
   const isGuidedMode = /\/e\d+/.test(pathname);
@@ -234,8 +242,8 @@ function ExaminationContent({
   }, [navigate, caseId]);
 
   const viewContextValue = useMemo(
-    () => ({ patientName, patientDob, clinicInternalId, navigateToGuidedMode }),
-    [patientName, patientDob, clinicInternalId, navigateToGuidedMode]
+    () => ({ patientName, patientDob, clinicInternalId, examinerName, navigateToGuidedMode }),
+    [patientName, patientDob, clinicInternalId, examinerName, navigateToGuidedMode]
   );
 
   const handleExportPDF = useCallback(() => {
@@ -250,8 +258,9 @@ function ExaminationContent({
       patientDob,
       clinicInternalId,
       examDate,
+      examinerName,
     });
-  }, [getValues, patientName, patientDob, clinicInternalId]);
+  }, [getValues, patientName, patientDob, clinicInternalId, examinerName]);
 
   // Warn on browser tab close / page refresh (SPA navigation is handled by unmount flush)
   useEffect(() => {
