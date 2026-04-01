@@ -1,8 +1,9 @@
 /**
  * DiagnosisTreeView — Decision tree display for all DC/TMD diagnoses.
  *
- * Shows a selectable list of diagnoses, each rendering its decision tree
- * when selected. Uses a default side ("right") and first applicable region.
+ * Dropdown shows one entry per unique decision tree. When a specific
+ * DiagnosisId is passed from the parent, the matching tree is shown
+ * and the dropdown reflects the corresponding tree option.
  */
 
 import {
@@ -14,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ALL_DIAGNOSES, type DiagnosisId } from "@cmdetect/dc-tmd";
+import type { DiagnosisId } from "@cmdetect/dc-tmd";
 import { useMemo, useState } from "react";
 import {
   DecisionTreeView,
@@ -23,78 +24,126 @@ import {
   createDjdTree,
   createHeadacheTree,
   createMyalgiaCombinedTree,
-  createSubluxationTree,
+  type DecisionTreeDef,
 } from "../../decision-tree";
 
-interface DiagnosisTreeViewProps {
-  selectedDiagnosisId?: DiagnosisId | null;
-  onDiagnosisChange?: (id: DiagnosisId | null) => void;
+// ── Tree options (one per unique decision tree) ─────────────────────
+
+interface TreeOption {
+  id: string;
+  label: string;
+  category: "pain" | "joint";
+  create: () => DecisionTreeDef;
 }
 
-const GROUPED = {
-  pain: ALL_DIAGNOSES.filter((d) => d.category === "pain"),
-  joint: ALL_DIAGNOSES.filter((d) => d.category === "joint"),
+const TREE_OPTIONS: TreeOption[] = [
+  {
+    id: "myalgia",
+    label: "Myalgie & Subtypen",
+    category: "pain",
+    create: () => createMyalgiaCombinedTree("right", "temporalis"),
+  },
+  {
+    id: "arthralgia",
+    label: "Arthralgie",
+    category: "pain",
+    create: () => createArthalgiaTree("right"),
+  },
+  {
+    id: "headache",
+    label: "Auf CMD zurückgeführte Kopfschmerzen",
+    category: "pain",
+    create: () => createHeadacheTree("right"),
+  },
+  {
+    id: "disc-displacement",
+    label: "Diskusverlagerung",
+    category: "joint",
+    create: () => createDdWithReductionTree("right"),
+  },
+  {
+    id: "djd",
+    label: "Degenerative Gelenkerkrankung",
+    category: "joint",
+    create: () => createDjdTree("right"),
+  },
+];
+
+const GROUPED_OPTIONS = {
+  pain: TREE_OPTIONS.filter((t) => t.category === "pain"),
+  joint: TREE_OPTIONS.filter((t) => t.category === "joint"),
 };
 
-function createTree(diagnosisId: DiagnosisId) {
+/** Map any DiagnosisId to the corresponding tree option id */
+function diagnosisToTreeId(diagnosisId: DiagnosisId): string | null {
   switch (diagnosisId) {
     case "myalgia":
     case "localMyalgia":
     case "myofascialPainWithSpreading":
     case "myofascialPainWithReferral":
-      return createMyalgiaCombinedTree("right", "temporalis");
+      return "myalgia";
     case "arthralgia":
-      return createArthalgiaTree("right");
+      return "arthralgia";
     case "headacheAttributedToTmd":
-      return createHeadacheTree("right");
+      return "headache";
     case "discDisplacementWithReduction":
     case "discDisplacementWithReductionIntermittentLocking":
     case "discDisplacementWithoutReductionLimitedOpening":
     case "discDisplacementWithoutReductionWithoutLimitedOpening":
-      return createDdWithReductionTree("right");
+      return "disc-displacement";
     case "degenerativeJointDisease":
-      return createDjdTree("right");
-    case "subluxation":
-      return createSubluxationTree("right");
+      return "djd";
     default:
       return null;
   }
 }
 
-export function DiagnosisTreeView({ selectedDiagnosisId, onDiagnosisChange }: DiagnosisTreeViewProps) {
-  const [localSelectedId, setLocalSelectedId] = useState<DiagnosisId | null>(null);
-  const selectedId = selectedDiagnosisId ?? localSelectedId;
+// ── Component ───────────────────────────────────────────────────────
 
-  function handleChange(id: DiagnosisId) {
-    setLocalSelectedId(id);
-    onDiagnosisChange?.(id);
+interface DiagnosisTreeViewProps {
+  selectedDiagnosisId?: DiagnosisId | null;
+}
+
+export function DiagnosisTreeView({ selectedDiagnosisId }: DiagnosisTreeViewProps) {
+  const [localTreeId, setLocalTreeId] = useState<string | null>(null);
+
+  // If parent provides a diagnosis, resolve to tree id; otherwise use local state
+  const selectedTreeId = selectedDiagnosisId
+    ? diagnosisToTreeId(selectedDiagnosisId)
+    : localTreeId;
+
+  const selectedOption = TREE_OPTIONS.find((t) => t.id === selectedTreeId);
+  const tree = useMemo(() => selectedOption?.create() ?? null, [selectedOption]);
+
+  function handleChange(treeId: string) {
+    setLocalTreeId(treeId);
+    // Don't call onDiagnosisChange — dropdown selection is tree-level,
+    // the parent's diagnosis selection stays intact
   }
-
-  const tree = useMemo(() => (selectedId ? createTree(selectedId) : null), [selectedId]);
 
   return (
     <div className="space-y-4">
       <Select
-        value={selectedId ?? ""}
-        onValueChange={(v) => handleChange(v as DiagnosisId)}
+        value={selectedTreeId ?? ""}
+        onValueChange={handleChange}
       >
         <SelectTrigger className="w-auto min-w-[280px]">
-          <SelectValue placeholder="Diagnose wählen..." />
+          <SelectValue placeholder="Entscheidungsbaum wählen..." />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Schmerzerkrankungen</SelectLabel>
-            {GROUPED.pain.map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {d.nameDE}
+            {GROUPED_OPTIONS.pain.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.label}
               </SelectItem>
             ))}
           </SelectGroup>
           <SelectGroup>
             <SelectLabel>Gelenkerkrankungen</SelectLabel>
-            {GROUPED.joint.map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {d.nameDE}
+            {GROUPED_OPTIONS.joint.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.label}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -105,12 +154,6 @@ export function DiagnosisTreeView({ selectedDiagnosisId, onDiagnosisChange }: Di
         <div className="overflow-auto">
           <DecisionTreeView tree={tree} />
         </div>
-      )}
-
-      {!tree && selectedId && (
-        <p className="text-sm text-muted-foreground italic">
-          Kein Entscheidungsbaum für diese Diagnose verfügbar.
-        </p>
       )}
     </div>
   );

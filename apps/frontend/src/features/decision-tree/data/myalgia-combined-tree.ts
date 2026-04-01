@@ -166,7 +166,7 @@ export function createMyalgiaCombinedTree(side: Side, region: Region): DecisionT
     nodes.push({
       id: "lokaleMyalgie",
       label: "Lokale Myalgie",
-      color: "blue",
+      color: "blueDark",
       isEndNode: true,
       diagnosisId: "localMyalgia",
       center: { x: rightCol, y: y - gap },
@@ -178,7 +178,7 @@ export function createMyalgiaCombinedTree(side: Side, region: Region): DecisionT
     nodes.push({
       id: "myofaszial",
       label: "Myofaszialer Schmerz",
-      color: "blue",
+      color: "blueDark",
       isEndNode: true,
       diagnosisId: "myofascialPainWithSpreading",
       center: { x: mainCol - 180, y: y + diagGap },
@@ -190,7 +190,7 @@ export function createMyalgiaCombinedTree(side: Side, region: Region): DecisionT
     nodes.push({
       id: "myofaszialUebertragung",
       label: "Myofaszialer Schmerz mit Übertragung",
-      color: "blue",
+      color: "blueDark",
       isEndNode: true,
       diagnosisId: "myofascialPainWithReferral",
       center: { x: mainCol + 180, y: y + diagGap },
@@ -209,7 +209,7 @@ export function createMyalgiaCombinedTree(side: Side, region: Region): DecisionT
     nodes.push({
       id: "lokaleMyalgie",
       label: "Lokale Myalgie",
-      color: "blue",
+      color: "blueDark",
       isEndNode: true,
       diagnosisId: "localMyalgia",
       center: { x: mainCol - 180, y: y + diagGap },
@@ -220,7 +220,7 @@ export function createMyalgiaCombinedTree(side: Side, region: Region): DecisionT
     nodes.push({
       id: "myofaszialUebertragung",
       label: "Myofaszialer Schmerz mit Übertragung",
-      color: "blue",
+      color: "blueDark",
       isEndNode: true,
       diagnosisId: "myofascialPainWithReferral",
       center: { x: mainCol + 180, y: y + diagGap },

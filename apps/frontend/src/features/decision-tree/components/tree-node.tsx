@@ -47,7 +47,7 @@ interface TreeNodeProps {
     connector: "UND" | "ODER";
     sources?: string[][];
   };
-  color?: "blue" | "red";
+  color?: "blue" | "blueDark" | "red";
   isEndNode?: boolean;
   isEntryNode?: boolean;
   imagingNote?: string;
@@ -59,6 +59,12 @@ interface TreeNodeProps {
 const blueEndColors = {
   borderColor: "border-border",
   bgColor: "bg-teal-100",
+  textColor: "text-teal-900",
+};
+
+const blueDarkEndColors = {
+  borderColor: "border-border",
+  bgColor: "bg-teal-200",
   textColor: "text-teal-900",
 };
 
@@ -103,9 +109,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     isEndNode
       ? color === "blue"
         ? blueEndColors
-        : color === "red"
-          ? redEndColors
-          : defaultEndColors
+        : color === "blueDark"
+          ? blueDarkEndColors
+          : color === "red"
+            ? redEndColors
+            : defaultEndColors
       : isEntryNode
         ? entryNodeColors
         : neutralColors;

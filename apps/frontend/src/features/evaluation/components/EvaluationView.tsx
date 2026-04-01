@@ -265,7 +265,6 @@ export function EvaluationView({
             ) : (
               <DiagnosisTreeView
                 selectedDiagnosisId={criteriaDiagnosisId}
-                onDiagnosisChange={setCriteriaDiagnosisId}
               />
             )}
             <p className="mt-4 text-[10px] text-muted-foreground/70 leading-relaxed">

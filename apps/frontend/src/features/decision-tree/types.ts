@@ -38,7 +38,7 @@ export interface TreeNodeDef {
   /** Template context {side, region} for evaluation */
   context?: TemplateContext;
   /** Node color */
-  color?: "blue" | "red";
+  color?: "blue" | "blueDark" | "red";
   /** End node flag (no status badge) */
   isEndNode?: boolean;
   /** Entry node flag (blue border, matches flowchart "blau umrahmte Box") */
