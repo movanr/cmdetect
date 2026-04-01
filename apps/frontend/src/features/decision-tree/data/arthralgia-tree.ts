@@ -35,6 +35,7 @@ export function createArthalgiaTree(side: Side): DecisionTreeDef {
 
   nodes.push({
     id: "anamnese",
+    isEntryNode: true,
     label:
       "Regionaler Schmerz [SF3] UND Schmerz wird durch funktionelle oder parafunktionelle Kieferbewegungen modifiziert [SF4]",
     center: { x: mainCol, y },

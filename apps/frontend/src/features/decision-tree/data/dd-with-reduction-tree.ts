@@ -39,6 +39,7 @@ export function createDdWithReductionTree(side: Side): DecisionTreeDef {
 
   nodes.push({
     id: "entryKieferklemme",
+    isEntryNode: true,
     label:
       "Vorrausgehende Kieferklemme [SF9] UND Störungen beim Kauen [SF10]",
     center: { x: mainCol, y: 60 },

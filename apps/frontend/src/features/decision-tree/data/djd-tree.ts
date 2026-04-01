@@ -25,7 +25,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
   const redH = 80;
 
   // Vertical spacing
-  let y = 60;
+  let y = 80;
   const gap = 130;
 
   const nodes: TreeNodeDef[] = [];
@@ -35,6 +35,7 @@ export function createDjdTree(side: Side): DecisionTreeDef {
 
   nodes.push({
     id: "geraeusch",
+    isEntryNode: true,
     label: "",
     subItems: {
       labels: [

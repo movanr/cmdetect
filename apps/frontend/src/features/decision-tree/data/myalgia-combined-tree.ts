@@ -38,6 +38,7 @@ export function createMyalgiaCombinedTree(side: Side, region: Region): DecisionT
 
   nodes.push({
     id: "anamnese",
+    isEntryNode: true,
     label: "Regionaler Schmerz [SF3] UND Schmerz wird durch funktionelle oder parafunktionelle Kieferbewegungen modifiziert [SF4]",
     center: { x: mainCol, y },
     width: decisionW,

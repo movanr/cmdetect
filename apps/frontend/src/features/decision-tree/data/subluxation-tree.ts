@@ -27,6 +27,7 @@ export function createSubluxationTree(side: Side): DecisionTreeDef {
   const nodes: TreeNodeDef[] = [
     {
       id: "sq13",
+      isEntryNode: true,
       label: "Anamnese — Blockade in geöffneter Position",
       subLabel: "Kiefer fängt oder blockiert bei weit geöffnetem Mund",
       criterion: jawLockingOpenPositionAnamnesis,

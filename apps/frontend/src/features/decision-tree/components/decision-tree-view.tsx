@@ -110,7 +110,14 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({ tree }) => {
   );
 
   return (
-    <div className="flex justify-center">
+    <div className="pt-2">
+      <p className="text-xs text-muted-foreground mb-3 text-center">
+        Beginnen Sie an jeder{" "}
+        <span className="border border-blue-400 rounded px-1 py-0.5">
+          blau umrahmten
+        </span>{" "}
+        Box
+      </p>
       <div
         className="relative overflow-visible"
         style={{
@@ -128,6 +135,7 @@ export const DecisionTreeView: React.FC<DecisionTreeViewProps> = ({ tree }) => {
             subItems={node.subItems}
             color={node.color}
             isEndNode={node.isEndNode}
+            isEntryNode={node.isEntryNode}
             imagingNote={node.imagingNote}
             position={node.position}
             width={node.width}

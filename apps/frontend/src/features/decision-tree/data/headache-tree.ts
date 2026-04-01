@@ -36,6 +36,7 @@ export function createHeadacheTree(side: Side): DecisionTreeDef {
 
   nodes.push({
     id: "voraussetzung",
+    isEntryNode: true,
     label: "Diagnose einer Myalgie oder Arthralgie",
     center: { x: mainCol, y },
     width: decisionW,

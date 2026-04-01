@@ -49,16 +49,35 @@ interface TreeNodeProps {
   };
   color?: "blue" | "red";
   isEndNode?: boolean;
+  isEntryNode?: boolean;
   imagingNote?: string;
   position: Position;
   width: number;
   height: number;
 }
 
-const endNodeColors = {
-  borderColor: "border-gray-400",
-  bgColor: "bg-white",
-  textColor: "text-gray-900",
+const blueEndColors = {
+  borderColor: "border-border",
+  bgColor: "bg-teal-100",
+  textColor: "text-teal-900",
+};
+
+const redEndColors = {
+  borderColor: "border-border",
+  bgColor: "bg-red-100",
+  textColor: "text-red-900",
+};
+
+const defaultEndColors = {
+  borderColor: "border-border",
+  bgColor: "bg-card",
+  textColor: "text-foreground",
+};
+
+const entryNodeColors = {
+  borderColor: "border-blue-400",
+  bgColor: "bg-card",
+  textColor: "text-foreground",
 };
 
 const neutralColors = {
@@ -72,14 +91,24 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   subLabel,
   sources,
   subItems,
+  color,
   isEndNode,
+  isEntryNode,
   imagingNote,
   position,
   width,
   height,
 }) => {
   const { borderColor: borderClass, bgColor: bgClass, textColor: textClass } =
-    isEndNode ? endNodeColors : neutralColors;
+    isEndNode
+      ? color === "blue"
+        ? blueEndColors
+        : color === "red"
+          ? redEndColors
+          : defaultEndColors
+      : isEntryNode
+        ? entryNodeColors
+        : neutralColors;
 
   return (
     <div

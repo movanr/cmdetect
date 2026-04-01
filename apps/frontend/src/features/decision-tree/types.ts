@@ -41,6 +41,8 @@ export interface TreeNodeDef {
   color?: "blue" | "red";
   /** End node flag (no status badge) */
   isEndNode?: boolean;
+  /** Entry node flag (blue border, matches flowchart "blau umrahmte Box") */
+  isEntryNode?: boolean;
   /** Links to another tree (makes node clickable) */
   linkedTreeId?: string;
   /** Imaging recommendation shown on diagnosis end nodes (e.g. "MRT", "CT") */

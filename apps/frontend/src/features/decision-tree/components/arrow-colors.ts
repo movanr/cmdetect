@@ -1,11 +1,7 @@
 import type { TransitionType } from "../types";
 
-export const ARROW_COLORS: Record<TransitionType, string> = {
-  positive: "#3b82f6", // blue-500 (matches positive criteria nodes)
-  negative: "#9ca3af", // gray-400 (matches negative criteria nodes)
-  unconditional: "#000000", // black (for unconditional transitions)
-};
+const DEFAULT_ARROW_COLOR = "#6b7280"; // gray-500
 
-export function getArrowColor(type: TransitionType): string {
-  return ARROW_COLORS[type];
+export function getArrowColor(_type: TransitionType): string {
+  return DEFAULT_ARROW_COLOR;
 }
