@@ -12,21 +12,6 @@ object_relationships:
     using:
       foreign_key_constraint_on: patient_record_id
 insert_permissions:
-  - role: org_admin
-    permission:
-      check: {}
-      set:
-        organization_id: x-hasura-Organization-Id
-      columns:
-        - patient_record_id
-        - criterion_id
-        - side
-        - region
-        - site
-        - state
-        - assessed_by
-        - assessed_at
-    comment: ""
   - role: physician
     permission:
       check: {}
@@ -120,16 +105,6 @@ select_permissions:
           _eq: X-Hasura-Organization-Id
     comment: ""
 update_permissions:
-  - role: org_admin
-    permission:
-      columns:
-        - state
-        - assessed_by
-        - assessed_at
-      filter:
-        organization_id:
-          _eq: X-Hasura-Organization-Id
-    comment: ""
   - role: physician
     permission:
       columns:
@@ -141,12 +116,6 @@ update_permissions:
           _eq: X-Hasura-Organization-Id
     comment: ""
 delete_permissions:
-  - role: org_admin
-    permission:
-      filter:
-        organization_id:
-          _eq: X-Hasura-Organization-Id
-    comment: ""
   - role: physician
     permission:
       filter:

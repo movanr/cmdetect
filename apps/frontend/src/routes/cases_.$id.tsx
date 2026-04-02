@@ -15,11 +15,14 @@ function CaseRoute() {
   const { activeRole, isLoading } = useRole();
   const navigate = useNavigate();
 
+  const isClinicalRole =
+    activeRole === roles.PHYSICIAN || activeRole === roles.ASSISTANT;
+
   useEffect(() => {
-    if (activeRole === roles.RECEPTIONIST) {
-      navigate({ to: "/invites" });
+    if (!isLoading && activeRole && !isClinicalRole) {
+      navigate({ to: "/cases" });
     }
-  }, [activeRole, navigate]);
+  }, [isLoading, activeRole, isClinicalRole, navigate]);
 
   // Redirect to login when session has expired (not still loading)
   useEffect(() => {
@@ -28,8 +31,8 @@ function CaseRoute() {
     }
   }, [isLoading, activeRole, navigate]);
 
-  // Don't render case workflow while loading, redirecting, or for receptionist
-  if (isLoading || !activeRole || activeRole === roles.RECEPTIONIST) {
+  // Don't render case workflow while loading, redirecting, or for non-clinical roles
+  if (isLoading || !activeRole || !isClinicalRole) {
     return null;
   }
 

@@ -24,18 +24,6 @@ insert_permissions:
         - status
         - completed_sections
     comment: ""
-  - role: org_admin
-    permission:
-      check: {}
-      set:
-        organization_id: x-hasura-Organization-Id
-      columns:
-        - examined_by
-        - patient_record_id
-        - response_data
-        - status
-        - completed_sections
-    comment: ""
   - role: physician
     permission:
       check: {}
@@ -134,11 +122,6 @@ update_permissions:
   - role: org_admin
     permission:
       columns:
-        - examined_by
-        - response_data
-        - status
-        - completed_sections
-        - completed_at
         - deleted_at
       filter:
         _and:

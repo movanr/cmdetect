@@ -112,7 +112,7 @@ function EvaluationPage() {
   const activeRole = (session?.user as Record<string, unknown> | undefined)?.activeRole as
     | string
     | undefined;
-  const isReadOnly = activeRole === "receptionist" || activeRole === "assistant";
+  const isReadOnly = activeRole !== "physician";
 
   const completedStepsArray = useMemo(() => Array.from(completedSteps), [completedSteps]);
 

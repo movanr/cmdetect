@@ -12,17 +12,6 @@ object_relationships:
     using:
       foreign_key_constraint_on: patient_record_id
 insert_permissions:
-  - role: org_admin
-    permission:
-      check: {}
-      set:
-        organization_id: x-hasura-Organization-Id
-        submitted_at: now()
-      columns:
-        - response_data
-        - patient_consent_id
-        - patient_record_id
-    comment: ""
   - role: physician
     permission:
       check: {}
@@ -94,7 +83,6 @@ update_permissions:
     permission:
       columns:
         - deleted_at
-        - response_data
       filter:
         _and:
           - organization_id:
