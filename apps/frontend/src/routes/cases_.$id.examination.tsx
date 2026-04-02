@@ -24,7 +24,7 @@ import { useSession } from "@/lib/auth";
 import { formatDate } from "@/lib/date-utils";
 import { roles } from "@cmdetect/config";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useBlocker, useLocation, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -215,8 +215,14 @@ function ExaminationContent({
   isExaminationCompleted: boolean;
   isPhysician: boolean;
 }) {
-  const { isHydrated, status, completeExamination, isSaving, hasUnsavedBackendChangesRef } =
-    useExaminationPersistenceContext();
+  const {
+    isHydrated,
+    status,
+    completeExamination,
+    flushSave,
+    isSaving,
+    hasUnsavedBackendChangesRef,
+  } = useExaminationPersistenceContext();
   const { getValues } = useFormContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -262,16 +268,29 @@ function ExaminationContent({
     });
   }, [getValues, patientName, patientDob, clinicInternalId, examinerName]);
 
-  // Warn on browser tab close / page refresh (SPA navigation is handled by unmount flush)
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedBackendChangesRef.current) {
-        e.preventDefault();
+  // Block SPA navigation when there are unsaved changes: try to save first,
+  // show a dialog only if saving fails. Also covers browser close/refresh via enableBeforeUnload.
+  const shouldBlockFn = useCallback(
+    async ({ next }: { next: { pathname: string } }) => {
+      // Allow navigation within examination child routes (provider stays mounted)
+      if (next.pathname.includes(`/cases/${caseId}/examination`)) return false;
+      // No unsaved changes — allow navigation
+      if (!hasUnsavedBackendChangesRef.current) return false;
+      // Unsaved changes — try to save before navigating
+      try {
+        await flushSave();
+        return false;
+      } catch {
+        return true;
       }
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [hasUnsavedBackendChangesRef]);
+    },
+    [caseId, flushSave, hasUnsavedBackendChangesRef]
+  );
+  const enableBeforeUnload = useCallback(
+    () => hasUnsavedBackendChangesRef.current,
+    [hasUnsavedBackendChangesRef]
+  );
+  const blocker = useBlocker({ shouldBlockFn, enableBeforeUnload, withResolver: true });
 
   const handleCompleteExamination = async () => {
     setShowCompleteDialog(false);
@@ -378,6 +397,25 @@ function ExaminationContent({
               <AlertDialogAction onClick={handleCompleteExamination} disabled={isSaving}>
                 Abschließen
               </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Blocker dialog — shown only when save-before-navigate failed */}
+        <AlertDialog open={blocker.status === "blocked"}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Ungespeicherte Änderungen</AlertDialogTitle>
+              <AlertDialogDescription>
+                Die Änderungen konnten nicht gespeichert werden. Möchten Sie ohne Speichern
+                fortfahren?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => blocker.reset?.()}>Abbrechen</AlertDialogCancel>
+              <Button variant="destructive" onClick={() => blocker.proceed?.()}>
+                Ohne Speichern fortfahren
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

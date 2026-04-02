@@ -31,6 +31,8 @@ export interface UseExaminationPersistenceResult {
   saveSection: (sectionId: SectionId) => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
+  /** Flush any pending auto-save immediately (awaitable, throws on failure) */
+  flushSave: () => Promise<void>;
   /** Whether a save operation is in progress */
   isSaving: boolean;
   /** List of completed section IDs */
@@ -132,8 +134,11 @@ export function useExaminationPersistence({
     prevExaminedByRef.current = examinedBy;
 
     cancelDebounce();
-    upsertMutationRef.current.mutate(buildUpsertParamsRef.current());
-    hasUnsavedBackendChangesRef.current = false;
+    upsertMutationRef.current.mutate(buildUpsertParamsRef.current(), {
+      onSuccess: () => {
+        hasUnsavedBackendChangesRef.current = false;
+      },
+    });
   }, [examinedBy, isHydrated, cancelDebounce]);
 
   // Auto-save to backend on form changes (debounced).
@@ -167,6 +172,15 @@ export function useExaminationPersistence({
       }
     };
   }, [isHydrated, cancelDebounce]);
+
+  // Flush any pending auto-save immediately (awaitable, throws on failure).
+  // Used by useBlocker to save before SPA navigation.
+  const flushSave = useCallback(async () => {
+    if (!hasUnsavedBackendChangesRef.current || !examinedByRef.current) return;
+    cancelDebounce();
+    await upsertMutationRef.current.mutateAsync(buildUpsertParamsRef.current());
+    hasUnsavedBackendChangesRef.current = false;
+  }, [cancelDebounce]);
 
   // Save section to backend and mark it completed
   const saveSection = useCallback(
@@ -246,6 +260,7 @@ export function useExaminationPersistence({
   return {
     saveSection,
     completeExamination: completeExaminationFn,
+    flushSave,
     isSaving,
     completedSections,
     isHydrated,

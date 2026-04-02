@@ -22,7 +22,7 @@ function ExaminationE9Page() {
   const { id } = Route.useParams();
   const { step } = Route.useSearch();
   const { navigateToStep, handleComplete, handleBack } =
-    useExaminationRouteNavigation({ section: "e9", id, hasSteps: true, skipSave: true });
+    useExaminationRouteNavigation({ section: "e9", id, hasSteps: true });
 
   return (
     <E9Section
