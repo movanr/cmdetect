@@ -1,35 +1,30 @@
 /**
  * Generate a DC/TMD Befundbericht as a DOCX document.
  *
- * Mirrors the structure and data processing of PrintableBefundbericht.tsx
- * but outputs a Word document instead of React elements.
+ * Mirrors the structure of PrintableBefundbericht.tsx but outputs
+ * a Word document. The examination section consumes the same
+ * formatAllExaminationSections() output as the React version.
  */
 
 import {
   ALL_DIAGNOSES,
-  E3_OPENING_PATTERNS,
-  JOINT_SOUND_LABELS,
-  MOVEMENT_TYPE_LABELS,
-  OPENING_TYPE_LABELS,
   PALPATION_SITES,
   REGIONS,
-  extractClinicalFindings,
   generateAnamnesisText,
   getDiagnosisClinicalContext,
-  getValueAtPath as get,
   type DiagnosisId,
   type PalpationSite,
   type Region,
+  type SectionId,
   type Side,
-  type SignFinding,
-  type SymptomDomain,
-  type SymptomFinding,
 } from "@cmdetect/dc-tmd";
 import { Document, Packer, Paragraph, Tab, TabStopType, TextRun, UnderlineType } from "docx";
 import { saveAs } from "file-saver";
+import type { FormValues } from "../../examination";
+import { formatAllExaminationSections, type FormattedSection } from "./format-examination-sections";
 
 // ============================================================================
-// TYPES (same as PrintableBefundbericht)
+// TYPES
 // ============================================================================
 
 interface ConfirmedDiagnosis {
@@ -53,172 +48,16 @@ interface BefundberichtData {
   criteriaData: unknown;
   confirmedDiagnoses: ConfirmedDiagnosis[];
   questionnaireScores?: QuestionnaireScore[];
+  examinationData?: FormValues;
+  completedSections?: SectionId[];
 }
 
 // ============================================================================
-// HELPERS (reused from PrintableBefundbericht)
+// HELPERS
 // ============================================================================
 
 function sideLabel(side: Side): string {
   return side === "left" ? "links" : "rechts";
-}
-
-function locationSuffix(region: Region | undefined, side: Side): string {
-  if (!region) return `(${sideLabel(side)})`;
-  const regionName = region === "tmj" ? "Kiefergelenk" : REGIONS[region];
-  return `(${regionName}, ${sideLabel(side)})`;
-}
-
-// ── Joint sound details ────────────────────────────────────────────────
-
-interface JointSoundFinding {
-  type: "click" | "crepitus" | "locking" | "subluxation";
-  label: string;
-  detail?: string;
-  side: Side;
-}
-
-function extractJointSoundDetails(
-  symptoms: SymptomFinding[],
-  criteriaData: unknown
-): JointSoundFinding[] {
-  const results: JointSoundFinding[] = [];
-
-  for (const s of symptoms) {
-    if (s.domain === "tmjClick") {
-      const movements: string[] = [];
-      if (get(criteriaData, `e6.${s.side}.click.examinerOpen`) === "yes") movements.push("Öffnen");
-      if (get(criteriaData, `e6.${s.side}.click.examinerClose`) === "yes")
-        movements.push("Schließen");
-      if (get(criteriaData, `e7.${s.side}.click.examiner`) === "yes")
-        movements.push("Lateralbewegung/Protrusion");
-      results.push({
-        type: "click",
-        label: JOINT_SOUND_LABELS.click,
-        detail: movements.length > 0 ? `bei ${movements.join(", ")}` : undefined,
-        side: s.side,
-      });
-    } else if (s.domain === "tmjCrepitus") {
-      const movements: string[] = [];
-      if (get(criteriaData, `e6.${s.side}.crepitus.examinerOpen`) === "yes")
-        movements.push("Öffnen");
-      if (get(criteriaData, `e6.${s.side}.crepitus.examinerClose`) === "yes")
-        movements.push("Schließen");
-      if (get(criteriaData, `e7.${s.side}.crepitus.examiner`) === "yes")
-        movements.push("Lateralbewegung/Protrusion");
-      results.push({
-        type: "crepitus",
-        label: JOINT_SOUND_LABELS.crepitus,
-        detail: movements.length > 0 ? `bei ${movements.join(", ")}` : undefined,
-        side: s.side,
-      });
-    } else if (s.domain === "closedLocking") {
-      results.push({ type: "locking", label: "Kieferklemme", side: s.side });
-    } else if (s.domain === "limitedOpening") {
-      results.push({ type: "locking", label: s.label, side: s.side });
-    } else if (s.domain === "intermittentLocking") {
-      results.push({
-        type: "locking",
-        label: "Intermittierende Kieferklemme mit Knackmuster",
-        side: s.side,
-      });
-    } else if (s.domain === "subluxation") {
-      results.push({ type: "subluxation", label: "Subluxation", side: s.side });
-    }
-  }
-
-  return results;
-}
-
-// ── Measurement formatting ─────────────────────────────────────────────
-
-interface FormattedMeasurement {
-  label: string;
-  value: string;
-}
-
-function formatMeasurements(signs: SignFinding[]): FormattedMeasurement[] {
-  const measurements: FormattedMeasurement[] = [];
-
-  const openingLabels: Record<string, string> = {
-    "painFree.measurement": OPENING_TYPE_LABELS.painFree,
-    "maxUnassisted.measurement": OPENING_TYPE_LABELS.maxUnassisted,
-    "maxAssisted.measurement": OPENING_TYPE_LABELS.maxAssisted,
-  };
-  for (const sign of signs.filter((s) => s.section === "e4")) {
-    const label = openingLabels[sign.field];
-    if (label && typeof sign.value === "number") {
-      measurements.push({ label, value: `${sign.value} mm` });
-    }
-  }
-
-  const movementLabels: Record<string, string> = {
-    "lateralLeft.measurement": MOVEMENT_TYPE_LABELS.lateralLeft,
-    "lateralRight.measurement": MOVEMENT_TYPE_LABELS.lateralRight,
-    "protrusive.measurement": MOVEMENT_TYPE_LABELS.protrusive,
-  };
-  for (const sign of signs.filter((s) => s.section === "e5")) {
-    const label = movementLabels[sign.field];
-    if (label && typeof sign.value === "number") {
-      measurements.push({ label, value: `${sign.value} mm` });
-    }
-  }
-
-  const openingPatternLabels: Record<string, string> = { ...E3_OPENING_PATTERNS };
-  for (const sign of signs.filter((s) => s.section === "e3")) {
-    if (sign.field === "openingPattern" && typeof sign.value === "string") {
-      measurements.push({
-        label: "Öffnungsmuster",
-        value: openingPatternLabels[sign.value] ?? sign.value,
-      });
-    }
-  }
-
-  return measurements;
-}
-
-// ── Flat finding line formatters ───────────────────────────────────────
-
-/** Collapse symptoms by (domain-group, region, side) into flat description lines. */
-function formatSymptomLines(symptoms: SymptomFinding[]): string[] {
-  const painDomains = new Set<SymptomDomain>([
-    "familiarPainPalpation",
-    "familiarPainOpening",
-    "familiarPainMovement",
-  ]);
-  const headacheDomains = new Set<SymptomDomain>([
-    "familiarHeadachePalpation",
-    "familiarHeadacheOpening",
-    "familiarHeadacheMovement",
-  ]);
-
-  // Collapse by (label-type, region, side) to avoid duplicates
-  const seen = new Set<string>();
-  const lines: string[] = [];
-
-  for (const s of symptoms) {
-    let prefix: string | null = null;
-    if (painDomains.has(s.domain)) prefix = "Bekannter Schmerz";
-    else if (headacheDomains.has(s.domain)) prefix = "Bekannter Kopfschmerz";
-
-    if (!prefix) continue;
-
-    const key = `${prefix}-${s.region ?? "none"}-${s.side}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    lines.push(`${prefix} ${locationSuffix(s.region, s.side)}`);
-  }
-
-  return lines;
-}
-
-function formatJointSoundLines(sounds: JointSoundFinding[]): string[] {
-  return sounds.map((f) => {
-    const side = `(${sideLabel(f.side)})`;
-    const detail = f.detail ? ` ${f.detail}` : "";
-    return `${f.label} ${side}${detail}`;
-  });
 }
 
 // ============================================================================
@@ -230,18 +69,17 @@ const SIZE = 20; // half-points → 10pt (body + headings)
 const SIZE_SMALL = 18; // half-points → 9pt (footer only)
 
 // Tab stops in twips (1 inch = 1440 twips, 1cm ≈ 567 twips)
-// A4 text area with 2.5cm margins ≈ 9300 twips wide
 const TAB_META = 3200; // ~5.6cm from margin — after "Untersuchungsdatum"
-const TAB_MEASUREMENT = 4800; // ~8.5cm from margin — after "Maximale passive Mundöffnung"
-const TAB_SCORES = 1800; // ~3.2cm from margin — after short instrument names (GCS, PHQ-4)
+const TAB_SCORES = 1800; // ~3.2cm from margin — after short instrument names
 
-function r(content: string, opts?: { bold?: boolean; underline?: boolean }): TextRun {
+function r(content: string, opts?: { bold?: boolean; underline?: boolean; italic?: boolean }): TextRun {
   return new TextRun({
     text: content,
     font: FONT,
     size: SIZE,
     bold: opts?.bold,
     underline: opts?.underline ? { type: UnderlineType.SINGLE } : undefined,
+    italics: opts?.italic,
   });
 }
 
@@ -262,14 +100,14 @@ function sectionHeading(text: string): Paragraph[] {
 }
 
 /** Plain body line. */
-function line(content: string): Paragraph {
+function bodyLine(content: string): Paragraph {
   return new Paragraph({
     children: [r(content)],
     spacing: { after: 40 },
   });
 }
 
-/** Tab-aligned label → value row. Bold only for metadata, regular for measurements/scores. */
+/** Tab-aligned label → value row. Bold only for metadata, regular for scores. */
 function tabRow(label: string, value: string, tab = TAB_META, bold = tab === TAB_META): Paragraph {
   return new Paragraph({
     children: [
@@ -279,6 +117,47 @@ function tabRow(label: string, value: string, tab = TAB_META, bold = tab === TAB
     tabStops: [{ type: TabStopType.LEFT, position: tab }],
     spacing: { after: 40 },
   });
+}
+
+// ============================================================================
+// EXAMINATION SECTION → DOCX PARAGRAPHS
+// ============================================================================
+
+function sectionToParagraphs(section: FormattedSection): Paragraph[] {
+  if (section.unremarkable) {
+    // Single collapsed line: "N. Title: [label]"
+    return [
+      new Paragraph({
+        children: [
+          r(`${section.number}. ${section.title}: `, { bold: true }),
+          r(section.unremarkableLabel),
+        ],
+        spacing: { after: 40 },
+      }),
+    ];
+  }
+
+  const paragraphs: Paragraph[] = [];
+
+  // Section heading as bold inline prefix
+  paragraphs.push(
+    new Paragraph({
+      children: [r(`${section.number}. ${section.title}`, { bold: true })],
+      spacing: { after: 40 },
+    }),
+  );
+
+  for (const l of section.lines) {
+    paragraphs.push(
+      new Paragraph({
+        children: [r(l.text)],
+        spacing: { after: 40 },
+        indent: l.indent ? { left: 360 } : undefined, // ~0.25 inch indent
+      }),
+    );
+  }
+
+  return paragraphs;
 }
 
 // ============================================================================
@@ -294,18 +173,20 @@ function buildDocument(data: BefundberichtData): Document {
 
   // ── Process data ────────────────────────────────────────────────────
   const anamnesisParagraphs = generateAnamnesisText(data.criteriaData);
-  const findings = extractClinicalFindings(data.criteriaData);
-  const measurements = formatMeasurements(findings.signs);
-  const symptomLines = formatSymptomLines(findings.symptoms);
-  const jointSounds = extractJointSoundDetails(findings.symptoms, data.criteriaData);
-  const jointSoundLines = formatJointSoundLines(jointSounds);
+
+  const examinationSections = data.examinationData
+    ? formatAllExaminationSections(data.examinationData, data.completedSections ?? [])
+    : [];
 
   const diagnoses = data.confirmedDiagnoses.map((d) => {
     const def = ALL_DIAGNOSES.find((diag) => diag.id === d.diagnosisId);
     const label = def?.nameDE ?? d.diagnosisId;
     const icd10 = getDiagnosisClinicalContext(d.diagnosisId).icd10;
     const site = d.site ? PALPATION_SITES[d.site] : null;
-    const suffix = site ? `(${site}, ${sideLabel(d.side)})` : locationSuffix(d.region, d.side);
+    const regionName = d.region === "tmj" ? "Kiefergelenk" : REGIONS[d.region];
+    const suffix = site
+      ? `(${site}, ${sideLabel(d.side)})`
+      : `(${regionName}, ${sideLabel(d.side)})`;
     return `${label} [${icd10}] ${suffix}`;
   });
 
@@ -313,8 +194,7 @@ function buildDocument(data: BefundberichtData): Document {
 
   // ── Title + date ────────────────────────────────────────────────────
 
-  // Right-aligned date: tab at far right edge of text area (A4 - 2×margin)
-  const rightEdge = 11906 - 2 * 1440; // ~9026 twips
+  const rightEdge = 11906 - 2 * 1440; // A4 - 2×margin ≈ 9026 twips
   p.push(
     new Paragraph({
       children: [
@@ -328,7 +208,6 @@ function buildDocument(data: BefundberichtData): Document {
 
   // ── Patient metadata ───────────────────────────────────────────────
 
-  // Combine name + DOB on one line (like the template)
   const patientValue = [data.patientName, data.patientDob ? `geb. ${data.patientDob}` : undefined]
     .filter(Boolean)
     .join(", ");
@@ -337,16 +216,16 @@ function buildDocument(data: BefundberichtData): Document {
   if (data.examinerName) p.push(tabRow("Untersucher", data.examinerName));
   if (data.examinationDate) p.push(tabRow("Untersuchungsdatum", data.examinationDate));
 
-  // ── Diagnoses (first, per template) ────────────────────────────────
+  // ── Diagnoses ─────────────────────────────────────────────────────
 
   if (diagnoses.length > 0) {
     p.push(...sectionHeading("Aktuelle Diagnosen (DC/TMD)"));
     for (const d of diagnoses) {
-      p.push(line(d));
+      p.push(bodyLine(d));
     }
   }
 
-  // ── Anamnesis ──────────────────────────────────────────────────────
+  // ── Anamnesis ─────────────────────────────────────────────────────
 
   if (anamnesisParagraphs.length > 0) {
     p.push(...sectionHeading("Anamnese (DC/TMD Achse I)"));
@@ -360,7 +239,7 @@ function buildDocument(data: BefundberichtData): Document {
     }
   }
 
-  // ── Axis 2 scores ──────────────────────────────────────────────────
+  // ── Axis 2 scores ─────────────────────────────────────────────────
 
   if (data.questionnaireScores && data.questionnaireScores.length > 0) {
     p.push(...sectionHeading("Fragebogeninstrumente (DC/TMD Achse II)"));
@@ -369,43 +248,24 @@ function buildDocument(data: BefundberichtData): Document {
     }
   }
 
-  // ── Clinical examination ───────────────────────────────────────────
+  // ── Clinical examination (section-by-section) ─────────────────────
 
   p.push(...sectionHeading("DC/TMD-Untersuchung"));
 
-  // Measurements (tab-aligned at wider stop)
-  for (const m of measurements) {
-    p.push(tabRow(m.label, m.value, TAB_MEASUREMENT));
-  }
-
-  // Findings as flat text lines (with spacing before if measurements exist)
-  const findingLines = [...symptomLines, ...jointSoundLines];
-  if (findingLines.length > 0) {
-    if (measurements.length > 0) {
-      p.push(spacer());
+  if (examinationSections.length > 0) {
+    for (const section of examinationSections) {
+      p.push(...sectionToParagraphs(section));
     }
-    for (const f of findingLines) {
-      p.push(line(f));
-    }
-  }
-
-  if (measurements.length === 0 && findingLines.length === 0) {
+  } else {
     p.push(
       new Paragraph({
-        children: [
-          new TextRun({
-            text: "Keine klinischen Befunde vorhanden.",
-            font: FONT,
-            size: SIZE,
-            italics: true,
-          }),
-        ],
+        children: [r("Keine Untersuchungsdaten vorhanden.", { italic: true })],
         spacing: { after: 80 },
       })
     );
   }
 
-  // ── Footer ─────────────────────────────────────────────────────────
+  // ── Footer ────────────────────────────────────────────────────────
 
   p.push(spacer());
   p.push(

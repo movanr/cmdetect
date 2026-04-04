@@ -88,6 +88,12 @@ function ReportSubPage() {
     return (validated ?? {}) as FormValues;
   }, [responseData]);
 
+  // Extract completed sections for section-by-section report
+  const completedSections = useMemo((): string[] => {
+    const raw = examResponse?.completed_sections;
+    return Array.isArray(raw) ? raw : [];
+  }, [examResponse]);
+
   const examinationDate = examResponse?.completed_at
     ? formatDate(new Date(examResponse.completed_at))
     : undefined;
@@ -241,6 +247,8 @@ function ReportSubPage() {
         criteriaData,
         confirmedDiagnoses,
         questionnaireScores,
+        examinationData,
+        completedSections: completedSections as import("@cmdetect/dc-tmd").SectionId[],
       },
       filename,
     );
@@ -280,6 +288,8 @@ function ReportSubPage() {
         criteriaData={criteriaData}
         confirmedDiagnoses={confirmedDiagnoses}
         questionnaireScores={questionnaireScores}
+        examinationData={examinationData}
+        completedSections={completedSections as import("@cmdetect/dc-tmd").SectionId[]}
       />
     </>
   );
