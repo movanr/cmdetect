@@ -119,7 +119,7 @@ export function DashboardView({
   );
 
   return (
-    <Card>
+    <Card className="max-w-4xl mx-auto">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Fragebögen-Übersicht</CardTitle>
         {/* Action buttons */}
