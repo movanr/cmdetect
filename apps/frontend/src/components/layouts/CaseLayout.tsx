@@ -307,7 +307,7 @@ export function CaseLayout({
         </aside>
 
         {/* Main content */}
-        <main id="main-scroll-container" className="flex-1 overflow-auto print:overflow-visible">
+        <main id="main-scroll-container" className="flex-1 overflow-auto print:overflow-visible [scrollbar-gutter:stable]">
           <div className="px-4 py-6 xl:px-8 xl:py-8 print:p-0">{children}</div>
         </main>
       </div>

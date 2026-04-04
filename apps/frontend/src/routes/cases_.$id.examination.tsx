@@ -322,7 +322,7 @@ function ExaminationContent({
 
   return (
     <ExaminationViewProvider {...viewContextValue}>
-      <div className="space-y-4 print:space-y-0">
+      <div className="space-y-4 print:space-y-0 max-w-4xl mx-auto">
         {/* Sub-step navigation tabs — only in guided mode */}
         {isGuidedMode && (
           <SubStepTabs

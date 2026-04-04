@@ -82,7 +82,7 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
         </IntroPanel>
 
         {/* Bilateral tables — side by side (single column on small screens) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
         {SIDES.map(({ key: side, label }) => (
           <div key={side} className="space-y-4">
             <h4 className="font-medium">{label}</h4>
