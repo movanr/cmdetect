@@ -35,6 +35,8 @@ import { DiagnosisReference } from "./DiagnosisReference";
 import { DiagnosisTreeView } from "./DiagnosisTreeView";
 import { DiagnosisSelector, type DiagnosisSelection } from "./DiagnosisSelector";
 import { DocumentedDiagnosesList } from "./DocumentedDiagnosesList";
+// @ts-expect-error kept for prototype — findings card is commented out below
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FindingsSummary } from "./FindingsSummary";
 
 /** Myalgia base + subtypes are mutually exclusive at the same location. */
@@ -169,7 +171,7 @@ export function EvaluationView({
   // ── Render ────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {caseId && (
         <div className="flex justify-end">
           <Button asChild>
@@ -231,63 +233,63 @@ export function EvaluationView({
         </CardContent>
       </Card>
 
-      {/* Side by side: diagnosis criteria + findings summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle>Diagnosekriterien</CardTitle>
-            <div className="flex gap-1">
-              <Button
-                variant={criteriaViewMode === "list" ? "default" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setCriteriaViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={criteriaViewMode === "tree" ? "default" : "ghost"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setCriteriaViewMode("tree")}
-              >
-                <Network className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {criteriaViewMode === "list" ? (
-              <DiagnosisReference
-                criteriaData={criteriaData}
-                selectedDiagnosisId={criteriaDiagnosisId}
-                onDiagnosisChange={setCriteriaDiagnosisId}
-              />
-            ) : (
-              <DiagnosisTreeView
-                selectedDiagnosisId={criteriaDiagnosisId}
-              />
-            )}
-            <p className="mt-4 text-[10px] text-muted-foreground/70 leading-relaxed">
-              Quelle: Schiffman E, Ohrbach R, Truelove E, et al. Diagnostic
-              Criteria for Temporomandibular Disorders (DC/TMD) for Clinical and
-              Research Applications. <em>J Oral Facial Pain Headache.</em>{" "}
-              2014;28(1):6–27. doi:10.11607/ofph.1151.{" "}
-              {criteriaViewMode === "list"
-                ? "Diagnostic Criteria Table Version: 23. Oktober 2015."
-                : "Diagnostic Decision Trees Version: 24. Januar 2014."}
-            </p>
-          </CardContent>
-        </Card>
+      {/* Diagnosis criteria — full width */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Diagnosekriterien</CardTitle>
+          <div className="flex gap-1">
+            <Button
+              variant={criteriaViewMode === "list" ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCriteriaViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={criteriaViewMode === "tree" ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCriteriaViewMode("tree")}
+            >
+              <Network className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {criteriaViewMode === "list" ? (
+            <DiagnosisReference
+              criteriaData={criteriaData}
+              selectedDiagnosisId={criteriaDiagnosisId}
+              onDiagnosisChange={setCriteriaDiagnosisId}
+            />
+          ) : (
+            <DiagnosisTreeView
+              selectedDiagnosisId={criteriaDiagnosisId}
+            />
+          )}
+          <p className="mt-4 text-[10px] text-muted-foreground/70 leading-relaxed">
+            Quelle: Schiffman E, Ohrbach R, Truelove E, et al. Diagnostic
+            Criteria for Temporomandibular Disorders (DC/TMD) for Clinical and
+            Research Applications. <em>J Oral Facial Pain Headache.</em>{" "}
+            2014;28(1):6–27. doi:10.11607/ofph.1151.{" "}
+            {criteriaViewMode === "list"
+              ? "Diagnostic Criteria Table Version: 23. Oktober 2015."
+              : "Diagnostic Decision Trees Version: 24. Januar 2014."}
+          </p>
+        </CardContent>
+      </Card>
 
-        <Card className="lg:sticky lg:top-4">
-          <CardHeader>
-            <CardTitle>Befundübersicht</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FindingsSummary criteriaData={criteriaData} alwaysOpen />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Findings summary — hidden for now, prototype for future development
+      <Card>
+        <CardHeader>
+          <CardTitle>Befundübersicht</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FindingsSummary criteriaData={criteriaData} alwaysOpen />
+        </CardContent>
+      </Card>
+      */}
 
       {/* Myalgia conflict confirmation dialog */}
       <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
