@@ -199,6 +199,8 @@ export interface I18nStrings {
   accessControl: {
     accessDenied: string;
     adminPrivilegesRequired: string;
+    clinicalRoleRequired: string;
+    clinicalRoleRequiredCanSwitch: string;
   };
 
   // Create invite page
@@ -503,6 +505,8 @@ export const translations: Record<Language, I18nStrings> = {
     accessControl: {
       accessDenied: "Access Denied",
       adminPrivilegesRequired: "You need administrator privileges to access team management.",
+      clinicalRoleRequired: "Case details are only accessible to the \"Practitioner\" and \"Assistant\" roles.",
+      clinicalRoleRequiredCanSwitch: "Case details are only accessible to the \"Practitioner\" and \"Assistant\" roles. You can switch your role in the menu.",
     },
 
     createInvite: {
@@ -804,6 +808,10 @@ export const translations: Record<Language, I18nStrings> = {
       accessDenied: "Zugriff verweigert",
       adminPrivilegesRequired:
         "Sie benötigen Administratorrechte, um auf die Teamverwaltung zuzugreifen.",
+      clinicalRoleRequired:
+        'Falldetails sind nur mit der Rolle \u201EBehandler\u201C oder \u201EMFA\u201C zugänglich.',
+      clinicalRoleRequiredCanSwitch:
+        'Falldetails sind nur mit der Rolle \u201EBehandler\u201C oder \u201EMFA\u201C zugänglich. Sie können Ihre Rolle im Menü wechseln.',
     },
 
     createInvite: {
