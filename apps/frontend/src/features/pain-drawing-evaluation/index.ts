@@ -38,7 +38,6 @@ export {
 export {
   IMAGE_CONFIGS,
   REGION_ORDER,
-  SEVERITY_SEGMENTS,
   DRAWING_STYLES,
   RISK_INTERPRETATIONS,
 } from "./constants";

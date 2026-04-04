@@ -186,7 +186,7 @@ export const JFLS20_QUESTION_ORDER: JFLS20QuestionId[] = [
  */
 export const JFLS20_METADATA = {
   id: QUESTIONNAIRE_ID.JFLS20,
-  title: "JFLS-20 - Kieferfunktions-Einschränkungsskala",
+  title: "JFLS-20 - Jaw Functional Limitation Scale",
   version: "12/2018",
   source: "Copyright Ohrbach R. Verfügbar unter http://www.rdc-tmdinternational.org",
   timeframe: "1-month",

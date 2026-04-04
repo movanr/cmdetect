@@ -13,20 +13,17 @@ import type {
   OBCAnswers,
   SQAnswers,
 } from "@cmdetect/questionnaires";
-import {
-  isQuestionnaireEnabled,
-  QUESTIONNAIRE_ID,
-} from "@cmdetect/questionnaires";
+import { isQuestionnaireEnabled, QUESTIONNAIRE_ID, QUESTIONNAIRE_TITLES } from "@cmdetect/questionnaires";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import {
-  ScoresOverviewTable,
-  SQAnswersTable,
   GCPSAnswersTable,
-  PHQ4AnswersTable,
-  JFLS8AnswersTable,
   JFLS20AnswersTable,
+  JFLS8AnswersTable,
   OBCAnswersTable,
   PainDrawingDetail,
+  PHQ4AnswersTable,
+  ScoresOverviewTable,
+  SQAnswersTable,
 } from "./questionnaire-tables";
 
 // ─── Types ─────────────────────────────────────────────────────────────
@@ -51,13 +48,9 @@ export function PrintableAnamnesis({
     (r) => r.questionnaireId === QUESTIONNAIRE_ID.PAIN_DRAWING
   );
   const phq4Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
-  const gcps1mResponse = responses.find(
-    (r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M
-  );
+  const gcps1mResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
   const jfls8Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
-  const jfls20Response = responses.find(
-    (r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20
-  );
+  const jfls20Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20);
   const obcResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.OBC);
 
   const painDrawingData = painDrawingResponse?.answers as PainDrawingData | undefined;
@@ -153,7 +146,7 @@ export function PrintableAnamnesis({
       {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && hasAnswers(gcps1mResponse) && (
         <section className="mb-6 print:break-inside-avoid">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            GCS — Graduierung chronischer Schmerzen
+            {QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.GCPS_1M]}
           </h2>
           <GCPSAnswersTable answers={gcps1mResponse?.answers as GCPS1MAnswers} />
         </section>
@@ -163,7 +156,7 @@ export function PrintableAnamnesis({
       {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && hasAnswers(phq4Response) && (
         <section className="mb-6 print:break-inside-avoid">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            PHQ-4 — Depression &amp; Angst
+            {QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.PHQ4]}
           </h2>
           <PHQ4AnswersTable answers={phq4Response?.answers as Record<string, string>} />
         </section>
@@ -173,7 +166,7 @@ export function PrintableAnamnesis({
       {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && hasAnswers(jfls8Response) && (
         <section className="mb-6 print:break-inside-avoid">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            JFLS-8 — Kieferfunktions-Einschränkungsskala
+            {QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.JFLS8]}
           </h2>
           <JFLS8AnswersTable answers={jfls8Response?.answers as JFLS8Answers} />
         </section>
@@ -183,7 +176,7 @@ export function PrintableAnamnesis({
       {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && hasAnswers(obcResponse) && (
         <section className="mb-6">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            OBC — Oral Behaviors Checklist
+            {QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.OBC]}
           </h2>
           <OBCAnswersTable answers={obcResponse?.answers as OBCAnswers} />
         </section>
@@ -193,7 +186,7 @@ export function PrintableAnamnesis({
       {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && hasAnswers(jfls20Response) && (
         <section className="mb-6">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
-            JFLS-20 — Kieferfunktions-Einschränkungsskala (erweitert)
+            {QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.JFLS20]}
           </h2>
           <JFLS20AnswersTable answers={jfls20Response?.answers as JFLS20Answers} />
         </section>

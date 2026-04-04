@@ -1,38 +1,47 @@
 /**
- * Pain Drawing Score Card - Displays pain region count with visual severity scale
- * Used in the dashboard for quick pain assessment before patient review
- * Follows the horizontal 3-column layout for consistent UI
+ * Pain Drawing Score Card — EU MDR compliant: displays region count only,
+ * clinician records their own clinical determination via dropdown.
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ClinicianDetermination } from "@/features/questionnaire-viewer/components/dashboard/ClinicianDetermination";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import { IMAGE_CONFIGS, REGION_ORDER, SEVERITY_SEGMENTS } from "../constants";
+import { IMAGE_CONFIGS, REGION_ORDER } from "../constants";
 import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
 import type { ImageId, PainDrawingData } from "../types";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
 import { RegionThumbnail } from "./RegionThumbnail";
 
+// Pain Drawing: "There is no single method for assessing and interpreting" (DC/TMD scoring manual)
+// → free text only, no dropdown categories
+
 interface PainDrawingScoreCardProps {
   data: PainDrawingData | null;
   title?: string;
-  subtitle?: string;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 /**
- * Dashboard card component for pain drawing evaluation
- * Shows severity scale, region count, and expandable thumbnail grid
+ * Dashboard card component for pain drawing evaluation.
+ * Shows region count, clinician determination, and expandable thumbnail grid.
  */
 export function PainDrawingScoreCard({
   data,
   title = "Schmerzzeichnung",
-  subtitle = "DC/TMD Schmerzgebiete",
+  isExpanded: isExpandedProp,
+  onToggleExpand,
 }: PainDrawingScoreCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpandedLocal, setIsExpandedLocal] = useState(false);
+  const isExpanded = isExpandedProp ?? isExpandedLocal;
+  const toggleExpand = onToggleExpand ?? (() => setIsExpandedLocal(!isExpandedLocal));
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
+  const [freeText, setFreeText] = useState("");
+  const [note, setNote] = useState("");
 
   // Check if data is empty (null, undefined, empty object, or missing drawings)
   const hasData = data && data.drawings && Object.keys(data.drawings).length > 0;
@@ -42,15 +51,9 @@ export function PainDrawingScoreCard({
     return (
       <Card className="bg-muted/30">
         <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
-            <div>
-              <h4 className="font-medium text-sm text-muted-foreground">{title}</h4>
-              {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
-            </div>
-            <div />
-            <div className="text-left">
-              <p className="text-sm text-muted-foreground">Keine Daten</p>
-            </div>
+          <div className="flex items-start justify-between gap-4">
+            <h4 className="font-medium text-sm text-muted-foreground">{title}</h4>
+            <p className="text-sm text-muted-foreground">Keine Daten</p>
           </div>
         </div>
       </Card>
@@ -58,71 +61,33 @@ export function PainDrawingScoreCard({
   }
 
   const score = calculatePainDrawingScore(data);
-  const activeSegmentIndex = Math.min(score.regionCount, 5);
-  const isWidespread = score.patterns.hasWidespreadPain;
 
   return (
     <>
       <Card className="overflow-hidden py-0 gap-0">
-        <div className="p-4 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
-          <div className="grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(250px,2fr)_minmax(150px,1fr)] gap-x-6 gap-y-4 items-center">
-            {/* LEFT: Title + warning */}
+        {/* Header: title + scores */}
+        <div
+          className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
+          onClick={toggleExpand}
+        >
+          <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <h4 className="font-medium text-sm leading-tight">{title}</h4>
-              {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
               <Link
                 to="/docs/scoring-manual"
                 hash="pain-drawing"
-                onClick={(e) => { e.stopPropagation(); sessionStorage.setItem("docs-return-url", window.location.pathname); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sessionStorage.setItem("docs-return-url", window.location.pathname);
+                }}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
               >
                 <BookOpen className="h-3 w-3" />
                 Scoring-Anleitung
               </Link>
-              <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">
-                Jedes markierte Schmerzgebiet erhöht das Risiko für weitere Schmerzerkrankungen sowie für chronische Schmerzen.
-              </p>
-              {isWidespread && (
-                <div className="flex items-center gap-1.5 text-red-600 mt-1.5">
-                  <AlertTriangle className="size-3.5 shrink-0" />
-                  <span className="text-xs font-medium">Schmerz in mehreren Körperbereichen</span>
-                </div>
-              )}
             </div>
-
-            {/* CENTER: Severity scale */}
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground mb-1">Anzahl Schmerzgebiete</p>
-              <div className="relative">
-                <div className="flex h-6 rounded-md overflow-hidden gap-0.5 bg-muted">
-                  {SEVERITY_SEGMENTS.map((segment, index) => {
-                    const isActive = index === activeSegmentIndex;
-                    return (
-                      <div
-                        key={segment.label}
-                        className={`flex-1 ${
-                          isActive
-                            ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                            : "bg-gray-200"
-                        } flex items-center justify-center transition-all`}
-                      >
-                        <span
-                          className={`text-[9px] font-bold ${
-                            isActive ? "text-white drop-shadow-sm" : "text-gray-400"
-                          }`}
-                        >
-                          {segment.label}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT: Region count + expand */}
-            <div className="flex items-start justify-between gap-2 min-w-0">
-              <div>
+            <div className="flex items-start gap-4 shrink-0">
+              <div className="text-right">
                 <div className="text-xl font-bold leading-tight">
                   {score.regionCount}
                   <span className="text-sm text-muted-foreground font-normal">
@@ -137,7 +102,10 @@ export function PainDrawingScoreCard({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleExpand();
+                }}
                 className="text-muted-foreground h-7 px-2 text-xs shrink-0"
               >
                 {isExpanded ? (
@@ -153,6 +121,14 @@ export function PainDrawingScoreCard({
             </div>
           </div>
         </div>
+
+        {/* Clinician determination — free text only (no validated norms) */}
+        <ClinicianDetermination
+          freeText={freeText}
+          onFreeTextChange={setFreeText}
+          note={note}
+          onNoteChange={setNote}
+        />
 
         {/* Expandable details with thumbnail grid */}
         <div

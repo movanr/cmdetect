@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Circle, MoveRight, PenLine } from "lucide-react";
+import { Circle, MoveRight, PenLine } from "lucide-react";
 import { useState } from "react";
-import { IMAGE_CONFIGS, REGION_ORDER, SEVERITY_SEGMENTS } from "../constants";
+import { IMAGE_CONFIGS, REGION_ORDER } from "../constants";
 import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
 import type { ImageId, PainDrawingData } from "../types";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
@@ -14,82 +14,29 @@ interface PainDrawingViewerProps {
 }
 
 /**
- * Full-page viewer component for pain drawing evaluation
- * Shows score summary, tab navigation for regions, and detailed element counts
+ * Full-page viewer component for pain drawing evaluation.
+ * Shows region count, tab navigation for regions, and detailed element counts.
  */
 export function PainDrawingViewer({ data }: PainDrawingViewerProps) {
   const [selectedRegion, setSelectedRegion] = useState<ImageId>("head-right");
   const score = calculatePainDrawingScore(data);
-
-  // Get active segment index for severity scale
-  const activeSegmentIndex = Math.min(score.regionCount, 5);
 
   return (
     <div className="space-y-6">
       {/* Score Summary Card */}
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Schmerzzeichnung - Auswertung</CardTitle>
+          <CardTitle className="text-lg">Schmerzzeichnung</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Severity Scale */}
-          <div>
-            <p className="text-sm text-muted-foreground mb-2">Betroffene Regionen</p>
-            <div className="flex h-8 rounded-md overflow-hidden gap-0.5 bg-muted">
-              {SEVERITY_SEGMENTS.map((segment, index) => {
-                const isActive = index === activeSegmentIndex;
-                return (
-                  <div
-                    key={segment.label}
-                    className={`flex-1 ${
-                      isActive
-                        ? `${segment.color} ring-2 ring-black/60 ring-inset scale-105 z-10 rounded-sm shadow-md`
-                        : "bg-gray-200"
-                    } flex items-center justify-center transition-all`}
-                  >
-                    <span
-                      className={`text-sm font-bold ${
-                        isActive ? "text-white drop-shadow-sm" : "text-gray-400"
-                      }`}
-                    >
-                      {segment.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex mt-1 text-[9px]">
-              {SEVERITY_SEGMENTS.map((segment, index) => (
-                <div
-                  key={segment.label}
-                  className={`flex-1 text-center ${
-                    index === activeSegmentIndex
-                      ? "font-medium text-foreground"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {segment.label}
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Score Display */}
           <div className="flex items-center justify-center py-2">
             <span className="text-3xl font-bold">{score.regionCount}</span>
             <span className="text-xl text-muted-foreground ml-1">/ 5</span>
             <span className="ml-3 text-lg font-medium">
-              {score.regionCount} {score.regionCount === 1 ? "Region" : "Regionen"}
+              {score.regionCount} {score.regionCount === 1 ? "Schmerzgebiet" : "Schmerzgebiete"}
             </span>
           </div>
-
-          {/* Widespread Pain Warning */}
-          {score.patterns.hasWidespreadPain && (
-            <div className="flex items-center justify-center gap-2 text-red-600 bg-red-50 py-2 px-4 rounded-md">
-              <AlertTriangle className="size-5" />
-              <span className="font-medium">Schmerz in mehreren Körperbereichen</span>
-            </div>
-          )}
 
           {/* Affected Regions List */}
           {score.affectedRegions.length > 0 && (

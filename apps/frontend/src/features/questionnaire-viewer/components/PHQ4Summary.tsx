@@ -96,7 +96,7 @@ export function PHQ4Summary({ answers }: PHQ4SummaryProps) {
           {score.total}/{score.maxTotal}
         </span>
         <span className="text-muted-foreground text-sm">
-          Angst {score.anxiety}/{score.maxAnxiety}, Depression{" "}
+          GAD-2 {score.anxiety}/{score.maxAnxiety}, PHQ-2{" "}
           {score.depression}/{score.maxDepression}
         </span>
       </CardFooter>

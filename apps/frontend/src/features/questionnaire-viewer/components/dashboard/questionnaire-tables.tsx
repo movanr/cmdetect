@@ -428,7 +428,7 @@ export function PHQ4AnswersTable({
             {s.total} / {s.maxTotal}
           </td>
           <td className={`${tdMuted} whitespace-nowrap`}>
-            Angst {s.anxiety}/{s.maxAnxiety}, Depr. {s.depression}/{s.maxDepression}
+            GAD-2 {s.anxiety}/{s.maxAnxiety}, PHQ-2 {s.depression}/{s.maxDepression}
           </td>
         </tr>
       </tbody>

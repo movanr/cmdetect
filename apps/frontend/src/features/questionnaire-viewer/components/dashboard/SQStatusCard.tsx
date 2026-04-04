@@ -18,14 +18,12 @@ import { AlertCircle, BookOpen, CheckCircle2, ChevronDown, ChevronUp } from "luc
 import { useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
-import { AnamnesisOverview } from "./AnamnesisOverview";
 import { SQAnswersTable } from "./questionnaire-tables";
 
 interface SQStatusCardProps {
   response: QuestionnaireResponse | undefined;
   /** Whether SQ screening is negative (all screening questions answered "no") */
   isScreeningNegative?: boolean;
-  onStartReview?: () => void;
   isReviewed?: boolean;
 }
 
@@ -49,7 +47,6 @@ function countPendingConfirmations(answers: Record<string, unknown>): number {
 export function SQStatusCard({
   response,
   isScreeningNegative = false,
-  onStartReview,
   isReviewed = false,
 }: SQStatusCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -165,17 +162,6 @@ export function SQStatusCard({
           </Button>
         </div>
       </div>
-
-      {/* Anamnesis overview — always visible */}
-      {!isScreeningNegative && (
-        <div className="px-4 pb-4">
-          <AnamnesisOverview
-            sqAnswers={answers}
-            onStartReview={onStartReview}
-            isReviewed={isReviewed}
-          />
-        </div>
-      )}
 
       {/* Expandable details */}
       <div
