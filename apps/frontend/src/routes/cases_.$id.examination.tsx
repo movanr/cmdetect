@@ -24,7 +24,7 @@ import { useSession } from "@/lib/auth";
 import { formatDate } from "@/lib/date-utils";
 import { roles } from "@cmdetect/config";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Outlet, useBlocker, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useBlocker, useLocation, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -239,17 +239,9 @@ function ExaminationContent({
   // Detect if we're on a guided section route (e1-e10) vs the form sheet index
   const isGuidedMode = /\/e\d+/.test(pathname);
 
-  const navigateToFormSheet = useCallback(() => {
-    navigate({ to: "/cases/$id/examination", params: { id: caseId } });
-  }, [navigate, caseId]);
-
-  const navigateToGuidedMode = useCallback(() => {
-    navigate({ to: "/cases/$id/examination/e1", params: { id: caseId } });
-  }, [navigate, caseId]);
-
   const viewContextValue = useMemo(
-    () => ({ patientName, patientDob, clinicInternalId, examinerName, navigateToGuidedMode }),
-    [patientName, patientDob, clinicInternalId, examinerName, navigateToGuidedMode]
+    () => ({ patientName, patientDob, clinicInternalId, examinerName }),
+    [patientName, patientDob, clinicInternalId, examinerName]
   );
 
   const handleExportPDF = useCallback(() => {
@@ -345,9 +337,11 @@ function ExaminationContent({
         <div className="flex items-center justify-end gap-2 print:hidden">
           {/* Back to form sheet — only in guided mode */}
           {isGuidedMode && (
-            <Button variant="ghost" size="sm" onClick={navigateToFormSheet} className="mr-auto">
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Formularbogen
+            <Button variant="ghost" size="sm" asChild className="mr-auto">
+              <Link to="/cases/$id/examination" params={{ id: caseId }}>
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Formularbogen
+              </Link>
             </Button>
           )}
 
@@ -366,11 +360,10 @@ function ExaminationContent({
             </Button>
 
             {status === "completed" ? (
-              <Button
-                size="sm"
-                onClick={() => navigate({ to: "/cases/$id/evaluation", params: { id: caseId } })}
-              >
-                Zur Auswertung
+              <Button size="sm" asChild>
+                <Link to="/cases/$id/evaluation" params={{ id: caseId }}>
+                  Zur Auswertung
+                </Link>
               </Button>
             ) : (
               <Button variant="outline" size="sm" onClick={() => setShowCompleteDialog(true)}>

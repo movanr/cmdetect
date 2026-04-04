@@ -224,22 +224,20 @@ export function Header() {
 
                 {/* Team - only show for org_admin */}
                 {activeRole === roles.ORG_ADMIN && (
-                  <DropdownMenuItem
-                    onClick={() => navigate({ to: "/team" })}
-                    className="min-h-[44px] py-3"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>{t.nav.team}</span>
+                  <DropdownMenuItem asChild className="min-h-[44px] py-3">
+                    <Link to="/team">
+                      <Users className="h-4 w-4 mr-2" />
+                      <span>{t.nav.team}</span>
+                    </Link>
                   </DropdownMenuItem>
                 )}
 
                 {/* Settings */}
-                <DropdownMenuItem
-                  onClick={() => navigate({ to: "/settings" })}
-                  className="min-h-[44px] py-3"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  <span>{t.nav.settings}</span>
+                <DropdownMenuItem asChild className="min-h-[44px] py-3">
+                  <Link to="/settings">
+                    <Settings className="h-4 w-4 mr-2" />
+                    <span>{t.nav.settings}</span>
+                  </Link>
                 </DropdownMenuItem>
 
                 {/* Role Switcher - only show if user has multiple roles */}

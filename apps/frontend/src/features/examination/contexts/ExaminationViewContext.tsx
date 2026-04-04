@@ -5,7 +5,6 @@ interface ExaminationViewContextValue {
   patientDob?: string;
   clinicInternalId?: string;
   examinerName?: string;
-  navigateToGuidedMode: () => void;
 }
 
 const ExaminationViewContext = createContext<ExaminationViewContextValue | null>(null);

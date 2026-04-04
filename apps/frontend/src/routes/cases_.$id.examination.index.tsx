@@ -6,7 +6,7 @@
  */
 
 import { Button } from "@/components/ui/button";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClipboardList } from "lucide-react";
 import { DCTMDFormSheet, useExaminationPersistenceContext } from "../features/examination";
 import { useExaminationView } from "../features/examination/contexts/ExaminationViewContext";
@@ -16,7 +16,8 @@ export const Route = createFileRoute("/cases_/$id/examination/")({
 });
 
 function ExaminationFormSheetView() {
-  const { patientName, patientDob, clinicInternalId, examinerName, navigateToGuidedMode } = useExaminationView();
+  const { id } = Route.useParams();
+  const { patientName, patientDob, clinicInternalId, examinerName } = useExaminationView();
   const { status } = useExaminationPersistenceContext();
   const isCompleted = status === "completed";
 
@@ -37,9 +38,11 @@ function ExaminationFormSheetView() {
         <Button
           variant={isCompleted ? "outline" : "default"}
           className="shrink-0"
-          onClick={navigateToGuidedMode}
+          asChild
         >
-          {isCompleted ? "Untersuchung erneut öffnen" : "Untersuchung starten"}
+          <Link to="/cases/$id/examination/e1" params={{ id }}>
+            {isCompleted ? "Untersuchung erneut öffnen" : "Untersuchung starten"}
+          </Link>
         </Button>
       </div>
 

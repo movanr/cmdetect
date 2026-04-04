@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,6 @@ const CASE_STATUSES: readonly CaseStatus[] = ["new", "viewed"] as const;
 export function CasesView() {
   const { data: submissions, isLoading } = useSubmissions();
   const t = getTranslations();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeRole } = useRole();
   const isReceptionist = activeRole === roles.RECEPTIONIST;
@@ -59,10 +58,6 @@ export function CasesView() {
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<CaseStatus | "all">("all");
-
-  const handleRowClick = (record: PatientRecord) => {
-    navigate({ to: "/cases/$id", params: { id: record.id } });
-  };
 
   // Decrypt patient data when submissions load
   useEffect(() => {
@@ -114,6 +109,7 @@ export function CasesView() {
       key: "new_indicator" as keyof PatientRecord,
       header: "",
       width: "3%",
+      disableLink: true,
       render: (_: unknown, record: PatientRecord) => {
         if (record.is_demo && getCaseStatus(record) !== "new") {
           return (
@@ -121,10 +117,7 @@ export function CasesView() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetMutation.mutate(record.id);
-                    }}
+                    onClick={() => resetMutation.mutate(record.id)}
                     disabled={resetMutation.isPending}
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
@@ -338,7 +331,7 @@ export function CasesView() {
         <DataTable
           data={filteredSubmissions}
           columns={columns}
-          onRowClick={isReceptionist ? undefined : handleRowClick}
+          rowLink={isReceptionist ? undefined : (record) => ({ to: "/cases/$id", params: { id: record.id } })}
         />
       )}
     </div>

@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { ClipboardList, ArrowLeft } from "lucide-react";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuestionnaireResponses, SQWizardView } from "../features/questionnaire-viewer";
 
 export const Route = createFileRoute("/cases_/$id/anamnesis/wizard")({
@@ -56,12 +56,11 @@ function AnamnesisWizardPage() {
             description="Der Patient hat den Symptomfragebogen noch nicht ausgefüllt."
           />
           <div className="flex justify-center mt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate({ to: "/cases/$id/anamnesis/review", params: { id } })}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Zurück zur Übersicht
+            <Button variant="outline" asChild>
+              <Link to="/cases/$id/anamnesis/review" params={{ id }}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Zurück zur Übersicht
+              </Link>
             </Button>
           </div>
         </CardContent>

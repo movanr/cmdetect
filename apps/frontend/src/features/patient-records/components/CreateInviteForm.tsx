@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useCreatePatientRecord } from "@/features/patient-records";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "@/config/i18n";
@@ -63,10 +63,6 @@ export function CreateInviteForm() {
     }
   };
 
-  const handleCancel = () => {
-    navigate({ to: "/invites" });
-  };
-
   if (inviteUrl) {
     return (
       <div className="max-w-2xl space-y-6">
@@ -115,8 +111,8 @@ export function CreateInviteForm() {
         </div>
 
         <div className="flex gap-3">
-          <Button onClick={() => navigate({ to: "/invites" })}>
-            {t.createInvite.backToInvites}
+          <Button asChild>
+            <Link to="/invites">{t.createInvite.backToInvites}</Link>
           </Button>
           <Button
             variant="outline"
@@ -178,13 +174,8 @@ export function CreateInviteForm() {
           <Button type="submit" disabled={createMutation.isPending}>
             {createMutation.isPending ? t.createInvite.creating : t.createInvite.createButton}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={createMutation.isPending}
-          >
-            {t.createInvite.cancel}
+          <Button variant="outline" asChild>
+            <Link to="/invites">{t.createInvite.cancel}</Link>
           </Button>
         </div>
       </form>
