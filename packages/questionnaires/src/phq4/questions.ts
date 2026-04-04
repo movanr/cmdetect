@@ -50,7 +50,7 @@ export const PHQ4_QUESTION_ORDER: PHQ4QuestionId[] = [
  */
 export const PHQ4_METADATA = {
   id: QUESTIONNAIRE_ID.PHQ4,
-  title: "PHQ-4 Gesundheitsfragebogen",
+  title: "PHQ-4 Patient Health Questionnaire-4",
   version: "1.0",
   instruction:
     "Wie oft fühlten Sie sich im Verlauf der letzten 2 Wochen durch die folgenden Beschwerden beeinträchtigt?",

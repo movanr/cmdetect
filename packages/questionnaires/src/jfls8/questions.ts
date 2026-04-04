@@ -90,7 +90,7 @@ export const JFLS8_QUESTION_ORDER: JFLS8QuestionId[] = [
  */
 export const JFLS8_METADATA = {
   id: QUESTIONNAIRE_ID.JFLS8,
-  title: "JFLS-8 - Kieferfunktions-Einschränkungsskala",
+  title: "JFLS-8 - Jaw Functional Limitation Scale",
   version: "12/2018",
   source: "Copyright Ohrbach R. Verfügbar unter http://www.rdc-tmdinternational.org",
   timeframe: "1-month",
