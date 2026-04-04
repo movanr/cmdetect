@@ -12,8 +12,10 @@ import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { SQAnswers } from "@cmdetect/questionnaires";
 import { isQuestionnaireEnabled, QUESTIONNAIRE_ID, QUESTIONNAIRE_TITLES } from "@cmdetect/questionnaires";
 import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
+import { useState } from "react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
+import { AnamnesisOverview } from "./AnamnesisOverview";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import { DashboardInfoBlock } from "./DashboardInfoBlock";
 import { SQStatusCard } from "./SQStatusCard";
@@ -38,6 +40,8 @@ export function DashboardView({
   caseId,
 }: DashboardViewProps) {
   const { print, isPrinting } = useBackgroundPrint();
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const toggleCard = (id: string) => setExpandedCard((prev) => (prev === id ? null : id));
 
   // Find specific questionnaire responses
   const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
@@ -171,9 +175,17 @@ export function DashboardView({
             <SQStatusCard
               response={sqResponse}
               isScreeningNegative={isScreeningNegative}
-              onStartReview={onStartReview}
               isReviewed={isReviewed}
             />
+            {sqResponse && !isScreeningNegative && (
+              <div className="mt-3">
+                <AnamnesisOverview
+                  sqAnswers={sqResponse.answers}
+                  onStartReview={onStartReview}
+                  isReviewed={isReviewed}
+                />
+              </div>
+            )}
           </section>
         )}
 
@@ -185,7 +197,11 @@ export function DashboardView({
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
           <div className="space-y-3">
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
-              <PainDrawingScoreCard data={painDrawingData ?? null} />
+              <PainDrawingScoreCard
+                data={painDrawingData ?? null}
+                isExpanded={expandedCard === QUESTIONNAIRE_ID.PAIN_DRAWING}
+                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.PAIN_DRAWING)}
+              />
             )}
 
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && (
@@ -197,6 +213,8 @@ export function DashboardView({
                     ? (gcps1mResponse.answers as Record<string, string | number>)
                     : null
                 }
+                isExpanded={expandedCard === QUESTIONNAIRE_ID.GCPS_1M}
+                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.GCPS_1M)}
               />
             )}
 
@@ -205,6 +223,8 @@ export function DashboardView({
                 questionnaireId={QUESTIONNAIRE_ID.JFLS8}
                 title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.JFLS8]}
                 answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
+                isExpanded={expandedCard === QUESTIONNAIRE_ID.JFLS8}
+                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.JFLS8)}
               />
             )}
 
@@ -213,6 +233,8 @@ export function DashboardView({
                 questionnaireId={QUESTIONNAIRE_ID.PHQ4}
                 title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.PHQ4]}
                 answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
+                isExpanded={expandedCard === QUESTIONNAIRE_ID.PHQ4}
+                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.PHQ4)}
               />
             )}
 
@@ -221,6 +243,8 @@ export function DashboardView({
                 questionnaireId={QUESTIONNAIRE_ID.OBC}
                 title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.OBC]}
                 answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
+                isExpanded={expandedCard === QUESTIONNAIRE_ID.OBC}
+                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.OBC)}
               />
             )}
 
@@ -229,6 +253,8 @@ export function DashboardView({
                 questionnaireId={QUESTIONNAIRE_ID.JFLS20}
                 title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.JFLS20]}
                 answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
+                isExpanded={expandedCard === QUESTIONNAIRE_ID.JFLS20}
+                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.JFLS20)}
               />
             )}
           </div>

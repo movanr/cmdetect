@@ -66,6 +66,8 @@ interface ScoreCardLayoutProps {
   /** Omit for free-text-only mode (instruments without validated norms) */
   determinationOptions?: DeterminationOption[];
   expandedContent: React.ReactNode;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 /**
@@ -77,8 +79,12 @@ function ScoreCardLayout({
   scoreDisplay,
   determinationOptions,
   expandedContent,
+  isExpanded: isExpandedProp,
+  onToggleExpand,
 }: ScoreCardLayoutProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpandedLocal, setIsExpandedLocal] = useState(false);
+  const isExpanded = isExpandedProp ?? isExpandedLocal;
+  const toggleExpand = onToggleExpand ?? (() => setIsExpandedLocal(!isExpandedLocal));
   const [determination, setDetermination] = useState("");
   const [freeText, setFreeText] = useState("");
   const [note, setNote] = useState("");
@@ -88,7 +94,7 @@ function ScoreCardLayout({
       {/* Header: title + scores */}
       <div
         className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={toggleExpand}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -115,7 +121,7 @@ function ScoreCardLayout({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsExpanded(!isExpanded);
+                toggleExpand();
               }}
               className="text-muted-foreground h-7 px-2 text-xs shrink-0"
             >
@@ -187,17 +193,24 @@ function JFLS20SubscaleDisplay({
 
 // ─── Individual score card renderers ────────────────────────────────────
 
-function PHQ4ScoreCard({ title, manualAnchor, score, answers }: {
+interface ExpandProps {
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+}
+
+function PHQ4ScoreCard({ title, manualAnchor, score, answers, isExpanded, onToggleExpand }: {
   title: string;
   manualAnchor?: string;
   score: PHQ4Score;
   answers: Record<string, string>;
-}) {
+} & ExpandProps) {
   return (
     <ScoreCardLayout
       title={title}
       manualAnchor={manualAnchor}
       determinationOptions={PHQ4_DETERMINATION_OPTIONS}
+      isExpanded={isExpanded}
+      onToggleExpand={onToggleExpand}
       scoreDisplay={
         <div className="text-right">
           <div className="text-xl font-bold leading-tight">
@@ -221,11 +234,11 @@ function PHQ4ScoreCard({ title, manualAnchor, score, answers }: {
   );
 }
 
-function GCPSScoreCard({ title, manualAnchor, answers }: {
+function GCPSScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
   title: string;
   manualAnchor?: string;
   answers: GCPS1MAnswers;
-}) {
+} & ExpandProps) {
   const gcpsScore = calculateGCPS1MScore(answers);
 
   return (
@@ -233,6 +246,8 @@ function GCPSScoreCard({ title, manualAnchor, answers }: {
       title={title}
       manualAnchor={manualAnchor}
       determinationOptions={GCPS_DETERMINATION_OPTIONS}
+      isExpanded={isExpanded}
+      onToggleExpand={onToggleExpand}
       scoreDisplay={
         <div className="text-right">
           <div className="flex gap-4">
@@ -302,17 +317,19 @@ function GCPSScoreCard({ title, manualAnchor, answers }: {
   );
 }
 
-function JFLS8ScoreCard({ title, manualAnchor, answers }: {
+function JFLS8ScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
   title: string;
   manualAnchor?: string;
   answers: JFLS8Answers;
-}) {
+} & ExpandProps) {
   const jflsScore = calculateJFLS8Score(answers);
 
   return (
     <ScoreCardLayout
       title={title}
       manualAnchor={manualAnchor}
+      isExpanded={isExpanded}
+      onToggleExpand={onToggleExpand}
       scoreDisplay={
         <div className="text-right">
           {jflsScore.isValid && jflsScore.globalScore !== null ? (
@@ -335,17 +352,19 @@ function JFLS8ScoreCard({ title, manualAnchor, answers }: {
   );
 }
 
-function JFLS20ScoreCard({ title, manualAnchor, answers }: {
+function JFLS20ScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
   title: string;
   manualAnchor?: string;
   answers: JFLS20Answers;
-}) {
+} & ExpandProps) {
   const jflsScore = calculateJFLS20Score(answers);
 
   return (
     <ScoreCardLayout
       title={title}
       manualAnchor={manualAnchor}
+      isExpanded={isExpanded}
+      onToggleExpand={onToggleExpand}
       scoreDisplay={
         <div className="text-right">
           {jflsScore.isValid && jflsScore.globalScore !== null ? (
@@ -384,17 +403,19 @@ function JFLS20ScoreCard({ title, manualAnchor, answers }: {
   );
 }
 
-function OBCScoreCard({ title, manualAnchor, answers }: {
+function OBCScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
   title: string;
   manualAnchor?: string;
   answers: OBCAnswers;
-}) {
+} & ExpandProps) {
   const obcScore = calculateOBCScore(answers);
 
   return (
     <ScoreCardLayout
       title={title}
       manualAnchor={manualAnchor}
+      isExpanded={isExpanded}
+      onToggleExpand={onToggleExpand}
       scoreDisplay={
         <div className="text-right">
           <div className="text-xl font-bold leading-tight">
@@ -417,6 +438,8 @@ interface Axis2ScoreCardProps {
   title: string;
   answers: Record<string, string | number> | null;
   isPlaceholder?: boolean;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 export function Axis2ScoreCard({
@@ -424,6 +447,8 @@ export function Axis2ScoreCard({
   title,
   answers,
   isPlaceholder = false,
+  isExpanded,
+  onToggleExpand,
 }: Axis2ScoreCardProps) {
   const manualAnchor = SCORING_MANUAL_ANCHORS[questionnaireId];
 
@@ -454,6 +479,8 @@ export function Axis2ScoreCard({
         manualAnchor={manualAnchor}
         score={score}
         answers={answers as Record<string, string>}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
       />
     );
   }
@@ -464,6 +491,8 @@ export function Axis2ScoreCard({
         title={title}
         manualAnchor={manualAnchor}
         answers={answers as GCPS1MAnswers}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
       />
     );
   }
@@ -474,6 +503,8 @@ export function Axis2ScoreCard({
         title={title}
         manualAnchor={manualAnchor}
         answers={answers as JFLS8Answers}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
       />
     );
   }
@@ -484,6 +515,8 @@ export function Axis2ScoreCard({
         title={title}
         manualAnchor={manualAnchor}
         answers={answers as JFLS20Answers}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
       />
     );
   }
@@ -494,6 +527,8 @@ export function Axis2ScoreCard({
         title={title}
         manualAnchor={manualAnchor}
         answers={answers as OBCAnswers}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
       />
     );
   }

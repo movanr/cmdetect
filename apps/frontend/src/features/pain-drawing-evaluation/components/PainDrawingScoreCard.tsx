@@ -22,6 +22,8 @@ import { RegionThumbnail } from "./RegionThumbnail";
 interface PainDrawingScoreCardProps {
   data: PainDrawingData | null;
   title?: string;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 /**
@@ -31,8 +33,12 @@ interface PainDrawingScoreCardProps {
 export function PainDrawingScoreCard({
   data,
   title = "Schmerzzeichnung",
+  isExpanded: isExpandedProp,
+  onToggleExpand,
 }: PainDrawingScoreCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpandedLocal, setIsExpandedLocal] = useState(false);
+  const isExpanded = isExpandedProp ?? isExpandedLocal;
+  const toggleExpand = onToggleExpand ?? (() => setIsExpandedLocal(!isExpandedLocal));
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
   const [freeText, setFreeText] = useState("");
   const [note, setNote] = useState("");
@@ -62,7 +68,7 @@ export function PainDrawingScoreCard({
         {/* Header: title + scores */}
         <div
           className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={toggleExpand}
         >
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -98,7 +104,7 @@ export function PainDrawingScoreCard({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsExpanded(!isExpanded);
+                  toggleExpand();
                 }}
                 className="text-muted-foreground h-7 px-2 text-xs shrink-0"
               >
