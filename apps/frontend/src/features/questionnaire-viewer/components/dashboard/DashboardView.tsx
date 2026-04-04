@@ -191,8 +191,7 @@ export function DashboardView({
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && (
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.GCPS_1M}
-                title="GCS - Graduierung chronischer Schmerzen"
-                subtitle="30-Tage-Version"
+                title="GCPS-1M"
                 answers={
                   gcps1mResponse
                     ? (gcps1mResponse.answers as Record<string, string | number>)
@@ -204,7 +203,7 @@ export function DashboardView({
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && (
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.JFLS8}
-                title="JFLS-8 - Kieferfunktions-Einschränkungsskala"
+                title="JFLS-8"
                 answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
               />
             )}
@@ -212,8 +211,7 @@ export function DashboardView({
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && (
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.PHQ4}
-                title="PHQ-4 - Gesundheitsfragebogen für Patienten"
-                subtitle="Depression & Angst"
+                title="PHQ-4"
                 answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
               />
             )}
@@ -221,8 +219,7 @@ export function DashboardView({
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && (
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.OBC}
-                title="OBC - Oral Behaviors Checklist"
-                subtitle="Orale Parafunktionen"
+                title="OBC"
                 answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
               />
             )}
@@ -230,7 +227,7 @@ export function DashboardView({
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && (
               <Axis2ScoreCard
                 questionnaireId={QUESTIONNAIRE_ID.JFLS20}
-                title="JFLS-20 - Kieferfunktions-Einschränkungsskala (erweitert)"
+                title="JFLS-20"
                 answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
               />
             )}
