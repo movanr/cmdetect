@@ -216,11 +216,9 @@ export function useExaminationPersistence({
     cancelDebounce();
 
     const formValues = formRef.current.getValues();
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const lastSectionId = SECTION_IDS.at(-1)!;
-    const finalCompletedSections = completedSections.includes(lastSectionId)
-      ? completedSections
-      : [...completedSections, lastSectionId];
+    // Mark all sections as completed — covers both guided mode (sections accumulated
+    // one-by-one) and form sheet mode (no individual saveSection calls).
+    const finalCompletedSections = [...SECTION_IDS];
 
     // Upsert with all data first
     const upsertResult = await upsertMutation.mutateAsync({
@@ -248,7 +246,6 @@ export function useExaminationPersistence({
     completedSectionsRef.current = finalCompletedSections;
     hasUnsavedBackendChangesRef.current = false;
   }, [
-    completedSections,
     upsertMutation,
     completeMutation,
     patientRecordId,
