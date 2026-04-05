@@ -103,7 +103,7 @@ export function DashboardView({
     <div className="flex justify-end gap-2 pt-2 border-t">
       {isReviewed ? (
         <>
-          <Button variant="outline" onClick={onStartReview}>
+          <Button variant="outline" onClick={onStartReview} title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen.">
             Erneut überprüfen
           </Button>
           {onContinueToExamination && (
@@ -114,7 +114,7 @@ export function DashboardView({
           )}
         </>
       ) : (
-        <Button onClick={onStartReview}>
+        <Button onClick={onStartReview} title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen.">
           SF mit Patient überprüfen
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -143,7 +143,7 @@ export function DashboardView({
           {showNextStepButton &&
             (isReviewed ? (
               <>
-                <Button variant="outline" onClick={onStartReview}>
+                <Button variant="outline" onClick={onStartReview} title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen.">
                   Erneut überprüfen
                 </Button>
                 {onContinueToExamination && (
@@ -154,7 +154,7 @@ export function DashboardView({
                 )}
               </>
             ) : (
-              <Button onClick={onStartReview}>
+              <Button onClick={onStartReview} title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen.">
                 SF mit Patient überprüfen
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -179,11 +179,7 @@ export function DashboardView({
             />
             {sqResponse && !isScreeningNegative && (
               <div className="mt-3">
-                <AnamnesisOverview
-                  sqAnswers={sqResponse.answers}
-                  onStartReview={onStartReview}
-                  isReviewed={isReviewed}
-                />
+                <AnamnesisOverview sqAnswers={sqResponse.answers} />
               </div>
             )}
           </section>

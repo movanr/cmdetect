@@ -13,9 +13,7 @@
  */
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ClipboardCheck } from "lucide-react";
 import { SQ_PAIN_FREQUENCY_LABELS } from "@cmdetect/questionnaires";
 import { Check, X } from "lucide-react";
 
@@ -23,8 +21,6 @@ import { Check, X } from "lucide-react";
 
 interface AnamnesisOverviewProps {
   sqAnswers: Record<string, unknown>;
-  onStartReview?: () => void;
-  isReviewed?: boolean;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────
@@ -345,7 +341,7 @@ function KiefersperreDomain({ sqAnswers }: { sqAnswers: Record<string, unknown> 
 
 // ─── Main component ─────────────────────────────────────────────────────
 
-export function AnamnesisOverview({ sqAnswers, onStartReview, isReviewed }: AnamnesisOverviewProps) {
+export function AnamnesisOverview({ sqAnswers }: AnamnesisOverviewProps) {
   return (
     <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       <SchmerzDomain sqAnswers={sqAnswers} />
@@ -353,33 +349,6 @@ export function AnamnesisOverview({ sqAnswers, onStartReview, isReviewed }: Anam
       <GelenkgeraeuscheDomain sqAnswers={sqAnswers} />
       <KieferklemmeDomain sqAnswers={sqAnswers} />
       <KiefersperreDomain sqAnswers={sqAnswers} />
-
-      {onStartReview && (
-        <div className="rounded-lg border border-dashed p-3 flex flex-col justify-between gap-3">
-          <div className="flex items-start gap-2">
-            <ClipboardCheck className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">
-                {isReviewed ? "Erneut überprüfen" : "SF überprüfen"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {isReviewed
-                  ? "Antworten gemeinsam mit dem Patienten nochmals durchgehen und Lokalisationen aktualisieren."
-                  : "Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."}
-              </p>
-            </div>
-          </div>
-          <Button
-            onClick={onStartReview}
-            variant={isReviewed ? "outline" : "default"}
-            size="sm"
-            className="w-full"
-          >
-            {isReviewed ? "Erneut überprüfen" : "SF mit Patient überprüfen"}
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
