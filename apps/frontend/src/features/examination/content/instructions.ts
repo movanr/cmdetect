@@ -6,8 +6,13 @@
  * Patient scripts are quotable prompts for communication.
  */
 
-import { E8_LOCKING_TYPE_DESCRIPTIONS, E8_LOCKING_TYPE_LABELS, MOVEMENT_TYPE_LABELS, OPENING_TYPE_LABELS } from "@cmdetect/dc-tmd";
 import type { PalpationMode } from "@cmdetect/dc-tmd";
+import {
+  E8_LOCKING_TYPE_DESCRIPTIONS,
+  E8_LOCKING_TYPE_LABELS,
+  MOVEMENT_TYPE_LABELS,
+  OPENING_TYPE_LABELS,
+} from "@cmdetect/dc-tmd";
 import type {
   ProcedureFlowStep,
   RichMeasurementInstruction,
@@ -58,8 +63,7 @@ const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
     id: "confirm",
     label: "Bestätigung",
-    examinerInstruction:
-      "Bereich berühren und anatomische Struktur identifizieren",
+    examinerInstruction: "Bereich berühren und anatomische Struktur identifizieren",
     figureRef: "3",
     appAction: "Region im Diagramm wählen",
   },
@@ -68,8 +72,7 @@ const E4B_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     label: "Bekannter Schmerz",
     patientScript:
       "Ist dieser Schmerz Ihnen bekannt von Schmerzen, die Sie in diesem Bereich in den letzten 30 Tagen erfahren haben?",
-    examinerInstruction:
-      `Bei Temporalis-Lokalisation zusätzlich: „Ist dieser Schmerz Ihnen bekannt von Kopfschmerzen, die Sie in diesem Bereich in den letzten 30 Tagen hatten?"`,
+    examinerInstruction: `Bei Temporalis-Lokalisation zusätzlich: „Ist dieser Schmerz Ihnen bekannt von Kopfschmerzen, die Sie in diesem Bereich in den letzten 30 Tagen hatten?"`,
     appAction: "Schmerztypen eingeben",
   },
   {
@@ -107,8 +110,7 @@ const E4C_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
   {
     id: "confirm",
     label: "Bestätigung",
-    examinerInstruction:
-      "Bereich berühren und anatomische Struktur identifizieren",
+    examinerInstruction: "Bereich berühren und anatomische Struktur identifizieren",
     figureRef: "3",
     appAction: "Region im Diagramm wählen",
   },
@@ -117,8 +119,7 @@ const E4C_PAIN_INTERVIEW_FLOW: ProcedureFlowStep[] = [
     label: "Bekannter Schmerz",
     patientScript:
       "Ist dieser Schmerz Ihnen bekannt von Schmerzen, die Sie in diesem Bereich in den letzten 30 Tagen erfahren haben?",
-    examinerInstruction:
-      `Bei Temporalis-Lokalisation zusätzlich: „Ist dieser Schmerz Ihnen bekannt von Kopfschmerzen, die Sie in diesem Bereich in den letzten 30 Tagen hatten?"`,
+    examinerInstruction: `Bei Temporalis-Lokalisation zusätzlich: „Ist dieser Schmerz Ihnen bekannt von Kopfschmerzen, die Sie in diesem Bereich in den letzten 30 Tagen hatten?"`,
     appAction: "Schmerztypen eingeben",
   },
   {
@@ -329,7 +330,11 @@ export const E4_RICH_INSTRUCTIONS = {
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
       { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
-      { section: "e4", anchor: "4b-maximale-nicht-unterstutzte-offnung", label: "5.4 U4B Max. nicht-unterstützte Öffnung" },
+      {
+        section: "e4",
+        anchor: "4b-maximale-nicht-unterstutzte-offnung",
+        label: "5.4 U4B Max. nicht-unterstützte Öffnung",
+      },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
@@ -343,7 +348,11 @@ export const E4_RICH_INSTRUCTIONS = {
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
       { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
-      { section: "e4", anchor: "4c-maximale-unterstutzte-offnung", label: "5.4 U4C Max. unterstützte Öffnung" },
+      {
+        section: "e4",
+        anchor: "4c-maximale-unterstutzte-offnung",
+        label: "5.4 U4C Max. unterstützte Öffnung",
+      },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichMeasurementInstruction,
@@ -357,7 +366,11 @@ export const E4_RICH_INSTRUCTIONS = {
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
       { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
-      { section: "e4", anchor: "u4b-schmerz-nach-maximaler-nicht-unterstutzter-offnung", label: "5.4 Schmerzbefragung U4B" },
+      {
+        section: "e4",
+        anchor: "u4b-schmerz-nach-maximaler-nicht-unterstutzter-offnung",
+        label: "5.4 Schmerzbefragung U4B",
+      },
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
       { section: "section8", anchor: "82", label: "8.2 Untersuchungsbezogene Schmerzbefragung" },
     ],
@@ -373,7 +386,11 @@ export const E4_RICH_INSTRUCTIONS = {
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
       { section: "section4", anchor: "u4-offnungsbewegungen", label: "4.5 U4 Öffnungsbewegungen" },
-      { section: "e4", anchor: "u4c-schmerz-nach-maximaler-unterstutzter-offnung", label: "5.4 Schmerzbefragung U4C" },
+      {
+        section: "e4",
+        anchor: "u4c-schmerz-nach-maximaler-unterstutzter-offnung",
+        label: "5.4 Schmerzbefragung U4C",
+      },
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
       { section: "section8", anchor: "82", label: "8.2 Untersuchungsbezogene Schmerzbefragung" },
     ],
@@ -431,8 +448,7 @@ const E5A_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     label: "Halten",
     patientScript:
       "Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe.",
-    examinerInstruction:
-      "Lineal an UK-Mittellinie anlegen und Distanz zur OK-Mittellinie messen.",
+    examinerInstruction: "Lineal an UK-Mittellinie anlegen und Distanz zur OK-Mittellinie messen.",
   },
   {
     id: "measure",
@@ -458,8 +474,7 @@ const E5B_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     label: "Halten",
     patientScript:
       "Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe.",
-    examinerInstruction:
-      "Lineal an UK-Mittellinie anlegen und Distanz zur OK-Mittellinie messen.",
+    examinerInstruction: "Lineal an UK-Mittellinie anlegen und Distanz zur OK-Mittellinie messen.",
   },
   {
     id: "measure",
@@ -485,8 +500,7 @@ const E5C_MEASUREMENT_FLOW: ProcedureFlowStep[] = [
     label: "Halten",
     patientScript:
       "Halten Sie Ihren Kiefer in dieser Position, bis ich eine Messung vorgenommen habe.",
-    examinerInstruction:
-      "Labialfläche OK-Referenzzahn zu Labialfläche UK-Referenzzahn messen.",
+    examinerInstruction: "Labialfläche OK-Referenzzahn zu Labialfläche UK-Referenzzahn messen.",
   },
   {
     id: "measure",
@@ -514,7 +528,11 @@ export const E5_RICH_INSTRUCTIONS = {
     protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
       { section: "section2", anchor: "211", label: "2.11 Schmerzbefragung" },
-      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      {
+        section: "section4",
+        anchor: "u5-laterotrusionsbewegungen-und-protrusion",
+        label: "4.5 U5 Laterotrusionsbewegungen",
+      },
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
     ],
   } satisfies RichMeasurementInstruction,
@@ -526,7 +544,11 @@ export const E5_RICH_INSTRUCTIONS = {
     flow: E5A_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
-      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      {
+        section: "section4",
+        anchor: "u5-laterotrusionsbewegungen-und-protrusion",
+        label: "4.5 U5 Laterotrusionsbewegungen",
+      },
       { section: "e5", anchor: "5a-laterotrusion-rechts", label: "5.5 U5A Laterotrusion rechts" },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
@@ -539,7 +561,11 @@ export const E5_RICH_INSTRUCTIONS = {
     flow: E5B_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
-      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      {
+        section: "section4",
+        anchor: "u5-laterotrusionsbewegungen-und-protrusion",
+        label: "4.5 U5 Laterotrusionsbewegungen",
+      },
       { section: "e5", anchor: "5b-laterotrusion-links", label: "5.5 U5B Laterotrusion links" },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
@@ -552,7 +578,11 @@ export const E5_RICH_INSTRUCTIONS = {
     flow: E5C_MEASUREMENT_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "25", label: "2.5 Messungen und Bewegungen" },
-      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      {
+        section: "section4",
+        anchor: "u5-laterotrusionsbewegungen-und-protrusion",
+        label: "4.5 U5 Laterotrusionsbewegungen",
+      },
       { section: "e5", anchor: "5c-protrusion", label: "5.5 U5C Protrusion" },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
@@ -566,7 +596,11 @@ export const E5_RICH_INSTRUCTIONS = {
     protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
       { section: "section2", anchor: "29", label: "2.9 Bekannter Schmerz" },
-      { section: "section4", anchor: "u5-laterotrusionsbewegungen-und-protrusion", label: "4.5 U5 Laterotrusionsbewegungen" },
+      {
+        section: "section4",
+        anchor: "u5-laterotrusionsbewegungen-und-protrusion",
+        label: "4.5 U5 Laterotrusionsbewegungen",
+      },
       { section: "section6", anchor: "62", label: "6.2 Strukturierte Schmerzbefragung" },
       { section: "section8", anchor: "82", label: "8.2 Untersuchungsbezogene Schmerzbefragung" },
     ],
@@ -652,16 +686,14 @@ const E1A_PAIN_LOCATION_FLOW: ProcedureFlowStep[] = [
   {
     id: "confirm",
     label: "Bestätigung",
-    examinerInstruction:
-      'Betroffene Bereiche berühren zur Bestätigung, „hier?" fragen',
+    examinerInstruction: 'Betroffene Bereiche berühren zur Bestätigung, „hier?" fragen',
     figureRef: "3",
     appAction: "Region im Diagramm wählen",
   },
   {
     id: "more",
     label: "Weitere Bereiche?",
-    patientScript:
-      "Gibt es noch weitere Bereiche, in denen Sie Schmerzen hatten?",
+    patientScript: "Gibt es noch weitere Bereiche, in denen Sie Schmerzen hatten?",
   },
 ];
 
@@ -685,15 +717,13 @@ const E1B_HEADACHE_LOCATION_FLOW: ProcedureFlowStep[] = [
   {
     id: "confirm",
     label: "Bestätigung",
-    examinerInstruction:
-      'Betroffene Bereiche berühren zur Bestätigung, „hier?" fragen',
+    examinerInstruction: 'Betroffene Bereiche berühren zur Bestätigung, „hier?" fragen',
     appAction: "Temporalis-Region im Diagramm wählen",
   },
   {
     id: "more",
     label: "Weitere Bereiche?",
-    patientScript:
-      "Gibt es noch weitere Bereiche, in denen Sie Kopfschmerzen hatten?",
+    patientScript: "Gibt es noch weitere Bereiche, in denen Sie Kopfschmerzen hatten?",
   },
 ];
 
@@ -728,8 +758,16 @@ export const E1_RICH_INSTRUCTIONS = {
     flow: E1A_PAIN_LOCATION_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "26", label: "2.6 Klassifikation anatomischer Strukturen" },
-      { section: "section4", anchor: "u1-untersucherbestatigung-der-schmerz-und-kopfschmerzlokalisationen", label: "4.5 U1 Schmerzlokalisation" },
-      { section: "e1", anchor: "lokalisation-von-schmerzen-innerhalb-den-letzten-30-tagen", label: "5.3 U1A Schmerzlokalisation" },
+      {
+        section: "section4",
+        anchor: "u1-untersucherbestatigung-der-schmerz-und-kopfschmerzlokalisationen",
+        label: "4.5 U1 Schmerzlokalisation",
+      },
+      {
+        section: "e1",
+        anchor: "lokalisation-von-schmerzen-innerhalb-den-letzten-30-tagen",
+        label: "5.3 U1A Schmerzlokalisation",
+      },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichPainInterviewInstruction,
@@ -740,8 +778,16 @@ export const E1_RICH_INSTRUCTIONS = {
     prompt: "Hatten Sie während der letzten 30 Tage Kopfschmerzen?",
     flow: E1B_HEADACHE_LOCATION_FLOW,
     protocolRefs: [
-      { section: "section4", anchor: "u1-untersucherbestatigung-der-schmerz-und-kopfschmerzlokalisationen", label: "4.5 U1 Schmerzlokalisation" },
-      { section: "e1", anchor: "u1b-kopfschmerzlokalisation-wahrend-der-letzten-30-tage", label: "5.3 U1B Kopfschmerzlokalisation" },
+      {
+        section: "section4",
+        anchor: "u1-untersucherbestatigung-der-schmerz-und-kopfschmerzlokalisationen",
+        label: "4.5 U1 Schmerzlokalisation",
+      },
+      {
+        section: "e1",
+        anchor: "u1b-kopfschmerzlokalisation-wahrend-der-letzten-30-tage",
+        label: "5.3 U1B Kopfschmerzlokalisation",
+      },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
   } satisfies RichPainInterviewInstruction,
@@ -787,8 +833,7 @@ const E2_MIDLINE_FLOW: ProcedureFlowStep[] = [
   {
     id: "assess",
     label: "Mittellinie prüfen",
-    examinerInstruction:
-      "Dentale Mittellinien OK/UK vergleichen. < 1mm = keine Abweichung (0 mm)",
+    examinerInstruction: "Dentale Mittellinien OK/UK vergleichen. < 1mm = keine Abweichung (0 mm)",
     figureRef: ["5a", "5b"],
   },
   {
@@ -856,8 +901,16 @@ export const E2_RICH_INSTRUCTIONS = {
     title: "Referenzzahn & Markierungen",
     flow: E2_REFERENCE_TOOTH_FLOW,
     protocolRefs: [
-      { section: "section4", anchor: "u2-schneidekantenverhaltnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
-      { section: "e2", anchor: "wahlen-sie-referenzzahne-im-ober-und-unterkiefer-aus", label: "5.3 U2 Referenzzähne" },
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhaltnisse",
+        label: "4.5 U2 Schneidekantenverhältnisse",
+      },
+      {
+        section: "e2",
+        anchor: "wahlen-sie-referenzzahne-im-ober-und-unterkiefer-aus",
+        label: "5.3 U2 Referenzzähne",
+      },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -867,8 +920,16 @@ export const E2_RICH_INSTRUCTIONS = {
     title: "Mittellinienabweichung",
     flow: E2_MIDLINE_FLOW,
     protocolRefs: [
-      { section: "section4", anchor: "u2-schneidekantenverhaltnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
-      { section: "e2", anchor: "referenzlinie-referenz-mittellinie-im-unterkiefer", label: "5.3 U2 Mittellinie" },
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhaltnisse",
+        label: "4.5 U2 Schneidekantenverhältnisse",
+      },
+      {
+        section: "e2",
+        anchor: "referenzlinie-referenz-mittellinie-im-unterkiefer",
+        label: "5.3 U2 Mittellinie",
+      },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -878,8 +939,16 @@ export const E2_RICH_INSTRUCTIONS = {
     title: "Horizontaler Overjet",
     flow: E2_OVERJET_FLOW,
     protocolRefs: [
-      { section: "section4", anchor: "u2-schneidekantenverhaltnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
-      { section: "e2", anchor: "horizontaler-inzisaler-uberbiss", label: "5.3 U2 Horizontaler Overjet" },
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhaltnisse",
+        label: "4.5 U2 Schneidekantenverhältnisse",
+      },
+      {
+        section: "e2",
+        anchor: "horizontaler-inzisaler-uberbiss",
+        label: "5.3 U2 Horizontaler Overjet",
+      },
     ],
   } satisfies RichMeasurementInstruction,
 
@@ -889,8 +958,16 @@ export const E2_RICH_INSTRUCTIONS = {
     title: "Vertikaler Overlap",
     flow: E2_OVERLAP_FLOW,
     protocolRefs: [
-      { section: "section4", anchor: "u2-schneidekantenverhaltnisse", label: "4.5 U2 Schneidekantenverhältnisse" },
-      { section: "e2", anchor: "vertikaler-inzisaler-uberbiss", label: "5.3 U2 Vertikaler Überbiss" },
+      {
+        section: "section4",
+        anchor: "u2-schneidekantenverhaltnisse",
+        label: "4.5 U2 Schneidekantenverhältnisse",
+      },
+      {
+        section: "e2",
+        anchor: "vertikaler-inzisaler-uberbiss",
+        label: "5.3 U2 Vertikaler Überbiss",
+      },
     ],
   } satisfies RichMeasurementInstruction,
 } as const;
@@ -949,7 +1026,11 @@ export const E3_RICH_INSTRUCTIONS = {
     title: "Öffnungsmuster",
     flow: E3_OPENING_PATTERN_FLOW,
     protocolRefs: [
-      { section: "section4", anchor: "u3-offnungsmuster-erganzend", label: "4.5 U3 Öffnungsmuster" },
+      {
+        section: "section4",
+        anchor: "u3-offnungsmuster-erganzend",
+        label: "4.5 U3 Öffnungsmuster",
+      },
       { section: "e3", anchor: "offnungsmuster", label: "5.3 U3 Öffnungsmuster" },
       { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
     ],
@@ -1035,9 +1116,10 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
   steps.push({
     id: "prompts",
     label: "Kurzabfrage",
-    patientScript: mode === "basic"
-      ? `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz" und „bekannter Kopfschmerz" abfragen.`
-      : `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" abfragen.`,
+    patientScript:
+      mode === "basic"
+        ? `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz" und „bekannter Kopfschmerz" abfragen.`
+        : `Ich werde Sie mit den Worten „Schmerz", „bekannter Schmerz", „bekannter Kopfschmerz" und „nur unter meinem Finger?" abfragen.`,
   });
   steps.push(
     {
@@ -1050,7 +1132,7 @@ function createE9IntroductionFlow(mode: PalpationMode): ProcedureFlowStep[] {
       label: "Kalibrierung",
       examinerInstruction: "Mit Finger-Algometer auf 1,0 kg kalibrieren",
       figureRef: "25",
-    },
+    }
   );
   return steps;
 }
@@ -1226,9 +1308,17 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
       title: "Einführung Palpation",
       flow: createE9IntroductionFlow(mode),
       protocolRefs: [
-        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-        { section: "e9", anchor: "allgemeine-instruktionen", label: "5.9 Allgemeine Instruktionen" },
-        { section: "section8", anchor: "622", label: "6.2.2 Palpationsschmerz" },
+        {
+          section: "section4",
+          anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation",
+          label: "4.5 U9 Palpation",
+        },
+        {
+          section: "e9",
+          anchor: "allgemeine-instruktionen",
+          label: "5.9 Allgemeine Instruktionen",
+        },
+        { section: "section8", anchor: "622", label: "6.2.2 Palpationsinduzierter Schmerz" },
         { section: "section8", anchor: "83", label: "8.3 Untersuchungsanweisungen" },
       ],
     },
@@ -1237,8 +1327,16 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
       prompt: "Hatten Sie Schmerzen?",
       flow: createE9TemporalisFlow(mode),
       protocolRefs: [
-        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-        { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
+        {
+          section: "section4",
+          anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation",
+          label: "4.5 U9 Palpation",
+        },
+        {
+          section: "e9",
+          anchor: "m-temporalis-und-m-masseter",
+          label: "5.9 Temporalis & Masseter",
+        },
         { section: "section8", anchor: "624", label: "6.2.4 Bekannter Schmerz" },
         { section: "section8", anchor: "625", label: "6.2.5 Übertragener Schmerz" },
       ],
@@ -1248,8 +1346,16 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
       prompt: "Hatten Sie Schmerzen?",
       flow: createE9MasseterFlow(mode),
       protocolRefs: [
-        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-        { section: "e9", anchor: "m-temporalis-und-m-masseter", label: "5.9 Temporalis & Masseter" },
+        {
+          section: "section4",
+          anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation",
+          label: "4.5 U9 Palpation",
+        },
+        {
+          section: "e9",
+          anchor: "m-temporalis-und-m-masseter",
+          label: "5.9 Temporalis & Masseter",
+        },
       ],
     },
     tmjLateralPole: {
@@ -1257,7 +1363,11 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
       title: "Lateraler Kondylenpol",
       flow: createE9TmjLateralPoleFlow(mode),
       protocolRefs: [
-        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
+        {
+          section: "section4",
+          anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation",
+          label: "4.5 U9 Palpation",
+        },
         { section: "e9", anchor: "lateraler-kondylenpol", label: "5.9 Lateraler Kondylenpol" },
       ],
     },
@@ -1266,8 +1376,16 @@ export function createE9RichInstructions(mode: PalpationMode): E9RichInstruction
       title: "Um den lateralen Kondylenpol",
       flow: createE9TmjAroundPoleFlow(mode),
       protocolRefs: [
-        { section: "section4", anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation", label: "4.5 U9 Palpation" },
-        { section: "e9", anchor: "um-den-lateralen-kondylenpol", label: "5.9 Um den lateralen Kondylenpol" },
+        {
+          section: "section4",
+          anchor: "u9-muskel-und-kiefergelenkschmerz-bei-palpation",
+          label: "4.5 U9 Palpation",
+        },
+        {
+          section: "e9",
+          anchor: "um-den-lateralen-kondylenpol",
+          label: "5.9 Um den lateralen Kondylenpol",
+        },
       ],
     },
   };
@@ -1346,8 +1464,16 @@ export const E6_RICH_INSTRUCTIONS = {
     flow: E6_JOINT_SOUNDS_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "210", label: "2.10 Kiefergelenkgeräusche" },
-      { section: "section4", anchor: "u6-kiefergelenkgerausche-bei-offnungs-und-schliessbewegung", label: "4.5 U6 Gelenkgeräusche" },
-      { section: "e6", anchor: "u6-kiefergelenkgerausche-bei-offnungs-und-schliessbewegung", label: "5.6 U6 Gelenkgeräusche" },
+      {
+        section: "section4",
+        anchor: "u6-kiefergelenkgerausche-bei-offnungs-und-schliessbewegung",
+        label: "4.5 U6 Gelenkgeräusche",
+      },
+      {
+        section: "e6",
+        anchor: "u6-kiefergelenkgerausche-bei-offnungs-und-schliessbewegung",
+        label: "5.6 U6 Gelenkgeräusche",
+      },
       { section: "section6", anchor: "623", label: "6.2.3 Knackbezogener Schmerz" },
     ],
   } satisfies RichMeasurementInstruction,
@@ -1438,8 +1564,16 @@ export const E7_RICH_INSTRUCTIONS = {
     flow: E7_JOINT_SOUNDS_FLOW,
     protocolRefs: [
       { section: "section2", anchor: "210", label: "2.10 Kiefergelenkgeräusche" },
-      { section: "section4", anchor: "u7-kiefergelenkgerausche-bei-laterotrusions-und-protrusionsbewegungen", label: "4.5 U7 Gelenkgeräusche Lateral" },
-      { section: "e7", anchor: "u7-kiefergelenkgerausche-bei-laterotrusion-und-protrusion", label: "5.7 U7 Gelenkgeräusche Lateral" },
+      {
+        section: "section4",
+        anchor: "u7-kiefergelenkgerausche-bei-laterotrusions-und-protrusionsbewegungen",
+        label: "4.5 U7 Gelenkgeräusche Lateral",
+      },
+      {
+        section: "e7",
+        anchor: "u7-kiefergelenkgerausche-bei-laterotrusion-und-protrusion",
+        label: "5.7 U7 Gelenkgeräusche Lateral",
+      },
       { section: "section6", anchor: "623", label: "6.2.3 Knackbezogener Schmerz" },
     ],
   } satisfies RichMeasurementInstruction,

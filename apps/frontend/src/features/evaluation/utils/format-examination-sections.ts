@@ -18,8 +18,8 @@ import {
   E3_OPENING_PATTERNS,
   E8_LOCKING_TYPE_LABELS,
   E8_REDUCTION_LABELS,
-  getPalpationPainQuestions,
   getValueAtPath as get,
+  getPalpationPainQuestions,
   JOINT_SOUND_LABELS,
   MOVEMENT_TYPE_LABELS,
   OPENING_TYPE_LABELS,
@@ -101,7 +101,7 @@ function formatBilateralLocations(
   data: unknown,
   pathRight: string,
   pathLeft: string,
-  labels: Record<string, string>,
+  labels: Record<string, string>
 ): string | null {
   const rightArr = v(data, pathRight) as string[] | undefined;
   const leftArr = v(data, pathLeft) as string[] | undefined;
@@ -126,12 +126,18 @@ function formatE1(data: unknown): FormattedLine[] {
   const lines: FormattedLine[] = [];
 
   const pain = formatBilateralLocations(
-    data, "e1.painLocation.right", "e1.painLocation.left", E1_PAIN_LABELS,
+    data,
+    "e1.painLocation.right",
+    "e1.painLocation.left",
+    E1_PAIN_LABELS
   );
   if (pain) lines.push(line(`Schmerz: ${pain}.`));
 
   const headache = formatBilateralLocations(
-    data, "e1.headacheLocation.right", "e1.headacheLocation.left", E1_HEADACHE_LABELS,
+    data,
+    "e1.headacheLocation.right",
+    "e1.headacheLocation.left",
+    E1_HEADACHE_LABELS
   );
   if (headache) lines.push(line(`Kopfschmerz: ${headache}.`));
 
@@ -149,9 +155,10 @@ function formatE2(data: unknown): FormattedLine[] {
   if (selection != null) {
     const toothLabels: Record<string, string> = { tooth11: "Zahn 11", tooth21: "Zahn 21" };
     const otherTooth = v(data, "e2.referenceTooth.otherTooth") as string | undefined;
-    const label = selection === "other" && otherTooth
-      ? `Zahn ${otherTooth}`
-      : (toothLabels[selection] ?? selection);
+    const label =
+      selection === "other" && otherTooth
+        ? `Zahn ${otherTooth}`
+        : (toothLabels[selection] ?? selection);
     lines.push(line(`Referenzzahn: ${label}`));
   }
 
@@ -190,18 +197,20 @@ function formatE3(data: unknown): FormattedLine[] {
 // E4/E5 SHARED: Bilateral Pain Interview (positive-only, inline qualifiers)
 // ============================================================================
 
-const MOVEMENT_REGIONS: readonly Region[] = ["temporalis", "masseter", "tmj", "otherMast", "nonMast"];
+const MOVEMENT_REGIONS: readonly Region[] = [
+  "temporalis",
+  "masseter",
+  "tmj",
+  "otherMast",
+  "nonMast",
+];
 
 /**
  * Formats positive pain findings for a movement step.
  * Returns null if no positive findings on either side.
  * Format: "Label — Rechts: Masseter (bekannter Schmerz), Gelenk. Links: Temporalis."
  */
-function formatMovementPain(
-  data: unknown,
-  prefix: string,
-  label: string,
-): FormattedLine | null {
+function formatMovementPain(data: unknown, prefix: string, label: string): FormattedLine | null {
   const sideParts: string[] = [];
 
   for (const side of SIDE_KEYS) {
@@ -444,7 +453,7 @@ function formatPalpationSide(
   data: unknown,
   sectionKey: "e9" | "e10",
   side: Side,
-  sitesByRegion: Record<string, readonly PalpationSite[]>,
+  sitesByRegion: Record<string, readonly PalpationSite[]>
 ): FormattedLine[] {
   const findings: string[] = [];
 
@@ -546,8 +555,8 @@ const UNREMARKABLE_LABELS: Record<SectionId, string> = {
   e6: "Keine Gelenkgeräusche.",
   e7: "Keine Gelenkgeräusche.",
   e8: "Keine Blockierung.",
-  e9: "Kein Palpationsschmerz.",
-  e10: "Kein Palpationsschmerz.",
+  e9: "Kein Schmerz bei Palpation.",
+  e10: "Kein Schmerz bei Palpation.",
   e11: "Keine Kommentare.",
 };
 
@@ -565,7 +574,19 @@ const SECTION_FORMATTERS: Record<SectionId, (data: unknown) => FormattedLine[]> 
   e11: formatE11,
 };
 
-const SECTION_IDS: SectionId[] = ["e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11"];
+const SECTION_IDS: SectionId[] = [
+  "e1",
+  "e2",
+  "e3",
+  "e4",
+  "e5",
+  "e6",
+  "e7",
+  "e8",
+  "e9",
+  "e10",
+  "e11",
+];
 
 /**
  * Format all examination sections for the report.
@@ -576,7 +597,7 @@ const SECTION_IDS: SectionId[] = ["e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8"
  */
 export function formatAllExaminationSections(
   data: FormValues,
-  completedSections: SectionId[],
+  completedSections: SectionId[]
 ): FormattedSection[] {
   const completed = new Set(completedSections);
   const sections: FormattedSection[] = [];
