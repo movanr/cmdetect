@@ -49,11 +49,12 @@ export function ClinicianDetermination({
       <p className="text-xs font-medium text-muted-foreground mb-2">Klinische Einordnung</p>
       <div className="flex items-center gap-2">
         {hasDropdown ? (
-          <Select value={value} onValueChange={onValueChange}>
+          <Select value={value || "__none__"} onValueChange={(v) => onValueChange(v === "__none__" ? "" : v)}>
             <SelectTrigger size="sm" className="w-[160px]">
               <SelectValue placeholder="—" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="__none__">—</SelectItem>
               {options.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
