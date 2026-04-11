@@ -49,5 +49,13 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.0"
+  "packageManager": "pnpm@8.15.0",
+  "pnpm": {
+    "overrides": {
+      "handlebars": ">=4.7.9",
+      "seroval": ">=1.4.1",
+      "fast-xml-parser": ">=5.5.7",
+      "tar": ">=7.5.13"
+    }
+  }
 }
