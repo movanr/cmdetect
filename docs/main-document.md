@@ -36,10 +36,10 @@ Each step must be completed before the next becomes accessible. This mirrors the
 
 ### 2.1 Patient Questionnaire App
 
-A public-facing web application where patients complete questionnaires prior to their appointment.
+A public-facing web application where patients complete questionnaires prior to their appointment. Questions are presented one at a time.
 
 - **Input:** Patient enters personal data (name, date of birth) and completes the DC/TMD Symptom Questionnaire (SQ), an interactive pain drawing, and Axis 2 instruments (PHQ-4, GCPS-1M, JFLS-8, OBC).
-- **Processing:** Personal identity data (name, date of birth) is encrypted client-side using ECIES (P-256) before transmission. Questionnaire answers are stored as-is in plaintext JSON. No scoring, transformation, or validation of clinical content occurs at this stage.
+- **Processing:** Personal identity data (name, date of birth) is encrypted client-side using ECIES (P-256) before transmission. Questionnaire answers are stored as-is in plaintext JSON. No scoring, transformation, or validation of clinical content occurs at this stage. The SQ uses the built-in skip logic from the published paper form -- directly translated from printed instructions such as "If you answered 'No', skip to question 5" into automatic navigation between questions. The skip rules are static and defined by the DC/TMD publication; the software does not introduce any additional branching logic.
 - **Output:** Stored questionnaire responses and encrypted patient identity linked to the patient record.
 - **Computation:** None.
 
@@ -57,7 +57,7 @@ The practitioner reviews submitted questionnaire data and records clinical class
   - An SF verification wizard allows the practitioner to walk through SQ screening answers with the patient and annotate office-use fields (side assignments, confirmations).
 
   **Axis 2 Questionnaires:**
-  - Scores are computed: arithmetic operations only -- sums, means, and scale transformations per the published scoring manuals. Specifically: PHQ-4 total and subscale sums; GCPS-1M Characteristic Pain Intensity (CPI) and total disability points (BP); JFLS-8 global mean; OBC total sum. See Appendix A for exact formulas.
+  - Scores are computed: arithmetic operations only -- sums, means, and scale transformations per the published scoring manuals. Specifically: PHQ-4 total and subscale sums; GCPS-1M Characteristic Pain Intensity (CPI) and total disability points (BP); JFLS-8 global mean; OBC total sum. For the multi-step instruments (GCPS), the exact formula is displayed inline next to the score via a tooltip popover (e.g., "CSI = (Frage 2 + 3 + 4) / 3 × 10"), so the practitioner sees exactly how the number was derived. See Appendix A for exact formulas. *[Screenshot B.3]*
   - A "Klinische Einordnung" (Clinical Classification) field is provided per instrument: a dropdown with published classification categories (PHQ-4 severity, GCPS grade) or free-text input (JFLS, OBC) for instruments without established norms. The field is always empty/unselected by default. The software never pre-selects, suggests, or highlights a classification. *[Screenshot B.2]*
 
 - **Output:** Displayed scores and practitioner-recorded classifications.
@@ -79,7 +79,7 @@ The published DC/TMD Self-Report Scoring Manual (Ohrbach & Knibbe, Version March
 Guided form-based entry of DC/TMD examination findings.
 
 - **Input:** Practitioner conducts the physical examination and enters findings.
-- **Processing:** Structured form fields: measurements in millimeters, yes/no responses, checkbox selections, palpation findings. Data is stored as JSON. The software provides the same structured data entry fields as the DC/TMD paper examination form. In the step-by-step wizard mode, the software validates that all required fields in a section are filled before allowing progression to the next section (missing data validation only -- no plausibility checks or clinical validation of entered values).
+- **Processing:** Structured form fields: measurements in millimeters, yes/no responses, checkbox selections, palpation findings. Data is stored as JSON. The software provides the same structured data entry fields as the DC/TMD paper examination form. In the step-by-step wizard mode, the software validates that all required fields in a section are filled before allowing progression to the next section (missing data validation only -- no plausibility checks or clinical validation of entered values). Fields that are conditionally disabled based on a prior answer in the same section (e.g., "familiar pain" is irrelevant when "pain" is marked as absent) are excluded from validation. The practitioner can skip validation at each individual step and proceed with incomplete data. The sequence of examination sections is entirely static -- it does not change based on the patient's clinical data or the practitioner's findings. Every practitioner always sees the same sections in the same order, regardless of input.
 - **Output:** Examination data record.
 - **Computation:** None. Pure data entry, missing data validation, and storage.
 
@@ -243,13 +243,17 @@ Two features generate formatted text from SQ answers:
 
 ### 5.4 GCPS Multi-Step Scoring Algorithm
 
-The GCPS scoring converts continuous interference scores to discrete "points" via a published lookup table (e.g., 0-29 -> 0 points, 30-49 -> 1 point). While published and standardized, this is arguably a form of classification. **Does applying published lookup tables cross the boundary from arithmetic to interpretation?**
+The GCPS scoring bins the interference score (an integer in the range 0--100) into one of four "point" categories via a published lookup table (e.g., 0-29 -> 0 points, 30-49 -> 1 point). While published and standardized, this many-to-one mapping is arguably a form of classification. **Does applying published lookup tables cross the boundary from arithmetic to interpretation?**
 
 ### 5.5 Sequential Workflow with Gated Progression
 
 The application enforces a fixed sequential workflow: anamnesis review must be completed before the examination unlocks, and the examination must be completed before the evaluation becomes accessible. This mirrors the DC/TMD protocol's own prescribed order, but the software actively prevents the practitioner from proceeding out of sequence. **Does enforcing a clinical workflow sequence constitute "guiding" clinical procedure in a regulatory sense, or is it equivalent to a structured paper form where pages are meant to be completed in order?**
 
-### 5.6 Features Under Consideration -- Regulatory Boundaries
+### 5.6 Automated Skip Logic in the Patient Questionnaire
+
+The SQ questionnaire is presented to the patient one question at a time. The next question shown depends on the patient's previous answer, following the skip instructions printed on the official DC/TMD paper form (e.g., "If you answered 'No', skip to question 5"). The software translates these static printed instructions into automatic navigation between questions -- no additional branching logic is introduced beyond what is specified in the publication. **Does automating the skip logic from a published paper form constitute "filtering" or "reorganizing" data, or is it equivalent to following the printed navigation instructions the patient would otherwise follow manually?**
+
+### 5.7 Features Under Consideration -- Regulatory Boundaries
 
 Several features exist in the codebase but are not active in the current product. Before activation, we seek guidance on which would change the regulatory classification:
 
