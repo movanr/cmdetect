@@ -8,7 +8,7 @@ import { INTERVIEW_REFUSED_FIELD, REFUSED_FIELD } from "./e4.model";
 function movementGroup() {
   return M.group({
     [MEASUREMENT_FIELDS.measurement]: M.question(
-      Q.measurement({ unit: "mm", required: true }),
+      Q.measurement({ unit: "mm", required: true, min: 0, max: 30 }),
       MEASUREMENT_FIELDS.measurement
     ),
     [REFUSED_FIELD]: M.question(Q.boolean(), REFUSED_FIELD),

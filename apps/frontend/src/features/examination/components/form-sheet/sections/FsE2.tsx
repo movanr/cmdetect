@@ -40,11 +40,11 @@ export function FsE2() {
         <div className="flex items-center gap-6 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500 print:text-[7pt]">Horiz. Überbiss:</span>
-            <FsMeasurement name="e2.horizontalOverjet" />
+            <FsMeasurement name="e2.horizontalOverjet" min={-30} max={30} />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500 print:text-[7pt]">Vert. Überbiss:</span>
-            <FsMeasurement name="e2.verticalOverlap" />
+            <FsMeasurement name="e2.verticalOverlap" min={-30} max={30} />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500 print:text-[7pt]">Mittellinienabw.:</span>
@@ -53,7 +53,7 @@ export function FsE2() {
               value={getValue("e2.midlineDeviation.direction") as string | null}
               options={midlineOptions}
             />
-            <FsMeasurement name="e2.midlineDeviation.mm" width="w-12" />
+            <FsMeasurement name="e2.midlineDeviation.mm" width="w-12" min={0} max={20} />
           </div>
         </div>
       </div>

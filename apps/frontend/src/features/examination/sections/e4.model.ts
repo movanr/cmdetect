@@ -11,14 +11,14 @@ export const INTERVIEW_REFUSED_FIELD = "interviewRefused" as const;
 export const E4_MODEL = M.group({
   [OPENING_TYPES.painFree]: M.group({
     [MEASUREMENT_FIELDS.measurement]: M.question(
-      Q.measurement({ unit: "mm", required: true }),
+      Q.measurement({ unit: "mm", required: true, min: 0, max: 100 }),
       MEASUREMENT_FIELDS.measurement
     ),
     [REFUSED_FIELD]: M.question(Q.boolean(), REFUSED_FIELD),
   }),
   [OPENING_TYPES.maxUnassisted]: M.group({
     [MEASUREMENT_FIELDS.measurement]: M.question(
-      Q.measurement({ unit: "mm", required: true }),
+      Q.measurement({ unit: "mm", required: true, min: 0, max: 100 }),
       MEASUREMENT_FIELDS.measurement
     ),
     [REFUSED_FIELD]: M.question(Q.boolean(), REFUSED_FIELD),
@@ -27,7 +27,7 @@ export const E4_MODEL = M.group({
   }),
   [OPENING_TYPES.maxAssisted]: M.group({
     [MEASUREMENT_FIELDS.measurement]: M.question(
-      Q.measurement({ unit: "mm", required: true }),
+      Q.measurement({ unit: "mm", required: true, min: 0, max: 100 }),
       MEASUREMENT_FIELDS.measurement
     ),
     [MEASUREMENT_FIELDS.terminated]: M.question(Q.boolean(), MEASUREMENT_FIELDS.terminated),

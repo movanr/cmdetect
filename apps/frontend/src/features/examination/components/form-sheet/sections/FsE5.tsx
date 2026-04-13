@@ -19,7 +19,7 @@ export function FsE5() {
             <span className="text-xs font-semibold text-slate-600 w-40 print:text-[7pt] print:w-32">
               A. {MOVEMENT_TYPE_LABELS.lateralRight}
             </span>
-            <FsMeasurement name="e5.lateralRight.measurement" />
+            <FsMeasurement name="e5.lateralRight.measurement" min={0} max={30} />
           </div>
           <FsPainGrid prefix="e5.lateralRight" getValue={getValue} />
         </div>
@@ -30,7 +30,7 @@ export function FsE5() {
             <span className="text-xs font-semibold text-slate-600 w-40 print:text-[7pt] print:w-32">
               B. {MOVEMENT_TYPE_LABELS.lateralLeft}
             </span>
-            <FsMeasurement name="e5.lateralLeft.measurement" />
+            <FsMeasurement name="e5.lateralLeft.measurement" min={0} max={30} />
           </div>
           <FsPainGrid prefix="e5.lateralLeft" getValue={getValue} />
         </div>
@@ -41,7 +41,7 @@ export function FsE5() {
             <span className="text-xs font-semibold text-slate-600 w-40 print:text-[7pt] print:w-32">
               C. {MOVEMENT_TYPE_LABELS.protrusive}
             </span>
-            <FsMeasurement name="e5.protrusive.measurement" />
+            <FsMeasurement name="e5.protrusive.measurement" min={0} max={30} />
           </div>
           <FsPainGrid prefix="e5.protrusive" getValue={getValue} />
         </div>

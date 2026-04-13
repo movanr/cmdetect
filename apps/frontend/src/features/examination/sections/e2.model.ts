@@ -39,12 +39,12 @@ export const E2_MODEL = M.group({
   }),
   // Horizontal overjet (can be negative for anterior cross-bite)
   [E2_FIELDS.horizontalOverjet]: M.question(
-    Q.measurement({ unit: "mm", required: true, allowNegative: true }),
+    Q.measurement({ unit: "mm", required: true, allowNegative: true, min: -30, max: 30 }),
     "horizontalOverjet"
   ),
   // Vertical overlap (can be negative for anterior open-bite)
   [E2_FIELDS.verticalOverlap]: M.question(
-    Q.measurement({ unit: "mm", required: true, allowNegative: true }),
+    Q.measurement({ unit: "mm", required: true, allowNegative: true, min: -30, max: 30 }),
     "verticalOverlap"
   ),
   // Midline deviation
@@ -62,6 +62,8 @@ export const E2_MODEL = M.group({
       Q.measurement({
         unit: "mm",
         required: true,
+        min: 0,
+        max: 20,
         enableWhen: { sibling: "direction", notEquals: "na" },
       }),
       "midlineMm"

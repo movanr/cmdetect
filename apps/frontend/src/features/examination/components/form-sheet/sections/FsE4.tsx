@@ -18,7 +18,7 @@ export function FsE4() {
           <span className="text-xs font-semibold text-slate-600 w-36 print:text-[7pt] print:w-28">
             A. {OPENING_TYPE_LABELS.painFree}
           </span>
-          <FsMeasurement name="e4.painFree.measurement" />
+          <FsMeasurement name="e4.painFree.measurement" min={0} max={100} />
         </div>
 
         {/* B. Max unassisted opening */}
@@ -27,7 +27,7 @@ export function FsE4() {
             <span className="text-xs font-semibold text-slate-600 w-36 print:text-[7pt] print:w-28">
               B. {OPENING_TYPE_LABELS.maxUnassisted}
             </span>
-            <FsMeasurement name="e4.maxUnassisted.measurement" />
+            <FsMeasurement name="e4.maxUnassisted.measurement" min={0} max={100} />
           </div>
           <FsPainGrid prefix="e4.maxUnassisted" getValue={getValue} />
         </div>
@@ -38,7 +38,7 @@ export function FsE4() {
             <span className="text-xs font-semibold text-slate-600 w-36 print:text-[7pt] print:w-28">
               C. {OPENING_TYPE_LABELS.maxAssisted}
             </span>
-            <FsMeasurement name="e4.maxAssisted.measurement" />
+            <FsMeasurement name="e4.maxAssisted.measurement" min={0} max={100} />
           </div>
           <FsPainGrid prefix="e4.maxAssisted" getValue={getValue} />
         </div>

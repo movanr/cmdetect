@@ -28,7 +28,7 @@ export function MeasurementField<T extends FieldValues>({
   disabled,
   className,
 }: MeasurementFieldProps<T>) {
-  const { control, clearErrors } = useFormContext<T>();
+  const { control, clearErrors, setError } = useFormContext<T>();
 
   return (
     <FormField
@@ -52,7 +52,18 @@ export function MeasurementField<T extends FieldValues>({
                 // Clear error when user starts typing
                 clearErrors(name);
               }}
-              onBlur={field.onBlur}
+              onBlur={() => {
+                field.onBlur();
+                const val = field.value;
+                if (val != null && val !== "") {
+                  const numVal = Number(val);
+                  if (min !== undefined && numVal < min) {
+                    setError(name, { type: "range", message: `Minimum: ${min}` });
+                  } else if (max !== undefined && numVal > max) {
+                    setError(name, { type: "range", message: `Maximum: ${max}` });
+                  }
+                }
+              }}
               ref={field.ref}
             />
           </FormControl>
