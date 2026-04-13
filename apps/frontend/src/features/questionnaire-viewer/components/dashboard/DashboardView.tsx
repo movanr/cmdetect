@@ -15,7 +15,6 @@ import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
 import { useState } from "react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
-import { AnamnesisOverview } from "./AnamnesisOverview";
 import { Axis2ScoreCard } from "./Axis2ScoreCard";
 import { DashboardInfoBlock } from "./DashboardInfoBlock";
 import { SQStatusCard } from "./SQStatusCard";
@@ -177,11 +176,6 @@ export function DashboardView({
               isScreeningNegative={isScreeningNegative}
               isReviewed={isReviewed}
             />
-            {sqResponse && !isScreeningNegative && (
-              <div className="mt-3">
-                <AnamnesisOverview sqAnswers={sqResponse.answers} />
-              </div>
-            )}
           </section>
         )}
 

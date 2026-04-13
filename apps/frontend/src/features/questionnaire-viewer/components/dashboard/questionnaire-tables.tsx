@@ -274,7 +274,7 @@ export function SQAnswersTable({ answers }: { answers: Record<string, unknown> }
               <tr>
                 <td
                   colSpan={4}
-                  className="pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500"
+                  className="pt-3 pb-2 px-3 text-sm font-semibold text-gray-900 bg-gray-100 border-t-2 border-gray-300"
                 >
                   {section}
                 </td>

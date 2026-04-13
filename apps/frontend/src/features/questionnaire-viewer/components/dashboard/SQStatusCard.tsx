@@ -49,7 +49,7 @@ export function SQStatusCard({
   isScreeningNegative = false,
   isReviewed = false,
 }: SQStatusCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // No SQ data
   if (!response) {
