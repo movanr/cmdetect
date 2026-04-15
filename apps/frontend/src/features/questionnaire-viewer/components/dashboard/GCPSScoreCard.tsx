@@ -12,9 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { ClinicalNote } from "./ClinicalNote";
-import type { TabSummary } from "./Axis2ScoreCard";
+import { StackedField, type TabSummary } from "./Axis2ScoreCard";
 
 const NONE = "__none__";
 
@@ -53,15 +53,6 @@ function gradeLabel(value: string): string | undefined {
 }
 
 // ─── Small helpers ──────────────────────────────────────────────────────
-
-function Fraction({ numerator, denominator }: { numerator: ReactNode; denominator: ReactNode }) {
-  return (
-    <span className="inline-flex flex-col items-center leading-[1.1] align-middle">
-      <span>{numerator}</span>
-      <span className="border-t border-current w-full text-center px-1">{denominator}</span>
-    </span>
-  );
-}
 
 function NumberField({
   value,
@@ -180,97 +171,90 @@ export function GCPSScoringContent({ onSummaryChange }: GCPSScoringContentProps)
 
   return (
     <>
-      <div className="space-y-6">
-        {/* Grad selector (final result) */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium w-32 shrink-0">Grad</span>
-          <Select value={grade || NONE} onValueChange={(v) => setGrade(v === NONE ? "" : v)}>
-            <SelectTrigger size="sm" className="w-[160px]">
-              <SelectValue placeholder="—" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE}>—</SelectItem>
-              {GCPS_GRADE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
+      <div className="flex flex-col gap-6">
         {/* (1) BP */}
-        <div className="space-y-3">
-          <p className="text-sm font-medium">(1) Beeinträchtigungspunkte (BP)</p>
+        <section className="flex flex-col gap-4">
+          <h4 className="text-sm font-medium">(1) Beeinträchtigungspunkte (BP)</h4>
 
-          <div className="border border-border rounded-md p-3 space-y-2 bg-background">
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="text-xs font-medium">(a) Anzahl der Tage</p>
-              <span className="text-[11px] text-muted-foreground">aus Frage 5</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap text-sm">
-              <span className="text-muted-foreground">Anzahl:</span>
+          {/* (a) Days */}
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              (a) Anzahl der Tage (aus Frage 5)
+            </p>
+            <StackedField label="Anzahl Tage" hint="0–31">
               <NumberField value={daysRaw} onChange={setDaysRaw} min={0} max={31} />
-              <span className="text-muted-foreground">Tage</span>
-            </div>
+            </StackedField>
             <BandingTable headers={["Tage", "BP"]} rows={GCPS_DAYS_BANDING} />
-            <div className="flex items-baseline justify-end gap-2 pt-2 border-t border-border">
-              <span className="text-xs text-muted-foreground">(a) =</span>
+            <StackedField label="BP (a)" hint="0–3">
               <NumberField value={bpA} onChange={setBpA} min={0} max={3} />
-              <span className="text-xs">BP</span>
-            </div>
+            </StackedField>
           </div>
 
-          <div className="border border-border rounded-md p-3 space-y-2 bg-background">
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="text-xs font-medium">(b) Subjektive Beeinträchtigung</p>
-              <span className="text-[11px] text-muted-foreground">aus Fragen 6–8</span>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap text-sm">
-              <span>
-                <Fraction numerator={<>F6 + F7 + F8</>} denominator={<>3</>} /> · 10 =
-              </span>
+          {/* (b) Interference */}
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              (b) Subjektive Beeinträchtigung (aus F6–F8)
+            </p>
+            <StackedField
+              label="Punkte"
+              hint="0–100"
+              formula={<>(F6 + F7 + F8) / 3 · 10</>}
+            >
               <NumberField
                 value={interferencePunkte}
                 onChange={setInterferencePunkte}
                 min={0}
                 max={100}
               />
-              <span className="text-muted-foreground">Punkte</span>
-            </div>
+            </StackedField>
             <BandingTable headers={["Punkte", "BP"]} rows={GCPS_INTERFERENCE_BANDING} />
-            <div className="flex items-baseline justify-end gap-2 pt-2 border-t border-border">
-              <span className="text-xs text-muted-foreground">(b) =</span>
+            <StackedField label="BP (b)" hint="0–3">
               <NumberField value={bpB} onChange={setBpB} min={0} max={3} />
-              <span className="text-xs">BP</span>
-            </div>
+            </StackedField>
           </div>
 
-          <div className="flex items-baseline justify-end gap-2">
-            <span className="text-sm font-medium">Gesamt: (a + b) =</span>
+          <StackedField label="Gesamt BP (a + b)" hint="0–6">
             <NumberField value={bpTotal} onChange={setBpTotal} min={0} max={6} />
-            <span className="text-sm">BP</span>
-          </div>
-        </div>
+          </StackedField>
+        </section>
 
         {/* (2) CSI */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">(2) Charakteristische Schmerzintensität</p>
-          <p className="text-xs italic text-muted-foreground">Nur nötig, wenn Gesamt-BP &lt; 3.</p>
-          <div className="flex items-center gap-2 flex-wrap text-sm pl-3">
-            <span>
-              CSI = <Fraction numerator={<>F2 + F3 + F4</>} denominator={<>3</>} /> · 10 =
-            </span>
+        <section className="flex flex-col gap-3">
+          <h4 className="text-sm font-medium">(2) Charakteristische Schmerzintensität (CSI)</h4>
+          <p className="text-[11px] italic text-muted-foreground">
+            Nur nötig, wenn Gesamt-BP &lt; 3.
+          </p>
+          <StackedField label="CSI" hint="0–100" formula={<>(F2 + F3 + F4) / 3 · 10</>}>
             <NumberField value={csi} onChange={setCsi} min={0} max={100} />
-            <span className="text-muted-foreground">(0–100)</span>
-          </div>
-        </div>
+          </StackedField>
+        </section>
 
-        {/* (3) Grad-Bestimmung */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">(3) Grad-Bestimmung</p>
-          <GradeTable />
-        </div>
+        {/* (3) Grad */}
+        <section className="flex flex-col gap-3">
+          <h4 className="text-sm font-medium">(3) Grad</h4>
+          <StackedField label="Grad">
+            <Select value={grade || NONE} onValueChange={(v) => setGrade(v === NONE ? "" : v)}>
+              <SelectTrigger size="sm" className="w-full max-w-[260px]">
+                <SelectValue placeholder="—" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>—</SelectItem>
+                {GCPS_GRADE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </StackedField>
+
+          <div className="flex flex-col gap-1.5 mt-1">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+              Grad-Bestimmung
+            </span>
+            <GradeTable />
+          </div>
+        </section>
       </div>
       <ClinicalNote value={note} onChange={setNote} />
     </>

@@ -8,11 +8,24 @@ interface Axis2DetailPanelProps {
   leftTitle?: string;
   rightTitle?: string;
   manualAnchor?: string;
+  /** Split variant. "default" = 70/30, "balanced" = 50/50 (used for GCPS). */
+  split?: "default" | "balanced";
 }
 
+const LEFT_BASIS = {
+  default: "md:basis-[70%]",
+  balanced: "md:basis-[60%]",
+} as const;
+
+const RIGHT_BASIS = {
+  default: "md:basis-[30%]",
+  balanced: "md:basis-[40%]",
+} as const;
+
 /**
- * Split-view shell: two paper-sheet surfaces side-by-side (60/40).
+ * Split-view shell: two paper-sheet surfaces side-by-side.
  * Left sheet shows the patient's answers; right sheet shows the scoring formsheet.
+ * GCPS uses "balanced" (60/40) to fit its BP + CSI + Grade flow.
  */
 export function Axis2DetailPanel({
   left,
@@ -20,16 +33,21 @@ export function Axis2DetailPanel({
   leftTitle = "Antworten",
   rightTitle = "Bewertung",
   manualAnchor,
+  split = "default",
 }: Axis2DetailPanelProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
-      <section className="md:basis-3/5 md:min-w-0 bg-card border rounded-md shadow-sm p-5 rounded-tl-none">
+      <section
+        className={`${LEFT_BASIS[split]} md:min-w-0 bg-card border rounded-md shadow-sm p-5 rounded-tl-none`}
+      >
         <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-3">
           {leftTitle}
         </p>
         {left}
       </section>
-      <section className="md:basis-2/5 md:min-w-0 bg-card border rounded-md shadow-sm p-5">
+      <section
+        className={`${RIGHT_BASIS[split]} md:min-w-0 bg-card border rounded-md shadow-sm p-5`}
+      >
         <div className="flex items-baseline justify-between gap-2 mb-3">
           <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
             {rightTitle}

@@ -343,7 +343,7 @@ export function GCPSAnswersTable({
         <tr className={headerRowClass}>
           <th className={thClass}>Nr.</th>
           <th className={thClass}>Frage</th>
-          <th className={`${thClass} text-right`}>Antwort</th>
+          <th className={`${thClass} text-right whitespace-nowrap`}>Antwort</th>
         </tr>
       </thead>
       <tbody>
@@ -356,7 +356,7 @@ export function GCPSAnswersTable({
             <tr key={qId} className={bodyRowClass}>
               <td className={tdMuted}>{idx + 1}</td>
               <td className={tdClass}>{question.text}</td>
-              <td className={`${tdClass} text-right font-medium`}>
+              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
                 {showPips && isScale && answer != null && (
                   <ScalePips value={Number(answer)} max={10} />
                 )}
@@ -386,8 +386,8 @@ export function PHQ4AnswersTable({
         <tr className={headerRowClass}>
           <th className={thClass}>Nr.</th>
           <th className={thClass}>Frage</th>
-          <th className={`${thClass} text-right`}>Wert</th>
-          <th className={thClass}>Antwort</th>
+          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
+          <th className={`${thClass} whitespace-nowrap`}>Antwort</th>
         </tr>
       </thead>
       <tbody>
@@ -399,11 +399,11 @@ export function PHQ4AnswersTable({
             <tr key={qId} className={bodyRowClass}>
               <td className={tdMuted}>{String.fromCharCode(97 + idx)}</td>
               <td className={tdClass}>{question.text}</td>
-              <td className={`${tdClass} text-right font-medium`}>
+              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
                 {showPips && selected != null && <ScalePips value={Number(selected)} max={3} />}
                 {selected ?? "—"}
               </td>
-              <td className={tdMuted}>{option?.label ?? ""}</td>
+              <td className={`${tdMuted} whitespace-nowrap`}>{option?.label ?? ""}</td>
             </tr>
           );
         })}
@@ -432,7 +432,7 @@ export function JFLS8AnswersTable({
               (0 = {JFLS8_SCALE_LABELS.min}, 10 = {JFLS8_SCALE_LABELS.max})
             </span>
           </th>
-          <th className={`${thClass} text-right`}>Wert</th>
+          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
         </tr>
       </thead>
       <tbody>
@@ -442,7 +442,7 @@ export function JFLS8AnswersTable({
             <tr key={qId} className={bodyRowClass}>
               <td className={tdMuted}>{idx + 1}</td>
               <td className={tdClass}>{JFLS8_QUESTIONS[qId].text}</td>
-              <td className={`${tdClass} text-right font-medium`}>
+              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
                 {showPips && selected != null && <ScalePips value={Number(selected)} max={10} />}
                 {selected ?? "—"}
                 <span className="text-gray-400 font-normal"> / 10</span>
@@ -475,7 +475,7 @@ export function JFLS20AnswersTable({
               (0 = {JFLS20_SCALE_LABELS.min}, 10 = {JFLS20_SCALE_LABELS.max})
             </span>
           </th>
-          <th className={`${thClass} text-right`}>Wert</th>
+          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
         </tr>
       </thead>
       <tbody>
@@ -485,7 +485,7 @@ export function JFLS20AnswersTable({
             <tr key={qId} className={bodyRowClass}>
               <td className={tdMuted}>{idx + 1}</td>
               <td className={tdClass}>{JFLS20_QUESTIONS[qId].text}</td>
-              <td className={`${tdClass} text-right font-medium`}>
+              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
                 {showPips && selected != null && <ScalePips value={Number(selected)} max={10} />}
                 {selected ?? "—"}
                 <span className="text-gray-400 font-normal"> / 10</span>
@@ -531,18 +531,15 @@ export function OBCAnswersTable({
         const selected = answers[qId];
         const num = OBC_QUESTION_ORDER.indexOf(qId) + 1;
         const numericVal = selected !== undefined ? parseInt(selected, 10) : 0;
-        const isHigh = selected !== undefined && numericVal >= 3;
-        const isSleep = OBC_QUESTIONS[qId].section === "sleep";
-        const maxVal = isSleep ? 4 : 4;
         return (
-          <tr key={qId} className={`${bodyRowClass} ${isHigh ? "bg-gray-50" : ""}`}>
+          <tr key={qId} className={bodyRowClass}>
             <td className={tdMuted}>{num}</td>
             <td className={tdClass}>{OBC_QUESTIONS[qId].text}</td>
-            <td className={`${tdClass} text-right ${isHigh ? "font-semibold" : "font-medium"}`}>
-              {showPips && selected != null && <ScalePips value={numericVal} max={maxVal} />}
+            <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
+              {showPips && selected != null && <ScalePips value={numericVal} max={4} />}
               {selected ?? "—"}
             </td>
-            <td className={tdMuted}>{optionLabel(qId, selected)}</td>
+            <td className={`${tdMuted} whitespace-nowrap`}>{optionLabel(qId, selected)}</td>
           </tr>
         );
       })}
@@ -555,8 +552,8 @@ export function OBCAnswersTable({
         <tr className={headerRowClass}>
           <th className={thClass}>Nr.</th>
           <th className={thClass}>Aktivität</th>
-          <th className={`${thClass} text-right`}>Wert</th>
-          <th className={thClass}>Häufigkeit</th>
+          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
+          <th className={`${thClass} whitespace-nowrap`}>Häufigkeit</th>
         </tr>
       </thead>
       <tbody>

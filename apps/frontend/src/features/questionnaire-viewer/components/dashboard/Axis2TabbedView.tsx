@@ -147,6 +147,7 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
           <div key={tab.id} className={activeTab === tab.id ? "block" : "hidden"}>
             <Axis2DetailPanel
               manualAnchor={SCORING_MANUAL_ANCHORS[tab.id]}
+              split={tab.id === QUESTIONNAIRE_ID.GCPS_1M ? "balanced" : "default"}
               left={renderAnswers(tab.id)}
               right={renderScoring(tab.id, summarySetters[tab.id])}
             />

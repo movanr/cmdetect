@@ -167,7 +167,7 @@ function Stack({ children }: { children: ReactNode }) {
 
 // ─── PHQ-4 ──────────────────────────────────────────────────────────────
 
-function StackedField({
+export function StackedField({
   label,
   hint,
   formula,
