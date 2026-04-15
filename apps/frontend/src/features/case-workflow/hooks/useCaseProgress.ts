@@ -58,6 +58,16 @@ function getSqReviewedAt(responses: QuestionnaireResponse[]): string | null {
   return sqResponse.reviewedAt ?? null;
 }
 
+/**
+ * Determines if the SQ review step was explicitly skipped
+ */
+function getSqReviewSkippedAt(responses: QuestionnaireResponse[]): string | null {
+  const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
+  if (!sqResponse) return null;
+
+  return sqResponse.reviewSkippedAt ?? null;
+}
+
 export function useCaseProgress(options: UseCaseProgressOptions): CaseProgressResult {
   const {
     patientRecordId,
@@ -71,6 +81,7 @@ export function useCaseProgress(options: UseCaseProgressOptions): CaseProgressRe
   return useMemo(() => {
     const isScreeningNegative = checkScreeningNegative(responses);
     const sqReviewedAt = getSqReviewedAt(responses);
+    const sqReviewSkippedAt = getSqReviewSkippedAt(responses);
 
     const caseData: CaseData = {
       patientRecordId,
@@ -78,6 +89,7 @@ export function useCaseProgress(options: UseCaseProgressOptions): CaseProgressRe
       responses,
       isScreeningNegative,
       sqReviewedAt,
+      sqReviewSkippedAt,
       examinationCompletedAt,
       evaluationCompletedAt,
       documentationCompletedAt,

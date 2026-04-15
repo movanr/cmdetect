@@ -70,6 +70,7 @@ export const ResponseDataSchema = z.object({
     .object({
       reviewed_at: z.string().optional(),
       reviewed_by: z.string().optional(),
+      review_skipped_at: z.string().optional(),
     })
     .passthrough()
     .optional(),

@@ -19,7 +19,14 @@ interface UpdateParams {
     questionnaire_id: string;
     questionnaire_version: string;
     answers: Record<string, unknown>;
+    _meta?: {
+      reviewed_at?: string;
+      reviewed_by?: string;
+      review_skipped_at?: string;
+    };
   };
+  /** Override the success toast message. Pass `null` to suppress the toast. */
+  successMessage?: string | null;
 }
 
 export function useUpdateQuestionnaireResponse(patientRecordId: string) {
@@ -43,11 +50,20 @@ export function useUpdateQuestionnaireResponse(patientRecordId: string) {
       const previousResponses =
         queryClient.getQueryData<QuestionnaireResponse[]>(queryKey);
 
-      // Optimistically update the cache
+      // Optimistically update the cache — mirror the _meta fields the
+      // useQuestionnaireResponses hook surfaces so downstream gating
+      // (e.g. step completion) sees the new state immediately.
       queryClient.setQueryData<QuestionnaireResponse[]>(queryKey, (old) =>
         old?.map((response) =>
           response.id === id
-            ? { ...response, answers: responseData.answers }
+            ? {
+                ...response,
+                answers: responseData.answers,
+                reviewedAt: responseData._meta?.reviewed_at ?? response.reviewedAt,
+                reviewedBy: responseData._meta?.reviewed_by ?? response.reviewedBy,
+                reviewSkippedAt:
+                  responseData._meta?.review_skipped_at ?? response.reviewSkippedAt,
+              }
             : response
         )
       );
@@ -65,9 +81,10 @@ export function useUpdateQuestionnaireResponse(patientRecordId: string) {
       toast.error("Fehler beim Speichern: " + error.message);
     },
 
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       // No invalidateQueries() needed - cache is already updated optimistically
-      toast.success("Antwort gespeichert");
+      if (variables.successMessage === null) return;
+      toast.success(variables.successMessage ?? "Antwort gespeichert");
     },
   });
 }

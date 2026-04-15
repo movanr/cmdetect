@@ -25,8 +25,12 @@ interface DashboardViewProps {
   responses: QuestionnaireResponse[];
   /** Callback when starting patient review */
   onStartReview: () => void;
+  /** Callback to skip the review and continue directly to the examination */
+  onSkipReview?: () => void;
   /** Callback to continue to the examination (shown after review is complete) */
   onContinueToExamination?: () => void;
+  /** Disables the skip / start-review buttons while a skip mutation is in flight */
+  isSkippingReview?: boolean;
   /** Patient record / case ID (for print export) */
   caseId?: string;
 }
@@ -34,7 +38,9 @@ interface DashboardViewProps {
 export function DashboardView({
   responses,
   onStartReview,
+  onSkipReview,
   onContinueToExamination,
+  isSkippingReview,
   caseId,
 }: DashboardViewProps) {
   const { print, isPrinting } = useBackgroundPrint();
@@ -109,13 +115,27 @@ export function DashboardView({
           )}
         </>
       ) : (
-        <Button
-          onClick={onStartReview}
-          title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."
-        >
-          SF mit Patient überprüfen
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <>
+          {onSkipReview && (
+            <Button
+              variant="outline"
+              onClick={onSkipReview}
+              disabled={isSkippingReview}
+              title="Überprüfung überspringen und direkt zur Untersuchung fortfahren."
+            >
+              Überprüfung überspringen
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            onClick={onStartReview}
+            disabled={isSkippingReview}
+            title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."
+          >
+            SF mit Patient überprüfen
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </>
       )}
     </div>
   );
@@ -156,13 +176,27 @@ export function DashboardView({
                 )}
               </>
             ) : (
-              <Button
-                onClick={onStartReview}
-                title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."
-              >
-                SF mit Patient überprüfen
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <>
+                {onSkipReview && (
+                  <Button
+                    variant="outline"
+                    onClick={onSkipReview}
+                    disabled={isSkippingReview}
+                    title="Überprüfung überspringen und direkt zur Untersuchung fortfahren."
+                  >
+                    Überprüfung überspringen
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  onClick={onStartReview}
+                  disabled={isSkippingReview}
+                  title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."
+                >
+                  SF mit Patient überprüfen
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </>
             ))}
         </div>
       </CardHeader>

@@ -18,6 +18,8 @@ export interface QuestionnaireResponse {
   reviewedAt?: string;
   /** User ID of who reviewed the questionnaire */
   reviewedBy?: string;
+  /** ISO timestamp when the review step was explicitly skipped */
+  reviewSkippedAt?: string;
   /** Warning message if parsing failed (data may be incomplete) */
   _parseWarning?: string;
 }
@@ -50,6 +52,7 @@ export function useQuestionnaireResponses(patientRecordId: string) {
             _meta?: {
               reviewed_at?: string;
               reviewed_by?: string;
+              review_skipped_at?: string;
             };
           } | null;
 
@@ -61,6 +64,7 @@ export function useQuestionnaireResponses(patientRecordId: string) {
             submittedAt: response.submitted_at,
             reviewedAt: fallbackData?._meta?.reviewed_at,
             reviewedBy: fallbackData?._meta?.reviewed_by,
+            reviewSkippedAt: fallbackData?._meta?.review_skipped_at,
             _parseWarning: parsed.error.message,
           } satisfies QuestionnaireResponse;
         }
@@ -74,6 +78,7 @@ export function useQuestionnaireResponses(patientRecordId: string) {
           submittedAt: response.submitted_at,
           reviewedAt: parsed.data._meta?.reviewed_at,
           reviewedBy: parsed.data._meta?.reviewed_by,
+          reviewSkippedAt: parsed.data._meta?.review_skipped_at,
         } satisfies QuestionnaireResponse;
       });
     },

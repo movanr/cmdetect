@@ -47,6 +47,7 @@ export interface CaseData {
   // Anamnesis completion markers
   isScreeningNegative: boolean;
   sqReviewedAt: string | null;
+  sqReviewSkippedAt: string | null;
 
   // Examination completion markers
   examinationCompletedAt: string | null;
@@ -127,8 +128,12 @@ export function getSubStepDefinition(
 export function isStepComplete(step: MainStep, caseData: CaseData): boolean {
   switch (step) {
     case "anamnesis":
-      // Anamnesis is complete if SQ was reviewed OR screening is negative
-      return caseData.sqReviewedAt !== null || caseData.isScreeningNegative;
+      // Anamnesis is complete if SQ was reviewed, explicitly skipped, or screening is negative
+      return (
+        caseData.sqReviewedAt !== null ||
+        caseData.sqReviewSkippedAt !== null ||
+        caseData.isScreeningNegative
+      );
 
     case "examination":
       return caseData.examinationCompletedAt !== null;
