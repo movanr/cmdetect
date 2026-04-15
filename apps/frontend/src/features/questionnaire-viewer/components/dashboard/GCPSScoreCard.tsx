@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { Fraction, StackedField, type TabSummary, type TabSummaryEntry } from "./Axis2ScoreCard";
 import { ClinicalNote } from "./ClinicalNote";
-import { StackedField, type TabSummary, type TabSummaryEntry } from "./Axis2ScoreCard";
 
 const NONE = "__none__";
 
@@ -97,7 +97,9 @@ function BandingTable({
           <th className="px-2 py-0.5 text-left font-medium text-muted-foreground border-r border-border">
             {headers[0]}
           </th>
-          <th className="px-2 py-0.5 text-center font-medium text-muted-foreground">{headers[1]}</th>
+          <th className="px-2 py-0.5 text-center font-medium text-muted-foreground">
+            {headers[1]}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -196,12 +198,17 @@ export function GCPSScoringContent({ onSummaryChange }: GCPSScoringContentProps)
           {/* (b) Interference */}
           <div className="flex flex-col gap-3">
             <p className="text-xs font-medium text-muted-foreground">
-              (b) Subjektive Beeinträchtigung (aus F6–F8)
+              (b) Subjektive Beeinträchtigung (aus Fragen 6–8)
             </p>
             <StackedField
               label="Punkte"
               hint="0–100"
-              formula={<>(F6 + F7 + F8) / 3 · 10</>}
+              formula={
+                <span className="inline-flex items-center gap-1">
+                  ={" "}
+                  <Fraction numerator={<>F6 + F7 + F8</>} denominator={<>3</>} /> · 10
+                </span>
+              }
             >
               <NumberField
                 value={interferencePunkte}
@@ -227,7 +234,16 @@ export function GCPSScoringContent({ onSummaryChange }: GCPSScoringContentProps)
           <p className="text-[11px] italic text-muted-foreground">
             Nur nötig, wenn Gesamt-BP &lt; 3.
           </p>
-          <StackedField label="CSI" hint="0–100" formula={<>(F2 + F3 + F4) / 3 · 10</>}>
+          <StackedField
+            label="CSI"
+            hint="0–100"
+            formula={
+              <span className="inline-flex items-center gap-1">
+                ={" "}
+                <Fraction numerator={<>F2 + F3 + F4</>} denominator={<>3</>} /> · 10
+              </span>
+            }
+          >
             <NumberField value={csi} onChange={setCsi} min={0} max={100} />
           </StackedField>
         </section>

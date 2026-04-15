@@ -10,6 +10,9 @@ interface Axis2DetailPanelProps {
   manualAnchor?: string;
   /** Split variant. "default" = 70/30, "balanced" = 50/50 (used for GCPS). */
   split?: "default" | "balanced";
+  /** When true, squares the top-left corner so the panel visually attaches
+   * to a tab row above (used by Axis2TabbedView). Default true. */
+  attachedTop?: boolean;
 }
 
 const LEFT_BASIS = {
@@ -34,15 +37,16 @@ export function Axis2DetailPanel({
   rightTitle = "Bewertung",
   manualAnchor,
   split = "default",
+  attachedTop = true,
 }: Axis2DetailPanelProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
       <section
-        className={`${LEFT_BASIS[split]} md:min-w-0 bg-card border rounded-md shadow-sm p-5 rounded-tl-none`}
+        className={`${LEFT_BASIS[split]} md:min-w-0 bg-card border rounded-md shadow-sm p-5 ${
+          attachedTop ? "rounded-tl-none" : ""
+        }`}
       >
-        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide mb-3">
-          {leftTitle}
-        </p>
+        <p className="text-sm font-medium mb-3">{leftTitle}</p>
         {left}
       </section>
       <section

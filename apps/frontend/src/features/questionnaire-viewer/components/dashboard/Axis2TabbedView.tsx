@@ -130,7 +130,6 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
             <Axis2TabCard
               key={tab.id}
               abbreviation={tab.abbreviation}
-              title={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
               entries={summary?.entries ?? []}
               active={activeTab === tab.id}
               completed={completed}
@@ -148,6 +147,7 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
             <Axis2DetailPanel
               manualAnchor={SCORING_MANUAL_ANCHORS[tab.id]}
               split={tab.id === QUESTIONNAIRE_ID.GCPS_1M ? "balanced" : "default"}
+              leftTitle={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
               left={renderAnswers(tab.id)}
               right={renderScoring(tab.id, summarySetters[tab.id])}
             />

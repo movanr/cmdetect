@@ -14,6 +14,8 @@ interface ScoreCardLayoutProps {
   expandedContent: ReactNode;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
+  /** Initial expansion state when uncontrolled (default false). */
+  defaultExpanded?: boolean;
 }
 
 export function ScoreCardLayout({
@@ -25,8 +27,9 @@ export function ScoreCardLayout({
   expandedContent,
   isExpanded: isExpandedProp,
   onToggleExpand,
+  defaultExpanded = false,
 }: ScoreCardLayoutProps) {
-  const [isExpandedLocal, setIsExpandedLocal] = useState(false);
+  const [isExpandedLocal, setIsExpandedLocal] = useState(defaultExpanded);
   const isExpanded = isExpandedProp ?? isExpandedLocal;
   const toggleExpand = onToggleExpand ?? (() => setIsExpandedLocal(!isExpandedLocal));
 

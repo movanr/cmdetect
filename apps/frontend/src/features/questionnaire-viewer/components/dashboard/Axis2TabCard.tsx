@@ -3,7 +3,6 @@ import type { TabSummaryEntry } from "./Axis2ScoreCard";
 
 interface Axis2TabCardProps {
   abbreviation: string;
-  title: string;
   entries: TabSummaryEntry[];
   active: boolean;
   completed: boolean;
@@ -12,7 +11,6 @@ interface Axis2TabCardProps {
 
 export function Axis2TabCard({
   abbreviation,
-  title,
   entries,
   active,
   completed,
@@ -40,7 +38,6 @@ export function Axis2TabCard({
           </span>
         )}
       </div>
-      <div className="text-[11px] text-muted-foreground truncate mt-0.5">{title}</div>
       <div className="mt-2 flex flex-col gap-0.5 min-h-[1.25rem]">
         {entries.length === 0 ? (
           <span className="text-sm text-muted-foreground">—</span>

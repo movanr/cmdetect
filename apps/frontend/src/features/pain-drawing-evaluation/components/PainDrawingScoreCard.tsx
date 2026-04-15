@@ -1,15 +1,25 @@
 /**
- * Pain Drawing Score Card — documentation only.
- * Practitioner enters the region count and free-text classification manually;
- * the expanded view shows the patient's drawings as a thumbnail grid.
+ * Pain Drawing Score Card — paper-split layout (70/30) matching Axis 2 tabs.
+ * Left sheet shows the patient's drawings; right sheet shows manual scoring inputs.
  */
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScoreCardLayout } from "@/features/questionnaire-viewer/components/dashboard/ScoreCardLayout";
-import { ScoreInputRow } from "@/features/questionnaire-viewer/components/dashboard/ScoreInputRow";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Axis2DetailPanel } from "@/features/questionnaire-viewer/components/dashboard/Axis2DetailPanel";
+import {
+  CutoffTable,
+  StackedField,
+} from "@/features/questionnaire-viewer/components/dashboard/Axis2ScoreCard";
+import { ClinicalNote } from "@/features/questionnaire-viewer/components/dashboard/ClinicalNote";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { IMAGE_CONFIGS, REGION_ORDER } from "../constants";
@@ -17,22 +27,35 @@ import type { ImageId, PainDrawingData } from "../types";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
 import { RegionThumbnail } from "./RegionThumbnail";
 
+const NONE = "__none__";
+
+const PAIN_DRAWING_SEVERITY_OPTIONS = [
+  { value: "keine", label: "Keine" },
+  { value: "leicht", label: "Leicht" },
+  { value: "moderat", label: "Moderat" },
+  { value: "schwer", label: "Schwer" },
+] as const;
+
+const PAIN_DRAWING_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
+  ["0", "Keine"],
+  ["1", "Leicht"],
+  ["2", "Moderat"],
+  ["3", "—"],
+  ["≥ 4", "Schwer"],
+];
+
 interface PainDrawingScoreCardProps {
   data: PainDrawingData | null;
   title?: string;
-  isExpanded?: boolean;
-  onToggleExpand?: () => void;
 }
 
 export function PainDrawingScoreCard({
   data,
   title = "Schmerzzeichnung",
-  isExpanded,
-  onToggleExpand,
 }: PainDrawingScoreCardProps) {
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
   const [regionCount, setRegionCount] = useState("");
-  const [classification, setClassification] = useState("");
+  const [severity, setSeverity] = useState("");
   const [note, setNote] = useState("");
 
   const hasData = data && data.drawings && Object.keys(data.drawings).length > 0;
@@ -52,18 +75,28 @@ export function PainDrawingScoreCard({
 
   return (
     <>
-      <ScoreCardLayout
-        title={title}
+      <Axis2DetailPanel
         manualAnchor="pain-drawing"
-        isExpanded={isExpanded}
-        onToggleExpand={onToggleExpand}
-        note={note}
-        onNoteChange={setNote}
-        scoreInputs={
-          <>
-            <ScoreInputRow
-              label="Regionen"
-              rangeHint="≥ 0"
+        leftTitle={title}
+        rightTitle="Bewertung"
+        attachedTop={false}
+        left={
+          <div className="grid grid-cols-3 gap-2">
+            {REGION_ORDER.map((regionId) => (
+              <RegionThumbnail
+                key={regionId}
+                imageId={regionId}
+                elements={data.drawings[regionId]?.elements ?? []}
+                onClick={() => setSelectedRegion(regionId)}
+              />
+            ))}
+          </div>
+        }
+        right={
+          <div className="flex flex-col gap-5">
+            <StackedField
+              label="Anzahl Regionen"
+              hint="≥ 0"
               formula={<>= Anzahl Regionen mit ≥ 1 Markierung</>}
             >
               <Input
@@ -73,32 +106,41 @@ export function PainDrawingScoreCard({
                 onChange={(e) => setRegionCount(e.target.value)}
                 min={0}
                 step={1}
-                className="h-8 text-sm w-20"
+                className="h-8 text-sm w-24"
               />
-            </ScoreInputRow>
-            <ScoreInputRow
-              label="Einordnung"
-              formula={<>frei (keine validierten Normwerte)</>}
-            >
-              <Input
-                value={classification}
-                onChange={(e) => setClassification(e.target.value)}
-                placeholder="Einordnung eingeben"
-                className="h-8 text-sm w-[200px]"
-              />
-            </ScoreInputRow>
-          </>
-        }
-        expandedContent={
-          <div className="grid grid-cols-5 gap-2">
-            {REGION_ORDER.map((regionId) => (
-              <RegionThumbnail
-                key={regionId}
-                imageId={regionId}
-                elements={data.drawings[regionId]?.elements ?? []}
-                onClick={() => setSelectedRegion(regionId)}
-              />
-            ))}
+            </StackedField>
+
+            <StackedField label="Schweregrad">
+              <Select
+                value={severity || NONE}
+                onValueChange={(v) => setSeverity(v === NONE ? "" : v)}
+              >
+                <SelectTrigger size="sm" className="w-full max-w-[220px]">
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>—</SelectItem>
+                  {PAIN_DRAWING_SEVERITY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </StackedField>
+
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                Cutoffs (Appendix 3)
+              </span>
+              <CutoffTable label="Schweregrad" rows={PAIN_DRAWING_CUTOFFS} />
+              <p className="text-[11px] text-muted-foreground italic">
+                Keine validierten Normwerte — deskriptive Einteilung aus dem DC/TMD Scoring Manual
+                (Appendix 3).
+              </p>
+            </div>
+
+            <ClinicalNote value={note} onChange={setNote} />
           </div>
         }
       />

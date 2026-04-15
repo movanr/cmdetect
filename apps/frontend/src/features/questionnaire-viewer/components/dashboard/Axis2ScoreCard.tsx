@@ -17,7 +17,6 @@ import {
 import { JFLS20_SUBSCALE_LABELS } from "@cmdetect/questionnaires";
 import { useEffect, useState, type ReactNode } from "react";
 import { ClinicalNote } from "./ClinicalNote";
-import { ScoreInputRow } from "./ScoreInputRow";
 
 const NONE = "__none__";
 
@@ -156,17 +155,19 @@ function FreeTextField({
 
 // ─── Formula helpers ────────────────────────────────────────────────────
 
-function Fraction({ numerator, denominator }: { numerator: ReactNode; denominator: ReactNode }) {
+export function Fraction({
+  numerator,
+  denominator,
+}: {
+  numerator: ReactNode;
+  denominator: ReactNode;
+}) {
   return (
-    <span className="inline-flex flex-col items-center leading-[1.1] align-middle">
-      <span>{numerator}</span>
-      <span className="border-t border-current w-full text-center px-1">{denominator}</span>
+    <span className="inline-flex flex-col items-center leading-[1.15] align-middle">
+      <span className="px-2">{numerator}</span>
+      <span className="border-t border-current w-full text-center px-2">{denominator}</span>
     </span>
   );
-}
-
-function Stack({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col gap-3">{children}</div>;
 }
 
 // ─── PHQ-4 ──────────────────────────────────────────────────────────────
@@ -194,7 +195,7 @@ export function StackedField({
   );
 }
 
-function CutoffTable({
+export function CutoffTable({
   label,
   rows,
 }: {
@@ -232,7 +233,7 @@ export function PHQ4Content({ onSummaryChange }: ContentProps) {
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
-    if (total) entries.push({ label: "Gesamtscore", value: total });
+    if (total) entries.push({ label: "Gesamtwert", value: total });
     const severityLabel = labelFor(PHQ4_SEVERITY_OPTIONS, severity);
     if (severityLabel) entries.push({ label: "Schweregrad der Belastung", value: severityLabel });
     onSummaryChange?.({ entries });
@@ -241,7 +242,18 @@ export function PHQ4Content({ onSummaryChange }: ContentProps) {
   return (
     <>
       <div className="flex flex-col gap-5">
-        <StackedField label="Gesamtscore" hint="0–12">
+        <StackedField
+          label="Gesamtwert"
+          hint="0–12"
+          formula={
+            <span className="flex flex-col gap-1">
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Summe aller Werte</>} denominator={<>4 − fehlend</>} /> · 4
+              </span>
+              <span>maximal 1 fehlend</span>
+            </span>
+          }
+        >
           <NumberField value={total} onChange={setTotal} min={0} max={12} />
         </StackedField>
 
@@ -310,7 +322,18 @@ export function JFLS8Content({ onSummaryChange }: ContentProps) {
   return (
     <>
       <div className="flex flex-col gap-5">
-        <StackedField label="Globalwert" hint="0–10">
+        <StackedField
+          label="Globalwert"
+          hint="0–10"
+          formula={
+            <span className="flex flex-col gap-1">
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Summe aller Werte</>} denominator={<>8 − fehlend</>} />
+              </span>
+              <span>maximal 2 fehlend</span>
+            </span>
+          }
+        >
           <NumberField value={global} onChange={setGlobal} min={0} max={10} step={0.01} />
         </StackedField>
 
@@ -328,7 +351,7 @@ export function JFLS8Content({ onSummaryChange }: ContentProps) {
           </span>
           <JFLS8ReferenceTable />
           <p className="text-[11px] text-muted-foreground italic">
-            Keine Normwerte etabliert — nur deskriptive Studienwerte.
+            Keine validierten Normwerte — deskriptive Studienwerte.
           </p>
         </div>
       </div>
@@ -356,46 +379,58 @@ export function JFLS20Content({ onSummaryChange }: ContentProps) {
 
   return (
     <>
-      <Stack>
-        <ScoreInputRow
+      <div className="flex flex-col gap-5">
+        <StackedField
           label="Globalwert"
-          rangeHint="0–10"
+          hint="0–10"
           formula={
-            <span className="inline-flex items-center gap-1">
-              = <Fraction numerator={<>Σ aller 20 Items</>} denominator={<>n</>} /> (max. 2 fehlend)
+            <span className="flex flex-col gap-1">
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Summe aller 20 Items</>} denominator={<>20 − fehlend</>} />
+              </span>
+              <span>maximal 2 fehlend</span>
             </span>
           }
         >
           <NumberField value={global} onChange={setGlobal} min={0} max={10} step={0.01} />
-        </ScoreInputRow>
-        <ScoreInputRow
+        </StackedField>
+        <StackedField
           label={JFLS20_SUBSCALE_LABELS.mastication.label}
-          rangeHint="0–10"
+          hint="0–10"
           formula={
-            <span className="inline-flex items-center gap-1">
-              = <Fraction numerator={<>Σ Items 1–6</>} denominator={<>n</>} /> (max. 2 fehlend)
+            <span className="flex flex-col gap-1">
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Summe Items 1–6</>} denominator={<>6 − fehlend</>} />
+              </span>
+              <span>maximal 2 fehlend</span>
             </span>
           }
         >
           <NumberField value={mastication} onChange={setMastication} min={0} max={10} step={0.01} />
-        </ScoreInputRow>
-        <ScoreInputRow
+        </StackedField>
+        <StackedField
           label={JFLS20_SUBSCALE_LABELS.mobility.label}
-          rangeHint="0–10"
+          hint="0–10"
           formula={
-            <span className="inline-flex items-center gap-1">
-              = <Fraction numerator={<>Σ Items 7–10</>} denominator={<>n</>} /> (max. 1 fehlend)
+            <span className="flex flex-col gap-1">
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Summe Items 7–10</>} denominator={<>4 − fehlend</>} />
+              </span>
+              <span>maximal 1 fehlend</span>
             </span>
           }
         >
           <NumberField value={mobility} onChange={setMobility} min={0} max={10} step={0.01} />
-        </ScoreInputRow>
-        <ScoreInputRow
+        </StackedField>
+        <StackedField
           label={JFLS20_SUBSCALE_LABELS.communication.label}
-          rangeHint="0–10"
+          hint="0–10"
           formula={
-            <span className="inline-flex items-center gap-1">
-              = <Fraction numerator={<>Σ Items 13–20</>} denominator={<>n</>} /> (max. 2 fehlend)
+            <span className="flex flex-col gap-1">
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Summe Items 13–20</>} denominator={<>8 − fehlend</>} />
+              </span>
+              <span>maximal 2 fehlend</span>
             </span>
           }
         >
@@ -406,11 +441,15 @@ export function JFLS20Content({ onSummaryChange }: ContentProps) {
             max={10}
             step={0.01}
           />
-        </ScoreInputRow>
-        <ScoreInputRow label="Einordnung" formula={<>frei (keine validierten Normwerte)</>}>
-          <FreeTextField value={classification} onChange={setClassification} />
-        </ScoreInputRow>
-      </Stack>
+        </StackedField>
+        <StackedField label="Einordnung">
+          <FreeTextField
+            value={classification}
+            onChange={setClassification}
+            width="w-full max-w-[260px]"
+          />
+        </StackedField>
+      </div>
       <ClinicalNote value={note} onChange={setNote} />
     </>
   );
@@ -425,7 +464,7 @@ export function OBCContent({ onSummaryChange }: ContentProps) {
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
-    if (total) entries.push({ label: "Gesamtscore", value: total });
+    if (total) entries.push({ label: "Gesamtwert", value: total });
     const severityLabel = labelFor(OBC_SEVERITY_OPTIONS, severity);
     if (severityLabel) entries.push({ label: "Risiko-Einstufung", value: severityLabel });
     onSummaryChange?.({ entries });
@@ -434,7 +473,7 @@ export function OBCContent({ onSummaryChange }: ContentProps) {
   return (
     <>
       <div className="flex flex-col gap-5">
-        <StackedField label="Gesamtscore" hint="0–84">
+        <StackedField label="Gesamtwert" hint="0–84" formula={<>= Summe aller Werte</>}>
           <NumberField value={total} onChange={setTotal} min={0} max={84} />
         </StackedField>
 

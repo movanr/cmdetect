@@ -12,7 +12,6 @@ import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { SQAnswers } from "@cmdetect/questionnaires";
 import { isQuestionnaireEnabled, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
-import { useState } from "react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2TabbedView } from "./Axis2TabbedView";
@@ -39,8 +38,6 @@ export function DashboardView({
   caseId,
 }: DashboardViewProps) {
   const { print, isPrinting } = useBackgroundPrint();
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const toggleCard = (id: string) => setExpandedCard((prev) => (prev === id ? null : id));
 
   // Find specific questionnaire responses
   const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
@@ -182,11 +179,7 @@ export function DashboardView({
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
           <div className="space-y-4">
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
-              <PainDrawingScoreCard
-                data={painDrawingData ?? null}
-                isExpanded={expandedCard === QUESTIONNAIRE_ID.PAIN_DRAWING}
-                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.PAIN_DRAWING)}
-              />
+              <PainDrawingScoreCard data={painDrawingData ?? null} />
             )}
 
             <Axis2TabbedView responses={responses} />
