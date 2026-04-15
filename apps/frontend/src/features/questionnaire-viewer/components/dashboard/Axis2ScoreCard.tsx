@@ -23,9 +23,13 @@ const NONE = "__none__";
 
 // ─── Shared types ───────────────────────────────────────────────────────
 
+export interface TabSummaryEntry {
+  label: string;
+  value: string;
+}
+
 export interface TabSummary {
-  mainScore?: string;
-  classification?: string;
+  entries: TabSummaryEntry[];
 }
 
 interface ContentProps {
@@ -227,10 +231,11 @@ export function PHQ4Content({ onSummaryChange }: ContentProps) {
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    onSummaryChange?.({
-      mainScore: total || undefined,
-      classification: labelFor(PHQ4_SEVERITY_OPTIONS, severity),
-    });
+    const entries: TabSummaryEntry[] = [];
+    if (total) entries.push({ label: "Gesamtscore", value: total });
+    const severityLabel = labelFor(PHQ4_SEVERITY_OPTIONS, severity);
+    if (severityLabel) entries.push({ label: "Schweregrad der Belastung", value: severityLabel });
+    onSummaryChange?.({ entries });
   }, [total, severity, onSummaryChange]);
 
   return (
@@ -296,10 +301,10 @@ export function JFLS8Content({ onSummaryChange }: ContentProps) {
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    onSummaryChange?.({
-      mainScore: global || undefined,
-      classification: classification || undefined,
-    });
+    const entries: TabSummaryEntry[] = [];
+    if (global) entries.push({ label: "Globalwert", value: global });
+    if (classification) entries.push({ label: "Einordnung", value: classification });
+    onSummaryChange?.({ entries });
   }, [global, classification, onSummaryChange]);
 
   return (
@@ -343,10 +348,10 @@ export function JFLS20Content({ onSummaryChange }: ContentProps) {
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    onSummaryChange?.({
-      mainScore: global || undefined,
-      classification: classification || undefined,
-    });
+    const entries: TabSummaryEntry[] = [];
+    if (global) entries.push({ label: "Globalwert", value: global });
+    if (classification) entries.push({ label: "Einordnung", value: classification });
+    onSummaryChange?.({ entries });
   }, [global, classification, onSummaryChange]);
 
   return (
@@ -419,10 +424,11 @@ export function OBCContent({ onSummaryChange }: ContentProps) {
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    onSummaryChange?.({
-      mainScore: total || undefined,
-      classification: labelFor(OBC_SEVERITY_OPTIONS, severity),
-    });
+    const entries: TabSummaryEntry[] = [];
+    if (total) entries.push({ label: "Gesamtscore", value: total });
+    const severityLabel = labelFor(OBC_SEVERITY_OPTIONS, severity);
+    if (severityLabel) entries.push({ label: "Risiko-Einstufung", value: severityLabel });
+    onSummaryChange?.({ entries });
   }, [total, severity, onSummaryChange]);
 
   return (

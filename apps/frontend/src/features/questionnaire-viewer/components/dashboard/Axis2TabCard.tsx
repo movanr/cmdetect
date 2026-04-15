@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
+import type { TabSummaryEntry } from "./Axis2ScoreCard";
 
 interface Axis2TabCardProps {
   abbreviation: string;
   title: string;
-  mainScore?: string;
-  classification?: string;
+  entries: TabSummaryEntry[];
   active: boolean;
   completed: boolean;
   onClick: () => void;
@@ -13,8 +13,7 @@ interface Axis2TabCardProps {
 export function Axis2TabCard({
   abbreviation,
   title,
-  mainScore,
-  classification,
+  entries,
   active,
   completed,
   onClick,
@@ -25,7 +24,7 @@ export function Axis2TabCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex-1 min-w-[140px] text-left rounded-md border px-3 py-2.5 transition-colors",
+        "flex-1 min-w-[160px] text-left rounded-md border px-3 py-2.5 transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         active
           ? "bg-card border-border shadow-sm ring-1 ring-primary/40 rounded-b-none relative z-10 -mb-px"
@@ -42,17 +41,16 @@ export function Axis2TabCard({
         )}
       </div>
       <div className="text-[11px] text-muted-foreground truncate mt-0.5">{title}</div>
-      <div className="mt-2 flex items-baseline gap-2">
-        <span
-          className={cn(
-            "text-lg font-mono leading-none",
-            !mainScore && "text-muted-foreground"
-          )}
-        >
-          {mainScore || "—"}
-        </span>
-        {classification && (
-          <span className="text-[11px] text-muted-foreground truncate">{classification}</span>
+      <div className="mt-2 flex flex-col gap-0.5 min-h-[1.25rem]">
+        {entries.length === 0 ? (
+          <span className="text-sm text-muted-foreground">—</span>
+        ) : (
+          entries.map((entry) => (
+            <div key={entry.label} className="text-[11px] leading-tight">
+              <span className="text-muted-foreground">{entry.label}: </span>
+              <span className="font-medium text-foreground">{entry.value}</span>
+            </div>
+          ))
         )}
       </div>
     </button>

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { ClinicalNote } from "./ClinicalNote";
-import { StackedField, type TabSummary } from "./Axis2ScoreCard";
+import { StackedField, type TabSummary, type TabSummaryEntry } from "./Axis2ScoreCard";
 
 const NONE = "__none__";
 
@@ -164,10 +164,13 @@ export function GCPSScoringContent({ onSummaryChange }: GCPSScoringContentProps)
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    onSummaryChange?.({
-      mainScore: gradeLabel(grade),
-    });
-  }, [grade, onSummaryChange]);
+    const entries: TabSummaryEntry[] = [];
+    if (bpTotal) entries.push({ label: "Gesamt BP", value: bpTotal });
+    if (csi) entries.push({ label: "CSI", value: csi });
+    const label = gradeLabel(grade);
+    if (label) entries.push({ label: "Grad", value: label });
+    onSummaryChange?.({ entries });
+  }, [bpTotal, csi, grade, onSummaryChange]);
 
   return (
     <>

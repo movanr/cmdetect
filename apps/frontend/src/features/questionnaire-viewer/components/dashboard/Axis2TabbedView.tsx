@@ -85,10 +85,11 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
     for (const tab of TAB_DEFS) {
       map[tab.id] = (summary) =>
         setSummaries((prev) => {
-          const existing = prev[tab.id];
+          const existing = prev[tab.id]?.entries ?? [];
+          const next = summary.entries;
           if (
-            existing?.mainScore === summary.mainScore &&
-            existing?.classification === summary.classification
+            existing.length === next.length &&
+            existing.every((e, i) => e.label === next[i].label && e.value === next[i].value)
           ) {
             return prev;
           }
@@ -130,8 +131,7 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
               key={tab.id}
               abbreviation={tab.abbreviation}
               title={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
-              mainScore={summary?.mainScore}
-              classification={summary?.classification}
+              entries={summary?.entries ?? []}
               active={activeTab === tab.id}
               completed={completed}
               onClick={() => toggle(tab.id)}
