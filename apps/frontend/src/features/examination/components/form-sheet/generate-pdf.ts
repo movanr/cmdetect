@@ -325,7 +325,7 @@ export async function generateFormSheetPDF(options: PdfOptions): Promise<void> {
 
   sectionHeader("3", SECTION_LABELS.e3.full);
   let px = MARGIN + 2;
-  const openingPattern = getStr(d, "e3.openingPattern");
+  const openingPattern = getStr(d, "e3.pattern");
   for (const key of E3_OPENING_PATTERN_KEYS) {
     px = optionRow(px, y + 0.5, E3_OPENING_PATTERNS[key], openingPattern === key);
   }

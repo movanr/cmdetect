@@ -17,8 +17,8 @@ export function FsE3() {
   return (
     <FormSheetSection number="3" title="Öffnungs- und Schließmuster">
       <FsEnumRadio
-        name="e3.openingPattern"
-        value={getValue("e3.openingPattern") as string | null}
+        name="e3.pattern"
+        value={getValue("e3.pattern") as string | null}
         options={patternOptions}
       />
     </FormSheetSection>
