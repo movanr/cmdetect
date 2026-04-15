@@ -22,7 +22,8 @@ export type {
 } from "./types";
 
 // Components
-export { PainDrawingScoreCard } from "./components/PainDrawingScoreCard";
+export { PainDrawingAnswers } from "./components/PainDrawingAnswers";
+export { PainDrawingScoringContent } from "./components/PainDrawingScoringContent";
 export { PainDrawingViewer } from "./components/PainDrawingViewer";
 export { ReadOnlyCanvas } from "./components/ReadOnlyCanvas";
 export { RegionThumbnail } from "./components/RegionThumbnail";

@@ -6,8 +6,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
-import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
 import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { SQAnswers } from "@cmdetect/questionnaires";
 import { isQuestionnaireEnabled, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
@@ -47,12 +45,6 @@ export function DashboardView({
 
   // Find specific questionnaire responses
   const sqResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.SQ);
-  const painDrawingResponse = responses.find(
-    (r) => r.questionnaireId === QUESTIONNAIRE_ID.PAIN_DRAWING
-  );
-
-  // Extract pain drawing data from response
-  const painDrawingData = painDrawingResponse?.answers as PainDrawingData | undefined;
 
   // Check if SQ screening is negative
   const sqAnswers = sqResponse?.answers as SQAnswers | undefined;
@@ -225,13 +217,7 @@ export function DashboardView({
             Achse 2 - Psychosoziale Bewertung
           </h3>
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
-          <div className="space-y-4">
-            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
-              <PainDrawingScoreCard data={painDrawingData ?? null} />
-            )}
-
-            <Axis2TabbedView responses={responses} />
-          </div>
+          <Axis2TabbedView responses={responses} />
         </section>
 
         {bottomNav}

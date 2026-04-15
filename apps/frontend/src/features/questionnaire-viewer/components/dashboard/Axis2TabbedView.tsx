@@ -5,6 +5,11 @@
  */
 
 import { EmptyState } from "@/components/ui/empty-state";
+import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
+import {
+  PainDrawingAnswers,
+  PainDrawingScoringContent,
+} from "@/features/pain-drawing-evaluation";
 import type {
   GCPS1MAnswers,
   JFLS20Answers,
@@ -44,12 +49,18 @@ interface TabDef {
 }
 
 const TAB_DEFS: TabDef[] = [
+  { id: QUESTIONNAIRE_ID.PAIN_DRAWING, abbreviation: "Schmerzzeichnung" },
   { id: QUESTIONNAIRE_ID.GCPS_1M, abbreviation: "GCPS-1M" },
   { id: QUESTIONNAIRE_ID.PHQ4, abbreviation: "PHQ-4" },
   { id: QUESTIONNAIRE_ID.JFLS8, abbreviation: "JFLS-8" },
   { id: QUESTIONNAIRE_ID.JFLS20, abbreviation: "JFLS-20" },
   { id: QUESTIONNAIRE_ID.OBC, abbreviation: "OBC" },
 ];
+
+function painDrawingCompleted(data: PainDrawingData | null | undefined): boolean {
+  if (!data || !data.drawings) return false;
+  return Object.values(data.drawings).some((d) => (d?.elements?.length ?? 0) > 0);
+}
 
 interface Axis2TabbedViewProps {
   responses: QuestionnaireResponse[];
@@ -101,6 +112,12 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
 
   const renderAnswers = (id: string) => {
     const response = responseFor(id);
+
+    if (id === QUESTIONNAIRE_ID.PAIN_DRAWING) {
+      const data = (response?.answers ?? null) as PainDrawingData | null;
+      return <PainDrawingAnswers data={data} />;
+    }
+
     if (!response || Object.keys(response.answers).length === 0) return <AnswersEmpty />;
     switch (id) {
       case QUESTIONNAIRE_ID.GCPS_1M:
@@ -124,7 +141,10 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
       <div className="flex flex-wrap gap-2 items-stretch">
         {tabs.map((tab) => {
           const response = responseFor(tab.id);
-          const completed = !!response && Object.keys(response.answers).length > 0;
+          const completed =
+            tab.id === QUESTIONNAIRE_ID.PAIN_DRAWING
+              ? painDrawingCompleted(response?.answers as PainDrawingData | undefined)
+              : !!response && Object.keys(response.answers).length > 0;
           const summary = summaries[tab.id];
           return (
             <Axis2TabCard
@@ -160,6 +180,8 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
 
 function renderScoring(id: string, onSummaryChange: (summary: TabSummary) => void) {
   switch (id) {
+    case QUESTIONNAIRE_ID.PAIN_DRAWING:
+      return <PainDrawingScoringContent onSummaryChange={onSummaryChange} />;
     case QUESTIONNAIRE_ID.GCPS_1M:
       return <GCPSScoringContent onSummaryChange={onSummaryChange} />;
     case QUESTIONNAIRE_ID.PHQ4:
