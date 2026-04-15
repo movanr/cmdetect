@@ -1,328 +1,207 @@
 /**
- * Axis 2 Score Cards — EU MDR compliant: displays only arithmetic scores,
- * clinician records their own clinical determination via dropdown.
+ * Axis 2 Score Cards — documentation only.
+ * Each card shows the scoring formulas next to numeric/categorical input fields;
+ * the practitioner enters every score manually. Local state, no persistence.
  */
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   GCPS1MAnswers,
   JFLS20Answers,
-  JFLS20SubscaleScore,
   JFLS8Answers,
   OBCAnswers,
-  PHQ4Score,
 } from "@cmdetect/questionnaires";
-import {
-  calculateGCPS1MScore,
-  calculateJFLS20Score,
-  calculateJFLS8Score,
-  calculateOBCScore,
-  calculatePHQ4Score,
-  JFLS20_SUBSCALE_LABELS,
-  QUESTIONNAIRE_ID,
-} from "@cmdetect/questionnaires";
-import { Link } from "@tanstack/react-router";
-import { BookOpen, ChevronDown, ChevronUp, Info } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState } from "react";
+import { JFLS20_SUBSCALE_LABELS, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import { useState, type ReactNode } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
-import { ClinicianDetermination } from "./ClinicianDetermination";
-import type { DeterminationOption } from "./ClinicianDetermination";
+import { GCPSScoreCard } from "./GCPSScoreCard";
 import {
-  GCPSAnswersTable,
   JFLS20AnswersTable,
   JFLS8AnswersTable,
   OBCAnswersTable,
   PHQ4AnswersTable,
 } from "./questionnaire-tables";
+import { ScoreCardLayout } from "./ScoreCardLayout";
+import { ScoreInputRow } from "./ScoreInputRow";
 
-// ─── Determination options per questionnaire ────────────────────────────
+const NONE = "__none__";
 
-const PHQ4_DETERMINATION_OPTIONS: DeterminationOption[] = [
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+const PHQ4_SEVERITY_OPTIONS: SelectOption[] = [
   { value: "normal", label: "Normal" },
   { value: "leicht", label: "Leicht" },
   { value: "moderat", label: "Moderat" },
   { value: "schwer", label: "Schwer" },
 ];
 
-const GCPS_DETERMINATION_OPTIONS: DeterminationOption[] = [
-  { value: "grad_0", label: "Grad 0" },
-  { value: "grad_1", label: "Grad I" },
-  { value: "grad_2", label: "Grad II" },
-  { value: "grad_3", label: "Grad III" },
-  { value: "grad_4", label: "Grad IV" },
-];
+// ─── Input helpers ──────────────────────────────────────────────────────
 
-// JFLS-8, JFLS-20, OBC: "Norms have not yet been established" (DC/TMD scoring manual)
-// → free text only, no dropdown categories
-
-// ─── Shared score card layout ───────────────────────────────────────────
-
-interface ScoreCardLayoutProps {
-  title: string;
-  manualAnchor?: string;
-  scoreDisplay: React.ReactNode;
-  /** Omit for free-text-only mode (instruments without validated norms) */
-  determinationOptions?: DeterminationOption[];
-  expandedContent: React.ReactNode;
-  isExpanded?: boolean;
-  onToggleExpand?: () => void;
+interface NumberFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  min: number;
+  max: number;
+  step?: number;
+  width?: string;
 }
 
-/**
- * Shared layout: header (title + scores), clinician determination, expandable details.
- */
-function ScoreCardLayout({
-  title,
-  manualAnchor,
-  scoreDisplay,
-  determinationOptions,
-  expandedContent,
-  isExpanded: isExpandedProp,
-  onToggleExpand,
-}: ScoreCardLayoutProps) {
-  const [isExpandedLocal, setIsExpandedLocal] = useState(false);
-  const isExpanded = isExpandedProp ?? isExpandedLocal;
-  const toggleExpand = onToggleExpand ?? (() => setIsExpandedLocal(!isExpandedLocal));
-  const [determination, setDetermination] = useState("");
-  const [freeText, setFreeText] = useState("");
-  const [note, setNote] = useState("");
-
+function NumberField({ value, onChange, min, max, step = 1, width = "w-20" }: NumberFieldProps) {
   return (
-    <Card className="overflow-hidden py-0 gap-0">
-      {/* Header: title + scores */}
-      <div
-        className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-        onClick={toggleExpand}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h4 className="font-medium text-sm leading-tight">{title}</h4>
-            {manualAnchor && (
-              <Link
-                to="/docs/scoring-manual"
-                hash={manualAnchor}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sessionStorage.setItem("docs-return-url", window.location.pathname);
-                }}
-                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
-              >
-                <BookOpen className="h-3 w-3" />
-                Scoring-Anleitung
-              </Link>
-            )}
-          </div>
-          <div className="flex items-start gap-4 shrink-0">
-            {scoreDisplay}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleExpand();
-              }}
-              className="text-muted-foreground h-7 px-2 text-xs shrink-0"
-            >
-              {isExpanded ? (
-                <>
-                  Ausblenden <ChevronUp className="ml-1 h-3 w-3" />
-                </>
-              ) : (
-                <>
-                  Details <ChevronDown className="ml-1 h-3 w-3" />
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Clinician determination */}
-      <ClinicianDetermination
-        options={determinationOptions}
-        value={determinationOptions ? determination : undefined}
-        onValueChange={determinationOptions ? setDetermination : undefined}
-        freeText={determinationOptions ? undefined : freeText}
-        onFreeTextChange={determinationOptions ? undefined : setFreeText}
-        note={note}
-        onNoteChange={setNote}
-      />
-
-      {/* Expandable details */}
-      <div
-        className="grid transition-[grid-template-rows] duration-300 ease-out"
-        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-      >
-        <div className="overflow-hidden">
-          <CardContent className="border-t bg-muted/20 p-4">
-            {expandedContent}
-          </CardContent>
-        </div>
-      </div>
-    </Card>
+    <Input
+      type="number"
+      inputMode="decimal"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      min={min}
+      max={max}
+      step={step}
+      className={`h-8 text-sm ${width}`}
+    />
   );
 }
 
-// ─── JFLS-20 subscale display (plain, no classification highlighting) ───
+interface SelectFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  width?: string;
+}
 
-function JFLS20SubscaleDisplay({
-  label,
-  subscale,
-}: {
-  label: string;
-  subscale: JFLS20SubscaleScore;
-}) {
-  if (!subscale.isValid) {
-    return (
-      <div className="flex items-center gap-1.5">
-        <span className="text-muted-foreground">{label}:</span>
-        <span className="text-muted-foreground text-xs">({subscale.missingCount} fehlend)</span>
-      </div>
-    );
-  }
-
+function SelectField({
+  value,
+  onChange,
+  options,
+  placeholder = "—",
+  width = "w-[140px]",
+}: SelectFieldProps) {
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-muted-foreground">{label}:</span>
-      <span>{subscale.score?.toFixed(1)}</span>
-    </div>
+    <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
+      <SelectTrigger size="sm" className={width}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NONE}>—</SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
-// ─── Individual score card renderers ────────────────────────────────────
+interface FreeTextFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  width?: string;
+  placeholder?: string;
+}
+
+function FreeTextField({
+  value,
+  onChange,
+  width = "w-[200px]",
+  placeholder = "Einordnung eingeben",
+}: FreeTextFieldProps) {
+  return (
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`h-8 text-sm ${width}`}
+    />
+  );
+}
+
+// ─── Formula helpers ────────────────────────────────────────────────────
+
+function Fraction({ numerator, denominator }: { numerator: ReactNode; denominator: ReactNode }) {
+  return (
+    <span className="inline-flex flex-col items-center leading-[1.1] align-middle">
+      <span>{numerator}</span>
+      <span className="border-t border-current w-full text-center px-1">{denominator}</span>
+    </span>
+  );
+}
+
+// ─── Per-questionnaire renderers ────────────────────────────────────────
 
 interface ExpandProps {
   isExpanded?: boolean;
   onToggleExpand?: () => void;
 }
 
-function PHQ4ScoreCard({ title, manualAnchor, score, answers, isExpanded, onToggleExpand }: {
+interface CardCommonProps extends ExpandProps {
   title: string;
   manualAnchor?: string;
-  score: PHQ4Score;
-  answers: Record<string, string>;
-} & ExpandProps) {
+}
+
+function PHQ4ScoreCard({
+  title,
+  manualAnchor,
+  answers,
+  isExpanded,
+  onToggleExpand,
+}: CardCommonProps & { answers: Record<string, string> }) {
+  const [phq2, setPhq2] = useState("");
+  const [gad2, setGad2] = useState("");
+  const [total, setTotal] = useState("");
+  const [severity, setSeverity] = useState("");
+  const [note, setNote] = useState("");
+
   return (
     <ScoreCardLayout
       title={title}
       manualAnchor={manualAnchor}
-      determinationOptions={PHQ4_DETERMINATION_OPTIONS}
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
-      scoreDisplay={
-        <div className="text-right">
-          <div className="text-xl font-bold leading-tight">
-            Gesamt: {score.total}
-            <span className="text-sm text-muted-foreground font-normal">/{score.maxTotal}</span>
-          </div>
-          <div className="flex gap-3 text-xs mt-1">
-            <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">GAD-2:</span>
-              <span>{score.anxiety}/{score.maxAnxiety}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">PHQ-2:</span>
-              <span>{score.depression}/{score.maxDepression}</span>
-            </div>
-          </div>
-        </div>
+      note={note}
+      onNoteChange={setNote}
+      scoreInputs={
+        <>
+          <ScoreInputRow label="PHQ-2" rangeHint="0–6" formula={<>= F1 + F2 (Depression)</>}>
+            <NumberField value={phq2} onChange={setPhq2} min={0} max={6} />
+          </ScoreInputRow>
+          <ScoreInputRow label="GAD-2" rangeHint="0–6" formula={<>= F3 + F4 (Angst)</>}>
+            <NumberField value={gad2} onChange={setGad2} min={0} max={6} />
+          </ScoreInputRow>
+          <ScoreInputRow label="Gesamt" rangeHint="0–12" formula={<>= PHQ-2 + GAD-2</>}>
+            <NumberField value={total} onChange={setTotal} min={0} max={12} />
+          </ScoreInputRow>
+          <ScoreInputRow label="Schweregrad" formula={<>kategorial (Manual)</>}>
+            <SelectField value={severity} onChange={setSeverity} options={PHQ4_SEVERITY_OPTIONS} />
+          </ScoreInputRow>
+        </>
       }
       expandedContent={<PHQ4AnswersTable answers={answers} showPips />}
     />
   );
 }
 
-function GCPSScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
-  title: string;
-  manualAnchor?: string;
-  answers: GCPS1MAnswers;
-} & ExpandProps) {
-  const gcpsScore = calculateGCPS1MScore(answers);
-
-  return (
-    <ScoreCardLayout
-      title={title}
-      manualAnchor={manualAnchor}
-      determinationOptions={GCPS_DETERMINATION_OPTIONS}
-      isExpanded={isExpanded}
-      onToggleExpand={onToggleExpand}
-      scoreDisplay={
-        <div className="text-right">
-          <div className="flex gap-4">
-            <div>
-              <div className="text-xs text-muted-foreground flex items-center gap-1">
-                CSI
-                <Popover>
-                  <PopoverTrigger
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-                  >
-                    <Info className="h-3 w-3" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto text-[11px] text-muted-foreground p-3">
-                    <div className="flex items-center gap-0.5">
-                      <span>CSI =</span>
-                      <span className="inline-flex flex-col items-center leading-[1.1]">
-                        <span>Frage 2 + 3 + 4</span>
-                        <span className="border-t border-current w-full text-center">3</span>
-                      </span>
-                      <span>× 10</span>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="text-xl font-bold leading-tight">
-                {gcpsScore.cpi}
-                <span className="text-sm text-muted-foreground font-normal">/100</span>
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground flex items-center gap-1">
-                BP
-                <Popover>
-                  <PopoverTrigger
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-                  >
-                    <Info className="h-3 w-3" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto text-[11px] text-muted-foreground p-3 space-y-1">
-                    <div>BP = BP Beeinträchtigung + BP Beeinträchtigungstage</div>
-                    <div className="flex items-center gap-0.5">
-                      <span>BP Beeinträchtigung =</span>
-                      <span className="inline-flex flex-col items-center leading-[1.1]">
-                        <span>Frage 6 + 7 + 8</span>
-                        <span className="border-t border-current w-full text-center">3</span>
-                      </span>
-                      <span>× 10 → Punkte</span>
-                    </div>
-                    <div>
-                      BP Tage = Frage 5 (0–1→0, 2→1, 3–5→2, ≥6→3)
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="text-xl font-bold leading-tight">
-                {gcpsScore.totalDisabilityPoints}
-                <span className="text-sm text-muted-foreground font-normal">/6</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-      expandedContent={<GCPSAnswersTable answers={answers} showPips />}
-    />
-  );
-}
-
-function JFLS8ScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
-  title: string;
-  manualAnchor?: string;
-  answers: JFLS8Answers;
-} & ExpandProps) {
-  const jflsScore = calculateJFLS8Score(answers);
+function JFLS8ScoreCard({
+  title,
+  manualAnchor,
+  answers,
+  isExpanded,
+  onToggleExpand,
+}: CardCommonProps & { answers: JFLS8Answers }) {
+  const [global, setGlobal] = useState("");
+  const [classification, setClassification] = useState("");
+  const [note, setNote] = useState("");
 
   return (
     <ScoreCardLayout
@@ -330,34 +209,44 @@ function JFLS8ScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpa
       manualAnchor={manualAnchor}
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
-      scoreDisplay={
-        <div className="text-right">
-          {jflsScore.isValid && jflsScore.globalScore !== null ? (
-            <div className="text-xl font-bold leading-tight">
-              <span className="text-sm text-muted-foreground font-normal">⌀ </span>
-              {jflsScore.globalScore.toFixed(2)}
-              <span className="text-sm text-muted-foreground font-normal">
-                /{jflsScore.maxScore}
+      note={note}
+      onNoteChange={setNote}
+      scoreInputs={
+        <>
+          <ScoreInputRow
+            label="Globalwert"
+            rangeHint="0–10"
+            formula={
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Σ Antworten</>} denominator={<>n</>} /> (max. 2 fehlend)
               </span>
-            </div>
-          ) : (
-            <span className="text-xs text-muted-foreground">
-              Zu viele fehlende Antworten ({jflsScore.missingCount}/8)
-            </span>
-          )}
-        </div>
+            }
+          >
+            <NumberField value={global} onChange={setGlobal} min={0} max={10} step={0.01} />
+          </ScoreInputRow>
+          <ScoreInputRow label="Einordnung" formula={<>frei (keine validierten Normwerte)</>}>
+            <FreeTextField value={classification} onChange={setClassification} />
+          </ScoreInputRow>
+        </>
       }
       expandedContent={<JFLS8AnswersTable answers={answers} showPips />}
     />
   );
 }
 
-function JFLS20ScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
-  title: string;
-  manualAnchor?: string;
-  answers: JFLS20Answers;
-} & ExpandProps) {
-  const jflsScore = calculateJFLS20Score(answers);
+function JFLS20ScoreCard({
+  title,
+  manualAnchor,
+  answers,
+  isExpanded,
+  onToggleExpand,
+}: CardCommonProps & { answers: JFLS20Answers }) {
+  const [global, setGlobal] = useState("");
+  const [mastication, setMastication] = useState("");
+  const [mobility, setMobility] = useState("");
+  const [communication, setCommunication] = useState("");
+  const [classification, setClassification] = useState("");
+  const [note, setNote] = useState("");
 
   return (
     <ScoreCardLayout
@@ -365,50 +254,87 @@ function JFLS20ScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExp
       manualAnchor={manualAnchor}
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
-      scoreDisplay={
-        <div className="text-right">
-          {jflsScore.isValid && jflsScore.globalScore !== null ? (
-            <>
-              <div className="text-xl font-bold leading-tight">
-                <span className="text-sm text-muted-foreground font-normal">⌀ </span>
-                {jflsScore.globalScore.toFixed(2)}
-                <span className="text-sm text-muted-foreground font-normal">
-                  /{jflsScore.maxScore}
-                </span>
-              </div>
-              <div className="text-xs space-y-0.5 mt-1">
-                <JFLS20SubscaleDisplay
-                  label={JFLS20_SUBSCALE_LABELS.mastication.label}
-                  subscale={jflsScore.subscales.mastication}
-                />
-                <JFLS20SubscaleDisplay
-                  label={JFLS20_SUBSCALE_LABELS.mobility.label}
-                  subscale={jflsScore.subscales.mobility}
-                />
-                <JFLS20SubscaleDisplay
-                  label={JFLS20_SUBSCALE_LABELS.communication.label}
-                  subscale={jflsScore.subscales.communication}
-                />
-              </div>
-            </>
-          ) : (
-            <span className="text-xs text-muted-foreground">
-              Zu viele fehlende Antworten ({jflsScore.missingCount}/20)
-            </span>
-          )}
-        </div>
+      note={note}
+      onNoteChange={setNote}
+      scoreInputs={
+        <>
+          <ScoreInputRow
+            label="Globalwert"
+            rangeHint="0–10"
+            formula={
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Σ aller 20 Items</>} denominator={<>n</>} /> (max. 2
+                fehlend)
+              </span>
+            }
+          >
+            <NumberField value={global} onChange={setGlobal} min={0} max={10} step={0.01} />
+          </ScoreInputRow>
+          <ScoreInputRow
+            label={JFLS20_SUBSCALE_LABELS.mastication.label}
+            rangeHint="0–10"
+            formula={
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Σ Items 1–6</>} denominator={<>n</>} /> (max. 2 fehlend)
+              </span>
+            }
+          >
+            <NumberField
+              value={mastication}
+              onChange={setMastication}
+              min={0}
+              max={10}
+              step={0.01}
+            />
+          </ScoreInputRow>
+          <ScoreInputRow
+            label={JFLS20_SUBSCALE_LABELS.mobility.label}
+            rangeHint="0–10"
+            formula={
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Σ Items 7–10</>} denominator={<>n</>} /> (max. 1 fehlend)
+              </span>
+            }
+          >
+            <NumberField value={mobility} onChange={setMobility} min={0} max={10} step={0.01} />
+          </ScoreInputRow>
+          <ScoreInputRow
+            label={JFLS20_SUBSCALE_LABELS.communication.label}
+            rangeHint="0–10"
+            formula={
+              <span className="inline-flex items-center gap-1">
+                = <Fraction numerator={<>Σ Items 13–20</>} denominator={<>n</>} /> (max. 2 fehlend)
+              </span>
+            }
+          >
+            <NumberField
+              value={communication}
+              onChange={setCommunication}
+              min={0}
+              max={10}
+              step={0.01}
+            />
+          </ScoreInputRow>
+          <ScoreInputRow label="Einordnung" formula={<>frei (keine validierten Normwerte)</>}>
+            <FreeTextField value={classification} onChange={setClassification} />
+          </ScoreInputRow>
+        </>
       }
       expandedContent={<JFLS20AnswersTable answers={answers} showPips />}
     />
   );
 }
 
-function OBCScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand }: {
-  title: string;
-  manualAnchor?: string;
-  answers: OBCAnswers;
-} & ExpandProps) {
-  const obcScore = calculateOBCScore(answers);
+function OBCScoreCard({
+  title,
+  manualAnchor,
+  answers,
+  isExpanded,
+  onToggleExpand,
+}: CardCommonProps & { answers: OBCAnswers }) {
+  const [total, setTotal] = useState("");
+  const [classification, setClassification] = useState("");
+  const [note, setNote] = useState("");
 
   return (
     <ScoreCardLayout
@@ -416,15 +342,17 @@ function OBCScoreCard({ title, manualAnchor, answers, isExpanded, onToggleExpand
       manualAnchor={manualAnchor}
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
-      scoreDisplay={
-        <div className="text-right">
-          <div className="text-xl font-bold leading-tight">
-            {obcScore.totalScore}
-            <span className="text-sm text-muted-foreground font-normal">
-              /{obcScore.maxScore}
-            </span>
-          </div>
-        </div>
+      note={note}
+      onNoteChange={setNote}
+      scoreInputs={
+        <>
+          <ScoreInputRow label="Gesamt" rangeHint="0–84" formula={<>= Σ aller 21 Items (je 0–4)</>}>
+            <NumberField value={total} onChange={setTotal} min={0} max={84} />
+          </ScoreInputRow>
+          <ScoreInputRow label="Einordnung" formula={<>frei (keine validierten Normwerte)</>}>
+            <FreeTextField value={classification} onChange={setClassification} />
+          </ScoreInputRow>
+        </>
       }
       expandedContent={<OBCAnswersTable answers={answers} showPips />}
     />
@@ -451,11 +379,8 @@ export function Axis2ScoreCard({
   onToggleExpand,
 }: Axis2ScoreCardProps) {
   const manualAnchor = SCORING_MANUAL_ANCHORS[questionnaireId];
-
-  // Check if answers is empty (null, undefined, or empty object)
   const hasData = answers && Object.keys(answers).length > 0;
 
-  // Placeholder card for future questionnaires or empty submissions (SQ screening negative)
   if (isPlaceholder || !hasData) {
     return (
       <Card className="bg-muted/30">
@@ -472,12 +397,10 @@ export function Axis2ScoreCard({
   }
 
   if (questionnaireId === QUESTIONNAIRE_ID.PHQ4) {
-    const score = calculatePHQ4Score(answers as Record<string, string>);
     return (
       <PHQ4ScoreCard
         title={title}
         manualAnchor={manualAnchor}
-        score={score}
         answers={answers as Record<string, string>}
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
@@ -489,7 +412,6 @@ export function Axis2ScoreCard({
     return (
       <GCPSScoreCard
         title={title}
-        manualAnchor={manualAnchor}
         answers={answers as GCPS1MAnswers}
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}

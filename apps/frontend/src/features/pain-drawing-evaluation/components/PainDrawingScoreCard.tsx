@@ -1,23 +1,21 @@
 /**
- * Pain Drawing Score Card — EU MDR compliant: displays region count only,
- * clinician records their own clinical determination via dropdown.
+ * Pain Drawing Score Card — documentation only.
+ * Practitioner enters the region count and free-text classification manually;
+ * the expanded view shows the patient's drawings as a thumbnail grid.
  */
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ClinicianDetermination } from "@/features/questionnaire-viewer/components/dashboard/ClinicianDetermination";
-import { Link } from "@tanstack/react-router";
-import { BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ScoreCardLayout } from "@/features/questionnaire-viewer/components/dashboard/ScoreCardLayout";
+import { ScoreInputRow } from "@/features/questionnaire-viewer/components/dashboard/ScoreInputRow";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { IMAGE_CONFIGS, REGION_ORDER } from "../constants";
-import { calculatePainDrawingScore } from "../scoring/calculatePainScore";
 import type { ImageId, PainDrawingData } from "../types";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
 import { RegionThumbnail } from "./RegionThumbnail";
-
-// Pain Drawing: "There is no single method for assessing and interpreting" (DC/TMD scoring manual)
-// → free text only, no dropdown categories
 
 interface PainDrawingScoreCardProps {
   data: PainDrawingData | null;
@@ -26,27 +24,19 @@ interface PainDrawingScoreCardProps {
   onToggleExpand?: () => void;
 }
 
-/**
- * Dashboard card component for pain drawing evaluation.
- * Shows region count, clinician determination, and expandable thumbnail grid.
- */
 export function PainDrawingScoreCard({
   data,
   title = "Schmerzzeichnung",
-  isExpanded: isExpandedProp,
+  isExpanded,
   onToggleExpand,
 }: PainDrawingScoreCardProps) {
-  const [isExpandedLocal, setIsExpandedLocal] = useState(false);
-  const isExpanded = isExpandedProp ?? isExpandedLocal;
-  const toggleExpand = onToggleExpand ?? (() => setIsExpandedLocal(!isExpandedLocal));
   const [selectedRegion, setSelectedRegion] = useState<ImageId | null>(null);
-  const [freeText, setFreeText] = useState("");
+  const [regionCount, setRegionCount] = useState("");
+  const [classification, setClassification] = useState("");
   const [note, setNote] = useState("");
 
-  // Check if data is empty (null, undefined, empty object, or missing drawings)
   const hasData = data && data.drawings && Object.keys(data.drawings).length > 0;
 
-  // Handle no data case (including empty submissions from SQ screening negative)
   if (!hasData) {
     return (
       <Card className="bg-muted/30">
@@ -60,99 +50,59 @@ export function PainDrawingScoreCard({
     );
   }
 
-  const score = calculatePainDrawingScore(data);
-
   return (
     <>
-      <Card className="overflow-hidden py-0 gap-0">
-        {/* Header: title + scores */}
-        <div
-          className="p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-          onClick={toggleExpand}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h4 className="font-medium text-sm leading-tight">{title}</h4>
-              <Link
-                to="/docs/scoring-manual"
-                hash="pain-drawing"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sessionStorage.setItem("docs-return-url", window.location.pathname);
-                }}
-                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline mt-0.5"
-              >
-                <BookOpen className="h-3 w-3" />
-                Scoring-Anleitung
-              </Link>
-            </div>
-            <div className="flex items-start gap-4 shrink-0">
-              <div className="text-right">
-                <div className="text-xl font-bold leading-tight">
-                  {score.regionCount}
-                  <span className="text-sm text-muted-foreground font-normal">
-                    {" "}
-                    {score.regionCount === 1 ? "Schmerzgebiet" : "Schmerzgebiete"}
-                  </span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {score.totalElements} Markierung{score.totalElements !== 1 ? "en" : ""}
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleExpand();
-                }}
-                className="text-muted-foreground h-7 px-2 text-xs shrink-0"
-              >
-                {isExpanded ? (
-                  <>
-                    Ausblenden <ChevronUp className="ml-1 h-3 w-3" />
-                  </>
-                ) : (
-                  <>
-                    Details <ChevronDown className="ml-1 h-3 w-3" />
-                  </>
-                )}
-              </Button>
-            </div>
+      <ScoreCardLayout
+        title={title}
+        manualAnchor="pain-drawing"
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
+        note={note}
+        onNoteChange={setNote}
+        scoreInputs={
+          <>
+            <ScoreInputRow
+              label="Regionen"
+              rangeHint="≥ 0"
+              formula={<>= Anzahl Regionen mit ≥ 1 Markierung</>}
+            >
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={regionCount}
+                onChange={(e) => setRegionCount(e.target.value)}
+                min={0}
+                step={1}
+                className="h-8 text-sm w-20"
+              />
+            </ScoreInputRow>
+            <ScoreInputRow
+              label="Einordnung"
+              formula={<>frei (keine validierten Normwerte)</>}
+            >
+              <Input
+                value={classification}
+                onChange={(e) => setClassification(e.target.value)}
+                placeholder="Einordnung eingeben"
+                className="h-8 text-sm w-[200px]"
+              />
+            </ScoreInputRow>
+          </>
+        }
+        expandedContent={
+          <div className="grid grid-cols-5 gap-2">
+            {REGION_ORDER.map((regionId) => (
+              <RegionThumbnail
+                key={regionId}
+                imageId={regionId}
+                elements={data.drawings[regionId]?.elements ?? []}
+                onClick={() => setSelectedRegion(regionId)}
+              />
+            ))}
           </div>
-        </div>
+        }
+      />
 
-        {/* Clinician determination — free text only (no validated norms) */}
-        <ClinicianDetermination
-          freeText={freeText}
-          onFreeTextChange={setFreeText}
-          note={note}
-          onNoteChange={setNote}
-        />
-
-        {/* Expandable details with thumbnail grid */}
-        <div
-          className="grid transition-[grid-template-rows] duration-300 ease-out"
-          style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-        >
-          <div className="overflow-hidden">
-            <CardContent className="border-t bg-muted/20 p-4">
-              <div className="grid grid-cols-5 gap-2">
-                {REGION_ORDER.map((regionId) => (
-                  <RegionThumbnail
-                    key={regionId}
-                    imageId={regionId}
-                    elements={data.drawings[regionId]?.elements ?? []}
-                    onClick={() => setSelectedRegion(regionId)}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </div>
-        </div>
-      </Card>
-
-      {/* Single Region Modal */}
       <Dialog open={!!selectedRegion} onOpenChange={(open) => !open && setSelectedRegion(null)}>
         <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl">
           <DialogHeader>
@@ -166,7 +116,6 @@ export function PainDrawingScoreCard({
           </DialogHeader>
           {selectedRegion && (
             <div className="flex flex-col items-center">
-              {/* Navigation and Canvas */}
               <div className="flex items-center gap-2 w-full">
                 <Button
                   variant="ghost"
@@ -203,11 +152,6 @@ export function PainDrawingScoreCard({
                   <ChevronRight className="size-5" />
                 </Button>
               </div>
-
-              <p className="text-sm text-muted-foreground mt-3">
-                {score.elementCounts[selectedRegion].total} Markierung
-                {score.elementCounts[selectedRegion].total !== 1 ? "en" : ""}
-              </p>
             </div>
           )}
         </DialogContent>
