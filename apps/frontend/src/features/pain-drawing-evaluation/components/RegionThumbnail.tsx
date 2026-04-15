@@ -1,4 +1,3 @@
-import { Check, Minus } from "lucide-react";
 import { IMAGE_CONFIGS, CANVAS_CONFIG } from "../constants";
 import type { DrawingElement, ImageId } from "../types";
 import { ReadOnlyCanvas } from "./ReadOnlyCanvas";
@@ -10,10 +9,7 @@ interface RegionThumbnailProps {
   onClick?: () => void;
 }
 
-/**
- * Small thumbnail card showing a body region with drawing preview
- * Shows checkmark badge if region has drawings, dash if empty
- */
+/** Small thumbnail card showing a body region with drawing preview. */
 export function RegionThumbnail({
   imageId,
   elements,
@@ -21,7 +17,6 @@ export function RegionThumbnail({
   onClick,
 }: RegionThumbnailProps) {
   const config = IMAGE_CONFIGS[imageId];
-  const hasDrawings = elements.length > 0;
 
   return (
     <button
@@ -33,7 +28,6 @@ export function RegionThumbnail({
         ${onClick ? "cursor-pointer hover:border-primary/50 hover:bg-muted/50" : "cursor-default"}
       `}
     >
-      {/* Thumbnail canvas */}
       <div className="w-full overflow-hidden rounded">
         <ReadOnlyCanvas
           imageConfig={config}
@@ -42,25 +36,7 @@ export function RegionThumbnail({
           className="pointer-events-none"
         />
       </div>
-
-      {/* Region label */}
-      <span className="mt-1.5 text-xs font-medium text-center">
-        {config.label}
-      </span>
-
-      {/* Status badge */}
-      <div
-        className={`
-          absolute -top-1 -right-1 size-5 rounded-full flex items-center justify-center
-          ${hasDrawings ? "bg-red-500 text-white" : "bg-gray-300 text-gray-600"}
-        `}
-      >
-        {hasDrawings ? (
-          <Check className="size-3" strokeWidth={3} />
-        ) : (
-          <Minus className="size-3" strokeWidth={3} />
-        )}
-      </div>
+      <span className="mt-1.5 text-xs font-medium text-center">{config.label}</span>
     </button>
   );
 }
