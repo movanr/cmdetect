@@ -150,7 +150,7 @@ export function SQWizardView({
   // Handle edge case: no enabled sections
   if (enabledSections.length === 0) {
     return (
-      <Card>
+      <Card className="max-w-4xl mx-auto">
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground">
             Keine Fragen zur Überprüfung vorhanden.
@@ -162,7 +162,7 @@ export function SQWizardView({
 
   return (
     <FormProvider {...methods}>
-      <Card>
+      <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Symptomfragebogen mit Patient überprüfen</CardTitle>
         </CardHeader>
