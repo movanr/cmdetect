@@ -87,51 +87,6 @@ export function DashboardView({
     </Alert>
   );
 
-  // Shared bottom navigation
-  const bottomNav = showNextStepButton && (
-    <div className="flex justify-end gap-2 pt-2 border-t">
-      {isReviewed ? (
-        <>
-          <Button
-            variant="outline"
-            onClick={onStartReview}
-            title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."
-          >
-            SF erneut überprüfen
-          </Button>
-          {onContinueToExamination && (
-            <Button onClick={onContinueToExamination}>
-              Weiter zur Untersuchung
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )}
-        </>
-      ) : (
-        <>
-          {onSkipReview && (
-            <Button
-              variant="outline"
-              onClick={onSkipReview}
-              disabled={isSkippingReview}
-              title="Überprüfung überspringen und direkt zur Untersuchung fortfahren."
-            >
-              Überprüfung überspringen
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )}
-          <Button
-            onClick={onStartReview}
-            disabled={isSkippingReview}
-            title="Antworten gemeinsam mit dem Patienten durchgehen und Lokalisationen bestätigen."
-          >
-            SF mit Patient überprüfen
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </>
-      )}
-    </div>
-  );
-
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -219,8 +174,6 @@ export function DashboardView({
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
           <Axis2TabbedView responses={responses} />
         </section>
-
-        {bottomNav}
       </CardContent>
     </Card>
   );
