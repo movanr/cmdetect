@@ -84,7 +84,9 @@ export function ScoreCardLayout({
         <div className="flex flex-col">{scoreInputs}</div>
       </div>
 
-      <ClinicalNote value={note} onChange={onNoteChange} />
+      <div className="px-4">
+        <ClinicalNote value={note} onChange={onNoteChange} />
+      </div>
 
       <div
         className="grid transition-[grid-template-rows] duration-300 ease-out"

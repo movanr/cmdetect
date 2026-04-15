@@ -1,0 +1,175 @@
+/**
+ * Axis 2 tabbed view — horizontal selector row above a paper-split detail panel.
+ * Each tab card selects one questionnaire; the detail panel shows the patient's
+ * answers on the left sheet and the practitioner's manual scoring form on the right.
+ */
+
+import { EmptyState } from "@/components/ui/empty-state";
+import type {
+  GCPS1MAnswers,
+  JFLS20Answers,
+  JFLS8Answers,
+  OBCAnswers,
+} from "@cmdetect/questionnaires";
+import {
+  isQuestionnaireEnabled,
+  QUESTIONNAIRE_ID,
+  QUESTIONNAIRE_TITLES,
+} from "@cmdetect/questionnaires";
+import { ClipboardList } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
+import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
+import { Axis2DetailPanel } from "./Axis2DetailPanel";
+import { Axis2TabCard } from "./Axis2TabCard";
+import {
+  JFLS20Content,
+  JFLS8Content,
+  OBCContent,
+  PHQ4Content,
+  type TabSummary,
+} from "./Axis2ScoreCard";
+import { GCPSScoringContent } from "./GCPSScoreCard";
+import {
+  GCPSAnswersTable,
+  JFLS20AnswersTable,
+  JFLS8AnswersTable,
+  OBCAnswersTable,
+  PHQ4AnswersTable,
+} from "./questionnaire-tables";
+
+interface TabDef {
+  id: string;
+  abbreviation: string;
+}
+
+const TAB_DEFS: TabDef[] = [
+  { id: QUESTIONNAIRE_ID.GCPS_1M, abbreviation: "GCPS-1M" },
+  { id: QUESTIONNAIRE_ID.PHQ4, abbreviation: "PHQ-4" },
+  { id: QUESTIONNAIRE_ID.JFLS8, abbreviation: "JFLS-8" },
+  { id: QUESTIONNAIRE_ID.JFLS20, abbreviation: "JFLS-20" },
+  { id: QUESTIONNAIRE_ID.OBC, abbreviation: "OBC" },
+];
+
+interface Axis2TabbedViewProps {
+  responses: QuestionnaireResponse[];
+}
+
+function AnswersEmpty() {
+  return (
+    <div className="py-6">
+      <EmptyState
+        icon={ClipboardList}
+        title="Noch keine Antworten eingereicht"
+        description="Manuelle Scoring-Eingabe ist weiterhin möglich (z. B. von Papierbogen)."
+      />
+    </div>
+  );
+}
+
+export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
+  const tabs = useMemo(() => TAB_DEFS.filter((t) => isQuestionnaireEnabled(t.id)), []);
+
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [summaries, setSummaries] = useState<Record<string, TabSummary>>({});
+
+  const responseFor = useCallback(
+    (id: string) => responses.find((r) => r.questionnaireId === id),
+    [responses]
+  );
+
+  const toggle = (id: string) => setActiveTab((prev) => (prev === id ? null : id));
+
+  const summarySetters = useMemo<Record<string, (summary: TabSummary) => void>>(() => {
+    const map: Record<string, (summary: TabSummary) => void> = {};
+    for (const tab of TAB_DEFS) {
+      map[tab.id] = (summary) =>
+        setSummaries((prev) => {
+          const existing = prev[tab.id];
+          if (
+            existing?.mainScore === summary.mainScore &&
+            existing?.classification === summary.classification
+          ) {
+            return prev;
+          }
+          return { ...prev, [tab.id]: summary };
+        });
+    }
+    return map;
+  }, []);
+
+  const renderAnswers = (id: string) => {
+    const response = responseFor(id);
+    if (!response || Object.keys(response.answers).length === 0) return <AnswersEmpty />;
+    switch (id) {
+      case QUESTIONNAIRE_ID.GCPS_1M:
+        return <GCPSAnswersTable answers={response.answers as GCPS1MAnswers} showPips />;
+      case QUESTIONNAIRE_ID.PHQ4:
+        return <PHQ4AnswersTable answers={response.answers as Record<string, string>} showPips />;
+      case QUESTIONNAIRE_ID.JFLS8:
+        return <JFLS8AnswersTable answers={response.answers as JFLS8Answers} showPips />;
+      case QUESTIONNAIRE_ID.JFLS20:
+        return <JFLS20AnswersTable answers={response.answers as JFLS20Answers} showPips />;
+      case QUESTIONNAIRE_ID.OBC:
+        return <OBCAnswersTable answers={response.answers as OBCAnswers} showPips />;
+      default:
+        return <AnswersEmpty />;
+    }
+  };
+
+  return (
+    <div className="space-y-0">
+      {/* Tab row */}
+      <div className="flex flex-wrap gap-2 items-stretch">
+        {tabs.map((tab) => {
+          const response = responseFor(tab.id);
+          const completed = !!response && Object.keys(response.answers).length > 0;
+          const summary = summaries[tab.id];
+          return (
+            <Axis2TabCard
+              key={tab.id}
+              abbreviation={tab.abbreviation}
+              title={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
+              mainScore={summary?.mainScore}
+              classification={summary?.classification}
+              active={activeTab === tab.id}
+              completed={completed}
+              onClick={() => toggle(tab.id)}
+            />
+          );
+        })}
+      </div>
+
+      {/* Detail panels — all mounted to preserve per-questionnaire local state across switches.
+          Only the active one is visible; outer wrapper is hidden entirely when no tab is active. */}
+      <div className={activeTab ? "pt-4" : "hidden"}>
+        {tabs.map((tab) => (
+          <div key={tab.id} className={activeTab === tab.id ? "block" : "hidden"}>
+            <Axis2DetailPanel
+              manualAnchor={SCORING_MANUAL_ANCHORS[tab.id]}
+              left={renderAnswers(tab.id)}
+              right={renderScoring(tab.id, summarySetters[tab.id])}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderScoring(id: string, onSummaryChange: (summary: TabSummary) => void) {
+  switch (id) {
+    case QUESTIONNAIRE_ID.GCPS_1M:
+      return <GCPSScoringContent onSummaryChange={onSummaryChange} />;
+    case QUESTIONNAIRE_ID.PHQ4:
+      return <PHQ4Content onSummaryChange={onSummaryChange} />;
+    case QUESTIONNAIRE_ID.JFLS8:
+      return <JFLS8Content onSummaryChange={onSummaryChange} />;
+    case QUESTIONNAIRE_ID.JFLS20:
+      return <JFLS20Content onSummaryChange={onSummaryChange} />;
+    case QUESTIONNAIRE_ID.OBC:
+      return <OBCContent onSummaryChange={onSummaryChange} />;
+    default:
+      return null;
+  }
+}

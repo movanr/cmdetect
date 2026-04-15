@@ -29,7 +29,6 @@ import {
   isQuestionnaireEnabled,
   JFLS20_QUESTION_ORDER,
   JFLS20_QUESTIONS,
-  JFLS20_REFERENCE_VALUES,
   JFLS20_SCALE_LABELS,
   JFLS20_SUBSCALE_LABELS,
   JFLS8_QUESTION_ORDER,
@@ -338,7 +337,6 @@ export function GCPSAnswersTable({
   answers: GCPS1MAnswers;
   showPips?: boolean;
 }) {
-  const s = calculateGCPS1MScore(answers);
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
@@ -368,15 +366,6 @@ export function GCPSAnswersTable({
             </tr>
           );
         })}
-        {/* Score summary row */}
-        <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>
-            Auswertung
-          </td>
-          <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
-            CSI {s.cpi}, {s.totalDisabilityPoints} BP
-          </td>
-        </tr>
       </tbody>
     </table>
   );
@@ -391,8 +380,6 @@ export function PHQ4AnswersTable({
   answers: Record<string, string>;
   showPips?: boolean;
 }) {
-  const s = calculatePHQ4Score(answers);
-
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
@@ -420,17 +407,6 @@ export function PHQ4AnswersTable({
             </tr>
           );
         })}
-        <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>
-            Gesamt
-          </td>
-          <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
-            {s.total} / {s.maxTotal}
-          </td>
-          <td className={`${tdMuted} whitespace-nowrap`}>
-            GAD-2 {s.anxiety}/{s.maxAnxiety}, PHQ-2 {s.depression}/{s.maxDepression}
-          </td>
-        </tr>
       </tbody>
     </table>
   );
@@ -445,8 +421,6 @@ export function JFLS8AnswersTable({
   answers: JFLS8Answers;
   showPips?: boolean;
 }) {
-  const s = calculateJFLS8Score(answers);
-
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
@@ -476,16 +450,6 @@ export function JFLS8AnswersTable({
             </tr>
           );
         })}
-        {s.isValid && s.globalScore !== null && (
-          <tr className="border-t-2 border-gray-300">
-            <td colSpan={2} className={`${tdClass} font-semibold`}>
-              Gesamt
-            </td>
-            <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
-              &#x2300; {s.globalScore.toFixed(2)}
-            </td>
-          </tr>
-        )}
       </tbody>
     </table>
   );
@@ -500,8 +464,6 @@ export function JFLS20AnswersTable({
   answers: JFLS20Answers;
   showPips?: boolean;
 }) {
-  const s = calculateJFLS20Score(answers);
-
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
@@ -531,39 +493,6 @@ export function JFLS20AnswersTable({
             </tr>
           );
         })}
-        {s.isValid && s.globalScore !== null && (
-          <>
-            <tr className="border-t-2 border-gray-300">
-              <td colSpan={2} className={`${tdClass} font-semibold`}>
-                Gesamt
-              </td>
-              <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
-                &#x2300; {s.globalScore.toFixed(2)}
-              </td>
-            </tr>
-            {(["mastication", "mobility", "communication"] as const).map((key) => {
-              const sub = s.subscales[key];
-              const ref = JFLS20_REFERENCE_VALUES[key];
-              if (!sub.isValid || sub.score === null) return null;
-              const elevated = sub.score >= ref.chronicTMD.mean;
-              return (
-                <tr key={key} className={bodyRowClass}>
-                  <td colSpan={2} className={tdMuted}>
-                    {JFLS20_SUBSCALE_LABELS[key].label}
-                    {elevated && (
-                      <span className="text-gray-700 ml-1">
-                        (≥ {ref.chronicTMD.mean.toFixed(1)} Ref. TMD)
-                      </span>
-                    )}
-                  </td>
-                  <td className={`${tdClass} text-right ${elevated ? "font-semibold" : ""}`}>
-                    {sub.score.toFixed(1)}
-                  </td>
-                </tr>
-              );
-            })}
-          </>
-        )}
       </tbody>
     </table>
   );
@@ -578,7 +507,6 @@ export function OBCAnswersTable({
   answers: OBCAnswers;
   showPips?: boolean;
 }) {
-  const s = calculateOBCScore(answers);
   const sleepQuestions = OBC_QUESTION_ORDER.filter((id) => OBC_QUESTIONS[id].section === "sleep");
   const wakingQuestions = OBC_QUESTION_ORDER.filter((id) => OBC_QUESTIONS[id].section === "waking");
 
@@ -634,15 +562,6 @@ export function OBCAnswersTable({
       <tbody>
         {renderSection("Schlaf-Aktivitäten", sleepQuestions)}
         {renderSection("Wach-Aktivitäten", wakingQuestions)}
-        <tr className="border-t-2 border-gray-300">
-          <td colSpan={2} className={`${tdClass} font-semibold`}>
-            Gesamt
-          </td>
-          <td className={`${tdClass} text-right font-semibold whitespace-nowrap`}>
-            {s.totalScore} / {s.maxScore}
-          </td>
-          <td />
-        </tr>
       </tbody>
     </table>
   );

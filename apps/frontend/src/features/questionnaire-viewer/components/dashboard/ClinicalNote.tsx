@@ -7,7 +7,7 @@ interface ClinicalNoteProps {
 
 export function ClinicalNote({ value, onChange }: ClinicalNoteProps) {
   return (
-    <div className="border-t px-4 py-3">
+    <div className="border-t py-3 mt-4">
       <p className="text-xs font-medium text-muted-foreground mb-2">
         Klinische Anmerkung (optional)
       </p>

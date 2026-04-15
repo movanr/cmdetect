@@ -10,12 +10,12 @@ import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
 import { PainDrawingScoreCard } from "@/features/pain-drawing-evaluation";
 import { useBackgroundPrint } from "@/hooks/use-background-print";
 import type { SQAnswers } from "@cmdetect/questionnaires";
-import { isQuestionnaireEnabled, QUESTIONNAIRE_ID, QUESTIONNAIRE_TITLES } from "@cmdetect/questionnaires";
+import { isQuestionnaireEnabled, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { ArrowRight, CheckCircle2, ClipboardList, Printer } from "lucide-react";
 import { useState } from "react";
 import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
-import { Axis2ScoreCard } from "./Axis2ScoreCard";
+import { Axis2TabbedView } from "./Axis2TabbedView";
 import { DashboardInfoBlock } from "./DashboardInfoBlock";
 import { SQStatusCard } from "./SQStatusCard";
 
@@ -47,11 +47,6 @@ export function DashboardView({
   const painDrawingResponse = responses.find(
     (r) => r.questionnaireId === QUESTIONNAIRE_ID.PAIN_DRAWING
   );
-  const phq4Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
-  const gcps1mResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
-  const jfls8Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
-  const jfls20Response = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20);
-  const obcResponse = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.OBC);
 
   // Extract pain drawing data from response
   const painDrawingData = painDrawingResponse?.answers as PainDrawingData | undefined;
@@ -185,7 +180,7 @@ export function DashboardView({
             Achse 2 - Psychosoziale Bewertung
           </h3>
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
-          <div className="space-y-3">
+          <div className="space-y-4">
             {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PAIN_DRAWING) && (
               <PainDrawingScoreCard
                 data={painDrawingData ?? null}
@@ -194,59 +189,7 @@ export function DashboardView({
               />
             )}
 
-            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.GCPS_1M) && (
-              <Axis2ScoreCard
-                questionnaireId={QUESTIONNAIRE_ID.GCPS_1M}
-                title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.GCPS_1M]}
-                answers={
-                  gcps1mResponse
-                    ? (gcps1mResponse.answers as Record<string, string | number>)
-                    : null
-                }
-                isExpanded={expandedCard === QUESTIONNAIRE_ID.GCPS_1M}
-                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.GCPS_1M)}
-              />
-            )}
-
-            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS8) && (
-              <Axis2ScoreCard
-                questionnaireId={QUESTIONNAIRE_ID.JFLS8}
-                title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.JFLS8]}
-                answers={jfls8Response ? (jfls8Response.answers as Record<string, string>) : null}
-                isExpanded={expandedCard === QUESTIONNAIRE_ID.JFLS8}
-                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.JFLS8)}
-              />
-            )}
-
-            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.PHQ4) && (
-              <Axis2ScoreCard
-                questionnaireId={QUESTIONNAIRE_ID.PHQ4}
-                title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.PHQ4]}
-                answers={phq4Response ? (phq4Response.answers as Record<string, string>) : null}
-                isExpanded={expandedCard === QUESTIONNAIRE_ID.PHQ4}
-                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.PHQ4)}
-              />
-            )}
-
-            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.OBC) && (
-              <Axis2ScoreCard
-                questionnaireId={QUESTIONNAIRE_ID.OBC}
-                title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.OBC]}
-                answers={obcResponse ? (obcResponse.answers as Record<string, string>) : null}
-                isExpanded={expandedCard === QUESTIONNAIRE_ID.OBC}
-                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.OBC)}
-              />
-            )}
-
-            {isQuestionnaireEnabled(QUESTIONNAIRE_ID.JFLS20) && (
-              <Axis2ScoreCard
-                questionnaireId={QUESTIONNAIRE_ID.JFLS20}
-                title={QUESTIONNAIRE_TITLES[QUESTIONNAIRE_ID.JFLS20]}
-                answers={jfls20Response ? (jfls20Response.answers as Record<string, string>) : null}
-                isExpanded={expandedCard === QUESTIONNAIRE_ID.JFLS20}
-                onToggleExpand={() => toggleCard(QUESTIONNAIRE_ID.JFLS20)}
-              />
-            )}
+            <Axis2TabbedView responses={responses} />
           </div>
         </section>
 

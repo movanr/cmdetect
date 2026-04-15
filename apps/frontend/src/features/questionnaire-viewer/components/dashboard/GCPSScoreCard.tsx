@@ -1,6 +1,7 @@
 /**
- * GCPS-1M Scoring Card — collapses like other Axis 2 cards.
- * Collapsed: only the Grad dropdown. Expanded: full BP + CSI + Grad tables + answers.
+ * GCPS-1M scoring body. Rendered inside Axis2DetailPanel (right sheet).
+ * Kept in a single scrollable column pending a dedicated redesign
+ * for the multi-step BP + CSI + Grade flow.
  */
 
 import { Input } from "@/components/ui/input";
@@ -11,11 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { GCPS1MAnswers } from "@cmdetect/questionnaires";
-import { useState, type ReactNode } from "react";
-import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
-import { GCPSAnswersTable } from "./questionnaire-tables";
-import { ScoreCardLayout } from "./ScoreCardLayout";
+import { useEffect, useState, type ReactNode } from "react";
+import { ClinicalNote } from "./ClinicalNote";
+import type { TabSummary } from "./Axis2ScoreCard";
 
 const NONE = "__none__";
 
@@ -48,6 +47,10 @@ const GCPS_GRADE_TABLE = [
   { grade: "III", label: "Mäßige Einschränkung", csi: "—", bp: "3–4" },
   { grade: "IV", label: "Hochgradige Einschränkung", csi: "—", bp: "5–6" },
 ] as const;
+
+function gradeLabel(value: string): string | undefined {
+  return GCPS_GRADE_OPTIONS.find((o) => o.value === value)?.label;
+}
 
 // ─── Small helpers ──────────────────────────────────────────────────────
 
@@ -153,23 +156,13 @@ function GradeTable() {
   );
 }
 
-// ─── Main component ─────────────────────────────────────────────────────
+// ─── Main content component ─────────────────────────────────────────────
 
-interface GCPSScoreCardProps {
-  title: string;
-  answers: GCPS1MAnswers;
-  isExpanded?: boolean;
-  onToggleExpand?: () => void;
+interface GCPSScoringContentProps {
+  onSummaryChange?: (summary: TabSummary) => void;
 }
 
-export function GCPSScoreCard({
-  title,
-  answers,
-  isExpanded,
-  onToggleExpand,
-}: GCPSScoreCardProps) {
-  const manualAnchor = SCORING_MANUAL_ANCHORS["gcps-1m"];
-
+export function GCPSScoringContent({ onSummaryChange }: GCPSScoringContentProps) {
   const [daysRaw, setDaysRaw] = useState("");
   const [bpA, setBpA] = useState("");
   const [interferencePunkte, setInterferencePunkte] = useState("");
@@ -179,17 +172,18 @@ export function GCPSScoreCard({
   const [grade, setGrade] = useState("");
   const [note, setNote] = useState("");
 
+  useEffect(() => {
+    onSummaryChange?.({
+      mainScore: gradeLabel(grade),
+    });
+  }, [grade, onSummaryChange]);
+
   return (
-    <ScoreCardLayout
-      title={title}
-      manualAnchor={manualAnchor}
-      isExpanded={isExpanded}
-      onToggleExpand={onToggleExpand}
-      note={note}
-      onNoteChange={setNote}
-      scoreInputs={
-        <div className="flex items-center gap-2 py-1">
-          <span className="text-sm font-medium">Grad:</span>
+    <>
+      <div className="space-y-6">
+        {/* Grad selector (final result) */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium w-32 shrink-0">Grad</span>
           <Select value={grade || NONE} onValueChange={(v) => setGrade(v === NONE ? "" : v)}>
             <SelectTrigger size="sm" className="w-[160px]">
               <SelectValue placeholder="—" />
@@ -204,91 +198,81 @@ export function GCPSScoreCard({
             </SelectContent>
           </Select>
         </div>
-      }
-      expandedContent={
-        <div className="space-y-6">
-          {/* (1) BP */}
-          <div className="space-y-3">
-            <p className="text-sm font-medium">(1) Beeinträchtigungspunkte (BP)</p>
 
-            <div className="border border-border rounded-md p-3 space-y-2 bg-background">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-xs font-medium">(a) Anzahl der Tage</p>
-                <span className="text-[11px] text-muted-foreground">aus Frage 5</span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap text-sm">
-                <span className="text-muted-foreground">Anzahl:</span>
-                <NumberField value={daysRaw} onChange={setDaysRaw} min={0} max={31} />
-                <span className="text-muted-foreground">Tage</span>
-              </div>
-              <BandingTable headers={["Tage", "BP"]} rows={GCPS_DAYS_BANDING} />
-              <div className="flex items-baseline justify-end gap-2 pt-2 border-t border-border">
-                <span className="text-xs text-muted-foreground">(a) =</span>
-                <NumberField value={bpA} onChange={setBpA} min={0} max={3} />
-                <span className="text-xs">BP</span>
-              </div>
+        {/* (1) BP */}
+        <div className="space-y-3">
+          <p className="text-sm font-medium">(1) Beeinträchtigungspunkte (BP)</p>
+
+          <div className="border border-border rounded-md p-3 space-y-2 bg-background">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-xs font-medium">(a) Anzahl der Tage</p>
+              <span className="text-[11px] text-muted-foreground">aus Frage 5</span>
             </div>
-
-            <div className="border border-border rounded-md p-3 space-y-2 bg-background">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-xs font-medium">(b) Subjektive Beeinträchtigung</p>
-                <span className="text-[11px] text-muted-foreground">aus Fragen 6–8</span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap text-sm">
-                <span>
-                  <Fraction numerator={<>F6 + F7 + F8</>} denominator={<>3</>} /> · 10 =
-                </span>
-                <NumberField
-                  value={interferencePunkte}
-                  onChange={setInterferencePunkte}
-                  min={0}
-                  max={100}
-                />
-                <span className="text-muted-foreground">Punkte</span>
-              </div>
-              <BandingTable headers={["Punkte", "BP"]} rows={GCPS_INTERFERENCE_BANDING} />
-              <div className="flex items-baseline justify-end gap-2 pt-2 border-t border-border">
-                <span className="text-xs text-muted-foreground">(b) =</span>
-                <NumberField value={bpB} onChange={setBpB} min={0} max={3} />
-                <span className="text-xs">BP</span>
-              </div>
+            <div className="flex items-center gap-2 flex-wrap text-sm">
+              <span className="text-muted-foreground">Anzahl:</span>
+              <NumberField value={daysRaw} onChange={setDaysRaw} min={0} max={31} />
+              <span className="text-muted-foreground">Tage</span>
             </div>
-
-            <div className="flex items-baseline justify-end gap-2">
-              <span className="text-sm font-medium">Gesamt: (a + b) =</span>
-              <NumberField value={bpTotal} onChange={setBpTotal} min={0} max={6} />
-              <span className="text-sm">BP</span>
+            <BandingTable headers={["Tage", "BP"]} rows={GCPS_DAYS_BANDING} />
+            <div className="flex items-baseline justify-end gap-2 pt-2 border-t border-border">
+              <span className="text-xs text-muted-foreground">(a) =</span>
+              <NumberField value={bpA} onChange={setBpA} min={0} max={3} />
+              <span className="text-xs">BP</span>
             </div>
           </div>
 
-          {/* (2) CSI */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">(2) Charakteristische Schmerzintensität</p>
-            <p className="text-xs italic text-muted-foreground">
-              Nur nötig, wenn Gesamt-BP &lt; 3.
-            </p>
-            <div className="flex items-center gap-2 flex-wrap text-sm pl-3">
+          <div className="border border-border rounded-md p-3 space-y-2 bg-background">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-xs font-medium">(b) Subjektive Beeinträchtigung</p>
+              <span className="text-[11px] text-muted-foreground">aus Fragen 6–8</span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap text-sm">
               <span>
-                CSI = <Fraction numerator={<>F2 + F3 + F4</>} denominator={<>3</>} /> · 10 =
+                <Fraction numerator={<>F6 + F7 + F8</>} denominator={<>3</>} /> · 10 =
               </span>
-              <NumberField value={csi} onChange={setCsi} min={0} max={100} />
-              <span className="text-muted-foreground">(0–100)</span>
+              <NumberField
+                value={interferencePunkte}
+                onChange={setInterferencePunkte}
+                min={0}
+                max={100}
+              />
+              <span className="text-muted-foreground">Punkte</span>
+            </div>
+            <BandingTable headers={["Punkte", "BP"]} rows={GCPS_INTERFERENCE_BANDING} />
+            <div className="flex items-baseline justify-end gap-2 pt-2 border-t border-border">
+              <span className="text-xs text-muted-foreground">(b) =</span>
+              <NumberField value={bpB} onChange={setBpB} min={0} max={3} />
+              <span className="text-xs">BP</span>
             </div>
           </div>
 
-          {/* (3) Grad-Bestimmung */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">(3) Grad-Bestimmung</p>
-            <GradeTable />
-          </div>
-
-          {/* Answers */}
-          <div>
-            <p className="text-sm font-medium mb-2">Antworten</p>
-            <GCPSAnswersTable answers={answers} showPips />
+          <div className="flex items-baseline justify-end gap-2">
+            <span className="text-sm font-medium">Gesamt: (a + b) =</span>
+            <NumberField value={bpTotal} onChange={setBpTotal} min={0} max={6} />
+            <span className="text-sm">BP</span>
           </div>
         </div>
-      }
-    />
+
+        {/* (2) CSI */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">(2) Charakteristische Schmerzintensität</p>
+          <p className="text-xs italic text-muted-foreground">Nur nötig, wenn Gesamt-BP &lt; 3.</p>
+          <div className="flex items-center gap-2 flex-wrap text-sm pl-3">
+            <span>
+              CSI = <Fraction numerator={<>F2 + F3 + F4</>} denominator={<>3</>} /> · 10 =
+            </span>
+            <NumberField value={csi} onChange={setCsi} min={0} max={100} />
+            <span className="text-muted-foreground">(0–100)</span>
+          </div>
+        </div>
+
+        {/* (3) Grad-Bestimmung */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">(3) Grad-Bestimmung</p>
+          <GradeTable />
+        </div>
+      </div>
+      <ClinicalNote value={note} onChange={setNote} />
+    </>
   );
 }
