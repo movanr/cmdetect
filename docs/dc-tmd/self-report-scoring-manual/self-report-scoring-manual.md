@@ -520,9 +520,9 @@ Sumscore = \_\_\_
 
 ### Pain Drawing
 
-| Number of body areas with pain | 0    | 1    | 2        | 3   | 4      | 5      | >5     |
-| ------------------------------ | ---- | ---- | -------- | --- | ------ | ------ | ------ |
-| Severity                       | NONE | MILD | MODERATE | —   | SEVERE | SEVERE | SEVERE |
+| Number of body areas with pain | 0    | 1    | 2        | 3      | 4      | 5      | >5     |
+| ------------------------------ | ---- | ---- | -------- | ------ | ------ | ------ | ------ |
+| Severity                       | NONE | MILD | MODERATE | SEVERE | SEVERE | SEVERE | SEVERE |
 
 ### GCPS
 
@@ -568,6 +568,7 @@ All subscales (Mastication, Mobility, Communication, Global): 0-10 scale
 
 ## Appendix 4: Changes to this document
 
+- **2026/04/15:** In Appendix 3, the Pain Drawing severity table had a transcription error: the cell for 3 body areas was rendered as "—" (gap), which did not match the source PDF. Corrected so that SEVERE spans 3 through >5.
 - **2021/03/30:** For the TMD Pain Screener, the threshold cutoffs were indicated incorrectly using the ">" operation; this was corrected to "≥".
 - **2021/03/30:** For the OBC, scoring of each response option was augmented by indicating that the range is 0-4.
 - **2018/10/30:** In Appendix 2, the Total disability points computation section omitted the score values for Grade IV; that information was, however, available in Appendix 1.

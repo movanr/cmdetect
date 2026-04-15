@@ -40,8 +40,7 @@ const PAIN_DRAWING_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
   ["0", "Keine"],
   ["1", "Leicht"],
   ["2", "Moderat"],
-  ["3", "—"],
-  ["≥ 4", "Schwer"],
+  ["≥ 3", "Schwer"],
 ];
 
 interface PainDrawingScoreCardProps {
@@ -95,9 +94,9 @@ export function PainDrawingScoreCard({
         right={
           <div className="flex flex-col gap-5">
             <StackedField
-              label="Anzahl Regionen"
+              label="Anzahl Körperbereiche mit Schmerz"
               hint="≥ 0"
-              formula={<>= Anzahl Regionen mit ≥ 1 Markierung</>}
+              formula={<>= distinkte Körperbereiche mit Schmerz</>}
             >
               <Input
                 type="number"
