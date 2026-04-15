@@ -235,7 +235,14 @@ export function formatOfficeUse(
   return sides.join(", ");
 }
 
-export function SQAnswersTable({ answers }: { answers: Record<string, unknown> }) {
+export function SQAnswersTable({
+  answers,
+  sectionFilter,
+}: {
+  answers: Record<string, unknown>;
+  /** When set, only rows from this section render; the section-header band row is suppressed. */
+  sectionFilter?: string;
+}) {
   // Build lookup from SQ_SCREENS
   const screenMap = new Map(SQ_SCREENS.map((s) => [s.id, s]));
 
@@ -253,6 +260,10 @@ export function SQAnswersTable({ answers }: { answers: Record<string, unknown> }
   // Track which matrix parent texts we've already rendered
   const renderedParents = new Set<string>();
 
+  const sectionsToRender = sectionFilter
+    ? SQ_SECTION_NAMES_ORDER.filter((s) => s === sectionFilter)
+    : SQ_SECTION_NAMES_ORDER;
+
   return (
     <table className="w-full text-sm border-collapse">
       <thead>
@@ -264,20 +275,22 @@ export function SQAnswersTable({ answers }: { answers: Record<string, unknown> }
         </tr>
       </thead>
       <tbody>
-        {SQ_SECTION_NAMES_ORDER.map((section) => {
+        {sectionsToRender.map((section) => {
           const sectionAnswers = answersBySection[section];
           if (!sectionAnswers || sectionAnswers.length === 0) return null;
 
           return (
             <Fragment key={section}>
-              <tr>
-                <td
-                  colSpan={4}
-                  className="pt-3 pb-2 px-3 text-sm font-semibold text-gray-900 bg-gray-100 border-t-2 border-gray-300"
-                >
-                  {section}
-                </td>
-              </tr>
+              {!sectionFilter && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="pt-3 pb-2 px-3 text-sm font-semibold text-gray-900 bg-gray-100 border-t-2 border-gray-300"
+                  >
+                    {section}
+                  </td>
+                </tr>
+              )}
               {sectionAnswers.map(({ id, answer }) => {
                 const screen = screenMap.get(id);
                 const isOfficeUse = SQ_OFFICE_USE_QUESTIONS.has(id);

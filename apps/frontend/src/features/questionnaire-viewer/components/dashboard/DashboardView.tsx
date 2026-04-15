@@ -14,7 +14,7 @@ import { AXIS1_INFO, AXIS2_INFO } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2TabbedView } from "./Axis2TabbedView";
 import { DashboardInfoBlock } from "./DashboardInfoBlock";
-import { SQStatusCard } from "./SQStatusCard";
+import { SQTabbedView } from "./SQTabbedView";
 
 // ─── Main component ────────────────────────────────────────────────────
 
@@ -158,7 +158,7 @@ export function DashboardView({
               Achse 1 - Symptomfragebogen
             </h3>
             <DashboardInfoBlock info={AXIS1_INFO} className="mb-3" />
-            <SQStatusCard
+            <SQTabbedView
               response={sqResponse}
               isScreeningNegative={isScreeningNegative}
               isReviewed={isReviewed}
