@@ -64,6 +64,81 @@ export const tdMuted = "py-1 pr-3 text-sm text-gray-500";
 export const headerRowClass = "border-b-2 border-gray-300";
 export const bodyRowClass = "border-b border-gray-100";
 
+// ─── Raw answer arithmetic (scoring-algorithm-independent) ────────────
+
+function computeRawSumAndCount(answers: Record<string, unknown> | undefined): {
+  sum: number;
+  count: number;
+} {
+  if (!answers) return { sum: 0, count: 0 };
+  let sum = 0;
+  let count = 0;
+  for (const value of Object.values(answers)) {
+    if (value === undefined || value === null || value === "") continue;
+    const n = parseFloat(String(value));
+    if (Number.isNaN(n)) continue;
+    sum += n;
+    count += 1;
+  }
+  return { sum, count };
+}
+
+function formatNumber(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2);
+}
+
+function StatCard({
+  label,
+  value,
+  subtitle,
+}: {
+  label: string;
+  value: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-start gap-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-3 text-center">
+      <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wide">
+        {label}
+      </span>
+      <span className="font-mono text-xl font-semibold text-gray-900 leading-tight">{value}</span>
+      <span className="font-mono text-[11px] text-gray-400 leading-tight">
+        {subtitle ?? "\u00A0"}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Compact stat row showing the raw sum, mean and missing-answer count for a
+ * questionnaire — rendered above the answers table so it's visible without
+ * scrolling. Independent of any questionnaire scoring algorithm (no
+ * missing-handling, rescaling, or subscale logic).
+ */
+function AnswerTotalsStats({
+  answers,
+  expectedCount,
+}: {
+  answers: Record<string, unknown> | undefined;
+  expectedCount: number;
+}) {
+  const { sum, count } = computeRawSumAndCount(answers);
+  if (count === 0) return null;
+  const mean = sum / count;
+  const missing = Math.max(0, expectedCount - count);
+  return (
+    <div className="grid grid-cols-3 gap-3 mb-3">
+      <StatCard label="Summe" value={formatNumber(sum)} />
+      <StatCard
+        label="Mittelwert"
+        value={formatNumber(mean)}
+        subtitle={`${formatNumber(sum)} ÷ ${count}`}
+      />
+      <StatCard label="Fehlend" value={String(missing)} />
+    </div>
+  );
+}
+
 // ─── Scale Pips ────────────────────────────────────────────────────────
 
 /**
@@ -389,39 +464,46 @@ export function GCPSAnswersTable({
 export function PHQ4AnswersTable({
   answers,
   showPips = false,
+  showTotals = false,
 }: {
   answers: Record<string, string>;
   showPips?: boolean;
+  showTotals?: boolean;
 }) {
   return (
-    <table className="w-full text-sm border-collapse">
-      <thead>
-        <tr className={headerRowClass}>
-          <th className={thClass}>Nr.</th>
-          <th className={thClass}>Frage</th>
-          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
-          <th className={`${thClass} whitespace-nowrap`}>Antwort</th>
-        </tr>
-      </thead>
-      <tbody>
-        {PHQ4_QUESTION_ORDER.map((qId, idx) => {
-          const question = PHQ4_QUESTIONS[qId];
-          const selected = answers[qId];
-          const option = PHQ4_OPTIONS.find((o) => o.value === selected);
-          return (
-            <tr key={qId} className={bodyRowClass}>
-              <td className={tdMuted}>{String.fromCharCode(97 + idx)}</td>
-              <td className={tdClass}>{question.text}</td>
-              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
-                {showPips && selected != null && <ScalePips value={Number(selected)} max={3} />}
-                {selected ?? "—"}
-              </td>
-              <td className={`${tdMuted} whitespace-nowrap`}>{option?.label ?? ""}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <>
+      {showTotals && (
+        <AnswerTotalsStats answers={answers} expectedCount={PHQ4_QUESTION_ORDER.length} />
+      )}
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className={headerRowClass}>
+            <th className={thClass}>Nr.</th>
+            <th className={thClass}>Frage</th>
+            <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
+            <th className={`${thClass} whitespace-nowrap`}>Antwort</th>
+          </tr>
+        </thead>
+        <tbody>
+          {PHQ4_QUESTION_ORDER.map((qId, idx) => {
+            const question = PHQ4_QUESTIONS[qId];
+            const selected = answers[qId];
+            const option = PHQ4_OPTIONS.find((o) => o.value === selected);
+            return (
+              <tr key={qId} className={bodyRowClass}>
+                <td className={tdMuted}>{String.fromCharCode(97 + idx)}</td>
+                <td className={tdClass}>{question.text}</td>
+                <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
+                  {showPips && selected != null && <ScalePips value={Number(selected)} max={3} />}
+                  {selected ?? "—"}
+                </td>
+                <td className={`${tdMuted} whitespace-nowrap`}>{option?.label ?? ""}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -430,41 +512,48 @@ export function PHQ4AnswersTable({
 export function JFLS8AnswersTable({
   answers,
   showPips = false,
+  showTotals = false,
 }: {
   answers: JFLS8Answers;
   showPips?: boolean;
+  showTotals?: boolean;
 }) {
   return (
-    <table className="w-full text-sm border-collapse">
-      <thead>
-        <tr className={headerRowClass}>
-          <th className={thClass}>Nr.</th>
-          <th className={thClass}>
-            Aktivität{" "}
-            <span className="font-normal text-gray-400">
-              (0 = {JFLS8_SCALE_LABELS.min}, 10 = {JFLS8_SCALE_LABELS.max})
-            </span>
-          </th>
-          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
-        </tr>
-      </thead>
-      <tbody>
-        {JFLS8_QUESTION_ORDER.map((qId, idx) => {
-          const selected = answers[qId];
-          return (
-            <tr key={qId} className={bodyRowClass}>
-              <td className={tdMuted}>{idx + 1}</td>
-              <td className={tdClass}>{JFLS8_QUESTIONS[qId].text}</td>
-              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
-                {showPips && selected != null && <ScalePips value={Number(selected)} max={10} />}
-                {selected ?? "—"}
-                <span className="text-gray-400 font-normal"> / 10</span>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <>
+      {showTotals && (
+        <AnswerTotalsStats answers={answers} expectedCount={JFLS8_QUESTION_ORDER.length} />
+      )}
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className={headerRowClass}>
+            <th className={thClass}>Nr.</th>
+            <th className={thClass}>
+              Aktivität{" "}
+              <span className="font-normal text-gray-400">
+                (0 = {JFLS8_SCALE_LABELS.min}, 10 = {JFLS8_SCALE_LABELS.max})
+              </span>
+            </th>
+            <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
+          </tr>
+        </thead>
+        <tbody>
+          {JFLS8_QUESTION_ORDER.map((qId, idx) => {
+            const selected = answers[qId];
+            return (
+              <tr key={qId} className={bodyRowClass}>
+                <td className={tdMuted}>{idx + 1}</td>
+                <td className={tdClass}>{JFLS8_QUESTIONS[qId].text}</td>
+                <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
+                  {showPips && selected != null && <ScalePips value={Number(selected)} max={10} />}
+                  {selected ?? "—"}
+                  <span className="text-gray-400 font-normal"> / 10</span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -473,41 +562,48 @@ export function JFLS8AnswersTable({
 export function JFLS20AnswersTable({
   answers,
   showPips = false,
+  showTotals = false,
 }: {
   answers: JFLS20Answers;
   showPips?: boolean;
+  showTotals?: boolean;
 }) {
   return (
-    <table className="w-full text-sm border-collapse">
-      <thead>
-        <tr className={headerRowClass}>
-          <th className={thClass}>Nr.</th>
-          <th className={thClass}>
-            Aktivität{" "}
-            <span className="font-normal text-gray-400">
-              (0 = {JFLS20_SCALE_LABELS.min}, 10 = {JFLS20_SCALE_LABELS.max})
-            </span>
-          </th>
-          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
-        </tr>
-      </thead>
-      <tbody>
-        {JFLS20_QUESTION_ORDER.map((qId, idx) => {
-          const selected = answers[qId];
-          return (
-            <tr key={qId} className={bodyRowClass}>
-              <td className={tdMuted}>{idx + 1}</td>
-              <td className={tdClass}>{JFLS20_QUESTIONS[qId].text}</td>
-              <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
-                {showPips && selected != null && <ScalePips value={Number(selected)} max={10} />}
-                {selected ?? "—"}
-                <span className="text-gray-400 font-normal"> / 10</span>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <>
+      {showTotals && (
+        <AnswerTotalsStats answers={answers} expectedCount={JFLS20_QUESTION_ORDER.length} />
+      )}
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className={headerRowClass}>
+            <th className={thClass}>Nr.</th>
+            <th className={thClass}>
+              Aktivität{" "}
+              <span className="font-normal text-gray-400">
+                (0 = {JFLS20_SCALE_LABELS.min}, 10 = {JFLS20_SCALE_LABELS.max})
+              </span>
+            </th>
+            <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
+          </tr>
+        </thead>
+        <tbody>
+          {JFLS20_QUESTION_ORDER.map((qId, idx) => {
+            const selected = answers[qId];
+            return (
+              <tr key={qId} className={bodyRowClass}>
+                <td className={tdMuted}>{idx + 1}</td>
+                <td className={tdClass}>{JFLS20_QUESTIONS[qId].text}</td>
+                <td className={`${tdClass} text-right font-medium whitespace-nowrap`}>
+                  {showPips && selected != null && <ScalePips value={Number(selected)} max={10} />}
+                  {selected ?? "—"}
+                  <span className="text-gray-400 font-normal"> / 10</span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -516,9 +612,11 @@ export function JFLS20AnswersTable({
 export function OBCAnswersTable({
   answers,
   showPips = false,
+  showTotals = false,
 }: {
   answers: OBCAnswers;
   showPips?: boolean;
+  showTotals?: boolean;
 }) {
   const sleepQuestions = OBC_QUESTION_ORDER.filter((id) => OBC_QUESTIONS[id].section === "sleep");
   const wakingQuestions = OBC_QUESTION_ORDER.filter((id) => OBC_QUESTIONS[id].section === "waking");
@@ -560,20 +658,25 @@ export function OBCAnswersTable({
   );
 
   return (
-    <table className="w-full text-sm border-collapse">
-      <thead>
-        <tr className={headerRowClass}>
-          <th className={thClass}>Nr.</th>
-          <th className={thClass}>Aktivität</th>
-          <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
-          <th className={`${thClass} whitespace-nowrap`}>Häufigkeit</th>
-        </tr>
-      </thead>
-      <tbody>
-        {renderSection("Schlaf-Aktivitäten", sleepQuestions)}
-        {renderSection("Wach-Aktivitäten", wakingQuestions)}
-      </tbody>
-    </table>
+    <>
+      {showTotals && (
+        <AnswerTotalsStats answers={answers} expectedCount={OBC_QUESTION_ORDER.length} />
+      )}
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className={headerRowClass}>
+            <th className={thClass}>Nr.</th>
+            <th className={thClass}>Aktivität</th>
+            <th className={`${thClass} text-right whitespace-nowrap`}>Wert</th>
+            <th className={`${thClass} whitespace-nowrap`}>Häufigkeit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {renderSection("Schlaf-Aktivitäten", sleepQuestions)}
+          {renderSection("Wach-Aktivitäten", wakingQuestions)}
+        </tbody>
+      </table>
+    </>
   );
 }
 

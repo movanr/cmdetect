@@ -247,9 +247,7 @@ export function PHQ4Content({ onSummaryChange }: ContentProps) {
           hint="0–12"
           formula={
             <span className="flex flex-col gap-1">
-              <span className="inline-flex items-center gap-1">
-                = <Fraction numerator={<>Summe aller Werte</>} denominator={<>4 − fehlend</>} /> · 4
-              </span>
+              <span className="inline-flex items-center gap-1">= Mittelwert · 4</span>
               <span>maximal 1 fehlend</span>
             </span>
           }
@@ -323,13 +321,10 @@ export function JFLS8Content({ onSummaryChange }: ContentProps) {
     <>
       <div className="flex flex-col gap-5">
         <StackedField
-          label="Globalwert"
+          label="Mittelwert"
           hint="0–10"
           formula={
             <span className="flex flex-col gap-1">
-              <span className="inline-flex items-center gap-1">
-                = <Fraction numerator={<>Summe aller Werte</>} denominator={<>8 − fehlend</>} />
-              </span>
               <span>maximal 2 fehlend</span>
             </span>
           }
@@ -473,7 +468,7 @@ export function OBCContent({ onSummaryChange }: ContentProps) {
   return (
     <>
       <div className="flex flex-col gap-5">
-        <StackedField label="Gesamtwert" hint="0–84" formula={<>= Summe aller Werte</>}>
+        <StackedField label="Gesamtwert" hint="0–84" formula={<>= Summe aller Antworten</>}>
           <NumberField value={total} onChange={setTotal} min={0} max={84} />
         </StackedField>
 

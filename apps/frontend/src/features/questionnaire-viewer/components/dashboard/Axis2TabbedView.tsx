@@ -123,13 +123,23 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
       case QUESTIONNAIRE_ID.GCPS_1M:
         return <GCPSAnswersTable answers={response.answers as GCPS1MAnswers} showPips />;
       case QUESTIONNAIRE_ID.PHQ4:
-        return <PHQ4AnswersTable answers={response.answers as Record<string, string>} showPips />;
+        return (
+          <PHQ4AnswersTable
+            answers={response.answers as Record<string, string>}
+            showPips
+            showTotals
+          />
+        );
       case QUESTIONNAIRE_ID.JFLS8:
-        return <JFLS8AnswersTable answers={response.answers as JFLS8Answers} showPips />;
+        return (
+          <JFLS8AnswersTable answers={response.answers as JFLS8Answers} showPips showTotals />
+        );
       case QUESTIONNAIRE_ID.JFLS20:
-        return <JFLS20AnswersTable answers={response.answers as JFLS20Answers} showPips />;
+        return (
+          <JFLS20AnswersTable answers={response.answers as JFLS20Answers} showPips showTotals />
+        );
       case QUESTIONNAIRE_ID.OBC:
-        return <OBCAnswersTable answers={response.answers as OBCAnswers} showPips />;
+        return <OBCAnswersTable answers={response.answers as OBCAnswers} showPips showTotals />;
       default:
         return <AnswersEmpty />;
     }
