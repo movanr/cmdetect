@@ -81,7 +81,7 @@ function AnswersEmpty() {
 export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
   const tabs = useMemo(() => TAB_DEFS.filter((t) => isQuestionnaireEnabled(t.id)), []);
 
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string | null>(QUESTIONNAIRE_ID.PAIN_DRAWING);
   const [summaries, setSummaries] = useState<Record<string, TabSummary>>({});
 
   const responseFor = useCallback(
