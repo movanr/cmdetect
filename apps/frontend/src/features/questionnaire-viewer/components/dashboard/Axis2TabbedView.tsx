@@ -62,8 +62,6 @@ function painDrawingCompleted(data: PainDrawingData | null | undefined): boolean
 interface Axis2TabbedViewProps {
   responses: QuestionnaireResponse[];
   patientRecordId: string;
-  /** When true, patient skipped all Axis 2 questionnaires by design — relabel empty tabs. */
-  isScreeningNegative: boolean;
 }
 
 function AnswersEmpty() {
@@ -78,15 +76,8 @@ function AnswersEmpty() {
   );
 }
 
-export function Axis2TabbedView({
-  responses,
-  patientRecordId,
-  isScreeningNegative,
-}: Axis2TabbedViewProps) {
+export function Axis2TabbedView({ responses, patientRecordId }: Axis2TabbedViewProps) {
   const tabs = useMemo(() => TAB_DEFS.filter((t) => isQuestionnaireEnabled(t.id)), []);
-
-  const emptyLabel = isScreeningNegative ? "Keine Daten" : "Bewertung ausstehend";
-  const pendingLabel = isScreeningNegative ? null : "offen";
 
   const [activeTab, setActiveTab] = useState<string | null>(QUESTIONNAIRE_ID.PAIN_DRAWING);
   const [summaries, setSummaries] = useState<Record<string, TabSummary>>({});
@@ -169,8 +160,7 @@ export function Axis2TabbedView({
               active={activeTab === tab.id}
               completed={completed}
               onClick={() => toggle(tab.id)}
-              emptyLabel={emptyLabel}
-              pendingLabel={pendingLabel}
+              emptyLabel={completed ? "Bewertung ausstehend" : "Keine Daten"}
             />
           );
         })}

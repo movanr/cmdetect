@@ -9,8 +9,6 @@ interface Axis2TabCardProps {
   onClick: () => void;
   /** Text shown when entries is empty. Defaults to "—". */
   emptyLabel?: string;
-  /** Badge shown in the top-right when not completed. Pass null to hide. Defaults to "offen". */
-  pendingLabel?: string | null;
 }
 
 export function Axis2TabCard({
@@ -20,7 +18,6 @@ export function Axis2TabCard({
   completed,
   onClick,
   emptyLabel = "—",
-  pendingLabel = "offen",
 }: Axis2TabCardProps) {
   return (
     <button
@@ -38,11 +35,6 @@ export function Axis2TabCard({
     >
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-sm font-semibold leading-tight">{abbreviation}</span>
-        {!completed && pendingLabel && (
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            {pendingLabel}
-          </span>
-        )}
       </div>
       <div className="pt-2 flex flex-col gap-0.5 min-h-[1.25rem]">
         {entries.length === 0 ? (

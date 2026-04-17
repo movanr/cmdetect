@@ -74,8 +74,13 @@ export function DashboardView({
     );
   }
 
-  // Determine if we should show the next step button
-  const showNextStepButton = sqResponse && !isScreeningNegative;
+  // Review is always offered once the SQ response exists, even when the
+  // screening is negative — the clinician may still want to go through the
+  // answers with the patient. Examination-related actions (skip-to-exam,
+  // continue-to-exam) are hidden for negative screenings since the workflow
+  // does not continue there.
+  const showReviewButtons = !!sqResponse;
+  const showExaminationActions = !!sqResponse && !isScreeningNegative;
   const isReviewed = !!sqResponse?.reviewedAt;
 
   // Shared screening banner
@@ -108,7 +113,7 @@ export function DashboardView({
             </Button>
           )}
           {/* Top navigation button(s) */}
-          {showNextStepButton &&
+          {showReviewButtons &&
             (isReviewed ? (
               <>
                 <Button
@@ -118,7 +123,7 @@ export function DashboardView({
                 >
                   SF erneut überprüfen
                 </Button>
-                {onContinueToExamination && (
+                {showExaminationActions && onContinueToExamination && (
                   <Button onClick={onContinueToExamination}>
                     Weiter zur Untersuchung
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -127,7 +132,7 @@ export function DashboardView({
               </>
             ) : (
               <>
-                {onSkipReview && (
+                {showExaminationActions && onSkipReview && (
                   <Button
                     variant="outline"
                     onClick={onSkipReview}
@@ -175,11 +180,7 @@ export function DashboardView({
             Achse 2 - Psychosoziale Bewertung
           </h3>
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
-          <Axis2TabbedView
-            responses={responses}
-            patientRecordId={patientRecordId}
-            isScreeningNegative={isScreeningNegative}
-          />
+          <Axis2TabbedView responses={responses} patientRecordId={patientRecordId} />
         </section>
       </CardContent>
     </Card>
