@@ -3,12 +3,12 @@
  *
  * Owns the per-field string state + free-text note, hydrates from the server on
  * first load, and debounces upserts back with a 3s delay (mirroring the
- * examination auto-save cadence). Flushes pending changes on unmount or when the
- * caller explicitly requests it.
+ * examination auto-save cadence). Flushes pending changes on unmount.
  *
- * Registers with the ManualScoreFlushController (if mounted) so the enclosing
- * route can await pending saves on SPA navigation and trigger the native
- * browser warning on reload/close while edits are unsaved.
+ * SPA-nav and pending-save coordination now runs through TanStack Query's
+ * mutation scope: concurrent autosaves serialize via `scope.id` on
+ * `useUpsertManualScore`, and the anamnesis route's nav blocker awaits
+ * in-flight mutations via `queryClient.isMutating({ mutationKey })`.
  *
  * Auto-save is gated on `enabled` — today, that means "the patient has submitted
  * this questionnaire". When disabled, the component still works as a local-only
@@ -16,7 +16,6 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useManualScoreFlushController } from "./ManualScoreFlushContext";
 import { useManualScores } from "./useManualScores";
 import { useUpsertManualScore } from "./useUpsertManualScore";
 
@@ -47,7 +46,6 @@ export function useManualScoreAutoSave<T extends Record<string, string>>({
 }: UseManualScoreStateParams<T>): UseManualScoreStateResult<T> {
   const { data: serverData, isLoading } = useManualScores(patientRecordId);
   const upsert = useUpsertManualScore(patientRecordId);
-  const flushController = useManualScoreFlushController();
 
   const [scores, setScores] = useState<T>(defaultValues);
   const [note, setNoteInternal] = useState("");
@@ -151,17 +149,6 @@ export function useManualScoreAutoSave<T extends Record<string, string>>({
     },
     [scheduleSave]
   );
-
-  // Register with the enclosing flush controller (if any) so the route can
-  // aggregate pending state across every Axis 2 tab.
-  useEffect(() => {
-    if (!flushController) return;
-    const unregister = flushController.register(questionnaireId, {
-      hasPending: () => pendingRef.current,
-      flush: flushNow,
-    });
-    return unregister;
-  }, [flushController, questionnaireId, flushNow]);
 
   // Flush on unmount (SPA navigation keeps fetch alive, matches examination pattern).
   useEffect(() => {

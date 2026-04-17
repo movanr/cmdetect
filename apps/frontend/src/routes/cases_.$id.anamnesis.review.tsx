@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import {
@@ -25,48 +26,54 @@ import {
   useUpdateQuestionnaireResponse,
 } from "../features/questionnaire-viewer";
 import { DashboardView } from "../features/questionnaire-viewer/components/dashboard";
-import {
-  ManualScoreFlushProvider,
-  useManualScoreFlushController,
-} from "../features/questionnaire-viewer/hooks/ManualScoreFlushContext";
+import { OfflineIndicator } from "../features/examination/components/OfflineIndicator";
 
 export const Route = createFileRoute("/cases_/$id/anamnesis/review")({
   component: AnamnesisReviewPage,
 });
 
 function AnamnesisReviewPage() {
-  return (
-    <ManualScoreFlushProvider>
-      <AnamnesisReviewContent />
-    </ManualScoreFlushProvider>
-  );
-}
-
-function AnamnesisReviewContent() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const flushController = useManualScoreFlushController();
+  const queryClient = useQueryClient();
 
   const { data: responses, isLoading } = useQuestionnaireResponses(id);
   const updateMutation = useUpdateQuestionnaireResponse(id);
 
-  // Block SPA navigation when manual-score saves are pending: try to flush,
-  // fall back to a "discard or cancel" dialog only if the save fails.
-  // enableBeforeUnload returns true whenever there are pending edits so the
-  // browser's native warning fires on reload/close.
+  // True iff any anamnesis save for THIS patient is in flight (or queued
+  // behind another via scope.id). Matches both manual-score and
+  // questionnaire-response mutations — both share the same patientRecordId
+  // in position [1] of their mutationKey.
+  const isAnamnesisMutating = useCallback(() => {
+    return (
+      queryClient.isMutating({
+        predicate: (m) => {
+          const key = m.options.mutationKey;
+          if (!Array.isArray(key) || key[1] !== id) return false;
+          return key[0] === "manual-score" || key[0] === "questionnaire-response";
+        },
+      }) > 0
+    );
+  }, [queryClient, id]);
+
+  // Block SPA navigation while any anamnesis save is in flight. We give
+  // pending mutations a short window to settle so the common case (user
+  // navigates immediately after an edit) just waits briefly and proceeds.
+  // If they don't settle, the "unsaved changes" dialog appears.
   const shouldBlockFn = useCallback(async () => {
-    if (!flushController?.hasAnyPending()) return false;
-    try {
-      await flushController.flushAll();
-      return false;
-    } catch {
-      return true;
+    if (!isAnamnesisMutating()) return false;
+    const deadline = Date.now() + 10000;
+    while (isAnamnesisMutating() && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 100));
     }
-  }, [flushController]);
+    return isAnamnesisMutating();
+  }, [isAnamnesisMutating]);
+
   const enableBeforeUnload = useCallback(
-    () => flushController?.hasAnyPending() ?? false,
-    [flushController]
+    () => isAnamnesisMutating(),
+    [isAnamnesisMutating],
   );
+
   const blocker = useBlocker({ shouldBlockFn, enableBeforeUnload, withResolver: true });
 
   if (isLoading) {
@@ -120,6 +127,10 @@ function AnamnesisReviewContent() {
 
   return (
     <>
+      <div className="flex justify-end mb-2">
+        <OfflineIndicator />
+      </div>
+
       <DashboardView
         responses={responses ?? []}
         patientRecordId={id}
@@ -130,14 +141,14 @@ function AnamnesisReviewContent() {
         caseId={id}
       />
 
-      {/* Blocker dialog — shown only when flush-before-navigate failed. */}
+      {/* Blocker dialog — shown only when in-flight mutations didn't settle. */}
       <AlertDialog open={blocker.status === "blocked"}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Ungespeicherte Änderungen</AlertDialogTitle>
             <AlertDialogDescription>
-              Die manuell eingegebenen Scores konnten nicht gespeichert werden. Möchten Sie ohne
-              Speichern fortfahren?
+              Die Änderungen konnten nicht gespeichert werden. Möchten Sie ohne Speichern
+              fortfahren?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

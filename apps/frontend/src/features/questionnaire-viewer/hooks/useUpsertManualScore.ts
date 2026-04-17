@@ -3,6 +3,11 @@
  * Silent by default — this is the workhorse behind auto-save; noisy toasts on
  * every debounced flush would be obnoxious. Error toasts remain.
  *
+ * Serialization: all manual-score saves for a patient share a mutation scope,
+ * so concurrent autosaves (across different Axis 2 panels) sequence through
+ * TanStack Query rather than racing. Offline edits queue and resume on
+ * reconnect via `networkMode: "offlineFirst"`.
+ *
  * Optimistic cache update mirrors the pattern in useUpdateQuestionnaireResponse.
  */
 
@@ -24,6 +29,10 @@ export function useUpsertManualScore(patientRecordId: string) {
   const queryKey = manualScoresQueryKey(patientRecordId);
 
   return useMutation({
+    mutationKey: ["manual-score", patientRecordId],
+    scope: { id: `manual-score:${patientRecordId}` },
+    networkMode: "offlineFirst",
+
     mutationFn: async ({ questionnaireId, scores, note }: UpsertParams) => {
       return execute(UPSERT_MANUAL_SCORE, {
         patient_record_id: patientRecordId,

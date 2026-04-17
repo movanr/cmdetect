@@ -5,6 +5,11 @@
  * - Updates cache immediately on mutation
  * - Rolls back on error
  * - No refetch needed on success
+ *
+ * Serialization: saves for the same patient share a mutation scope, so
+ * overlapping edits (e.g. answer edit + office-use toggle in quick succession)
+ * sequence at the network layer rather than racing. Offline edits queue via
+ * `networkMode: "offlineFirst"` and resume on reconnect.
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -34,6 +39,10 @@ export function useUpdateQuestionnaireResponse(patientRecordId: string) {
   const queryKey = ["questionnaire-responses", patientRecordId];
 
   return useMutation({
+    mutationKey: ["questionnaire-response", patientRecordId],
+    scope: { id: `questionnaire-response:${patientRecordId}` },
+    networkMode: "offlineFirst",
+
     mutationFn: async ({ id, responseData }: UpdateParams) => {
       return execute(UPDATE_QUESTIONNAIRE_RESPONSE, {
         id,
