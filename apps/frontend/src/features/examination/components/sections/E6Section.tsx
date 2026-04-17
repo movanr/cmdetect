@@ -8,6 +8,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { E6_OBSERVER_LABELS, JOINT_SOUND_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
@@ -67,12 +68,14 @@ export function E6Section({ onComplete, onBack, isFirstSection }: SectionProps) 
         <CardTitle>{getSectionCardTitle(SECTIONS.e6)}</CardTitle>
         <div className="flex items-center gap-1">
           <SectionCommentButton />
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/protocol/$section" params={{ section: "e6" }}>
-              <BookOpen className="h-4 w-4 mr-1" />
-              Protokoll
-            </Link>
-          </Button>
+          {features.docsViewer && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/protocol/$section" params={{ section: "e6" }}>
+                <BookOpen className="h-4 w-4 mr-1" />
+                Protokoll
+              </Link>
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-8">

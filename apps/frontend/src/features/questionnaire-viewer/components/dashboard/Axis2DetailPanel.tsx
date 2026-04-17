@@ -1,3 +1,4 @@
+import { features } from "@/config/features";
 import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
 import type { ReactNode } from "react";
@@ -56,7 +57,7 @@ export function Axis2DetailPanel({
           <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
             {rightTitle}
           </p>
-          {manualAnchor && (
+          {features.docsViewer && manualAnchor && (
             <Link
               to="/docs/scoring-manual"
               hash={manualAnchor}

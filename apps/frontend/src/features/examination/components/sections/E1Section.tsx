@@ -12,6 +12,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -431,12 +432,14 @@ export function E1Section({
           <CardTitle>{getSectionCardTitle(SECTIONS.e1)}</CardTitle>
           <div className="flex items-center gap-3">
             <SectionCommentButton />
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/protocol/$section" params={{ section: "e1" }}>
-                <BookOpen className="h-4 w-4 mr-1" />
-                Protokoll
-              </Link>
-            </Button>
+            {features.docsViewer && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/protocol/$section" params={{ section: "e1" }}>
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  Protokoll
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>

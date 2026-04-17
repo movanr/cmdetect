@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { features } from "@/config/features";
 import { cn } from "@/lib/utils";
 import { PALPATION_MODE_QUESTIONS, SECTIONS, SITE_CONFIG } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
@@ -764,12 +765,14 @@ export function E9Section({
               onChange={(mode) => setValue("e9.palpationMode", mode)}
             />
             <SectionCommentButton />
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/protocol/$section" params={{ section: "e9" }}>
-                <BookOpen className="h-4 w-4 mr-1" />
-                Protokoll
-              </Link>
-            </Button>
+            {features.docsViewer && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/protocol/$section" params={{ section: "e9" }}>
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  Protokoll
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>

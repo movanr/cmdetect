@@ -1,6 +1,10 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, notFound } from "@tanstack/react-router";
+import { features } from "@/config/features";
 
 export const Route = createFileRoute("/protocol/")({
+  beforeLoad: () => {
+    if (!features.docsViewer) throw notFound();
+  },
   component: ProtocolIndex,
 });
 

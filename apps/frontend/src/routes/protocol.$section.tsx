@@ -1,5 +1,6 @@
 import { ProtocolMarkdownViewer, useProtocolContext } from "@/features/protocol";
-import { createFileRoute } from "@tanstack/react-router";
+import { features } from "@/config/features";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 // Import Section 5 subsections (existing German official translations)
@@ -46,6 +47,9 @@ const sections: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/protocol/$section")({
+  beforeLoad: () => {
+    if (!features.docsViewer) throw notFound();
+  },
   component: ProtocolSection,
 });
 

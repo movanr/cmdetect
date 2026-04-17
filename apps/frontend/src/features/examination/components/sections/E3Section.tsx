@@ -11,6 +11,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
@@ -44,12 +45,14 @@ export function E3Section({ onComplete, onBack, isFirstSection }: SectionProps) 
         </div>
         <div className="flex items-center gap-1">
           <SectionCommentButton />
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/protocol/$section" params={{ section: "e3" }}>
-              <BookOpen className="h-4 w-4 mr-1" />
-              Protokoll
-            </Link>
-          </Button>
+          {features.docsViewer && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/protocol/$section" params={{ section: "e3" }}>
+                <BookOpen className="h-4 w-4 mr-1" />
+                Protokoll
+              </Link>
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">

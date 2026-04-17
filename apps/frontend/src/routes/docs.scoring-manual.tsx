@@ -3,11 +3,15 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import scoringManual from "@docs/dc-tmd/self-report-scoring-manual/self-report-scoring-manual.md?raw";
+import { features } from "@/config/features";
 
 export const Route = createFileRoute("/docs/scoring-manual")({
+  beforeLoad: () => {
+    if (!features.docsViewer) throw notFound();
+  },
   component: ScoringManualPage,
 });
 

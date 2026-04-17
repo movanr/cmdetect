@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { features } from "@/config/features";
 import {
   E10_PAIN_QUESTIONS,
   E10_SITE_KEYS,
@@ -230,12 +231,14 @@ export function E10Section({
           <CardTitle>{getSectionCardTitle(SECTIONS.e10)}</CardTitle>
           <div className="flex items-center gap-1">
             <SectionCommentButton />
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/protocol/$section" params={{ section: "e10" }}>
-                <BookOpen className="h-4 w-4 mr-1" />
-                Protokoll
-              </Link>
-            </Button>
+            {features.docsViewer && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/protocol/$section" params={{ section: "e10" }}>
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  Protokoll
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>

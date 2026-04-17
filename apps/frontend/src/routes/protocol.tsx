@@ -1,5 +1,6 @@
-import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { features } from "@/config/features";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   FileText,
@@ -25,6 +26,9 @@ import { useState } from "react";
 import { ProtocolContext, TableOfContents } from "@/features/protocol";
 
 export const Route = createFileRoute("/protocol")({
+  beforeLoad: () => {
+    if (!features.docsViewer) throw notFound();
+  },
   component: ProtocolLayout,
 });
 

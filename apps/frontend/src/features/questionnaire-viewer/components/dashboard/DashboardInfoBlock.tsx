@@ -6,6 +6,7 @@
  * to a source document (e.g., the scoring manual).
  */
 
+import { features } from "@/config/features";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronRight, Info } from "lucide-react";
@@ -62,7 +63,7 @@ export function DashboardInfoBlock({
             ))}
           </ul>
 
-          {info.source && (
+          {features.docsViewer && info.source && (
             <div className="mt-2 pl-7">
               <Link
                 to={info.source.to}

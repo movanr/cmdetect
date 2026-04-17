@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -42,7 +43,7 @@ export function ScoreCardLayout({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h4 className="font-medium text-sm leading-tight">{title}</h4>
-            {manualAnchor && (
+            {features.docsViewer && manualAnchor && (
               <Link
                 to="/docs/scoring-manual"
                 hash={manualAnchor}

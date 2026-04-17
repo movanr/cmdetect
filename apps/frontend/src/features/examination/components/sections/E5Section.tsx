@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { MOVEMENT_TYPE_LABELS, SECTIONS } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, ChevronDown, ChevronLeft } from "lucide-react";
@@ -472,12 +473,14 @@ export function E5Section({
           <CardTitle>{getSectionCardTitle(SECTIONS.e5)}</CardTitle>
           <div className="flex items-center gap-3">
             <SectionCommentButton />
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/protocol/$section" params={{ section: "e5" }}>
-                <BookOpen className="h-4 w-4 mr-1" />
-                Protokoll
-              </Link>
-            </Button>
+            {features.docsViewer && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/protocol/$section" params={{ section: "e5" }}>
+                  <BookOpen className="h-4 w-4 mr-1" />
+                  Protokoll
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>

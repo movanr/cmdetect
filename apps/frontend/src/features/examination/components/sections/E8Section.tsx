@@ -10,6 +10,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { E8_LOCKING_TYPE_DESCRIPTIONS, E8_LOCKING_TYPE_LABELS, SECTIONS, type E8LockingType } from "@cmdetect/dc-tmd";
 import { Link } from "@tanstack/react-router";
 import { BookOpen, CheckCircle } from "lucide-react";
@@ -73,12 +74,14 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
         <CardTitle>{getSectionCardTitle(SECTIONS.e8)}</CardTitle>
         <div className="flex items-center gap-1">
           <SectionCommentButton />
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/protocol/$section" params={{ section: "e8" }}>
-              <BookOpen className="h-4 w-4 mr-1" />
-              Protokoll
-            </Link>
-          </Button>
+          {features.docsViewer && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/protocol/$section" params={{ section: "e8" }}>
+                <BookOpen className="h-4 w-4 mr-1" />
+                Protokoll
+              </Link>
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-8">

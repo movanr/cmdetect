@@ -7,6 +7,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { features } from "@/config/features";
 import { formatDistanceToNow } from "@/lib/date-utils";
 import {
   isQuestionIdEnabled,
@@ -123,17 +124,19 @@ export function SQTabbedView({
               <> · Überprüft {formatDistanceToNow(new Date(reviewedAt), { addSuffix: true })}</>
             )}
           </p>
-          <Link
-            to="/docs/scoring-manual"
-            hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
-            onClick={() => {
-              sessionStorage.setItem("docs-return-url", window.location.pathname);
-            }}
-            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline"
-          >
-            <BookOpen className="h-3 w-3" />
-            Scoring-Anleitung
-          </Link>
+          {features.docsViewer && (
+            <Link
+              to="/docs/scoring-manual"
+              hash={SCORING_MANUAL_ANCHORS["dc-tmd-sq"]}
+              onClick={() => {
+                sessionStorage.setItem("docs-return-url", window.location.pathname);
+              }}
+              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary hover:underline"
+            >
+              <BookOpen className="h-3 w-3" />
+              Scoring-Anleitung
+            </Link>
+          )}
         </div>
 
         {isScreeningNegative && (

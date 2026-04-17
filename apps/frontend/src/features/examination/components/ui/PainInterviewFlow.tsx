@@ -8,6 +8,7 @@
  */
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { features } from "@/config/features";
 import { imageMap, typedFigureIndex, type FigureData } from "@/features/protocol/lib/figures";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
@@ -130,15 +131,17 @@ function FigureRefLink({ figureRef }: { figureRef: string | string[] }) {
             </div>
           ))}
           {/* Link to full protocol */}
-          <Link
-            to="/protocol/$section"
-            params={{ section: "section7" }}
-            hash={anchor}
-            className="flex items-center gap-1 text-xs text-primary hover:underline pt-2 border-t"
-          >
-            <ExternalLink className="h-3 w-3" />
-            <span>Im Protokoll öffnen</span>
-          </Link>
+          {features.docsViewer && (
+            <Link
+              to="/protocol/$section"
+              params={{ section: "section7" }}
+              hash={anchor}
+              className="flex items-center gap-1 text-xs text-primary hover:underline pt-2 border-t"
+            >
+              <ExternalLink className="h-3 w-3" />
+              <span>Im Protokoll öffnen</span>
+            </Link>
+          )}
         </div>
       </PopoverContent>
     </Popover>
@@ -245,6 +248,7 @@ export function ProcedureFlow({ flow, className }: ProcedureFlowProps) {
 function ProtocolReferences({ protocolRefs }: { protocolRefs?: CrossReference[] }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  if (!features.docsViewer) return null;
   if (!protocolRefs || protocolRefs.length === 0) return null;
 
   return (
