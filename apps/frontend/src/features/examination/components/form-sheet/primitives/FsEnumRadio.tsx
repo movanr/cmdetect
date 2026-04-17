@@ -25,6 +25,11 @@ export const FsEnumRadio = memo(function FsEnumRadio({ name, value, options }: F
             onChange={() => {
               if (!readOnly) setValue(name, key, { shouldDirty: true });
             }}
+            onClick={() => {
+              if (!readOnly && value === key) {
+                setValue(name, null, { shouldDirty: true });
+              }
+            }}
             disabled={readOnly}
             className="accent-slate-700 w-3.5 h-3.5 print:w-2.5 print:h-2.5"
           />

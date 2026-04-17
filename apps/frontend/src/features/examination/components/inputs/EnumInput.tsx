@@ -52,6 +52,12 @@ export function EnumInput<T extends string>({
           <Label
             key={option}
             htmlFor={getOptionId(option)}
+            onClick={(e) => {
+              if (isSelected && !disabled) {
+                e.preventDefault();
+                onChange(null);
+              }
+            }}
             className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-md border cursor-pointer transition-colors",
               isSelected
