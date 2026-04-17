@@ -191,7 +191,7 @@ export function CaseLayout({
 
       {/* Patient info top bar — hidden in print */}
       {hasPatientInfo && (
-        <div className="print:hidden flex flex-wrap items-center gap-x-4 gap-y-1 border-b bg-muted/40 px-4 py-2 xl:px-6 shrink-0">
+        <div className="print:hidden flex flex-wrap items-center gap-x-4 gap-y-1 border-b bg-muted/40 px-4 py-2 lg:px-5 xl:px-6 shrink-0">
           {isDemo && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -308,7 +308,7 @@ export function CaseLayout({
 
         {/* Main content */}
         <main id="main-scroll-container" className="flex-1 overflow-auto print:overflow-visible [scrollbar-gutter:stable]">
-          <div className="px-4 py-6 xl:px-8 xl:py-8 print:p-0">{children}</div>
+          <div className="px-4 py-6 lg:px-6 lg:py-7 xl:px-8 xl:py-8 print:p-0">{children}</div>
         </main>
       </div>
     </div>

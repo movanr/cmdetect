@@ -32,7 +32,7 @@ export function DrawingToolbar({
           <Button
             key={tool}
             variant={activeTool === tool ? 'default' : 'outline'}
-            size="sm"
+            size="default"
             onClick={() => onToolChange(tool)}
             className={cn(
               'min-w-[80px]',
