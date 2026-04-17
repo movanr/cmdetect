@@ -194,7 +194,7 @@ async function main() {
     console.log("\n💡 Users should change their password after first login.");
     console.log("💡 The admin user needs to set up the encryption key on first login.");
   } catch (error) {
-    console.error("❌ Error:", error instanceof Error ? error.message : error);
+    console.error("❌ Error:", error);
     process.exit(1);
   } finally {
     await pool.end();
