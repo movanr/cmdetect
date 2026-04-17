@@ -32,7 +32,7 @@ function CaseIndexRedirect() {
   const { data: examination, isLoading: isExaminationLoading } =
     useExaminationResponse(id);
 
-  const { completedSteps } = useCaseProgress({
+  const { completedSteps, isScreeningNegative } = useCaseProgress({
     patientRecordId: id,
     responses: responses ?? [],
     hasPatientData: true,
@@ -46,6 +46,13 @@ function CaseIndexRedirect() {
         <div className="text-muted-foreground">Laden...</div>
       </div>
     );
+  }
+
+  // Negative screening: no further clinical steps are indicated. Land on the
+  // anamnesis dashboard (which shows the "Screening negativ" banner) instead
+  // of auto-forwarding through the completed-step chain.
+  if (isScreeningNegative) {
+    return <Navigate to="/cases/$id/anamnesis" params={{ id }} replace />;
   }
 
   const targetStep = getFirstIncompleteStep(completedSteps);
