@@ -74,5 +74,12 @@ export function useExaminationResponse(patientRecordId: string) {
     // delays the error surfacing to the user.
     retry: (failureCount, error) =>
       !(error instanceof PersistenceMigrationError) && failureCount < 3,
+    // The form is the working copy; the cache is only ever written from a
+    // real server response or an explicit invalidation after a mutation. We
+    // never want a window-focus or reconnect refetch to race the form's
+    // local edits, so refetches are opt-in (via invalidateQueries).
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 }

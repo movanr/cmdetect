@@ -1,5 +1,17 @@
 /**
- * Mutation hooks for saving examination responses
+ * Mutation hooks for saving examination responses.
+ *
+ * All writes share `mutationKey: ["examination-response", patientRecordId]`
+ * + `scope: { id: patientRecordId }` so TanStack Query serializes concurrent
+ * mutations on the same exam (upsert + complete can overlap in code; scope
+ * guarantees the network calls run strictly in order).
+ *
+ * `networkMode: "offlineFirst"` pauses mutations when offline and auto-resumes
+ * them on reconnect within the same tab session.
+ *
+ * No optimistic cache updates: the form is the working copy, the query cache
+ * is only ever written from a real server response. This prevents the class of
+ * bugs where an orphaned optimistic placeholder never gets swapped back.
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -34,29 +46,29 @@ interface CompleteParams {
 }
 
 /**
- * Defense-in-depth: the form's own Zod resolver already validates on submit,
- * but autosave serialization runs on a raw getValues() snapshot. Re-validating
- * here rejects programmatic writes that bypass the form (and surfaces schema
- * drift loudly instead of silently persisting garbage).
+ * Defense-in-depth: the form's own Zod resolver validates on submit, but
+ * autosave serializes a raw getValues() snapshot. Re-validating here rejects
+ * programmatic writes that bypass the form (and surfaces schema drift loudly
+ * instead of silently persisting garbage). Throws on failure — the mutation
+ * rejects, onError runs, no network call happens.
  */
 function validateOrThrow(responseData: FormValues) {
   const parsed = examinationSchema.safeParse(responseData);
   if (!parsed.success) {
-    // Keep Zod details in the console for devs; user-facing message is plain.
     console.error("[examination] Schema validation failed", parsed.error);
     throw new Error("Untersuchungsdaten sind ungültig.");
   }
 }
 
-/**
- * Mutation hook for upserting examination response.
- * Creates new record or updates existing one.
- */
 export function useUpsertExamination(patientRecordId: string) {
   const queryClient = useQueryClient();
   const queryKey = ["examination-response", patientRecordId];
 
   return useMutation({
+    mutationKey: ["examination-response", patientRecordId],
+    scope: { id: `examination-response:${patientRecordId}` },
+    networkMode: "offlineFirst",
+
     mutationFn: async ({
       patientRecordId,
       examinedBy,
@@ -64,6 +76,7 @@ export function useUpsertExamination(patientRecordId: string) {
       status,
       completedSections,
     }: UpsertParams) => {
+      validateOrThrow(responseData);
       return execute(UPSERT_EXAMINATION_RESPONSE, {
         patient_record_id: patientRecordId,
         examined_by: examinedBy,
@@ -73,49 +86,7 @@ export function useUpsertExamination(patientRecordId: string) {
       });
     },
 
-    // Optimistic update — but only after validation passes.
-    onMutate: async ({ responseData, status, completedSections }) => {
-      validateOrThrow(responseData);
-
-      await queryClient.cancelQueries({ queryKey });
-
-      const previousResponse =
-        queryClient.getQueryData<ExaminationResponse | null>(queryKey);
-
-      // Optimistically update the cache
-      queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
-        if (old) {
-          return {
-            ...old,
-            responseData,
-            status,
-            completedSections,
-            updatedAt: new Date().toISOString(),
-          };
-        }
-        // If no existing record, create optimistic one (id will be replaced on success)
-        return {
-          id: "optimistic",
-          patientRecordId,
-          examinedBy: "",
-          responseData,
-          status,
-          completedSections,
-          startedAt: new Date().toISOString(),
-          completedAt: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-      });
-
-      return { previousResponse };
-    },
-
-    onError: (error, _variables, context) => {
-      // Rollback on error
-      if (context?.previousResponse !== undefined) {
-        queryClient.setQueryData(queryKey, context.previousResponse);
-      }
+    onError: (error) => {
       // Stable id → Sonner replaces instead of stacking a new toast per
       // debounced autosave retry.
       toast.error("Fehler beim Speichern: " + error.message, {
@@ -124,23 +95,27 @@ export function useUpsertExamination(patientRecordId: string) {
     },
 
     onSuccess: (data) => {
-      // Dismiss any lingering error toast so the UI reflects the recovered state.
       toast.dismiss(`examination-save-error:${patientRecordId}`);
-      // Update cache with server response (gets correct id)
       const response = data.insert_examination_response_one;
       if (!response) return;
       const validatedData = parseExaminationData(response.response_data);
       if (!validatedData) return;
-      queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          id: response.id,
-          responseData: validatedData,
-          status: response.status as ExaminationStatus,
-          completedSections: parseCompletedSections(response.completed_sections),
-          updatedAt: response.updated_at,
-        };
+
+      const existing =
+        queryClient.getQueryData<ExaminationResponse | null>(queryKey);
+      if (!existing) {
+        // First save — mutation return is missing started_at/created_at/
+        // examined_by. Invalidate to refetch the complete record.
+        queryClient.invalidateQueries({ queryKey });
+        return;
+      }
+      queryClient.setQueryData<ExaminationResponse>(queryKey, {
+        ...existing,
+        id: response.id,
+        responseData: validatedData,
+        status: response.status as ExaminationStatus,
+        completedSections: parseCompletedSections(response.completed_sections),
+        updatedAt: response.updated_at,
       });
     },
   });
@@ -148,22 +123,27 @@ export function useUpsertExamination(patientRecordId: string) {
 
 /**
  * Mutation hook for completing an examination in a single atomic write.
- * Writes response_data, status="completed", completed_sections, and completed_at
- * together, so data and status land together. Replaces the prior two-mutation
- * split (upsert then status update) which could leave the row stuck
- * in_progress if the status call failed.
+ * Writes response_data, status="completed", completed_sections, and
+ * completed_at together so data and status land together. Shares
+ * mutationKey/scope with useUpsertExamination so a pending upsert
+ * drains before completion runs.
  */
 export function useCompleteExamination(patientRecordId: string) {
   const queryClient = useQueryClient();
   const queryKey = ["examination-response", patientRecordId];
 
   return useMutation({
+    mutationKey: ["examination-response", patientRecordId],
+    scope: { id: `examination-response:${patientRecordId}` },
+    networkMode: "offlineFirst",
+
     mutationFn: async ({
       patientRecordId,
       examinedBy,
       responseData,
       completedSections,
     }: CompleteParams) => {
+      validateOrThrow(responseData);
       return execute(UPSERT_AND_COMPLETE_EXAMINATION, {
         patient_record_id: patientRecordId,
         examined_by: examinedBy,
@@ -172,53 +152,14 @@ export function useCompleteExamination(patientRecordId: string) {
       });
     },
 
-    onMutate: async ({ responseData, completedSections }) => {
-      validateOrThrow(responseData);
-
-      await queryClient.cancelQueries({ queryKey });
-
-      const previousResponse =
-        queryClient.getQueryData<ExaminationResponse | null>(queryKey);
-
-      queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
-        const now = new Date().toISOString();
-        if (old) {
-          return {
-            ...old,
-            responseData,
-            status: "completed",
-            completedSections,
-            completedAt: now,
-            updatedAt: now,
-          };
-        }
-        return {
-          id: "optimistic",
-          patientRecordId,
-          examinedBy: "",
-          responseData,
-          status: "completed",
-          completedSections,
-          startedAt: now,
-          completedAt: now,
-          createdAt: now,
-          updatedAt: now,
-        };
-      });
-
-      return { previousResponse };
-    },
-
-    onError: (error, _variables, context) => {
-      if (context?.previousResponse !== undefined) {
-        queryClient.setQueryData(queryKey, context.previousResponse);
-      }
+    onError: (error) => {
       toast.error("Fehler beim Abschließen: " + error.message, {
         id: `examination-complete-error:${patientRecordId}`,
       });
     },
 
     onSuccess: (data) => {
+      toast.dismiss(`examination-complete-error:${patientRecordId}`);
       const response = data.insert_examination_response_one;
       if (!response) {
         toast.success("Untersuchung abgeschlossen");
@@ -226,18 +167,21 @@ export function useCompleteExamination(patientRecordId: string) {
       }
       const validatedData = parseExaminationData(response.response_data);
       if (validatedData) {
-        queryClient.setQueryData<ExaminationResponse | null>(queryKey, (old) => {
-          if (!old) return old;
-          return {
-            ...old,
+        const existing =
+          queryClient.getQueryData<ExaminationResponse | null>(queryKey);
+        if (!existing) {
+          queryClient.invalidateQueries({ queryKey });
+        } else {
+          queryClient.setQueryData<ExaminationResponse>(queryKey, {
+            ...existing,
             id: response.id,
             responseData: validatedData,
             status: response.status as ExaminationStatus,
             completedSections: parseCompletedSections(response.completed_sections),
             completedAt: response.completed_at ?? null,
             updatedAt: response.updated_at,
-          };
-        });
+          });
+        }
       }
       toast.success("Untersuchung abgeschlossen");
     },

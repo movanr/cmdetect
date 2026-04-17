@@ -23,7 +23,7 @@ import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { useSession } from "@/lib/auth";
 import { formatDate } from "@/lib/date-utils";
 import { roles } from "@cmdetect/config";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, useBlocker, useLocation, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
@@ -44,6 +44,7 @@ import {
   useExaminationResponse,
 } from "../features/examination";
 import { BehandlerSelector } from "../features/examination/components/BehandlerSelector";
+import { OfflineIndicator } from "../features/examination/components/OfflineIndicator";
 import { usePhysicians } from "../features/examination/hooks/use-physicians";
 import { ExaminationViewProvider } from "../features/examination/contexts/ExaminationViewContext";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
@@ -254,9 +255,14 @@ function ExaminationContent({
   const { getValues } = useFormContext();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const t = getTranslations();
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const { data: physicians } = usePhysicians();
+  const mutationKey = useMemo(
+    () => ["examination-response", caseId],
+    [caseId],
+  );
 
   // Resolve examiner ID → name
   const examinerName = useMemo(() => {
@@ -288,15 +294,16 @@ function ExaminationContent({
     });
   }, [getValues, patientName, patientDob, clinicInternalId, examinerName]);
 
-  // Block SPA navigation when there are unsaved changes: try to save first,
-  // show a dialog only if saving fails. Also covers browser close/refresh via enableBeforeUnload.
+  // Block SPA navigation when there are unsaved changes or a save is still
+  // in flight. Try to flush first; show the dialog only if flushing fails.
+  // enableBeforeUnload wires up the browser's native "unsaved changes" prompt
+  // for tab close / refresh.
   const shouldBlockFn = useCallback(
     async ({ next }: { next: { pathname: string } }) => {
       // Allow navigation within examination child routes (provider stays mounted)
       if (next.pathname.includes(`/cases/${caseId}/examination`)) return false;
-      // No unsaved changes — allow navigation
-      if (!hasUnsavedBackendChangesRef.current) return false;
-      // Unsaved changes — try to save before navigating
+      const isMutating = queryClient.isMutating({ mutationKey }) > 0;
+      if (!hasUnsavedBackendChangesRef.current && !isMutating) return false;
       try {
         await flushSave();
         return false;
@@ -304,11 +311,13 @@ function ExaminationContent({
         return true;
       }
     },
-    [caseId, flushSave, hasUnsavedBackendChangesRef]
+    [caseId, flushSave, hasUnsavedBackendChangesRef, queryClient, mutationKey]
   );
   const enableBeforeUnload = useCallback(
-    () => hasUnsavedBackendChangesRef.current,
-    [hasUnsavedBackendChangesRef]
+    () =>
+      hasUnsavedBackendChangesRef.current ||
+      queryClient.isMutating({ mutationKey }) > 0,
+    [hasUnsavedBackendChangesRef, queryClient, mutationKey]
   );
   const blocker = useBlocker({ shouldBlockFn, enableBeforeUnload, withResolver: true });
 
@@ -383,6 +392,7 @@ function ExaminationContent({
           )}
 
           <div className="ml-auto flex items-center gap-2">
+            <OfflineIndicator />
             <Button variant="outline" size="sm" onClick={handleExportPDF}>
               PDF Export
             </Button>
