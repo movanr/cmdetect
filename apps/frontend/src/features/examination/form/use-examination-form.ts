@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { useFormContext, type FieldPath } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { M } from "../model/nodes";
 import {
@@ -248,6 +249,26 @@ export function useExaminationForm() {
       form.setError(error.path as FieldPath<FormValues>, {
         type: "manual",
         message: error.message,
+      });
+    }
+
+    if (!result.valid && result.errors.length > 0) {
+      toast.error(
+        "Bitte vervollständigen Sie die markierten Felder oder überspringen Sie den Schritt",
+        { id: "examination-validation" }
+      );
+
+      const firstErrorPath = result.errors[0].path;
+      requestAnimationFrame(() => {
+        const container = document.getElementById("main-scroll-container");
+        if (!container) return;
+
+        const escapedPath = CSS.escape(firstErrorPath);
+        const target =
+          container.querySelector<HTMLElement>(`[name="${escapedPath}"]`) ??
+          container.querySelector<HTMLElement>('[aria-invalid="true"]');
+
+        target?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
     }
 

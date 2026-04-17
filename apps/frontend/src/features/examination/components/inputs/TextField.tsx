@@ -25,9 +25,11 @@ export function TextField<T extends FieldValues>({
           {label && <Label htmlFor={name}>{label}</Label>}
           <Input
             id={name}
+            name={name}
             placeholder={placeholder}
             value={field.value ?? ""}
             onChange={(e) => field.onChange(e.target.value || null)}
+            aria-invalid={!!fieldState.error}
             className={fieldState.error ? "border-destructive" : ""}
           />
           {fieldState.error && (
