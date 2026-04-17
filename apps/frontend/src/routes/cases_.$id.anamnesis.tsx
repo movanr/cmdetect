@@ -11,11 +11,7 @@ import { CaseLayout } from "../components/layouts/CaseLayout";
 import { formatDate } from "@/lib/date-utils";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { execute } from "@/graphql/execute";
-import {
-  getStepDefinition,
-  SubStepTabs,
-  useCaseProgress,
-} from "../features/case-workflow";
+import { useCaseProgress } from "../features/case-workflow";
 import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
 import { useExaminationResponse } from "../features/examination";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
@@ -53,10 +49,6 @@ function AnamnesisLayout() {
     isDemo: record?.is_demo ?? false,
     clinicInternalId: record?.clinic_internal_id,
   });
-
-  // Get anamnesis step definition for sub-steps
-  const anamnesisStep = getStepDefinition("anamnesis");
-  const subSteps = anamnesisStep?.subSteps ?? [];
 
   // Format patient display data
   const patientName =
@@ -97,18 +89,7 @@ function AnamnesisLayout() {
       isDecrypting={isDecrypting}
       isDemo={record?.is_demo ?? false}
     >
-      <div className="space-y-4">
-        {/* Sub-step navigation tabs */}
-        <SubStepTabs
-          caseId={id}
-          parentStep="anamnesis"
-          subSteps={subSteps}
-          className="rounded-t-lg -mx-4 xl:-mx-8 -mt-6 xl:-mt-8 mb-6"
-        />
-
-        {/* Child route content */}
-        <Outlet />
-      </div>
+      <Outlet />
     </CaseLayout>
   );
 }

@@ -73,10 +73,6 @@ export const MAIN_STEPS: StepDefinition[] = [
     id: "anamnesis",
     label: "Anamnese",
     order: 1,
-    subSteps: [
-      { id: "review", label: "Übersicht", order: 1, route: "review" },
-      { id: "wizard", label: "SF überprüfen", order: 2, route: "wizard" },
-    ],
   },
   {
     id: "examination",
