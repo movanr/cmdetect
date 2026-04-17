@@ -15,7 +15,7 @@ interface ExaminationPersistenceContextValue {
   saveSection: (sectionId: SectionId) => Promise<void>;
   /** Complete the entire examination */
   completeExamination: () => Promise<void>;
-  /** Flush any pending auto-save immediately (awaitable, throws on failure) */
+  /** Drain all pending writes (awaited by the navigation blocker) */
   flushSave: () => Promise<void>;
   /** Whether a save operation is in progress */
   isSaving: boolean;

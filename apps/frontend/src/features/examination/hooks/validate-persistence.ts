@@ -12,7 +12,7 @@ import {
   examinationDefaults,
   type FormValues,
 } from "../form/use-examination-form";
-import { migrateExaminationData } from "./model-versioning";
+import { CURRENT_MODEL_VERSION, migrateExaminationData } from "./model-versioning";
 
 /** Schema for validating completedSections arrays from untrusted sources */
 const sectionIdSchema = z.enum(SECTION_KEYS as [SectionId, ...SectionId[]]);
@@ -159,6 +159,63 @@ export function migrateAndParseExaminationData(
 }
 
 export { CURRENT_MODEL_VERSION } from "./model-versioning";
+
+/**
+ * Thrown when persisted examination data cannot be migrated to the current
+ * schema. Callers MUST NOT silently fall back to defaults — real examination
+ * content was saved and failed to load. Surface a load-blocking error so the
+ * user contacts support rather than re-entering data into an empty form.
+ */
+export class PersistenceMigrationError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "PersistenceMigrationError";
+  }
+}
+
+/**
+ * Load-path wrapper around `migrateAndParseExaminationData` that throws when
+ * real content fails to validate. For empty inputs (null/undefined/junk, or
+ * an object with no section keys) returns null — the caller interprets that
+ * as "no prior response". For inputs that clearly contain examination content
+ * but fail migration, throws `PersistenceMigrationError`.
+ */
+export function migrateAndParseExaminationDataStrict(
+  data: unknown,
+): FormValues | null {
+  if (data == null || typeof data !== "object" || Array.isArray(data)) {
+    return null;
+  }
+
+  const raw = data as Record<string, unknown>;
+
+  // Forward-compat guard: if the persisted data was written by a newer
+  // frontend (higher _modelVersion), we must NOT load+save it with the
+  // current (older) schema — doing so would silently drop fields only the
+  // newer frontend knew about. Refuse to load; user sees the support message.
+  const persistedVersion =
+    typeof raw._modelVersion === "number" ? raw._modelVersion : null;
+  if (persistedVersion !== null && persistedVersion > CURRENT_MODEL_VERSION) {
+    throw new PersistenceMigrationError(
+      "Untersuchungsdaten wurden mit einer neueren Version gespeichert. Bitte Seite neu laden oder Support kontaktieren.",
+    );
+  }
+
+  const sectionKeys = new Set(SECTION_KEYS as readonly string[]);
+  const hasSectionData = Object.keys(raw).some(
+    (k) => sectionKeys.has(k) && raw[k] != null && typeof raw[k] === "object",
+  );
+
+  const result = migrateAndParseExaminationData(data);
+  if (result) return result;
+
+  if (hasSectionData) {
+    throw new PersistenceMigrationError(
+      "Untersuchungsdaten sind mit der aktuellen Formularversion nicht kompatibel.",
+    );
+  }
+  return null;
+}
 
 /**
  * Get the default form values from the model.

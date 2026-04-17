@@ -82,22 +82,41 @@ export const UPSERT_EXAMINATION_RESPONSE = graphql(`
 `);
 
 /**
- * Complete examination - sets status to 'completed' and completed_at timestamp.
+ * Upsert + complete in a single mutation: writes response_data, marks status
+ * "completed", sets completed_at. Used on the completion path so data and
+ * status land atomically (previously two sequential mutations that could
+ * leave the row stuck in_progress if the second call failed).
+ *
+ * completed_at is intentionally NOT in UPSERT_EXAMINATION_RESPONSE's
+ * update_columns — regular saves must not clear it after completion.
  */
-export const COMPLETE_EXAMINATION = graphql(`
-  mutation CompleteExamination($id: String!, $completed_sections: jsonb!) {
-    update_examination_response_by_pk(
-      pk_columns: { id: $id }
-      _set: {
+export const UPSERT_AND_COMPLETE_EXAMINATION = graphql(`
+  mutation UpsertAndCompleteExamination(
+    $patient_record_id: String!
+    $examined_by: String!
+    $response_data: jsonb!
+    $completed_sections: jsonb!
+  ) {
+    insert_examination_response_one(
+      object: {
+        patient_record_id: $patient_record_id
+        examined_by: $examined_by
+        response_data: $response_data
         status: "completed"
-        completed_at: "now()"
         completed_sections: $completed_sections
+        completed_at: "now()"
+      }
+      on_conflict: {
+        constraint: examination_response_patient_record_unique
+        update_columns: [examined_by, response_data, status, completed_sections, completed_at]
       }
     ) {
       id
+      patient_record_id
+      response_data
       status
-      completed_at
       completed_sections
+      completed_at
       updated_at
     }
   }

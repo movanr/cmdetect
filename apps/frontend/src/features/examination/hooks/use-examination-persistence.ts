@@ -1,15 +1,25 @@
 /**
  * Examination Persistence Orchestration Hook
  *
- * Coordinates backend persistence via debounced auto-save:
- * - Hydrates form from backend on mount
- * - Auto-saves to backend on form changes (debounced 3s)
- * - Flushes pending save on unmount (SPA navigation keeps fetch alive)
- * - Saves immediately on section completion, examination completion, or blocker "save and leave"
+ * Coordinates backend persistence for the examination form.
+ *
+ * All writes go through a single serialized write queue (`useWriteQueue`),
+ * so debounced autosave, explicit saveSection, completeExamination, and
+ * Behandler changes execute strictly in order. No cross-write clobber;
+ * every write reads the freshest form state at the time it runs.
+ *
+ * - Hydrates form from backend on mount.
+ * - Autosaves on form changes (debounced 3s) via the queue.
+ * - Saves immediately on section completion, Behandler change, or
+ *   blocker "save and leave" (bypasses the debounce, not the queue).
+ * - `flushSave()` drains the queue and is awaited by the React Router blocker.
  *
  * Status model: once an examination is completed, its status stays "completed".
- * Subsequent edits update the data in place without changing the status.
- * This avoids the reopen/re-complete dance and its associated race conditions.
+ * Subsequent edits update the data in place (`UPSERT_EXAMINATION_RESPONSE`
+ * doesn't touch `status` or `completed_at` on an existing completed row's
+ * autosave path — see `queries.ts`). Completion itself is a single atomic
+ * mutation (`UPSERT_AND_COMPLETE_EXAMINATION`) that writes data + status +
+ * completed_at together.
  */
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
@@ -18,6 +28,7 @@ import type { FormValues } from "../form/use-examination-form";
 import { SECTION_IDS, type SectionId } from "../sections/registry";
 import { useExaminationResponse, type ExaminationStatus } from "./use-examination-response";
 import { useCompleteExamination, useUpsertExamination } from "./use-save-examination";
+import { useWriteQueue } from "./useWriteQueue";
 
 const AUTO_SAVE_DELAY_MS = 3000;
 
@@ -29,11 +40,11 @@ interface UseExaminationPersistenceOptions {
 export interface UseExaminationPersistenceResult {
   /** Save a section to backend and mark it completed */
   saveSection: (sectionId: SectionId) => Promise<void>;
-  /** Complete the entire examination */
+  /** Complete the entire examination (atomic: data + status + completed_at) */
   completeExamination: () => Promise<void>;
-  /** Flush any pending auto-save immediately (awaitable, throws on failure) */
+  /** Drain all pending writes. Awaited by the navigation blocker. */
   flushSave: () => Promise<void>;
-  /** Whether a save operation is in progress */
+  /** Whether any write is currently in flight */
   isSaving: boolean;
   /** List of completed section IDs */
   completedSections: SectionId[];
@@ -50,9 +61,8 @@ export function useExaminationPersistence({
   examinedBy,
 }: UseExaminationPersistenceOptions): UseExaminationPersistenceResult {
   const form = useFormContext<FormValues>();
-  // Ref for form methods — FormProvider spreads methods into a new object on every
-  // parent re-render, making the context reference unstable. The underlying RHF
-  // form state is the same regardless, so a ref avoids effect re-runs.
+  // FormProvider spreads methods into a new object each parent render,
+  // making the context reference unstable. A ref keeps effect deps stable.
   const formRef = useRef(form);
   formRef.current = form;
 
@@ -60,15 +70,22 @@ export function useExaminationPersistence({
   const [completedSections, setCompletedSections] = useState<SectionId[]>([]);
   const hasUnsavedBackendChangesRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Ref mirrors to avoid stale closures in watch/timer callbacks
   const completedSectionsRef = useRef<SectionId[]>([]);
   const backendStatusRef = useRef<ExaminationStatus | null>(null);
+  // Incremented on every form change; a save captures this at start and
+  // only clears the unsaved-changes flag if it hasn't moved by the time
+  // the mutation resolves — otherwise typing during the in-flight request
+  // would be silently marked "saved".
+  const unsavedEpochRef = useRef(0);
 
-  // Backend queries
   const { data: backendResponse, isFetched } = useExaminationResponse(patientRecordId);
 
   const upsertMutation = useUpsertExamination(patientRecordId);
   const completeMutation = useCompleteExamination(patientRecordId);
+  // Queue's `error` field is intentionally unused here — autosave failures
+  // are already surfaced via the mutation hook's onError toast. The queue
+  // primitive keeps it for other consumers (e.g. future SQ review unification).
+  const { enqueue, drain } = useWriteQueue();
 
   const isSaving = upsertMutation.isPending || completeMutation.isPending;
 
@@ -87,24 +104,22 @@ export function useExaminationPersistence({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFetched, isHydrated, backendResponse]);
 
-  // Build upsert params from current state, preserving backend status
-  const buildUpsertParams = useCallback(() => {
-    const formValues = formRef.current.getValues();
-    const sections = completedSectionsRef.current;
-    // Preserve backend status (e.g. "completed") — only compute if no backend record yet
-    const status: ExaminationStatus =
-      backendStatusRef.current ?? (sections.length === 0 ? "draft" : "in_progress");
-    return {
-      patientRecordId,
-      examinedBy,
-      responseData: formValues,
-      status,
-      completedSections: sections,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientRecordId, examinedBy]);
+  // Refs for latest values — autosave effect reads these without re-subscribing.
+  const upsertMutationRef = useRef(upsertMutation);
+  const completeMutationRef = useRef(completeMutation);
+  const enqueueRef = useRef(enqueue);
+  const examinedByRef = useRef(examinedBy);
+  const patientRecordIdRef = useRef(patientRecordId);
 
-  // Cancel any pending debounce timer
+  useEffect(() => {
+    backendStatusRef.current = backendResponse?.status ?? null;
+    upsertMutationRef.current = upsertMutation;
+    completeMutationRef.current = completeMutation;
+    enqueueRef.current = enqueue;
+    examinedByRef.current = examinedBy;
+    patientRecordIdRef.current = patientRecordId;
+  }, [backendResponse?.status, upsertMutation, completeMutation, enqueue, examinedBy, patientRecordId]);
+
   const cancelDebounce = useCallback(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -112,21 +127,34 @@ export function useExaminationPersistence({
     }
   }, []);
 
-  // Refs for latest values — lets the auto-save effect access current
-  // callbacks without re-subscribing on every cache update.
-  const buildUpsertParamsRef = useRef(buildUpsertParams);
-  const upsertMutationRef = useRef(upsertMutation);
-  const examinedByRef = useRef(examinedBy);
+  /**
+   * Enqueue an autosave: reads form state *inside* the queued closure so the
+   * write sees the freshest values after any prior queued writes have settled.
+   * Captures the unsaved-epoch before the mutation so a new edit during the
+   * request doesn't get falsely marked saved when the mutation resolves.
+   */
+  const enqueueAutosave = useCallback(() => {
+    return enqueueRef.current(async () => {
+      if (!examinedByRef.current) return;
+      const sections = completedSectionsRef.current;
+      const status: ExaminationStatus =
+        backendStatusRef.current ?? (sections.length === 0 ? "draft" : "in_progress");
+      const startedEpoch = unsavedEpochRef.current;
+      await upsertMutationRef.current.mutateAsync({
+        patientRecordId: patientRecordIdRef.current,
+        examinedBy: examinedByRef.current,
+        responseData: formRef.current.getValues(),
+        status,
+        completedSections: sections,
+      });
+      // Only clear if the form hasn't been touched during the mutation.
+      if (unsavedEpochRef.current === startedEpoch) {
+        hasUnsavedBackendChangesRef.current = false;
+      }
+    });
+  }, []);
 
-  // Sync refs in effect (react-hooks/rules-of-hooks forbids ref writes during render)
-  useEffect(() => {
-    backendStatusRef.current = backendResponse?.status ?? null;
-    buildUpsertParamsRef.current = buildUpsertParams;
-    upsertMutationRef.current = upsertMutation;
-    examinedByRef.current = examinedBy;
-  }, [backendResponse?.status, buildUpsertParams, upsertMutation, examinedBy]);
-
-  // Save immediately when Behandler changes (not debounced)
+  // Save immediately on Behandler change (cancels debounce, enqueues a flush).
   const prevExaminedByRef = useRef(examinedBy);
   useEffect(() => {
     if (!isHydrated || !examinedBy) return;
@@ -134,125 +162,139 @@ export function useExaminationPersistence({
     prevExaminedByRef.current = examinedBy;
 
     cancelDebounce();
-    upsertMutationRef.current.mutate(buildUpsertParamsRef.current(), {
-      onSuccess: () => {
-        hasUnsavedBackendChangesRef.current = false;
-      },
-    });
-  }, [examinedBy, isHydrated, cancelDebounce]);
+    // Don't await — the queue handles ordering; surfaced errors go through
+    // the write queue's error state.
+    void enqueueAutosave();
+  }, [examinedBy, isHydrated, cancelDebounce, enqueueAutosave]);
 
-  // Auto-save to backend on form changes (debounced).
+  // Auto-save on form changes (debounced).
   useEffect(() => {
     if (!isHydrated) return;
 
     const subscription = formRef.current.watch(() => {
       hasUnsavedBackendChangesRef.current = true;
-
+      unsavedEpochRef.current += 1;
       cancelDebounce();
 
-      debounceTimerRef.current = setTimeout(async () => {
-        // Skip save if no Behandler selected (required field)
-        if (!examinedByRef.current) return;
-        try {
-          await upsertMutationRef.current.mutateAsync(buildUpsertParamsRef.current());
-          hasUnsavedBackendChangesRef.current = false;
-        } catch (error) {
-          console.warn("Auto-save failed:", error);
-        }
+      debounceTimerRef.current = setTimeout(() => {
+        void enqueueAutosave();
       }, AUTO_SAVE_DELAY_MS);
     });
 
     return () => {
       subscription.unsubscribe();
       cancelDebounce();
-      // Flush: if there are unsaved changes, fire an immediate save.
-      // SPA navigation keeps the fetch alive so this reliably completes.
+      // Final flush on unmount: enqueue — NOT fire-and-forget. The write
+      // queue's error state keeps the failure observable; the outer
+      // React Router blocker normally drains before unmount.
       if (hasUnsavedBackendChangesRef.current && examinedByRef.current) {
-        upsertMutationRef.current.mutate(buildUpsertParamsRef.current());
+        void enqueueAutosave();
       }
     };
-  }, [isHydrated, cancelDebounce]);
+  }, [isHydrated, cancelDebounce, enqueueAutosave]);
 
-  // Flush any pending auto-save immediately (awaitable, throws on failure).
-  // Used by useBlocker to save before SPA navigation.
+  /**
+   * Flush pending writes before navigation. If there are unsaved changes,
+   * enqueue an autosave and **await it** so a failure rejects here and the
+   * navigation blocker can surface the dialog. If there are pending changes
+   * but no Behandler is selected (save would be a no-op), throw so the
+   * blocker shows the "unsaved changes" dialog instead of silently leaving.
+   * With no pending changes, drain any other in-flight queued writes
+   * (drain() itself does not throw — that's fine, we have no new work).
+   */
   const flushSave = useCallback(async () => {
-    if (!hasUnsavedBackendChangesRef.current || !examinedByRef.current) return;
     cancelDebounce();
-    await upsertMutationRef.current.mutateAsync(buildUpsertParamsRef.current());
-    hasUnsavedBackendChangesRef.current = false;
-  }, [cancelDebounce]);
+    if (hasUnsavedBackendChangesRef.current) {
+      if (!examinedByRef.current) {
+        throw new Error(
+          "Kein Behandler ausgewählt — Änderungen können nicht gespeichert werden.",
+        );
+      }
+      await enqueueAutosave();
+      return;
+    }
+    await drain();
+  }, [cancelDebounce, drain, enqueueAutosave]);
 
-  // Save section to backend and mark it completed
+  /**
+   * Save section: cancels debounce, enqueues an upsert with the new
+   * completed sections array. Ref + state are only updated after the
+   * mutation resolves, so a failed mutation doesn't desync local state.
+   * Same epoch-guarded clear as autosave — typing during an in-flight save
+   * must not be marked "saved".
+   */
   const saveSection = useCallback(
     async (sectionId: SectionId) => {
       cancelDebounce();
 
-      const formValues = formRef.current.getValues();
-      const newCompletedSections = completedSections.includes(sectionId)
-        ? completedSections
-        : [...completedSections, sectionId];
+      await enqueueRef.current(async () => {
+        if (!examinedByRef.current) {
+          throw new Error(
+            "Kein Behandler ausgewählt — Abschnitt kann nicht gespeichert werden.",
+          );
+        }
 
-      // Preserve backend status (e.g. "completed")
-      const status: ExaminationStatus =
-        backendStatusRef.current ?? (newCompletedSections.length === 0 ? "draft" : "in_progress");
+        const prior = completedSectionsRef.current;
+        const newCompletedSections = prior.includes(sectionId)
+          ? prior
+          : [...prior, sectionId];
 
-      await upsertMutation.mutateAsync({
-        patientRecordId,
-        examinedBy,
-        responseData: formValues,
-        status,
-        completedSections: newCompletedSections,
+        const status: ExaminationStatus =
+          backendStatusRef.current ?? (newCompletedSections.length === 0 ? "draft" : "in_progress");
+
+        const startedEpoch = unsavedEpochRef.current;
+        await upsertMutationRef.current.mutateAsync({
+          patientRecordId: patientRecordIdRef.current,
+          examinedBy: examinedByRef.current,
+          responseData: formRef.current.getValues(),
+          status,
+          completedSections: newCompletedSections,
+        });
+
+        setCompletedSections(newCompletedSections);
+        completedSectionsRef.current = newCompletedSections;
+        if (unsavedEpochRef.current === startedEpoch) {
+          hasUnsavedBackendChangesRef.current = false;
+        }
       });
-
-      setCompletedSections(newCompletedSections);
-      completedSectionsRef.current = newCompletedSections;
-      hasUnsavedBackendChangesRef.current = false;
     },
-    [completedSections, upsertMutation, patientRecordId, examinedBy, cancelDebounce]
+    [cancelDebounce],
   );
 
-  // Complete the entire examination
+  /**
+   * Complete: single atomic mutation. No two-call split — status, data, and
+   * completed_at land together.
+   */
   const completeExaminationFn = useCallback(async () => {
     cancelDebounce();
 
-    const formValues = formRef.current.getValues();
-    // Mark all sections as completed — covers both guided mode (sections accumulated
-    // one-by-one) and form sheet mode (no individual saveSection calls).
-    const finalCompletedSections = [...SECTION_IDS];
+    await enqueueRef.current(async () => {
+      if (!examinedByRef.current) {
+        throw new Error(
+          "Kein Behandler ausgewählt — Untersuchung kann nicht abgeschlossen werden.",
+        );
+      }
 
-    // Upsert with all data first
-    const upsertResult = await upsertMutation.mutateAsync({
-      patientRecordId,
-      examinedBy,
-      responseData: formValues,
-      status: "in_progress",
-      completedSections: finalCompletedSections,
+      // Mark all sections completed — covers both guided mode (accumulated
+      // one-by-one) and form sheet mode (no individual saveSection calls).
+      const finalCompletedSections = [...SECTION_IDS];
+
+      const startedEpoch = unsavedEpochRef.current;
+      await completeMutationRef.current.mutateAsync({
+        patientRecordId: patientRecordIdRef.current,
+        examinedBy: examinedByRef.current,
+        responseData: formRef.current.getValues(),
+        completedSections: finalCompletedSections,
+      });
+
+      setCompletedSections(finalCompletedSections);
+      completedSectionsRef.current = finalCompletedSections;
+      backendStatusRef.current = "completed";
+      if (unsavedEpochRef.current === startedEpoch) {
+        hasUnsavedBackendChangesRef.current = false;
+      }
     });
-
-    // Get the examination ID
-    const examId = backendResponse?.id ?? upsertResult.insert_examination_response_one?.id;
-
-    if (!examId) {
-      throw new Error("Could not determine examination ID for completion");
-    }
-
-    // Mark as completed (sets status="completed" and completed_at)
-    await completeMutation.mutateAsync({
-      id: examId,
-      completedSections: finalCompletedSections,
-    });
-
-    setCompletedSections(finalCompletedSections);
-    completedSectionsRef.current = finalCompletedSections;
-    hasUnsavedBackendChangesRef.current = false;
-  }, [
-    upsertMutation,
-    completeMutation,
-    patientRecordId,
-    examinedBy,
-    backendResponse,
-    cancelDebounce,
-  ]);
+  }, [cancelDebounce]);
 
   return {
     saveSection,

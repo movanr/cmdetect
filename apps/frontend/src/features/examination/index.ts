@@ -82,7 +82,10 @@ export { createStepValidator, getStepPaths } from "./form/use-step-validation";
 export { GET_EXAMINATION_RESPONSE } from "./queries";
 
 // Data validation and migration
-export { migrateAndParseExaminationData } from "./hooks/validate-persistence";
+export {
+  migrateAndParseExaminationData,
+  PersistenceMigrationError,
+} from "./hooks/validate-persistence";
 
 
 // Persistence hooks and context

@@ -39,6 +39,7 @@ import {
   examinationFormConfig,
   ExaminationPersistenceProvider,
   generateFormSheetPDF,
+  PersistenceMigrationError,
   useExaminationPersistenceContext,
   useExaminationResponse,
 } from "../features/examination";
@@ -70,9 +71,15 @@ function ExaminationLayout() {
   const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
 
   // Fetch examination response for workflow progress (shares cache with persistence provider)
-  const { data: examination, isLoading: isExamLoading } = useExaminationResponse(id);
+  const {
+    data: examination,
+    isLoading: isExamLoading,
+    error: examError,
+  } = useExaminationResponse(id);
 
   const examinationCompletedAt = examination?.completedAt ?? null;
+  const migrationError =
+    examError instanceof PersistenceMigrationError ? examError : null;
 
   // Behandler (examiner) state:
   // - Physician: auto-select self (they ARE the examiner)
@@ -155,6 +162,27 @@ function ExaminationLayout() {
       <CaseLayout caseId={id} currentStep="examination" completedSteps={completedStepsArray}>
         <div className="flex items-center justify-center p-8">
           <div className="text-muted-foreground">Laden...</div>
+        </div>
+      </CaseLayout>
+    );
+  }
+
+  // Migration failure: block the form with an explicit error. Do NOT fall
+  // through to hydration with defaults — that would silently overwrite real
+  // data on the next autosave.
+  if (migrationError) {
+    return (
+      <CaseLayout caseId={id} currentStep="examination" completedSteps={completedStepsArray}>
+        <div className="mx-auto max-w-xl p-8 space-y-3 text-center">
+          <h2 className="text-lg font-semibold">Untersuchung konnte nicht geladen werden</h2>
+          <p className="text-sm text-muted-foreground">
+            Die gespeicherten Untersuchungsdaten sind nicht mit der aktuellen Formularversion
+            kompatibel und konnten nicht migriert werden.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Bitte kontaktieren Sie den Support. Geben Sie keine Daten neu ein — die
+            ursprünglichen Daten sind noch in der Datenbank vorhanden.
+          </p>
         </div>
       </CaseLayout>
     );
