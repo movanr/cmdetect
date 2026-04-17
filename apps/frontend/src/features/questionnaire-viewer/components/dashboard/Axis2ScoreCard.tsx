@@ -14,7 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { JFLS20_SUBSCALE_LABELS, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import {
+  JFLS20_SUBSCALE_LABELS,
+  OBC_SEVERITY_LABELS,
+  OBC_SEVERITY_OPTIONS,
+  PHQ4_SEVERITY_LABELS,
+  PHQ4_SEVERITY_OPTIONS,
+  QUESTIONNAIRE_ID,
+  resolveLabel,
+} from "@cmdetect/questionnaires";
 import { useEffect, type ReactNode } from "react";
 import { useManualScoreAutoSave } from "../../hooks/useManualScoreAutoSave";
 import { ClinicalNote } from "./ClinicalNote";
@@ -41,18 +49,6 @@ interface ContentProps {
 
 // ─── Option lists ───────────────────────────────────────────────────────
 
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
-const PHQ4_SEVERITY_OPTIONS: SelectOption[] = [
-  { value: "normal", label: "Normal" },
-  { value: "leicht", label: "Leicht" },
-  { value: "moderat", label: "Moderat" },
-  { value: "schwer", label: "Schwer" },
-];
-
 const PHQ4_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
   ["0–2", "Normal"],
   ["3–5", "Leicht"],
@@ -60,21 +56,11 @@ const PHQ4_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
   ["9–12", "Schwer"],
 ];
 
-const OBC_SEVERITY_OPTIONS: SelectOption[] = [
-  { value: "keine", label: "Keine" },
-  { value: "niedrig", label: "Niedrig" },
-  { value: "hoch", label: "Hoch" },
-];
-
 const OBC_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
   ["0", "Keine"],
   ["1–24", "Niedrig"],
   ["25–84", "Hoch"],
 ];
-
-function labelFor(options: SelectOption[], value: string): string | undefined {
-  return options.find((o) => o.value === value)?.label;
-}
 
 // ─── Input helpers ──────────────────────────────────────────────────────
 
@@ -105,7 +91,7 @@ function NumberField({ value, onChange, min, max, step = 1, width = "w-20" }: Nu
 interface SelectFieldProps {
   value: string;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: ReadonlyArray<{ value: string; label: string }>;
   placeholder?: string;
   width?: string;
 }
@@ -244,7 +230,7 @@ export function PHQ4Content({ onSummaryChange, patientRecordId, hasResponse }: C
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
     if (total) entries.push({ label: "Gesamtwert", value: total });
-    const severityLabel = labelFor(PHQ4_SEVERITY_OPTIONS, severity);
+    const severityLabel = resolveLabel(PHQ4_SEVERITY_LABELS, severity);
     if (severityLabel) entries.push({ label: "Schweregrad der Belastung", value: severityLabel });
     onSummaryChange?.({ entries });
   }, [total, severity, onSummaryChange]);
@@ -494,7 +480,7 @@ export function OBCContent({ onSummaryChange, patientRecordId, hasResponse }: Co
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
     if (total) entries.push({ label: "Gesamtwert", value: total });
-    const severityLabel = labelFor(OBC_SEVERITY_OPTIONS, severity);
+    const severityLabel = resolveLabel(OBC_SEVERITY_LABELS, severity);
     if (severityLabel) entries.push({ label: "Risiko-Einstufung", value: severityLabel });
     onSummaryChange?.({ entries });
   }, [total, severity, onSummaryChange]);

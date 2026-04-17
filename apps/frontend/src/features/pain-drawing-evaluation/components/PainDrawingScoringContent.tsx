@@ -20,17 +20,15 @@ import {
 } from "@/features/questionnaire-viewer/components/dashboard/Axis2ScoreCard";
 import { ClinicalNote } from "@/features/questionnaire-viewer/components/dashboard/ClinicalNote";
 import { useManualScoreAutoSave } from "@/features/questionnaire-viewer/hooks/useManualScoreAutoSave";
-import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import {
+  PAIN_DRAWING_SEVERITY_LABELS,
+  PAIN_DRAWING_SEVERITY_OPTIONS,
+  QUESTIONNAIRE_ID,
+  resolveLabel,
+} from "@cmdetect/questionnaires";
 import { useEffect } from "react";
 
 const NONE = "__none__";
-
-const PAIN_DRAWING_SEVERITY_OPTIONS = [
-  { value: "keine", label: "Keine" },
-  { value: "leicht", label: "Leicht" },
-  { value: "moderat", label: "Moderat" },
-  { value: "schwer", label: "Schwer" },
-] as const;
 
 const PAIN_DRAWING_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
   ["0", "Keine"],
@@ -63,7 +61,7 @@ export function PainDrawingScoringContent({
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
     if (regionCount) entries.push({ label: "Schmerzgebiete", value: regionCount });
-    const severityLabel = PAIN_DRAWING_SEVERITY_OPTIONS.find((o) => o.value === severity)?.label;
+    const severityLabel = resolveLabel(PAIN_DRAWING_SEVERITY_LABELS, severity);
     if (severityLabel) entries.push({ label: "Schweregrad", value: severityLabel });
     onSummaryChange?.({ entries });
   }, [regionCount, severity, onSummaryChange]);

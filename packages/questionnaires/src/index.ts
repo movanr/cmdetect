@@ -303,6 +303,22 @@ export {
 } from "./validation";
 
 // ============================================================================
+// Manual score labels (German display labels for practitioner-entered enum fields)
+// ============================================================================
+export {
+  GCPS_GRADE_LABELS,
+  GCPS_GRADE_OPTIONS,
+  OBC_SEVERITY_LABELS,
+  OBC_SEVERITY_OPTIONS,
+  PAIN_DRAWING_SEVERITY_LABELS,
+  PAIN_DRAWING_SEVERITY_OPTIONS,
+  PHQ4_SEVERITY_LABELS,
+  PHQ4_SEVERITY_OPTIONS,
+  resolveLabel,
+  type LabelOption,
+} from "./manual-score-labels";
+
+// ============================================================================
 // Score Schemas (Zod schemas - single source of truth for score types)
 // ============================================================================
 export {

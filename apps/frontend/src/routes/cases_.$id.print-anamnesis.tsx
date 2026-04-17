@@ -15,7 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import { execute } from "@/graphql/execute";
 import { formatDate } from "@/lib/date-utils";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
-import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
+import {
+  useManualScores,
+  useQuestionnaireResponses,
+} from "../features/questionnaire-viewer";
 import { PrintableAnamnesis } from "../features/questionnaire-viewer/components/dashboard/PrintableAnamnesis";
 import { usePrintTitle, formatFilename } from "@/hooks/use-print-title";
 import { GET_PATIENT_RECORD } from "../features/patient-records/queries";
@@ -38,6 +41,8 @@ function PrintAnamnesisPage() {
 
   // Fetch questionnaire responses (shares cache)
   const { data: responses, isLoading: isResponsesLoading } = useQuestionnaireResponses(id);
+  // Fetch practitioner-entered manual scores (drives the print overview)
+  const { data: manualScores, isLoading: isManualScoresLoading } = useManualScores(id);
 
   const { decryptedData, isDecrypting } = useDecryptedPatientData(record?.first_name_encrypted, {
     isDemo: record?.is_demo ?? false,
@@ -45,7 +50,12 @@ function PrintAnamnesisPage() {
   });
 
   // Auto-trigger print after everything is ready
-  const isReady = !isRecordLoading && !isResponsesLoading && !isDecrypting && responses;
+  const isReady =
+    !isRecordLoading &&
+    !isResponsesLoading &&
+    !isManualScoresLoading &&
+    !isDecrypting &&
+    responses;
 
   useEffect(() => {
     if (!isReady || hasPrinted) return;
@@ -127,6 +137,7 @@ function PrintAnamnesisPage() {
 
       <PrintableAnamnesis
         responses={responses}
+        manualScores={manualScores ?? {}}
         patientName={patientName}
         patientDob={patientDob}
         clinicInternalId={record?.clinic_internal_id ?? undefined}

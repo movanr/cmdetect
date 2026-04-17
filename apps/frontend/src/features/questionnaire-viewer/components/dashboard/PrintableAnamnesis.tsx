@@ -14,6 +14,7 @@ import type {
   SQAnswers,
 } from "@cmdetect/questionnaires";
 import { isQuestionnaireEnabled, QUESTIONNAIRE_ID, QUESTIONNAIRE_TITLES } from "@cmdetect/questionnaires";
+import type { ManualScoreRow } from "../../hooks/useManualScores";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import {
   GCPSAnswersTable,
@@ -30,6 +31,8 @@ import {
 
 interface PrintableAnamnesisProps {
   responses: QuestionnaireResponse[];
+  /** Practitioner-entered manual scores, keyed by questionnaire_id. */
+  manualScores: Record<string, ManualScoreRow>;
   patientName?: string;
   patientDob?: string;
   clinicInternalId?: string;
@@ -39,6 +42,7 @@ interface PrintableAnamnesisProps {
 
 export function PrintableAnamnesis({
   responses,
+  manualScores,
   patientName,
   patientDob,
   clinicInternalId,
@@ -115,7 +119,7 @@ export function PrintableAnamnesis({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">
           Ergebnisübersicht
         </h2>
-        <ScoresOverviewTable responses={responses} />
+        <ScoresOverviewTable manualScores={manualScores} />
       </section>
 
       {/* ── SQ Detail ── */}

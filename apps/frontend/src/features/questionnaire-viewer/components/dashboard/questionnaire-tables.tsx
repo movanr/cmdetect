@@ -6,11 +6,7 @@
  */
 
 import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
-import {
-  calculatePainDrawingScore,
-  REGION_ORDER,
-  RegionThumbnail,
-} from "@/features/pain-drawing-evaluation";
+import { REGION_ORDER, RegionThumbnail } from "@/features/pain-drawing-evaluation";
 import type {
   GCPS1MAnswers,
   JFLS20Answers,
@@ -18,12 +14,12 @@ import type {
   OBCAnswers,
 } from "@cmdetect/questionnaires";
 import {
-  calculateGCPS1MScore,
-  calculateJFLS20Score,
-  calculateJFLS8Score,
-  calculateOBCScore,
-  calculatePHQ4Score,
   GCPS_1M_QUESTION_ORDER,
+  GCPS_GRADE_LABELS,
+  OBC_SEVERITY_LABELS,
+  PAIN_DRAWING_SEVERITY_LABELS,
+  PHQ4_SEVERITY_LABELS,
+  resolveLabel,
   GCPS_1M_QUESTIONS,
   isQuestionIdEnabled,
   isQuestionnaireEnabled,
@@ -54,6 +50,7 @@ import {
   type SQQuestionId,
 } from "@cmdetect/questionnaires";
 import { Fragment } from "react";
+import type { ManualScoreRow } from "../../hooks/useManualScores";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 
 // ─── Shared styles ─────────────────────────────────────────────────────
@@ -162,92 +159,87 @@ export function ScalePips({ value, max }: { value: number; max: number }) {
 
 // ─── Scores Overview ───────────────────────────────────────────────────
 
-export function ScoresOverviewTable({ responses }: { responses: QuestionnaireResponse[] }) {
-  const phq4 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
-  const gcps = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
-  const jfls8 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
-  const jfls20 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20);
-  const obc = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.OBC);
-  const painDrawing = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PAIN_DRAWING);
+/** Joins non-empty score fragments with " · " (display separator). */
+function joinFragments(fragments: Array<string | undefined | null>): string {
+  return fragments.filter((s): s is string => !!s && s.length > 0).join(" · ");
+}
 
-  const rows: Array<{
-    instrument: string;
-    score: string;
-  }> = [];
+/** Formats one instrument's manual score payload into a display string. */
+function formatManualScoreLine(
+  questionnaireId: string,
+  row: ManualScoreRow | undefined
+): string {
+  const scores = row?.scores ?? {};
 
-  if (painDrawing) {
-    const data = painDrawing.answers as unknown as PainDrawingData | undefined;
-    if (data?.drawings && Object.keys(data.drawings).length > 0) {
-      const pd = calculatePainDrawingScore(data);
-      rows.push({
-        instrument: "Schmerzzeichnung",
-        score:
-          pd.regionCount === 0
-            ? "Keine Schmerzgebiete"
-            : `mindestens ${pd.regionCount} Schmerzgebiet${pd.regionCount !== 1 ? "e" : ""}, ${pd.totalElements} Markierung${pd.totalElements !== 1 ? "en" : ""}`,
-      });
+  switch (questionnaireId) {
+    case QUESTIONNAIRE_ID.PAIN_DRAWING: {
+      const { regionCount, severity } = scores;
+      const countStr = regionCount
+        ? `${regionCount} Schmerzgebiet${regionCount === "1" ? "" : "e"}`
+        : "";
+      return joinFragments([countStr, resolveLabel(PAIN_DRAWING_SEVERITY_LABELS, severity)]);
     }
-  }
-
-  if (gcps && Object.keys(gcps.answers).length > 0) {
-    const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
-    rows.push({
-      instrument: "GCS",
-      score: `CSI ${s.cpi}, ${s.totalDisabilityPoints} BP`,
-    });
-  }
-
-  if (jfls8 && Object.keys(jfls8.answers).length > 0) {
-    const s = calculateJFLS8Score(jfls8.answers as JFLS8Answers);
-    rows.push({
-      instrument: "JFLS-8",
-      score:
-        s.isValid && s.globalScore !== null
-          ? `${s.globalScore.toFixed(2)} / ${s.maxScore}`
-          : `Ungültig (${s.missingCount} fehlend)`,
-    });
-  }
-
-  if (phq4 && Object.keys(phq4.answers).length > 0) {
-    const s = calculatePHQ4Score(phq4.answers as Record<string, string>);
-    rows.push({
-      instrument: "PHQ-4",
-      score: `${s.total} / ${s.maxTotal}`,
-    });
-  }
-
-  if (obc && Object.keys(obc.answers).length > 0) {
-    const s = calculateOBCScore(obc.answers as OBCAnswers);
-    rows.push({
-      instrument: "OBC",
-      score: `${s.totalScore} / ${s.maxScore}`,
-    });
-  }
-
-  if (jfls20 && Object.keys(jfls20.answers).length > 0) {
-    const s = calculateJFLS20Score(jfls20.answers as JFLS20Answers);
-    let subscaleStr = "";
-    if (s.isValid) {
-      const parts = (["mastication", "mobility", "communication"] as const)
-        .map((k) => {
-          const sub = s.subscales[k];
-          return sub.isValid && sub.score !== null
-            ? `${JFLS20_SUBSCALE_LABELS[k].label} ${sub.score.toFixed(1)}`
-            : null;
-        })
-        .filter(Boolean);
-      subscaleStr = parts.length > 0 ? ` (${parts.join(", ")})` : "";
+    case QUESTIONNAIRE_ID.GCPS_1M: {
+      const { bpA, bpB, bpTotal, csi, grade } = scores;
+      const bp = bpTotal
+        ? `BP ${bpTotal}${bpA && bpB ? ` (${bpA} + ${bpB})` : ""}`
+        : "";
+      const csiStr = csi ? `CSI ${csi}` : "";
+      return joinFragments([bp, csiStr, resolveLabel(GCPS_GRADE_LABELS, grade)]);
     }
-    rows.push({
-      instrument: "JFLS-20",
-      score:
-        s.isValid && s.globalScore !== null
-          ? `${s.globalScore.toFixed(2)} / ${s.maxScore}${subscaleStr}`
-          : `Ungültig (${s.missingCount} fehlend)`,
-    });
+    case QUESTIONNAIRE_ID.PHQ4: {
+      const { total, severity } = scores;
+      const totalStr = total ? `${total} / 12` : "";
+      return joinFragments([totalStr, resolveLabel(PHQ4_SEVERITY_LABELS, severity)]);
+    }
+    case QUESTIONNAIRE_ID.JFLS8: {
+      const { global, classification } = scores;
+      return joinFragments([global || undefined, classification || undefined]);
+    }
+    case QUESTIONNAIRE_ID.JFLS20: {
+      const { global, mastication, mobility, communication, classification } = scores;
+      const parts: string[] = [];
+      if (global) parts.push(`Global ${global}`);
+      if (mastication) parts.push(`${JFLS20_SUBSCALE_LABELS.mastication.label} ${mastication}`);
+      if (mobility) parts.push(`${JFLS20_SUBSCALE_LABELS.mobility.label} ${mobility}`);
+      if (communication)
+        parts.push(`${JFLS20_SUBSCALE_LABELS.communication.label} ${communication}`);
+      return joinFragments([parts.join(" · "), classification || undefined]);
+    }
+    case QUESTIONNAIRE_ID.OBC: {
+      const { total, severity } = scores;
+      const totalStr = total ? `${total} / 84` : "";
+      return joinFragments([totalStr, resolveLabel(OBC_SEVERITY_LABELS, severity)]);
+    }
+    default:
+      return "";
   }
+}
 
-  if (rows.length === 0) return null;
+const OVERVIEW_ROWS: ReadonlyArray<{ id: string; label: string }> = [
+  { id: QUESTIONNAIRE_ID.PAIN_DRAWING, label: "Schmerzzeichnung" },
+  { id: QUESTIONNAIRE_ID.GCPS_1M, label: "GCPS-1M" },
+  { id: QUESTIONNAIRE_ID.PHQ4, label: "PHQ-4" },
+  { id: QUESTIONNAIRE_ID.JFLS8, label: "JFLS-8" },
+  { id: QUESTIONNAIRE_ID.JFLS20, label: "JFLS-20" },
+  { id: QUESTIONNAIRE_ID.OBC, label: "OBC" },
+];
+
+export function ScoresOverviewTable({
+  manualScores,
+}: {
+  manualScores: Record<string, ManualScoreRow>;
+}) {
+  const rows = OVERVIEW_ROWS.filter((r) => isQuestionnaireEnabled(r.id)).map((row) => {
+    const manual = manualScores[row.id];
+    const line = formatManualScoreLine(row.id, manual);
+    return {
+      instrument: row.label,
+      score: line || "Nicht bewertet",
+      note: manual?.note?.trim() ?? "",
+      hasValue: !!line,
+    };
+  });
 
   return (
     <table className="w-full text-sm border-collapse">
@@ -260,8 +252,18 @@ export function ScoresOverviewTable({ responses }: { responses: QuestionnaireRes
       <tbody>
         {rows.map((r) => (
           <tr key={r.instrument} className={bodyRowClass}>
-            <td className={`${tdClass} whitespace-nowrap font-medium`}>{r.instrument}</td>
-            <td className={tdClass}>{r.score}</td>
+            <td className={`${tdClass} whitespace-nowrap font-medium align-top`}>
+              {r.instrument}
+            </td>
+            <td className={tdClass}>
+              <div className={r.hasValue ? "" : "text-gray-400 italic"}>{r.score}</div>
+              {r.note && (
+                <div className="text-xs text-gray-500 mt-0.5">
+                  <span className="text-gray-400">Anmerkung: </span>
+                  {r.note}
+                </div>
+              )}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -689,20 +691,8 @@ export function PainDrawingDetail({
   data: PainDrawingData;
   onRegionClick?: (regionId: string) => void;
 }) {
-  const score = calculatePainDrawingScore(data);
   return (
     <div>
-      <p className="text-sm mb-2">
-        <span className="text-gray-500">Schmerzgebiete: </span>
-        <span className="font-medium">
-          {score.regionCount === 0 ? "keine" : `mindestens ${score.regionCount}`}
-        </span>
-        <span className="text-gray-500 ml-3">Markierungen: </span>
-        <span className="font-medium">{score.totalElements}</span>
-        {score.patterns.hasWidespreadPain && (
-          <span className="ml-3 text-gray-600">— Schmerz in mehreren Körperbereichen</span>
-        )}
-      </p>
       <div className="grid grid-cols-5 gap-2">
         {REGION_ORDER.map((regionId) => (
           <RegionThumbnail

@@ -12,21 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import {
+  GCPS_GRADE_LABELS,
+  GCPS_GRADE_OPTIONS,
+  QUESTIONNAIRE_ID,
+  resolveLabel,
+} from "@cmdetect/questionnaires";
 import { useEffect } from "react";
 import { useManualScoreAutoSave } from "../../hooks/useManualScoreAutoSave";
 import { Fraction, StackedField, type TabSummary, type TabSummaryEntry } from "./Axis2ScoreCard";
 import { ClinicalNote } from "./ClinicalNote";
 
 const NONE = "__none__";
-
-const GCPS_GRADE_OPTIONS = [
-  { value: "grad_0", label: "Grad 0" },
-  { value: "grad_1", label: "Grad I" },
-  { value: "grad_2", label: "Grad II" },
-  { value: "grad_3", label: "Grad III" },
-  { value: "grad_4", label: "Grad IV" },
-] as const;
 
 const GCPS_DAYS_BANDING = [
   ["0–1", 0],
@@ -49,10 +46,6 @@ const GCPS_GRADE_TABLE = [
   { grade: "III", label: "Mäßige Einschränkung", csi: "—", bp: "3–4" },
   { grade: "IV", label: "Hochgradige Einschränkung", csi: "—", bp: "5–6" },
 ] as const;
-
-function gradeLabel(value: string): string | undefined {
-  return GCPS_GRADE_OPTIONS.find((o) => o.value === value)?.label;
-}
 
 // ─── Small helpers ──────────────────────────────────────────────────────
 
@@ -191,7 +184,7 @@ export function GCPSScoringContent({
     const entries: TabSummaryEntry[] = [];
     if (bpTotal) entries.push({ label: "Gesamt BP", value: bpTotal });
     if (csi) entries.push({ label: "CSI", value: csi });
-    const label = gradeLabel(grade);
+    const label = resolveLabel(GCPS_GRADE_LABELS, grade);
     if (label) entries.push({ label: "Grad", value: label });
     onSummaryChange?.({ entries });
   }, [bpTotal, csi, grade, onSummaryChange]);
