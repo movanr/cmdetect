@@ -616,22 +616,18 @@ function LockingFindingsContent({
               label="Blockade"
               value={translateValue(get(criteriaData, `e8.${side}.${lockingType}.locking`))}
             />
-            {(() => {
-              const reduction = get(criteriaData, `e8.${side}.${lockingType}.reduction`);
-              const noData = reduction == null;
-              return (
-                <>
-                  <InlineField
-                    label="Lösbar durch Patient"
-                    value={noData ? "—" : reduction === "patient" ? "Ja" : "Nein"}
-                  />
-                  <InlineField
-                    label="Lösbar durch Untersucher"
-                    value={noData ? "—" : reduction === "examiner" ? "Ja" : "Nein"}
-                  />
-                </>
-              );
-            })()}
+            <InlineField
+              label="Lösbar durch Patient"
+              value={translateValue(
+                get(criteriaData, `e8.${side}.${lockingType}.reducibleByPatient`)
+              )}
+            />
+            <InlineField
+              label="Lösbar durch Untersucher"
+              value={translateValue(
+                get(criteriaData, `e8.${side}.${lockingType}.reducibleByExaminer`)
+              )}
+            />
           </div>
         </div>
       )}

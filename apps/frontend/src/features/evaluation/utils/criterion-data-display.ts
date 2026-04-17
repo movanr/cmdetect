@@ -13,7 +13,6 @@ import {
   E7_OBSERVER_LABELS,
   E4_PAIN_STEPS,
   E5_STEPS,
-  E8_REDUCTION_LABELS,
   JOINT_SOUND_LABELS,
   PAIN_TYPES,
   PALPATION_SITES,
@@ -46,7 +45,6 @@ const ENUM_LABELS: Record<string, string> = {
   ...E3_OPENING_PATTERNS,
   ...E2_MIDLINE_DIRECTIONS,
   ...E2_REFERENCE_TEETH,
-  ...E8_REDUCTION_LABELS,
 };
 
 export function translateValue(value: unknown): string {

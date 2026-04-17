@@ -172,7 +172,8 @@ export type E8LockingType = keyof typeof E8_LOCKING_TYPES;
 
 export const E8_LOCKING_FIELDS = {
   locking: "locking",
-  reduction: "reduction",
+  reducibleByPatient: "reducibleByPatient",
+  reducibleByExaminer: "reducibleByExaminer",
 } as const;
 export type E8LockingField = keyof typeof E8_LOCKING_FIELDS;
 
@@ -188,14 +189,13 @@ export const E8_LOCKING_TYPE_DESCRIPTIONS = {
   openLocking: "Bei weiter Mundöffnung",
 } as const satisfies Record<E8LockingType, string>;
 
-// === E8 REDUCTION LABELS (German) ===
+// === E8 "REDUCIBLE BY" LABELS (German) ===
 // Form: "Lösbar durch Patient" / "Lösbar durch Untersucher"
-export const E8_REDUCTION_LABELS = {
-  patient: "Patient",
-  examiner: "Untersucher",
-  notReduced: "Nicht lösbar",
+export const E8_REDUCIBLE_BY_LABELS = {
+  reducibleByPatient: "Lösbar durch Patient",
+  reducibleByExaminer: "Lösbar durch Untersucher",
 } as const;
-export type E8Reduction = keyof typeof E8_REDUCTION_LABELS;
+export type E8ReducibleBy = keyof typeof E8_REDUCIBLE_BY_LABELS;
 
 // === E6-E8 JOINT SOUNDS ===
 export const JOINT_SOUNDS = {

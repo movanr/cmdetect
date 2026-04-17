@@ -2,27 +2,29 @@
  * E8: Joint Locking (Gelenkblockierung)
  *
  * Per side (right/left): closed locking and open locking observations.
- * Each locking type has a yes/no observation, plus a conditional reduction
- * field (who reduced it: patient, examiner, or not reduced).
+ * Each locking type has a yes/no observation, plus two conditional yes/no
+ * fields capturing whether the patient or the examiner was able to reduce
+ * the locking. The two "reducible by" fields are independent — either,
+ * both, or neither may be "yes".
  *
  * Locking events are only documented if observed during the examination.
  */
 
-import { E8_REDUCTION_LABELS } from "@cmdetect/dc-tmd";
 import { M } from "../model/nodes";
 import { Q } from "../model/primitives";
 
-/** Reduction options after locking is observed */
-const REDUCTION_OPTIONS = ["patient", "examiner", "notReduced"] as const;
-
-/** Locking group: observed yes/no + conditional reduction */
+/** Locking group: observed yes/no + two conditional "reducible by" yes/no */
 function lockingGroup() {
   return M.group({
     locking: M.question(Q.yesNo({ required: true })),
-    reduction: M.question(
-      Q.enum({
-        options: REDUCTION_OPTIONS,
-        labels: E8_REDUCTION_LABELS,
+    reducibleByPatient: M.question(
+      Q.yesNo({
+        required: true,
+        enableWhen: { sibling: "locking", equals: "yes" },
+      })
+    ),
+    reducibleByExaminer: M.question(
+      Q.yesNo({
         required: true,
         enableWhen: { sibling: "locking", equals: "yes" },
       })

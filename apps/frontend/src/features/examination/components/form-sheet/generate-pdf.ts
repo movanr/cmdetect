@@ -22,7 +22,6 @@ import {
   SECTION_LABELS,
   JOINT_SOUND_LABELS,
   E8_LOCKING_TYPE_DESCRIPTIONS,
-  E8_REDUCTION_LABELS,
   E10_SITE_KEYS,
   E10_PAIN_QUESTIONS,
   PALPATION_SITES,
@@ -499,24 +498,24 @@ export async function generateFormSheetPDF(options: PdfOptions): Promise<void> {
     doc.text(side.key === "right" ? "Rechtes Kiefergelenk" : "Linkes Kiefergelenk", ox + 2, y);
     doc.setFont("helvetica", "normal");
     doc.text("Blockade", ox + 40, y);
-    doc.text("Reduktion", ox + 55, y);
-    let ry = y + 4;
+    doc.text("lösbar durch", ox + 55, y);
+    doc.setFontSize(5);
+    doc.text("Patient", ox + 55, y + 2.5);
+    doc.text("Untersucher", ox + 67, y + 2.5);
+    doc.setFontSize(5.5);
+    let ry = y + 6;
     for (const [lk, ll] of [
       ["closedLocking", E8_LOCKING_TYPE_DESCRIPTIONS.closedLocking],
       ["openLocking", E8_LOCKING_TYPE_DESCRIPTIONS.openLocking],
     ] as const) {
       doc.text(ll, ox + 2, ry + 0.8);
       njPair(ox + 40, ry, getYesNo(d, `e8.${side.key}.${lk}.locking`));
-      // Reduction as text
-      const reduction = getStr(d, `e8.${side.key}.${lk}.reduction`);
-      if (reduction && reduction in E8_REDUCTION_LABELS) {
-        doc.setFontSize(5);
-        doc.text(E8_REDUCTION_LABELS[reduction as keyof typeof E8_REDUCTION_LABELS], ox + 55, ry + 0.8);
-      }
+      njPair(ox + 55, ry, getYesNo(d, `e8.${side.key}.${lk}.reducibleByPatient`));
+      njPair(ox + 67, ry, getYesNo(d, `e8.${side.key}.${lk}.reducibleByExaminer`));
       ry += 4;
     }
   }
-  y += 4 + 2 * 4 + 3;
+  y += 6 + 2 * 4 + 3;
 
   // ══════════════════════════════════
   // E9: Palpation

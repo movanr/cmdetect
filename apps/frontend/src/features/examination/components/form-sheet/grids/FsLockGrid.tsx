@@ -3,17 +3,14 @@
  *
  * Per side: closedLocking and openLocking, each with:
  * - Blockade (locking yes/no)
- * - lösbar durch Patient / Untersucher (mapped from reduction enum)
- *
- * Matches the original DC/TMD form layout with 3 N/J columns.
+ * - lösbar durch Patient (reducibleByPatient, gated by locking=yes)
+ * - lösbar durch Untersucher (reducibleByExaminer, gated by locking=yes)
  */
 
-import { memo } from "react";
 import { E8_LOCKING_TYPE_DESCRIPTIONS } from "@cmdetect/dc-tmd";
 import type { Side } from "../../../model/regions";
 import { FsYesNo } from "../primitives/FsYesNo";
-import { useFormSheet } from "../use-form-sheet";
-import { useFormContext } from "react-hook-form";
+import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
 import type { GetValue } from "../use-section-values";
 
 const DISPLAY_SIDES: Side[] = ["right", "left"];
@@ -51,7 +48,6 @@ export function FsLockGrid({ getValue }: FsLockGridProps) {
               {LOCKING_TYPES.map((type) => {
                 const basePath = `e8.${side}.${type}`;
                 const locking = getValue(`${basePath}.locking`) as "yes" | "no" | null;
-                const reduction = getValue(`${basePath}.reduction`) as string | null;
                 return (
                   <tr key={type} className="border-t border-slate-100">
                     <td className="text-slate-600 py-0.5">{E8_LOCKING_TYPE_DESCRIPTIONS[type]}</td>
@@ -59,10 +55,20 @@ export function FsLockGrid({ getValue }: FsLockGridProps) {
                       <FsYesNo name={`${basePath}.locking`} value={locking} />
                     </td>
                     <td className="text-center py-0.5">
-                      <ReductionNJ locking={locking} reduction={reduction} basePath={basePath} option="patient" />
+                      <FsConditionalYesNo
+                        name={`${basePath}.reducibleByPatient`}
+                        value={getValue(`${basePath}.reducibleByPatient`) as "yes" | "no" | null}
+                        siblingValue={locking}
+                        equals="yes"
+                      />
                     </td>
                     <td className="text-center py-0.5">
-                      <ReductionNJ locking={locking} reduction={reduction} basePath={basePath} option="examiner" />
+                      <FsConditionalYesNo
+                        name={`${basePath}.reducibleByExaminer`}
+                        value={getValue(`${basePath}.reducibleByExaminer`) as "yes" | "no" | null}
+                        siblingValue={locking}
+                        equals="yes"
+                      />
                     </td>
                   </tr>
                 );
@@ -74,70 +80,3 @@ export function FsLockGrid({ getValue }: FsLockGridProps) {
     </div>
   );
 }
-
-/**
- * Maps the reduction enum to individual N/J toggles for Patient and Untersucher columns.
- * When locking=yes: selecting Patient sets reduction="patient", Untersucher sets "examiner".
- */
-const ReductionNJ = memo(function ReductionNJ({
-  locking,
-  reduction,
-  basePath,
-  option,
-}: {
-  locking: string | null;
-  reduction: string | null;
-  basePath: string;
-  option: "patient" | "examiner";
-}) {
-  const { setValue } = useFormContext();
-  const { readOnly } = useFormSheet();
-
-  // Only show values when locking is "yes"
-  const value: "yes" | "no" | null =
-    locking === "yes"
-      ? reduction === option
-        ? "yes"
-        : reduction != null
-          ? "no"
-          : null
-      : null;
-
-  const handleToggle = (v: "yes" | "no") => {
-    if (readOnly || locking !== "yes") return;
-    if (v === "yes") {
-      setValue(`${basePath}.reduction`, option, { shouldDirty: true });
-    } else if (reduction === option) {
-      setValue(`${basePath}.reduction`, "notReduced", { shouldDirty: true });
-    }
-  };
-
-  return (
-    <span className="inline-flex gap-0.5">
-      <button
-        type="button"
-        onClick={() => handleToggle("no")}
-        disabled={readOnly || locking !== "yes"}
-        className={`w-5 h-5 rounded text-xs font-bold transition-all print:w-3.5 print:h-3.5 print:text-[6pt] ${
-          value === "no"
-            ? "bg-slate-700 text-white"
-            : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-        } ${readOnly || locking !== "yes" ? "cursor-default opacity-50" : ""}`}
-      >
-        N
-      </button>
-      <button
-        type="button"
-        onClick={() => handleToggle("yes")}
-        disabled={readOnly || locking !== "yes"}
-        className={`w-5 h-5 rounded text-xs font-bold transition-all print:w-3.5 print:h-3.5 print:text-[6pt] ${
-          value === "yes"
-            ? "bg-blue-600 text-white"
-            : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-        } ${readOnly || locking !== "yes" ? "cursor-default opacity-50" : ""}`}
-      >
-        J
-      </button>
-    </span>
-  );
-});

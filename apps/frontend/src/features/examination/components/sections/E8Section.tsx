@@ -2,8 +2,8 @@
  * E8: Joint Locking (Gelenkblockierung)
  *
  * Single-step section with bilateral locking observations.
- * Per side: closed locking and open locking, each with a yes/no toggle
- * and conditional reduction enum (patient/examiner/not reduced).
+ * Per side: closed locking and open locking, each with a Blockade yes/no
+ * and two conditional "lösbar durch" yes/no fields (Patient, Untersucher).
  *
  * Locking is only documented if observed during the examination.
  */
@@ -19,7 +19,6 @@ import { E8_RICH_INSTRUCTIONS } from "../../content/instructions";
 import { setInstanceValue } from "../../form/form-helpers";
 import { useExaminationForm, type FormValues } from "../../form/use-examination-form";
 import { getSectionCardTitle } from "../../labels";
-import { QuestionField } from "../QuestionField";
 import { YesNoField } from "../inputs/YesNoField";
 import { IntroPanel, MeasurementFlowBlock, SectionFooter } from ".";
 import { SectionCommentButton } from "../ui/SectionCommentButton";
@@ -30,9 +29,15 @@ const SIDES = [
   { key: "left", label: "Linkes Kiefergelenk" },
 ] as const;
 
-const LOCKING_TYPES: { key: E8LockingType; label: string; reductionLabel: string }[] = [
-  { key: "closedLocking", label: `${E8_LOCKING_TYPE_LABELS.closedLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.closedLocking}`, reductionLabel: `Lösbar (${E8_LOCKING_TYPE_LABELS.closedLocking})` },
-  { key: "openLocking", label: `${E8_LOCKING_TYPE_LABELS.openLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.openLocking}`, reductionLabel: `Lösbar (${E8_LOCKING_TYPE_LABELS.openLocking})` },
+const LOCKING_TYPES: { key: E8LockingType; label: string }[] = [
+  {
+    key: "closedLocking",
+    label: `${E8_LOCKING_TYPE_LABELS.closedLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.closedLocking}`,
+  },
+  {
+    key: "openLocking",
+    label: `${E8_LOCKING_TYPE_LABELS.openLocking} — ${E8_LOCKING_TYPE_DESCRIPTIONS.openLocking}`,
+  },
 ];
 
 export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) {
@@ -40,14 +45,19 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
 
   const instances = getInstancesForStep("e8-all");
 
-  const getInstance = (path: string) =>
-    instances.find((i) => i.path === path);
-
   const yesNoPaths = instances
     .filter((i) => i.renderType === "yesNo")
     .map((i) => i.path as FieldPath<FormValues>);
   const yesNoValues = useWatch({ name: yesNoPaths });
   const hasUnansweredLockings = yesNoValues.some((v) => v == null);
+
+  // Subscribe to the 4 locking fields to drive disabled state of the
+  // "reducible by" cells.
+  const lockingPaths = SIDES.flatMap(({ key: side }) =>
+    LOCKING_TYPES.map(({ key: type }) => `e8.${side}.${type}.locking` as FieldPath<FormValues>)
+  );
+  const lockingValues = useWatch({ name: lockingPaths });
+  const lockingMap = new Map(lockingPaths.map((p, i) => [p, lockingValues[i]]));
 
   // Set all unanswered locking questions to "no"
   const handleNoMoreLockings = () => {
@@ -90,45 +100,72 @@ export function E8Section({ onComplete, onBack, isFirstSection }: SectionProps) 
           <MeasurementFlowBlock instruction={E8_RICH_INSTRUCTIONS.jointLocking} />
         </IntroPanel>
 
-        {/* Bilateral locking observations — side by side (single column on small screens) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {SIDES.map(({ key: side, label: sideLabel }) => (
-          <div key={side} className="space-y-4">
-            {/* Locking observation table */}
-            <div className="border rounded-lg overflow-hidden">
+        {/* Bilateral locking observations — right side stacked above left */}
+        <div className="space-y-6">
+          {SIDES.map(({ key: side, label: sideLabel }) => (
+            <div key={side} className="border rounded-lg overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="bg-muted/50">
-                    <th className="text-left text-sm font-medium p-3" colSpan={2}>{sideLabel}</th>
+                    <th className="text-left text-sm font-medium p-3" rowSpan={2}>
+                      {sideLabel}
+                    </th>
+                    <th className="text-center text-sm font-medium p-3 w-48" rowSpan={2}>
+                      Blockade
+                    </th>
+                    <th
+                      className="text-center text-sm font-medium p-3 pb-1 border-b border-border/50"
+                      colSpan={2}
+                    >
+                      lösbar durch
+                    </th>
+                  </tr>
+                  <tr className="bg-muted/50">
+                    <th className="text-center text-xs font-normal text-muted-foreground px-3 pb-2 pt-0 w-48">
+                      Patient
+                    </th>
+                    <th className="text-center text-xs font-normal text-muted-foreground px-3 pb-2 pt-0 w-48">
+                      Untersucher
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {LOCKING_TYPES.map(({ key: lockingType, label: lockingLabel }) => (
-                    <tr key={lockingType} className="border-t">
-                      <td className="p-3 text-sm font-medium">{lockingLabel}</td>
-                      <td className="p-3 text-center">
-                        <div className="flex justify-center">
-                          <YesNoField name={`e8.${side}.${lockingType}.locking`} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {LOCKING_TYPES.map(({ key: lockingType, label: lockingLabel }) => {
+                    const lockingPath = `e8.${side}.${lockingType}.locking` as FieldPath<FormValues>;
+                    const isLocking = lockingMap.get(lockingPath) === "yes";
+                    return (
+                      <tr key={lockingType} className="border-t">
+                        <td className="p-3 text-sm font-medium">{lockingLabel}</td>
+                        <td className="p-3">
+                          <div className="flex justify-center">
+                            <YesNoField name={lockingPath} />
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex justify-center">
+                            <YesNoField
+                              name={`e8.${side}.${lockingType}.reducibleByPatient` as FieldPath<FormValues>}
+                              disabled={!isLocking}
+                            />
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex justify-center">
+                            <YesNoField
+                              name={`e8.${side}.${lockingType}.reducibleByExaminer` as FieldPath<FormValues>}
+                              disabled={!isLocking}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-
-            {/* Conditional reduction fields (below table) */}
-            <div className="pl-4 space-y-3">
-              {LOCKING_TYPES.map(({ key: lockingType, reductionLabel }) => {
-                const reduction = getInstance(`e8.${side}.${lockingType}.reduction`);
-                return reduction && (
-                  <QuestionField key={lockingType} instance={reduction} label={reductionLabel} />
-                );
-              })}
-            </div>
-          </div>
-        ))}
+          ))}
         </div>
+
         {/* "Keine weiteren Blockierungen" shortcut — only shown when there are unanswered fields */}
         {hasUnansweredLockings && <div className="flex justify-end">
           <Button type="button" variant="outline" size="sm" onClick={handleNoMoreLockings}>

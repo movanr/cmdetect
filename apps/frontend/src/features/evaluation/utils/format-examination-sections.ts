@@ -17,7 +17,6 @@
 import {
   E3_OPENING_PATTERNS,
   E8_LOCKING_TYPE_LABELS,
-  E8_REDUCTION_LABELS,
   getValueAtPath as get,
   getPalpationPainQuestions,
   JOINT_SOUND_LABELS,
@@ -32,7 +31,6 @@ import {
   SIDE_KEYS,
   SITES_BY_GROUP,
   type E8LockingType,
-  type E8Reduction,
   type MovementType,
   type OpeningType,
   type PalpationSite,
@@ -428,11 +426,17 @@ function formatE8(data: unknown): FormattedLine[] {
 
     for (const lt of lockingTypes) {
       if (v(data, `e8.${side}.${lt}.locking`) !== "yes") continue;
-      const reduction = v(data, `e8.${side}.${lt}.reduction`) as E8Reduction | undefined;
-      const reductionLabel = reduction ? E8_REDUCTION_LABELS[reduction] : undefined;
-      const detail = reductionLabel
-        ? `${E8_LOCKING_TYPE_LABELS[lt]} (Reduktion: ${reductionLabel})`
-        : E8_LOCKING_TYPE_LABELS[lt];
+      const byPatient = v(data, `e8.${side}.${lt}.reducibleByPatient`);
+      const byExaminer = v(data, `e8.${side}.${lt}.reducibleByExaminer`);
+      const reducibleParts: string[] = [];
+      if (byPatient === "yes") reducibleParts.push("Patient");
+      if (byExaminer === "yes") reducibleParts.push("Untersucher");
+      const detail =
+        reducibleParts.length > 0
+          ? `${E8_LOCKING_TYPE_LABELS[lt]} (lösbar durch ${reducibleParts.join(" + ")})`
+          : byPatient === "no" && byExaminer === "no"
+            ? `${E8_LOCKING_TYPE_LABELS[lt]} (nicht lösbar)`
+            : E8_LOCKING_TYPE_LABELS[lt];
       sideFindings.push(detail);
     }
 

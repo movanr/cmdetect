@@ -1,7 +1,6 @@
 import {
   E8_LOCKING_TYPE_DESCRIPTIONS,
   E8_LOCKING_TYPE_LABELS,
-  E8_REDUCTION_LABELS,
   SIDES,
   type E8LockingType,
   type Side,
@@ -28,7 +27,9 @@ export function E8Summary() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const locking = getValues(`e8.${side}.${lockingType}.locking` as any) as string | null;
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const reduction = getValues(`e8.${side}.${lockingType}.reduction` as any) as string | null;
+                const byPatient = getValues(`e8.${side}.${lockingType}.reducibleByPatient` as any) as string | null;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const byExaminer = getValues(`e8.${side}.${lockingType}.reducibleByExaminer` as any) as string | null;
 
                 return (
                   <div key={lockingType} className="contents">
@@ -37,9 +38,9 @@ export function E8Summary() {
                     </dt>
                     <dd>
                       {yn(locking)}
-                      {locking === "yes" && reduction && (
+                      {locking === "yes" && (
                         <span className="ml-2 text-muted-foreground">
-                          — {E8_REDUCTION_LABELS[reduction as keyof typeof E8_REDUCTION_LABELS] ?? reduction}
+                          — Patient: {yn(byPatient)}, Untersucher: {yn(byExaminer)}
                         </span>
                       )}
                     </dd>
