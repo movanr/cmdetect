@@ -18,13 +18,13 @@
  * Demo cases (BEISPIEL-001/002) are seeded automatically.
  */
 
-import { betterAuth } from "better-auth";
 import { roles } from "@cmdetect/config";
-import dotenv from "dotenv";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
-import { Pool } from "pg";
+import { betterAuth } from "better-auth";
 import { execSync } from "child_process";
+import dotenv from "dotenv";
+import { dirname, resolve } from "path";
+import { Pool } from "pg";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, "../../../.env") });
@@ -42,7 +42,7 @@ const auth = betterAuth({
 
 const pool = new Pool({ connectionString });
 
-const DEFAULT_PASSWORD = "Testpraxis1!";
+const DEFAULT_PASSWORD = "Passwort123!";
 
 const ROLE_FLAGS: Record<string, { roles: string[]; label: string }> = {
   "--admin": { roles: [roles.ORG_ADMIN, roles.PHYSICIAN], label: "Admin + Physician" },
@@ -60,15 +60,21 @@ interface UserSpec {
 
 function parseArgs(args: string[]): { practiceName: string; users: UserSpec[] } {
   if (args.length < 3 || !args[1].startsWith("--")) {
-    console.error('Usage: npx tsx scripts/provision-practice.ts <practice-name> --admin <email> [name] [--physician <email> [name]] ...');
+    console.error(
+      "Usage: npx tsx scripts/provision-practice.ts <practice-name> --admin <email> [name] [--physician <email> [name]] ..."
+    );
     console.error("\nRoles:");
     console.error("  --admin        org_admin + physician");
     console.error("  --physician    physician");
     console.error("  --assistant    assistant");
     console.error("  --receptionist receptionist");
-    console.error('\nExamples:');
-    console.error('  npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de "Dr. Müller" --assistant mfa@praxis.de "Anna Schmidt"');
-    console.error('  npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de');
+    console.error("\nExamples:");
+    console.error(
+      '  npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de "Dr. Müller" --assistant mfa@praxis.de "Anna Schmidt"'
+    );
+    console.error(
+      '  npx tsx scripts/provision-practice.ts "Praxis Dr. Müller" --admin mueller@praxis.de'
+    );
     process.exit(1);
   }
 
@@ -80,7 +86,9 @@ function parseArgs(args: string[]): { practiceName: string; users: UserSpec[] } 
     const flag = args[i];
 
     if (!ROLE_FLAGS[flag]) {
-      console.error(`Unknown flag: ${flag}. Use --admin, --physician, --assistant, or --receptionist`);
+      console.error(
+        `Unknown flag: ${flag}. Use --admin, --physician, --assistant, or --receptionist`
+      );
       process.exit(1);
     }
 
@@ -132,7 +140,6 @@ async function main() {
     console.log(`\n👥 Creating ${users.length} user(s)...`);
 
     for (const { email, name, userRoles, label } of users) {
-
       console.log(`\n   📧 ${email} (${label})`);
 
       // Create via Better Auth API (handles password hashing)
@@ -168,7 +175,9 @@ async function main() {
         cwd: repoRoot,
       });
     } catch {
-      console.log("   ⚠️  Demo case seeding failed (run manually: ./scripts/seed-demo-cases.sh " + orgId + ")");
+      console.log(
+        "   ⚠️  Demo case seeding failed (run manually: ./scripts/seed-demo-cases.sh " + orgId + ")"
+      );
     }
 
     // Summary
