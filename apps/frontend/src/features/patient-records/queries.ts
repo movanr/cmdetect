@@ -116,6 +116,8 @@ export const RESET_INVITE_TOKEN = graphql(`
   }
 `);
 
+// Office-use keys mirror SQ_OFFICE_USE_QUESTIONS in
+// packages/questionnaires/src/sq/sections.ts — keep in sync.
 export const RESET_DEMO_CASE = graphql(`
   mutation ResetDemoCase($patient_record_id: String!, $empty_response_data: jsonb!) {
     update_examination_response(
@@ -124,9 +126,56 @@ export const RESET_DEMO_CASE = graphql(`
     ) {
       affected_rows
     }
-    update_questionnaire_response(
+    clear_meta: update_questionnaire_response(
       where: { patient_record_id: { _eq: $patient_record_id } }
       _delete_key: { response_data: "_meta" }
+    ) {
+      affected_rows
+    }
+    clear_sq8_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ8_office"] }
+    ) {
+      affected_rows
+    }
+    clear_sq9_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ9_office"] }
+    ) {
+      affected_rows
+    }
+    clear_sq10_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ10_office"] }
+    ) {
+      affected_rows
+    }
+    clear_sq11_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ11_office"] }
+    ) {
+      affected_rows
+    }
+    clear_sq12_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ12_office"] }
+    ) {
+      affected_rows
+    }
+    clear_sq13_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ13_office"] }
+    ) {
+      affected_rows
+    }
+    clear_sq14_office: update_questionnaire_response(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      _delete_at_path: { response_data: ["answers", "SQ14_office"] }
+    ) {
+      affected_rows
+    }
+    delete_manual_score(
+      where: { patient_record_id: { _eq: $patient_record_id } }
     ) {
       affected_rows
     }

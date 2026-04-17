@@ -115,3 +115,10 @@ update_permissions:
       set:
         updated_at: now()
     comment: ""
+delete_permissions:
+  - role: physician
+    permission:
+      filter:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+    comment: ""
