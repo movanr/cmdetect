@@ -14,19 +14,14 @@ import type {
   OBCAnswers,
 } from "@cmdetect/questionnaires";
 import {
+  formatManualScoreLine,
   GCPS_1M_QUESTION_ORDER,
-  GCPS_GRADE_LABELS,
-  OBC_SEVERITY_LABELS,
-  PAIN_DRAWING_SEVERITY_LABELS,
-  PHQ4_SEVERITY_LABELS,
-  resolveLabel,
   GCPS_1M_QUESTIONS,
   isQuestionIdEnabled,
   isQuestionnaireEnabled,
   JFLS20_QUESTION_ORDER,
   JFLS20_QUESTIONS,
   JFLS20_SCALE_LABELS,
-  JFLS20_SUBSCALE_LABELS,
   JFLS8_QUESTION_ORDER,
   JFLS8_QUESTIONS,
   JFLS8_SCALE_LABELS,
@@ -159,63 +154,6 @@ export function ScalePips({ value, max }: { value: number; max: number }) {
 
 // ─── Scores Overview ───────────────────────────────────────────────────
 
-/** Joins non-empty score fragments with " · " (display separator). */
-function joinFragments(fragments: Array<string | undefined | null>): string {
-  return fragments.filter((s): s is string => !!s && s.length > 0).join(" · ");
-}
-
-/** Formats one instrument's manual score payload into a display string. */
-function formatManualScoreLine(
-  questionnaireId: string,
-  row: ManualScoreRow | undefined
-): string {
-  const scores = row?.scores ?? {};
-
-  switch (questionnaireId) {
-    case QUESTIONNAIRE_ID.PAIN_DRAWING: {
-      const { regionCount, severity } = scores;
-      const countStr = regionCount
-        ? `${regionCount} Schmerzgebiet${regionCount === "1" ? "" : "e"}`
-        : "";
-      return joinFragments([countStr, resolveLabel(PAIN_DRAWING_SEVERITY_LABELS, severity)]);
-    }
-    case QUESTIONNAIRE_ID.GCPS_1M: {
-      const { bpA, bpB, bpTotal, csi, grade } = scores;
-      const bp = bpTotal
-        ? `BP ${bpTotal}${bpA && bpB ? ` (${bpA} + ${bpB})` : ""}`
-        : "";
-      const csiStr = csi ? `CSI ${csi}` : "";
-      return joinFragments([bp, csiStr, resolveLabel(GCPS_GRADE_LABELS, grade)]);
-    }
-    case QUESTIONNAIRE_ID.PHQ4: {
-      const { total, severity } = scores;
-      const totalStr = total ? `${total} / 12` : "";
-      return joinFragments([totalStr, resolveLabel(PHQ4_SEVERITY_LABELS, severity)]);
-    }
-    case QUESTIONNAIRE_ID.JFLS8: {
-      const { global, classification } = scores;
-      return joinFragments([global || undefined, classification || undefined]);
-    }
-    case QUESTIONNAIRE_ID.JFLS20: {
-      const { global, mastication, mobility, communication, classification } = scores;
-      const parts: string[] = [];
-      if (global) parts.push(`Global ${global}`);
-      if (mastication) parts.push(`${JFLS20_SUBSCALE_LABELS.mastication.label} ${mastication}`);
-      if (mobility) parts.push(`${JFLS20_SUBSCALE_LABELS.mobility.label} ${mobility}`);
-      if (communication)
-        parts.push(`${JFLS20_SUBSCALE_LABELS.communication.label} ${communication}`);
-      return joinFragments([parts.join(" · "), classification || undefined]);
-    }
-    case QUESTIONNAIRE_ID.OBC: {
-      const { total, severity } = scores;
-      const totalStr = total ? `${total} / 84` : "";
-      return joinFragments([totalStr, resolveLabel(OBC_SEVERITY_LABELS, severity)]);
-    }
-    default:
-      return "";
-  }
-}
-
 const OVERVIEW_ROWS: ReadonlyArray<{ id: string; label: string }> = [
   { id: QUESTIONNAIRE_ID.PAIN_DRAWING, label: "Schmerzzeichnung" },
   { id: QUESTIONNAIRE_ID.GCPS_1M, label: "GCPS-1M" },
@@ -232,7 +170,7 @@ export function ScoresOverviewTable({
 }) {
   const rows = OVERVIEW_ROWS.filter((r) => isQuestionnaireEnabled(r.id)).map((row) => {
     const manual = manualScores[row.id];
-    const line = formatManualScoreLine(row.id, manual);
+    const line = formatManualScoreLine(row.id, manual?.scores);
     return {
       instrument: row.label,
       score: line || "Nicht bewertet",

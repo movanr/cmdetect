@@ -319,6 +319,11 @@ export {
 } from "./manual-score-labels";
 
 // ============================================================================
+// Manual score display formatter (shared by anamnesis print + Befundbericht)
+// ============================================================================
+export { formatManualScoreLine } from "./format-manual-score";
+
+// ============================================================================
 // Score Schemas (Zod schemas - single source of truth for score types)
 // ============================================================================
 export {

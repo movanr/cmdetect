@@ -42,6 +42,8 @@ interface ConfirmedDiagnosis {
 interface QuestionnaireScore {
   instrument: string;
   score: string;
+  /** Optional practitioner clinical note (rendered as a muted sub-line). */
+  note?: string;
 }
 
 interface PrintableBefundberichtProps {
@@ -198,7 +200,12 @@ export function PrintableBefundbericht({
           </h2>
           <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-0.5 text-sm">
             {questionnaireScores.map((qs, i) => (
-              <ScoreRow key={i} instrument={qs.instrument} score={qs.score} />
+              <ScoreRow
+                key={i}
+                instrument={qs.instrument}
+                score={qs.score}
+                note={qs.note}
+              />
             ))}
           </dl>
         </section>
@@ -257,11 +264,27 @@ function ExaminationSection({ section }: { section: FormattedSection }) {
   );
 }
 
-function ScoreRow({ instrument, score }: { instrument: string; score: string }) {
+function ScoreRow({
+  instrument,
+  score,
+  note,
+}: {
+  instrument: string;
+  score: string;
+  note?: string;
+}) {
   return (
     <>
-      <dt className="text-gray-600">{instrument}</dt>
-      <dd>{score}</dd>
+      <dt className="text-gray-600 align-top">{instrument}</dt>
+      <dd>
+        <div>{score}</div>
+        {note && (
+          <div className="text-xs text-gray-500 mt-0.5">
+            <span className="text-gray-400">Anmerkung: </span>
+            {note}
+          </div>
+        )}
+      </dd>
     </>
   );
 }

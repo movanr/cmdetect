@@ -37,6 +37,8 @@ interface ConfirmedDiagnosis {
 interface QuestionnaireScore {
   instrument: string;
   score: string;
+  /** Optional practitioner clinical note (rendered as an indented italic sub-line). */
+  note?: string;
 }
 
 interface BefundberichtData {
@@ -245,6 +247,15 @@ function buildDocument(data: BefundberichtData): Document {
     p.push(...sectionHeading("Fragebogeninstrumente (DC/TMD Achse II)"));
     for (const qs of data.questionnaireScores) {
       p.push(tabRow(qs.instrument, qs.score, TAB_SCORES));
+      if (qs.note) {
+        p.push(
+          new Paragraph({
+            children: [r(`Anmerkung: ${qs.note}`, { italic: true })],
+            indent: { left: TAB_SCORES },
+            spacing: { after: 80 },
+          })
+        );
+      }
     }
   }
 

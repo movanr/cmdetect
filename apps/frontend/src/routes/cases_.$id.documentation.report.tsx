@@ -11,26 +11,17 @@
 import { useMemo } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  calculateGCPS1MScore,
-  calculateJFLS8Score,
-  calculateJFLS20Score,
-  calculateOBCScore,
-  calculatePHQ4Score,
-  JFLS20_SUBSCALE_LABELS,
-  QUESTIONNAIRE_ID,
-  type GCPS1MAnswers,
-  type JFLS8Answers,
-  type JFLS20Answers,
-  type OBCAnswers,
-} from "@cmdetect/questionnaires";
+import { formatManualScoreLine, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
 import { execute } from "@/graphql/execute";
 import { formatDate } from "@/lib/date-utils";
 import { useDecryptedPatientData } from "@/hooks/use-decrypted-patient-data";
 import { GET_EXAMINATION_RESPONSE, migrateAndParseExaminationData } from "../features/examination";
 import { useDocumentedDiagnoses } from "../features/evaluation/hooks/use-diagnosis-evaluation";
 import { mapToCriteriaData } from "../features/evaluation/utils/map-to-criteria-data";
-import { useQuestionnaireResponses } from "../features/questionnaire-viewer";
+import {
+  useManualScores,
+  useQuestionnaireResponses,
+} from "../features/questionnaire-viewer";
 import type { FormValues } from "../features/examination";
 import { PrintableBefundbericht } from "../features/evaluation/components/PrintableBefundbericht";
 import { downloadBefundberichtDocx } from "../features/evaluation/utils/generate-befundbericht-docx";
@@ -56,6 +47,10 @@ function ReportSubPage() {
 
   const { data: responses, isLoading: isResponsesLoading } =
     useQuestionnaireResponses(id);
+
+  // Practitioner-entered manual scores drive Axis 2 in the Befundbericht
+  const { data: manualScores, isLoading: isManualScoresLoading } =
+    useManualScores(id);
 
   const { data: examData, isLoading: isExamLoading } = useQuery({
     queryKey: ["examination-response-raw", id],
@@ -124,67 +119,31 @@ function ReportSubPage() {
     }));
   }, [evalData]);
 
-  // Compute questionnaire scores for DOCX Achse 2 section
+  // Axis 2 section content for the Befundbericht: practitioner-entered manual
+  // scores + German interpretation, plus any clinical note. Instruments with no
+  // manual entry are omitted (keeps the clinical document concise).
   const questionnaireScores = useMemo(() => {
-    if (!responses) return [];
-    const scores: { instrument: string; score: string }[] = [];
-
-    const gcps = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.GCPS_1M);
-    if (gcps && Object.keys(gcps.answers).length > 0) {
-      const s = calculateGCPS1MScore(gcps.answers as GCPS1MAnswers);
-      scores.push({ instrument: "GCS", score: `CSI ${s.cpi}, ${s.totalDisabilityPoints} BP` });
-    }
-
-    const phq4 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.PHQ4);
-    if (phq4 && Object.keys(phq4.answers).length > 0) {
-      const s = calculatePHQ4Score(phq4.answers as Record<string, string>);
-      scores.push({ instrument: "PHQ-4", score: `${s.total} / ${s.maxTotal}` });
-    }
-
-    const jfls8 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS8);
-    if (jfls8 && Object.keys(jfls8.answers).length > 0) {
-      const s = calculateJFLS8Score(jfls8.answers as JFLS8Answers);
-      scores.push({
-        instrument: "JFLS-8",
-        score:
-          s.isValid && s.globalScore !== null
-            ? `${s.globalScore.toFixed(2)} / ${s.maxScore}`
-            : `Ungültig (${s.missingCount} fehlend)`,
+    if (!manualScores) return [];
+    const instruments: ReadonlyArray<{ id: string; label: string }> = [
+      { id: QUESTIONNAIRE_ID.GCPS_1M, label: "GCPS-1M" },
+      { id: QUESTIONNAIRE_ID.PHQ4, label: "PHQ-4" },
+      { id: QUESTIONNAIRE_ID.JFLS8, label: "JFLS-8" },
+      { id: QUESTIONNAIRE_ID.JFLS20, label: "JFLS-20" },
+      { id: QUESTIONNAIRE_ID.OBC, label: "OBC" },
+    ];
+    const out: { instrument: string; score: string; note?: string }[] = [];
+    for (const { id: qid, label } of instruments) {
+      const manual = manualScores[qid];
+      const line = formatManualScoreLine(qid, manual?.scores);
+      if (!line) continue;
+      out.push({
+        instrument: label,
+        score: line,
+        note: manual?.note?.trim() || undefined,
       });
     }
-
-    const jfls20 = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.JFLS20);
-    if (jfls20 && Object.keys(jfls20.answers).length > 0) {
-      const s = calculateJFLS20Score(jfls20.answers as JFLS20Answers);
-      let subscaleStr = "";
-      if (s.isValid) {
-        const parts = (["mastication", "mobility", "communication"] as const)
-          .map((k) => {
-            const sub = s.subscales[k];
-            return sub.isValid && sub.score !== null
-              ? `${JFLS20_SUBSCALE_LABELS[k].label} ${sub.score.toFixed(1)}`
-              : null;
-          })
-          .filter(Boolean);
-        subscaleStr = parts.length > 0 ? ` (${parts.join(", ")})` : "";
-      }
-      scores.push({
-        instrument: "JFLS-20",
-        score:
-          s.isValid && s.globalScore !== null
-            ? `${s.globalScore.toFixed(2)} / ${s.maxScore}${subscaleStr}`
-            : `Ungültig (${s.missingCount} fehlend)`,
-      });
-    }
-
-    const obc = responses.find((r) => r.questionnaireId === QUESTIONNAIRE_ID.OBC);
-    if (obc && Object.keys(obc.answers).length > 0) {
-      const s = calculateOBCScore(obc.answers as OBCAnswers);
-      scores.push({ instrument: "OBC", score: `${s.totalScore} / ${s.maxScore}` });
-    }
-
-    return scores;
-  }, [responses]);
+    return out;
+  }, [manualScores]);
 
   // Set PDF filename for browser print dialog
   const pdfTitle = patientName
@@ -202,6 +161,7 @@ function ReportSubPage() {
   const isReady =
     !isRecordLoading &&
     !isResponsesLoading &&
+    !isManualScoresLoading &&
     !isExamLoading &&
     !isEvalLoading &&
     !isDecrypting;
