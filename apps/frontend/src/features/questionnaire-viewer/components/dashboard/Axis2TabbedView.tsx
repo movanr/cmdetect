@@ -164,6 +164,7 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
               active={activeTab === tab.id}
               completed={completed}
               onClick={() => toggle(tab.id)}
+              emptyLabel="Bewertung ausstehend"
             />
           );
         })}

@@ -7,7 +7,8 @@ interface Axis2TabCardProps {
   active: boolean;
   completed: boolean;
   onClick: () => void;
-  className?: string;
+  /** Text shown when entries is empty. Defaults to "—". */
+  emptyLabel?: string;
 }
 
 export function Axis2TabCard({
@@ -16,7 +17,7 @@ export function Axis2TabCard({
   active,
   completed,
   onClick,
-  className,
+  emptyLabel = "—",
 }: Axis2TabCardProps) {
   return (
     <button
@@ -42,7 +43,7 @@ export function Axis2TabCard({
       </div>
       <div className="pt-2 flex flex-col gap-0.5 min-h-[1.25rem]">
         {entries.length === 0 ? (
-          <span className="text-sm text-muted-foreground">—</span>
+          <span className="text-[11px] text-muted-foreground">{emptyLabel}</span>
         ) : (
           entries.map((entry) => (
             <div key={entry.label} className="text-[11px] leading-tight">
