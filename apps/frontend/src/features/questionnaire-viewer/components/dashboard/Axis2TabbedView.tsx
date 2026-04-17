@@ -6,10 +6,7 @@
 
 import { EmptyState } from "@/components/ui/empty-state";
 import type { PainDrawingData } from "@/features/pain-drawing-evaluation";
-import {
-  PainDrawingAnswers,
-  PainDrawingScoringContent,
-} from "@/features/pain-drawing-evaluation";
+import { PainDrawingAnswers, PainDrawingScoringContent } from "@/features/pain-drawing-evaluation";
 import type {
   GCPS1MAnswers,
   JFLS20Answers,
@@ -26,7 +23,6 @@ import { useCallback, useMemo, useState } from "react";
 import { SCORING_MANUAL_ANCHORS } from "../../content/dashboard-instructions";
 import type { QuestionnaireResponse } from "../../hooks/useQuestionnaireResponses";
 import { Axis2DetailPanel } from "./Axis2DetailPanel";
-import { Axis2TabCard } from "./Axis2TabCard";
 import {
   JFLS20Content,
   JFLS8Content,
@@ -34,6 +30,7 @@ import {
   PHQ4Content,
   type TabSummary,
 } from "./Axis2ScoreCard";
+import { Axis2TabCard } from "./Axis2TabCard";
 import { GCPSScoringContent } from "./GCPSScoreCard";
 import {
   GCPSAnswersTable,
@@ -65,6 +62,8 @@ function painDrawingCompleted(data: PainDrawingData | null | undefined): boolean
 interface Axis2TabbedViewProps {
   responses: QuestionnaireResponse[];
   patientRecordId: string;
+  /** When true, patient skipped all Axis 2 questionnaires by design — relabel empty tabs. */
+  isScreeningNegative: boolean;
 }
 
 function AnswersEmpty() {
@@ -72,15 +71,22 @@ function AnswersEmpty() {
     <div className="py-6">
       <EmptyState
         icon={ClipboardList}
-        title="Noch keine Antworten eingereicht"
+        title="Keine Antworten eingereicht"
         description="Manuelle Scoring-Eingabe ist weiterhin möglich (z. B. von Papierbogen)."
       />
     </div>
   );
 }
 
-export function Axis2TabbedView({ responses, patientRecordId }: Axis2TabbedViewProps) {
+export function Axis2TabbedView({
+  responses,
+  patientRecordId,
+  isScreeningNegative,
+}: Axis2TabbedViewProps) {
   const tabs = useMemo(() => TAB_DEFS.filter((t) => isQuestionnaireEnabled(t.id)), []);
+
+  const emptyLabel = isScreeningNegative ? "Keine Daten" : "Bewertung ausstehend";
+  const pendingLabel = isScreeningNegative ? null : "offen";
 
   const [activeTab, setActiveTab] = useState<string | null>(QUESTIONNAIRE_ID.PAIN_DRAWING);
   const [summaries, setSummaries] = useState<Record<string, TabSummary>>({});
@@ -132,9 +138,7 @@ export function Axis2TabbedView({ responses, patientRecordId }: Axis2TabbedViewP
           />
         );
       case QUESTIONNAIRE_ID.JFLS8:
-        return (
-          <JFLS8AnswersTable answers={response.answers as JFLS8Answers} showPips showTotals />
-        );
+        return <JFLS8AnswersTable answers={response.answers as JFLS8Answers} showPips showTotals />;
       case QUESTIONNAIRE_ID.JFLS20:
         return (
           <JFLS20AnswersTable answers={response.answers as JFLS20Answers} showPips showTotals />
@@ -165,7 +169,8 @@ export function Axis2TabbedView({ responses, patientRecordId }: Axis2TabbedViewP
               active={activeTab === tab.id}
               completed={completed}
               onClick={() => toggle(tab.id)}
-              emptyLabel="Bewertung ausstehend"
+              emptyLabel={emptyLabel}
+              pendingLabel={pendingLabel}
             />
           );
         })}
@@ -187,12 +192,7 @@ export function Axis2TabbedView({ responses, patientRecordId }: Axis2TabbedViewP
                 split={tab.id === QUESTIONNAIRE_ID.GCPS_1M ? "balanced" : "default"}
                 leftTitle={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
                 left={renderAnswers(tab.id)}
-                right={renderScoring(
-                  tab.id,
-                  summarySetters[tab.id],
-                  patientRecordId,
-                  hasResponse
-                )}
+                right={renderScoring(tab.id, summarySetters[tab.id], patientRecordId, hasResponse)}
               />
             </div>
           );

@@ -24,7 +24,7 @@ export function PainDrawingAnswers({ data }: PainDrawingAnswersProps) {
       <div className="py-6">
         <EmptyState
           icon={ClipboardList}
-          title="Noch keine Zeichnung eingereicht"
+          title="Keine Zeichnung eingereicht"
           description="Manuelle Scoring-Eingabe ist weiterhin möglich (z. B. von Papierbogen)."
         />
       </div>

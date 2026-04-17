@@ -175,7 +175,11 @@ export function DashboardView({
             Achse 2 - Psychosoziale Bewertung
           </h3>
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
-          <Axis2TabbedView responses={responses} patientRecordId={patientRecordId} />
+          <Axis2TabbedView
+            responses={responses}
+            patientRecordId={patientRecordId}
+            isScreeningNegative={isScreeningNegative}
+          />
         </section>
       </CardContent>
     </Card>
