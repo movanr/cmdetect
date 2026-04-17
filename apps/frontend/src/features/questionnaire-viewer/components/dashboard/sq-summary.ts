@@ -107,11 +107,23 @@ export function summarizeGelenkgeraeusche(answers: SQAnswers): TabSummaryEntry[]
 
 export function summarizeKieferklemme(answers: SQAnswers): TabSummaryEntry[] {
   const sq9 = yesNo(answers.SQ9);
+  if (sq9 === null) return [];
+  if (sq9 === "Nein") return [{ label: "Jemals", value: "Nein" }];
+
+  const entries: TabSummaryEntry[] = [{ label: "Jemals", value: "Ja" }];
+
+  const sq10 = yesNo(answers.SQ10);
+  if (sq10 !== null) entries.push({ label: "Einschränkung beim Essen", value: sq10 });
+
   const sq11 = yesNo(answers.SQ11);
-  if (sq9 === null && sq11 === null) return [];
-  const entries: TabSummaryEntry[] = [];
-  if (sq9 !== null) entries.push({ label: "Blockade", value: sq9 });
-  if (sq11 !== null) entries.push({ label: "Intermittierend", value: sq11 });
+  if (sq11 !== null) entries.push({ label: "Letzte 30 Tage", value: sq11 });
+
+  const sq12 = yesNo(answers.SQ12);
+  if (sq12 !== null) entries.push({ label: "Gegenwärtig blockiert", value: sq12 });
+
+  const side = formatSide(answers.SQ9_office);
+  if (side) entries.push({ label: "Seite", value: side });
+
   return entries;
 }
 
@@ -122,6 +134,8 @@ export function summarizeKiefersperre(answers: SQAnswers): TabSummaryEntry[] {
   if (sq13 === "Ja") {
     const sq14 = yesNo(answers.SQ14);
     if (sq14 !== null) entries.push({ label: "Manöver nötig", value: sq14 });
+    const side = formatSide(answers.SQ13_office);
+    if (side) entries.push({ label: "Seite", value: side });
   }
   return entries;
 }

@@ -7,6 +7,7 @@ interface Axis2TabCardProps {
   active: boolean;
   completed: boolean;
   onClick: () => void;
+  className?: string;
 }
 
 export function Axis2TabCard({
@@ -15,6 +16,7 @@ export function Axis2TabCard({
   active,
   completed,
   onClick,
+  className,
 }: Axis2TabCardProps) {
   return (
     <button
@@ -22,7 +24,7 @@ export function Axis2TabCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex-1 min-w-[160px] text-left rounded-md border px-3 py-2.5 transition-colors",
+        "flex-1 min-w-[160px] min-h-[140px] text-left rounded-md border px-3 py-4 transition-colors flex flex-col",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         active
           ? "bg-card border-border shadow-sm ring-1 ring-primary/40 rounded-b-none relative z-10 -mb-px"
@@ -38,7 +40,7 @@ export function Axis2TabCard({
           </span>
         )}
       </div>
-      <div className="mt-2 flex flex-col gap-0.5 min-h-[1.25rem]">
+      <div className="pt-2 flex flex-col gap-0.5 min-h-[1.25rem]">
         {entries.length === 0 ? (
           <span className="text-sm text-muted-foreground">—</span>
         ) : (
