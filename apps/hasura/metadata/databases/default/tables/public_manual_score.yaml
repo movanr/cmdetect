@@ -1,0 +1,117 @@
+table:
+  name: manual_score
+  schema: public
+object_relationships:
+  - name: organization
+    using:
+      foreign_key_constraint_on: organization_id
+  - name: patient_record
+    using:
+      foreign_key_constraint_on: patient_record_id
+  - name: updatedByUser
+    using:
+      foreign_key_constraint_on: updated_by
+insert_permissions:
+  - role: physician
+    permission:
+      check:
+        organization_id:
+          _eq: X-Hasura-Organization-Id
+      set:
+        organization_id: x-hasura-Organization-Id
+        updated_by: x-hasura-User-Id
+      columns:
+        - patient_record_id
+        - questionnaire_id
+        - scores
+        - note
+    comment: ""
+select_permissions:
+  - role: assistant
+    permission:
+      columns:
+        - id
+        - patient_record_id
+        - organization_id
+        - questionnaire_id
+        - scores
+        - note
+        - updated_by
+        - created_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: org_admin
+    permission:
+      columns:
+        - id
+        - patient_record_id
+        - organization_id
+        - questionnaire_id
+        - scores
+        - note
+        - updated_by
+        - created_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+  - role: physician
+    permission:
+      columns:
+        - id
+        - patient_record_id
+        - organization_id
+        - questionnaire_id
+        - scores
+        - note
+        - updated_by
+        - created_at
+        - updated_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+    comment: ""
+update_permissions:
+  - role: physician
+    permission:
+      columns:
+        - scores
+        - note
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+      set:
+        updated_at: now()
+        updated_by: x-hasura-User-Id
+    comment: ""
+  - role: org_admin
+    permission:
+      columns:
+        - deleted_at
+      filter:
+        _and:
+          - organization_id:
+              _eq: X-Hasura-Organization-Id
+          - deleted_at:
+              _is_null: true
+      check: null
+      set:
+        updated_at: now()
+    comment: ""

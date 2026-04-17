@@ -12,7 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import { useEffect } from "react";
+import { useManualScoreAutoSave } from "../../hooks/useManualScoreAutoSave";
 import { Fraction, StackedField, type TabSummary, type TabSummaryEntry } from "./Axis2ScoreCard";
 import { ClinicalNote } from "./ClinicalNote";
 
@@ -153,17 +155,37 @@ function GradeTable() {
 
 interface GCPSScoringContentProps {
   onSummaryChange?: (summary: TabSummary) => void;
+  patientRecordId: string;
+  hasResponse: boolean;
 }
 
-export function GCPSScoringContent({ onSummaryChange }: GCPSScoringContentProps) {
-  const [daysRaw, setDaysRaw] = useState("");
-  const [bpA, setBpA] = useState("");
-  const [interferencePunkte, setInterferencePunkte] = useState("");
-  const [bpB, setBpB] = useState("");
-  const [bpTotal, setBpTotal] = useState("");
-  const [csi, setCsi] = useState("");
-  const [grade, setGrade] = useState("");
-  const [note, setNote] = useState("");
+export function GCPSScoringContent({
+  onSummaryChange,
+  patientRecordId,
+  hasResponse,
+}: GCPSScoringContentProps) {
+  const { scores, setScore, note, setNote } = useManualScoreAutoSave({
+    patientRecordId,
+    questionnaireId: QUESTIONNAIRE_ID.GCPS_1M,
+    defaultValues: {
+      daysRaw: "",
+      bpA: "",
+      interferencePunkte: "",
+      bpB: "",
+      bpTotal: "",
+      csi: "",
+      grade: "",
+    },
+    enabled: hasResponse,
+  });
+  const { daysRaw, bpA, interferencePunkte, bpB, bpTotal, csi, grade } = scores;
+  const setDaysRaw = (v: string) => setScore("daysRaw", v);
+  const setBpA = (v: string) => setScore("bpA", v);
+  const setInterferencePunkte = (v: string) => setScore("interferencePunkte", v);
+  const setBpB = (v: string) => setScore("bpB", v);
+  const setBpTotal = (v: string) => setScore("bpTotal", v);
+  const setCsi = (v: string) => setScore("csi", v);
+  const setGrade = (v: string) => setScore("grade", v);
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];

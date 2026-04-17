@@ -16,3 +16,48 @@ export const UPDATE_QUESTIONNAIRE_RESPONSE = graphql(`
     }
   }
 `);
+
+export const GET_MANUAL_SCORES = graphql(`
+  query GetManualScores($patient_record_id: String!) {
+    manual_score(
+      where: { patient_record_id: { _eq: $patient_record_id } }
+      order_by: { questionnaire_id: asc }
+    ) {
+      id
+      questionnaire_id
+      scores
+      note
+      updated_at
+      updated_by
+    }
+  }
+`);
+
+export const UPSERT_MANUAL_SCORE = graphql(`
+  mutation UpsertManualScore(
+    $patient_record_id: String!
+    $questionnaire_id: String!
+    $scores: jsonb!
+    $note: String!
+  ) {
+    insert_manual_score_one(
+      object: {
+        patient_record_id: $patient_record_id
+        questionnaire_id: $questionnaire_id
+        scores: $scores
+        note: $note
+      }
+      on_conflict: {
+        constraint: manual_score_unique
+        update_columns: [scores, note]
+      }
+    ) {
+      id
+      questionnaire_id
+      scores
+      note
+      updated_at
+      updated_by
+    }
+  }
+`);

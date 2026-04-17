@@ -63,6 +63,7 @@ export function AnamnesisReviewContainer({
   return (
     <DashboardView
       responses={responses}
+      patientRecordId={patientRecordId}
       onStartReview={() => setViewMode("wizard")}
     />
   );

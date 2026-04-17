@@ -1,6 +1,7 @@
 - "!include public_criteria_assessment.yaml"
 - "!include public_documented_diagnosis.yaml"
 - "!include public_examination_response.yaml"
+- "!include public_manual_score.yaml"
 - "!include public_organization.yaml"
 - "!include public_patient_consent.yaml"
 - "!include public_patient_record.yaml"

@@ -28,9 +28,13 @@ export { PHQ4Summary } from "./components/PHQ4Summary";
 export { useQuestionnaireResponses } from "./hooks/useQuestionnaireResponses";
 export { useUpdateQuestionnaireResponse } from "./hooks/useUpdateQuestionnaireResponse";
 export { useSQReviewForm } from "./hooks/useSQReviewForm";
+export { useManualScores } from "./hooks/useManualScores";
+export { useUpsertManualScore } from "./hooks/useUpsertManualScore";
+export { useManualScoreAutoSave } from "./hooks/useManualScoreAutoSave";
 
 // Types
 export type { QuestionnaireResponse } from "./hooks/useQuestionnaireResponses";
+export type { ManualScoreRow } from "./hooks/useManualScores";
 
 // Utilities
 export { getEnabledSections, filterEnabledAnswers } from "./utils";

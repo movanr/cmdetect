@@ -14,8 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { JFLS20_SUBSCALE_LABELS } from "@cmdetect/questionnaires";
-import { useEffect, useState, type ReactNode } from "react";
+import { JFLS20_SUBSCALE_LABELS, QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import { useEffect, type ReactNode } from "react";
+import { useManualScoreAutoSave } from "../../hooks/useManualScoreAutoSave";
 import { ClinicalNote } from "./ClinicalNote";
 
 const NONE = "__none__";
@@ -33,6 +34,9 @@ export interface TabSummary {
 
 interface ContentProps {
   onSummaryChange?: (summary: TabSummary) => void;
+  patientRecordId: string;
+  /** Whether a patient questionnaire_response exists. Auto-save only runs when true. */
+  hasResponse: boolean;
 }
 
 // ─── Option lists ───────────────────────────────────────────────────────
@@ -226,10 +230,16 @@ export function CutoffTable({
   );
 }
 
-export function PHQ4Content({ onSummaryChange }: ContentProps) {
-  const [total, setTotal] = useState("");
-  const [severity, setSeverity] = useState("");
-  const [note, setNote] = useState("");
+export function PHQ4Content({ onSummaryChange, patientRecordId, hasResponse }: ContentProps) {
+  const { scores, setScore, note, setNote } = useManualScoreAutoSave({
+    patientRecordId,
+    questionnaireId: QUESTIONNAIRE_ID.PHQ4,
+    defaultValues: { total: "", severity: "" },
+    enabled: hasResponse,
+  });
+  const { total, severity } = scores;
+  const setTotal = (v: string) => setScore("total", v);
+  const setSeverity = (v: string) => setScore("severity", v);
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
@@ -305,10 +315,16 @@ function JFLS8ReferenceTable() {
   );
 }
 
-export function JFLS8Content({ onSummaryChange }: ContentProps) {
-  const [global, setGlobal] = useState("");
-  const [classification, setClassification] = useState("");
-  const [note, setNote] = useState("");
+export function JFLS8Content({ onSummaryChange, patientRecordId, hasResponse }: ContentProps) {
+  const { scores, setScore, note, setNote } = useManualScoreAutoSave({
+    patientRecordId,
+    questionnaireId: QUESTIONNAIRE_ID.JFLS8,
+    defaultValues: { global: "", classification: "" },
+    enabled: hasResponse,
+  });
+  const { global, classification } = scores;
+  const setGlobal = (v: string) => setScore("global", v);
+  const setClassification = (v: string) => setScore("classification", v);
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
@@ -357,13 +373,25 @@ export function JFLS8Content({ onSummaryChange }: ContentProps) {
 
 // ─── JFLS-20 ────────────────────────────────────────────────────────────
 
-export function JFLS20Content({ onSummaryChange }: ContentProps) {
-  const [global, setGlobal] = useState("");
-  const [mastication, setMastication] = useState("");
-  const [mobility, setMobility] = useState("");
-  const [communication, setCommunication] = useState("");
-  const [classification, setClassification] = useState("");
-  const [note, setNote] = useState("");
+export function JFLS20Content({ onSummaryChange, patientRecordId, hasResponse }: ContentProps) {
+  const { scores, setScore, note, setNote } = useManualScoreAutoSave({
+    patientRecordId,
+    questionnaireId: QUESTIONNAIRE_ID.JFLS20,
+    defaultValues: {
+      global: "",
+      mastication: "",
+      mobility: "",
+      communication: "",
+      classification: "",
+    },
+    enabled: hasResponse,
+  });
+  const { global, mastication, mobility, communication, classification } = scores;
+  const setGlobal = (v: string) => setScore("global", v);
+  const setMastication = (v: string) => setScore("mastication", v);
+  const setMobility = (v: string) => setScore("mobility", v);
+  const setCommunication = (v: string) => setScore("communication", v);
+  const setClassification = (v: string) => setScore("classification", v);
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
@@ -452,10 +480,16 @@ export function JFLS20Content({ onSummaryChange }: ContentProps) {
 
 // ─── OBC ────────────────────────────────────────────────────────────────
 
-export function OBCContent({ onSummaryChange }: ContentProps) {
-  const [total, setTotal] = useState("");
-  const [severity, setSeverity] = useState("");
-  const [note, setNote] = useState("");
+export function OBCContent({ onSummaryChange, patientRecordId, hasResponse }: ContentProps) {
+  const { scores, setScore, note, setNote } = useManualScoreAutoSave({
+    patientRecordId,
+    questionnaireId: QUESTIONNAIRE_ID.OBC,
+    defaultValues: { total: "", severity: "" },
+    enabled: hasResponse,
+  });
+  const { total, severity } = scores;
+  const setTotal = (v: string) => setScore("total", v);
+  const setSeverity = (v: string) => setScore("severity", v);
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];

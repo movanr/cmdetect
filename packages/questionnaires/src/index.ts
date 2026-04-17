@@ -281,6 +281,8 @@ export {
   getAnswersSchema,
   isSQScreeningNegative,
   LikertSchema,
+  // Manual score entry schema
+  ManualScoreEntrySchema,
   OptionalAnswersSchema,
   // Registry and helpers
   questionnaireSchemas,
@@ -292,6 +294,7 @@ export {
   validateQuestionnaireResponse,
   YesNoSchema,
   type GenericAnswers,
+  type ManualScoreEntry,
   type ResponseData,
   type SQPainFrequency,
   type ValidationResult,

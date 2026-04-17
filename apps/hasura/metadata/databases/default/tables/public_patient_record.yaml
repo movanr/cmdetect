@@ -32,6 +32,13 @@ array_relationships:
         table:
           name: examination_response
           schema: public
+  - name: manual_scores
+    using:
+      foreign_key_constraint_on:
+        column: patient_record_id
+        table:
+          name: manual_score
+          schema: public
   - name: questionnaire_responses
     using:
       foreign_key_constraint_on:

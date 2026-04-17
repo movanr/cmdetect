@@ -79,6 +79,22 @@ export const ResponseDataSchema = z.object({
 export type ResponseData = z.infer<typeof ResponseDataSchema>;
 
 /**
+ * Manual score entry — practitioner-authored score values + clinical note
+ * for one questionnaire on one patient record (stored in public.manual_score).
+ *
+ * Scores are free-text strings (not numbers) so the UI can preserve exactly
+ * what the clinician typed, including partial / in-progress entries. Shape
+ * intentionally generic — per-questionnaire field sets live with the UI
+ * components.
+ */
+export const ManualScoreEntrySchema = z.object({
+  scores: z.record(z.string(), z.string()),
+  note: z.string(),
+});
+
+export type ManualScoreEntry = z.infer<typeof ManualScoreEntrySchema>;
+
+/**
  * Validation result type
  */
 export interface ValidationResult {

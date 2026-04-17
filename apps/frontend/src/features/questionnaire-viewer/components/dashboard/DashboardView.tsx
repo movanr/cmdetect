@@ -21,6 +21,8 @@ import { SQTabbedView } from "./SQTabbedView";
 interface DashboardViewProps {
   /** Questionnaire responses */
   responses: QuestionnaireResponse[];
+  /** Patient record ID — required to fetch/persist manual scores */
+  patientRecordId: string;
   /** Callback when starting patient review */
   onStartReview: () => void;
   /** Callback to skip the review and continue directly to the examination */
@@ -35,6 +37,7 @@ interface DashboardViewProps {
 
 export function DashboardView({
   responses,
+  patientRecordId,
   onStartReview,
   onSkipReview,
   onContinueToExamination,
@@ -172,7 +175,7 @@ export function DashboardView({
             Achse 2 - Psychosoziale Bewertung
           </h3>
           <DashboardInfoBlock info={AXIS2_INFO} className="mb-3" />
-          <Axis2TabbedView responses={responses} />
+          <Axis2TabbedView responses={responses} patientRecordId={patientRecordId} />
         </section>
       </CardContent>
     </Card>

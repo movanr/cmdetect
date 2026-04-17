@@ -64,6 +64,7 @@ function painDrawingCompleted(data: PainDrawingData | null | undefined): boolean
 
 interface Axis2TabbedViewProps {
   responses: QuestionnaireResponse[];
+  patientRecordId: string;
 }
 
 function AnswersEmpty() {
@@ -78,7 +79,7 @@ function AnswersEmpty() {
   );
 }
 
-export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
+export function Axis2TabbedView({ responses, patientRecordId }: Axis2TabbedViewProps) {
   const tabs = useMemo(() => TAB_DEFS.filter((t) => isQuestionnaireEnabled(t.id)), []);
 
   const [activeTab, setActiveTab] = useState<string | null>(QUESTIONNAIRE_ID.PAIN_DRAWING);
@@ -173,36 +174,54 @@ export function Axis2TabbedView({ responses }: Axis2TabbedViewProps) {
       {/* Detail panels — all mounted to preserve per-questionnaire local state across switches.
           Only the active one is visible; outer wrapper is hidden entirely when no tab is active. */}
       <div className={activeTab ? "pt-4" : "hidden"}>
-        {tabs.map((tab) => (
-          <div key={tab.id} className={activeTab === tab.id ? "block" : "hidden"}>
-            <Axis2DetailPanel
-              manualAnchor={SCORING_MANUAL_ANCHORS[tab.id]}
-              split={tab.id === QUESTIONNAIRE_ID.GCPS_1M ? "balanced" : "default"}
-              leftTitle={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
-              left={renderAnswers(tab.id)}
-              right={renderScoring(tab.id, summarySetters[tab.id])}
-            />
-          </div>
-        ))}
+        {tabs.map((tab) => {
+          const response = responseFor(tab.id);
+          const hasResponse =
+            tab.id === QUESTIONNAIRE_ID.PAIN_DRAWING
+              ? painDrawingCompleted(response?.answers as PainDrawingData | undefined)
+              : !!response && Object.keys(response.answers).length > 0;
+          return (
+            <div key={tab.id} className={activeTab === tab.id ? "block" : "hidden"}>
+              <Axis2DetailPanel
+                manualAnchor={SCORING_MANUAL_ANCHORS[tab.id]}
+                split={tab.id === QUESTIONNAIRE_ID.GCPS_1M ? "balanced" : "default"}
+                leftTitle={QUESTIONNAIRE_TITLES[tab.id] ?? tab.abbreviation}
+                left={renderAnswers(tab.id)}
+                right={renderScoring(
+                  tab.id,
+                  summarySetters[tab.id],
+                  patientRecordId,
+                  hasResponse
+                )}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function renderScoring(id: string, onSummaryChange: (summary: TabSummary) => void) {
+function renderScoring(
+  id: string,
+  onSummaryChange: (summary: TabSummary) => void,
+  patientRecordId: string,
+  hasResponse: boolean
+) {
+  const shared = { onSummaryChange, patientRecordId, hasResponse };
   switch (id) {
     case QUESTIONNAIRE_ID.PAIN_DRAWING:
-      return <PainDrawingScoringContent onSummaryChange={onSummaryChange} />;
+      return <PainDrawingScoringContent {...shared} />;
     case QUESTIONNAIRE_ID.GCPS_1M:
-      return <GCPSScoringContent onSummaryChange={onSummaryChange} />;
+      return <GCPSScoringContent {...shared} />;
     case QUESTIONNAIRE_ID.PHQ4:
-      return <PHQ4Content onSummaryChange={onSummaryChange} />;
+      return <PHQ4Content {...shared} />;
     case QUESTIONNAIRE_ID.JFLS8:
-      return <JFLS8Content onSummaryChange={onSummaryChange} />;
+      return <JFLS8Content {...shared} />;
     case QUESTIONNAIRE_ID.JFLS20:
-      return <JFLS20Content onSummaryChange={onSummaryChange} />;
+      return <JFLS20Content {...shared} />;
     case QUESTIONNAIRE_ID.OBC:
-      return <OBCContent onSummaryChange={onSummaryChange} />;
+      return <OBCContent {...shared} />;
     default:
       return null;
   }

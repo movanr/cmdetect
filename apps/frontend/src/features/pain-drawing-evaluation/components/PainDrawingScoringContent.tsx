@@ -19,7 +19,9 @@ import {
   type TabSummaryEntry,
 } from "@/features/questionnaire-viewer/components/dashboard/Axis2ScoreCard";
 import { ClinicalNote } from "@/features/questionnaire-viewer/components/dashboard/ClinicalNote";
-import { useEffect, useState } from "react";
+import { useManualScoreAutoSave } from "@/features/questionnaire-viewer/hooks/useManualScoreAutoSave";
+import { QUESTIONNAIRE_ID } from "@cmdetect/questionnaires";
+import { useEffect } from "react";
 
 const NONE = "__none__";
 
@@ -39,12 +41,24 @@ const PAIN_DRAWING_CUTOFFS: ReadonlyArray<readonly [string, string]> = [
 
 interface PainDrawingScoringContentProps {
   onSummaryChange?: (summary: TabSummary) => void;
+  patientRecordId: string;
+  hasResponse: boolean;
 }
 
-export function PainDrawingScoringContent({ onSummaryChange }: PainDrawingScoringContentProps) {
-  const [regionCount, setRegionCount] = useState("");
-  const [severity, setSeverity] = useState("");
-  const [note, setNote] = useState("");
+export function PainDrawingScoringContent({
+  onSummaryChange,
+  patientRecordId,
+  hasResponse,
+}: PainDrawingScoringContentProps) {
+  const { scores, setScore, note, setNote } = useManualScoreAutoSave({
+    patientRecordId,
+    questionnaireId: QUESTIONNAIRE_ID.PAIN_DRAWING,
+    defaultValues: { regionCount: "", severity: "" },
+    enabled: hasResponse,
+  });
+  const { regionCount, severity } = scores;
+  const setRegionCount = (v: string) => setScore("regionCount", v);
+  const setSeverity = (v: string) => setScore("severity", v);
 
   useEffect(() => {
     const entries: TabSummaryEntry[] = [];
