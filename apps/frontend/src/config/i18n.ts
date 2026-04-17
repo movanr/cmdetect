@@ -318,6 +318,11 @@ export interface I18nStrings {
     toastKeyMismatch: string;
     toastOrgKeyMissing: string;
     toastEmptyMnemonic: string;
+
+    // Org-load error step (network/GraphQL failure fetching organization key)
+    orgLoadErrorTitle: string;
+    orgLoadErrorDescription: string;
+    orgLoadErrorRetry: string;
   };
 
   // Case workflow steps
@@ -620,6 +625,11 @@ export const translations: Record<Language, I18nStrings> = {
       toastKeyMismatch: "Recovered key does not match the organization's public key",
       toastOrgKeyMissing: "Organization public key not found. Please contact your administrator.",
       toastEmptyMnemonic: "Please enter a recovery phrase",
+
+      orgLoadErrorTitle: "Couldn't load encryption setup",
+      orgLoadErrorDescription:
+        "We couldn't reach the server to check your organization's encryption keys. This is usually a temporary network issue, not a missing setup.",
+      orgLoadErrorRetry: "Retry",
     },
 
     caseSteps: {
@@ -930,6 +940,11 @@ export const translations: Record<Language, I18nStrings> = {
       toastOrgKeyMissing:
         "Organisationsschlüssel nicht gefunden. Bitte kontaktieren Sie Ihren Administrator.",
       toastEmptyMnemonic: "Bitte geben Sie eine Wiederherstellungsphrase ein",
+
+      orgLoadErrorTitle: "Verschlüsselungseinrichtung konnte nicht geladen werden",
+      orgLoadErrorDescription:
+        "Der Server konnte nicht erreicht werden, um die Verschlüsselungsschlüssel Ihrer Organisation zu prüfen. Dies ist in der Regel ein vorübergehendes Netzwerkproblem und kein fehlendes Setup.",
+      orgLoadErrorRetry: "Erneut versuchen",
     },
 
     caseSteps: {

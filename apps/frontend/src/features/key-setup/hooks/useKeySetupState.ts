@@ -62,6 +62,15 @@ function keySetupReducer(state: KeySetupState, action: KeySetupAction): KeySetup
     case 'ERROR':
       return { type: 'error', error: action.error };
 
+    case 'ORG_LOAD_ERROR':
+      // Never clobber an in-progress admin generation flow — once keys are
+      // generated locally, the user must finish the download/mnemonic steps
+      // regardless of transient network failures.
+      if (state.type === 'admin-generating' && state.step !== 'generate') {
+        return state;
+      }
+      return { type: 'org-load-error', message: action.message };
+
     case 'RESET':
       return { type: 'loading' };
 
@@ -87,6 +96,8 @@ export function useKeySetupState() {
       dispatch({ type: 'RECOVERY_SUCCESS' }),
     setError: (error: string) =>
       dispatch({ type: 'ERROR', error }),
+    setOrgLoadError: (message: string) =>
+      dispatch({ type: 'ORG_LOAD_ERROR', message }),
     reset: () => dispatch({ type: 'RESET' })
   }), []);
 

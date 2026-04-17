@@ -68,14 +68,13 @@ export function useKeyValidation({
         isCompatible,
       });
     } catch (err) {
+      // Surface the error up through the `error` return — do NOT invoke the
+      // callback with all-false values, which would push the state machine
+      // into "waiting for admin" / "generate keys" and lie to the user about
+      // what actually went wrong (e.g. IndexedDB unavailable).
       const errorMessage =
         err instanceof Error ? err.message : "Validation failed";
       setError(errorMessage);
-      callbackRef.current?.(false, {
-        hasLocalKey: false,
-        hasPublicKey: false,
-        isCompatible: null,
-      });
     } finally {
       setIsLoading(false);
     }

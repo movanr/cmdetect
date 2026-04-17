@@ -18,7 +18,13 @@ export function useKeySetup() {
     (session?.user as { organizationId?: string } | undefined)?.organizationId ?? "org_unknown";
 
   // Fetch organization data
-  const { data: organizationData, isLoading: orgLoading } = useQuery({
+  const {
+    data: organizationData,
+    isLoading: orgLoading,
+    isError: orgFetchErrored,
+    error: orgFetchError,
+    refetch: refetchOrganization,
+  } = useQuery({
     queryKey: ["organization", organizationId],
     queryFn: () => execute(getOrganizationById, { id: organizationId }),
     enabled: !!organizationId && organizationId !== "org_unknown",
@@ -63,7 +69,11 @@ export function useKeySetup() {
   );
 
   // Use simplified validation hook
-  const { isLoading: validationLoading, revalidate } = useKeyValidation({
+  const {
+    isLoading: validationLoading,
+    error: validationError,
+    revalidate,
+  } = useKeyValidation({
     organizationPublicKey,
     onValidationComplete: handleValidationComplete,
   });
@@ -75,9 +85,35 @@ export function useKeySetup() {
     }
   }, [orgLoading, validationLoading, actions]);
 
-  // Advance state when org data is unavailable (post-logout, disabled query, query error)
+  // Surface a dedicated error state when the org query fails (network, GraphQL,
+  // permission). Without this branch, `organizationPublicKey === undefined` from
+  // a failed fetch is indistinguishable from "no key configured", pushing users
+  // into the waiting/generate flow incorrectly.
   useEffect(() => {
-    if (!orgLoading && !validationLoading && organizationPublicKey === undefined) {
+    if (orgFetchErrored) {
+      const message =
+        orgFetchError instanceof Error ? orgFetchError.message : "Unknown error";
+      actions.setOrgLoadError(message);
+    }
+  }, [orgFetchErrored, orgFetchError, actions]);
+
+  // Surface local-key validation errors (e.g. IndexedDB unavailable) as a
+  // real error instead of silently routing to "waiting for admin".
+  useEffect(() => {
+    if (validationError) {
+      actions.setError(validationError);
+    }
+  }, [validationError, actions]);
+
+  // Advance state when org data is unavailable (post-logout, disabled query).
+  // Skip when the query errored — that case is handled above.
+  useEffect(() => {
+    if (
+      !orgLoading &&
+      !validationLoading &&
+      !orgFetchErrored &&
+      organizationPublicKey === undefined
+    ) {
       actions.setContext({
         organizationId,
         organizationName,
@@ -87,7 +123,7 @@ export function useKeySetup() {
         isAdmin: activeRole === roles.ORG_ADMIN,
       });
     }
-  }, [orgLoading, validationLoading, organizationPublicKey, organizationId, organizationName, activeRole, actions]);
+  }, [orgLoading, validationLoading, orgFetchErrored, organizationPublicKey, organizationId, organizationName, activeRole, actions]);
 
   return {
     state,
@@ -99,5 +135,6 @@ export function useKeySetup() {
       isAdmin: activeRole === roles.ORG_ADMIN,
     },
     revalidate,
+    retryOrgFetch: refetchOrganization,
   };
 }

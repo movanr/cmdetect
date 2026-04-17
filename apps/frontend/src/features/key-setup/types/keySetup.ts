@@ -5,6 +5,7 @@ export type KeySetupState =
   | { type: 'key-mismatch'; error: string }
   | { type: 'setup-complete' }
   | { type: 'error'; error: string }
+  | { type: 'org-load-error'; message: string }
   | {
       type: 'admin-generating';
       step: 'generate' | 'download' | 'mnemonic';
@@ -35,4 +36,5 @@ export type KeySetupAction =
   | { type: 'SETUP_COMPLETE' }
   | { type: 'RECOVERY_SUCCESS' }
   | { type: 'ERROR'; error: string }
+  | { type: 'ORG_LOAD_ERROR'; message: string }
   | { type: 'RESET' };

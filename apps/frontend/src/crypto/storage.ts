@@ -68,7 +68,14 @@ export async function loadPrivateKey(): Promise<string | null> {
   }
 }
 
-/** Checks whether a private key exists in IndexedDB. Returns `false` on any error. */
+/**
+ * Checks whether a private key exists in IndexedDB.
+ *
+ * @throws {CryptoError} with code `STORAGE_LOAD_FAILED` on database errors —
+ *   callers must distinguish this from a `false` return, otherwise a DB
+ *   failure (browser privacy mode, quota exceeded, etc.) gets mistaken for
+ *   "the user hasn't set up a key".
+ */
 export async function hasStoredPrivateKey(): Promise<boolean> {
   try {
     const db = await openDatabase();
@@ -81,8 +88,13 @@ export async function hasStoredPrivateKey(): Promise<boolean> {
       request.onerror = () =>
         reject(new Error("Failed to check for stored key"));
     });
-  } catch {
-    return false;
+  } catch (error) {
+    const cryptoError: CryptoError = {
+      name: "StorageError",
+      message: `Failed to check for stored private key: ${error instanceof Error ? error.message : "Unknown error"}`,
+      code: "STORAGE_LOAD_FAILED",
+    };
+    throw cryptoError;
   }
 }
 

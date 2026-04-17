@@ -7,13 +7,14 @@ import { AdminGeneratingStep } from './steps/AdminGeneratingStep';
 import { RecoveryStep } from './steps/RecoveryStep';
 import { ErrorStep } from './steps/ErrorStep';
 import { WaitingStep } from './steps/WaitingStep';
+import { OrgLoadErrorStep } from './steps/OrgLoadErrorStep';
 
 interface KeySetupProps {
   onSetupComplete?: () => void;
 }
 
 export function KeySetup({ onSetupComplete }: KeySetupProps) {
-  const { state, actions, context, revalidate } = useKeySetupContext();
+  const { state, actions, context, revalidate, retryOrgFetch } = useKeySetupContext();
   const { availableRoles } = useRole();
   const hasAdminRole = availableRoles.includes(roles.ORG_ADMIN);
 
@@ -60,6 +61,14 @@ export function KeySetup({ onSetupComplete }: KeySetupProps) {
             organizationName={context.organizationName}
             hasAdminRole={hasAdminRole}
             onRefresh={revalidate}
+          />
+        );
+
+      case 'org-load-error':
+        return (
+          <OrgLoadErrorStep
+            message={state.message}
+            onRetry={retryOrgFetch}
           />
         );
 
