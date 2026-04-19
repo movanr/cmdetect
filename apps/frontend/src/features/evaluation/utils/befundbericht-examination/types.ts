@@ -93,7 +93,8 @@ export interface U10Finding {
   kind: "u10";
   site: "posteriorMandibular" | "submandibular" | "lateralPterygoid" | "temporalisTendon";
   side: SideOrBoth;
-  referred: boolean;
+  /** null when referredPain was not asked (pain=no, so gated off). In practice always boolean at emission time. */
+  referred: boolean | null;
 }
 
 export type Finding =

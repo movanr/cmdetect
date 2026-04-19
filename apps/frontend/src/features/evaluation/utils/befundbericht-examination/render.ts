@@ -3,6 +3,7 @@ import type {
   Finding,
   HeadacheLocation,
   SideOrBoth,
+  U10Finding,
   U1aFinding,
   U1bFinding,
   U4Finding,
@@ -36,6 +37,8 @@ export function renderSentence(f: Finding): string {
       return renderU9Muscle(f);
     case "u9.tmj":
       return renderU9Tmj(f);
+    case "u10":
+      return renderU10(f);
     default:
       // Other section renderers arrive in subsequent slices.
       throw new Error(`renderSentence: unsupported finding kind "${f.kind}"`);
@@ -257,6 +260,31 @@ function tmjLocationU9(side: SideOrBoth): string {
 function renderPainQualifier(label: string, value: boolean | null): string | null {
   if (value === null) return null;
   return value ? `mit ${label}` : `ohne ${label}`;
+}
+
+// ============================================================================
+// U10 — Ergänzende Palpation
+// ============================================================================
+
+/**
+ * Labels per rules §U10 (which cites "Regio submandibularis, Pterygoideus
+ * lateralis, Temporalis-Sehne" as the example vocabulary). Distinct from the
+ * short UI labels in PALPATION_SITES.
+ */
+const U10_SITE_LABELS: Record<U10Finding["site"], string> = {
+  posteriorMandibular: "Regio retromandibularis",
+  submandibular: "Regio submandibularis",
+  lateralPterygoid: "Pterygoideus lateralis",
+  temporalisTendon: "Temporalis-Sehne",
+};
+
+function renderU10(f: U10Finding): string {
+  const parts = [
+    `Bekannter Schmerz bei Palpation in ${U10_SITE_LABELS[f.site]} ${sideAdv(f.side)}`,
+  ];
+  const q = renderPainQualifier("Übertragung", f.referred);
+  if (q) parts.push(q);
+  return parts.join(", ") + ".";
 }
 
 // ============================================================================

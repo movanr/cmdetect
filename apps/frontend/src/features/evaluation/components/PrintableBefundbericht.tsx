@@ -210,10 +210,7 @@ export function PrintableBefundbericht({
       {/* ── DC/TMD-Untersuchung ──── */}
       <section className="mb-5">
         <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
-          DC/TMD-Untersuchung{" "}
-          <span className="text-xs font-normal text-gray-500">
-            (Vorschau U1a/U1b/U4/U5/U6/U7/U9)
-          </span>
+          DC/TMD-Untersuchung
         </h2>
 
         {narrativeParagraphs.length > 0 ? (

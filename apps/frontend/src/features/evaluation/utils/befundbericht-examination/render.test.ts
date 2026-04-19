@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderSentence } from "./render";
 import type {
+  U10Finding,
   U1aFinding,
   U1bFinding,
   U4Finding,
@@ -302,6 +303,56 @@ describe("renderSentence — U9 TMJ", () => {
   it("TMJ basic-mode (null referred) → no qualifier clause", () => {
     const f: U9TmjFinding = { kind: "u9.tmj", side: "right", referred: null };
     expect(renderSentence(f)).toBe("Bekannter Schmerz bei Palpation im rechten Kiefergelenk.");
+  });
+});
+
+describe("renderSentence — U10", () => {
+  it("Regio submandibularis with Übertragung", () => {
+    const f: U10Finding = {
+      kind: "u10",
+      site: "submandibular",
+      side: "right",
+      referred: true,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation in Regio submandibularis rechts, mit Übertragung."
+    );
+  });
+
+  it("Pterygoideus lateralis without Übertragung", () => {
+    const f: U10Finding = {
+      kind: "u10",
+      site: "lateralPterygoid",
+      side: "left",
+      referred: false,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation in Pterygoideus lateralis links, ohne Übertragung."
+    );
+  });
+
+  it("Temporalis-Sehne bilateral, null referred → no qualifier clause", () => {
+    const f: U10Finding = {
+      kind: "u10",
+      site: "temporalisTendon",
+      side: "both",
+      referred: null,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation in Temporalis-Sehne beidseits."
+    );
+  });
+
+  it("Regio retromandibularis unilateral", () => {
+    const f: U10Finding = {
+      kind: "u10",
+      site: "posteriorMandibular",
+      side: "right",
+      referred: false,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation in Regio retromandibularis rechts, ohne Übertragung."
+    );
   });
 });
 
