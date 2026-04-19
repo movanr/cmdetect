@@ -3,6 +3,8 @@ import type { FormValues } from "../../../examination";
 import { extractU10 } from "./extract/u10";
 import { extractU1a } from "./extract/u1a";
 import { extractU1b } from "./extract/u1b";
+import { extractU2 } from "./extract/u2";
+import { extractU3 } from "./extract/u3";
 import { extractU4 } from "./extract/u4";
 import { extractU5 } from "./extract/u5";
 import { extractU6 } from "./extract/u6";
@@ -32,6 +34,16 @@ export function generateExaminationNarrative(
     if (pa) paragraphs.push(pa);
     const pb = renderSection(extractU1b(data));
     if (pb) paragraphs.push(pb);
+  }
+
+  if (completed.has("e2")) {
+    const p = renderSection(extractU2(data));
+    if (p) paragraphs.push(p);
+  }
+
+  if (completed.has("e3")) {
+    const p = renderSection(extractU3(data));
+    if (p) paragraphs.push(p);
   }
 
   if (completed.has("e4")) {

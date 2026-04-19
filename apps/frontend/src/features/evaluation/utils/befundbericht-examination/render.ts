@@ -1,4 +1,4 @@
-import { REGIONS, type Region } from "@cmdetect/dc-tmd";
+import { E3_OPENING_PATTERNS, REGIONS, type Region } from "@cmdetect/dc-tmd";
 import type {
   Finding,
   HeadacheLocation,
@@ -6,6 +6,8 @@ import type {
   U10Finding,
   U1aFinding,
   U1bFinding,
+  U2Finding,
+  U3Finding,
   U4Finding,
   U5Finding,
   U6Finding,
@@ -26,6 +28,10 @@ export function renderSentence(f: Finding): string {
       return renderU1a(f);
     case "u1b":
       return renderU1b(f);
+    case "u2":
+      return renderU2(f);
+    case "u3":
+      return renderU3(f);
     case "u4":
       return renderU4(f);
     case "u5":
@@ -42,9 +48,6 @@ export function renderSentence(f: Finding): string {
       return renderU9Tmj(f);
     case "u10":
       return renderU10(f);
-    default:
-      // Other section renderers arrive in subsequent slices.
-      throw new Error(`renderSentence: unsupported finding kind "${f.kind}"`);
   }
 }
 
@@ -96,6 +99,38 @@ const U1B_LABELS: Record<HeadacheLocation, string> = {
 function renderU1b(f: U1bFinding): string {
   const body = f.locations.map((l) => `${U1B_LABELS[l.location]} ${sideAdv(l.side)}`).join(", ");
   return `Kopfschmerzlokalisation letzte 30 Tage bestätigt in ${body}.`;
+}
+
+// ============================================================================
+// U2 — Schneidekantenverhältnisse
+// ============================================================================
+
+/**
+ * Produces one measurement sentence plus an optional trailing "Referenzzahn: …"
+ * sentence when a non-standard tooth was used (rules §U2: "Referenzzahn nur
+ * nennen, wenn nicht 11/21").
+ */
+function renderU2(f: U2Finding): string {
+  const parts: string[] = [];
+  if (f.horizontalOverjet !== null) parts.push(`Horizontaler Überbiss ${f.horizontalOverjet} mm`);
+  if (f.verticalOverlap !== null) parts.push(`vertikaler Überbiss ${f.verticalOverlap} mm`);
+  if (f.midline && f.midline !== "na") {
+    const dir = f.midline.direction === "right" ? "rechts" : "links";
+    parts.push(`Mittellinienabweichung ${f.midline.mm} mm nach ${dir}`);
+  }
+
+  const sentences: string[] = [];
+  if (parts.length > 0) sentences.push(parts.join(", ") + ".");
+  if (f.referenceTooth !== null) sentences.push(`Referenzzahn: ${f.referenceTooth}.`);
+  return sentences.join(" ");
+}
+
+// ============================================================================
+// U3 — Öffnungs-/Schließmuster
+// ============================================================================
+
+function renderU3(f: U3Finding): string {
+  return `Öffnungs-/Schließmuster: ${E3_OPENING_PATTERNS[f.pattern]}.`;
 }
 
 // ============================================================================

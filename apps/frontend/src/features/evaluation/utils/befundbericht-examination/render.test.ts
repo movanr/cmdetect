@@ -4,6 +4,8 @@ import type {
   U10Finding,
   U1aFinding,
   U1bFinding,
+  U2Finding,
+  U3Finding,
   U4Finding,
   U5Finding,
   U6Finding,
@@ -65,6 +67,70 @@ describe("renderSentence — U1b", () => {
     };
     expect(renderSentence(f)).toBe(
       "Kopfschmerzlokalisation letzte 30 Tage bestätigt in Temporalis beidseits, andere Lokalisation rechts."
+    );
+  });
+});
+
+describe("renderSentence — U2", () => {
+  it("all three measurements, standard reference tooth (no note)", () => {
+    const f: U2Finding = {
+      kind: "u2",
+      horizontalOverjet: 3,
+      verticalOverlap: 2,
+      midline: { direction: "right", mm: 1 },
+      referenceTooth: null,
+    };
+    expect(renderSentence(f)).toBe(
+      "Horizontaler Überbiss 3 mm, vertikaler Überbiss 2 mm, Mittellinienabweichung 1 mm nach rechts."
+    );
+  });
+
+  it("non-standard reference tooth appended as trailing sentence", () => {
+    const f: U2Finding = {
+      kind: "u2",
+      horizontalOverjet: 3,
+      verticalOverlap: 2,
+      midline: null,
+      referenceTooth: "Zahn 12",
+    };
+    expect(renderSentence(f)).toBe(
+      "Horizontaler Überbiss 3 mm, vertikaler Überbiss 2 mm. Referenzzahn: Zahn 12."
+    );
+  });
+
+  it("midline 'na' → no midline clause", () => {
+    const f: U2Finding = {
+      kind: "u2",
+      horizontalOverjet: 3,
+      verticalOverlap: 2,
+      midline: "na",
+      referenceTooth: null,
+    };
+    expect(renderSentence(f)).toBe("Horizontaler Überbiss 3 mm, vertikaler Überbiss 2 mm.");
+  });
+
+  it("midline nach links", () => {
+    const f: U2Finding = {
+      kind: "u2",
+      horizontalOverjet: null,
+      verticalOverlap: null,
+      midline: { direction: "left", mm: 2 },
+      referenceTooth: null,
+    };
+    expect(renderSentence(f)).toBe("Mittellinienabweichung 2 mm nach links.");
+  });
+});
+
+describe("renderSentence — U3", () => {
+  it("renders each non-straight opening pattern", () => {
+    expect(renderSentence({ kind: "u3", pattern: "correctedDeviation" } satisfies U3Finding)).toBe(
+      "Öffnungs-/Schließmuster: Korrigierte Deviation."
+    );
+    expect(renderSentence({ kind: "u3", pattern: "uncorrectedRight" } satisfies U3Finding)).toBe(
+      "Öffnungs-/Schließmuster: Unkorrigierte Deviation nach rechts."
+    );
+    expect(renderSentence({ kind: "u3", pattern: "uncorrectedLeft" } satisfies U3Finding)).toBe(
+      "Öffnungs-/Schließmuster: Unkorrigierte Deviation nach links."
     );
   });
 });
