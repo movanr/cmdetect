@@ -1,5 +1,5 @@
 import { SITES_BY_GROUP, getValueAtPath, type PalpationSite } from "@cmdetect/dc-tmd";
-import type { U9MuscleFinding, U9TmjFinding } from "../types";
+import type { U9MuscleFinding, U9RefusedFinding, U9TmjFinding } from "../types";
 
 /** Rule 1.3: within a section, right-first before left before bilateral merges. */
 const SIDES_RIGHT_FIRST = ["right", "left"] as const;
@@ -23,11 +23,16 @@ type Side = "left" | "right";
  * - Wenn kein Subpunkt familiarPain-positiv hat (reiner Kopfschmerz-Fall), Qualifier = null.
  * - Wenn Feld nicht abgefragt (Palpationsmodus basic, oder site.hasSpreading=false) → null.
  */
-export function extractU9(data: unknown): Array<U9MuscleFinding | U9TmjFinding> {
-  const findings: Array<U9MuscleFinding | U9TmjFinding> = [];
+export function extractU9(
+  data: unknown
+): Array<U9MuscleFinding | U9TmjFinding | U9RefusedFinding> {
+  const findings: Array<U9MuscleFinding | U9TmjFinding | U9RefusedFinding> = [];
 
   for (const side of SIDES_RIGHT_FIRST) {
-    if (getValueAtPath(data, `e9.${side}.refused`) === true) continue;
+    if (getValueAtPath(data, `e9.${side}.refused`) === true) {
+      findings.push({ kind: "u9.refused", side });
+      continue;
+    }
 
     const temporalis = extractMuscle(data, side, "temporalis");
     if (temporalis) findings.push(temporalis);

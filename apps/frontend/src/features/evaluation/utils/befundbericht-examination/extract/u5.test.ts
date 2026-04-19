@@ -51,4 +51,32 @@ describe("extractU5", () => {
       protrusiveMm: null,
     });
   });
+
+  it("per-movement refused sets refused flag and nulls mm", () => {
+    const data = {
+      e5: {
+        lateralRight: { refused: true, measurement: 10 }, // measurement ignored when refused
+        lateralLeft: { measurement: 9 },
+        protrusive: { measurement: 7 },
+      },
+    };
+    const [f] = extractU5(data);
+    expect(f).toMatchObject({
+      lateralRightRefused: true,
+      lateralRightMm: null,
+      lateralLeftRefused: false,
+      lateralLeftMm: 9,
+      protrusiveRefused: false,
+      protrusiveMm: 7,
+    });
+  });
+
+  it("interviewRefused = true when any movement's interview was refused", () => {
+    const data = {
+      e5: {
+        protrusive: { measurement: 7, interviewRefused: true },
+      },
+    };
+    expect(extractU5(data)[0].interviewRefused).toBe(true);
+  });
 });

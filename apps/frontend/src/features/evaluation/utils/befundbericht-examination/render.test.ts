@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderSentence } from "./render";
 import type {
   U10Finding,
+  U10RefusedFinding,
   U1aFinding,
   U1bFinding,
   U2Finding,
@@ -12,6 +13,7 @@ import type {
   U7Finding,
   U8Finding,
   U9MuscleFinding,
+  U9RefusedFinding,
   U9TmjFinding,
 } from "./types";
 
@@ -135,82 +137,155 @@ describe("renderSentence — U3", () => {
   });
 });
 
+function u4(overrides: Partial<U4Finding> = {}): U4Finding {
+  return {
+    kind: "u4",
+    painFreeMm: null,
+    painFreeRefused: false,
+    maxMm: null,
+    maxRefused: false,
+    painStructures: [],
+    withHeadache: false,
+    assistedTerminated: false,
+    interviewRefused: false,
+    ...overrides,
+  };
+}
+
+function u5(overrides: Partial<U5Finding> = {}): U5Finding {
+  return {
+    kind: "u5",
+    lateralRightMm: null,
+    lateralRightRefused: false,
+    lateralLeftMm: null,
+    lateralLeftRefused: false,
+    protrusiveMm: null,
+    protrusiveRefused: false,
+    painStructures: [],
+    interviewRefused: false,
+    ...overrides,
+  };
+}
+
 describe("renderSentence — U4", () => {
   it("both measurements + pain + headache qualifiers", () => {
-    const f: U4Finding = {
-      kind: "u4",
-      painFreeMm: 42,
-      maxMm: 54,
-      painStructures: [
-        { region: "temporalis", side: "left" },
-        { region: "masseter", side: "both" },
-      ],
-      withHeadache: true,
-    };
-    expect(renderSentence(f)).toBe(
+    expect(
+      renderSentence(
+        u4({
+          painFreeMm: 42,
+          maxMm: 54,
+          painStructures: [
+            { region: "temporalis", side: "left" },
+            { region: "masseter", side: "both" },
+          ],
+          withHeadache: true,
+        })
+      )
+    ).toBe(
       "Schmerzfreie Mundöffnung 42 mm. Maximale Mundöffnung 54 mm, mit bekannten Schmerzen in Temporalis links, Masseter beidseits, mit bekanntem Schläfenkopfschmerz."
     );
   });
 
   it("only max measurement, no qualifiers", () => {
-    const f: U4Finding = {
-      kind: "u4",
-      painFreeMm: null,
-      maxMm: 50,
-      painStructures: [],
-      withHeadache: false,
-    };
-    expect(renderSentence(f)).toBe("Maximale Mundöffnung 50 mm.");
+    expect(renderSentence(u4({ maxMm: 50 }))).toBe("Maximale Mundöffnung 50 mm.");
   });
 
   it("only painFree measurement (unusual but valid)", () => {
-    const f: U4Finding = {
-      kind: "u4",
-      painFreeMm: 38,
-      maxMm: null,
-      painStructures: [],
-      withHeadache: false,
-    };
-    expect(renderSentence(f)).toBe("Schmerzfreie Mundöffnung 38 mm.");
+    expect(renderSentence(u4({ painFreeMm: 38 }))).toBe("Schmerzfreie Mundöffnung 38 mm.");
   });
 
   it("pain/headache but no max measurement → fallback clause", () => {
-    const f: U4Finding = {
-      kind: "u4",
-      painFreeMm: null,
-      maxMm: null,
-      painStructures: [{ region: "temporalis", side: "right" }],
-      withHeadache: true,
-    };
-    expect(renderSentence(f)).toBe(
+    expect(
+      renderSentence(
+        u4({
+          painStructures: [{ region: "temporalis", side: "right" }],
+          withHeadache: true,
+        })
+      )
+    ).toBe(
       "Bekannte Schmerzen bei Mundöffnung in Temporalis rechts, bekannter Schläfenkopfschmerz bei Mundöffnung."
+    );
+  });
+
+  it("painFree refused → 'Schmerzfreie Mundöffnung verweigert.'", () => {
+    expect(renderSentence(u4({ painFreeRefused: true, maxMm: 50 }))).toBe(
+      "Schmerzfreie Mundöffnung verweigert. Maximale Mundöffnung 50 mm."
+    );
+  });
+
+  it("max refused → 'Maximale Mundöffnung verweigert.'", () => {
+    expect(renderSentence(u4({ painFreeMm: 38, maxRefused: true }))).toBe(
+      "Schmerzfreie Mundöffnung 38 mm. Maximale Mundöffnung verweigert."
+    );
+  });
+
+  it("terminated (hand gehoben) appended to max sentence", () => {
+    expect(renderSentence(u4({ maxMm: 54, assistedTerminated: true }))).toBe(
+      "Maximale Mundöffnung 54 mm, Untersuchung vom Patienten abgebrochen."
+    );
+  });
+
+  it("interviewRefused appended to max sentence", () => {
+    expect(renderSentence(u4({ maxMm: 54, interviewRefused: true }))).toBe(
+      "Maximale Mundöffnung 54 mm, Schmerzabfrage verweigert."
+    );
+  });
+
+  it("all trailing notes chained in canonical order (pain, headache, interview, terminated)", () => {
+    expect(
+      renderSentence(
+        u4({
+          maxMm: 54,
+          painStructures: [{ region: "masseter", side: "right" }],
+          withHeadache: true,
+          interviewRefused: true,
+          assistedTerminated: true,
+        })
+      )
+    ).toBe(
+      "Maximale Mundöffnung 54 mm, mit bekannten Schmerzen in Masseter rechts, mit bekanntem Schläfenkopfschmerz, Schmerzabfrage verweigert, Untersuchung vom Patienten abgebrochen."
     );
   });
 });
 
 describe("renderSentence — U5", () => {
   it("all three measurements + pain qualifier", () => {
-    const f: U5Finding = {
-      kind: "u5",
-      lateralRightMm: 11,
-      lateralLeftMm: 9,
-      protrusiveMm: 7,
-      painStructures: [{ region: "tmj", side: "right" }],
-    };
-    expect(renderSentence(f)).toBe(
+    expect(
+      renderSentence(
+        u5({
+          lateralRightMm: 11,
+          lateralLeftMm: 9,
+          protrusiveMm: 7,
+          painStructures: [{ region: "tmj", side: "right" }],
+        })
+      )
+    ).toBe(
       "Laterotrusion rechts 11 mm, Laterotrusion links 9 mm, Protrusion 7 mm, mit bekannten Schmerzen in Kiefergelenk rechts."
     );
   });
 
   it("partial measurements (some null) — null ones silently omitted", () => {
-    const f: U5Finding = {
-      kind: "u5",
-      lateralRightMm: 10,
-      lateralLeftMm: null,
-      protrusiveMm: 6,
-      painStructures: [],
-    };
-    expect(renderSentence(f)).toBe("Laterotrusion rechts 10 mm, Protrusion 6 mm.");
+    expect(renderSentence(u5({ lateralRightMm: 10, protrusiveMm: 6 }))).toBe(
+      "Laterotrusion rechts 10 mm, Protrusion 6 mm."
+    );
+  });
+
+  it("per-movement refused rendered in place of mm", () => {
+    expect(
+      renderSentence(
+        u5({ lateralRightRefused: true, lateralLeftMm: 9, protrusiveMm: 7 })
+      )
+    ).toBe("Laterotrusion rechts verweigert, Laterotrusion links 9 mm, Protrusion 7 mm.");
+  });
+
+  it("interviewRefused appended", () => {
+    expect(
+      renderSentence(
+        u5({ lateralRightMm: 10, lateralLeftMm: 9, protrusiveMm: 7, interviewRefused: true })
+      )
+    ).toBe(
+      "Laterotrusion rechts 10 mm, Laterotrusion links 9 mm, Protrusion 7 mm, Schmerzabfrage verweigert."
+    );
   });
 });
 
@@ -480,6 +555,23 @@ describe("renderSentence — U10", () => {
     expect(renderSentence(f)).toBe(
       "Bekannter Schmerz bei Palpation in Regio retromandibularis rechts, ohne Übertragung."
     );
+  });
+});
+
+describe("renderSentence — refused palpation sides (U9/U10)", () => {
+  it("u9.refused unilateral", () => {
+    const f: U9RefusedFinding = { kind: "u9.refused", side: "right" };
+    expect(renderSentence(f)).toBe("Palpation rechts verweigert.");
+  });
+
+  it("u9.refused bilateral (after merge)", () => {
+    const f: U9RefusedFinding = { kind: "u9.refused", side: "both" };
+    expect(renderSentence(f)).toBe("Palpation beidseits verweigert.");
+  });
+
+  it("u10.refused uses 'Ergänzende Palpation' prefix", () => {
+    const f: U10RefusedFinding = { kind: "u10.refused", side: "left" };
+    expect(renderSentence(f)).toBe("Ergänzende Palpation links verweigert.");
   });
 });
 

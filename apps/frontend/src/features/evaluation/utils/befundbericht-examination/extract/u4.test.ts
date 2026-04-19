@@ -67,4 +67,48 @@ describe("extractU4", () => {
     expect(out[0].painStructures).toHaveLength(1);
     expect(out[0].maxMm).toBe(null);
   });
+
+  it("painFree refused captured as flag", () => {
+    const data = { e4: { painFree: { refused: true } } };
+    const [f] = extractU4(data);
+    expect(f).toMatchObject({ painFreeRefused: true, painFreeMm: null });
+  });
+
+  it("maxRefused = true only when BOTH unassisted and assisted are refused", () => {
+    const bothRefused = {
+      e4: {
+        maxUnassisted: { refused: true },
+        maxAssisted: { refused: true },
+      },
+    };
+    expect(extractU4(bothRefused)[0]).toMatchObject({ maxRefused: true, maxMm: null });
+
+    // Only one refused → maxRefused=false, fallback to the measured one.
+    const onlyUnassistedRefused = {
+      e4: {
+        maxUnassisted: { refused: true },
+        maxAssisted: { measurement: 52 },
+      },
+    };
+    expect(extractU4(onlyUnassistedRefused)[0]).toMatchObject({ maxRefused: false, maxMm: 52 });
+  });
+
+  it("assistedTerminated captured (hand gehoben bei U4c)", () => {
+    const data = {
+      e4: { maxAssisted: { measurement: 50, terminated: true } },
+    };
+    expect(extractU4(data)[0].assistedTerminated).toBe(true);
+  });
+
+  it("interviewRefused = true when any pain interview (un- or assisted) refused", () => {
+    const unassistedOnly = {
+      e4: { maxUnassisted: { measurement: 48, interviewRefused: true } },
+    };
+    expect(extractU4(unassistedOnly)[0].interviewRefused).toBe(true);
+
+    const assistedOnly = {
+      e4: { maxAssisted: { measurement: 52, interviewRefused: true } },
+    };
+    expect(extractU4(assistedOnly)[0].interviewRefused).toBe(true);
+  });
 });

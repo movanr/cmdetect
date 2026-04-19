@@ -31,17 +31,30 @@ export interface U3Finding {
 export interface U4Finding {
   kind: "u4";
   painFreeMm: number | null;
+  /** Patient refused the pain-free measurement. */
+  painFreeRefused: boolean;
   maxMm: number | null;
+  /** Both maxUnassisted and maxAssisted refused → "Maximale Mundöffnung verweigert." */
+  maxRefused: boolean;
   painStructures: Array<{ region: Region; side: SideOrBoth }>;
   withHeadache: boolean;
+  /** Hand gehoben bei U4c (maxAssisted.terminated). */
+  assistedTerminated: boolean;
+  /** Any pain interview (maxUnassisted or maxAssisted) was refused. */
+  interviewRefused: boolean;
 }
 
 export interface U5Finding {
   kind: "u5";
   lateralRightMm: number | null;
+  lateralRightRefused: boolean;
   lateralLeftMm: number | null;
+  lateralLeftRefused: boolean;
   protrusiveMm: number | null;
+  protrusiveRefused: boolean;
   painStructures: Array<{ region: Region; side: SideOrBoth }>;
+  /** Any pain interview across the three movements was refused. */
+  interviewRefused: boolean;
 }
 
 export interface U6Finding {
@@ -102,6 +115,18 @@ export interface U10Finding {
   referred: boolean | null;
 }
 
+/** Whole-side palpation refusal (U9). Rendered as "Palpation {side} verweigert." */
+export interface U9RefusedFinding {
+  kind: "u9.refused";
+  side: SideOrBoth;
+}
+
+/** Whole-side supplemental-palpation refusal (U10). */
+export interface U10RefusedFinding {
+  kind: "u10.refused";
+  side: SideOrBoth;
+}
+
 export type Finding =
   | U1aFinding
   | U1bFinding
@@ -114,7 +139,9 @@ export type Finding =
   | U8Finding
   | U9MuscleFinding
   | U9TmjFinding
-  | U10Finding;
+  | U9RefusedFinding
+  | U10Finding
+  | U10RefusedFinding;
 
 /** Findings that carry a `side` and are eligible for bilateral merging. */
 export type SidedFinding = Extract<Finding, { side: SideOrBoth }>;

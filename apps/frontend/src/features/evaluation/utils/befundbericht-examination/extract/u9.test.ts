@@ -149,16 +149,27 @@ describe("extractU9 — TMJ (rule 1.9: no spreading)", () => {
 });
 
 describe("extractU9 — refused", () => {
-  it("skips a refused side entirely", () => {
+  it("refused side emits u9.refused instead of muscle findings", () => {
     const data = {
       e9: {
-        right: { refused: true, masseterOrigin: pain("yes") },
+        right: { refused: true, masseterOrigin: pain("yes") }, // muscle data ignored
         left: { masseterOrigin: pain("yes", { referredPain: "no", spreadingPain: "no" }) },
       },
     };
     const findings = extractU9(data);
-    // Only the left side should produce findings.
-    expect(findings.every((f) => f.side === "left")).toBe(true);
-    expect(findings.length).toBeGreaterThan(0);
+    expect(findings).toContainEqual({ kind: "u9.refused", side: "right" });
+    // The left side still produces normal muscle findings.
+    expect(findings.some((f) => f.kind === "u9.muscle" && f.side === "left")).toBe(true);
+  });
+
+  it("both sides refused → two u9.refused findings (merged to 'both' by bilateral-merge)", () => {
+    const data = {
+      e9: { right: { refused: true }, left: { refused: true } },
+    };
+    const findings = extractU9(data);
+    expect(findings).toEqual([
+      { kind: "u9.refused", side: "right" },
+      { kind: "u9.refused", side: "left" },
+    ]);
   });
 });

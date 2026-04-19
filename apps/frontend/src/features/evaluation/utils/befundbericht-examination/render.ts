@@ -4,6 +4,7 @@ import type {
   HeadacheLocation,
   SideOrBoth,
   U10Finding,
+  U10RefusedFinding,
   U1aFinding,
   U1bFinding,
   U2Finding,
@@ -14,6 +15,7 @@ import type {
   U7Finding,
   U8Finding,
   U9MuscleFinding,
+  U9RefusedFinding,
   U9TmjFinding,
 } from "./types";
 import { sideAdv, tmjLocation } from "./labels";
@@ -46,8 +48,12 @@ export function renderSentence(f: Finding): string {
       return renderU9Muscle(f);
     case "u9.tmj":
       return renderU9Tmj(f);
+    case "u9.refused":
+      return renderU9Refused(f);
     case "u10":
       return renderU10(f);
+    case "u10.refused":
+      return renderU10Refused(f);
   }
 }
 
@@ -139,33 +145,42 @@ function renderU3(f: U3Finding): string {
 
 /**
  * Produces up to two sentences:
- *   "Schmerzfreie Mundöffnung X mm."
- *   "Maximale Mundöffnung Y mm[, mit bekannten Schmerzen in …][, mit bekanntem Schläfenkopfschmerz]."
+ *   "Schmerzfreie Mundöffnung X mm." | "Schmerzfreie Mundöffnung verweigert."
+ *   "Maximale Mundöffnung Y mm[, mit bekannten Schmerzen in …][, mit bekanntem Schläfenkopfschmerz]
+ *    [, Schmerzabfrage verweigert][, Untersuchung vom Patienten abgebrochen]."
+ *   | "Maximale Mundöffnung verweigert."
  *
- * Each sentence is skipped if its measurement is null. Qualifier clauses only
- * appear on the "Maximale Mundöffnung" sentence.
+ * Qualifier clauses only appear on the "Maximale Mundöffnung" measurement sentence.
  */
 function renderU4(f: U4Finding): string {
   const sentences: string[] = [];
 
-  if (f.painFreeMm !== null) {
+  if (f.painFreeRefused) {
+    sentences.push("Schmerzfreie Mundöffnung verweigert.");
+  } else if (f.painFreeMm !== null) {
     sentences.push(`Schmerzfreie Mundöffnung ${f.painFreeMm} mm.`);
   }
 
-  if (f.maxMm !== null) {
+  if (f.maxRefused) {
+    sentences.push("Maximale Mundöffnung verweigert.");
+  } else if (f.maxMm !== null) {
     const parts = [`Maximale Mundöffnung ${f.maxMm} mm`];
     if (f.painStructures.length > 0) {
       parts.push(`mit bekannten Schmerzen in ${renderStructureList(f.painStructures)}`);
     }
     if (f.withHeadache) parts.push("mit bekanntem Schläfenkopfschmerz");
+    if (f.interviewRefused) parts.push("Schmerzabfrage verweigert");
+    if (f.assistedTerminated) parts.push("Untersuchung vom Patienten abgebrochen");
     sentences.push(parts.join(", ") + ".");
-  } else if (f.painStructures.length > 0 || f.withHeadache) {
-    // Unusual: pain/headache reported but no measurement recorded. Surface as standalone clause.
+  } else if (f.painStructures.length > 0 || f.withHeadache || f.interviewRefused || f.assistedTerminated) {
+    // No measurement but qualifier/meta signals exist. Surface as a neutral clause.
     const parts: string[] = [];
     if (f.painStructures.length > 0) {
       parts.push(`Bekannte Schmerzen bei Mundöffnung in ${renderStructureList(f.painStructures)}`);
     }
     if (f.withHeadache) parts.push("bekannter Schläfenkopfschmerz bei Mundöffnung");
+    if (f.interviewRefused) parts.push("Schmerzabfrage verweigert");
+    if (f.assistedTerminated) parts.push("Untersuchung vom Patienten abgebrochen");
     sentences.push(parts.join(", ") + ".");
   }
 
@@ -178,17 +193,28 @@ function renderU4(f: U4Finding): string {
 
 function renderU5(f: U5Finding): string {
   const measurements: string[] = [];
-  if (f.lateralRightMm !== null) measurements.push(`Laterotrusion rechts ${f.lateralRightMm} mm`);
-  if (f.lateralLeftMm !== null) measurements.push(`Laterotrusion links ${f.lateralLeftMm} mm`);
-  if (f.protrusiveMm !== null) measurements.push(`Protrusion ${f.protrusiveMm} mm`);
+  pushMovementSlot(measurements, "Laterotrusion rechts", f.lateralRightMm, f.lateralRightRefused);
+  pushMovementSlot(measurements, "Laterotrusion links", f.lateralLeftMm, f.lateralLeftRefused);
+  pushMovementSlot(measurements, "Protrusion", f.protrusiveMm, f.protrusiveRefused);
 
   const parts = [...measurements];
   if (f.painStructures.length > 0) {
     parts.push(`mit bekannten Schmerzen in ${renderStructureList(f.painStructures)}`);
   }
+  if (f.interviewRefused) parts.push("Schmerzabfrage verweigert");
 
   if (parts.length === 0) return "";
   return parts.join(", ") + ".";
+}
+
+function pushMovementSlot(
+  out: string[],
+  label: string,
+  mm: number | null,
+  refused: boolean
+): void {
+  if (refused) out.push(`${label} verweigert`);
+  else if (mm !== null) out.push(`${label} ${mm} mm`);
 }
 
 // ============================================================================
@@ -280,6 +306,10 @@ function renderU9Tmj(f: U9TmjFinding): string {
   return parts.join(", ") + ".";
 }
 
+function renderU9Refused(f: U9RefusedFinding): string {
+  return `Palpation ${sideAdv(f.side)} verweigert.`;
+}
+
 /**
  * TMJ location in U9 uses the same helper as U6/U7 (→ "im Kiefergelenk (beidseitig)"),
  * rather than the rules-doc literal "im Kiefergelenk beidseits", per UX feedback
@@ -347,6 +377,10 @@ function renderU10(f: U10Finding): string {
   const q = renderPainQualifier("Übertragung", f.referred);
   if (q) parts.push(q);
   return parts.join(", ") + ".";
+}
+
+function renderU10Refused(f: U10RefusedFinding): string {
+  return `Ergänzende Palpation ${sideAdv(f.side)} verweigert.`;
 }
 
 // ============================================================================

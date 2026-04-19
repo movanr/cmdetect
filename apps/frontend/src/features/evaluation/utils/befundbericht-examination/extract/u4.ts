@@ -5,24 +5,38 @@ import { anyFamiliarHeadacheAtTemporalis, unionFamiliarPainStructures } from "./
 /**
  * U4 — Öffnungs-/Schließbewegungen.
  *
- * Template per rules §U4:
- *   "Schmerzfreie Mundöffnung X mm. Maximale Mundöffnung Y mm
- *    [, mit bekannten Schmerzen in Struktur1, Struktur2]
- *    [, mit bekanntem Schläfenkopfschmerz]."
+ * Template per rules §U4 plus refused/terminated overlays:
+ *   "Schmerzfreie Mundöffnung X mm." | "Schmerzfreie Mundöffnung verweigert."
+ *   "Maximale Mundöffnung Y mm [, mit bekannten Schmerzen in …]
+ *    [, mit bekanntem Schläfenkopfschmerz]
+ *    [, Schmerzabfrage verweigert]
+ *    [, Untersuchung vom Patienten abgebrochen]."
+ *   (or "Maximale Mundöffnung verweigert." if both sub-measurements refused)
  *
- * - painFreeMm: e4.painFree.measurement
- * - maxMm:      MAX(maxUnassisted.measurement, maxAssisted.measurement)
- * - painStructures: union(familiarPain) across maxUnassisted × maxAssisted
- *                   (painFree has no pain interview)
- * - withHeadache:   OR familiarHeadache at temporalis across maxUnassisted × maxAssisted
- *
- * Emits null when no measurements are present AND no pain/headache triggered.
+ * - maxMm = max(maxUnassisted.measurement, maxAssisted.measurement), ignoring refused slots.
+ * - maxRefused = both maxUnassisted AND maxAssisted refused.
+ * - assistedTerminated = hand raised during passive measurement (U4c terminated).
+ * - interviewRefused = at least one pain interview (maxUnassisted or maxAssisted) refused.
  */
 export function extractU4(data: unknown): U4Finding[] {
   const painFreeMm = num(getValueAtPath(data, "e4.painFree.measurement"));
-  const unassistedMm = num(getValueAtPath(data, "e4.maxUnassisted.measurement"));
-  const assistedMm = num(getValueAtPath(data, "e4.maxAssisted.measurement"));
+  const painFreeRefused = getValueAtPath(data, "e4.painFree.refused") === true;
+
+  const unassistedRefused = getValueAtPath(data, "e4.maxUnassisted.refused") === true;
+  const assistedRefused = getValueAtPath(data, "e4.maxAssisted.refused") === true;
+  const unassistedMm = unassistedRefused
+    ? null
+    : num(getValueAtPath(data, "e4.maxUnassisted.measurement"));
+  const assistedMm = assistedRefused
+    ? null
+    : num(getValueAtPath(data, "e4.maxAssisted.measurement"));
   const maxMm = maxOrNull(unassistedMm, assistedMm);
+  const maxRefused = unassistedRefused && assistedRefused;
+
+  const assistedTerminated = getValueAtPath(data, "e4.maxAssisted.terminated") === true;
+  const interviewRefused =
+    getValueAtPath(data, "e4.maxUnassisted.interviewRefused") === true ||
+    getValueAtPath(data, "e4.maxAssisted.interviewRefused") === true;
 
   const painPrefixes = ["e4.maxUnassisted", "e4.maxAssisted"];
   const painStructures = unionFamiliarPainStructures(data, painPrefixes);
@@ -30,7 +44,11 @@ export function extractU4(data: unknown): U4Finding[] {
 
   const hasContent =
     painFreeMm !== null ||
+    painFreeRefused ||
     maxMm !== null ||
+    maxRefused ||
+    assistedTerminated ||
+    interviewRefused ||
     painStructures.length > 0 ||
     withHeadache;
   if (!hasContent) return [];
@@ -39,9 +57,13 @@ export function extractU4(data: unknown): U4Finding[] {
     {
       kind: "u4",
       painFreeMm,
+      painFreeRefused,
       maxMm,
+      maxRefused,
       painStructures,
       withHeadache,
+      assistedTerminated,
+      interviewRefused,
     },
   ];
 }

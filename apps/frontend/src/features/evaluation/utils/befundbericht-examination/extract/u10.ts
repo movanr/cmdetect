@@ -1,5 +1,5 @@
 import { E10_SITE_KEYS, getValueAtPath } from "@cmdetect/dc-tmd";
-import type { U10Finding } from "../types";
+import type { U10Finding, U10RefusedFinding } from "../types";
 
 /** Rule 1.3: within a section, right-first before left before bilateral merges. */
 const SIDES_RIGHT_FIRST = ["right", "left"] as const;
@@ -19,8 +19,15 @@ type Site = U10Finding["site"];
  * Emits one Finding per positive site × side. Bilateral merging happens in a
  * later stage (rule 1.7).
  */
-export function extractU10(data: unknown): U10Finding[] {
-  const findings: U10Finding[] = [];
+export function extractU10(data: unknown): Array<U10Finding | U10RefusedFinding> {
+  const findings: Array<U10Finding | U10RefusedFinding> = [];
+
+  // Refused sides first (iteration order preserved by bilateral-merge).
+  for (const side of SIDES_RIGHT_FIRST) {
+    if (getValueAtPath(data, `e10.${side}.refused`) === true) {
+      findings.push({ kind: "u10.refused", side });
+    }
+  }
 
   for (const site of E10_SITE_KEYS as readonly Site[]) {
     for (const side of SIDES_RIGHT_FIRST) {

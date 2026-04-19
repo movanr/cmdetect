@@ -30,7 +30,7 @@ describe("extractU10", () => {
         },
       },
     };
-    const findings = extractU10(data);
+    const findings = extractU10(data).filter((f) => f.kind === "u10");
     expect(findings).toHaveLength(3);
     expect(findings.map((f) => ({ site: f.site, side: f.side, referred: f.referred }))).toEqual([
       { site: "submandibular", side: "right", referred: false },
@@ -39,7 +39,7 @@ describe("extractU10", () => {
     ]);
   });
 
-  it("refused side is skipped entirely", () => {
+  it("refused side emits u10.refused instead of site findings", () => {
     const data = {
       e10: {
         right: { refused: true, submandibular: site({ pain: "yes", familiarPain: "yes" }) },
@@ -49,8 +49,8 @@ describe("extractU10", () => {
       },
     };
     const findings = extractU10(data);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({ site: "submandibular", side: "left" });
+    expect(findings).toContainEqual({ kind: "u10.refused", side: "right" });
+    expect(findings.some((f) => f.kind === "u10" && f.side === "left")).toBe(true);
   });
 
   it("ignores bare pain=yes without familiarPain (rule 1.6)", () => {
@@ -74,7 +74,7 @@ describe("extractU10", () => {
         },
       },
     };
-    const findings = extractU10(data);
+    const findings = extractU10(data).filter((f) => f.kind === "u10");
     expect(findings.map((f) => f.site)).toEqual([
       "posteriorMandibular",
       "submandibular",
