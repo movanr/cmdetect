@@ -1,6 +1,9 @@
+import { REGIONS, type Region } from "@cmdetect/dc-tmd";
 import type {
   Finding,
   SideOrBoth,
+  U4Finding,
+  U5Finding,
   U6Finding,
   U7Finding,
   U9MuscleFinding,
@@ -14,6 +17,10 @@ import { sideAdv, tmjLocation } from "./labels";
  */
 export function renderSentence(f: Finding): string {
   switch (f.kind) {
+    case "u4":
+      return renderU4(f);
+    case "u5":
+      return renderU5(f);
     case "u6":
       return renderU6(f);
     case "u7":
@@ -26,6 +33,72 @@ export function renderSentence(f: Finding): string {
       // Other section renderers arrive in subsequent slices.
       throw new Error(`renderSentence: unsupported finding kind "${f.kind}"`);
   }
+}
+
+// ============================================================================
+// U4 — Öffnungs-/Schließbewegungen
+// ============================================================================
+
+/**
+ * Produces up to two sentences:
+ *   "Schmerzfreie Mundöffnung X mm."
+ *   "Maximale Mundöffnung Y mm[, mit bekannten Schmerzen in …][, mit bekanntem Schläfenkopfschmerz]."
+ *
+ * Each sentence is skipped if its measurement is null. Qualifier clauses only
+ * appear on the "Maximale Mundöffnung" sentence.
+ */
+function renderU4(f: U4Finding): string {
+  const sentences: string[] = [];
+
+  if (f.painFreeMm !== null) {
+    sentences.push(`Schmerzfreie Mundöffnung ${f.painFreeMm} mm.`);
+  }
+
+  if (f.maxMm !== null) {
+    const parts = [`Maximale Mundöffnung ${f.maxMm} mm`];
+    if (f.painStructures.length > 0) {
+      parts.push(`mit bekannten Schmerzen in ${renderStructureList(f.painStructures)}`);
+    }
+    if (f.withHeadache) parts.push("mit bekanntem Schläfenkopfschmerz");
+    sentences.push(parts.join(", ") + ".");
+  } else if (f.painStructures.length > 0 || f.withHeadache) {
+    // Unusual: pain/headache reported but no measurement recorded. Surface as standalone clause.
+    const parts: string[] = [];
+    if (f.painStructures.length > 0) {
+      parts.push(`Bekannte Schmerzen bei Mundöffnung in ${renderStructureList(f.painStructures)}`);
+    }
+    if (f.withHeadache) parts.push("bekannter Schläfenkopfschmerz bei Mundöffnung");
+    sentences.push(parts.join(", ") + ".");
+  }
+
+  return sentences.join(" ");
+}
+
+// ============================================================================
+// U5 — Laterotrusion/Protrusion
+// ============================================================================
+
+function renderU5(f: U5Finding): string {
+  const measurements: string[] = [];
+  if (f.lateralRightMm !== null) measurements.push(`Laterotrusion rechts ${f.lateralRightMm} mm`);
+  if (f.lateralLeftMm !== null) measurements.push(`Laterotrusion links ${f.lateralLeftMm} mm`);
+  if (f.protrusiveMm !== null) measurements.push(`Protrusion ${f.protrusiveMm} mm`);
+
+  const parts = [...measurements];
+  if (f.painStructures.length > 0) {
+    parts.push(`mit bekannten Schmerzen in ${renderStructureList(f.painStructures)}`);
+  }
+
+  if (parts.length === 0) return "";
+  return parts.join(", ") + ".";
+}
+
+// ============================================================================
+// Shared: pain-structure list ("Temporalis rechts, Masseter beidseits")
+// ============================================================================
+
+function renderStructureList(structures: Array<{ region: Region; side: SideOrBoth }>): string {
+  return structures.map((s) => `${REGIONS[s.region]} ${sideAdv(s.side)}`).join(", ");
 }
 
 // ============================================================================

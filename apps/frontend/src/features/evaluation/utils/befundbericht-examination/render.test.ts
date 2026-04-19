@@ -1,6 +1,92 @@
 import { describe, it, expect } from "vitest";
 import { renderSentence } from "./render";
-import type { U6Finding, U7Finding, U9MuscleFinding, U9TmjFinding } from "./types";
+import type {
+  U4Finding,
+  U5Finding,
+  U6Finding,
+  U7Finding,
+  U9MuscleFinding,
+  U9TmjFinding,
+} from "./types";
+
+describe("renderSentence — U4", () => {
+  it("both measurements + pain + headache qualifiers", () => {
+    const f: U4Finding = {
+      kind: "u4",
+      painFreeMm: 42,
+      maxMm: 54,
+      painStructures: [
+        { region: "temporalis", side: "left" },
+        { region: "masseter", side: "both" },
+      ],
+      withHeadache: true,
+    };
+    expect(renderSentence(f)).toBe(
+      "Schmerzfreie Mundöffnung 42 mm. Maximale Mundöffnung 54 mm, mit bekannten Schmerzen in Temporalis links, Masseter beidseits, mit bekanntem Schläfenkopfschmerz."
+    );
+  });
+
+  it("only max measurement, no qualifiers", () => {
+    const f: U4Finding = {
+      kind: "u4",
+      painFreeMm: null,
+      maxMm: 50,
+      painStructures: [],
+      withHeadache: false,
+    };
+    expect(renderSentence(f)).toBe("Maximale Mundöffnung 50 mm.");
+  });
+
+  it("only painFree measurement (unusual but valid)", () => {
+    const f: U4Finding = {
+      kind: "u4",
+      painFreeMm: 38,
+      maxMm: null,
+      painStructures: [],
+      withHeadache: false,
+    };
+    expect(renderSentence(f)).toBe("Schmerzfreie Mundöffnung 38 mm.");
+  });
+
+  it("pain/headache but no max measurement → fallback clause", () => {
+    const f: U4Finding = {
+      kind: "u4",
+      painFreeMm: null,
+      maxMm: null,
+      painStructures: [{ region: "temporalis", side: "right" }],
+      withHeadache: true,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannte Schmerzen bei Mundöffnung in Temporalis rechts, bekannter Schläfenkopfschmerz bei Mundöffnung."
+    );
+  });
+});
+
+describe("renderSentence — U5", () => {
+  it("all three measurements + pain qualifier", () => {
+    const f: U5Finding = {
+      kind: "u5",
+      lateralRightMm: 11,
+      lateralLeftMm: 9,
+      protrusiveMm: 7,
+      painStructures: [{ region: "tmj", side: "right" }],
+    };
+    expect(renderSentence(f)).toBe(
+      "Laterotrusion rechts 11 mm, Laterotrusion links 9 mm, Protrusion 7 mm, mit bekannten Schmerzen in Kiefergelenk rechts."
+    );
+  });
+
+  it("partial measurements (some null) — null ones silently omitted", () => {
+    const f: U5Finding = {
+      kind: "u5",
+      lateralRightMm: 10,
+      lateralLeftMm: null,
+      protrusiveMm: 6,
+      painStructures: [],
+    };
+    expect(renderSentence(f)).toBe("Laterotrusion rechts 10 mm, Protrusion 6 mm.");
+  });
+});
 
 describe("renderSentence — U6", () => {
   it("textbook positive: click, both movements, both sources, familiar pain", () => {
