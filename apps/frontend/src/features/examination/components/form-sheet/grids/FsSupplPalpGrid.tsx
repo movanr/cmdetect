@@ -11,11 +11,14 @@ import {
   type PalpationSite,
   type PainType,
 } from "../../../model/regions";
+import { COMMON } from "../../../labels";
+import { FsBooleanCheckbox } from "../primitives/FsBooleanCheckbox";
 import { FsYesNo } from "../primitives/FsYesNo";
 import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
 import type { GetValue } from "../use-section-values";
 
 const SIDE_KEYS = ["right", "left"] as const;
+type Side = (typeof SIDE_KEYS)[number];
 
 const COL_LABELS: Record<string, string> = {
   pain: "Schmerz",
@@ -25,17 +28,40 @@ const COL_LABELS: Record<string, string> = {
 
 interface FsSupplPalpGridProps {
   getValue: GetValue;
+  /** Per-side RHF paths for the refused boolean. Renders a checkbox inline in the side header. */
+  refusedPaths?: Record<Side, string>;
+  /** Fires after the refused value is written — parent uses it to clear data. */
+  onRefuseChange?: (side: Side, refused: boolean) => void;
 }
 
-export function FsSupplPalpGrid({ getValue }: FsSupplPalpGridProps) {
+export function FsSupplPalpGrid({
+  getValue,
+  refusedPaths,
+  onRefuseChange,
+}: FsSupplPalpGridProps) {
   return (
     <div className="grid grid-cols-2 gap-x-4 mt-1 print:gap-x-2 print:mt-0.5">
-      {SIDE_KEYS.map((side) => (
+      {SIDE_KEYS.map((side) => {
+        const refusedPath = refusedPaths?.[side];
+        const sideRefused = refusedPath
+          ? getValue(refusedPath) === true
+          : false;
+        return (
         <div key={side}>
-          <div className="text-xs font-semibold text-slate-500 mb-0.5 uppercase tracking-wider print:text-[6pt]">
-            {side === "right" ? "Rechte Seite (0,5 kg)" : "Linke Seite (0,5 kg)"}
+          <div className="flex items-center gap-3 mb-0.5">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider print:text-[6pt]">
+              {side === "right" ? "Rechte Seite (0,5 kg)" : "Linke Seite (0,5 kg)"}
+            </span>
+            {refusedPath && (
+              <FsBooleanCheckbox
+                name={refusedPath}
+                label={COMMON.refusedFull}
+                title={COMMON.refusedTooltip}
+                onChange={(v) => onRefuseChange?.(side, v)}
+              />
+            )}
           </div>
-          <table className="w-full text-xs print:text-[6pt]">
+          <table className={`w-full text-xs print:text-[6pt] ${sideRefused ? "opacity-40" : ""}`}>
             <thead>
               <tr className="text-slate-400">
                 <th className="text-left font-normal py-0 w-32 print:w-20"></th>
@@ -72,7 +98,8 @@ export function FsSupplPalpGrid({ getValue }: FsSupplPalpGridProps) {
             </tbody>
           </table>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

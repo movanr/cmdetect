@@ -15,12 +15,15 @@ import {
   type PalpationSite,
   type PainType,
 } from "../../../model/regions";
+import { COMMON } from "../../../labels";
+import { FsBooleanCheckbox } from "../primitives/FsBooleanCheckbox";
 import { FsYesNo } from "../primitives/FsYesNo";
 import { FsConditionalYesNo } from "../primitives/FsConditionalYesNo";
 import type { GetValue } from "../use-section-values";
 
 const SIDE_KEYS = ["right", "left"] as const;
-const SIDE_LABELS = { right: "Rechte Seite", left: "Linke Seite" };
+type Side = (typeof SIDE_KEYS)[number];
+const SIDE_LABELS: Record<Side, string> = { right: "Rechte Seite", left: "Linke Seite" };
 
 // E9 site groups with their applicable pain columns
 const E9_GROUPS: {
@@ -59,18 +62,41 @@ function siteHasColumn(site: PalpationSite, column: PainType): boolean {
 
 interface FsPalpationGridProps {
   getValue: GetValue;
+  /** Per-side RHF paths for the refused boolean. Renders a checkbox inline in the side header. */
+  refusedPaths?: Record<Side, string>;
+  /** Fires after the refused value is written — parent uses it to clear data. */
+  onRefuseChange?: (side: Side, refused: boolean) => void;
 }
 
-export function FsPalpationGrid({ getValue }: FsPalpationGridProps) {
+export function FsPalpationGrid({
+  getValue,
+  refusedPaths,
+  onRefuseChange,
+}: FsPalpationGridProps) {
   return (
     <div className="space-y-4 mt-1 print:space-y-2 print:mt-0.5">
-      {SIDE_KEYS.map((side) => (
+      {SIDE_KEYS.map((side) => {
+        const refusedPath = refusedPaths?.[side];
+        const sideRefused = refusedPath
+          ? getValue(refusedPath) === true
+          : false;
+        return (
         <div key={side}>
-          <div className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider print:text-[6pt]">
-            {SIDE_LABELS[side]}
+          <div className="flex items-center gap-3 mb-1">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider print:text-[6pt]">
+              {SIDE_LABELS[side]}
+            </span>
+            {refusedPath && (
+              <FsBooleanCheckbox
+                name={refusedPath}
+                label={COMMON.refusedFull}
+                title={COMMON.refusedTooltip}
+                onChange={(v) => onRefuseChange?.(side, v)}
+              />
+            )}
           </div>
 
-          <div className="flex gap-6 print:gap-3">
+          <div className={`flex gap-6 print:gap-3 ${sideRefused ? "opacity-40" : ""}`}>
             {/* Muscle sites (left) + TMJ sites (right) side by side */}
             {E9_GROUPS.map((group) => (
               <div key={group.label}>
@@ -129,7 +155,8 @@ export function FsPalpationGrid({ getValue }: FsPalpationGridProps) {
             ))}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
