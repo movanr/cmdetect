@@ -1,6 +1,7 @@
 import type { SectionId } from "@cmdetect/dc-tmd";
 import type { FormValues } from "../../../examination";
 import { extractU6 } from "./extract/u6";
+import { extractU9 } from "./extract/u9";
 import { mergeBilateral } from "./merge-bilateral";
 import { renderSentence } from "./render";
 import type { Finding } from "./types";
@@ -22,6 +23,11 @@ export function generateExaminationNarrative(
 
   if (completed.has("e6")) {
     const p = renderSection(extractU6(data));
+    if (p) paragraphs.push(p);
+  }
+
+  if (completed.has("e9")) {
+    const p = renderSection(extractU9(data));
     if (p) paragraphs.push(p);
   }
 

@@ -85,7 +85,8 @@ export interface U9MuscleFinding {
 export interface U9TmjFinding {
   kind: "u9.tmj";
   side: SideOrBoth;
-  referred: boolean;
+  /** null = not asked (e.g. palpation mode = basic → referredPain field absent). */
+  referred: boolean | null;
 }
 
 export interface U10Finding {

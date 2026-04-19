@@ -219,7 +219,7 @@ function buildDocument(data: BefundberichtData): Document {
 
   // ── Clinical examination (Fließtext, rule-driven) ─────────────────
 
-  p.push(...sectionHeading("DC/TMD-Untersuchung (Vorschau U6)"));
+  p.push(...sectionHeading("DC/TMD-Untersuchung (Vorschau U6/U7/U9)"));
 
   if (narrativeParagraphs.length > 0) {
     for (const para of narrativeParagraphs) {

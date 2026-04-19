@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderSentence } from "./render";
-import type { U6Finding, U7Finding } from "./types";
+import type { U6Finding, U7Finding, U9MuscleFinding, U9TmjFinding } from "./types";
 
 describe("renderSentence — U6", () => {
   it("textbook positive: click, both movements, both sources, familiar pain", () => {
@@ -71,6 +71,93 @@ describe("renderSentence — U6", () => {
     expect(renderSentence(f)).toBe(
       "Knacken im Kiefergelenk (beidseitig) beim Öffnen und Schließen, vom Untersucher und Patient festgestellt, mit bekanntem Schmerz."
     );
+  });
+});
+
+describe("renderSentence — U9 muscle", () => {
+  it("Masseter pain-only with referred+spreading qualifiers", () => {
+    const f: U9MuscleFinding = {
+      kind: "u9.muscle",
+      muscle: "masseter",
+      side: "right",
+      triggeredByPain: true,
+      triggeredByHeadache: false,
+      referred: true,
+      spreading: false,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation in Masseter rechts, mit Übertragung, ohne Ausbreitung."
+    );
+  });
+
+  it("Temporalis pain-only uses 'in Temporalis' preposition", () => {
+    const f: U9MuscleFinding = {
+      kind: "u9.muscle",
+      muscle: "temporalis",
+      side: "left",
+      triggeredByPain: true,
+      triggeredByHeadache: false,
+      referred: false,
+      spreading: true,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation in Temporalis links, ohne Übertragung, mit Ausbreitung."
+    );
+  });
+
+  it("Temporalis headache-only uses 'des Temporalis' and no qualifier clauses", () => {
+    const f: U9MuscleFinding = {
+      kind: "u9.muscle",
+      muscle: "temporalis",
+      side: "right",
+      triggeredByPain: false,
+      triggeredByHeadache: true,
+      referred: null,
+      spreading: null,
+    };
+    expect(renderSentence(f)).toBe("Bekannter Kopfschmerz bei Palpation des Temporalis rechts.");
+  });
+
+  it("Temporalis combined pain + headache uses 'des Temporalis' and the combined phrase", () => {
+    const f: U9MuscleFinding = {
+      kind: "u9.muscle",
+      muscle: "temporalis",
+      side: "both",
+      triggeredByPain: true,
+      triggeredByHeadache: true,
+      referred: true,
+      spreading: true,
+    };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz und bekannter Kopfschmerz bei Palpation des Temporalis beidseits, mit Übertragung, mit Ausbreitung."
+    );
+  });
+
+  it("basic-mode muscle pain (null qualifiers) → no qualifier clauses (rule 1.5)", () => {
+    const f: U9MuscleFinding = {
+      kind: "u9.muscle",
+      muscle: "masseter",
+      side: "right",
+      triggeredByPain: true,
+      triggeredByHeadache: false,
+      referred: null,
+      spreading: null,
+    };
+    expect(renderSentence(f)).toBe("Bekannter Schmerz bei Palpation in Masseter rechts.");
+  });
+});
+
+describe("renderSentence — U9 TMJ", () => {
+  it("TMJ with referred qualifier, bilateral phrasing uses (beidseitig)", () => {
+    const f: U9TmjFinding = { kind: "u9.tmj", side: "both", referred: false };
+    expect(renderSentence(f)).toBe(
+      "Bekannter Schmerz bei Palpation im Kiefergelenk (beidseitig), ohne Übertragung."
+    );
+  });
+
+  it("TMJ basic-mode (null referred) → no qualifier clause", () => {
+    const f: U9TmjFinding = { kind: "u9.tmj", side: "right", referred: null };
+    expect(renderSentence(f)).toBe("Bekannter Schmerz bei Palpation im rechten Kiefergelenk.");
   });
 });
 

@@ -1,5 +1,12 @@
-import type { Finding, U6Finding, U7Finding } from "./types";
-import { tmjLocation } from "./labels";
+import type {
+  Finding,
+  SideOrBoth,
+  U6Finding,
+  U7Finding,
+  U9MuscleFinding,
+  U9TmjFinding,
+} from "./types";
+import { sideAdv, tmjLocation } from "./labels";
 
 /**
  * Renders a single Finding as one complete German sentence (ends with period).
@@ -11,6 +18,10 @@ export function renderSentence(f: Finding): string {
       return renderU6(f);
     case "u7":
       return renderU7(f);
+    case "u9.muscle":
+      return renderU9Muscle(f);
+    case "u9.tmj":
+      return renderU9Tmj(f);
     default:
       // Other section renderers arrive in subsequent slices.
       throw new Error(`renderSentence: unsupported finding kind "${f.kind}"`);
@@ -59,6 +70,63 @@ function renderU7(f: U7Finding): string {
     parts.push(f.familiarPain ? "mit bekanntem Schmerz" : "ohne bekanntem Schmerz");
   }
   return parts.join(", ") + ".";
+}
+
+// ============================================================================
+// U9 — Palpation Muskeln & Kiefergelenk
+// ============================================================================
+
+function renderU9Muscle(f: U9MuscleFinding): string {
+  const sideLabel = sideAdv(f.side);
+
+  // Template dispatch (rules §U9):
+  // - Temporalis + pain + headache → combined ("Bekannter Schmerz und bekannter Kopfschmerz bei Palpation des Temporalis …")
+  // - Temporalis + headache only   → reiner Kopfschmerz-Befund ("Bekannter Kopfschmerz bei Palpation des Temporalis …")
+  // - Temporalis + pain only OR Masseter + pain → muscle template ("Bekannter Schmerz bei Palpation in [Muskel] …")
+  if (f.muscle === "temporalis" && f.triggeredByHeadache && !f.triggeredByPain) {
+    return `Bekannter Kopfschmerz bei Palpation des Temporalis ${sideLabel}.`;
+  }
+
+  const muscleLabel = f.muscle === "temporalis" ? "Temporalis" : "Masseter";
+  const phenomenonAndLoc =
+    f.muscle === "temporalis" && f.triggeredByHeadache
+      ? `Bekannter Schmerz und bekannter Kopfschmerz bei Palpation des ${muscleLabel} ${sideLabel}`
+      : `Bekannter Schmerz bei Palpation in ${muscleLabel} ${sideLabel}`;
+
+  const qualifiers = [
+    renderPainQualifier("Übertragung", f.referred),
+    renderPainQualifier("Ausbreitung", f.spreading),
+  ].filter((q): q is string => q !== null);
+
+  const parts = [phenomenonAndLoc, ...qualifiers];
+  return parts.join(", ") + ".";
+}
+
+function renderU9Tmj(f: U9TmjFinding): string {
+  const parts = [`Bekannter Schmerz bei Palpation ${tmjLocationU9(f.side)}`];
+  const q = renderPainQualifier("Übertragung", f.referred);
+  if (q) parts.push(q);
+  return parts.join(", ") + ".";
+}
+
+/**
+ * TMJ location in U9 uses the same helper as U6/U7 (→ "im Kiefergelenk (beidseitig)"),
+ * rather than the rules-doc literal "im Kiefergelenk beidseits", per UX feedback
+ * that the parenthetical reads more naturally.
+ */
+function tmjLocationU9(side: SideOrBoth): string {
+  return tmjLocation(side);
+}
+
+/**
+ * Renders a mit/ohne pain-direction qualifier.
+ *   true  → "mit {label}"
+ *   false → "ohne {label}"
+ *   null  → null (caller omits the clause — rule 1.5 "null entfällt")
+ */
+function renderPainQualifier(label: string, value: boolean | null): string | null {
+  if (value === null) return null;
+  return value ? `mit ${label}` : `ohne ${label}`;
 }
 
 // ============================================================================
