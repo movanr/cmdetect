@@ -1,7 +1,10 @@
 import { REGIONS, type Region } from "@cmdetect/dc-tmd";
 import type {
   Finding,
+  HeadacheLocation,
   SideOrBoth,
+  U1aFinding,
+  U1bFinding,
   U4Finding,
   U5Finding,
   U6Finding,
@@ -17,6 +20,10 @@ import { sideAdv, tmjLocation } from "./labels";
  */
 export function renderSentence(f: Finding): string {
   switch (f.kind) {
+    case "u1a":
+      return renderU1a(f);
+    case "u1b":
+      return renderU1b(f);
     case "u4":
       return renderU4(f);
     case "u5":
@@ -33,6 +40,56 @@ export function renderSentence(f: Finding): string {
       // Other section renderers arrive in subsequent slices.
       throw new Error(`renderSentence: unsupported finding kind "${f.kind}"`);
   }
+}
+
+// ============================================================================
+// U1a — Schmerzlokalisation letzte 30 Tage
+// ============================================================================
+
+/**
+ * Rules §U1a: primary structures listed directly; auxiliary (otherMast, nonMast)
+ * appended in parentheses at the end. Full labels ("Andere Kaumuskeln" / "Nicht-Kaumuskeln")
+ * — not the REGIONS abbreviations — per rules example.
+ */
+const U1A_PRIMARY_LABELS: Record<"temporalis" | "masseter" | "tmj", string> = {
+  temporalis: "Temporalis",
+  masseter: "Masseter",
+  tmj: "Kiefergelenk",
+};
+
+const U1A_AUX_LABELS: Record<"otherMast" | "nonMast", string> = {
+  otherMast: "Andere Kaumuskeln",
+  nonMast: "Nicht-Kaumuskeln",
+};
+
+function renderU1a(f: U1aFinding): string {
+  const primary = f.primary
+    .map((s) => `${U1A_PRIMARY_LABELS[s.region]} ${sideAdv(s.side)}`)
+    .join(", ");
+  const auxiliary = f.auxiliary
+    .map((s) => `${U1A_AUX_LABELS[s.region]} ${sideAdv(s.side)}`)
+    .join(", ");
+
+  let body: string;
+  if (primary && auxiliary) body = `${primary} (${auxiliary})`;
+  else if (primary) body = primary;
+  else body = auxiliary;
+
+  return `Schmerzlokalisation letzte 30 Tage bestätigt in ${body}.`;
+}
+
+// ============================================================================
+// U1b — Kopfschmerzlokalisation letzte 30 Tage
+// ============================================================================
+
+const U1B_LABELS: Record<HeadacheLocation, string> = {
+  temporalis: "Temporalis",
+  other: "andere Lokalisation",
+};
+
+function renderU1b(f: U1bFinding): string {
+  const body = f.locations.map((l) => `${U1B_LABELS[l.location]} ${sideAdv(l.side)}`).join(", ");
+  return `Kopfschmerzlokalisation letzte 30 Tage bestätigt in ${body}.`;
 }
 
 // ============================================================================

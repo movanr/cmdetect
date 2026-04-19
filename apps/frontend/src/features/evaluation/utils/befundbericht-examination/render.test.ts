@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { renderSentence } from "./render";
 import type {
+  U1aFinding,
+  U1bFinding,
   U4Finding,
   U5Finding,
   U6Finding,
@@ -8,6 +10,62 @@ import type {
   U9MuscleFinding,
   U9TmjFinding,
 } from "./types";
+
+describe("renderSentence — U1a", () => {
+  it("primary structures only", () => {
+    const f: U1aFinding = {
+      kind: "u1a",
+      primary: [
+        { region: "temporalis", side: "right" },
+        { region: "masseter", side: "both" },
+      ],
+      auxiliary: [],
+    };
+    expect(renderSentence(f)).toBe(
+      "Schmerzlokalisation letzte 30 Tage bestätigt in Temporalis rechts, Masseter beidseits."
+    );
+  });
+
+  it("primary + auxiliary: auxiliary appended in parentheses", () => {
+    const f: U1aFinding = {
+      kind: "u1a",
+      primary: [{ region: "tmj", side: "left" }],
+      auxiliary: [
+        { region: "otherMast", side: "both" },
+        { region: "nonMast", side: "right" },
+      ],
+    };
+    expect(renderSentence(f)).toBe(
+      "Schmerzlokalisation letzte 30 Tage bestätigt in Kiefergelenk links (Andere Kaumuskeln beidseits, Nicht-Kaumuskeln rechts)."
+    );
+  });
+
+  it("auxiliary only (no primary): rendered without parentheses", () => {
+    const f: U1aFinding = {
+      kind: "u1a",
+      primary: [],
+      auxiliary: [{ region: "nonMast", side: "both" }],
+    };
+    expect(renderSentence(f)).toBe(
+      "Schmerzlokalisation letzte 30 Tage bestätigt in Nicht-Kaumuskeln beidseits."
+    );
+  });
+});
+
+describe("renderSentence — U1b", () => {
+  it("lists headache locations with sides", () => {
+    const f: U1bFinding = {
+      kind: "u1b",
+      locations: [
+        { location: "temporalis", side: "both" },
+        { location: "other", side: "right" },
+      ],
+    };
+    expect(renderSentence(f)).toBe(
+      "Kopfschmerzlokalisation letzte 30 Tage bestätigt in Temporalis beidseits, andere Lokalisation rechts."
+    );
+  });
+});
 
 describe("renderSentence — U4", () => {
   it("both measurements + pain + headache qualifiers", () => {
