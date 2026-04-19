@@ -8,6 +8,7 @@ import type {
   U5Finding,
   U6Finding,
   U7Finding,
+  U8Finding,
   U9MuscleFinding,
   U9TmjFinding,
 } from "./types";
@@ -303,6 +304,66 @@ describe("renderSentence — U9 TMJ", () => {
   it("TMJ basic-mode (null referred) → no qualifier clause", () => {
     const f: U9TmjFinding = { kind: "u9.tmj", side: "right", referred: null };
     expect(renderSentence(f)).toBe("Bekannter Schmerz bei Palpation im rechten Kiefergelenk.");
+  });
+});
+
+describe("renderSentence — U8", () => {
+  it("duringOpening, unilateral, lösbar durch Patient", () => {
+    const f: U8Finding = {
+      kind: "u8",
+      situation: "duringOpening",
+      side: "right",
+      reducibility: "byPatient",
+    };
+    expect(renderSentence(f)).toBe(
+      "Kieferblockade während der Öffnung im rechten Kiefergelenk, lösbar durch Patient."
+    );
+  });
+
+  it("wideOpening, bilateral, lösbar durch Untersucher", () => {
+    const f: U8Finding = {
+      kind: "u8",
+      situation: "wideOpening",
+      side: "both",
+      reducibility: "byExaminer",
+    };
+    expect(renderSentence(f)).toBe(
+      "Kieferblockade bei weiter Mundöffnung im Kiefergelenk (beidseitig), lösbar durch Untersucher."
+    );
+  });
+
+  it("byBoth → 'lösbar durch Patient und Untersucher'", () => {
+    const f: U8Finding = {
+      kind: "u8",
+      situation: "duringOpening",
+      side: "left",
+      reducibility: "byBoth",
+    };
+    expect(renderSentence(f)).toBe(
+      "Kieferblockade während der Öffnung im linken Kiefergelenk, lösbar durch Patient und Untersucher."
+    );
+  });
+
+  it("none → 'nicht lösbar'", () => {
+    const f: U8Finding = {
+      kind: "u8",
+      situation: "wideOpening",
+      side: "right",
+      reducibility: "none",
+    };
+    expect(renderSentence(f)).toBe(
+      "Kieferblockade bei weiter Mundöffnung im rechten Kiefergelenk, nicht lösbar."
+    );
+  });
+
+  it("null reducibility → clause omitted", () => {
+    const f: U8Finding = {
+      kind: "u8",
+      situation: "duringOpening",
+      side: "right",
+      reducibility: null,
+    };
+    expect(renderSentence(f)).toBe("Kieferblockade während der Öffnung im rechten Kiefergelenk.");
   });
 });
 

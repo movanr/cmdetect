@@ -68,7 +68,12 @@ export interface U8Finding {
   kind: "u8";
   situation: "duringOpening" | "wideOpening";
   side: SideOrBoth;
-  reducibility: "byPatient" | "byExaminer" | "none";
+  /**
+   * "byBoth" = lösbar durch Patient und Untersucher.
+   * "none"   = weder durch Patient noch Untersucher lösbar.
+   * null     = beide Felder fehlend/unbekannt → Klausel entfällt.
+   */
+  reducibility: "byPatient" | "byExaminer" | "byBoth" | "none" | null;
 }
 
 export interface U9MuscleFinding {

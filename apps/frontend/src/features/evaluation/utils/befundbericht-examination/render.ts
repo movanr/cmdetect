@@ -10,6 +10,7 @@ import type {
   U5Finding,
   U6Finding,
   U7Finding,
+  U8Finding,
   U9MuscleFinding,
   U9TmjFinding,
 } from "./types";
@@ -33,6 +34,8 @@ export function renderSentence(f: Finding): string {
       return renderU6(f);
     case "u7":
       return renderU7(f);
+    case "u8":
+      return renderU8(f);
     case "u9.muscle":
       return renderU9Muscle(f);
     case "u9.tmj":
@@ -260,6 +263,30 @@ function tmjLocationU9(side: SideOrBoth): string {
 function renderPainQualifier(label: string, value: boolean | null): string | null {
   if (value === null) return null;
   return value ? `mit ${label}` : `ohne ${label}`;
+}
+
+// ============================================================================
+// U8 — Kieferklemme/Sperre
+// ============================================================================
+
+const U8_SITUATION_LABELS: Record<U8Finding["situation"], string> = {
+  duringOpening: "während der Öffnung",
+  wideOpening: "bei weiter Mundöffnung",
+};
+
+const U8_REDUCIBILITY_LABELS: Record<Exclude<U8Finding["reducibility"], null>, string> = {
+  byPatient: "lösbar durch Patient",
+  byExaminer: "lösbar durch Untersucher",
+  byBoth: "lösbar durch Patient und Untersucher",
+  none: "nicht lösbar",
+};
+
+function renderU8(f: U8Finding): string {
+  const parts = [
+    `Kieferblockade ${U8_SITUATION_LABELS[f.situation]} ${tmjLocation(f.side)}`,
+  ];
+  if (f.reducibility !== null) parts.push(U8_REDUCIBILITY_LABELS[f.reducibility]);
+  return parts.join(", ") + ".";
 }
 
 // ============================================================================

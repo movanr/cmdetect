@@ -1,5 +1,8 @@
-import { SIDE_KEYS, getValueAtPath } from "@cmdetect/dc-tmd";
+import { getValueAtPath } from "@cmdetect/dc-tmd";
 import type { U6Finding } from "../types";
+
+/** Rule 1.3: within a section, right-first before left before bilateral merges. */
+const SIDES_RIGHT_FIRST = ["right", "left"] as const;
 
 /**
  * U6 — Gelenkgeräusche bei Öffnung/Schließung.
@@ -16,7 +19,7 @@ import type { U6Finding } from "../types";
  */
 export function extractU6(data: unknown): U6Finding[] {
   const findings: U6Finding[] = [];
-  for (const side of SIDE_KEYS) {
+  for (const side of SIDES_RIGHT_FIRST) {
     const click = extractSide(data, side, "click");
     if (click) findings.push(click);
     const crepitus = extractSide(data, side, "crepitus");

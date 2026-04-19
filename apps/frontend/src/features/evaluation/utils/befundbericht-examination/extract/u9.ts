@@ -1,5 +1,8 @@
-import { SIDE_KEYS, SITES_BY_GROUP, getValueAtPath, type PalpationSite } from "@cmdetect/dc-tmd";
+import { SITES_BY_GROUP, getValueAtPath, type PalpationSite } from "@cmdetect/dc-tmd";
 import type { U9MuscleFinding, U9TmjFinding } from "../types";
+
+/** Rule 1.3: within a section, right-first before left before bilateral merges. */
+const SIDES_RIGHT_FIRST = ["right", "left"] as const;
 
 type Side = "left" | "right";
 
@@ -23,7 +26,7 @@ type Side = "left" | "right";
 export function extractU9(data: unknown): Array<U9MuscleFinding | U9TmjFinding> {
   const findings: Array<U9MuscleFinding | U9TmjFinding> = [];
 
-  for (const side of SIDE_KEYS) {
+  for (const side of SIDES_RIGHT_FIRST) {
     if (getValueAtPath(data, `e9.${side}.refused`) === true) continue;
 
     const temporalis = extractMuscle(data, side, "temporalis");

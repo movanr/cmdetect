@@ -6,6 +6,7 @@ import { extractU1b } from "./extract/u1b";
 import { extractU4 } from "./extract/u4";
 import { extractU5 } from "./extract/u5";
 import { extractU6 } from "./extract/u6";
+import { extractU8 } from "./extract/u8";
 import { extractU9 } from "./extract/u9";
 import { mergeBilateral } from "./merge-bilateral";
 import { renderSentence } from "./render";
@@ -45,6 +46,11 @@ export function generateExaminationNarrative(
 
   if (completed.has("e6")) {
     const p = renderSection(extractU6(data));
+    if (p) paragraphs.push(p);
+  }
+
+  if (completed.has("e8")) {
+    const p = renderSection(extractU8(data));
     if (p) paragraphs.push(p);
   }
 

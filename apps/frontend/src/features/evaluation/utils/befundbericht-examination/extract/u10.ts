@@ -1,5 +1,8 @@
-import { E10_SITE_KEYS, SIDE_KEYS, getValueAtPath } from "@cmdetect/dc-tmd";
+import { E10_SITE_KEYS, getValueAtPath } from "@cmdetect/dc-tmd";
 import type { U10Finding } from "../types";
+
+/** Rule 1.3: within a section, right-first before left before bilateral merges. */
+const SIDES_RIGHT_FIRST = ["right", "left"] as const;
 
 type Site = U10Finding["site"];
 
@@ -20,7 +23,7 @@ export function extractU10(data: unknown): U10Finding[] {
   const findings: U10Finding[] = [];
 
   for (const site of E10_SITE_KEYS as readonly Site[]) {
-    for (const side of SIDE_KEYS) {
+    for (const side of SIDES_RIGHT_FIRST) {
       if (getValueAtPath(data, `e10.${side}.refused`) === true) continue;
       if (getValueAtPath(data, `e10.${side}.${site}.familiarPain`) !== "yes") continue;
 
