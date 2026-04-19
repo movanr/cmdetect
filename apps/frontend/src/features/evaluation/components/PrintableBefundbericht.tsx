@@ -23,10 +23,7 @@ import {
   type Side,
 } from "@cmdetect/dc-tmd";
 import type { FormValues } from "../../examination";
-import {
-  formatAllExaminationSections,
-  type FormattedSection,
-} from "../utils/format-examination-sections";
+import { generateExaminationNarrative } from "../utils/befundbericht-examination";
 
 // ============================================================================
 // TYPES
@@ -93,9 +90,8 @@ export function PrintableBefundbericht({
   // Generate anamnesis text
   const anamnesisParagraphs = generateAnamnesisText(criteriaData);
 
-  // Format examination sections
-  const examinationSections = examinationData
-    ? formatAllExaminationSections(examinationData, completedSections ?? [])
+  const narrativeParagraphs = examinationData
+    ? generateExaminationNarrative(examinationData, completedSections ?? [])
     : [];
 
   // Resolve diagnosis German labels (flat, no grouping)
@@ -211,16 +207,17 @@ export function PrintableBefundbericht({
         </section>
       )}
 
-      {/* ── DC/TMD-Untersuchung (section-by-section) ──── */}
+      {/* ── DC/TMD-Untersuchung ──── */}
       <section className="mb-5">
         <h2 className="text-base font-bold mb-2 border-b border-gray-300 pb-1">
-          DC/TMD-Untersuchung
+          DC/TMD-Untersuchung{" "}
+          <span className="text-xs font-normal text-gray-500">(Vorschau U6)</span>
         </h2>
 
-        {examinationSections.length > 0 ? (
-          <div className="space-y-3">
-            {examinationSections.map((section) => (
-              <ExaminationSection key={section.number} section={section} />
+        {narrativeParagraphs.length > 0 ? (
+          <div className="space-y-2 text-sm leading-relaxed">
+            {narrativeParagraphs.map((p, i) => (
+              <p key={i}>{p}</p>
             ))}
           </div>
         ) : (
@@ -239,30 +236,6 @@ export function PrintableBefundbericht({
 // ============================================================================
 // SUB-COMPONENTS
 // ============================================================================
-
-function ExaminationSection({ section }: { section: FormattedSection }) {
-  if (section.unremarkable) {
-    return (
-      <p className="text-sm text-gray-600 print:break-inside-avoid">
-        <span className="font-semibold">{section.number}. {section.title}:</span>{" "}
-        {section.unremarkableLabel}
-      </p>
-    );
-  }
-
-  return (
-    <div className="print:break-inside-avoid">
-      <h3 className="text-sm font-semibold mb-0.5">
-        {section.number}. {section.title}
-      </h3>
-      <div className="text-sm space-y-0.5">
-        {section.lines.map((l, i) => (
-          <p key={i} className={l.indent ? "pl-5" : "pl-3"}>{l.text}</p>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function ScoreRow({
   instrument,

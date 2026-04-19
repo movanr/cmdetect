@@ -2,8 +2,7 @@
  * Generate a DC/TMD Befundbericht as a DOCX document.
  *
  * Mirrors the structure of PrintableBefundbericht.tsx but outputs
- * a Word document. The examination section consumes the same
- * formatAllExaminationSections() output as the React version.
+ * a Word document.
  */
 
 import {
@@ -21,7 +20,7 @@ import {
 import { Document, Packer, Paragraph, Tab, TabStopType, TextRun, UnderlineType } from "docx";
 import { saveAs } from "file-saver";
 import type { FormValues } from "../../examination";
-import { formatAllExaminationSections, type FormattedSection } from "./format-examination-sections";
+import { generateExaminationNarrative } from "./befundbericht-examination";
 
 // ============================================================================
 // TYPES
@@ -122,47 +121,6 @@ function tabRow(label: string, value: string, tab = TAB_META, bold = tab === TAB
 }
 
 // ============================================================================
-// EXAMINATION SECTION → DOCX PARAGRAPHS
-// ============================================================================
-
-function sectionToParagraphs(section: FormattedSection): Paragraph[] {
-  if (section.unremarkable) {
-    // Single collapsed line: "N. Title: [label]"
-    return [
-      new Paragraph({
-        children: [
-          r(`${section.number}. ${section.title}: `, { bold: true }),
-          r(section.unremarkableLabel),
-        ],
-        spacing: { after: 40 },
-      }),
-    ];
-  }
-
-  const paragraphs: Paragraph[] = [];
-
-  // Section heading as bold inline prefix
-  paragraphs.push(
-    new Paragraph({
-      children: [r(`${section.number}. ${section.title}`, { bold: true })],
-      spacing: { after: 40 },
-    }),
-  );
-
-  for (const l of section.lines) {
-    paragraphs.push(
-      new Paragraph({
-        children: [r(l.text)],
-        spacing: { after: 40 },
-        indent: l.indent ? { left: 360 } : undefined, // ~0.25 inch indent
-      }),
-    );
-  }
-
-  return paragraphs;
-}
-
-// ============================================================================
 // DOCUMENT GENERATION
 // ============================================================================
 
@@ -176,8 +134,8 @@ function buildDocument(data: BefundberichtData): Document {
   // ── Process data ────────────────────────────────────────────────────
   const anamnesisParagraphs = generateAnamnesisText(data.criteriaData);
 
-  const examinationSections = data.examinationData
-    ? formatAllExaminationSections(data.examinationData, data.completedSections ?? [])
+  const narrativeParagraphs = data.examinationData
+    ? generateExaminationNarrative(data.examinationData, data.completedSections ?? [])
     : [];
 
   const diagnoses = data.confirmedDiagnoses.map((d) => {
@@ -259,13 +217,18 @@ function buildDocument(data: BefundberichtData): Document {
     }
   }
 
-  // ── Clinical examination (section-by-section) ─────────────────────
+  // ── Clinical examination (Fließtext, rule-driven) ─────────────────
 
-  p.push(...sectionHeading("DC/TMD-Untersuchung"));
+  p.push(...sectionHeading("DC/TMD-Untersuchung (Vorschau U6)"));
 
-  if (examinationSections.length > 0) {
-    for (const section of examinationSections) {
-      p.push(...sectionToParagraphs(section));
+  if (narrativeParagraphs.length > 0) {
+    for (const para of narrativeParagraphs) {
+      p.push(
+        new Paragraph({
+          children: [r(para)],
+          spacing: { after: 120 },
+        })
+      );
     }
   } else {
     p.push(
